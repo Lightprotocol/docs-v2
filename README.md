@@ -1,43 +1,62 @@
-# Mintlify Starter Kit
+# Hello World - Mintlify Documentation
 
-Use the starter kit to get your docs deployed and ready to customize.
+Welcome to your first Mintlify documentation site.
 
-Click the green **Use this template** button at the top of this repo to copy the Mintlify starter kit. The starter kit contains examples with
+## Quick Start
 
-- Guide pages
-- Navigation
-- Customizations
-- API reference pages
-- Use of popular components
+This is a simple hello world example demonstrating Mintlify components.
 
-**[Follow the full quickstart guide](https://starter.mintlify.com/quickstart)**
+<Note>
+  Hello World! This is your first Mintlify note component.
+</Note>
 
-## Development
+<Steps>
+  <Step title="Install Mintlify CLI">
+    ```bash
+    npm i -g mint
+    ```
+  </Step>
+  <Step title="Start Development Server">
+    ```bash
+    mint dev
+    ```
+  </Step>
+  <Step title="View Your Docs">
+    Open `http://localhost:3000` in your browser
+  </Step>
+</Steps>
 
-Install the [Mintlify CLI](https://www.npmjs.com/package/mint) to preview your documentation changes locally. To install, use the following command:
+## Example Components
 
-```
-npm i -g mint
-```
+<CardGroup cols={2}>
+  <Card title="Getting Started" icon="rocket" href="/quickstart">
+    Start building your documentation
+  </Card>
+  <Card title="Development" icon="code" href="/development">
+    Learn about local development
+  </Card>
+</CardGroup>
 
-Run the following command at the root of your documentation, where your `docs.json` is located:
+## Code Example
 
-```
-mint dev
-```
+<CodeGroup>
+  <Tab title="JavaScript">
+    ```javascript
+    console.log("Hello World from Mintlify!");
+    ```
+  </Tab>
+  <Tab title="Python">
+    ```python
+    print("Hello World from Mintlify!")
+    ```
+  </Tab>
+</CodeGroup>
 
-View your local preview at `http://localhost:3000`.
+<Tip>
+  You can customize this README and add more pages to build comprehensive documentation.
+</Tip>
 
-## Publishing changes
+## Resources
 
-Install our GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app) to propagate changes from your repo to your deployment. Changes are deployed to production automatically after pushing to the default branch.
-
-## Need help?
-
-### Troubleshooting
-
-- If your dev environment isn't running: Run `mint update` to ensure you have the most recent version of the CLI.
-- If a page loads as a 404: Make sure you are running in a folder with a valid `docs.json`.
-
-### Resources
-- [Mintlify documentation](https://mintlify.com/docs)
+- [Mintlify Documentation](https://mintlify.com/docs)
+- [Component Library](https://mintlify.com/docs/components)

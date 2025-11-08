@@ -1,0 +1,193 @@
+---
+title: 'TypeScript'
+description: 'TypeScript examples and code samples for c-token'
+---
+
+## Update Your Client
+
+Updating your client to use c-token is simple:
+
+<Steps>
+  <Step title="Replace SPL methods with Interface methods">
+    - `getMint` → `getMintInterface`
+    - `unpackMint` → `unpackMintInterface`
+    - `getAccount` → `getAccountInterface`
+    - `getAssociatedTokenAddress` → `getAtaInterface`
+    - `getOrCreateAssociatedTokenAccount` → `getOrCreateAtaInterface`
+    - `createTokenAccount` → `createTokenAccountInterface`
+    - `getAccountInfo` → `getAccountInfoInterface`
+  </Step>
+</Steps>
+
+<Note>
+Migrating to these interface methods is backward-compatible: they support all 3 token standards.
+
+No matter which token standard your client interacts with, your token accounts are now 200x cheaper.
+</Note>
+
+## Examples
+
+### Fetch Mints
+
+<CodeGroup>
+```typescript SPL (old)
+import { getMint } from "@solana/spl-token";
+const mint = await getMint(rpc, address);
+```
+
+```typescript Interface (new)
+import { getMintInterface } from "@lightprotocol/compressed-token";
+const { mint } = await getMintInterface(rpc, address);
+```
+</CodeGroup>
+
+#### Specification
+
+```typescript
+// spl
+const { mint } = await getMintInterface(rpc, address);
+
+// ctoken
+const { mint, merkleContext?, mintContext?, tokenMetadata?, extensions? } =
+  await getMintInterface(rpc, address, undefined, CTOKEN_PROGRAM_ID);
+```
+
+### Get Token Account Data
+
+<CodeGroup>
+```typescript Old
+const address = getAssociatedTokenAddressSync(mint, owner);
+const account = await getAccount(address);
+console.log(account);
+```
+
+```typescript New
+const accountInterface = await getAtaInterface(mint, owner);
+console.log(accountInterface.account);
+```
+</CodeGroup>
+
+### Parse Mint
+
+```typescript
+const info = await connection.getAccountInfo(address);
+
+// old (spl)
+const { mint } = unpackMint(
+  address,
+  info,
+  TOKEN_PROGRAM_ID
+);
+
+// new (spl)
+const { mint } = unpackMintInterface(
+  address,
+  info,
+  TOKEN_PROGRAM_ID
+);
+
+// new (ctoken)
+const { mint } = unpackMintInterface(
+  address,
+  info,
+  C_TOKEN_PROGRAM_ID
+);
+```
+
+### Create a c-token Mint
+
+<Note>
+You can use interface methods to reduce your token account cost by 200x even if you don't use c-token native mints!
+</Note>
+
+```typescript
+const { transactionSignature, mint } = await createMint(
+      rpc,
+      payer,
+      mintAuthority,
+      null, // freezeAuthority
+      decimals,
+      Keypair.generate()
+);
+```
+
+You can directly attach TokenMetadata to the mint:
+
+```typescript
+const { transactionSignature, mint } = await createMint(
+      rpc,
+      payer,
+      mintAuthority,
+      null, // freezeAuthority
+      decimals,
+      Keypair.generate(),
+      createTokenMetadata(
+            'name',
+            'symbol',
+            'ipfs://QmYwAPJzv5CZsnAzt8auVTL7oU4vNnB8L2xZ5C4X5PqW3R/metadata.json',
+      ),
+);
+```
+
+### Parse Token-Metadata
+
+<CodeGroup>
+```typescript Decode
+const metadata = decodeTokenMetadata(extensionData);
+```
+
+```typescript Encode
+const buffer = encodeTokenMetadata({
+  name: "My Token",
+  symbol: "MTK",
+  uri: "https://...",
+});
+```
+</CodeGroup>
+
+### Generic Account Fetching
+
+<CodeGroup>
+```typescript Before
+const accountInfo = await connection.getAccountInfo(
+  address,
+);
+```
+
+```typescript After
+const { accountInfo } = await connection.getAccountInfoInterface(
+  address,
+  programId,
+  DEFAULT_ADDRESS_SPACE
+);
+
+console.log(accountInfo);
+```
+</CodeGroup>
+
+## Example Usage
+
+```typescript
+import {
+  getMintInterface,
+  CTOKEN_PROGRAM_ID,
+} from "@lightprotocol/compressed-token";
+
+// Fetch CToken mint
+const { mint, tokenMetadata, mintContext } =
+  await getMintInterface(rpc, mintAddress, undefined, CTOKEN_PROGRAM_ID);
+
+// SPL-compatible fields
+console.log(mint);
+console.log(mint.decimals); // 9
+console.log(mint.supply); // 1000000n
+console.log(mint.mintAuthority); // PublicKey
+
+// ctoken metadata
+console.log(tokenMetadata?.name); // "My Token"
+console.log(tokenMetadata?.symbol); // "MTK"
+console.log(tokenMetadata?.uri); // "https://example.com/metadata.json"
+
+// ctoken mint context
+console.log(mintContext.version); // 3
+```
