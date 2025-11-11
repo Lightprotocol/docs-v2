@@ -717,9 +717,10 @@ const packedAccounts = new PackedAccounts();
 3. **`treeAccounts`**: State trees, address trees, and queue accounts from validity proof
 
 <Note>
-The instance maintains an internal deduplication map that assigns sequential u8 indices (0, 1, 2...) when you call `insertOrGet()`. If the same pubkey is inserted multiple times, it returns the cached index.
+* The instance maintains an internal deduplication map that assigns sequential u8 indices (0, 1, 2...) when you call `insert_or_get()`.
+* If the same pubkey is inserted multiple times, it returns the cached index.
+* For example, if the input state tree equals the output state tree, both return the same index.
 </Note>
-
 **Array Anchor framework:**
 
 ```
@@ -733,7 +734,8 @@ The instance maintains an internal deduplication map that assigns sequential u8 
 ```
 
 1. Pass program-specific accounts to `.accounts()`
-2 Pass packed accounts to `.remainingAccounts()`
+
+2. Pass packed accounts to `.remainingAccounts()`
 
 **Array for Native Programs:**
 
@@ -778,23 +780,15 @@ const packedAddressTreeInfo = {
 };
 ```
 
-
-1. Call `insertOrGet()` with the address tree and address queue pubkeys from `addressTree` TreeInfo
-
-* Each call returns a sequential index starting from 0 (first call returns 0, second returns 1)
-
-2. Pass the `packedAddressTreeInfo` in your instruction data (Step 6)
-
 </Tab>
 
 <Tab title="Update, Close, Reinit, Burn">
 
 ```typescript
-const tree = compressedAccount.treeInfo.tree;
-const queue = compressedAccount.treeInfo.queue;
-
-const merkleTreePubkeyIndex = packedAccounts.insertOrGet(tree);
-const queuePubkeyIndex = packedAccounts.insertOrGet(queue);
+const merkleTreePubkeyIndex =
+  packedAccounts.insertOrGet(compressedAccount.treeInfo.tree);
+const queuePubkeyIndex =
+  packedAccounts.insertOrGet(compressedAccount.treeInfo.queue);
 
 const packedInputAccounts = {
   merkleTreePubkeyIndex,  // u8 index: 0
@@ -803,17 +797,11 @@ const packedInputAccounts = {
   rootIndex: proofRpcResult.rootIndices[0],
 };
 ```
-
-
-1. Call `insertOrGet()` with the state tree and queue pubkeys from the compressed account's `compressedAccount.treeInfo`
-
-* Each call returns a sequential index starting from 0 (first call returns 0, second returns 1)
-
-2. Pass the returned indices along with `leafIndex` and `rootIndex` from the validity proof in your instruction data (Step 6)
 </Tab>
 </Tabs>
 
-#### Tree Accounts by Instructions Type
+<Tabs>
+<Tab title="V1 Trees">
 
 | Instruction             | Address Tree             | State Tree           | Nullifier Queue | Output State Tree       |
 | ----------------------- | ------------------------ | -------------------- | --------------- | ----------------------- |
@@ -821,52 +809,60 @@ const packedInputAccounts = {
 | Update / Close / Reinit | -                        | ✓ (proves existence) | ✓ (nullifies)   | ✓ (stores updated hash) |
 | Burn                    | -                        | ✓ (proves existence) | ✓ (nullifies)   | -                       |
 
+</Tab>
+
+<Tab title="V2 Trees">
+
+| Instruction             | Address Tree             | State Tree (with nullifier queue) | Output Queue            |
+| ----------------------- | ------------------------ | --------------------------------- | ----------------------- |
+| Create                  | ✓ (proves non-existence) | -                                 | ✓ (stores new hash)     |
+| Update / Close / Reinit | -                        | ✓ (proves existence, nullifies)   | ✓ (stores updated hash) |
+| Burn                    | -                        | ✓ (proves existence, nullifies)   | -                       |
+
+<Tip>
+**V2 is on Devnet and reduces compute unit consumption by up to 70%**:
+
+* V2 combines the state tree and nullifier queue into a single account for batched operations.
+* New hashes are stored in the output queue. A forester node updates the Merkle tree asynchronously.
+</Tip>
+
+</Tab>
+</Tabs>
+
 ### 4. Pack Output State Tree
 
-Pack the output state tree to specify where the new or updated account state will be stored.
+<Warning>
+The burn instruction does not produce output state and does not require `outputStateTreeIndex`.
+</Warning>
 
+1. Pack the output state tree to specify where the new or updated account state will be stored.
+2. Pass the returned `outputStateTreeIndex` in your instruction data (Step 6).
 
 ```typescript
 const outputStateTreeIndex =
   packedAccounts.insertOrGet(outputStateTree);
 ```
 
-
-1. Call `insertOrGet()` with the output state tree pubkey from `outputStateTree` TreeInfo
-
-* Returns the u8 index (continues sequential numbering from previous `insertOrGet()` calls)
-
-2. Pass `outputStateTreeIndex` in your instruction data (Step 6)
-
-<Note>
-
-* **Create**: Stores new account hash in output state tree
-* **Update/Close/Reinit**: Stores updated account hash in output state tree (may be same tree as input or different)
-* **Burn**: No output state tree
-</Note>
+<Tip>
+**For other instructions than create and burn, use the state tree of the existing compressed account**.
+* **Best practice**: minimize the number of different trees per transaction to keep instruction data light.
+* Account hashes can move to different state trees after each state transition.
+* Since trees fill up over time, your programs must be able to handle accounts from different state trees within the same transaction.
+</Tip>
 
 ### 5. Finalize Packed Accounts
 
 Call `toAccountMetas()` to convert packed accounts into the final array for your instruction.
-
 
 ```typescript
 const { remainingAccounts, systemStart, packedStart } =
   packedAccounts.toAccountMetas();
 ```
 
-
-1. Call `toAccountMetas()` on your PackedAccounts instance
-
-   * Returns an object with three fields:
-     * `remainingAccounts`: `AccountMeta[]` array containing all accounts (system accounts + tree accounts)
-     * `systemStart`: Offset indicating where system accounts start in the array (used internally by Light System Program)
-     * `packedStart`: Offset indicating where tree accounts start in the array (used internally by Light System Program)
-2. You have now prepared all components needed for the next step:
-
-   * `remainingAccounts` - to pass to `.remainingAccounts()` in your Anchor instruction builder
-   * From Section 3: `packedAddressTreeInfo` (Create) OR `packedInputAccounts` (Update/Close/Reinit/Burn)
-   * From Section 4: `outputStateTreeIndex` (Create/Update/Close/Reinit only - Burn has no output state tree)
+This method returns an object with three fields:
+* `remainingAccounts`: `AccountMeta[]` array with all accounts (system accounts + tree accounts)
+* `systemStart`: Offset indicating where system accounts start in the array (used internally by Light System Program)
+* `packedStart`: Offset indicating where tree accounts start in the array (used internally by Light System Program)
 
 </Tab>
 
@@ -883,9 +879,13 @@ The instance organizes accounts into three sections:
 
 1. **`pre_accounts`**: Program-specific accounts (signers, fee payer)
 2. **`system_accounts`**: [Light System accounts](https://www.zkcompression.com/resources/addresses-and-urls#system-accounts) for proof verification and CPI calls to update state and address trees
-3. **`tree_accounts`**: State trees, address trees, and queue accounts added dynamically via `insert_or_get()`
+3. **`tree_accounts`**: State trees, address trees, and queue accounts 
 
-### Final array structure:
+<Note>
+* The instance maintains an internal deduplication map that assigns sequential u8 indices (0, 1, 2...) when you call `insert_or_get()`.
+* If the same pubkey is inserted multiple times, it returns the cached index.
+* For example, if the input state tree equals the output state tree, both return the same index.
+</Note>
 
 ```
 [pre_accounts] [system_accounts] [tree_accounts]
@@ -895,26 +895,14 @@ The instance organizes accounts into three sections:
                                    queues
 ```
 
-<Note>
-
-* The instance maintains an internal deduplication map that assigns sequential u8 indices (0, 1, 2...) when you call `insert_or_get()`.
-* If the same pubkey is inserted multiple times, it returns the cached index.
-* For example, if the input state tree equals the output state tree, both return the same index.
-</Note>
-
 ### 2. Add Light System Accounts
 
 Populate the `system_accounts` with [Light System accounts](https://www.zkcompression.com/resources/addresses-and-urls#system-accounts) needed for proof verification and CPI calls to update state and address trees.
-
 
 ```rust
 let config = SystemAccountMetaConfig::new(program::ID);
 remaining_accounts.add_system_accounts(config)?;
 ```
-
-
-1. Pass your program ID to `SystemAccountMetaConfig::new(program_id)` to configure system accounts
-2. Call `add_system_accounts(config)?` - the SDK populates `system_accounts` with [Light System accounts](https://www.zkcompression.com/resources/addresses-and-urls#system-accounts), including the CPI signer PDA derived from your program ID.
 
 ### 3. Pack Tree Accounts
 
@@ -922,24 +910,13 @@ Add tree and queue accounts to the packed accounts array and retrieve indices fo
 
 <Tabs>
 <Tab title="Create">
-Add the address tree and address queue pubkeys to the accounts array and retrieve their indices.
-
 
 ```rust
 let packed_accounts = rpc_result.pack_tree_infos(&mut remaining_accounts);
 ```
-
-
-1. Call `pack_tree_infos()` on the RPC result from `get_validity_proof()`
-
-   * Returns `PackedTreeInfos` with `.address_trees` field
-   * Contains `PackedAddressTreeInfo` with indices for address tree, address queue, and root index
-2. Use `packed_accounts.address_trees[0]` in your instruction data (Step 6)
 </Tab>
 
 <Tab title="Update / Close / Reinit">
-Add the state tree and nullifier queue pubkeys to the accounts array and retrieve their indices.
-
 
 ```rust
 let packed_tree_accounts = rpc_result
@@ -947,19 +924,9 @@ let packed_tree_accounts = rpc_result
     .state_trees
     .unwrap();
 ```
-
-
-1. Call `pack_tree_infos()` on the RPC result and extract `.state_trees.unwrap()`
-
-   * Returns `PackedStateTreeInfos` containing:
-     * `packed_tree_infos`: Array with `PackedStateTreeInfo` (indices for state tree, nullifier queue, leaf index, root index)
-     * `output_tree_index`: u8 index for output state tree to store the compressed account hash
-2. Use both `packed_tree_accounts.packed_tree_infos[0]` and `packed_tree_accounts.output_tree_index` in your instruction data (Step 6)
 </Tab>
 
 <Tab title="Burn">
-Add the state tree and nullifier queue pubkeys to the accounts array and retrieve their indices. Burn permanently removes the account without creating output state.
-
 
 ```rust
 let packed_tree_accounts = rpc_result
@@ -967,17 +934,11 @@ let packed_tree_accounts = rpc_result
     .state_trees
     .unwrap();
 ```
-
-
-1. Call `pack_tree_infos()` on the RPC result and extract `.state_trees.unwrap()`
-
-   * Returns `PackedStateTreeInfos` with `packed_tree_infos` array (indices for state tree, nullifier queue, leaf index, root index)
-   * No `output_tree_index` field - Burn permanently removes the account without creating output state
-2. Use `packed_tree_accounts.packed_tree_infos[0]` in your instruction data (Step 6)
 </Tab>
 </Tabs>
 
-#### Tree Accounts by Instructions Type
+<Tabs>
+<Tab title="V1 Trees">
 
 | Instruction             | Address Tree             | State Tree           | Nullifier Queue | Output State Tree       |
 | ----------------------- | ------------------------ | -------------------- | --------------- | ----------------------- |
@@ -985,33 +946,44 @@ let packed_tree_accounts = rpc_result
 | Update / Close / Reinit | -                        | ✓ (proves existence) | ✓ (nullifies)   | ✓ (stores updated hash) |
 | Burn                    | -                        | ✓ (proves existence) | ✓ (nullifies)   | -                       |
 
+</Tab>
+
+<Tab title="V2 Trees">
+
+| Instruction             | Address Tree             | State Tree (with nullifier queue) | Output Queue            |
+| ----------------------- | ------------------------ | --------------------------------- | ----------------------- |
+| Create                  | ✓ (proves non-existence) | -                                 | ✓ (stores new hash)     |
+| Update / Close / Reinit | -                        | ✓ (proves existence, nullifies)   | ✓ (stores updated hash) |
+| Burn                    | -                        | ✓ (proves existence, nullifies)   | -                       |
+
+<Tip>
+**V2 is on Devnet and reduces compute unit consumption by up to 70%**:
+
+* V2 combines the state tree and nullifier queue into a single account for batched operations.
+* New hashes are stored in the output queue. A forester node updates the Merkle tree asynchronously.
+</Tip>
+
+</Tab>
+</Tabs>
+
 ### 4. Pack Output State Tree (Anchor Create Only)
 
-For Anchor Create instructions, pack the output state tree to store the new account hash.
+For Anchor Create instructions, pack the output state tree to store the new account hash and pass it to your program instruction's `output_state_tree_index` parameter.
 
-<Note>
-
+<Tip>
 * **Anchor Create**: Requires separate `pack_output_tree_index()` call (shown below)
 * **Update/Close/Reinit**: `output_tree_index` already includes this in `PackedStateTreeInfos` from Step 3
 * **Burn**: Has no output state tree
-</Note>
-
+</Tip>
 
 ```rust
 let output_state_tree_index = output_state_tree_info
     .pack_output_tree_index(&mut remaining_accounts)?;
 ```
 
-
-Call `pack_output_tree_index()` on the output state tree `TreeInfo`
-
-* Returns u8 index for the output state tree
-* This index is passed to your program instruction's `output_state_tree_index` parameter
-
 ### 5. Finalize Packed Accounts
 
 Convert packed accounts into the final array for your instruction.
-
 
 ```rust
 let (remaining_accounts, _, _) = remaining_accounts.to_account_metas();
@@ -1024,8 +996,6 @@ Call `to_account_metas()` on your `PackedAccounts` instance
   * `remaining_accounts`: `Vec<AccountMeta>` containing all accounts (system accounts + tree accounts)
   * `system_start`: Offset where system accounts start (used internally by Light System Program)
   * `packed_start`: Offset where tree accounts start (used internally by Light System Program)
-* Pass `remaining_accounts` to `.remaining_accounts()` in your Anchor instruction builder
-
 </Tab>
 </Tabs>
 </Step>
@@ -1046,7 +1016,7 @@ The program hashes this data, and the Light System Program verifies the hash aga
 <Tabs>
 <Tab title="Create">
 
-```typescript
+```typescript focus={7-9}
 const proof = {
   0: proofRpcResult.compressedProof,
 };
@@ -1055,30 +1025,20 @@ const instructionData = {
   proof,
   addressTreeInfo: packedAddressTreeInfo,
   outputStateTreeIndex: outputStateTreeIndex,
+  message,
 };
 ```
 
-
-### 1. Validity Proof
-
-* Wrap the `compressedProof` from Step 4 to prove that the address does not exist yet in the specified address tree.
-
-### 2. Specify Merkle trees to store address and account hash
-
-Include the Merkle tree metadata from Step 5:
-
-* `packedAddressTreeInfo`: Index to the address tree account used to derive the address, from Step 5 Section 3
-* `outputStateTreeIndex`: Index to the state tree account that will store the compressed account hash, from Step 5 Section 4
-
-### 3. Pass initial account data
-
-* Add custom fields to your instruction struct for any initial data your program requires.
-* In this example, a `message` field defines the initial account state.
+1. Include `compressedProof` from Step 4 to **prove the address does not exist** in the address tree
+2. Specify **Merkle trees to store address and account hash** from Step 5
+   * `packedAddressTreeInfo`: Index to the address tree account used to derive the address, from Step 5 Section 3
+   * `outputStateTreeIndex`: Index to the state tree account that will store the compressed account hash, from Step 5 Section 4
+3. Pass **initial account data**
 </Tab>
 
 <Tab title="Update">
 
-```typescript
+```typescript focus={7-13}
 const proof = {
   0: proofRpcResult.compressedProof,
 };
@@ -1095,29 +1055,17 @@ const instructionData = {
 };
 ```
 
-
-### 1. Validity Proof
-
-* Wrap the `compressedProof` from Step 4 to prove the account hash exists in the state tree.
-
-### 2. Specify input hash and output state tree
-
-Include the Merkle tree metadata from Step 5:
-
-* `accountMeta` points to the input hash and specifies the output state tree:
-  * `treeInfo: packedStateTreeInfo`: Packed indices pointing to the existing account hash that will be nullified, from Step 5 Section 3
-  * `address`: Account's derived address from Step 3
-  * `outputStateTreeIndex`: Index to the state tree that will store the updated account hash, from Step 5 Section 3
-
-### 3. Pass current account data
-
-* Pass the complete current account data. The program reconstructs the existing account hash from this data to verify it matches the hash in the state tree.
-* In this example, `currentMessage` from the fetched account and `newMessage` for the update.
+1. Include `compressedProof` from **Step 4** to prove the **account hash exists** in the state tree
+2. Specify **input hash** and **output state tree** from **Step 5**
+   * `treeInfo`: Packed indices to the state tree and nullifier queue accounts (Pack Accounts, Step 5 Section 3)
+   * `address`: Account's derived address from Step 3
+   * `outputStateTreeIndex`: Index to the state tree that will store the updated account hash (Pack Accounts, Step 5 Section 3)
+3. Pass **current account data** and **new data** 
 </Tab>
 
 <Tab title="Close">
 
-```typescript
+```typescript focus={7-12}
 const proof = {
   0: proofRpcResult.compressedProof,
 };
@@ -1133,28 +1081,17 @@ const instructionData = {
 };
 ```
 
-### 1. Validity Proof
-
-* Wrap the `compressedProof` from Step 4 to prove the account hash exists in the state tree.
-
-### 2. Specify input hash and output state tree
-
-Include the Merkle tree metadata from Step 5:
-
-* `accountMeta`:
-  * `treeInfo: packedStateTreeInfo`: Packed indices to the account hash being closed, from Step 5 Section 3
-  * `address`: Account's derived address from Step 3
-  * `outputStateTreeIndex`: Index to the state tree that will store a hash with zero values, from Step 5 Section 3
-
-### 3. Pass current account data
-
-* Pass the complete current account data. The program reconstructs the account hash to verify it exists before closing.
-* In this example, `currentMessage` from the fetched account.
+1. Include `compressedProof` from **Step 4** to prove the **account hash exists** in the state tree
+2. Specify **input hash** and **output state tree** from **Step 5**
+   * `treeInfo`: Packed indices to the state tree and nullifier queue accounts (Pack Accounts, Step 5 Section 3)
+   * `address`: Account's derived address from Step 3
+   * `outputStateTreeIndex`: Index to the state tree that will store a **hash with zero values** (Pack Accounts, Step 5 Section 3)
+3. Pass **current account data**
 </Tab>
 
 <Tab title="Reinit">
 
-```typescript
+```typescript focus={7-11}
 const proof = {
   0: proofRpcResult.compressedProof,
 };
@@ -1169,29 +1106,19 @@ const instructionData = {
 };
 ```
 
-
-### 1. Validity Proof
-
-* Wrap the `compressedProof` from Step 4 to prove the account hash exists in the state tree.
-
-### 2. Specify input hash and output state tree
-
-Include the Merkle tree metadata from Step 5:
-
-* `accountMeta`:
-  * `treeInfo: packedStateTreeInfo`: Packed indices to the account hash being reinitialized, from Step 5 Section 3
-  * `address`: Account's derived address from Step 3
-  * `outputStateTreeIndex`: Index to the state tree that will store the reinitialized account hash, from Step 5 Section 3
-
-### 3. Account data initialization
-
-* Reinitialize creates an account with default-initialized values (e.g., `Pubkey` as all zeros, numbers as `0`, strings as empty).
+1. Include `compressedProof` from **Step 4** to prove the **account hash exists** in the state tree
+2. Specify **input hash** and **output state tree** from **Step 5**
+   * `treeInfo`: Packed indices to the state tree and nullifier queue accounts (Pack Accounts, Step 5 Section 3)
+   * `address`: Account's derived address from Step 3
+   * `outputStateTreeIndex`: Index to the state tree that will store the reinitialized account hash (Pack Accounts, Step 5 Section 3)
+3. Reinitialize creates an account with **default-initialized values**
+* These values are `Pubkey` as all zeros, numbers as `0`, strings as empty.
 * To set custom values, update the account in the same or a separate transaction.
 </Tab>
 
 <Tab title="Burn">
 
-```typescript
+```typescript focus={7-11}
 const proof = {
   0: proofRpcResult.compressedProof,
 };
@@ -1206,24 +1133,12 @@ const instructionData = {
 };
 ```
 
-
-### 1. Validity Proof
-
-* Wrap the `compressedProof` from Step 4 to prove the account hash exists in the state tree.
-
-### 2. Specify input hash
-
-Include the Merkle tree metadata from Step 5:
-
-* `accountMeta`:
-  * `treeInfo: packedStateTreeInfo`: Packed indices to the account hash being burned, from Step 5 Section 3
-  * `address`: Account's derived address from Step 3
-  * No `outputStateTreeIndex` - Burn permanently removes the account with no output state
-
-### 3. Pass current account data
-
-* Pass the complete current account data for hash reconstruction before burning.
-* In this example, `currentMessage` from the fetched account.
+1. Include `compressedProof` from **Step 4** to prove the **account hash exists** in the state tree
+2. Specify **input hash** from **Step 5**
+   * `treeInfo`: Packed indices to the state tree and nullifier queue accounts (Pack Accounts, Step 5 Section 3)
+   * `address`: Account's derived address from Step 3
+   * No `outputStateTreeIndex` - Burn permanently removes the account with no output state
+3. Pass **current account data**
 </Tab>
 </Tabs>
 </Tab>
@@ -1231,12 +1146,8 @@ Include the Merkle tree metadata from Step 5:
 <Tab title="Rust">
 <Tabs>
 <Tab title="Create">
-<Tabs>
-<Tab title="Anchor">
 
 ```rust
-use anchor_lang::InstructionData;
-
 let instruction_data = create::instruction::CreateAccount {
     proof: rpc_result.proof,
     address_tree_info: packed_accounts.address_trees[0],
@@ -1246,55 +1157,16 @@ let instruction_data = create::instruction::CreateAccount {
 .data();
 ```
 
-</Tab>
-
-<Tab title="Native">
-
-```rust
-use borsh::BorshSerialize;
-
-let instruction_data = CreateInstructionData {
-    proof: rpc_result.proof,
-    address_tree_info: packed_address_tree_info,
-    output_state_tree_index: output_state_tree_index,
-    message,
-};
-let serialized = instruction_data.try_to_vec().unwrap();
-let data = [&[InstructionType::Create as u8][..], &serialized[..]].concat();
-```
-
-</Tab>
-</Tabs>
-
-### 1. Validity Proof
-
-* `proof`: Validity proof from Step 4 proving the address does not exist yet in the specified address tree.
-
-### 2. Specify Merkle trees to store address and account hash
-
-Include the Merkle tree metadata from Step 5:
-
-* `address_tree_info`: Index to the address tree account used to derive the address, from Step 5 Section 3
-* `output_state_tree_index`: Index to the state tree account that will store the compressed account hash, from Step 5 Section 4
-
-### 3. Pass initial account data
-
-* Add custom fields to your instruction struct for any initial data your program requires.
-* In this example, a `message` field defines the initial account state.
+1. Include `proof` from Step 4 to prove the **address does not exist** in the address tree
+2. Specify **Merkle trees** to store **address and account hash** from Step 5
+   * `address_tree_info`: Index to the address tree account used to derive the address (Pack Accounts, Step 5 Section 3)
+   * `output_state_tree_index`: Index to the state tree that stores the compressed account hash (Pack Accounts, Step 5 Section 4)
+3. Pass **initial account data**
 </Tab>
 
 <Tab title="Update">
-<Tabs>
-<Tab title="Anchor">
 
 ```rust
-use anchor_lang::InstructionData;
-use light_sdk::instruction::account_meta::CompressedAccountMeta;
-
-let current_account = MyCompressedAccount::deserialize(
-    &mut compressed_account.data.as_ref().unwrap().data.as_slice(),
-)?;
-
 let instruction_data = update::instruction::UpdateAccount {
     proof: rpc_result.proof,
     current_account,
@@ -1308,61 +1180,17 @@ let instruction_data = update::instruction::UpdateAccount {
 .data();
 ```
 
-</Tab>
-
-<Tab title="Native">
-
-```rust
-use borsh::BorshSerialize;
-
-let current_account = MyCompressedAccount::deserialize(
-    &mut compressed_account.data.as_ref().unwrap().data.as_slice(),
-)?;
-
-let instruction_data = UpdateInstructionData {
-    proof: rpc_result.proof,
-    current_account,
-    account_meta: CompressedAccountMeta {
-        tree_info: packed_tree_accounts.packed_tree_infos[0],
-        address: compressed_account.address.unwrap(),
-        output_state_tree_index: packed_tree_accounts.output_tree_index,
-    },
-    new_message,
-};
-let serialized = instruction_data.try_to_vec().unwrap();
-let data = [&[InstructionType::Update as u8][..], &serialized[..]].concat();
-```
-
-</Tab>
-</Tabs>
-
-### 1. Validity Proof
-
-* `proof`: Validity proof from Step 4 proving the account hash exists in the state tree.
-
-### 2. Specify input hash and output state tree
-
-Include the Merkle tree metadata from Step 5:
-
-* `account_meta` points to the input hash and specifies the output state tree:
-  * `tree_info`: Packed indices pointing to the existing account hash that will be nullified, from Step 5 Section 3
-  * `address`: Account's derived address from Step 3
-  * `output_state_tree_index`: Index to the state tree that will store the updated account hash, from Step 5 Section 3
-
-### 3. Pass current account data
-
-* Pass the complete current account data. The program reconstructs the existing account hash from this data to verify it matches the hash in the state tree.
-* In this example, `current_account` (deserialized from fetched account) and `new_message` for the update.
+1. Include `proof` from Step 4 to prove the **account hash exists** in the state tree
+2. Specify **input hash** and **output state tree** from Step 5
+   * `tree_info`: Packed indices to the state tree and nullifier queue accounts (Pack Accounts, Step 5 Section 3)
+   * `address`: Account's derived address from Step 3
+   * `output_state_tree_index`: Index to the state tree that stores the updated account hash (Pack Accounts, Step 5 Section 3)
+3. Pass **complete current account data** and **new data**
 </Tab>
 
 <Tab title="Close">
-<Tabs>
-<Tab title="Anchor">
 
 ```rust
-use anchor_lang::InstructionData;
-use light_sdk::instruction::account_meta::CompressedAccountMeta;
-
 let instruction_data = close::instruction::CloseAccount {
     proof: rpc_result.proof,
     account_meta: CompressedAccountMeta {
@@ -1375,56 +1203,17 @@ let instruction_data = close::instruction::CloseAccount {
 .data();
 ```
 
-</Tab>
-
-<Tab title="Native">
-
-```rust
-use borsh::BorshSerialize;
-
-let instruction_data = CloseInstructionData {
-    proof: rpc_result.proof,
-    account_meta: CompressedAccountMeta {
-        tree_info: packed_tree_accounts.packed_tree_infos[0],
-        address: compressed_account.address.unwrap(),
-        output_state_tree_index: packed_tree_accounts.output_tree_index,
-    },
-    current_message,
-};
-let serialized = instruction_data.try_to_vec().unwrap();
-let data = [&[InstructionType::Close as u8][..], &serialized[..]].concat();
-```
-
-</Tab>
-</Tabs>
-
-### 1. Validity Proof
-
-* `proof`: Validity proof from Step 4 proving the account hash exists in the state tree.
-
-### 2. Specify input hash and output state tree
-
-Include the Merkle tree metadata from Step 5:
-
-* `account_meta`:
-  * `tree_info`: Packed indices to the account hash being closed, from Step 5 Section 3
-  * `address`: Account's derived address from Step 3
-  * `output_state_tree_index`: Index to the state tree that will store a hash with zero values, from Step 5 Section 3
-
-### 3. Pass current account data
-
-* Pass the complete current account data. The program reconstructs the account hash to verify it exists before closing.
-* In this example, `current_message` from the fetched account.
+1. Include `proof` from Step 4 to prove the **account hash exists** in the state tree
+2. Specify **input hash** and **output state tree** from Step 5
+   * `tree_info`: Packed indices to the state tree and nullifier queue accounts (Pack Accounts, Step 5 Section 3)
+   * `address`: Account's derived address from Step 3
+   * `output_state_tree_index`: Index to the state tree that stores a **hash with zero values** (Pack Accounts, Step 5 Section 3)
+3. Pass **current account data**
 </Tab>
 
 <Tab title="Reinit">
-<Tabs>
-<Tab title="Anchor">
 
 ```rust
-use anchor_lang::InstructionData;
-use light_sdk::instruction::account_meta::CompressedAccountMeta;
-
 let instruction_data = reinit::instruction::ReinitAccount {
     proof: rpc_result.proof,
     account_meta: CompressedAccountMeta {
@@ -1436,55 +1225,17 @@ let instruction_data = reinit::instruction::ReinitAccount {
 .data();
 ```
 
-</Tab>
-
-<Tab title="Native">
-
-```rust
-use borsh::BorshSerialize;
-
-let instruction_data = ReinitInstructionData {
-    proof: rpc_result.proof,
-    account_meta: CompressedAccountMeta {
-        tree_info: packed_tree_accounts.packed_tree_infos[0],
-        address: compressed_account.address.unwrap(),
-        output_state_tree_index: packed_tree_accounts.output_tree_index,
-    },
-};
-let serialized = instruction_data.try_to_vec().unwrap();
-let data = [&[InstructionType::Reinit as u8][..], &serialized[..]].concat();
-```
-
-</Tab>
-</Tabs>
-
-### 1. Validity Proof
-
-* `proof`: Validity proof from Step 4 proving the account hash exists in the state tree.
-
-### 2. Specify input hash and output state tree
-
-Include the Merkle tree metadata from Step 5:
-
-* `account_meta`:
-  * `tree_info`: Packed indices to the account hash being reinitialized, from Step 5 Section 3
-  * `address`: Account's derived address from Step 3
-  * `output_state_tree_index`: Index to the state tree that will store the reinitialized account hash, from Step 5 Section 3
-
-### 3. Account data initialization
-
-* Reinitialize creates an account with default-initialized values (e.g., `Pubkey` as all zeros, numbers as `0`, strings as empty).
-* To set custom values, update the account in the same or a separate transaction.
+1. Include `proof` from Step 4 to prove the **account hash exists** in the state tree
+2. Specify **input hash** and **output state tree** from Step 5
+   * `tree_info`: Packed indices to the state tree and nullifier queue accounts (Pack Accounts, Step 5 Section 3)
+   * `address`: Account's derived address from Step 3
+   * `output_state_tree_index`: Index to the state tree that stores the reinitialized account hash (Pack Accounts, Step 5 Section 3)
+3. Reinitialize creates an account with **default-initialized values** (`Pubkey` as all zeros, numbers as `0`, strings as empty). To set custom values, update the account in the same or a separate transaction.
 </Tab>
 
 <Tab title="Burn">
-<Tabs>
-<Tab title="Anchor">
 
 ```rust
-use anchor_lang::InstructionData;
-use light_sdk::instruction::account_meta::CompressedAccountMetaBurn;
-
 let instruction_data = burn::instruction::BurnAccount {
     proof: rpc_result.proof,
     account_meta: CompressedAccountMetaBurn {
@@ -1496,45 +1247,12 @@ let instruction_data = burn::instruction::BurnAccount {
 .data();
 ```
 
-</Tab>
-
-<Tab title="Native">
-
-```rust
-use borsh::BorshSerialize;
-
-let instruction_data = BurnInstructionData {
-    proof: rpc_result.proof,
-    account_meta: CompressedAccountMetaBurn {
-        tree_info: packed_tree_accounts.packed_tree_infos[0],
-        address: compressed_account.address.unwrap(),
-    },
-    current_message,
-};
-let serialized = instruction_data.try_to_vec().unwrap();
-let data = [&[InstructionType::Burn as u8][..], &serialized[..]].concat();
-```
-
-</Tab>
-</Tabs>
-
-### 1. Validity Proof
-
-* `proof`: Validity proof from Step 4 proving the account hash exists in the state tree.
-
-### 2. Specify input hash
-
-Include the Merkle tree metadata from Step 5:
-
-* `account_meta`:
-  * `tree_info`: Packed indices to the account hash being burned, from Step 5 Section 3
-  * `address`: Account's derived address from Step 3
-  * No `output_state_tree_index` - Burn permanently removes the account with no output state
-
-### 3. Pass current account data
-
-* Pass the complete current account data for hash reconstruction before burning.
-* In this example, `current_message` from the fetched account.
+1. Include `proof` from Step 4 to prove the **account hash exists** in the state tree
+2. Specify **input hash** from Step 5
+   * `tree_info`: Packed indices to the state tree and nullifier queue accounts (Pack Accounts, Step 5 Section 3)
+   * `address`: Account's derived address from Step 3
+   * No `output_state_tree_index` - Burn permanently removes the account with no output state
+3. Pass **current account data**
 </Tab>
 </Tabs>
 </Tab>
@@ -1544,7 +1262,7 @@ Include the Merkle tree metadata from Step 5:
 <Step>
 ## Instruction
 
-Build the instruction with your `program_id`, `accounts`, and `data` from Step 6. Pass the accounts array you built in Step 5.
+Build the instruction with your `program_id`, `accounts`, and `data` from Step 6.
 
 ```rust
 let instruction = Instruction {
