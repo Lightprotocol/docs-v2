@@ -114,7 +114,7 @@ The Rust packages separate client library, and program-side development:
 1. [`light-client`](https://docs.rs/light-client): The RPC client that provides the ZK Compression RPC interface to query and build transactions for **compressed accounts and tokens** on Solana.
 2. [`light-sdk`](https://docs.rs/light-sdk): Program-side abstractions (macros, wrappers, CPI interface) to create and interact with compressed accounts in Solana programs. Similar to Anchor's `Account` pattern.
 
-#### For devnet and mainnet, use `light-client`
+### For devnet and mainnet, use `light-client`
 
 * Connects to Photon indexer to query compressed accounts and generate validity proofs.
 
@@ -204,7 +204,7 @@ let payer = rpc.get_payer().insecure_clone();
 </Step>
 
 <Step>
-# Tree Configuration
+## Tree Configuration
 
 Your client must fetch metadata of two Merkle trees:
 
@@ -214,6 +214,12 @@ Your client must fetch metadata of two Merkle trees:
 <Tip>
 The protocol maintains Merkle trees. You don't need to initialize custom trees. Find the [addresses for Merkle trees here](https://www.zkcompression.com/resources/addresses-and-urls).
 </Tip>
+
+| Instruction                      | Address Tree Required | State Tree Required |
+| ------------------------------ | :-------------------: | :-----------------: |
+| Create                         | ✓                     | ✓                   |
+| Update / Close / Reinit / Burn | -                     | ✓                   |
+| Combined (Create + Update)     | ✓                     | ✓                   |
 
 <Note>
 V2 is currently on Devnet. Use to optimize compute unit consumption by up to 70%.
@@ -234,7 +240,7 @@ const outputStateTree = selectStateTreeInfo(stateTreeInfos);
 
 <Tab title="V2 Trees">
 
-```typescript
+```typescript focus={1}
 const addressTree = await rpc.getAddressTreeInfoV2();
 const stateTreeInfos = await rpc.getStateTreeInfos();
 const outputStateTree = selectStateTreeInfo(stateTreeInfos);
@@ -257,7 +263,7 @@ let output_state_tree_info = rpc.get_random_state_tree_info().unwrap();
 
 <Tab title="V2 Trees">
 
-```rust
+```rust focus={1}
 let address_tree_info = rpc.get_address_tree_v2();
 let output_state_tree_info = rpc.get_random_state_tree_info().unwrap();
 ```
@@ -267,33 +273,24 @@ let output_state_tree_info = rpc.get_random_state_tree_info().unwrap();
 </Tab>
 </Tabs>
 
-**Address Tree methods** return `TreeInfo` of address trees with the public key and other metadata for the address tree.
+These methods return `TreeInfo` of trees with the public key and other metadata to store the compressed account or address.
 
-Use the address tree `TreeInfo`:
+**Use the address tree `TreeInfo`**, when you create a compressed account:
+1. In **Step 3 to derive the address** for the compressed account.
+2. In **Step 4 for `getValidityProofV0()`** to prove the address does not exist yet.
 
-1. In Step 3 to derive the address for the compressed account.
-2. In Step 4 for `getValidityProofV0()` to prove the address does not exist yet, if you create compressed accounts with address.
+**Use the state tree `TreeInfo`**:
+1. In **Step 4 for `getValidityProofV0()`** to prove the account hash exists in the state tree, if you update/close/reinit/burn a compressed account.
+2. In **Step 5 to pack accounts** to optimize instruction data. This assigns indices to accounts instead of repeating full pubkeys in the instruction data.
 
-**State Tree methods** return an array of `TreeInfo` objects of state trees with public key and other metadata. With these methods you select a random state tree to store the compressed account hash.
-
-Use the state tree `TreeInfo`:
-
-1. In Step 4 for `getValidityProofV0()` to prove the account hash exists in the state tree, if you update/close/reinit/burn a compressed account.
-2. In Step 5 for packing accounts to optimize instruction data.
-
-* Assigns indices to accounts instead of repeating full pubkeys
-
-<Note>
-
+<Tip>
+For other instructions than create, **use the state tree of the existing compressed account**.
+* **Best practice**: minimize the number of different trees per transaction to keep instruction data light.
 * Account hashes can move to different state trees after each state transition.
 * Since trees fill up over time, your programs must be able to handle accounts from different state trees within the same transaction.
-* **Best practice**: minimize the number of different trees per transaction.
-</Note>
+</Tip>
 
-<details>
-
-<summary>Expand to learn what pubkeys and other metadata of a Merkle tree <code>TreeInfo</code> contains.</summary>
-
+<Accordion title="Expand to learn what TreeInfo contains">
 * `tree`: Merkle tree account pubkey
 * `queue`: Queue account pubkey of queue associated with a Merkle tree
   * Buffers updates of compressed accounts before they are added to the Merkle tree.
@@ -302,11 +299,10 @@ Use the state tree `TreeInfo`:
 * `cpiContext`: Optional CPI context account for batched operations across multiple programs (may be null, currently on devnet)
   * Allows a single zero-knowledge proof to verify compressed accounts from different programs in one instruction
   * Reduces instruction data size and compute unit costs when multiple programs interact with compressed accounts
-* `nextTreeInfo`: Next tree to use when current tree reaches \~95% capacity (may be null).
+* `nextTreeInfo`: Next tree to use when current tree reaches ~95% capacity (may be null).
   * The SDK automatically switches to next tree when present. Developers don't need to handle tree rollovers manually.
   * The protocol creates new trees, once existing trees fill up.
-
-</details>
+</Accordion>
 </Step>
 
 <Step>
@@ -1100,7 +1096,6 @@ const instructionData = {
 };
 ```
 
-
 ### 1. Validity Proof
 
 * Wrap the `compressedProof` from Step 4 to prove the account hash exists in the state tree.
@@ -1514,98 +1509,9 @@ Include the Merkle tree metadata from Step 5:
 
 Build the instruction with your `program_id`, `accounts`, and `data` from Step 6. Pass the accounts array you built in Step 5.
 
-<Tabs>
-<Tab title="Typescript">
-<Tabs>
-<Tab title="Create">
-
-```typescript
-const instruction = await program.methods
-  .createAccount(proof, packedAddressTreeInfo, outputStateTreeIndex, message)
-  .accounts({
-    signer: payer.publicKey
-  })
-  .remainingAccounts(packedAccounts.toAccountMetas().remainingAccounts)
-  .instruction();
-```
-
-
-Pass the proof, packed address tree info, output state tree index from Step 6, and initial account data (e.g., `message`) as separate parameters to `.createAccount()`.
-</Tab>
-
-<Tab title="Update">
-
-```typescript
-const instruction = await program.methods
-  .updateAccount(proof, currentAccount, compressedAccountMeta, newMessage)
-  .accounts({
-    signer: payer.publicKey
-  })
-  .remainingAccounts(packedAccounts.toAccountMetas().remainingAccounts)
-  .instruction();
-```
-
-
-Pass the proof, current account data, compressed account metadata from Step 6, and new account data as separate parameters to `.updateAccount()`.
-</Tab>
-
-<Tab title="Close">
-
-```typescript
-const instruction = await program.methods
-  .closeAccount(proof, compressedAccountMeta, message)
-  .accounts({
-    signer: payer.publicKey
-  })
-  .remainingAccounts(packedAccounts.toAccountMetas().remainingAccounts)
-  .instruction();
-```
-
-
-Pass the proof, compressed account metadata from Step 6, and current account data as separate parameters to `.closeAccount()`.
-</Tab>
-
-<Tab title="Reinit">
-
-```typescript
-const instruction = await program.methods
-  .reinitAccount(proof, compressedAccountMeta)
-  .accounts({
-    signer: payer.publicKey
-  })
-  .remainingAccounts(packedAccounts.toAccountMetas().remainingAccounts)
-  .instruction();
-```
-
-
-Pass the proof and compressed account metadata from Step 6 as separate parameters to `.reinitAccount()`. No account data is passed, since reinit creates default-initialized zero values.
-</Tab>
-
-<Tab title="Burn">
-
-```typescript
-const instruction = await program.methods
-  .burnAccount(proof, compressedAccountMeta, currentMessage)
-  .accounts({
-    signer: payer.publicKey
-  })
-  .remainingAccounts(packedAccounts.toAccountMetas().remainingAccounts)
-  .instruction();
-```
-
-
-Pass the proof, compressed account metadata (without `outputStateTreeIndex`) from Step 6, and current account data as separate parameters to `.burnAccount()`.
-</Tab>
-</Tabs>
-</Tab>
-
-<Tab title="Rust">
-<Tabs>
-<Tab title="Create">
-
 ```rust
 let instruction = Instruction {
-    program_id: create::ID,
+    program_id: program_id,
     accounts: [
         vec![AccountMeta::new(payer.pubkey(), true)],
         remaining_accounts,
@@ -1614,129 +1520,18 @@ let instruction = Instruction {
     data: instruction_data,
 };
 ```
-
-
-Pass the proof, packed address tree info, output state tree index from Step 6, and initial account data (e.g., `message`) as separate parameters to `.createAccount()`.
-</Tab>
-
-<Tab title="Update">
-
-```rust
-let instruction = Instruction {
-    program_id: update::ID,
-    accounts: [
-        vec![AccountMeta::new(payer.pubkey(), true)],
-        remaining_accounts,
-    ]
-    .concat(),
-    data: instruction_data,
-};
-```
-
-
-Pass the proof, current account data, compressed account metadata from Step 6, and new account data as separate parameters to `.updateAccount()`.
-</Tab>
-
-<Tab title="Close">
-
-```rust
-let instruction = Instruction {
-    program_id: close::ID,
-    accounts: [
-        vec![AccountMeta::new(payer.pubkey(), true)],
-        remaining_accounts,
-    ]
-    .concat(),
-    data: instruction_data,
-};
-```
-
-
-Pass the proof, compressed account metadata from Step 6, and current account data as separate parameters to `.closeAccount()`.
-</Tab>
-
-<Tab title="Reinit">
-
-```rust
-let instruction = Instruction {
-    program_id: reinit::ID,
-    accounts: [
-        vec![AccountMeta::new(payer.pubkey(), true)],
-        remaining_accounts,
-    ]
-    .concat(),
-    data: instruction_data,
-};
-```
-
-
-Pass the proof and compressed account metadata from Step 6 as separate parameters to `.reinitAccount()`. No account data is passed, since reinit creates default-initialized zero values.
-</Tab>
-
-<Tab title="Burn">
-
-```rust
-let instruction = Instruction {
-    program_id: burn::ID,
-    accounts: [
-        vec![AccountMeta::new(payer.pubkey(), true)],
-        remaining_accounts,
-    ]
-    .concat(),
-    data: instruction_data,
-};
-```
-
-
-Pass the proof, compressed account metadata (without `outputStateTreeIndex`) from Step 6, and current account data as separate parameters to `.burnAccount()`.
-</Tab>
-</Tabs>
-</Tab>
-</Tabs>
-
-### What to include:
 
 1. **Pass program-specific accounts** as defined by your program's IDL (signer, feepayer).
-2. **Add all remaining accounts** with `.remainingAccounts()` from Step 5:
-
-   * Light System accounts, added via `PackedAccounts.addSystemAccounts()`
-   * Merkle tree and queue accounts, added via `PackedAccounts.insertOrGet()`
+2. **Add all remaining accounts** from Step 5.
 3. **Build the instruction**:
-
    * Anchor converts `.accounts({ signer })` to `AccountMeta[]` using the program's IDL
    * `.remainingAccounts()` appends the complete packed accounts array
-   * Returns `TransactionInstruction` with `programId`, merged `keys`, and serialized instruction `data`
 
 </Step>
 
 <Step>
 ## Send Transaction
 
-<Tabs>
-<Tab title="Typescript">
-
-```typescript
-const blockhash = await rpc.getLatestBlockhash();
-const signedTx = buildAndSignTx(
-  [instruction],
-  payer,
-  blockhash.blockhash,
-  []
-);
-const signature = await sendAndConfirmTx(rpc, signedTx);
-```
-
-</Tab>
-
-<Tab title="Rust">
-
-```rust
-rpc.create_and_send_transaction(&[instruction], &payer.pubkey(), &[payer])
-    .await
-```
-
-</Tab>
-</Tabs>
 </Step>
 </Steps>
 
