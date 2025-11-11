@@ -30,7 +30,7 @@
           {
             "group": "Client Guides",
             "pages": [
-              "client-library"
+              "client-library/README"
             ]
           }
         ]
