@@ -5,10 +5,20 @@
   "colors": {
     "primary": "#0066ff",
     "light": "#3388ff",
-    "dark": "#0044cc"
+    "dark": "#0044cc",
+    "background": {
+      "light": "#ffffff",
+      "dark": "#0d1117"
+    },
+    "anchors": {
+      "from": "#0066ff",
+      "to": "#3388ff"
+    }
   },
   "favicon": "/favicon.png",
+  "customCSS": "/styles.css",
   "navigation": {
+    "tableOfContentsDepth": 2,
     "tabs": [
       {
         "tab": "Guides",
@@ -18,6 +28,17 @@
             "pages": [
               "ctoken-overview",
               "typescript"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Compressed PDAs",
+        "groups": [
+          {
+            "group": "Client Guides",
+            "pages": [
+              "client-library"
             ]
           }
         ]

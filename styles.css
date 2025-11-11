@@ -1,0 +1,157 @@
+/* Liquid Glass Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.02);
+  border-radius: 10px;
+  margin: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(
+    135deg,
+    rgba(0, 102, 255, 0.3) 0%,
+    rgba(51, 136, 255, 0.5) 50%,
+    rgba(0, 102, 255, 0.3) 100%
+  );
+  border-radius: 10px;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow:
+    0 2px 8px rgba(0, 102, 255, 0.2),
+    inset 0 1px 1px rgba(255, 255, 255, 0.3);
+  transition: all 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(0, 102, 255, 0.5) 0%,
+    rgba(51, 136, 255, 0.7) 50%,
+    rgba(0, 102, 255, 0.5) 100%
+  );
+  box-shadow:
+    0 4px 12px rgba(0, 102, 255, 0.4),
+    inset 0 1px 1px rgba(255, 255, 255, 0.5);
+  transform: scale(1.05);
+}
+
+::-webkit-scrollbar-thumb:active {
+  background: linear-gradient(
+    135deg,
+    rgba(0, 68, 204, 0.6) 0%,
+    rgba(0, 102, 255, 0.8) 50%,
+    rgba(0, 68, 204, 0.6) 100%
+  );
+}
+
+/* Firefox scrollbar with glass effect */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 102, 255, 0.4) rgba(0, 0, 0, 0.02);
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  ::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.03);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(
+      135deg,
+      rgba(0, 102, 255, 0.4) 0%,
+      rgba(51, 136, 255, 0.6) 50%,
+      rgba(0, 102, 255, 0.4) 100%
+    );
+    border: 2px solid rgba(255, 255, 255, 0.05);
+    box-shadow:
+      0 2px 8px rgba(0, 102, 255, 0.3),
+      inset 0 1px 1px rgba(255, 255, 255, 0.2);
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(
+      135deg,
+      rgba(0, 102, 255, 0.6) 0%,
+      rgba(51, 136, 255, 0.8) 50%,
+      rgba(0, 102, 255, 0.6) 100%
+    );
+    box-shadow:
+      0 4px 12px rgba(0, 102, 255, 0.5),
+      inset 0 1px 1px rgba(255, 255, 255, 0.3);
+  }
+}
+
+/* Enhanced TOC scrollbar */
+[data-testid="toc-scroll-container"]::-webkit-scrollbar {
+  width: 10px;
+}
+
+[data-testid="toc-scroll-container"]::-webkit-scrollbar-thumb {
+  background: linear-gradient(
+    180deg,
+    rgba(0, 102, 255, 0.35) 0%,
+    rgba(51, 136, 255, 0.55) 50%,
+    rgba(0, 102, 255, 0.35) 100%
+  );
+}
+
+/* Neutral Info Boxes - Remove Blue Styling */
+/* Note components */
+[class*="callout"][class*="note"],
+.note,
+[data-callout="note"] {
+  background: rgba(148, 163, 184, 0.1) !important;
+  border-color: rgba(148, 163, 184, 0.3) !important;
+}
+
+/* Tip components */
+[class*="callout"][class*="tip"],
+.tip,
+[data-callout="tip"] {
+  background: rgba(99, 102, 241, 0.08) !important;
+  border-color: rgba(99, 102, 241, 0.25) !important;
+}
+
+/* Warning components */
+[class*="callout"][class*="warning"],
+.warning,
+[data-callout="warning"] {
+  background: rgba(245, 158, 11, 0.08) !important;
+  border-color: rgba(245, 158, 11, 0.3) !important;
+}
+
+/* Info components - keep subtle, not primary blue */
+[class*="callout"][class*="info"],
+.info,
+[data-callout="info"] {
+  background: rgba(71, 85, 105, 0.08) !important;
+  border-color: rgba(71, 85, 105, 0.25) !important;
+}
+
+/* Success/Check components */
+[class*="callout"][class*="success"],
+[class*="callout"][class*="check"],
+.success,
+.check,
+[data-callout="success"],
+[data-callout="check"] {
+  background: rgba(34, 197, 94, 0.08) !important;
+  border-color: rgba(34, 197, 94, 0.3) !important;
+}
+
+/* Danger/Error components */
+[class*="callout"][class*="danger"],
+[class*="callout"][class*="error"],
+.danger,
+.error,
+[data-callout="danger"],
+[data-callout="error"] {
+  background: rgba(239, 68, 68, 0.08) !important;
+  border-color: rgba(239, 68, 68, 0.3) !important;
+}
