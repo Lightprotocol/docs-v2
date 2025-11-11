@@ -716,41 +716,48 @@ const packedAccounts = new PackedAccounts();
 2. **`systemAccounts`**: [Light System accounts](https://www.zkcompression.com/resources/addresses-and-urls#system-accounts) for proof verification and CPI calls to update state and address trees
 3. **`treeAccounts`**: State trees, address trees, and queue accounts from validity proof
 
-### Final array structure:
-
-```
-[preAccounts] [systemAccounts] [treeAccounts]
-      ↑              ↑                ↑
-   Signers,   Light System      state trees,
-  fee payer     accounts       address trees,
-                                   queues
-```
-
 <Note>
-
-* The instance maintains an internal deduplication map that assigns sequential u8 indices (0, 1, 2...) when you call `insertOrGet()`.
-* If the same pubkey is inserted multiple times, it returns the cached index.
-* For example, if the input state tree equals the output state tree, both return the same index.
+The instance maintains an internal deduplication map that assigns sequential u8 indices (0, 1, 2...) when you call `insertOrGet()`. If the same pubkey is inserted multiple times, it returns the cached index.
 </Note>
+
+**Array Anchor framework:**
+
+```
+
+[program accounts] [systemAccounts] [treeAccounts]
+
+      ↑ (.accounts())        ↑ (.remainingAccounts())
+
+   Signers, fee payer    Light System + tree accounts
+
+```
+
+1. Pass program-specific accounts to `.accounts()`
+2 Pass packed accounts to `.remainingAccounts()`
+
+**Array for Native Programs:**
+
+```
+
+[program accounts] [systemAccounts] [treeAccounts]
+
+         ↑                    ↑
+
+   Your accounts      Packed accounts appended at the end
+   (before)
+```
+
+1. Put your program-specific accounts first
+2. Append Packed accounts to end of the vector (recommended due to variable length)
 
 ### 2. Add Light System Accounts
 
-Populate the `systemAccounts` section with Light System accounts. These accounts are needed for proof verification and CPI calls to update state and address trees.
-
+Populate the `systemAccounts` section with Light System accounts needed for proof verification and CPI calls to update state and address trees.
 
 ```typescript
 const systemAccountConfig = SystemAccountMetaConfig.new(programId);
 packedAccounts.addSystemAccounts(systemAccountConfig);
 ```
-
-
-1. Pass your program ID to `SystemAccountMetaConfig.new(programId)` to configure system accounts
-2. Call `addSystemAccounts(systemAccountConfig)` - the SDK populates `systemAccounts` with Light System accounts, including the CPI signer PDA derived from your program ID
-
-<Note>
-Program-specific accounts (signers, fee payer) are passed to `.accounts()` in your instruction and are not added to `PackedAccounts`.
-</Note>
-
 ### 3. Pack Tree Accounts
 
 Populate the `treeAccounts` section with tree pubkeys from the validity proof and receive u8 indices to use in instruction data.
