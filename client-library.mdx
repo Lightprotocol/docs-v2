@@ -71,7 +71,6 @@ pnpm add \
 **Use `Rpc` for test-validator, devnet and mainnet**
 
 * `Rpc` is a thin wrapper extending Solana's web3.js `Connection` class with compression-related endpoints.
-* Connects to Photon indexer to query compressed accounts and prover service to generate validity proofs.
 
 <Tabs>
 <Tab title="Mainnet">
@@ -79,6 +78,7 @@ pnpm add \
 ```typescript
 const rpc = createRpc('https://mainnet.helius-rpc.com/?api-key=YOUR_API_KEY');
 ```
+Connect to Photon indexer to query compressed accounts and prover service to generate validity proofs.
 
 </Tab>
 
@@ -87,6 +87,7 @@ const rpc = createRpc('https://mainnet.helius-rpc.com/?api-key=YOUR_API_KEY');
 ```typescript
 const rpc = createRpc('https://devnet.helius-rpc.com/?api-key=YOUR_API_KEY');
 ```
+Connect to Photon indexer to query compressed accounts and prover service to generate validity proofs.
 
 </Tab>
 
@@ -215,12 +216,6 @@ Your client must fetch metadata of two Merkle trees:
 The protocol maintains Merkle trees. You don't need to initialize custom trees. Find the [addresses for Merkle trees here](https://www.zkcompression.com/resources/addresses-and-urls).
 </Tip>
 
-| Instruction                      | Address Tree Required | State Tree Required |
-| ------------------------------ | :-------------------: | :-----------------: |
-| Create                         | ✓                     | ✓                   |
-| Update / Close / Reinit / Burn | -                     | ✓                   |
-| Combined (Create + Update)     | ✓                     | ✓                   |
-
 <Note>
 V2 is currently on Devnet. Use to optimize compute unit consumption by up to 70%.
 </Note>
@@ -273,7 +268,15 @@ let output_state_tree_info = rpc.get_random_state_tree_info().unwrap();
 </Tab>
 </Tabs>
 
-These methods return `TreeInfo` of trees with the public key and other metadata to store the compressed account or address.
+These methods return `TreeInfo` with the public key and other metadata of trees.
+
+| Instruction                      | Address Tree Required | State Tree Required |
+| ------------------------------ | :-------------------: | :-----------------: |
+| Create                         | ✓                     | ✓                   |
+| Update / Close / Reinit / Burn | -                     | ✓                   |
+| Combined (Create + Update)     | ✓                     | ✓                   |
+
+All instructions require the state tree `TreeInfo` to store the compressed account hash.
 
 **Use the address tree `TreeInfo`**, when you create a compressed account:
 1. In **Step 3 to derive the address** for the compressed account.
@@ -282,13 +285,6 @@ These methods return `TreeInfo` of trees with the public key and other metadata 
 **Use the state tree `TreeInfo`**:
 1. In **Step 4 for `getValidityProofV0()`** to prove the account hash exists in the state tree, if you update/close/reinit/burn a compressed account.
 2. In **Step 5 to pack accounts** to optimize instruction data. This assigns indices to accounts instead of repeating full pubkeys in the instruction data.
-
-<Tip>
-For other instructions than create, **use the state tree of the existing compressed account**.
-* **Best practice**: minimize the number of different trees per transaction to keep instruction data light.
-* Account hashes can move to different state trees after each state transition.
-* Since trees fill up over time, your programs must be able to handle accounts from different state trees within the same transaction.
-</Tip>
 
 <Accordion title="Expand to learn what TreeInfo contains">
 * `tree`: Merkle tree account pubkey
@@ -303,20 +299,28 @@ For other instructions than create, **use the state tree of the existing compres
   * The SDK automatically switches to next tree when present. Developers don't need to handle tree rollovers manually.
   * The protocol creates new trees, once existing trees fill up.
 </Accordion>
+
+<Tip>
+For other instructions than create, **use the state tree of the existing compressed account**.
+* **Best practice**: minimize the number of different trees per transaction to keep instruction data light.
+* Account hashes can move to different state trees after each state transition.
+* Since trees fill up over time, your programs must be able to handle accounts from different state trees within the same transaction.
+</Tip>
+
 </Step>
 
 <Step>
 ## Derive Address
 
+You only need to derive an address when you create a compressed account.
+
+<Tabs>
+<Tab title="Create">
 Derive a persistent address as a unique identifier for your compressed account, similar to [program-derived addresses (PDAs)](https://solana.com/docs/core/pda).
 
 * Use the derivation method that matches your address tree type from the previous step (V1 or V2).
 * Like PDAs, compressed account addresses don't belong to a private key; rather, they're derived from the program that owns them.
 * The key difference to PDAs is that compressed accounts require an **address tree** parameter.
-
-<Note>
-V2 is currently on Devnet. Use to optimize compute unit consumption by up to 70%.
-</Note>
 
 <Tabs>
 <Tab title="Typescript">
@@ -328,14 +332,16 @@ const seed = deriveAddressSeed(
   [Buffer.from('my-seed')],
   programId
 );
-const address = deriveAddress(seed, addressTree.tree);
+const address = deriveAddress(
+  seed,
+  addressTree.tree
+);
 ```
-
 
 **1. Derive the seed**:
 
 * Seeds are predefined inputs, such as strings, numbers or other account addresses.
-* Specify `programId` to combine with your seeds
+* Specify your `programId` to combine with your seeds
 
 **2. Then, derive the address**:
 
@@ -345,23 +351,25 @@ const address = deriveAddress(seed, addressTree.tree);
 
 <Tab title="V2 Address Trees">
 
-```typescript
+```typescript focus={1,5,8}
 const seed = deriveAddressSeedV2(
   [Buffer.from('my-seed')]
 );
-const address = deriveAddressV2(seed, addressTree.tree, programId);
+
+const address = deriveAddressV2(
+  seed,
+  addressTree.tree,
+  programId
+);
 ```
 
-
-**1. Derive the seed**:
-
-* Seeds are predefined inputs, such as strings, numbers or other account addresses.
+**1. Derive the seed**
 
 **2. Then, derive the address**:
 
 * Pass the derived 32-byte `seed` from the first step.
 * Specify `addressTree.tree` pubkey to ensure an address is unique to an address tree. Different trees produce different addresses from identical seeds.
-* Specify `programId` in the address derivation. V2 includes it here instead of the first step.
+* Specify your *`programId` in this step.*
 </Tab>
 </Tabs>
 </Tab>
@@ -384,7 +392,7 @@ let (address, _) = derive_address(
 
 <Tab title="V2 Address Trees">
 
-```rust
+```rust focus={1}
 use light_sdk::address::v2::derive_address;
 
 let (address, _) = derive_address(
@@ -401,30 +409,53 @@ let (address, _) = derive_address(
 
 * `&[b"my-seed"]`: Predefined inputs, such as strings, numbers or other account addresses.
 * `&address_tree_info.tree`: Specify the tree pubkey to ensure an address is unique to this address tree. Different trees produce different addresses from identical seeds.
-* `&program_id`: Specify the program owner pubkey.
+* `&program_id`: Specify your program ID.
+</Tab>
+</Tabs>
+
+<Tip>
+**Use the same address** tree for all subsequent instructions **in client and program**.
+</Tip>
+</Tab>
+
+<Tab title="Update, Close, Reinit, Burn">
+Use the address from the existing compressed account. Fetch the account with the RPC methods to get its address.
+
+<Tabs>
+<Tab title="Typescript">
+
+```typescript
+const compressedAccount = await rpc.getCompressedAccount(address);
+const accountAddress = compressedAccount.address;
+```
+
+</Tab>
+
+<Tab title="Rust">
+
+```rust
+let compressed_account = rpc.get_compressed_account(address).await?;
+let account_address = compressed_account.address;
+```
+
 </Tab>
 </Tabs>
 
 <Note>
-Use the same address tree for both address derivation and all subsequent operations:
-
-* To create a compressed account, pass the address to the validity proof, to prove the address does not exist yet.
-* To update/close, use the address to fetch the current account with `getCompressedAccount(address)` / `get_compressed_account(address)`.
+Use the same address tree that was used during account creation. The address is stored in the compressed account data returned by the RPC methods.
 </Note>
+</Tab>
+</Tabs>
 </Step>
 
 <Step>
 ## Validity Proof
 
-Fetch a validity proof from your RPC provider that supports ZK Compression (Helius, Triton, ...). The proof type depends on the operation:
+Fetch a validity proof from your RPC provider that supports ZK Compression (Helius, Triton, ...). The proof type depends on the instruction:
 
-* To create a compressed account, you must prove the **address doesn't already exist** in the address tree.
-* To update or close a compressed account, you must **prove its account hash exists** in a state tree.
+* To **create** a compressed account, you prove the **address doesn't already exist** in the address tree.
+* In **other instructions**, you **prove its account hash exists** in a state tree.
 * You can **combine multiple addresses and hashes in one proof** to optimize compute cost and instruction data.
-
-<Note>
-[Here's a full guide](https://www.zkcompression.com/resources/json-rpc-methods/getvalidityproof) to the `getValidityProofV0()` / `get_validity_proof()` method.
-</Note>
 
 <Tabs>
 <Tab title="Typescript">
@@ -434,49 +465,50 @@ Fetch a validity proof from your RPC provider that supports ZK Compression (Heli
 ```typescript
 const proof = await rpc.getValidityProofV0(
   [],
-  [{ address: bn(address.toBytes()), tree: addressTree.tree, queue: addressTree.queue }]
+  [{
+    address: bn(address.toBytes()),
+    tree: addressTree.tree,
+    queue: addressTree.queue
+  }]
 );
 ```
 
-
 **1. Pass these parameters**:
 
-* Leave (`[]`) empty to create compressed accounts since no compressed account exists yet to reference.
-* Specify the derived address with its `tree` and `queue` pubkeys from the address tree `TreeInfo`.
+* Leave the **hash array empty** (`[]`) since no compressed account exists yet to reference.
+* Specify the **derived address** with `tree` and `queue` pubkeys from the address tree `TreeInfo`.
 
 **2. The RPC returns**:
 
-* `compressedProof`: The proof that the address does not exist in the address tree, passed to the program in your instruction data.
-* `rootIndices`: An array with root index from the validity proof for the address tree.
-* Empty `leafIndices` array, since you do not reference an existing account, when you create a compressed account.
+* `compressedProof` with the proof that the address does not exist in the address tree for your instruction data (Step 6)
+* `rootIndices` array with root index from the validity proof for the address tree.
+* Empty `leafIndices` array since you do not reference an existing account when you create a compressed account.
 </Tab>
 
 <Tab title="Update, Close, Reinit, Burn">
-<Note>
-These operations proof that the account hash exists in the state tree. The difference is in your program's instruction handler.
-</Note>
-
 
 ```typescript
-const hash = compressedAccount.hash;
-const tree = compressedAccount.treeInfo.tree;
-const queue = compressedAccount.treeInfo.queue;
-
 const proof = await rpc.getValidityProofV0(
-  [{ hash, tree, queue }],
+  [{
+    hash: compressedAccount.hash,
+    tree: compressedAccount.treeInfo.tree,
+    queue: compressedAccount.treeInfo.queue
+  }],
   []
 );
 ```
-
+<Note>
+These instructions prove that the account hash exists in the state tree. The difference is in your program's instruction handler.
+</Note>
 
 **1. Pass these parameters**:
 
-* Specify the account `hash` along with `tree` and `queue` pubkeys from the compressed account's `TreeInfo`.
-* (`[]`) remains empty, since the proof verifies the account hash exists in a state tree, not that the address doesn't exist in an address tree.
+* Specify the **account hash** with `tree` and `queue` pubkeys from the compressed account's `TreeInfo`.
+* Leave the **address array empty** (`[]`) since the proof verifies the account hash exists in a state tree, not that the address doesn't exist in an address tree.
 
 **2. The RPC returns**:
 
-* `compressedProof`: The proof that the account hash exists in the state tree, passed to the program in your instruction data.
+* `compressedProof` with the proof that the **account hash exists in the state tree** for your instruction data (Step 6)
 * `rootIndices` and `leafIndices` arrays with proof metadata to pack accounts (Step 5).
 </Tab>
 </Tabs>
@@ -491,8 +523,8 @@ let rpc_result = rpc
     .get_validity_proof(
         vec![],
         vec![AddressWithTree {
-            address: *address,
-            tree: address_tree_info.tree,
+          address: *address,
+          tree: address_tree_info.tree
         }],
         None,
     )
@@ -504,58 +536,54 @@ let rpc_result = rpc
 **1. Pass these parameters**:
 
 * Leave (`vec![]`) empty to create compressed accounts since no compressed account exists yet to reference.
-* Specify the new address with `tree` pubkey from the address tree `TreeInfo` in `vec![AddressWithTree]`. Rust does not have a queue field, different from Typescript.
+* Specify the pubkeys of the new address and address tree from `TreeInfo`.
 
 **2. The RPC returns `ValidityProofWithContext`**:
 
-* `proof` to prove that the address does not exist in the address tree, passed to the program in your instruction data.
+* `proof` with the proof that the address does not exist in the address tree for your instruction data (Step 6)
 * `addresses` with the public key and metadata of the address tree to pack accounts (Step 5).
-* An empty `accounts` field since you do not reference an existing account, when you create a compressed account.
+* Empty `accounts` field since you do not reference an existing account when you create a compressed account.
 </Tab>
 
 <Tab title="Update, Close, Reinit, Burn">
-<Note>
-These operations proof that the account hash exists in the state tree. The difference is in your program's instruction handler.
-</Note>
-
 
 ```rust
-let hash = compressed_account.hash;
-
 let rpc_result = rpc
     .get_validity_proof(
-        vec![hash],
+        vec![compressed_account.hash],
         vec![],
         None,
     )
     .await?
     .value;
 ```
-
+<Note>
+These instructions prove that the account hash exists in the state tree. The difference is in your program's instruction handler.
+</Note>
 
 **1. Pass these parameters**:
 
-* Specify the `hash` extracted from the compressed account in `vec![hash]` to prove its existence in the state tree.
-* (`vec![]`) remains empty, since the proof verifies the account hash exists in a state tree, not that the address doesn't exist in an address tree.
+* Specify the **compressed account hash in `vec![hash]`** to prove its existence in the state tree.
+* Leave the **address vector empty**, since the proof verifies the account hash exists in a state tree, not that the address doesn't exist in an address tree.
 
 **2. The RPC returns `ValidityProofWithContext`**:
 
-* `proof` with the proof that the account hash exists in the state tree, passed to the program in your instruction data.
-* `accounts` with the public key and metadata of the state tree to pack accounts (Step 5).
-* An empty `addresses` field (only needed when creating an address).
+* `proof` with the proof that the **account hash exists in the state tree** for your instruction data (Step 6)
+* `accounts` with the **public key and metadata of the state tree** to pack accounts (Step 5).
+* **Empty `addresses` field** (only needed when creating an address).
 </Tab>
 </Tabs>
 </Tab>
 </Tabs>
 
-### Optimize with Single Combined Proofs
+### Optimize with Combined Proofs
 
-<Note>
+<Tip>
 **Advantages of combined proofs**:
 
 * You only add one validity proof with 128 bytes in size instead of two to your instruction data.
 * Reduction of compute unit consumption by at least 100k CU, since combined proofs are verified in a single CPI by the Light System Program.
-</Note>
+</Tip>
 
 The specific combinations and maximums to combine proofs depend on the circuit version (v1 or v2) and the proof type.
 
@@ -602,39 +630,41 @@ In this example, we generate one proof for the update of an existing account and
 <Tab title="Typescript">
 
 ```typescript
-const hash = compressedAccount.hash;
-const tree = compressedAccount.treeInfo.tree;
-const queue = compressedAccount.treeInfo.queue;
-
 const proof = await rpc.getValidityProofV0(
-  [{ hash, tree, queue }],
-  [{ address: bn(address.toBytes()), tree: addressTree.tree, queue: addressTree.queue }]
+  [{
+    hash: compressedAccount.hash,
+    tree: compressedAccount.treeInfo.tree,
+    queue: compressedAccount.treeInfo.queue
+  }],
+  [{
+    address: bn(address.toBytes()),
+    tree: addressTree.tree,
+    queue: addressTree.queue
+  }]
 );
 ```
 
 
 **1. Pass these parameters**:
 
-* Specify one or more account `hash` values along with `tree` and `queue` pubkeys from the compressed account's `TreeInfo`.
-* Specify one or more derived addresses with `tree` and `queue` pubkeys from the address tree `TreeInfo`.
+* Specify one or more **account hashes** with `tree` and `queue` pubkeys from the compressed account's `TreeInfo`.
+* Specify one or more **derived addresses** with `tree` and `queue` pubkeys from the address tree `TreeInfo`.
 
-### 2. The RPC returns:
+**2. The RPC returns**:
 
-* `compressedProof`: A single combined proof that verifies both the account hash exists in the state tree and the address does not exist in the address tree, passed to the program in your instruction data.
-* `rootIndices` and `leafIndices` arrays with proof metadata to build `PackedAddressTreeInfo` and `PackedStateTreeInfo` (Step 5).
+* `compressedProof` with a single combined proof that verifies both the **account hash exists in the state tree** and the **address does not exist in the address tree** for your instruction data (Step 6)
+* `rootIndices` and `leafIndices` arrays with proof metadata to pack accounts (Step 5).
 </Tab>
 
 <Tab title="Rust">
 
 ```rust
-let hash = compressed_account.hash;
-
 let rpc_result = rpc
     .get_validity_proof(
-        vec![hash],
+        vec![compressed_account.hash],
         vec![AddressWithTree {
-            address: *address,
-            tree: address_tree_info.tree,
+          address: *address,
+          tree: address_tree_info.tree
         }],
         None,
     )
@@ -645,12 +675,12 @@ let rpc_result = rpc
 
 **1. Pass these parameters**:
 
-* Specify one or more `hash` values extracted from compressed accounts in `vec![hash]` to prove existence in the state trees.
-* Specify one or more addresses with `tree` pubkey from the address tree `TreeInfo` in `vec![AddressWithTree]` to prove non-existence in address trees.
+* Specify one or more **account hashes** in `vec![hash]` from compressed accounts.
+* Specify one or more **derived addresses** in `vec![AddressWithTree]` with `tree` pubkey from the address tree `TreeInfo`.
 
-### 2. The RPC returns `ValidityProofWithContext` with
+**2. The RPC returns `ValidityProofWithContext`**:
 
-* `proof`: A single combined proof, passed to the program in your instruction data.
+* `proof` with a single combined proof that verifies both the **account hash exists in the state tree** and the **address does not exist in the address tree** for your instruction data (Step 6)
 * `addresses` with the public key and metadata of the address tree to pack accounts (Step 5).
 * `accounts` with the public key and metadata of the state tree to pack accounts (Step 5).
 </Tab>
@@ -721,7 +751,7 @@ packedAccounts.addSystemAccounts(systemAccountConfig);
 Program-specific accounts (signers, fee payer) are passed to `.accounts()` in your instruction and are not added to `PackedAccounts`.
 </Note>
 
-### 3. Pack Tree Accounts from Validity Proof
+### 3. Pack Tree Accounts
 
 Populate the `treeAccounts` section with tree pubkeys from the validity proof and receive u8 indices to use in instruction data.
 
@@ -881,7 +911,7 @@ remaining_accounts.add_system_accounts(config)?;
 
 ### 3. Pack Tree Accounts
 
-Add tree and queue accounts to the packed accounts array and retrieve indices for the instruction data. The specific trees used depend on your operation type.
+Add tree and queue accounts to the packed accounts array and retrieve indices for the instruction data. The specific trees used depend on your instruction type.
 
 <Tabs>
 <Tab title="Create">
