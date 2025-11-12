@@ -13,13 +13,13 @@
     "tableOfContentsDepth": 2,
     "tabs": [
       {
-        "tab": "Guides",
+        "tab": "Docs",
         "groups": [
           {
             "group": "Getting started",
             "pages": [
-              "ctoken-overview",
-              "typescript"
+              "c-token/ctoken-overview",
+              "c-token/typescript"
             ]
           }
         ]
@@ -31,6 +31,17 @@
             "group": "Client Guides",
             "pages": [
               "client-library/README"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Compressible",
+        "groups": [
+          {
+            "group": "Overview",
+            "pages": [
+              "compressible/README"
             ]
           }
         ]
@@ -69,7 +80,28 @@
   "footer": {
     "socials": {
       "x": "https://x.com/lightprotocol",
-      "github": "https://github.com/Lightprotocol/light-protocol"
-    }
+      "github": "https://github.com/Lightprotocol/light-protocol",
+      "discord": "https://discord.com/invite/CYvjBgzRFP"
+    },
+    "links": [
+      {
+        "header": "Compressed by Light Protocol",
+        "items": [
+          {
+            "label": "lightprotocol.com",
+            "href": "https://lightprotocol.com"
+          }
+        ]
+      },
+      {
+        "header": "Indexed by Helius",
+        "items": [
+          {
+            "label": "helius.dev",
+            "href": "https://helius.dev"
+          }
+        ]
+      }
+    ]
   }
 }

@@ -6,13 +6,9 @@ description: >-
 icon: 'code'
 ---
 
-<Note>
-Ask anything via [DeepWiki](https://deepwiki.com/Lightprotocol/light-protocol/3.1-javascripttypescript-sdks).
-</Note>
-
 <Steps>
 <Step>
-## Installation and Setup
+## Prerequisites
 
 <Tabs>
 <Tab title="Typescript">
@@ -622,9 +618,10 @@ V2 circuits can prove in a single proof
 The combinations and maximums are determined by the available circuit verifying keys. Different proof sizes require different circuits optimized for that specific combination. View the [source code here](https://github.com/Lightprotocol/light-protocol/tree/871215642b4b5b69d2bcd7eca22542346d0e2cfa/program-libs/verifier/src/verifying_keys).
 </Note>
 
-### Example create-and-update proof
+### ### Example Create Address & Update Account in one Proof
 
-In this example, we generate one proof for the update of an existing account and the creation of a new account.
+In this example, we generate one proof that proves that an account exists and that an address does not exist yet. 
+This updates an account and create the address for a new account.
 
 <Tabs>
 <Tab title="Typescript">
@@ -643,7 +640,6 @@ const proof = await rpc.getValidityProofV0(
   }]
 );
 ```
-
 
 **1. Pass these parameters**:
 
@@ -694,7 +690,11 @@ See the full [create-and-update program example with tests](https://github.com/L
 <Step>
 ## Pack Accounts
 
-To optimize instruction data, we pack accounts into an array:
+Transactions with compressed accounts reference in their instruction
+1. a number of [Light System accounts](https://www.zkcompression.com/resources/addresses-and-urls#system-accounts) for proof verification and CPI calls to update state and address trees
+2. a number of Merkle tree accounts
+
+To optimize instruction data, we pack accounts into an array with `PackedAccounts`:
 
 * Every packed account is assigned to an u8 index.
 * Indices are included in instruction data, instead of 32 byte pubkeys.
@@ -702,190 +702,8 @@ To optimize instruction data, we pack accounts into an array:
   * in anchor to `remainingAccounts`, and
   * in native programs to the account info slice.
 
-<Tabs>
-<Tab title="Typescript">
-### 1. Initialize PackedAccounts
+This instance contains three empty account sections with subsequent indices.
 
-```typescript
-const packedAccounts = new PackedAccounts();
-```
-
-`PackedAccounts` creates a helper instance with three empty account sections:
-
-1. **`preAccounts`**: Program-specific accounts like signers or fee payer.
-2. **`systemAccounts`**: [Light System accounts](https://www.zkcompression.com/resources/addresses-and-urls#system-accounts) for proof verification and CPI calls to update state and address trees
-3. **`treeAccounts`**: State trees, address trees, and queue accounts from validity proof
-
-<Note>
-* The instance maintains an internal deduplication map that assigns sequential u8 indices (0, 1, 2...) when you call `insert_or_get()`.
-* If the same pubkey is inserted multiple times, it returns the cached index.
-* For example, if the input state tree equals the output state tree, both return the same index.
-</Note>
-**Array Anchor framework:**
-
-```
-
-[program accounts] [systemAccounts] [treeAccounts]
-
-      ↑ (.accounts())        ↑ (.remainingAccounts())
-
-   Signers, fee payer    Light System + tree accounts
-
-```
-
-1. Pass program-specific accounts to `.accounts()`
-
-2. Pass packed accounts to `.remainingAccounts()`
-
-**Array for Native Programs:**
-
-```
-
-[program accounts] [systemAccounts] [treeAccounts]
-
-         ↑                    ↑
-
-   Your accounts      Packed accounts appended at the end
-   (before)
-```
-
-1. Put your program-specific accounts first
-2. Append Packed accounts to end of the vector (recommended due to variable length)
-
-### 2. Add Light System Accounts
-
-Populate the `systemAccounts` section with Light System accounts needed for proof verification and CPI calls to update state and address trees.
-
-```typescript
-const systemAccountConfig = SystemAccountMetaConfig.new(programId);
-packedAccounts.addSystemAccounts(systemAccountConfig);
-```
-### 3. Pack Tree Accounts
-
-Populate the `treeAccounts` section with tree pubkeys from the validity proof and receive u8 indices to use in instruction data.
-
-<Tabs>
-<Tab title="Create">
-
-```typescript
-const addressMerkleTreePubkeyIndex =
-  packedAccounts.insertOrGet(addressTree);
-const addressQueuePubkeyIndex =
-  packedAccounts.insertOrGet(addressQueue);
-
-const packedAddressTreeInfo = {
-  rootIndex: proofRpcResult.rootIndices[0],
-  addressMerkleTreePubkeyIndex,  // u8 index: 0
-  addressQueuePubkeyIndex,        // u8 index: 1
-};
-```
-
-</Tab>
-
-<Tab title="Update, Close, Reinit, Burn">
-
-```typescript
-const merkleTreePubkeyIndex =
-  packedAccounts.insertOrGet(compressedAccount.treeInfo.tree);
-const queuePubkeyIndex =
-  packedAccounts.insertOrGet(compressedAccount.treeInfo.queue);
-
-const packedInputAccounts = {
-  merkleTreePubkeyIndex,  // u8 index: 0
-  queuePubkeyIndex,       // u8 index: 1
-  leafIndex: proofRpcResult.leafIndices[0],
-  rootIndex: proofRpcResult.rootIndices[0],
-};
-```
-</Tab>
-</Tabs>
-
-<Tabs>
-<Tab title="V1 Trees">
-
-| Instruction             | Address Tree             | State Tree           | Nullifier Queue | Output State Tree       |
-| ----------------------- | ------------------------ | -------------------- | --------------- | ----------------------- |
-| Create                  | ✓ (proves non-existence) | -                    | -               | ✓ (stores new hash)     |
-| Update / Close / Reinit | -                        | ✓ (proves existence) | ✓ (nullifies)   | ✓ (stores updated hash) |
-| Burn                    | -                        | ✓ (proves existence) | ✓ (nullifies)   | -                       |
-
-</Tab>
-
-<Tab title="V2 Trees">
-
-| Instruction             | Address Tree             | State Tree (with nullifier queue) | Output Queue            |
-| ----------------------- | ------------------------ | --------------------------------- | ----------------------- |
-| Create                  | ✓ (proves non-existence) | -                                 | ✓ (stores new hash)     |
-| Update / Close / Reinit | -                        | ✓ (proves existence, nullifies)   | ✓ (stores updated hash) |
-| Burn                    | -                        | ✓ (proves existence, nullifies)   | -                       |
-
-<Tip>
-**V2 is on Devnet and reduces compute unit consumption by up to 70%**:
-
-* V2 combines the state tree and nullifier queue into a single account for batched operations.
-* New hashes are stored in the output queue. A forester node updates the Merkle tree asynchronously.
-</Tip>
-
-</Tab>
-</Tabs>
-
-### 4. Pack Output State Tree
-
-<Warning>
-The burn instruction does not produce output state and does not require `outputStateTreeIndex`.
-</Warning>
-
-1. Pack the output state tree to specify where the new or updated account state will be stored.
-2. Pass the returned `outputStateTreeIndex` in your instruction data (Step 6).
-
-```typescript
-const outputStateTreeIndex =
-  packedAccounts.insertOrGet(outputStateTree);
-```
-
-<Tip>
-**For other instructions than create and burn, use the state tree of the existing compressed account**.
-* **Best practice**: minimize the number of different trees per transaction to keep instruction data light.
-* Account hashes can move to different state trees after each state transition.
-* Since trees fill up over time, your programs must be able to handle accounts from different state trees within the same transaction.
-</Tip>
-
-### 5. Finalize Packed Accounts
-
-Call `toAccountMetas()` to convert packed accounts into the final array for your instruction.
-
-```typescript
-const { remainingAccounts, systemStart, packedStart } =
-  packedAccounts.toAccountMetas();
-```
-
-This method returns an object with three fields:
-* `remainingAccounts`: `AccountMeta[]` array with all accounts (system accounts + tree accounts)
-* `systemStart`: Offset indicating where system accounts start in the array (used internally by Light System Program)
-* `packedStart`: Offset indicating where tree accounts start in the array (used internally by Light System Program)
-
-</Tab>
-
-<Tab title="Rust">
-### 1. Initialize PackedAccounts
-
-```rust
-let mut remaining_accounts = PackedAccounts::default();
-```
-
-Creates a PackedAccounts instance that manages account deduplication and indexing for compressed account operations.
-
-The instance organizes accounts into three sections:
-
-1. **`pre_accounts`**: Program-specific accounts (signers, fee payer)
-2. **`system_accounts`**: [Light System accounts](https://www.zkcompression.com/resources/addresses-and-urls#system-accounts) for proof verification and CPI calls to update state and address trees
-3. **`tree_accounts`**: State trees, address trees, and queue accounts 
-
-<Note>
-* The instance maintains an internal deduplication map that assigns sequential u8 indices (0, 1, 2...) when you call `insert_or_get()`.
-* If the same pubkey is inserted multiple times, it returns the cached index.
-* For example, if the input state tree equals the output state tree, both return the same index.
-</Note>
 
 ```
 [pre_accounts] [system_accounts] [tree_accounts]
@@ -895,44 +713,166 @@ The instance organizes accounts into three sections:
                                    queues
 ```
 
-### 2. Add Light System Accounts
+<Tip>
+* The instance maintains an internal deduplication map that assigns sequential u8 indices (0, 1, 2...) when you call `insert_or_get()`.
+* If the same pubkey is inserted multiple times, it returns the cached index.
+* For example, if the input state tree equals the output state tree, both return the same index.
+</Tip>
 
-Populate the `system_accounts` with [Light System accounts](https://www.zkcompression.com/resources/addresses-and-urls#system-accounts) needed for proof verification and CPI calls to update state and address trees.
+<Tabs>
+<Tab title="Typescript">
 
-```rust
-let config = SystemAccountMetaConfig::new(program::ID);
-remaining_accounts.add_system_accounts(config)?;
+<Tabs>
+<Tab title="Create">
+
+```typescript
+// 1. Initialize
+const packedAccounts 
+  = new PackedAccounts();
+
+// 2. Add system accounts
+const systemAccountConfig
+  = SystemAccountMetaConfig.new(programId);
+packedAccounts.addSystemAccounts(systemAccountConfig);
+
+// 3. Pack tree accounts from proof to get indices for instruction data
+// Returns index 0, adds tree to accounts array
+const addressMerkleTreePubkeyIndex 
+  = packedAccounts.insertOrGet(addressTree);
+// Returns index 1, adds queue to accounts array  
+const addressQueuePubkeyIndex 
+  = packedAccounts.insertOrGet(addressQueue);
+
+const packedAddressTreeInfo = {
+  rootIndex: proofRpcResult.rootIndices[0],
+  addressMerkleTreePubkeyIndex,
+  addressQueuePubkeyIndex,
+};
+
+// 4. Pack output state tree
+const outputStateTreeIndex 
+  = packedAccounts.insertOrGet(outputStateTree);
+
+// 5. Convert to Account Metas
+const { remainingAccounts }
+  = packedAccounts.toAccountMetas();
 ```
+</Tab>
 
-### 3. Pack Tree Accounts
+<Tab title="Update, Close, Reinit Burn">
+```typescript focus={10-21}
+// 1. Initialize
+const packedAccounts
+  = new PackedAccounts();
 
-Add tree and queue accounts to the packed accounts array and retrieve indices for the instruction data. The specific trees used depend on your instruction type.
+// 2. Add system accounts
+const systemAccountConfig
+  = SystemAccountMetaConfig.new(programId);
+packedAccounts.addSystemAccounts(systemAccountConfig);
+
+// 3. Pack tree accounts from proof to get indices for instruction data
+const merkleTreePubkeyIndex
+  = packedAccounts.insertOrGet(compressedAccount.treeInfo.tree);
+const queuePubkeyIndex
+  = packedAccounts.insertOrGet(compressedAccount.treeInfo.queue);
+
+const packedInputAccounts = {
+  merkleTreePubkeyIndex,
+  queuePubkeyIndex,
+  leafIndex: proofRpcResult.leafIndices[0],
+  rootIndex: proofRpcResult.rootIndices[0],
+};
+
+// 4. Pack output state tree
+const outputStateTreeIndex
+  = packedAccounts.insertOrGet(outputStateTree);
+
+// 5. Finalize
+const { remainingAccounts }
+  = packedAccounts.toAccountMetas();
+```
+</Tab>
+</Tabs>
+
+
+<Tabs>
+<Tab title="V1 Trees">
+
+| Instruction             | Address Tree             | State Tree           | Nullifier Queue | Output State Tree       |
+| ----------------------- | ------------------------ | -------------------- | --------------- | ----------------------- |
+| Create                  | ✓ (proves non-existence) | -                    | -               | ✓ (stores new hash)     |
+| Update / Close / Reinit | -                        | ✓ (proves existence) | ✓ (nullifies)   | ✓ (stores updated hash) |
+| Burn                    | -                        | ✓ (proves existence) | ✓ (nullifies)   | -                       |
+
+</Tab>
+
+<Tab title="V2 Trees">
+
+| Instruction             | Address Tree             | State Tree (with nullifier queue) | Output Queue            |
+| ----------------------- | ------------------------ | --------------------------------- | ----------------------- |
+| Create                  | ✓ (proves non-existence) | -                                 | ✓ (stores new hash)     |
+| Update / Close / Reinit | -                        | ✓ (proves existence, nullifies)   | ✓ (stores updated hash) |
+| Burn                    | -                        | ✓ (proves existence, nullifies)   | -                       |
+
+</Tab>
+</Tabs>
+<Tip>
+**V2 is on Devnet and reduces compute unit consumption by up to 70%**.
+
+* V2 combines the state tree and nullifier queue into a single account for batched Merkle tree updates.
+* New hashes are stored in the output queue. A forester node updates the Merkle tree asynchronously.
+</Tip>
+
+</Tab>
+
+<Tab title="Rust">
 
 <Tabs>
 <Tab title="Create">
 
 ```rust
-let packed_accounts = rpc_result.pack_tree_infos(&mut remaining_accounts);
+// 1. Initialize
+let mut remaining_accounts = PackedAccounts::default();
+
+// 2. Add system accounts
+let config 
+  = SystemAccountMetaConfig::new(program_id);
+  remaining_accounts.add_system_accounts(config)?;
+
+// 3. Pack tree accounts from proof to get indices for instruction data
+let packed_accounts 
+  = rpc_result.pack_tree_infos(&mut remaining_accounts);
+
+// 4. Pack output state tree
+let output_state_tree_index 
+  = output_state_tree_info.pack_output_tree_index(&mut remaining_accounts)?;
+
+// 5. Convert to Account Metas
+let (remaining_accounts_metas, _, _) 
+  = remaining_accounts.to_account_metas();
 ```
 </Tab>
 
-<Tab title="Update / Close / Reinit">
+<Tab title="Update, Close, Reinit, Burn">
 
-```rust
+```rust focus={3,8-14}
+// 1. Initialize
+let mut remaining_accounts = PackedAccounts::default();
+
+// 2. Add system accounts
+let config 
+  = SystemAccountMetaConfig::new(program_id);
+  remaining_accounts.add_system_accounts(config)?;
+
+// 3. Pack tree accounts from proof to get indices for instruction data
 let packed_tree_accounts = rpc_result
     .pack_tree_infos(&mut remaining_accounts)
-    .state_trees
+    .state_trees // includes output_state_tree_index
     .unwrap();
-```
-</Tab>
 
-<Tab title="Burn">
-
-```rust
-let packed_tree_accounts = rpc_result
-    .pack_tree_infos(&mut remaining_accounts)
-    .state_trees
-    .unwrap();
+// 4. Convert to Account Metas
+let (remaining_accounts_metas, _, _) 
+  = remaining_accounts.to_account_metas();
 ```
 </Tab>
 </Tabs>
@@ -956,46 +896,15 @@ let packed_tree_accounts = rpc_result
 | Update / Close / Reinit | -                        | ✓ (proves existence, nullifies)   | ✓ (stores updated hash) |
 | Burn                    | -                        | ✓ (proves existence, nullifies)   | -                       |
 
+</Tab>
+</Tabs>
 <Tip>
-**V2 is on Devnet and reduces compute unit consumption by up to 70%**:
+**V2 is on Devnet and reduces compute unit consumption by up to 70%**.
 
-* V2 combines the state tree and nullifier queue into a single account for batched operations.
+* V2 combines the state tree and nullifier queue into a single account for batched Merkle tree updates.
 * New hashes are stored in the output queue. A forester node updates the Merkle tree asynchronously.
 </Tip>
 
-</Tab>
-</Tabs>
-
-### 4. Pack Output State Tree (Anchor Create Only)
-
-For Anchor Create instructions, pack the output state tree to store the new account hash and pass it to your program instruction's `output_state_tree_index` parameter.
-
-<Tip>
-* **Anchor Create**: Requires separate `pack_output_tree_index()` call (shown below)
-* **Update/Close/Reinit**: `output_tree_index` already includes this in `PackedStateTreeInfos` from Step 3
-* **Burn**: Has no output state tree
-</Tip>
-
-```rust
-let output_state_tree_index = output_state_tree_info
-    .pack_output_tree_index(&mut remaining_accounts)?;
-```
-
-### 5. Finalize Packed Accounts
-
-Convert packed accounts into the final array for your instruction.
-
-```rust
-let (remaining_accounts, _, _) = remaining_accounts.to_account_metas();
-```
-
-
-Call `to_account_metas()` on your `PackedAccounts` instance
-
-* Returns a tuple with three elements:
-  * `remaining_accounts`: `Vec<AccountMeta>` containing all accounts (system accounts + tree accounts)
-  * `system_start`: Offset where system accounts start (used internally by Light System Program)
-  * `packed_start`: Offset where tree accounts start (used internally by Light System Program)
 </Tab>
 </Tabs>
 </Step>
@@ -1276,12 +1185,6 @@ let instruction = Instruction {
 };
 ```
 
-1. **Pass program-specific accounts** as defined by your program's IDL (signer, feepayer).
-2. **Add all remaining accounts** from Step 5.
-3. **Build the instruction**:
-   * Anchor converts `.accounts({ signer })` to `AccountMeta[]` using the program's IDL
-   * `.remainingAccounts()` appends the complete packed accounts array
-
 </Step>
 
 <Step>
@@ -1292,37 +1195,287 @@ let instruction = Instruction {
 
 # Full Code Examples
 
-Full TypeScript test examples using local test validator.
+<Tabs>
+<Tab title="Typescript">
+```typescript create.ts expandable wrap
+import * as anchor from "@coral-xyz/anchor";
+import { Program, web3 } from "@coral-xyz/anchor";
+import { Create } from "../target/types/create";
+import idl from "../target/idl/create.json";
+import {
+  bn,
+  CompressedAccountWithMerkleContext,
+  confirmTx,
+  createRpc,
+  defaultStaticAccountsStruct,
+  defaultTestStateTreeAccounts,
+  deriveAddress,
+  deriveAddressSeed,
+  LightSystemProgram,
+  PackedAccounts,
+  Rpc,
+  sleep,
+  SystemAccountMetaConfig,
+} from "@lightprotocol/stateless.js";
+import * as assert from "assert";
 
-1. Install the Light CLI first to download program binaries:
+const path = require("path");
+const os = require("os");
+require("dotenv").config();
 
+const anchorWalletPath = path.join(os.homedir(), ".config/solana/id.json");
+process.env.ANCHOR_WALLET = anchorWalletPath;
 
-```bash
-npm -g i @lightprotocol/zk-compression-cli@0.27.1-alpha.2
+describe("test-anchor", () => {
+  const program = anchor.workspace.Create as Program<Create>;
+  const coder = new anchor.BorshCoder(idl as anchor.Idl);
+
+  it("create compressed account", async () => {
+    let signer = new web3.Keypair();
+    let rpc = createRpc(
+      "http://127.0.0.1:8899",
+      "http://127.0.0.1:8784",
+      "http://127.0.0.1:3001",
+      {
+        commitment: "confirmed",
+      },
+    );
+    let lamports = web3.LAMPORTS_PER_SOL;
+    await rpc.requestAirdrop(signer.publicKey, lamports);
+    await sleep(2000);
+
+    const outputStateTree = defaultTestStateTreeAccounts().merkleTree;
+    const addressTree = defaultTestStateTreeAccounts().addressTree;
+    const addressQueue = defaultTestStateTreeAccounts().addressQueue;
+
+    const messageSeed = new TextEncoder().encode("message");
+    const seed = deriveAddressSeed(
+      [messageSeed, signer.publicKey.toBytes()],
+      new web3.PublicKey(program.idl.address),
+    );
+    const address = deriveAddress(seed, addressTree);
+
+    // Create compressed account with message
+    const txId = await createCompressedAccount(
+      rpc,
+      addressTree,
+      addressQueue,
+      address,
+      program,
+      outputStateTree,
+      signer,
+      "Hello, compressed world!",
+    );
+    console.log("Transaction ID:", txId);
+
+    // Wait for indexer to process the transaction
+    const slot = await rpc.getSlot();
+    await rpc.confirmTransactionIndexed(slot);
+
+    let compressedAccount = await rpc.getCompressedAccount(bn(address.toBytes()));
+    let myAccount = coder.types.decode(
+      "MyCompressedAccount",
+      compressedAccount.data.data,
+    );
+
+    console.log("Decoded data owner:", myAccount.owner.toBase58());
+    console.log("Decoded data message:", myAccount.message);
+
+    // Verify account data
+    assert.ok(
+      myAccount.owner.equals(signer.publicKey),
+      "Owner should match signer public key"
+    );
+    assert.strictEqual(
+      myAccount.message,
+      "Hello, compressed world!",
+      "Message should match the created message"
+    );
+  });
+});
+
+async function createCompressedAccount(
+  rpc: Rpc,
+  addressTree: anchor.web3.PublicKey,
+  addressQueue: anchor.web3.PublicKey,
+  address: anchor.web3.PublicKey,
+  program: anchor.Program<Create>,
+  outputStateTree: anchor.web3.PublicKey,
+  signer: anchor.web3.Keypair,
+  message: string,
+) {
+  const proofRpcResult = await rpc.getValidityProofV0(
+    [],
+    [
+      {
+        tree: addressTree,
+        queue: addressQueue,
+        address: bn(address.toBytes()),
+      },
+    ],
+  );
+  const systemAccountConfig = new SystemAccountMetaConfig(program.programId);
+  let remainingAccounts = new PackedAccounts();
+  remainingAccounts.addSystemAccounts(systemAccountConfig);
+
+  const addressMerkleTreePubkeyIndex =
+    remainingAccounts.insertOrGet(addressTree);
+  const addressQueuePubkeyIndex = remainingAccounts.insertOrGet(addressQueue);
+  const packedAddressTreeInfo = {
+    rootIndex: proofRpcResult.rootIndices[0],
+    addressMerkleTreePubkeyIndex,
+    addressQueuePubkeyIndex,
+  };
+  const outputStateTreeIndex =
+    remainingAccounts.insertOrGet(outputStateTree);
+  let proof = {
+    0: proofRpcResult.compressedProof,
+  };
+  const computeBudgetIx = web3.ComputeBudgetProgram.setComputeUnitLimit({
+    units: 1000000,
+  });
+  let tx = await program.methods
+    .createAccount(proof, packedAddressTreeInfo, outputStateTreeIndex, message)
+    .accounts({
+      signer: signer.publicKey,
+    })
+    .preInstructions([computeBudgetIx])
+    .remainingAccounts(remainingAccounts.toAccountMetas().remainingAccounts)
+    .signers([signer])
+    .transaction();
+  tx.recentBlockhash = (await rpc.getRecentBlockhash()).blockhash;
+  tx.sign(signer);
+
+  const sig = await rpc.sendTransaction(tx, [signer]);
+  await confirmTx(rpc, sig);
+  return sig;
+}
 ```
+</Tab>
 
+<Tab title="Rust">
+```rust create.rs expandable wrap
+#![cfg(feature = "test-sbf")]
 
-2. Start local test validator:
+use anchor_lang::AnchorDeserialize;
+use light_program_test::{
+    program_test::LightProgramTest, AddressWithTree, Indexer, ProgramTestConfig, Rpc, RpcError,
+};
+use light_sdk::{
+    address::v1::derive_address,
+    instruction::{PackedAccounts, SystemAccountMetaConfig},
+};
+use create::MyCompressedAccount;
+use solana_sdk::{
+    instruction::{AccountMeta, Instruction},
+    signature::{Keypair, Signature, Signer},
+};
 
+#[tokio::test]
+async fn test_create() {
+    let config = ProgramTestConfig::new(true, Some(vec![("create", create::ID)]));
+    let mut rpc = LightProgramTest::new(config).await.unwrap();
+    let payer = rpc.get_payer().insecure_clone();
 
-```bash
-light test-validator
+    let address_tree_info = rpc.get_address_tree_v1();
+
+    let (address, _) = derive_address(
+        &[b"message", payer.pubkey().as_ref()],
+        &address_tree_info.tree,
+        &create::ID,
+    );
+
+    create_compressed_account(&mut rpc, &payer, &address, "Hello, compressed world!".to_string())
+        .await
+        .unwrap();
+
+    let compressed_account = rpc
+        .get_compressed_account(address, None)
+        .await
+        .unwrap()
+        .value
+        .unwrap();
+    let data = &compressed_account.data.as_ref().unwrap().data;
+    let account = MyCompressedAccount::deserialize(&mut &data[..]).unwrap();
+    assert_eq!(account.owner, payer.pubkey());
+    assert_eq!(account.message, "Hello, compressed world!");
+}
+
+async fn create_compressed_account(
+    rpc: &mut LightProgramTest,
+    payer: &Keypair,
+    address: &[u8; 32],
+    message: String,
+) -> Result<Signature, RpcError> {
+    let config = SystemAccountMetaConfig::new(create::ID);
+    let mut remaining_accounts = PackedAccounts::default();
+    remaining_accounts.add_system_accounts(config)?;
+
+    let address_tree_info = rpc.get_address_tree_v1();
+
+    let rpc_result = rpc
+        .get_validity_proof(
+            vec![],
+            vec![AddressWithTree {
+                address: *address,
+                tree: address_tree_info.tree,
+            }],
+            None,
+        )
+        .await?
+        .value;
+    let packed_accounts = rpc_result.pack_tree_infos(&mut remaining_accounts);
+
+    let output_state_tree_index = rpc
+        .get_random_state_tree_info()?
+        .pack_output_tree_index(&mut remaining_accounts)?;
+
+    let (remaining_accounts, _, _) = remaining_accounts.to_account_metas();
+
+    let instruction = Instruction {
+        program_id: create::ID,
+        accounts: [
+            vec![AccountMeta::new(payer.pubkey(), true)],
+            remaining_accounts,
+        ]
+        .concat(),
+        data: {
+            use anchor_lang::InstructionData;
+            create::instruction::CreateAccount {
+                proof: rpc_result.proof,
+                address_tree_info: packed_accounts.address_trees[0],
+                output_state_tree_index: output_state_tree_index,
+                message,
+            }
+            .data()
+        },
+    };
+
+    rpc.create_and_send_transaction(&[instruction], &payer.pubkey(), &[payer])
+        .await
+}
 ```
+</Tab>
+</Tabs>
 
-
-3. Then run tests in a separate terminal:
-
-
-```bash
-anchor test --skip-local-validator
-```
-
+Find all [full code examples with Rust and Typescript tests here](https://github.com/Lightprotocol/program-examples/tree/add-basic-operations-examples/basic-operations/anchor) for the following instructions:
+- **create** - Initialize a new compressed account
+- **update** - Modify data in an existing compressed account
+- **close** - Clear account data while preserving address
+- **reinit** - Reinitialize a closed account
+- **burn** - Permanently delete a compressed account
 
 <Warning>
-For help with debugging, see the [Error Cheatsheet](https://www.zkcompression.com/resources/error-cheatsheet).
+For help with debugging, see the [Error Cheatsheet](https://www.zkcompression.com/resources/error-cheatsheet) and [AskDevin](https://deepwiki.com/Lightprotocol/light-protocol/3.1-javascripttypescript-sdks).
 </Warning>
-
 
 # Next Steps
 
-Start building programs to create or interact with compressed accounts.
+<Card
+  title=" Learn how to Create Compressed Accounts"
+  icon="chevron-right"
+  color="#0066ff"
+  href="/c-token/ctoken-overview"
+  horizontal
+>
+</Card>
