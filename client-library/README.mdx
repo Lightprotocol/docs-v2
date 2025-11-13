@@ -71,32 +71,41 @@ pnpm add \
 <Tabs>
 <Tab title="Mainnet">
 
+Connect to Photon indexer to query compressed accounts and prover service to generate validity proofs.
+
 ```typescript
 const rpc = createRpc('https://mainnet.helius-rpc.com/?api-key=YOUR_API_KEY');
 ```
-Connect to Photon indexer to query compressed accounts and prover service to generate validity proofs.
 
 </Tab>
 
 <Tab title="Devnet">
 
+Connect to Photon indexer to query compressed accounts and prover service to generate validity proofs.
+
 ```typescript
 const rpc = createRpc('https://devnet.helius-rpc.com/?api-key=YOUR_API_KEY');
 ```
-Connect to Photon indexer to query compressed accounts and prover service to generate validity proofs.
-
 </Tab>
 
 <Tab title="Localnet">
 
+1. Install the CLI
+
+```bash
+npm install -g @lightprotocol/zk-compression-cli
+```
+
+2. Start a single-node Solana cluster, an RPC node, and a prover node at ports 8899, 8784, and 3001.
+
 ```bash
 light test-validator
 ```
-Start a single-node Solana cluster, an RPC node, and a prover node at ports 8899, 8784, and 3001.
 </Tab>
 </Tabs>
 
-**For unit tests, use `TestRpc`** to start a mock RPC instance that parses events and builds Merkle trees on-demand without persisting state.
+**For unit tests, use `TestRpc`.**
+* Starts a mock RPC instance that parses events and builds Merkle trees on-demand without persisting state.
 
 ```typescript
 const lightWasm: LightWasm = await WasmFactory.getInstance();
@@ -111,7 +120,7 @@ The Rust packages separate client library, and program-side development:
 1. [`light-client`](https://docs.rs/light-client): The RPC client that provides the ZK Compression RPC interface to query and build transactions for **compressed accounts and tokens** on Solana.
 2. [`light-sdk`](https://docs.rs/light-sdk): Program-side abstractions (macros, wrappers, CPI interface) to create and interact with compressed accounts in Solana programs. Similar to Anchor's `Account` pattern.
 
-### For devnet and mainnet, use `light-client`
+**For devnet and mainnet, use `light-client`**
 
 * Connects to Photon indexer to query compressed accounts and generate validity proofs.
 
@@ -163,17 +172,21 @@ let mut client = LightClient::new(config).await?;
 client.payer = read_keypair_file("~/.config/solana/id.json")?;
 ```
 
-Requires running `light test-validator` locally:
+1. Install the CLI
+
+```bash
+npm install -g @lightprotocol/zk-compression-cli
+```
+
+2. Start a single-node Solana cluster, an RPC node, and a prover node at ports 8899, 8784, and 3001.
 
 ```bash
 light test-validator
 ```
-
-Starts a start a single-node Solana cluster, an RPC node, and a prover node at ports 8899, 8784, and 3001.
 </Tab>
 </Tabs>
 
-**For local testing, use** [**`light-program-test`**](https://docs.rs/light-program-test).
+**For local testing, use [**`light-program-test`**](https://docs.rs/light-program-test).**
 
 * Initializes a [LiteSVM](https://github.com/LiteSVM/LiteSVM) optimized for ZK Compression with auto-funded payer and TestIndexer. Requires Light CLI for program binaries.
 * Use for unit and integration tests of your program or client code.
@@ -182,6 +195,16 @@ Starts a start a single-node Solana cluster, an RPC node, and a prover node at p
 [dev-dependencies]
 light-program-test = "0.16.0"
 light-sdk = "0.16.0"
+```
+
+```bash
+npm install -g @lightprotocol/zk-compression-cli
+```
+
+Run light test-validator once if programs are not found
+
+```bash
+light test-validator
 ```
 
 ```rust
@@ -211,10 +234,6 @@ Your client must fetch metadata of two Merkle trees:
 <Tip>
 The protocol maintains Merkle trees. You don't need to initialize custom trees. Find the [addresses for Merkle trees here](https://www.zkcompression.com/resources/addresses-and-urls).
 </Tip>
-
-<Note>
-V2 is currently on Devnet. Use to optimize compute unit consumption by up to 70%.
-</Note>
 
 <Tabs>
 <Tab title="Typescript">
@@ -264,7 +283,13 @@ let output_state_tree_info = rpc.get_random_state_tree_info().unwrap();
 </Tab>
 </Tabs>
 
+<Tip>
+**V2 is on Devnet and reduces compute unit consumption by up to 70%**.
+</Tip>
+
 These methods return `TreeInfo` with the public key and other metadata of trees.
+
+All instructions require the state tree `TreeInfo` to store or reference the compressed account hash.
 
 <table>
   <thead>
@@ -292,8 +317,6 @@ These methods return `TreeInfo` with the public key and other metadata of trees.
     </tr>
   </tbody>
 </table>
-
-All instructions require the state tree `TreeInfo` to store the compressed account hash.
 
 **Use the address tree `TreeInfo`**, when you create a compressed account:
 1. In **Step 3 to derive the address** for the compressed account.
@@ -1053,7 +1076,7 @@ The program hashes this data, and the Light System Program verifies the hash aga
 <Tabs>
 <Tab title="Create">
 
-```typescript focus={7-9}
+```typescript
 const proof = {
   0: proofRpcResult.compressedProof,
 };
@@ -1184,7 +1207,7 @@ const instructionData = {
 <Tabs>
 <Tab title="Create">
 
-```rust focus={2-6}
+```rust
 let instruction_data = create::instruction::CreateAccount {
     proof: rpc_result.proof,
     address_tree_info: packed_accounts.address_trees[0],
@@ -1203,7 +1226,7 @@ let instruction_data = create::instruction::CreateAccount {
 
 <Tab title="Update">
 
-```rust focus={2-10}
+```rust focus={3-10}
 let instruction_data = update::instruction::UpdateAccount {
     proof: rpc_result.proof,
     current_account,
@@ -1227,7 +1250,7 @@ let instruction_data = update::instruction::UpdateAccount {
 
 <Tab title="Close">
 
-```rust focus={2-9}
+```rust focus={3-9}
 let instruction_data = close::instruction::CloseAccount {
     proof: rpc_result.proof,
     account_meta: CompressedAccountMeta {
@@ -1250,7 +1273,7 @@ let instruction_data = close::instruction::CloseAccount {
 
 <Tab title="Reinit">
 
-```rust focus={2-8}
+```rust focus={3-8}
 let instruction_data = reinit::instruction::ReinitAccount {
     proof: rpc_result.proof,
     account_meta: CompressedAccountMeta {
@@ -1272,7 +1295,7 @@ let instruction_data = reinit::instruction::ReinitAccount {
 
 <Tab title="Burn">
 
-```rust focus={2-8}
+```rust focus={3-8}
 let instruction_data = burn::instruction::BurnAccount {
     proof: rpc_result.proof,
     account_meta: CompressedAccountMetaBurn {
@@ -1343,7 +1366,8 @@ let instruction = Instruction {
 
 <Tabs>
 <Tab title="Typescript">
-```typescript create.ts expandable wrap
+```typescript expandable wrap
+// create.ts
 import * as anchor from "@coral-xyz/anchor";
 import { Program, web3 } from "@coral-xyz/anchor";
 import { Create } from "../target/types/create";
@@ -1500,7 +1524,8 @@ async function createCompressedAccount(
 </Tab>
 
 <Tab title="Rust">
-```rust create.rs expandable wrap
+```rust expandable wrap
+// test.rs
 #![cfg(feature = "test-sbf")]
 
 use anchor_lang::AnchorDeserialize;

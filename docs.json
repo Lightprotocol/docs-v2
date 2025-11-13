@@ -32,6 +32,22 @@
             "pages": [
               "client-library/README"
             ]
+          },
+          {
+            "group": "API Reference",
+            "pages": [
+              {
+                "group": "Overview",
+                "pages": [
+                  "api-reference-overview",
+                  "stateless-js",
+                  "compressed-token",
+                  "light-client",
+                  "light-sdk",
+                  "light-program-test"
+                ]
+              }
+            ]
           }
         ]
       },
@@ -68,13 +84,25 @@
   "contextual": {
     "options": [
      "copy",
-     "view",
+     {
+       "title": "Open DeepWiki",
+       "description": "Ask Devin for help with debugging",
+       "icon": "/images/deepwiki-logo.svg",
+       "href": {
+         "base": "https://deepwiki.com/Lightprotocol/light-protocol",
+         "query": [{
+           "key": "context",
+           "value": "$page"
+         }]
+       }
+     },
+     "mcp",
      "chatgpt",
      "claude",
      "perplexity",
-     "mcp",
      "cursor",
-     "vscode"
+     "vscode",
+     "view"
    ]
   },
   "footer": {
