@@ -266,11 +266,32 @@ let output_state_tree_info = rpc.get_random_state_tree_info().unwrap();
 
 These methods return `TreeInfo` with the public key and other metadata of trees.
 
-| Instruction                      | Address Tree Required | State Tree Required |
-| ------------------------------ | :-------------------: | :-----------------: |
-| Create                         | ✓                     | ✓                   |
-| Update / Close / Reinit / Burn | -                     | ✓                   |
-| Combined (Create + Update)     | ✓                     | ✓                   |
+<table>
+  <thead>
+    <tr>
+      <th width="200">Instruction</th>
+      <th width="150" className="text-center">Address Tree Required</th>
+      <th width="130" className="text-center">State Tree Required</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Create</td>
+      <td className="text-center">✓</td>
+      <td className="text-center">✓</td>
+    </tr>
+    <tr>
+      <td>Update / Close / Reinit / Burn</td>
+      <td className="text-center">-</td>
+      <td className="text-center">✓</td>
+    </tr>
+    <tr>
+      <td>Combined (Create + Update)</td>
+      <td className="text-center">✓</td>
+      <td className="text-center">✓</td>
+    </tr>
+  </tbody>
+</table>
 
 All instructions require the state tree `TreeInfo` to store the compressed account hash.
 
@@ -306,7 +327,7 @@ For other instructions than create, **use the state tree of the existing compres
 </Step>
 
 <Step>
-## Derive Address
+## Address
 
 You only need to derive an address when you create a compressed account.
 
@@ -618,7 +639,7 @@ V2 circuits can prove in a single proof
 The combinations and maximums are determined by the available circuit verifying keys. Different proof sizes require different circuits optimized for that specific combination. View the [source code here](https://github.com/Lightprotocol/light-protocol/tree/871215642b4b5b69d2bcd7eca22542346d0e2cfa/program-libs/verifier/src/verifying_keys).
 </Note>
 
-### ### Example Create Address & Update Account in one Proof
+### Example Create Address & Update Account in one Proof
 
 In this example, we generate one proof that proves that an account exists and that an address does not exist yet. 
 This updates an account and create the address for a new account.
@@ -688,35 +709,98 @@ See the full [create-and-update program example with tests](https://github.com/L
 </Step>
 
 <Step>
-## Pack Accounts
+## Accounts
 
-Transactions with compressed accounts reference in their instruction
-1. a number of [Light System accounts](https://www.zkcompression.com/resources/addresses-and-urls#system-accounts) for proof verification and CPI calls to update state and address trees
-2. a number of Merkle tree accounts
 
-To optimize instruction data, we pack accounts into an array with `PackedAccounts`:
+### Overview
 
-* Every packed account is assigned to an u8 index.
-* Indices are included in instruction data, instead of 32 byte pubkeys.
-* The indices point to the instructions accounts
-  * in anchor to `remainingAccounts`, and
-  * in native programs to the account info slice.
+Transactions with compressed accounts reference three types of accounts:
+1. **Your custom accounts**: Signers, fee payers, or program-specific accounts
+2. **[Light System accounts](https://www.zkcompression.com/resources/addresses-and-urls#system-accounts)**: 8 required accounts for proof verification and CPI calls to update state and address trees.
+3. **Merkle tree accounts**: State trees, address trees, and their associated queues to store compressed accounts and addresses.
 
-This instance contains three empty account sections with subsequent indices.
+<Accordion title="Light System Accounts Explained">
 
+<table>
+  <thead>
+    <tr>
+      <th width="20">#</th>
+      <th width="200">Account</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td>Light System Program</td>
+      <td>Verifies validity proofs, compressed account ownership checks, CPIs the account compression program to update tree accounts</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>CPI Signer</td>
+      <td>PDA to sign CPI calls from your program to Light System Program. Verified by Light System Program during CPI. Derived from your program ID</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>Registered Program PDA</td>
+      <td>Access control to the Account Compression Program</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>Noop Program</td>
+      <td>Logs compressed account state to Solana ledger. Only used in v1. Indexers parse transaction logs to reconstruct compressed account state</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td>Account Compression Authority</td>
+      <td>Signs CPI calls from Light System Program to Account Compression Program</td>
+    </tr>
+    <tr>
+      <td>6</td>
+      <td>Account Compression Program</td>
+      <td>Writes to state and address tree accounts. Client and the account compression program do not interact directly</td>
+    </tr>
+    <tr>
+      <td>7</td>
+      <td>Invoking Program</td>
+      <td>Your program's ID, used by Light System Program to derive the CPI Signer PDA, verify the CPI Signer matches your program ID, and set the owner of created compressed accounts</td>
+    </tr>
+    <tr>
+      <td>8</td>
+      <td>System Program</td>
+      <td>Solana System Program to transfer lamports</td>
+    </tr>
+  </tbody>
+</table>
+
+</Accordion>
+
+### PackedAccounts
+
+To optimize instruction data, we reference these accounts with u8 indices instead of their 32-byte pubkeys.
+
+The SDK provides the `PackedAccounts` helper:
+* Each account is assigned a sequential u8 index (0, 1, 2...). 
+* Duplicate pubkeys return the cached index automatically.
+* All accounts are concatenated in a defined order to return the accounts array.
+
+Programs use these indices to retrieve accounts from the instruction's accounts array.
+* Anchor programs from `remainingAccounts`
+* Native programs from the account info slice
 
 ```
+                          PackedAccounts
+               ┌-------------------------------┐
 [pre_accounts] [system_accounts] [tree_accounts]
-      ↑              ↑                ↑
-   Signers,   Light System      state trees,
-  fee payer     accounts       address trees,
+      ↑               ↑                ↑
+   Signers,      Light System     state trees,
+  fee payer       accounts       address trees,
                                    queues
 ```
-
 <Tip>
-* The instance maintains an internal deduplication map that assigns sequential u8 indices (0, 1, 2...) when you call `insert_or_get()`.
-* If the same pubkey is inserted multiple times, it returns the cached index.
-* For example, if the input state tree equals the output state tree, both return the same index.
+In your instruction,
+1. Put your program-specific accounts first
+2. Append Packed accounts to end of the vector (recommended due to variable length)
 </Tip>
 
 <Tabs>
@@ -726,7 +810,7 @@ This instance contains three empty account sections with subsequent indices.
 <Tab title="Create">
 
 ```typescript
-// 1. Initialize
+// 1. Initialize helper
 const packedAccounts 
   = new PackedAccounts();
 
@@ -735,11 +819,9 @@ const systemAccountConfig
   = SystemAccountMetaConfig.new(programId);
 packedAccounts.addSystemAccounts(systemAccountConfig);
 
-// 3. Pack tree accounts from proof to get indices for instruction data
-// Returns index 0, adds tree to accounts array
+// 3. Get indices for tree accounts
 const addressMerkleTreePubkeyIndex 
   = packedAccounts.insertOrGet(addressTree);
-// Returns index 1, adds queue to accounts array  
 const addressQueuePubkeyIndex 
   = packedAccounts.insertOrGet(addressQueue);
 
@@ -749,8 +831,8 @@ const packedAddressTreeInfo = {
   addressQueuePubkeyIndex,
 };
 
-// 4. Pack output state tree
-const outputStateTreeIndex 
+// 4. Get index for output state tree
+const outputStateTreeIndex
   = packedAccounts.insertOrGet(outputStateTree);
 
 // 5. Convert to Account Metas
@@ -761,7 +843,7 @@ const { remainingAccounts }
 
 <Tab title="Update, Close, Reinit Burn">
 ```typescript focus={10-21}
-// 1. Initialize
+// 1. Initialize helper
 const packedAccounts
   = new PackedAccounts();
 
@@ -770,7 +852,7 @@ const systemAccountConfig
   = SystemAccountMetaConfig.new(programId);
 packedAccounts.addSystemAccounts(systemAccountConfig);
 
-// 3. Pack tree accounts from proof to get indices for instruction data
+// 3. Get indices for tree accounts
 const merkleTreePubkeyIndex
   = packedAccounts.insertOrGet(compressedAccount.treeInfo.tree);
 const queuePubkeyIndex
@@ -783,45 +865,16 @@ const packedInputAccounts = {
   rootIndex: proofRpcResult.rootIndices[0],
 };
 
-// 4. Pack output state tree
+// 4. Get index for output state tree
 const outputStateTreeIndex
   = packedAccounts.insertOrGet(outputStateTree);
 
-// 5. Finalize
+// 5. Convert to Account Metas
 const { remainingAccounts }
   = packedAccounts.toAccountMetas();
 ```
 </Tab>
 </Tabs>
-
-
-<Tabs>
-<Tab title="V1 Trees">
-
-| Instruction             | Address Tree             | State Tree           | Nullifier Queue | Output State Tree       |
-| ----------------------- | ------------------------ | -------------------- | --------------- | ----------------------- |
-| Create                  | ✓ (proves non-existence) | -                    | -               | ✓ (stores new hash)     |
-| Update / Close / Reinit | -                        | ✓ (proves existence) | ✓ (nullifies)   | ✓ (stores updated hash) |
-| Burn                    | -                        | ✓ (proves existence) | ✓ (nullifies)   | -                       |
-
-</Tab>
-
-<Tab title="V2 Trees">
-
-| Instruction             | Address Tree             | State Tree (with nullifier queue) | Output Queue            |
-| ----------------------- | ------------------------ | --------------------------------- | ----------------------- |
-| Create                  | ✓ (proves non-existence) | -                                 | ✓ (stores new hash)     |
-| Update / Close / Reinit | -                        | ✓ (proves existence, nullifies)   | ✓ (stores updated hash) |
-| Burn                    | -                        | ✓ (proves existence, nullifies)   | -                       |
-
-</Tab>
-</Tabs>
-<Tip>
-**V2 is on Devnet and reduces compute unit consumption by up to 70%**.
-
-* V2 combines the state tree and nullifier queue into a single account for batched Merkle tree updates.
-* New hashes are stored in the output queue. A forester node updates the Merkle tree asynchronously.
-</Tip>
 
 </Tab>
 
@@ -831,24 +884,24 @@ const { remainingAccounts }
 <Tab title="Create">
 
 ```rust
-// 1. Initialize
+// 1. Initialize helper
 let mut remaining_accounts = PackedAccounts::default();
 
 // 2. Add system accounts
-let config 
+let config
   = SystemAccountMetaConfig::new(program_id);
   remaining_accounts.add_system_accounts(config)?;
 
-// 3. Pack tree accounts from proof to get indices for instruction data
-let packed_accounts 
+// 3. Get indices for tree accounts
+let packed_accounts
   = rpc_result.pack_tree_infos(&mut remaining_accounts);
 
-// 4. Pack output state tree
-let output_state_tree_index 
+// 4. Get index for output state tree
+let output_state_tree_index
   = output_state_tree_info.pack_output_tree_index(&mut remaining_accounts)?;
 
 // 5. Convert to Account Metas
-let (remaining_accounts_metas, _, _) 
+let (remaining_accounts_metas, _, _)
   = remaining_accounts.to_account_metas();
 ```
 </Tab>
@@ -856,63 +909,138 @@ let (remaining_accounts_metas, _, _)
 <Tab title="Update, Close, Reinit, Burn">
 
 ```rust focus={3,8-14}
-// 1. Initialize
+// 1. Initialize helper
 let mut remaining_accounts = PackedAccounts::default();
 
 // 2. Add system accounts
-let config 
+let config
   = SystemAccountMetaConfig::new(program_id);
   remaining_accounts.add_system_accounts(config)?;
 
-// 3. Pack tree accounts from proof to get indices for instruction data
+// 3. Get indices for tree accounts
 let packed_tree_accounts = rpc_result
     .pack_tree_infos(&mut remaining_accounts)
     .state_trees // includes output_state_tree_index
     .unwrap();
 
 // 4. Convert to Account Metas
-let (remaining_accounts_metas, _, _) 
+let (remaining_accounts_metas, _, _)
   = remaining_accounts.to_account_metas();
 ```
+
 </Tab>
 </Tabs>
+
+</Tab>
+</Tabs>
+
+### Tree Accounts
+
+Depending on your instruction you must include indices for different tree and queue accounts. 
+* For other instructions than create, **use the state tree of the existing compressed account** as output state tree.
+* The pubkey is automatically deduplicated when you pack accounts.
+
+<Warning>
+When creating or updating multiple accounts in a single transaction, use one output state tree. 
+</Warning>
 
 <Tabs>
 <Tab title="V1 Trees">
 
-| Instruction             | Address Tree             | State Tree           | Nullifier Queue | Output State Tree       |
-| ----------------------- | ------------------------ | -------------------- | --------------- | ----------------------- |
-| Create                  | ✓ (proves non-existence) | -                    | -               | ✓ (stores new hash)     |
-| Update / Close / Reinit | -                        | ✓ (proves existence) | ✓ (nullifies)   | ✓ (stores updated hash) |
-| Burn                    | -                        | ✓ (proves existence) | ✓ (nullifies)   | -                       |
+<table>
+  <thead>
+    <tr>
+      <th width="150">Instruction</th>
+      <th width="80" className="text-center">Address Tree</th>
+      <th width="80" className="text-center">State Tree</th>
+      <th width="100" className="text-center">Nullifier Queue</th>
+      <th width="120" className="text-center">Output State Tree</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Create</td>
+      <td className="text-center">✓</td>
+      <td className="text-center">-</td>
+      <td className="text-center">-</td>
+      <td className="text-center">✓</td>
+    </tr>
+    <tr>
+      <td>Update / Close / Reinit</td>
+      <td className="text-center">-</td>
+      <td className="text-center">✓</td>
+      <td className="text-center">✓</td>
+      <td className="text-center">✓</td>
+    </tr>
+    <tr>
+      <td>Burn</td>
+      <td className="text-center">-</td>
+      <td className="text-center">✓</td>
+      <td className="text-center">✓</td>
+      <td className="text-center">-</td>
+    </tr>
+  </tbody>
+</table>
 
 </Tab>
 
 <Tab title="V2 Trees">
 
-| Instruction             | Address Tree             | State Tree (with nullifier queue) | Output Queue            |
-| ----------------------- | ------------------------ | --------------------------------- | ----------------------- |
-| Create                  | ✓ (proves non-existence) | -                                 | ✓ (stores new hash)     |
-| Update / Close / Reinit | -                        | ✓ (proves existence, nullifies)   | ✓ (stores updated hash) |
-| Burn                    | -                        | ✓ (proves existence, nullifies)   | -                       |
+<table>
+  <thead>
+    <tr>
+      <th width="150">Instruction</th>
+      <th width="80" className="text-center">Address Tree</th>
+      <th width="200" className="text-center">State Tree (includes nullifier queue)</th>
+      <th width="90" className="text-center">Output Queue</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Create</td>
+      <td className="text-center">✓</td>
+      <td className="text-center">-</td>
+      <td className="text-center">✓</td>
+    </tr>
+    <tr>
+      <td>Update / Close / Reinit</td>
+      <td className="text-center">-</td>
+      <td className="text-center">✓</td>
+      <td className="text-center">✓</td>
+    </tr>
+    <tr>
+      <td>Burn</td>
+      <td className="text-center">-</td>
+      <td className="text-center">✓</td>
+      <td className="text-center">-</td>
+    </tr>
+  </tbody>
+</table>
 
 </Tab>
 </Tabs>
+
 <Tip>
 **V2 is on Devnet and reduces compute unit consumption by up to 70%**.
-
-* V2 combines the state tree and nullifier queue into a single account for batched Merkle tree updates.
-* New hashes are stored in the output queue. A forester node updates the Merkle tree asynchronously.
 </Tip>
 
-</Tab>
-</Tabs>
+<Accordion title="Tree Accounts Explained">
+
+* **Address tree**: only used to derive and store a new address.
+* **State tree**: used to reference the existing compressed account hash. Therefore not used by create.
+* **Nullifier queue**: used to nullify the existing compressed account hash to prevent double spending. Therefore not used by create.
+  * V2 combines the state tree and nullifier queue into a single account.
+* **Output State tree**: used to store the new or updated compressed account hash. Burn does not produce output state.
+* **Output Queue**: used by V2 to store compressed account hashes. A forester node updates the Merkle tree asynchronously.
+
+</Accordion>
+
 </Step>
 
 <Step>
 ## Instruction Data
 
-Build your instruction data with the validity proof, tree account indices, and complete account data.
+Build your instruction data with the validity proof, tree account indices, and account data.
 
 <Note>
 Compressed account data must be passed in instruction data because only the Merkle root hash is stored on-chain. Regular accounts store full data on-chain for programs to read directly.
@@ -1056,7 +1184,7 @@ const instructionData = {
 <Tabs>
 <Tab title="Create">
 
-```rust
+```rust focus={2-6}
 let instruction_data = create::instruction::CreateAccount {
     proof: rpc_result.proof,
     address_tree_info: packed_accounts.address_trees[0],
@@ -1075,7 +1203,7 @@ let instruction_data = create::instruction::CreateAccount {
 
 <Tab title="Update">
 
-```rust
+```rust focus={2-10}
 let instruction_data = update::instruction::UpdateAccount {
     proof: rpc_result.proof,
     current_account,
@@ -1094,12 +1222,12 @@ let instruction_data = update::instruction::UpdateAccount {
    * `tree_info`: Packed indices to the state tree and nullifier queue accounts (Pack Accounts, Step 5 Section 3)
    * `address`: Account's derived address from Step 3
    * `output_state_tree_index`: Index to the state tree that stores the updated account hash (Pack Accounts, Step 5 Section 3)
-3. Pass **complete current account data** and **new data**
+3. Pass **current account data** and **new data**
 </Tab>
 
 <Tab title="Close">
 
-```rust
+```rust focus={2-9}
 let instruction_data = close::instruction::CloseAccount {
     proof: rpc_result.proof,
     account_meta: CompressedAccountMeta {
@@ -1122,7 +1250,7 @@ let instruction_data = close::instruction::CloseAccount {
 
 <Tab title="Reinit">
 
-```rust
+```rust focus={2-8}
 let instruction_data = reinit::instruction::ReinitAccount {
     proof: rpc_result.proof,
     account_meta: CompressedAccountMeta {
@@ -1144,7 +1272,7 @@ let instruction_data = reinit::instruction::ReinitAccount {
 
 <Tab title="Burn">
 
-```rust
+```rust focus={2-8}
 let instruction_data = burn::instruction::BurnAccount {
     proof: rpc_result.proof,
     account_meta: CompressedAccountMetaBurn {
@@ -1166,12 +1294,30 @@ let instruction_data = burn::instruction::BurnAccount {
 </Tabs>
 </Tab>
 </Tabs>
+
+<Tip>
+For other instructions than create, **use the state tree of the existing compressed account** as output state tree.
+* **Best practice**: minimize the number of different trees per transaction to keep instruction data light.
+* Still, account hashes can move to different state trees after each state transition.
+* Since trees fill up over time, your programs must be able to handle accounts from different state trees within the same transaction.
+</Tip>
+
+<Warning>
+When creating or updating multiple accounts in a single transaction, use one output state tree. 
+</Warning>
+
 </Step>
 
 <Step>
 ## Instruction
 
 Build the instruction with your `program_id`, `accounts`, and `data` from Step 6.
+
+<Tip>
+In `accounts`,
+1. Put your program-specific accounts first
+2. Append Packed accounts to end of the vector (recommended due to variable length)
+</Tip>
 
 ```rust
 let instruction = Instruction {
