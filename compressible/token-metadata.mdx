@@ -1,0 +1,92 @@
+---
+title: Token Metadata
+description: The Token Metadata extension stores human readable token information for cMints.
+
+---
+
+The `TokenMetadataInstructionData` struct defines the data format.
+
+```rust
+pub struct TokenMetadataInstructionData {
+    // Authority to modify metadata
+    pub update_authority: Option<Pubkey>,
+    // Token name
+    pub name: Vec<u8>,
+    // Token symbol
+    pub symbol: Vec<u8>,
+    // URI to external metadata
+    pub uri: Vec<u8>,
+    // Custom fields
+    pub additional_metadata: Option<Vec<AdditionalMetadata>>,
+}
+```
+
+<Info>
+Find the [source code to the Token Metadata extension here](https://github.com/Lightprotocol/light-protocol/blob/main/program-libs/ctoken-types/src/instructions/extensions/token_metadata.rs).
+</Info>
+
+### Update Token Metadata
+
+Use the `MintAction` enum to update the token metadata.
+1.  `UpdateMetadataField` to update specific fields.
+2.  `UpdateMetadataAuthority` updates the authority that can modifythe `TokenMetadata` extension.
+3.  `RemoveMetadataKey` removes a custom field.
+
+After mint creation, you can only update or remove existing custom keys. Adding new keys is not supported.
+
+<Info>
+Find the [source code to update the Token Metadata extension here](https://github.com/Lightprotocol/light-protocol/blob/main/programs/compressed-token/program/src/mint_action/actions/update_metadata.rs).
+</Info>
+
+### Considerations
+
+These are the recommended field lenghts:
+- `name`: 1-32 characters
+- `symbol`: 1-10 characters
+- `uri`: 0-200 characters
+- `additional_metadata`: Maximum 20 entries and no duplicate keys.
+
+
+
+# Example cMint with Token Metadata
+
+```rust
+use light_ctoken_types::state::{
+    CompressedMint, BaseMint, CompressedMintMetadata,
+    extensions::{ExtensionStruct, TokenMetadata, AdditionalMetadata}
+};
+
+let compressed_mint = CompressedMint {
+    base: BaseMint {
+        mint_authority: Some(authority_pubkey),
+        supply: 1_000_000,
+        decimals: 6,
+        is_initialized: true,
+        freeze_authority: Some(freeze_authority_pubkey),
+    },
+    metadata: CompressedMintMetadata {
+        version: 3,
+        spl_mint_initialized: false,
+        mint: spl_mint_pda,
+    },
+    extensions: Some(vec![
+        ExtensionStruct::TokenMetadata(TokenMetadata {
+            update_authority: authority_pubkey,
+            mint: spl_mint_pda,
+            name: "Rent-free Tokens".as_bytes().to_vec(),
+            symbol: "MTK".as_bytes().to_vec(),
+            uri: "https://mytoken.com/metadata.json".as_bytes().to_vec(),
+            additional_metadata: vec![
+                AdditionalMetadata {
+                    key: b"website".to_vec(),
+                    value: b"https://mytoken.com".to_vec(),
+                },
+                AdditionalMetadata {
+                    key: b"category".to_vec(),
+                    value: b"DeFi".to_vec(),
+                },
+            ],
+        })
+    ]),
+};
+```

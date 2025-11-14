@@ -1,0 +1,100 @@
+---
+title: Compressible Extension
+description: The compressible extension optimizes rent for any type of Solana account except mints.
+---
+
+# How it works
+
+1. Rent funded every transaction
+2. Automatic compression when no rent is funded for x epoch.
+
+
+```rust
+/// Compressible extension for cToken accounts and SPL token accounts.
+pub struct CompressionInfo {
+    pub config_account_version: u16,
+    pub compress_to_pubkey: u8,
+    pub account_version: u8,
+    pub lamports_per_write: u32,
+    pub compression_authority: [u8; 32],
+    pub rent_sponsor: [u8; 32],
+    pub last_claimed_slot: u64,
+    pub rent_config: RentConfig,
+}
+```
+<Tip>
+The following accounts can use the compressible extension:
+1. SPL token accounts
+2. cToken accounts
+3. associated cToken/token accounts
+</Tip>
+
+
+#### Token Account with Compressible Extension
+
+```rust expandable
+use light_ctoken_types::state::{
+    ctoken::CToken,
+    extensions::{ExtensionStruct, CompressionInfo},
+    AccountState,
+};
+use light_compressible::rent::RentConfig;
+
+let token_account = CToken {
+    mint: mint_pubkey,
+    owner: owner_pubkey,
+    amount: 0,
+    delegate: None,
+    state: AccountState::Initialized,
+    is_native: None,
+    delegated_amount: 0,
+    close_authority: None,
+    extensions: Some(vec![
+        ExtensionStruct::Compressible(CompressionInfo {
+            config_account_version: 1,
+            compress_to_pubkey: 0,           // Compress to owner (0) or pubkey (1)
+            account_version: 3,              // Hashing scheme version
+            lamports_per_write: 5000,        // Rent top-up per write
+            compression_authority: authority_pubkey.to_bytes(),
+            rent_sponsor: sponsor_pubkey.to_bytes(),
+            last_claimed_slot: current_slot,
+            rent_config: RentConfig::default(),
+        })
+    ]),
+};
+```
+
+#### cToken Account with Compressible Extension
+
+```rust expandable
+use light_ctoken_types::state::{
+    ctoken::CToken,
+    extensions::{ExtensionStruct, CompressionInfo},
+    AccountState,
+};
+use light_compressible::rent::RentConfig;
+
+// Complete CToken account with Compressible extension
+let ctoken = CToken {
+    mint: mint_pubkey,
+    owner: owner_pubkey,
+    amount: 1000,                            
+    delegate: None,                          
+    state: AccountState::Initialized,        
+    is_native: None,                         
+    delegated_amount: 0,                     
+    close_authority: None,                   // No close authority set
+    extensions: Some(vec![
+        ExtensionStruct::Compressible(CompressionInfo {
+            config_account_version: 1,
+            compress_to_pubkey: 0,           
+            account_version: 3,              
+            lamports_per_write: 5000,
+            compression_authority: authority_pubkey.to_bytes(),
+            rent_sponsor: sponsor_pubkey.to_bytes(),
+            last_claimed_slot: current_slot,
+            rent_config: RentConfig::default(),
+        })
+    ]),
+};
+```

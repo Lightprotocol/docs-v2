@@ -52,12 +52,38 @@
         ]
       },
       {
-        "tab": "Compressible",
+        "tab": "Compressed Token Program",
         "groups": [
           {
             "group": "Overview",
             "pages": [
-              "compressible/README"
+              "compressible/README",
+              "compressible/extensions",
+              "compressible/token-metadata",
+              "compressible/compressible"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Update Your Client",
+        "groups": [
+          {
+            "group": "Overview",
+            "pages": [
+              "ctoken-overview",
+              "typescript"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "Overview",
+            "pages": [
+              "api-reference-overview"
             ]
           }
         ]
