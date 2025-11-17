@@ -800,7 +800,7 @@ Transactions with compressed accounts reference three types of accounts:
 
 ### PackedAccounts
 
-To optimize instruction data, we reference these accounts with u8 indices instead of their 32-byte pubkeys.
+To optimize instruction data, we reference tree accounts by u8 indices instead of their 32-byte pubkeys.
 
 The SDK provides the `PackedAccounts` helper:
 * Each account is assigned a sequential u8 index (0, 1, 2...). 
