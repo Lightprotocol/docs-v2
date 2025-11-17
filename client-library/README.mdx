@@ -804,7 +804,7 @@ To optimize instruction data, we reference tree accounts by u8 indices instead o
 
 The SDK provides the `PackedAccounts` helper:
 * Each account is assigned a sequential u8 index (0, 1, 2...). 
-* Duplicate pubkeys return the cached index automatically.
+* Duplicate pubkeys return the cached index.
 * To build the instruction accounts are concatenated in order.
 
 Programs use these indices to retrieve accounts from the instruction's accounts array.
