@@ -4,9 +4,28 @@ description: The Token Metadata extension stores information of cMints like name
 
 ---
 
+<table>
+  <thead>
+    <tr>
+      <th style={{width: '20%', textAlign: 'left'}}></th>
+      <th style={{width: '35%', textAlign: 'left'}}>Supported Accounts</th>
+      <th style={{width: '45%', textAlign: 'left'}}>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style={{textAlign: 'left'}}>**Token Metadata**</td>
+      <td>cMint accounts</td>  
+      <td style={{textAlign: 'left'}}>
+        * Stores information like name, symbol, URI, and custom fields.
+        * Must be added at creation of cMint
+      </td>
+    </tr>
+  </tbody>
+</table>
+
 ## Key Points
 
-* The Token Metadata extension is supported by cMint accounts
 * cMints with Token Metadata work alongside Token-2022 mints in the same program.
 * The Token metadata extension for cMints embeds metadata directly in the account, unlike Token-2022 which uses a MetadataPointer extension to reference where metadata is stored.
 
@@ -36,7 +55,7 @@ These are the recommended field lenghts:
 - `additional_metadata`: Maximum 20 entries with no duplicate keys (keys: 1-20 characters, values: 0-100 characters)
 
 <Note>
-Metadata fields must be set at cMint creation. After creation, only existing `additional_metadata` keys can be modified or removed.
+Fields must be set at cMint creation. After creation, only existing `additional_metadata` keys can be modified or removed.
 </Note>
 
 ### Comparison to Token-2022

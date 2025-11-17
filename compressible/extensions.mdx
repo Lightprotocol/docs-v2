@@ -3,11 +3,11 @@ title: Extension
 description: Overview to compressible and token metadata extensions. 
 ---
 
-### Key Points
+## Key Points
 
-Like Token 2022, each extension adds specific state to an account. Depending on the extension, it can be added at account creation or existing accounts can migrate.
-
-* Both extensions are compatible with Token 2022
+* Like Token 2022, each extension adds specific state to an account. 
+* Depending on the extension, it can be added at account creation or existing accounts can migrate.
+* Both compressible and token metadata extension are compatible with Token 2022
 * The compressible extension is *not limited to token accounts*
 
 <table>
@@ -26,19 +26,16 @@ Like Token 2022, each extension adds specific state to an account. Depending on 
         * SPL token accounts
         * PDA accounts
         * cToken accounts
+        * associated cToken/token accounts
       </td>
       <td style={{textAlign: 'left'}}>
-        * **Rent optimization** via automatic compression when accounts become inactive
+        * **Rent optimization** via automatic compression/decompression when accounts become inactive/active
         * Can be added at account creation, or **existing accounts can migrate**
       </td>
     </tr>
     <tr>
       <td style={{textAlign: 'left'}}>**[Token Metadata](#token-metadata)**</td>
-      <td style={{textAlign: 'left'}}>
-        <ul>
-          <li>cMint accounts</li>
-        </ul>
-      </td>
+      <td>cMint accounts</td>  
       <td style={{textAlign: 'left'}}>
         * Stores information like name, symbol, URI, and custom fields.
         * Must be added at creation of cMint

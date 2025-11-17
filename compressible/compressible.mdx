@@ -3,10 +3,35 @@ title: Compressible
 description: The compressible extension optimizes rent for any type of Solana account except mints.
 ---
 
-# How it works
+<table>
+  <thead>
+    <tr>
+      <th style={{width: '20%', textAlign: 'left'}}></th>
+      <th style={{width: '35%', textAlign: 'left'}}>Supported Accounts</th>
+      <th style={{width: '45%', textAlign: 'left'}}>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style={{textAlign: 'left'}}>**Compressible**</td>
+      <td style={{textAlign: 'left'}}>
+        All Solana accounts, such as
+        * SPL token accounts
+        * PDA accounts
+        * cToken accounts
+        * associated cToken/token accounts
+      </td>
+      <td style={{textAlign: 'left'}}>
+        * **Rent optimization** via automatic compression/decompression when accounts become inactive/active
+        * Can be added at account creation, or **existing accounts can migrate**
+      </td>
+    </tr>
+  </tbody>
+</table>
 
+## Key Points
 1. Rent funded every transaction
-2. Automatic compression when no rent is funded for x epoch.
+2. Automatic compression with no writes over 6500 slots (1.75 hours)
 
 
 ```rust
@@ -22,13 +47,7 @@ pub struct CompressionInfo {
     pub rent_config: RentConfig,
 }
 ```
-<Tip>
-The following accounts can use the compressible extension:
-1. SPL token accounts
-2. cToken accounts
-3. associated cToken/token accounts
-</Tip>
-
+## Examples 
 
 #### Token Account with Compressible Extension
 
@@ -98,3 +117,15 @@ let ctoken = CToken {
     ]),
 };
 ```
+
+
+## Next Steps
+
+<Card
+  title=" Learn about all relevant actions to cMints"
+  icon="chevron-right"
+  color="#0066ff"
+  href="/compressible/mint-actions"
+  horizontal
+>
+</Card>
