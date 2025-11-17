@@ -9,6 +9,9 @@
   },
   "favicon": "/favicon.png",
   "customCSS": "/styles.css",
+  "telemetry": {
+    "enabled": true
+  },
   "navigation": {
     "tableOfContentsDepth": 2,
     "tabs": [

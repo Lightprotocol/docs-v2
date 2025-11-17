@@ -1,32 +1,36 @@
 ---
 title: Extension
-description: Overview to compressible and token metadata extensions for ZK Compression
+description: Overview to compressible and token metadata extensions. 
 ---
 
-# Overview
+### Key Points
+
+Like Token 2022, each extension adds specific state to an account. Depending on the extension, it can be added at account creation or existing accounts can migrate.
+
+* Both extensions are compatible with Token 2022
+* The compressible extension is *not limited to token accounts*
 
 <table>
   <thead>
     <tr>
       <th style={{width: '20%', textAlign: 'left'}}></th>
       <th style={{width: '35%', textAlign: 'left'}}>Supported Accounts</th>
-      <th style={{width: '45%', textAlign: 'left'}}>Purpose</th>
+      <th style={{width: '45%', textAlign: 'left'}}>Description</th>
     </tr>
   </thead>
   <tbody>
     <tr>
       <td style={{textAlign: 'left'}}>**[Compressible](#compressible)**</td>
       <td style={{textAlign: 'left'}}>
-        <ul>
-          <li>SPL token accounts</li>
-          <li>Solana accounts</li>
-          <li>PDA accounts</li>
-          <li>cToken accounts</li>
-          <li>Compressed accounts</li>
-          <li>Compressed PDA accounts</li>
-        </ul>
+        All Solana accounts, such as
+        * SPL token accounts
+        * PDA accounts
+        * cToken accounts
       </td>
-      <td style={{textAlign: 'left'}}>Rent optimization via automatic compression when accounts become inactive</td>
+      <td style={{textAlign: 'left'}}>
+        * **Rent optimization** via automatic compression when accounts become inactive
+        * Can be added at account creation, or **existing accounts can migrate**
+      </td>
     </tr>
     <tr>
       <td style={{textAlign: 'left'}}>**[Token Metadata](#token-metadata)**</td>
@@ -35,7 +39,10 @@ description: Overview to compressible and token metadata extensions for ZK Compr
           <li>cMint accounts</li>
         </ul>
       </td>
-      <td style={{textAlign: 'left'}}>Human-readable token information for wallets and marketplaces</td>
+      <td style={{textAlign: 'left'}}>
+        * Stores information like name, symbol, URI, and custom fields.
+        * Must be added at creation of cMint
+      </td>
     </tr>
   </tbody>
 </table>
