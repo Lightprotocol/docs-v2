@@ -1066,7 +1066,7 @@ When creating or updating multiple accounts in a single transaction, use one out
 Build your instruction data with the validity proof, tree account indices, and account data.
 
 <Note>
-Compressed account data must be passed in instruction data because only the Merkle root hash is stored on-chain. Regular accounts store full data on-chain for programs to read directly.
+Compressed account data must be passed as instruction data because only the Merkle root hash is stored in a Solana account.
 
 The program hashes this data, and the Light System Program verifies the hash against the root in a Merkle tree account.
 </Note>
