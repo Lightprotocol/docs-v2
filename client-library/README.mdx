@@ -1319,7 +1319,7 @@ let instruction_data = burn::instruction::BurnAccount {
 </Tabs>
 
 <Tip>
-For other instructions than create, **use the state tree of the existing compressed account** as output state tree.
+For instructions other than create, **use the state tree of the existing compressed account** as output state tree.
 * **Best practice**: minimize the number of different trees per transaction to keep instruction data light.
 * Still, account hashes can move to different state trees after each state transition.
 * Since trees fill up over time, your programs must be able to handle accounts from different state trees within the same transaction.
