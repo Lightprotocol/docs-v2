@@ -808,8 +808,8 @@ The SDK provides the `PackedAccounts` helper:
 * To build the instruction accounts are concatenated in order.
 
 Programs use these indices to retrieve accounts from the instruction's accounts array.
-* Anchor programs from `remainingAccounts`
-* Native programs from the account info slice
+* Anchor programs store packed accounts in `remainingAccounts`
+* Native programs can append packed accounts to the instructions account metas
 
 ```
                           PackedAccounts
