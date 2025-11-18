@@ -6,16 +6,35 @@ description: >-
 icon: 'code'
 ---
 
+ZK Compression provides Rust and Typescript clients to interact with compressed accounts and tokens on Solana.
+
+<table>
+  <thead>
+    <tr>
+      <th width="150"></th>
+      <th width="250" className="text-left">Compressed Accounts</th>
+      <th width="250" className="text-left">Compressed Tokens</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>**TypeScript**</td>
+      <td>[@lightprotocol/stateless.js](https://lightprotocol.github.io/light-protocol/stateless.js/index.html)</td>
+      <td>[@lightprotocol/compressed-token](https://lightprotocol.github.io/light-protocol/compressed-token/index.html)</td>
+    </tr>
+    <tr>
+      <td>**Rust**</td>
+      <td colspan="2" className="text-center">[light-client](https://docs.rs/light-client) (unified RPC client)</td>
+    </tr>
+  </tbody>
+</table>
+
 <Steps>
 <Step>
-## Prerequisites
+## Setup
 
 <Tabs>
 <Tab title="Typescript">
-The Typescript SDK consists of two packages:
-
-1. [@lightprotocol/stateless.js](https://lightprotocol.github.io/light-protocol/stateless.js/index.html) is the core RPC client that provides the ZK Compression RPC interface to query and build transactions that create or interact with compressed accounts on Solana.
-2. [@lightprotocol/compressed-token](https://lightprotocol.github.io/light-protocol/compressed-token/index.html) uses the stateless.js RPC interface to build transactions with compressed tokens.
 
 <Note>
 Use the [API documentation](https://lightprotocol.github.io/light-protocol/) to look up specific function signatures, parameters, and return types.
@@ -58,20 +77,12 @@ pnpm add \
 </Tab>
 </Tabs>
 
-### 2. Create an RPC Connection
+### 2. RPC Connection
 
-<Tip>
-`Rpc` and `TestRpc` implement the same `CompressionApiInterface` for consistent usage across `TestRpc`, local test validator, and public Solana networks.
-</Tip>
-
-**Use `Rpc` for test-validator, devnet and mainnet**
-
-* `Rpc` is a thin wrapper extending Solana's web3.js `Connection` class with compression-related endpoints.
+`Rpc` is a thin wrapper extending Solana's web3.js `Connection` class with compression-related endpoints.
 
 <Tabs>
 <Tab title="Mainnet">
-
-Connect to Photon indexer to query compressed accounts and prover service to generate validity proofs.
 
 ```typescript
 const rpc = createRpc('https://mainnet.helius-rpc.com/?api-key=YOUR_API_KEY');
@@ -80,8 +91,6 @@ const rpc = createRpc('https://mainnet.helius-rpc.com/?api-key=YOUR_API_KEY');
 </Tab>
 
 <Tab title="Devnet">
-
-Connect to Photon indexer to query compressed accounts and prover service to generate validity proofs.
 
 ```typescript
 const rpc = createRpc('https://devnet.helius-rpc.com/?api-key=YOUR_API_KEY');
@@ -103,32 +112,21 @@ light test-validator
 ```
 </Tab>
 </Tabs>
-
-**For unit tests, use `TestRpc`.**
-* Starts a mock RPC instance that parses events and builds Merkle trees.
-
-```typescript
-const lightWasm: LightWasm = await WasmFactory.getInstance();
-const testRpc = await TestRpc.create(lightWasm);
-```
-
 </Tab>
 
 <Tab title="Rust">
-The Rust packages separate client library, and program-side development:
 
-1. [`light-client`](https://docs.rs/light-client): The RPC client that provides the ZK Compression RPC interface to query and build transactions for **compressed accounts and tokens** on Solana.
-2. [`light-sdk`](https://docs.rs/light-sdk): Program-side abstractions (macros, wrappers, CPI interface) to create and interact with compressed accounts in Solana programs. Similar to Anchor's `Account` pattern.
-
-**For devnet and mainnet, use `light-client`**
-
-* Connects to Photon indexer to query compressed accounts and generate validity proofs.
+### 1. Dependencies
 
 ```toml
 [dependencies]
 light-client = "0.16.0"
 light-sdk = "0.16.0"
 ```
+
+### 2. RPC Connection
+
+Connect to an RPC provider that supports ZK Compression, such as Helius and Triton.
 
 <Tabs>
 <Tab title="Mainnet">
@@ -186,39 +184,6 @@ light test-validator
 </Tab>
 </Tabs>
 
-**For local testing, use [**`light-program-test`**](https://docs.rs/light-program-test).**
-
-* Initializes a [LiteSVM](https://github.com/LiteSVM/LiteSVM) optimized for ZK Compression with auto-funded payer and TestIndexer. Requires Light CLI for program binaries.
-* Use for unit and integration tests of your program or client code.
-
-```toml
-[dev-dependencies]
-light-program-test = "0.16.0"
-light-sdk = "0.16.0"
-```
-
-```bash
-npm install -g @lightprotocol/zk-compression-cli
-```
-
-Run light test-validator once if programs are not found
-
-```bash
-light test-validator
-```
-
-```rust
-let config = ProgramTestConfig::new_v2(
-    true,
-    Some(vec![("program_create", program_create::ID)])
-);
-let mut rpc = LightProgramTest::new(config).await.unwrap();
-let payer = rpc.get_payer().insecure_clone();
-```
-
-<Tip>
-`LightClient` and `LightProgramTest` implement the same [`Rpc`](https://docs.rs/light-client/latest/light_client/rpc/trait.Rpc.html) and [`Indexer`](https://docs.rs/light-client/latest/light_client/indexer/trait.Indexer.html) traits for consistent usage across `light-program-test`, local test validator, and public Solana networks.
-</Tip>
 </Tab>
 </Tabs>
 </Step>
@@ -226,70 +191,10 @@ let payer = rpc.get_payer().insecure_clone();
 <Step>
 ## Tree Configuration
 
-Your client must fetch metadata of two Merkle trees:
+Depending on your instruction, your client must fetch metadata of one or multiple Merkle trees.
 
-* an address tree to derive and store the account address and
-* a state tree to store the compressed account hash.
-
-<Tip>
-The protocol maintains Merkle trees. You don't need to initialize custom trees. Find the [addresses for Merkle trees here](https://www.zkcompression.com/resources/addresses-and-urls).
-</Tip>
-
-<Tabs>
-<Tab title="Typescript">
-<Tabs>
-<Tab title="V1 Trees">
-
-```typescript
-const addressTree = getDefaultAddressTreeInfo();
-const stateTreeInfos = await rpc.getStateTreeInfos();
-const outputStateTree = selectStateTreeInfo(stateTreeInfos);
-```
-
-</Tab>
-
-<Tab title="V2 Trees">
-
-```typescript focus={1}
-const addressTree = await rpc.getAddressTreeInfoV2();
-const stateTreeInfos = await rpc.getStateTreeInfos();
-const outputStateTree = selectStateTreeInfo(stateTreeInfos);
-```
-
-</Tab>
-</Tabs>
-</Tab>
-
-<Tab title="Rust">
-<Tabs>
-<Tab title="V1 Trees">
-
-```rust
-let address_tree_info = rpc.get_address_tree_v1();
-let output_state_tree_info = rpc.get_random_state_tree_info().unwrap();
-```
-
-</Tab>
-
-<Tab title="V2 Trees">
-
-```rust focus={1}
-let address_tree_info = rpc.get_address_tree_v2();
-let output_state_tree_info = rpc.get_random_state_tree_info().unwrap();
-```
-
-</Tab>
-</Tabs>
-</Tab>
-</Tabs>
-
-<Tip>
-**V2 is on Devnet and reduces compute unit consumption by up to 70%**.
-</Tip>
-
-These methods return `TreeInfo` with the public key and other metadata of trees.
-
-All instructions require the state tree `TreeInfo` to store or reference the compressed account hash.
+* **All instructions** require metadata for a **state tree** to store or reference the compressed account hash.
+* **Only** when you **create** a compressed account, you additionally fetch an **address tree** to derive and store the account address.
 
 <table>
   <thead>
@@ -318,13 +223,82 @@ All instructions require the state tree `TreeInfo` to store or reference the com
   </tbody>
 </table>
 
-**Use the address tree `TreeInfo`**, when you create a compressed account:
-1. In **Step 3 to derive the address** for the compressed account.
-2. In **Step 4 for `getValidityProofV0()`** to prove the address does not exist yet.
 
-**Use the state tree `TreeInfo`**:
-1. In **Step 4 for `getValidityProofV0()`** to prove the account hash exists in the state tree, if you update/close/reinit/burn a compressed account.
-2. In **Step 5 to pack accounts** to optimize instruction data. This assigns indices to accounts instead of repeating full pubkeys in the instruction data.
+
+<Tip>
+The protocol maintains Merkle trees. You don't need to initialize custom trees. Find the [pubkeys for Merkle trees here](https://www.zkcompression.com/resources/addresses-and-urls).
+</Tip>
+
+<Tabs>
+<Tab title="Typescript">
+<Tabs>
+<Tab title="Create">
+
+```typescript title=v1
+const addressTree = getDefaultAddressTreeInfo();
+const stateTreeInfos = await rpc.getStateTreeInfos();
+const outputStateTree = selectStateTreeInfo(stateTreeInfos);
+```
+
+```typescript title=v2
+const addressTree = await rpc.getAddressTreeInfoV2();
+const stateTreeInfos = await rpc.getStateTreeInfos();
+const outputStateTree = selectStateTreeInfo(stateTreeInfos);
+```
+</Tab>
+
+<Tab title="Update/Close/Reinitialize/burn">
+
+```typescript title=v1
+const stateTreeInfos = await rpc.getStateTreeInfos();
+const outputStateTree = selectStateTreeInfo(stateTreeInfos);
+```
+
+```typescript title=v2
+const stateTreeInfos = await rpc.getStateTreeInfos();
+const outputStateTree = selectStateTreeInfo(stateTreeInfos);
+```
+
+</Tab>
+</Tabs>
+
+<Tip>
+V2 is on Devnet and reduces compute unit consumption by up to 70%.
+</Tip>
+
+</Tab>
+
+<Tab title="Rust">
+<Tabs>
+<Tab title="Create">
+
+```rust title=v1
+let address_tree_info = rpc.get_address_tree_v1();
+let output_state_tree_info = rpc.get_random_state_tree_info().unwrap();
+```
+
+```rust title=v2
+let address_tree_info = rpc.get_address_tree_v2();
+let output_state_tree_info = rpc.get_random_state_tree_info().unwrap();
+```
+</Tab>
+
+<Tab title="Update/Close/Reinitialize/burn">
+
+```rust
+let output_state_tree_info = rpc.get_random_state_tree_info().unwrap();
+```
+
+</Tab>
+</Tabs>
+<Tip>
+V2 is on Devnet and reduces compute unit consumption by up to 70%.
+</Tip>
+</Tab>
+
+</Tabs>
+
+These methods return `TreeInfo` with the public key and other metadata of trees.
 
 <Accordion title="Expand to learn what TreeInfo contains">
 * `tree`: Merkle tree account pubkey
@@ -340,19 +314,14 @@ All instructions require the state tree `TreeInfo` to store or reference the com
   * The protocol creates new trees, once existing trees fill up.
 </Accordion>
 
-<Tip>
-For other instructions than create, **use the state tree of the existing compressed account**.
-* **Best practice**: minimize the number of different trees per transaction to keep instruction data light.
-* Account hashes can move to different state trees after each state transition.
-* Since trees fill up over time, your programs must be able to handle accounts from different state trees within the same transaction.
-</Tip>
-
 </Step>
 
 <Step>
 ## Address
 
+<Note>
 You only need to derive an address when you create a compressed account.
+</Note>
 
 <Tabs>
 <Tab title="Create">
@@ -391,7 +360,7 @@ const address = deriveAddress(
 
 <Tab title="V2 Address Trees">
 
-```typescript focus={1,5,8}
+```typescript
 const seed = deriveAddressSeedV2(
   [Buffer.from('my-seed')]
 );
@@ -432,7 +401,7 @@ let (address, _) = derive_address(
 
 <Tab title="V2 Address Trees">
 
-```rust focus={1}
+```rust
 use light_sdk::address::v2::derive_address;
 
 let (address, _) = derive_address(
@@ -459,7 +428,9 @@ let (address, _) = derive_address(
 </Tab>
 
 <Tab title="Update, Close, Reinit, Burn">
-Use the address from the existing compressed account. Fetch the account with the RPC methods to get its address.
+Use the address from the existing compressed account. 
+
+Fetch the account with the RPC methods to get its address.
 
 <Tabs>
 <Tab title="Typescript">
@@ -481,9 +452,6 @@ let account_address = compressed_account.address;
 </Tab>
 </Tabs>
 
-<Note>
-Use the same address tree that was used during account creation. The address is stored in the compressed account data returned by the RPC methods.
-</Note>
 </Tab>
 </Tabs>
 </Step>
@@ -865,7 +833,7 @@ const { remainingAccounts }
 </Tab>
 
 <Tab title="Update, Close, Reinit Burn">
-```typescript focus={10-21}
+```typescript
 // 1. Initialize helper
 const packedAccounts
   = new PackedAccounts();
@@ -931,7 +899,7 @@ let (remaining_accounts_metas, _, _)
 
 <Tab title="Update, Close, Reinit, Burn">
 
-```rust focus={3,8-14}
+```rust
 // 1. Initialize helper
 let mut remaining_accounts = PackedAccounts::default();
 
@@ -1065,12 +1033,6 @@ When creating or updating multiple accounts in a single transaction, use one out
 
 Build your instruction data with the validity proof, tree account indices, and account data.
 
-<Note>
-Compressed account data must be passed as instruction data because only the Merkle root hash is stored in a Solana account.
-
-The program hashes this data, and the Light System Program verifies the hash against the root in a Merkle tree account.
-</Note>
-
 <Tabs>
 <Tab title="Typescript">
 <Tabs>
@@ -1098,7 +1060,7 @@ const instructionData = {
 
 <Tab title="Update">
 
-```typescript focus={7-13}
+```typescript
 const proof = {
   0: proofRpcResult.compressedProof,
 };
@@ -1115,17 +1077,22 @@ const instructionData = {
 };
 ```
 
+<Tip>
+Use the state tree of the existing compressed account as output state tree.
+</Tip>
+
 1. Include `compressedProof` from **Step 4** to prove the **account hash exists** in the state tree
 2. Specify **input hash** and **output state tree** from **Step 5**
    * `treeInfo`: Packed indices to the state tree and nullifier queue accounts (Pack Accounts, Step 5 Section 3)
    * `address`: Account's derived address from Step 3
-   * `outputStateTreeIndex`: Index to the state tree that will store the updated account hash (Pack Accounts, Step 5 Section 3)
-3. Pass **current account data** and **new data** 
+   * `outputStateTreeIndex`: Index to the state tree that will store the updated account hash (Pack Accounts, Step 5 Section 4)
+3. Pass **current account data** and **new data**
+
 </Tab>
 
 <Tab title="Close">
 
-```typescript focus={7-12}
+```typescript
 const proof = {
   0: proofRpcResult.compressedProof,
 };
@@ -1141,17 +1108,22 @@ const instructionData = {
 };
 ```
 
+<Tip>
+Use the state tree of the existing compressed account as output state tree.
+</Tip>
+
 1. Include `compressedProof` from **Step 4** to prove the **account hash exists** in the state tree
 2. Specify **input hash** and **output state tree** from **Step 5**
    * `treeInfo`: Packed indices to the state tree and nullifier queue accounts (Pack Accounts, Step 5 Section 3)
    * `address`: Account's derived address from Step 3
-   * `outputStateTreeIndex`: Index to the state tree that will store a **hash with zero values** (Pack Accounts, Step 5 Section 3)
+   * `outputStateTreeIndex`: Index to the state tree that will store a **hash with zero values** (Pack Accounts, Step 5 Section 4)
 3. Pass **current account data**
+
 </Tab>
 
 <Tab title="Reinit">
 
-```typescript focus={7-11}
+```typescript
 const proof = {
   0: proofRpcResult.compressedProof,
 };
@@ -1166,19 +1138,24 @@ const instructionData = {
 };
 ```
 
+<Tip>
+Use the state tree of the existing compressed account as output state tree.
+</Tip>
+
 1. Include `compressedProof` from **Step 4** to prove the **account hash exists** in the state tree
 2. Specify **input hash** and **output state tree** from **Step 5**
    * `treeInfo`: Packed indices to the state tree and nullifier queue accounts (Pack Accounts, Step 5 Section 3)
    * `address`: Account's derived address from Step 3
-   * `outputStateTreeIndex`: Index to the state tree that will store the reinitialized account hash (Pack Accounts, Step 5 Section 3)
+   * `outputStateTreeIndex`: Index to the state tree that will store the reinitialized account hash (Pack Accounts, Step 5 Section 4)
 3. Reinitialize creates an account with **default-initialized values**
 * These values are `Pubkey` as all zeros, numbers as `0`, strings as empty.
 * To set custom values, update the account in the same or a separate transaction.
+
 </Tab>
 
 <Tab title="Burn">
 
-```typescript focus={7-11}
+```typescript
 const proof = {
   0: proofRpcResult.compressedProof,
 };
@@ -1226,7 +1203,7 @@ let instruction_data = create::instruction::CreateAccount {
 
 <Tab title="Update">
 
-```rust focus={3-10}
+```rust
 let instruction_data = update::instruction::UpdateAccount {
     proof: rpc_result.proof,
     current_account,
@@ -1240,17 +1217,22 @@ let instruction_data = update::instruction::UpdateAccount {
 .data();
 ```
 
+<Tip>
+Use the state tree of the existing compressed account as output state tree.
+</Tip>
+
 1. Include `proof` from Step 4 to prove the **account hash exists** in the state tree
 2. Specify **input hash** and **output state tree** from Step 5
    * `tree_info`: Packed indices to the state tree and nullifier queue accounts (Pack Accounts, Step 5 Section 3)
    * `address`: Account's derived address from Step 3
-   * `output_state_tree_index`: Index to the state tree that stores the updated account hash (Pack Accounts, Step 5 Section 3)
+   * `output_state_tree_index`: Index to the state tree that stores the updated account hash (Pack Accounts, Step 5 Section 4)
 3. Pass **current account data** and **new data**
+
 </Tab>
 
 <Tab title="Close">
 
-```rust focus={3-9}
+```rust
 let instruction_data = close::instruction::CloseAccount {
     proof: rpc_result.proof,
     account_meta: CompressedAccountMeta {
@@ -1263,17 +1245,22 @@ let instruction_data = close::instruction::CloseAccount {
 .data();
 ```
 
+<Tip>
+Use the state tree of the existing compressed account as output state tree.
+</Tip>
+
 1. Include `proof` from Step 4 to prove the **account hash exists** in the state tree
 2. Specify **input hash** and **output state tree** from Step 5
    * `tree_info`: Packed indices to the state tree and nullifier queue accounts (Pack Accounts, Step 5 Section 3)
    * `address`: Account's derived address from Step 3
-   * `output_state_tree_index`: Index to the state tree that stores a **hash with zero values** (Pack Accounts, Step 5 Section 3)
+   * `output_state_tree_index`: Index to the state tree that stores a **hash with zero values** (Pack Accounts, Step 5 Section 4)
 3. Pass **current account data**
+
 </Tab>
 
 <Tab title="Reinit">
 
-```rust focus={3-8}
+```rust
 let instruction_data = reinit::instruction::ReinitAccount {
     proof: rpc_result.proof,
     account_meta: CompressedAccountMeta {
@@ -1285,17 +1272,22 @@ let instruction_data = reinit::instruction::ReinitAccount {
 .data();
 ```
 
+<Tip>
+Use the state tree of the existing compressed account as output state tree.
+</Tip>
+
 1. Include `proof` from Step 4 to prove the **account hash exists** in the state tree
 2. Specify **input hash** and **output state tree** from Step 5
    * `tree_info`: Packed indices to the state tree and nullifier queue accounts (Pack Accounts, Step 5 Section 3)
    * `address`: Account's derived address from Step 3
-   * `output_state_tree_index`: Index to the state tree that stores the reinitialized account hash (Pack Accounts, Step 5 Section 3)
+   * `output_state_tree_index`: Index to the state tree that stores the reinitialized account hash (Pack Accounts, Step 5 Section 4)
 3. Reinitialize creates an account with **default-initialized values** (`Pubkey` as all zeros, numbers as `0`, strings as empty). To set custom values, update the account in the same or a separate transaction.
+
 </Tab>
 
 <Tab title="Burn">
 
-```rust focus={3-8}
+```rust
 let instruction_data = burn::instruction::BurnAccount {
     proof: rpc_result.proof,
     account_meta: CompressedAccountMetaBurn {
@@ -1318,15 +1310,9 @@ let instruction_data = burn::instruction::BurnAccount {
 </Tab>
 </Tabs>
 
-<Tip>
-For instructions other than create, **use the state tree of the existing compressed account** as output state tree.
-* **Best practice**: minimize the number of different trees per transaction to keep instruction data light.
-* Still, account hashes can move to different state trees after each state transition.
-* Since trees fill up over time, your programs must be able to handle accounts from different state trees within the same transaction.
-</Tip>
-
 <Warning>
-When creating or updating multiple accounts in a single transaction, use one output state tree. 
+* When creating or updating multiple accounts in a single transaction, use one output state tree. 
+* Minimize the number of different trees per transaction to keep instruction data light.
 </Warning>
 
 </Step>
