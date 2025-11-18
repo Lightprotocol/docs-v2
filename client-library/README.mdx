@@ -702,15 +702,15 @@ See the full [create-and-update program example with tests](https://github.com/L
 <Step>
 ## Accounts
 
+Transactions with compressed accounts reference **custom accounts and `PackedAccounts`**.
 
-### Overview
+The `PackedAccounts` helper optimizes instruction data by allowing you to reference accounts by u8 indices instead of their 32-byte pubkeys. Programs retrieve accounts via these indices.
 
-Transactions with compressed accounts reference three types of accounts:
-1. **Your custom accounts**: Signers, fee payers, or program-specific accounts
-2. **[Light System accounts](https://www.zkcompression.com/resources/addresses-and-urls#system-accounts)**: 8 required accounts for proof verification and CPI calls to update state and address trees.
-3. **Merkle tree accounts**: State trees, address trees, and their associated queues to store compressed accounts and addresses.
+* **Light System accounts**: 8 required accounts for proof verification and CPI calls to update state and address trees.
 
 <Accordion title="Light System Accounts Explained">
+
+Every interaction with compressed accounts requires Light System accounts for proof verification and CPI calls to update state and address trees.
 
 <table>
   <thead>
@@ -766,28 +766,108 @@ Transactions with compressed accounts reference three types of accounts:
 
 </Accordion>
 
-### PackedAccounts
+* **Merkle tree accounts**: State trees, address trees, and their associated queues to store compressed accounts and addresses.
 
-To optimize instruction data, we reference tree accounts by u8 indices instead of their 32-byte pubkeys.
+<Accordion title="Tree Accounts Explained">
 
-The SDK provides the `PackedAccounts` helper:
-* Each account is assigned a sequential u8 index (0, 1, 2...). 
-* Duplicate pubkeys return the cached index.
-* To build the instruction accounts are concatenated in order.
+Depending on your instruction you must include indices for different tree and queue accounts. 
+* For other instructions than create, **use the state tree of the existing compressed account** as output state tree.
+* The pubkey is automatically deduplicated when you pack accounts.
 
-Programs use these indices to retrieve accounts from the instruction's accounts array.
-* Anchor programs store packed accounts in `remainingAccounts`
-* Native programs can append packed accounts to the instructions account metas
+<Warning>
+When creating or updating multiple accounts in a single transaction, use one output state tree. 
+</Warning>
 
-```
-                          PackedAccounts
-               ┌-------------------------------┐
-[pre_accounts] [system_accounts] [tree_accounts]
-      ↑               ↑                ↑
-   Signers,      Light System     state trees,
-  fee payer       accounts       address trees,
-                                   queues
-```
+<Tip>
+V2 is on Devnet and reduces compute unit consumption by up to 70%.
+</Tip>
+<Tabs>
+<Tab title="V1 Trees">
+
+<table>
+  <thead>
+    <tr>
+      <th width="150">Instruction</th>
+      <th width="80" className="text-center">Address Tree</th>
+      <th width="80" className="text-center">State Tree</th>
+      <th width="100" className="text-center">Nullifier Queue</th>
+      <th width="120" className="text-center">Output State Tree</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Create</td>
+      <td className="text-center">✓</td>
+      <td className="text-center">-</td>
+      <td className="text-center">-</td>
+      <td className="text-center">✓</td>
+    </tr>
+    <tr>
+      <td>Update / Close / Reinit</td>
+      <td className="text-center">-</td>
+      <td className="text-center">✓</td>
+      <td className="text-center">✓</td>
+      <td className="text-center">✓</td>
+    </tr>
+    <tr>
+      <td>Burn</td>
+      <td className="text-center">-</td>
+      <td className="text-center">✓</td>
+      <td className="text-center">✓</td>
+      <td className="text-center">-</td>
+    </tr>
+  </tbody>
+</table>
+
+* **Address tree**: only used to derive and store a new address.
+* **State tree**: used to reference the existing compressed account hash. Therefore not used by create.
+* **Nullifier queue**: used to nullify the existing compressed account hash to prevent double spending. Therefore not used by create.
+* **Output State tree**: used to store the new or updated compressed account hash. Burn does not produce output state.
+
+</Tab>
+
+<Tab title="V2 Trees">
+
+<table>
+  <thead>
+    <tr>
+      <th width="150">Instruction</th>
+      <th width="80" className="text-center">Address Tree</th>
+      <th width="200" className="text-center">State Tree (includes nullifier queue)</th>
+      <th width="90" className="text-center">Output Queue</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Create</td>
+      <td className="text-center">✓</td>
+      <td className="text-center">-</td>
+      <td className="text-center">✓</td>
+    </tr>
+    <tr>
+      <td>Update / Close / Reinit</td>
+      <td className="text-center">-</td>
+      <td className="text-center">✓</td>
+      <td className="text-center">✓</td>
+    </tr>
+    <tr>
+      <td>Burn</td>
+      <td className="text-center">-</td>
+      <td className="text-center">✓</td>
+      <td className="text-center">-</td>
+    </tr>
+  </tbody>
+</table>
+
+* **Address tree**: only used to derive and store a new address.
+* **State tree**: used to reference the existing compressed account hash. Therefore not used by create. V2 combines the state tree and nullifier queue into a single account.
+* **Output State tree**: used to store the new or updated compressed account hash. Burn does not produce output state.
+* **Output Queue**: used to store compressed account hashes. A forester node updates the Merkle tree asynchronously.
+
+</Tab>
+</Tabs>
+
+</Accordion>
 <Tip>
 In your instruction,
 1. Put your program-specific accounts first
@@ -924,107 +1004,6 @@ let (remaining_accounts_metas, _, _)
 
 </Tab>
 </Tabs>
-
-### Tree Accounts
-
-Depending on your instruction you must include indices for different tree and queue accounts. 
-* For other instructions than create, **use the state tree of the existing compressed account** as output state tree.
-* The pubkey is automatically deduplicated when you pack accounts.
-
-<Warning>
-When creating or updating multiple accounts in a single transaction, use one output state tree. 
-</Warning>
-
-<Tabs>
-<Tab title="V1 Trees">
-
-<table>
-  <thead>
-    <tr>
-      <th width="150">Instruction</th>
-      <th width="80" className="text-center">Address Tree</th>
-      <th width="80" className="text-center">State Tree</th>
-      <th width="100" className="text-center">Nullifier Queue</th>
-      <th width="120" className="text-center">Output State Tree</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>Create</td>
-      <td className="text-center">✓</td>
-      <td className="text-center">-</td>
-      <td className="text-center">-</td>
-      <td className="text-center">✓</td>
-    </tr>
-    <tr>
-      <td>Update / Close / Reinit</td>
-      <td className="text-center">-</td>
-      <td className="text-center">✓</td>
-      <td className="text-center">✓</td>
-      <td className="text-center">✓</td>
-    </tr>
-    <tr>
-      <td>Burn</td>
-      <td className="text-center">-</td>
-      <td className="text-center">✓</td>
-      <td className="text-center">✓</td>
-      <td className="text-center">-</td>
-    </tr>
-  </tbody>
-</table>
-
-</Tab>
-
-<Tab title="V2 Trees">
-
-<table>
-  <thead>
-    <tr>
-      <th width="150">Instruction</th>
-      <th width="80" className="text-center">Address Tree</th>
-      <th width="200" className="text-center">State Tree (includes nullifier queue)</th>
-      <th width="90" className="text-center">Output Queue</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>Create</td>
-      <td className="text-center">✓</td>
-      <td className="text-center">-</td>
-      <td className="text-center">✓</td>
-    </tr>
-    <tr>
-      <td>Update / Close / Reinit</td>
-      <td className="text-center">-</td>
-      <td className="text-center">✓</td>
-      <td className="text-center">✓</td>
-    </tr>
-    <tr>
-      <td>Burn</td>
-      <td className="text-center">-</td>
-      <td className="text-center">✓</td>
-      <td className="text-center">-</td>
-    </tr>
-  </tbody>
-</table>
-
-</Tab>
-</Tabs>
-
-<Tip>
-**V2 is on Devnet and reduces compute unit consumption by up to 70%**.
-</Tip>
-
-<Accordion title="Tree Accounts Explained">
-
-* **Address tree**: only used to derive and store a new address.
-* **State tree**: used to reference the existing compressed account hash. Therefore not used by create.
-* **Nullifier queue**: used to nullify the existing compressed account hash to prevent double spending. Therefore not used by create.
-  * V2 combines the state tree and nullifier queue into a single account.
-* **Output State tree**: used to store the new or updated compressed account hash. Burn does not produce output state.
-* **Output Queue**: used by V2 to store compressed account hashes. A forester node updates the Merkle tree asynchronously.
-
-</Accordion>
 
 </Step>
 
