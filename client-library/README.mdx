@@ -213,66 +213,13 @@ Derive a persistent address as a unique identifier for your compressed account, 
 The protocol maintains Merkle trees. You don't need to initialize custom trees. Find the [pubkeys for Merkle trees here](https://www.zkcompression.com/resources/addresses-and-urls).
 </Tip>
 
-### 1. Fetch Address Tree TreeInfo
-
-These methods return `TreeInfo` with the public key and other metadata of trees.
-
 <Tabs>
 <Tab title="Typescript">
 <Tabs>
 <Tab title="V1 Address Trees">
+
 ```typescript
 const addressTree = getDefaultAddressTreeInfo();
-```
-</Tab>
-
-<Tab title="V2 Address Trees">
-```typescript
-const addressTree = await rpc.getAddressTreeInfoV2();
-```
-</Tab>
-</Tabs>
-</Tab>
-
-<Tab title="Rust">
-<Tabs>
-<Tab title="V1 Address Trees">
-```rust
-let address_tree_info = rpc.get_address_tree_v1();
-```
-</Tab>
-
-<Tab title="V2 Address Trees">
-```rust
-let address_tree_info = rpc.get_address_tree_v2();
-```
-</Tab>
-</Tabs>
-</Tab>
-</Tabs>
-
-<Accordion title="Expand to learn what TreeInfo contains">
-* `tree`: Merkle tree account pubkey
-* `queue`: Queue account pubkey of queue associated with a Merkle tree
-  * Buffers updates of compressed accounts before they are added to the Merkle tree.
-  * Clients and programs do not interact with the queue. The Light System Program inserts values into the queue.
-* `treeType`: Automatically set based on which tree selection method you used.
-* `cpiContext`: Optional CPI context account for batched operations across multiple programs (may be null, currently on devnet)
-  * Allows a single zero-knowledge proof to verify compressed accounts from different programs in one instruction
-  * Reduces instruction data size and compute unit costs when multiple programs interact with compressed accounts
-* `nextTreeInfo`: Next tree to use when current tree reaches ~95% capacity (may be null).
-  * The SDK automatically switches to next tree when present. Developers don't need to handle tree rollovers manually.
-  * The protocol creates new trees, once existing trees fill up.
-</Accordion>
-
-### 2. Derive Address
-
-<Tabs>
-<Tab title="Typescript">
-<Tabs>
-<Tab title="V1 Address Trees">
-
-```typescript
 const seed = deriveAddressSeed(
   [Buffer.from('my-seed')],
   programId
@@ -297,6 +244,7 @@ const address = deriveAddress(
 <Tab title="V2 Address Trees">
 
 ```typescript
+const addressTree = await rpc.getAddressTreeInfoV2();
 const seed = deriveAddressSeedV2(
   [Buffer.from('my-seed')]
 );
@@ -326,6 +274,7 @@ const address = deriveAddressV2(
 ```rust
 use light_sdk::address::v1::derive_address;
 
+let address_tree_info = rpc.get_address_tree_v1();
 let (address, _) = derive_address(
     &[b"my-seed"],
     &address_tree_info.tree,
@@ -340,6 +289,7 @@ let (address, _) = derive_address(
 ```rust
 use light_sdk::address::v2::derive_address;
 
+let address_tree_info = rpc.get_address_tree_v2();
 let (address, _) = derive_address(
     &[b"my-seed"],
     &address_tree_info.tree,
