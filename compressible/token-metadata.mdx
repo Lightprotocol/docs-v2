@@ -17,6 +17,7 @@ description: The Token Metadata extension stores information of cMints like name
       <td style={{textAlign: 'left'}}>**Token Metadata**</td>
       <td>cMint accounts</td>  
       <td style={{textAlign: 'left'}}>
+        * Rent-free mints with Token Metadata
         * Stores information like name, symbol, URI, and custom fields.
         * Must be added at creation of cMint
       </td>
@@ -26,13 +27,12 @@ description: The Token Metadata extension stores information of cMints like name
 
 ## Key Points
 
+*revisit*
+
 * cMints with Token Metadata work alongside Token-2022 mints in the same program 
 * cMint Token Metadata serializes to identical bytes as Token-2022 metadata.
-* The Token metadata extension for cMints embeds metadata directly in the account and does not use the MetadataPointer extension that references the Mint account where the Metadata extension lives like Token 2022.
-
-<Info>
-Find the [source code to the Token Metadata extension here](https://github.com/Lightprotocol/light-protocol/blob/main/programs/compressed-token/program/src/extensions/token_metadata.rs).
-</Info>
+* Token Metadata embeds directly in the cMint account without a MetadataPointer extension
+* cMints are rent-free and do not need rent-exempt calculations required by Token-2022
 
 ```rust
 pub struct TokenMetadataInstructionData {
@@ -48,17 +48,22 @@ pub struct TokenMetadataInstructionData {
     pub additional_metadata: Option<Vec<AdditionalMetadata>>,
 }
 ```
-<Note>
-Fields must be set at cMint creation. After creation, only existing `additional_metadata` keys can be modified or removed.
-</Note>
+<Info>
+Find the [source code to the Token Metadata extension here](https://github.com/Lightprotocol/light-protocol/blob/main/programs/compressed-token/program/src/extensions/token_metadata.rs).
+</Info>
 
-These are the recommended field lenghts:
 - `name`: 1-32 characters
 - `symbol`: 1-10 characters
 - `uri`: 0-200 characters
 - `additional_metadata`: Maximum 20 entries with no duplicate keys (keys: 1-20 characters, values: 0-100 characters)
 
-### Example cMint with Token Metadata
+## Creating cMint with Token Metadata
+
+<Note>
+**Fields must be set at cMint creation.**
+* Standard fields can be updated freely
+* For `additional_metadata`, only existing keys can be modified or removed.
+</Note>
 
 ```rust expandable
 use light_ctoken_types::state::{
@@ -101,23 +106,80 @@ let compressed_mint = CompressedMint {
 };
 ```
 
-## Update Token Metadata
+## Updating Token Metadata
 
-Once set, metadata can be updated with `MintAction`. Only existing `additional_metadata` keys can be modified or removed.
-New keys cannot be added after mint creation.
+Once set, metadata can be updated with `MintAction`:
 
-1.  `UpdateMetadataField` updates specific fields.
-2.  `UpdateMetadataAuthority` updates the authority that can modify the extension.
-3.  `RemoveMetadataKey` removes a custom field.
-
-<Note>
-cMints are rent-free. Therefore you don't need to make sure that the account is rent exempt like with Token-2022 metadata.
-</Note>
+1.  [`UpdateMetadataField`](#update-metadata-fields) updates specific fields.
+2.  [`UpdateMetadataAuthority`](#update-metadata-authority) updates the authority that can modify the extension.
+3.  [`RemoveMetadataKey`](#remove-metadata-keys) removes a key-value pair from `additional_metadata`.
 
 <Info>
 Find the [source code for these actions here](https://github.com/Lightprotocol/light-protocol/blob/main/programs/compressed-token/program/src/mint_action/actions/update_metadata.rs).
 </Info>
 
+<Steps>
+
+<Step>
+### Update Metadata Fields
+
+Update standard fields (name, symbol, URI) or existing keys in `additional_metadata`:
+
+```rust
+use light_ctoken_types::instructions::mint_action::UpdateMetadataFieldAction;
+
+// Update token name
+let action = UpdateMetadataFieldAction {
+    extension_index: 0,  // Index of TokenMetadata extension
+    field_type: 0,       // 0 = Name
+    key: vec![],         // Empty for standard fields
+    value: b"New Token Name".to_vec(),
+};
+```
+
+<Note>
+* For `additional_metadata`, only existing keys can be modified or removed.
+* New keys cannot be added after cMint creation. Only keys set during creation can be updated.
+</Note>
+
+</Step>
+
+<Step>
+### Update Metadata Authority
+
+```rust
+use light_ctoken_types::instructions::mint_action::UpdateMetadataAuthorityAction;
+
+let action = UpdateMetadataAuthorityAction {
+    extension_index: 0,
+    new_authority: new_authority_pubkey,
+};
+```
+
+<Tip>
+To revoke update authority, set `new_authority` to a zero-byte pubkey (`Pubkey::default()`).
+</Tip>
+
+</Step>
+
+<Step>
+### Remove Metadata Keys
+
+Removes a key from `additional_metadata`:
+
+```rust
+use light_ctoken_types::instructions::mint_action::RemoveMetadataKeyAction;
+
+let action = RemoveMetadataKeyAction {
+    extension_index: 0,
+    key: b"category".to_vec(),
+    idempotent: 0,  // 0 = error if key doesn't exist
+};
+```
+
+</Step>
+
+</Steps>
 
 ## Next Steps
 

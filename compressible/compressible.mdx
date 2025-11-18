@@ -15,14 +15,14 @@ description: The compressible extension optimizes rent for any type of Solana ac
     <tr>
       <td style={{textAlign: 'left'}}>**Compressible**</td>
       <td style={{textAlign: 'left'}}>
-        All Solana accounts, such as
+        All Solana accounts except mints, such as
         * SPL token accounts
         * PDA accounts
         * cToken accounts
         * associated cToken/token accounts
       </td>
       <td style={{textAlign: 'left'}}>
-        * **Rent optimization** via automatic compression/decompression when accounts become inactive/active
+        * **Sponsored rent-exemption**
         * Can be added at account creation, or **existing accounts can migrate**
       </td>
     </tr>
@@ -31,8 +31,8 @@ description: The compressible extension optimizes rent for any type of Solana ac
 
 ## Key Points
 1. Rent funded every transaction
-2. Automatic compression with no writes over 6500 slots (1.75 hours)
-
+2. Solana accounts with the [compressible extension](/compressible/compressible) are automatically compressed with no writes in 6300 slots (1.75 hours), and decompressed with new writes.
+3. Rent authority reclaims rent
 
 ```rust
 /// Compressible extension for cToken accounts and SPL token accounts.

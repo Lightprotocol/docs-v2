@@ -22,14 +22,14 @@ description: Overview to compressible and token metadata extensions.
     <tr>
       <td style={{textAlign: 'left'}}>**[Compressible](#compressible)**</td>
       <td style={{textAlign: 'left'}}>
-        All Solana accounts, such as
+        All Solana accounts except mints, such as
         * SPL token accounts
         * PDA accounts
         * cToken accounts
         * associated cToken/token accounts
       </td>
       <td style={{textAlign: 'left'}}>
-        * **Rent optimization** via automatic compression/decompression when accounts become inactive/active
+        * **Sponsored rent-exemption**
         * Can be added at account creation, or **existing accounts can migrate**
       </td>
     </tr>
@@ -37,8 +37,9 @@ description: Overview to compressible and token metadata extensions.
       <td style={{textAlign: 'left'}}>**[Token Metadata](#token-metadata)**</td>
       <td>cMint accounts</td>  
       <td style={{textAlign: 'left'}}>
+        * **Rent-free mint accounts** with Token Metadata
         * Stores information like name, symbol, URI, and custom fields.
-        * Must be added at creation of cMint
+        * Must be **added at creation** of cMint
       </td>
     </tr>
   </tbody>
