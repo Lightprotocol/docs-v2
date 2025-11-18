@@ -398,7 +398,7 @@ const proof = await rpc.getValidityProofV0(
 
 **2. The RPC returns**:
 
-* `compressedProof` with the proof that the address does not exist in the address tree for your instruction data (Step 6)
+* `compressedProof` with the proof that the address does not exist in the address tree for your instruction data (Step 5)
 * `rootIndices` array with root index from the validity proof for the address tree.
 * Empty `leafIndices` array since you do not reference an existing account when you create a compressed account.
 </Tab>
@@ -426,8 +426,8 @@ These instructions prove that the account hash exists in the state tree. The dif
 
 **2. The RPC returns**:
 
-* `compressedProof` with the proof that the **account hash exists in the state tree** for your instruction data (Step 6)
-* `rootIndices` and `leafIndices` arrays with proof metadata to pack accounts (Step 5).
+* `compressedProof` with the proof that the **account hash exists in the state tree** for your instruction data (Step 5)
+* `rootIndices` and `leafIndices` arrays with proof metadata to pack accounts (Step 4).
 </Tab>
 </Tabs>
 </Tab>
@@ -458,8 +458,8 @@ let rpc_result = rpc
 
 **2. The RPC returns `ValidityProofWithContext`**:
 
-* `proof` with the proof that the address does not exist in the address tree for your instruction data (Step 6)
-* `addresses` with the public key and metadata of the address tree to pack accounts (Step 5).
+* `proof` with the proof that the address does not exist in the address tree for your instruction data (Step 5)
+* `addresses` with the public key and metadata of the address tree to pack accounts (Step 4).
 * Empty `accounts` field since you do not reference an existing account when you create a compressed account.
 </Tab>
 
@@ -486,8 +486,8 @@ These instructions prove that the account hash exists in the state tree. The dif
 
 **2. The RPC returns `ValidityProofWithContext`**:
 
-* `proof` with the proof that the **account hash exists in the state tree** for your instruction data (Step 6)
-* `accounts` with the **public key and metadata of the state tree** to pack accounts (Step 5).
+* `proof` with the proof that the **account hash exists in the state tree** for your instruction data (Step 5)
+* `accounts` with the **public key and metadata of the state tree** to pack accounts (Step 4).
 * **Empty `addresses` field** (only needed when creating an address).
 </Tab>
 </Tabs>
@@ -570,8 +570,8 @@ const proof = await rpc.getValidityProofV0(
 
 **2. The RPC returns**:
 
-* `compressedProof` with a single combined proof that verifies both the **account hash exists in the state tree** and the **address does not exist in the address tree** for your instruction data (Step 6)
-* `rootIndices` and `leafIndices` arrays with proof metadata to pack accounts (Step 5).
+* `compressedProof` with a single combined proof that verifies both the **account hash exists in the state tree** and the **address does not exist in the address tree** for your instruction data (Step 5)
+* `rootIndices` and `leafIndices` arrays with proof metadata to pack accounts (Step 4).
 </Tab>
 
 <Tab title="Rust">
@@ -598,9 +598,9 @@ let rpc_result = rpc
 
 **2. The RPC returns `ValidityProofWithContext`**:
 
-* `proof` with a single combined proof that verifies both the **account hash exists in the state tree** and the **address does not exist in the address tree** for your instruction data (Step 6)
-* `addresses` with the public key and metadata of the address tree to pack accounts (Step 5).
-* `accounts` with the public key and metadata of the state tree to pack accounts (Step 5).
+* `proof` with a single combined proof that verifies both the **account hash exists in the state tree** and the **address does not exist in the address tree** for your instruction data (Step 5)
+* `addresses` with the public key and metadata of the address tree to pack accounts (Step 4).
+* `accounts` with the public key and metadata of the state tree to pack accounts (Step 4).
 </Tab>
 </Tabs>
 
@@ -943,10 +943,10 @@ const instructionData = {
 };
 ```
 
-1. Include `compressedProof` from Step 4 to **prove the address does not exist** in the address tree
-2. Specify **Merkle trees to store address and account hash** from Step 5
-   * `packedAddressTreeInfo`: Index to the address tree account used to derive the address, from Step 5 Section 3
-   * `outputStateTreeIndex`: Index to the state tree account that will store the compressed account hash, from Step 5 Section 4
+1. Include `compressedProof` from Step 3 to **prove the address does not exist** in the address tree
+2. Specify **Merkle trees to store address and account hash** from Step 4
+   * `packedAddressTreeInfo`: Index to the address tree account used to derive the address, from Step 4 Section 3
+   * `outputStateTreeIndex`: Index to the state tree account that will store the compressed account hash, from Step 4 Section 4
 3. Pass **initial account data**
 </Tab>
 
@@ -973,11 +973,11 @@ const instructionData = {
 Use the state tree of the existing compressed account as output state tree.
 </Tip>
 
-1. Include `compressedProof` from **Step 4** to prove the **account hash exists** in the state tree
-2. Specify **input hash** and **output state tree** from **Step 5**
-   * `treeInfo`: Packed indices to the state tree and nullifier queue accounts (Pack Accounts, Step 5 Section 3)
-   * `address`: Account's derived address from Step 3
-   * `outputStateTreeIndex`: Index to the state tree that will store the updated account hash (Pack Accounts, Step 5 Section 4)
+1. Include `compressedProof` from **Step 3** to prove the **account hash exists** in the state tree
+2. Specify **input hash** and **output state tree** from **Step 4**
+   * `treeInfo`: Packed indices to the state tree and nullifier queue accounts (Pack Accounts, Step 4 Section 3)
+   * `address`: Account's derived address from Step 2
+   * `outputStateTreeIndex`: Index to the state tree that will store the updated account hash (Pack Accounts, Step 4 Section 4)
 3. Pass **current account data** and **new data**
 
 </Tab>
@@ -1004,11 +1004,11 @@ const instructionData = {
 Use the state tree of the existing compressed account as output state tree.
 </Tip>
 
-1. Include `compressedProof` from **Step 4** to prove the **account hash exists** in the state tree
-2. Specify **input hash** and **output state tree** from **Step 5**
-   * `treeInfo`: Packed indices to the state tree and nullifier queue accounts (Pack Accounts, Step 5 Section 3)
-   * `address`: Account's derived address from Step 3
-   * `outputStateTreeIndex`: Index to the state tree that will store a **hash with zero values** (Pack Accounts, Step 5 Section 4)
+1. Include `compressedProof` from **Step 3** to prove the **account hash exists** in the state tree
+2. Specify **input hash** and **output state tree** from **Step 4**
+   * `treeInfo`: Packed indices to the state tree and nullifier queue accounts (Pack Accounts, Step 4 Section 3)
+   * `address`: Account's derived address from Step 2
+   * `outputStateTreeIndex`: Index to the state tree that will store a **hash with zero values** (Pack Accounts, Step 4 Section 4)
 3. Pass **current account data**
 
 </Tab>
@@ -1034,11 +1034,11 @@ const instructionData = {
 Use the state tree of the existing compressed account as output state tree.
 </Tip>
 
-1. Include `compressedProof` from **Step 4** to prove the **account hash exists** in the state tree
-2. Specify **input hash** and **output state tree** from **Step 5**
-   * `treeInfo`: Packed indices to the state tree and nullifier queue accounts (Pack Accounts, Step 5 Section 3)
-   * `address`: Account's derived address from Step 3
-   * `outputStateTreeIndex`: Index to the state tree that will store the reinitialized account hash (Pack Accounts, Step 5 Section 4)
+1. Include `compressedProof` from **Step 3** to prove the **account hash exists** in the state tree
+2. Specify **input hash** and **output state tree** from **Step 4**
+   * `treeInfo`: Packed indices to the state tree and nullifier queue accounts (Pack Accounts, Step 4 Section 3)
+   * `address`: Account's derived address from Step 2
+   * `outputStateTreeIndex`: Index to the state tree that will store the reinitialized account hash (Pack Accounts, Step 4 Section 4)
 3. Reinitialize creates an account with **default-initialized values**
 * These values are `Pubkey` as all zeros, numbers as `0`, strings as empty.
 * To set custom values, update the account in the same or a separate transaction.
@@ -1062,10 +1062,10 @@ const instructionData = {
 };
 ```
 
-1. Include `compressedProof` from **Step 4** to prove the **account hash exists** in the state tree
-2. Specify **input hash** from **Step 5**
-   * `treeInfo`: Packed indices to the state tree and nullifier queue accounts (Pack Accounts, Step 5 Section 3)
-   * `address`: Account's derived address from Step 3
+1. Include `compressedProof` from **Step 3** to prove the **account hash exists** in the state tree
+2. Specify **input hash** from **Step 4**
+   * `treeInfo`: Packed indices to the state tree and nullifier queue accounts (Pack Accounts, Step 4 Section 3)
+   * `address`: Account's derived address from Step 2
    * No `outputStateTreeIndex` - Burn permanently removes the account with no output state
 3. Pass **current account data**
 </Tab>
@@ -1086,10 +1086,10 @@ let instruction_data = create::instruction::CreateAccount {
 .data();
 ```
 
-1. Include `proof` from Step 4 to prove the **address does not exist** in the address tree
-2. Specify **Merkle trees** to store **address and account hash** from Step 5
-   * `address_tree_info`: Index to the address tree account used to derive the address (Pack Accounts, Step 5 Section 3)
-   * `output_state_tree_index`: Index to the state tree that stores the compressed account hash (Pack Accounts, Step 5 Section 4)
+1. Include `proof` from Step 3 to prove the **address does not exist** in the address tree
+2. Specify **Merkle trees** to store **address and account hash** from Step 4
+   * `address_tree_info`: Index to the address tree account used to derive the address (Pack Accounts, Step 4 Section 3)
+   * `output_state_tree_index`: Index to the state tree that stores the compressed account hash (Pack Accounts, Step 4 Section 4)
 3. Pass **initial account data**
 </Tab>
 
@@ -1113,11 +1113,11 @@ let instruction_data = update::instruction::UpdateAccount {
 Use the state tree of the existing compressed account as output state tree.
 </Tip>
 
-1. Include `proof` from Step 4 to prove the **account hash exists** in the state tree
-2. Specify **input hash** and **output state tree** from Step 5
-   * `tree_info`: Packed indices to the state tree and nullifier queue accounts (Pack Accounts, Step 5 Section 3)
-   * `address`: Account's derived address from Step 3
-   * `output_state_tree_index`: Index to the state tree that stores the updated account hash (Pack Accounts, Step 5 Section 4)
+1. Include `proof` from Step 3 to prove the **account hash exists** in the state tree
+2. Specify **input hash** and **output state tree** from Step 4
+   * `tree_info`: Packed indices to the state tree and nullifier queue accounts (Pack Accounts, Step 4 Section 3)
+   * `address`: Account's derived address from Step 2
+   * `output_state_tree_index`: Index to the state tree that stores the updated account hash (Pack Accounts, Step 4 Section 4)
 3. Pass **current account data** and **new data**
 
 </Tab>
@@ -1141,11 +1141,11 @@ let instruction_data = close::instruction::CloseAccount {
 Use the state tree of the existing compressed account as output state tree.
 </Tip>
 
-1. Include `proof` from Step 4 to prove the **account hash exists** in the state tree
-2. Specify **input hash** and **output state tree** from Step 5
-   * `tree_info`: Packed indices to the state tree and nullifier queue accounts (Pack Accounts, Step 5 Section 3)
-   * `address`: Account's derived address from Step 3
-   * `output_state_tree_index`: Index to the state tree that stores a **hash with zero values** (Pack Accounts, Step 5 Section 4)
+1. Include `proof` from Step 3 to prove the **account hash exists** in the state tree
+2. Specify **input hash** and **output state tree** from Step 4
+   * `tree_info`: Packed indices to the state tree and nullifier queue accounts (Pack Accounts, Step 4 Section 3)
+   * `address`: Account's derived address from Step 2
+   * `output_state_tree_index`: Index to the state tree that stores a **hash with zero values** (Pack Accounts, Step 4 Section 4)
 3. Pass **current account data**
 
 </Tab>
@@ -1168,11 +1168,11 @@ let instruction_data = reinit::instruction::ReinitAccount {
 Use the state tree of the existing compressed account as output state tree.
 </Tip>
 
-1. Include `proof` from Step 4 to prove the **account hash exists** in the state tree
-2. Specify **input hash** and **output state tree** from Step 5
-   * `tree_info`: Packed indices to the state tree and nullifier queue accounts (Pack Accounts, Step 5 Section 3)
-   * `address`: Account's derived address from Step 3
-   * `output_state_tree_index`: Index to the state tree that stores the reinitialized account hash (Pack Accounts, Step 5 Section 4)
+1. Include `proof` from Step 3 to prove the **account hash exists** in the state tree
+2. Specify **input hash** and **output state tree** from Step 4
+   * `tree_info`: Packed indices to the state tree and nullifier queue accounts (Pack Accounts, Step 4 Section 3)
+   * `address`: Account's derived address from Step 2
+   * `output_state_tree_index`: Index to the state tree that stores the reinitialized account hash (Pack Accounts, Step 4 Section 4)
 3. Reinitialize creates an account with **default-initialized values** (`Pubkey` as all zeros, numbers as `0`, strings as empty). To set custom values, update the account in the same or a separate transaction.
 
 </Tab>
@@ -1191,10 +1191,10 @@ let instruction_data = burn::instruction::BurnAccount {
 .data();
 ```
 
-1. Include `proof` from Step 4 to prove the **account hash exists** in the state tree
-2. Specify **input hash** from Step 5
-   * `tree_info`: Packed indices to the state tree and nullifier queue accounts (Pack Accounts, Step 5 Section 3)
-   * `address`: Account's derived address from Step 3
+1. Include `proof` from Step 3 to prove the **account hash exists** in the state tree
+2. Specify **input hash** from Step 4
+   * `tree_info`: Packed indices to the state tree and nullifier queue accounts (Pack Accounts, Step 4 Section 3)
+   * `address`: Account's derived address from Step 2
    * No `output_state_tree_index` - Burn permanently removes the account with no output state
 3. Pass **current account data**
 </Tab>
@@ -1212,7 +1212,7 @@ let instruction_data = burn::instruction::BurnAccount {
 <Step>
 ## Instruction
 
-Build the instruction with your `program_id`, `accounts`, and `data` from Step 6.
+Build the instruction with your `program_id`, `accounts`, and `data` from Step 5.
 
 <Tip>
 In `accounts`,
