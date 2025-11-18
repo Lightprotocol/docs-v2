@@ -52,3 +52,48 @@
     </tr>
   </tbody>
 </table>
+
+### Comparison to Token-2022
+
+
+<table>
+  <thead>
+    <tr>
+      <th style={{width: '34%', textAlign: 'left'}}>Field</th>
+      <th style={{width: '33%', textAlign: 'left'}}>cMint Token Metadata</th>
+      <th style={{width: '33%', textAlign: 'left'}}>Token-2022 MetadataPointer</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>update_authority</td>
+      <td>Pubkey</td>
+      <td>Option&lt;Pubkey&gt;</td>
+    </tr>
+    <tr>
+      <td>mint</td>
+      <td>Pubkey</td>
+      <td>Pubkey</td>
+    </tr>
+    <tr>
+      <td>name</td>
+      <td>Vec&lt;u8&gt;</td>
+      <td>String</td>
+    </tr>
+    <tr>
+      <td>symbol</td>
+      <td>Vec&lt;u8&gt;</td>
+      <td>String</td>
+    </tr>
+    <tr>
+      <td>uri</td>
+      <td>Vec&lt;u8&gt;</td>
+      <td>String</td>
+    </tr>
+    <tr>
+      <td>additional_metadata</td>
+      <td>Vec&lt;AdditionalMetadata&gt;</td>
+      <td>Vec&lt;(String, String)&gt;</td>
+    </tr>
+  </tbody>
+</table>

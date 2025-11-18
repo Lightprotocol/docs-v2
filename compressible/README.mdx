@@ -23,7 +23,7 @@ The [Compressed Token Program](https://github.com/Lightprotocol/light-protocol/t
       <td style={{textAlign: 'left'}}>
         <ul>
           <li>**Rent-free mint accounts** (similar to SPL mints)</li>
-          <li>Optional **extension** field for [Token Metadata](#token-metadata)</li>
+          <li>Optional [Token Metadata](#token-metadata) **extension**</li>
         </ul>
       </td>
     </tr>
@@ -33,7 +33,7 @@ The [Compressed Token Program](https://github.com/Lightprotocol/light-protocol/t
       <td style={{textAlign: 'left'}}>
         <ul>
           <li>**SPL-compatible token accounts** (derived from cMints)</li>
-          <li>Optional extension field to **optimize rent with** the [compressible extension](#compressible)</li>
+          <li>Optional **sponsored rent** exemption via [compressible extension](#compressible)</li>
           <li>Use for token accounts with **frequent writes** (trading, etc.)</li>
         </ul>
       </td>
@@ -43,10 +43,10 @@ The [Compressed Token Program](https://github.com/Lightprotocol/light-protocol/t
       <td style={{textAlign: 'left'}}>Compressed account</td>
       <td style={{textAlign: 'left'}}>
         <ul>
-          <li>**Compressed Solana accounts** with `TokenData` field</li>
+          <li>**Compressed account** with `TokenData` field</li>
           <li>**Rent-free** and SPL-compatible</li>
-          <li>Use for **token distribution** (for airdrops, payments, etc.)</li>
-          <li>The **[compressible extension](#compressible) automatically compresses/decompresses** accounts when active/inactive.</li>
+          <li>Use for **token distribution** (airdrops, payments, etc.)</li>
+          <li>Solana accounts with the **[compressible extension](#compressible) are automatically compressed/decompressed** accounts when active/inactive.</li>
         </ul>
       </td>
     </tr>
@@ -55,7 +55,8 @@ The [Compressed Token Program](https://github.com/Lightprotocol/light-protocol/t
 
 <Tip>
 * **SPL mints and tokens** owned by the [Token Program](https://github.com/solana-program/token) or [Token-2022](https://github.com/solana-program/token-2022) **require rent** by default. 
-* Use the **[compressible extension](/compressible/compressible) to optimize rent**. Accounts are compressed with no writes in 6300 slots (1.75 hours). Accounts are decompressed when they receive a write.
+* Use the **[compressible extension](/compressible/compressible) for sponsored rent exemption**.
+* Solana accounts with the [compressible extension](/compressible/compressible) are automatically compressed with no writes in 6300 slots (1.75 hours), and decompressed with new writes.
 </Tip>
 
 # cMint Accounts
@@ -104,36 +105,50 @@ The `metadata` field is used by the Compressed Token Program to store the intern
 
 The `BaseMint` field replicates the field layout and serialization format of [SPL Mint accounts](https://solana.com/docs/tokens#mint-account). The struct is serialized with Borsh to match the on-chain format of SPL tokens and mints.
 
+Here is how cMints and SPL mints compare:
 <table>
   <thead>
     <tr>
       <th style={{width: '10%', textAlign: 'left'}}>Field</th>
-      <th style={{width: '45%', textAlign: 'left'}}>cMint (BaseMint)</th>
-      <th style={{width: '30%', textAlign: 'left'}}>SPL Mint</th>
+      <th style={{width: '45%', textAlign: 'center'}}>cMint</th>
+      <th style={{width: '30%', textAlign: 'center'}}>SPL Mint</th>
     </tr>
   </thead>
   <tbody>
     <tr>
       <td>mint_authority</td>
-      <td>Option&lt;Pubkey&gt;</td>
-      <td>COption&lt;Pubkey&gt;</td>
+      <td style={{textAlign: 'center'}}>✓</td>
+      <td style={{textAlign: 'center'}}>✓</td>
     </tr>
     <tr>
       <td>supply</td>
-      <td colspan="2" style={{textAlign: 'center'}}>u64</td>
+      <td style={{textAlign: 'center'}}>✓</td>
+      <td style={{textAlign: 'center'}}>✓</td>
     </tr>
     <tr>
       <td>decimals</td>
-      <td colspan="2" style={{textAlign: 'center'}}>u8</td>
+      <td style={{textAlign: 'center'}}>✓</td>
+      <td style={{textAlign: 'center'}}>✓</td>
     </tr>
     <tr>
       <td>is_initialized</td>
-      <td colspan="2" style={{textAlign: 'center'}}>bool</td>
+      <td style={{textAlign: 'center'}}>✓</td>
+      <td style={{textAlign: 'center'}}>✓</td>
     </tr>
     <tr>
       <td>freeze_authority</td>
-      <td>Option&lt;Pubkey&gt;</td>
-      <td>COption&lt;Pubkey&gt;</td>
+      <td style={{textAlign: 'center'}}>✓</td>
+      <td style={{textAlign: 'center'}}>✓</td>
+    </tr>
+    <tr>
+      <td>cMint Data</td>
+      <td style={{textAlign: 'center'}}>✓</td>
+      <td style={{textAlign: 'center'}}>-</td>
+    </tr>
+    <tr>
+      <td>Extensions</td>
+      <td style={{textAlign: 'center'}}>✓</td>
+      <td style={{textAlign: 'center'}}>via Token-2022</td>
     </tr>
   </tbody>
 </table>
@@ -186,56 +201,60 @@ Find the [source code of cToken here](https://github.com/Lightprotocol/light-pro
 
 cToken accounts replicate the field layout and serialization format of [SPL Token accounts](https://solana.com/docs/tokens#token-account). The struct is serialized with Borsh to match the on-chain format of SPL tokens.
 
+Here is how cTokens and SPL tokens compare:
 <table>
   <thead>
     <tr>
       <th style={{width: '10%', textAlign: 'left'}}>Field</th>
-      <th style={{width: '45%', textAlign: 'left'}}>cToken</th>
-      <th style={{width: '30%', textAlign: 'left'}}>SPL Token Account</th>
+      <th style={{width: '45%', textAlign: 'center'}}>cToken</th>
+      <th style={{width: '30%', textAlign: 'center'}}>SPL Token Account</th>
     </tr>
   </thead>
   <tbody>
     <tr>
       <td>mint</td>
-      <td colspan="2" style={{textAlign: 'center'}}>Pubkey</td>
+      <td style={{textAlign: 'center'}}>✓</td>
+      <td style={{textAlign: 'center'}}>✓</td>
     </tr>
     <tr>
       <td>owner</td>
-      <td colspan="2" style={{textAlign: 'center'}}>Pubkey</td>
+      <td style={{textAlign: 'center'}}>✓</td>
+      <td style={{textAlign: 'center'}}>✓</td>
     </tr>
     <tr>
       <td>amount</td>
-      <td colspan="2" style={{textAlign: 'center'}}>u64</td>
+      <td style={{textAlign: 'center'}}>✓</td>
+      <td style={{textAlign: 'center'}}>✓</td>
     </tr>
     <tr>
       <td>delegate</td>
-      <td>-</td>
-      <td>COption&lt;Pubkey&gt;</td>
+      <td style={{textAlign: 'center'}}>unimplemented</td>
+      <td style={{textAlign: 'center'}}>✓</td>
     </tr>
     <tr>
       <td>state</td>
-      <td>u8</td>
-      <td>AccountState</td>
+      <td style={{textAlign: 'center'}}>✓</td>
+      <td style={{textAlign: 'center'}}>✓</td>
     </tr>
     <tr>
       <td>is_native</td>
-      <td>Option&lt;u64&gt;</td>
-      <td>COption&lt;u64&gt;</td>
+      <td style={{textAlign: 'center'}}>✓</td>
+      <td style={{textAlign: 'center'}}>✓</td>
     </tr>
     <tr>
       <td>delegated_amount</td>
-      <td>-</td>
-      <td>COption&lt;u64&gt;</td>
+      <td style={{textAlign: 'center'}}>unimplemented</td>
+      <td style={{textAlign: 'center'}}>✓</td>
     </tr>
     <tr>
       <td>close_authority</td>
-      <td>Option&lt;Pubkey&gt;</td>
-      <td>COption&lt;Pubkey&gt;</td>
+      <td style={{textAlign: 'center'}}>✓</td>
+      <td style={{textAlign: 'center'}}>✓</td>
     </tr>
     <tr>
       <td>extensions</td>
-      <td>Option&lt;Vec&lt;ExtensionStruct&gt;&gt;</td>
-      <td>-</td>
+      <td style={{textAlign: 'center'}}>✓</td>
+      <td style={{textAlign: 'center'}}>via Token-2022</td>
     </tr>
   </tbody>
 </table>
@@ -277,7 +296,7 @@ Find the [source code to associated cToken accounts here](https://github.com/Lig
 </Info>
 
 <Tip>
-**Both SPL and cToken ATAs** can implement the **[compressible extension](/compressible/compressible) to optimize rent**. Accounts are automatically compressed when inactive and decompressed when active.
+**Both SPL and cToken ATAs** can implement the **[compressible extension](/compressible/compressible) for sponsored rent exemption**.
 </Tip>
 
 # Compressed Token Account
@@ -292,7 +311,7 @@ Compressed token accounts store token balance, owner, and other information for 
 * Any cToken or SPL token can be compressed at will. 
 
 <Tip>
-Use the **[compressible extension](/compressible/compressible) to optimize rent**. Accounts are automatically compressed when inactive and decompressed when active.
+Solana accounts with the **[compressible extension](/compressible/compressible) are automatically compressed with no writes in 6300 slots (1.75 hours), and decompressed with new writes.
 </Tip>
 
 <Tabs>
