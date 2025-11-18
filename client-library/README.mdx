@@ -189,116 +189,41 @@ light test-validator
 </Step>
 
 <Step>
-## Tree Configuration
+## Address
 
-Depending on your instruction, your client must fetch metadata of one or multiple Merkle trees.
+<Note>
+You only need to derive an address when you create a compressed account.
+</Note>
 
-* **All instructions** require metadata for a **state tree** to store or reference the compressed account hash.
-* **Only** when you **create** a compressed account, you additionally fetch an **address tree** to derive and store the account address.
+<Tabs>
+<Tab title="Create">
+Derive a persistent address as a unique identifier for your compressed account, similar to [program-derived addresses (PDAs)](https://solana.com/docs/core/pda).
 
-<table>
-  <thead>
-    <tr>
-      <th width="200">Instruction</th>
-      <th width="150" className="text-center">Address Tree Required</th>
-      <th width="130" className="text-center">State Tree Required</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>Create</td>
-      <td className="text-center">✓</td>
-      <td className="text-center">✓</td>
-    </tr>
-    <tr>
-      <td>Update / Close / Reinit / Burn</td>
-      <td className="text-center">-</td>
-      <td className="text-center">✓</td>
-    </tr>
-    <tr>
-      <td>Combined (Create + Update)</td>
-      <td className="text-center">✓</td>
-      <td className="text-center">✓</td>
-    </tr>
-  </tbody>
-</table>
-
-
+* Like PDAs, compressed account addresses don't belong to a private key; rather, they're derived from the program that owns them.
+* The key difference to PDAs is that compressed accounts require an **address tree** parameter.
+* Address tree is a Merkle tree that stores the compressed account addresses.
 
 <Tip>
 The protocol maintains Merkle trees. You don't need to initialize custom trees. Find the [pubkeys for Merkle trees here](https://www.zkcompression.com/resources/addresses-and-urls).
 </Tip>
 
-<Tabs>
-<Tab title="Typescript">
-<Tabs>
-<Tab title="Create">
-
-```typescript title=v1
-const addressTree = getDefaultAddressTreeInfo();
-const stateTreeInfos = await rpc.getStateTreeInfos();
-const outputStateTree = selectStateTreeInfo(stateTreeInfos);
-```
-
-```typescript title=v2
-const addressTree = await rpc.getAddressTreeInfoV2();
-const stateTreeInfos = await rpc.getStateTreeInfos();
-const outputStateTree = selectStateTreeInfo(stateTreeInfos);
-```
-</Tab>
-
-<Tab title="Update/Close/Reinitialize/burn">
-
-```typescript title=v1
-const stateTreeInfos = await rpc.getStateTreeInfos();
-const outputStateTree = selectStateTreeInfo(stateTreeInfos);
-```
-
-```typescript title=v2
-const stateTreeInfos = await rpc.getStateTreeInfos();
-const outputStateTree = selectStateTreeInfo(stateTreeInfos);
-```
-
-</Tab>
-</Tabs>
-
-<Tip>
-V2 is on Devnet and reduces compute unit consumption by up to 70%.
-</Tip>
-
-</Tab>
-
-<Tab title="Rust">
-<Tabs>
-<Tab title="Create">
-
-```rust title=v1
-let address_tree_info = rpc.get_address_tree_v1();
-let output_state_tree_info = rpc.get_random_state_tree_info().unwrap();
-```
-
-```rust title=v2
-let address_tree_info = rpc.get_address_tree_v2();
-let output_state_tree_info = rpc.get_random_state_tree_info().unwrap();
-```
-</Tab>
-
-<Tab title="Update/Close/Reinitialize/burn">
-
-```rust
-let output_state_tree_info = rpc.get_random_state_tree_info().unwrap();
-```
-
-</Tab>
-</Tabs>
-<Tip>
-V2 is on Devnet and reduces compute unit consumption by up to 70%.
-</Tip>
-</Tab>
-
-</Tabs>
+### 1. Fetch Address Tree TreeInfo
 
 These methods return `TreeInfo` with the public key and other metadata of trees.
+
+<Tabs>
+<Tab title="V1 Address Trees">
+```typescript
+const addressTree = getDefaultAddressTreeInfo();
+```
+</Tab>
+
+<Tab title="V2 Address Trees">
+```typescript
+const addressTree = await rpc.getAddressTreeInfoV2();
+```
+</Tab>
+</Tabs>
 
 <Accordion title="Expand to learn what TreeInfo contains">
 * `tree`: Merkle tree account pubkey
@@ -314,22 +239,7 @@ These methods return `TreeInfo` with the public key and other metadata of trees.
   * The protocol creates new trees, once existing trees fill up.
 </Accordion>
 
-</Step>
-
-<Step>
-## Address
-
-<Note>
-You only need to derive an address when you create a compressed account.
-</Note>
-
-<Tabs>
-<Tab title="Create">
-Derive a persistent address as a unique identifier for your compressed account, similar to [program-derived addresses (PDAs)](https://solana.com/docs/core/pda).
-
-* Use the derivation method that matches your address tree type from the previous step (V1 or V2).
-* Like PDAs, compressed account addresses don't belong to a private key; rather, they're derived from the program that owns them.
-* The key difference to PDAs is that compressed accounts require an **address tree** parameter.
+### 2. Derive Address
 
 <Tabs>
 <Tab title="Typescript">
@@ -704,7 +614,13 @@ See the full [create-and-update program example with tests](https://github.com/L
 
 Transactions with compressed accounts reference **custom accounts and `PackedAccounts`**.
 
-The `PackedAccounts` helper optimizes instruction data by allowing you to reference accounts by u8 indices instead of their 32-byte pubkeys. Programs retrieve accounts via these indices.
+The `PackedAccounts` helper optimizes instruction data by organizing accounts into an array. You can then reference accounts by u8 indices instead of their 32-byte pubkeys.
+
+<Tip>
+In your instruction,
+1. Put your program-specific accounts first
+2. Append Packed accounts to end of the vector (recommended due to variable length)
+</Tip>
 
 * **Light System accounts**: 8 required accounts for proof verification and CPI calls to update state and address trees.
 
@@ -868,11 +784,6 @@ V2 is on Devnet and reduces compute unit consumption by up to 70%.
 </Tabs>
 
 </Accordion>
-<Tip>
-In your instruction,
-1. Put your program-specific accounts first
-2. Append Packed accounts to end of the vector (recommended due to variable length)
-</Tip>
 
 <Tabs>
 <Tab title="Typescript">
@@ -903,6 +814,8 @@ const packedAddressTreeInfo = {
 };
 
 // 4. Get index for output state tree
+const stateTreeInfos = await rpc.getStateTreeInfos();
+const outputStateTree = selectStateTreeInfo(stateTreeInfos).tree;
 const outputStateTreeIndex
   = packedAccounts.insertOrGet(outputStateTree);
 
@@ -923,7 +836,7 @@ const systemAccountConfig
   = SystemAccountMetaConfig.new(programId);
 packedAccounts.addSystemAccounts(systemAccountConfig);
 
-// 3. Get indices for tree accounts
+// 3. Get indices for tree accounts 
 const merkleTreePubkeyIndex
   = packedAccounts.insertOrGet(compressedAccount.treeInfo.tree);
 const queuePubkeyIndex
@@ -936,11 +849,10 @@ const packedInputAccounts = {
   rootIndex: proofRpcResult.rootIndices[0],
 };
 
-// 4. Get index for output state tree
 const outputStateTreeIndex
   = packedAccounts.insertOrGet(outputStateTree);
 
-// 5. Convert to Account Metas
+// 4. Convert to Account Metas
 const { remainingAccounts }
   = packedAccounts.toAccountMetas();
 ```
@@ -968,6 +880,7 @@ let packed_accounts
   = rpc_result.pack_tree_infos(&mut remaining_accounts);
 
 // 4. Get index for output state tree
+let output_state_tree_info = rpc.get_random_state_tree_info()?;
 let output_state_tree_index
   = output_state_tree_info.pack_output_tree_index(&mut remaining_accounts)?;
 
