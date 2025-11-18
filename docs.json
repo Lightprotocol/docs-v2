@@ -13,13 +13,13 @@
     "tableOfContentsDepth": 2,
     "tabs": [
       {
-        "tab": "Guides",
+        "tab": "Docs",
         "groups": [
           {
             "group": "Getting started",
             "pages": [
-              "ctoken-overview",
-              "typescript"
+              "c-token/ctoken-overview",
+              "c-token/typescript"
             ]
           }
         ]
@@ -30,7 +30,34 @@
           {
             "group": "Client Guides",
             "pages": [
-              "client-library"
+              "client-library/README"
+            ]
+          },
+          {
+            "group": "API Reference",
+            "pages": [
+              {
+                "group": "Overview",
+                "pages": [
+                  "api-reference-overview",
+                  "stateless-js",
+                  "compressed-token",
+                  "light-client",
+                  "light-sdk",
+                  "light-program-test"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Compressible",
+        "groups": [
+          {
+            "group": "Overview",
+            "pages": [
+              "compressible/README"
             ]
           }
         ]
@@ -57,19 +84,52 @@
   "contextual": {
     "options": [
      "copy",
-     "view",
+     {
+       "title": "Open DeepWiki",
+       "description": "Ask Devin for help with debugging",
+       "icon": "/images/deepwiki-logo.svg",
+       "href": {
+         "base": "https://deepwiki.com/Lightprotocol/light-protocol",
+         "query": [{
+           "key": "context",
+           "value": "$page"
+         }]
+       }
+     },
+     "mcp",
      "chatgpt",
      "claude",
      "perplexity",
-     "mcp",
      "cursor",
-     "vscode"
+     "vscode",
+     "view"
    ]
   },
   "footer": {
     "socials": {
       "x": "https://x.com/lightprotocol",
-      "github": "https://github.com/Lightprotocol/light-protocol"
-    }
+      "github": "https://github.com/Lightprotocol/light-protocol",
+      "discord": "https://discord.com/invite/CYvjBgzRFP"
+    },
+    "links": [
+      {
+        "header": "Compressed by Light Protocol",
+        "items": [
+          {
+            "label": "lightprotocol.com",
+            "href": "https://lightprotocol.com"
+          }
+        ]
+      },
+      {
+        "header": "Indexed by Helius",
+        "items": [
+          {
+            "label": "helius.dev",
+            "href": "https://helius.dev"
+          }
+        ]
+      }
+    ]
   }
 }
