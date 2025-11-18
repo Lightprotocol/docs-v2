@@ -12,8 +12,8 @@ The [Compressed Token Program](https://github.com/Lightprotocol/light-protocol/t
   <thead>
     <tr>
       <th style={{width: '15%', textAlign: 'left'}}></th>
-      <th style={{width: '25%', textAlign: 'left'}}>Account Type</th>
-      <th style={{width: '60%', textAlign: 'left'}}>Key Features</th>
+      <th style={{width: '22%', textAlign: 'left'}}>Account Type</th>
+      <th style={{width: '63%', textAlign: 'left'}}>Key Features</th>
     </tr>
   </thead>
   <tbody>
@@ -46,7 +46,7 @@ The [Compressed Token Program](https://github.com/Lightprotocol/light-protocol/t
           <li>**Compressed account** with `TokenData` field</li>
           <li>**Rent-free** and SPL-compatible</li>
           <li>Use for **token distribution** (airdrops, payments, etc.)</li>
-          <li>Solana accounts with the **[compressible extension](#compressible) are automatically compressed/decompressed** accounts when active/inactive.</li>
+          <li>Solana accounts with the **[compressible extension](#compressible) are automatically compressed/decompressed** when active/inactive.</li>
         </ul>
       </td>
     </tr>
@@ -79,7 +79,7 @@ cMints **store data and uniquely identify tokens**, similar to SPL mint accounts
     <Frame>
       <img
         src="/images/token-explainer.png"
-        alt="CompressedMint structure diagram showing three fields: base (BaseMint) containing mint_authority, supply, decimals, is_initialized, and freeze_authority for SPL mint layout; metadata (CompressedMintMetadata) used by the Compressed Token Program for cMint state; and extensions (Option<Vec<ExtensionStruct>>) field for Token Metadata extension"
+        alt="Diagram showing cMint compressed account structure with three components: Hash (identifier for cMint in purple box), Account (struct containing BaseMint with SPL-compatible fields, cMint Data for program state, and optional Extensions for Token Metadata), and BasemintData (containing Supply, Decimals, Mint Authority, and Freeze Authority fields) with Token Metadata extension"
       />
     </Frame>
   </Tab>
@@ -173,7 +173,7 @@ Use the **[compressible extension](/compressible/compressible) to optimize rent*
     <Frame>
       <img
         src="/images/ctoken-explainer.png"
-        alt="CToken structure diagram showing fields: mint, owner, amount, delegate, state, is_native, delegated_amount, close_authority, and extensions field for optional extensions like compressible"
+        alt="Diagram showing cToken Solana account structure with three components: Address (identifier for cToken account in purple box), Account (struct containing Data bytes, Executable flag, Lamports balance, and Owner set to Compressed Token Program), and AccountData (containing Mint, Owner, Amount, and Extensions fields)"
       />
     </Frame>
   </Tab>
@@ -317,7 +317,7 @@ Compressed token accounts store token balance, owner, and other information for 
     <Frame>
       <img
         src="/images/compressed-token-explainer.png"
-        alt="TokenData structure diagram showing fields: mint, owner, amount, delegate, state, and tlv placeholder for TokenExtension data"
+        alt="Diagram showing compressed token account structure with three components: Hash (identifier for compressed token account in purple box), Account (struct containing Data bytes, Executable flag, Lamports balance, and Address set to None), and AccountData (containing Mint, Owner, Amount, and Extensions fields marked as unimplemented)"
       />
     </Frame>
   </Tab>
