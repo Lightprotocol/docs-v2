@@ -11,20 +11,26 @@ ZK Compression provides Rust and Typescript clients to interact with compressed 
 <table>
   <thead>
     <tr>
-      <th width="150"></th>
-      <th width="250" className="text-left">Compressed Accounts</th>
-      <th width="250" className="text-left">Compressed Tokens</th>
+      <th width="120"></th>
+      <th width="250" className="text-left"></th>
+      <th width="280" className="text-left"></th>
     </tr>
   </thead>
   <tbody>
     <tr>
       <td>**TypeScript**</td>
       <td>[@lightprotocol/stateless.js](https://lightprotocol.github.io/light-protocol/stateless.js/index.html)</td>
+      <td>RPC Client for Compressed Accounts</td>
+    </tr>
+    <tr>
+      <td>**TypeScript**</td>
       <td>[@lightprotocol/compressed-token](https://lightprotocol.github.io/light-protocol/compressed-token/index.html)</td>
+      <td>RPC Client for Compressed Tokens</td>
     </tr>
     <tr>
       <td>**Rust**</td>
-      <td colspan="2" className="text-center">[light-client](https://docs.rs/light-client) (unified RPC client)</td>
+      <td>[light-client](https://docs.rs/light-client)</td>
+      <td>Unified RPC client for compressed accounts and tokens</td>
     </tr>
   </tbody>
 </table>
@@ -212,6 +218,8 @@ The protocol maintains Merkle trees. You don't need to initialize custom trees. 
 These methods return `TreeInfo` with the public key and other metadata of trees.
 
 <Tabs>
+<Tab title="Typescript">
+<Tabs>
 <Tab title="V1 Address Trees">
 ```typescript
 const addressTree = getDefaultAddressTreeInfo();
@@ -222,6 +230,24 @@ const addressTree = getDefaultAddressTreeInfo();
 ```typescript
 const addressTree = await rpc.getAddressTreeInfoV2();
 ```
+</Tab>
+</Tabs>
+</Tab>
+
+<Tab title="Rust">
+<Tabs>
+<Tab title="V1 Address Trees">
+```rust
+let address_tree_info = rpc.get_address_tree_v1();
+```
+</Tab>
+
+<Tab title="V2 Address Trees">
+```rust
+let address_tree_info = rpc.get_address_tree_v2();
+```
+</Tab>
+</Tabs>
 </Tab>
 </Tabs>
 
