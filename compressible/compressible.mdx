@@ -1,13 +1,13 @@
 ---
 title: Compressible
-description: The compressible extension optimizes rent for any type of Solana account except mints.
+description: The compressible extension sponsors rent-exemption for any type of Solana account except mints. 
 ---
 
 <table>
   <thead>
     <tr>
       <th style={{width: '20%', textAlign: 'left'}}></th>
-      <th style={{width: '35%', textAlign: 'left'}}>Supported Accounts</th>
+      <th style={{width: '20%', textAlign: 'left'}}>Supported Accounts</th>
       <th style={{width: '45%', textAlign: 'left'}}>Description</th>
     </tr>
   </thead>
@@ -15,24 +15,258 @@ description: The compressible extension optimizes rent for any type of Solana ac
     <tr>
       <td style={{textAlign: 'left'}}>**Compressible**</td>
       <td style={{textAlign: 'left'}}>
-        All Solana accounts except mints, such as
-        * SPL token accounts
-        * PDA accounts
-        * cToken accounts
-        * associated cToken/token accounts
+        cToken accounts
       </td>
       <td style={{textAlign: 'left'}}>
         * **Sponsored rent-exemption**
-        * Can be added at account creation, or **existing accounts can migrate**
+        * Compress accounts with no writes in 6300 slots (1.75 hours), and decompresses when written to.
+        * Must be **added at account creation**
       </td>
     </tr>
   </tbody>
 </table>
 
 ## Key Points
-1. Rent funded every transaction
-2. Solana accounts with the [compressible extension](/compressible/compressible) are automatically compressed with no writes in 6300 slots (1.75 hours), and decompressed with new writes.
-3. Rent authority reclaims rent
+Compressible accounts have the same functionality and compatibility like regular Solana accounts but with automated rent-exemption sponsorship: 
+
+1. Apps and developers can create cToken accounts without funding the rent-exemption balance.
+2. The protocol funds the account's rent exemption (rent sponsor).
+3. Transactions that write to compressible accounts fund the accounts rent for a specified number of epochs, instead of the full rent-exemption balance.
+4. The account will be automatically compressed when inactive over a period of 6300 slots (1.75 hours).
+5. When the account is written to, it's automatically decompressed.
+
+### Creation Cost
+
+Creating cToken accounts is 200x cheaper
+
+<table>
+  <thead>
+    <tr>
+      <th style={{width: '40%', textAlign: 'left'}}>Operation</th>
+      <th style={{width: '30%', textAlign: 'left'}}>cToken</th>
+      <th style={{width: '30%', textAlign: 'left'}}>SPL</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style={{textAlign: 'left'}}>allocate</td>
+      <td style={{textAlign: 'left'}}>0.000011</td>
+      <td style={{textAlign: 'left'}}>0.002</td>
+    </tr>
+    <tr>
+      <td style={{textAlign: 'left'}}>keep hot for 24h</td>
+      <td style={{textAlign: 'left'}}>0.000005</td>
+      <td style={{textAlign: 'left'}}>-</td>
+    </tr>
+  </tbody>
+</table>
+
+### Compute Unit Consumption
+
+cToken is 70%+ more compute efficient (CU) than SPL on hot paths
+
+<table>
+  <thead>
+    <tr>
+      <th style={{width: '40%', textAlign: 'left'}}>Operation</th>
+      <th style={{width: '30%', textAlign: 'left'}}>cToken (CU)</th>
+      <th style={{width: '30%', textAlign: 'left'}}>SPL (CU)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style={{textAlign: 'left'}}>transfer</td>
+      <td style={{textAlign: 'left'}}>312 - 1,885</td>
+      <td style={{textAlign: 'left'}}>~4,000</td>
+    </tr>
+    <tr>
+      <td style={{textAlign: 'left'}}>createAssociatedTokenAccount</td>
+      <td style={{textAlign: 'left'}}>~4,300</td>
+      <td style={{textAlign: 'left'}}>~20,000</td>
+    </tr>
+  </tbody>
+</table>
+<Note>
+add graphic with full lifecycle
+</Note>
+
+<Accordion title="Core Concept: Rent">
+
+## Core Concept: Rent
+
+Solana accounts require a minimum SOL balance for rent exemption at creation. The balance equals 2 years of rent payments, calculated as:
+
+```
+minimum_balance = (ACCOUNT_STORAGE_OVERHEAD + data_len) * lamports_per_byte * exemption_threshold
+```
+
+The rent-exemption balance can only be collected once accounts are closed. Closing a Solana account effectively leads to loss of the data stored in that account.
+Most Solana accounts are rarely accessed after creation, but continue to lock up SOL for the account's lifetime.
+
+Compressible accounts build on top of Solana's rent system, but with different goals:
+1. The full rent-exemption balance is sponsored by the protocol
+2. Every transaction funds the account's rent for the current and next epoch.
+3. Accounts become compressible when they advance two epochs without new transactions that fund rent.
+
+
+
+Time Unit: two years / current epoch + 1 (432,000 slots or 2.5 days)
+Calculation: (128 + data_len) * 6960 lamports /  1220 lamports base + 10 lamports per byte per epoch
+
+
+### Rent Calculation Comparison
+
+**Solana (rent-exempt for 100 bytes):**
+```rust
+// Using Solana's Rent sysvar
+let rent = Rent::get()?;
+let minimum_balance = rent.minimum_balance(100);
+// Result: (128 + 100) * 6960 = 1,586,880 lamports
+```
+
+**Light Protocol (rent for 100 bytes):**
+```rust
+// Per epoch rent
+let rent_per_epoch = rent_curve_per_epoch(1220, 10, 100);
+// Result: 1220 + (100 * 10) = 2220 lamports per epoch
+
+// To maintain for ~2 years (1051 epochs)
+let two_year_rent = 2220 * 1051 = 2,333,220 lamports
+```
+
+### When Accounts become compressible
+
+Epoch-based rent system vs. Solana's permanent rent exemption
+
+The compressibility check uses `AccountRentState` to calculate:
+
+An account becomes compressible, when available balance < rent needed for current epoch + next epoch.
+
+1. Epochs elapsed since the last Solana slot at which rent was claimed from a compressible account
+2. Calculate rent for those epochs using the rent curve formula: `base_rent + (num_bytes × lamports_per_byte_per_epoch)`
+3. Calculate available balance = current lamports - Solana rent exemption - compression cost
+
+### Rent sponsorship model
+
+The protocol funds the account's rent exemption through periodic prepayments. When creating a compressible account, you specify:
+- **rent_payment**: Number of epochs to prepay (must be at least 2, never 1)
+- **lamports_per_write**: Amount of lamports added to the account per write operation
+
+### Authority roles
+
+Three distinct authorities control different aspects of a compressible account:
+
+| Authority | Role | Capabilities |
+|-----------|------|--------------|
+| **Owner** | Controls account tokens/data | Can compress or close account at any time |
+| **Compression Authority** | Compress/ Decompress accounts and claim rent | Compress when account is compressible and claims rent for sponsor |
+| **Rent Sponsor** | Funds rent exemption | Receives rent payments and exemption refund on account closure; must sign rent top-up transactions |
+
+</Accordion>
+
+
+### Account Creation
+
+Creating a compressible cToken account (260 bytes) incurs these costs:
+
+<table>
+  <thead>
+    <tr>
+      <th style={{width: '25%', textAlign: 'left'}}>Component</th>
+      <th style={{width: '25%', textAlign: 'left'}}>Amount</th>
+      <th style={{width: '20%', textAlign: 'left'}}>Paid By</th>
+      <th style={{width: '30%', textAlign: 'left'}}>Purpose</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Solana rent exemption</td>
+      <td>~2,700,480 lamports</td>
+      <td>Rent sponsor PDA*</td>
+      <td>Solana's base account rent</td>
+    </tr>
+    <tr>
+      <td>Prepaid rent</td>
+      <td>388 × N epochs**</td>
+      <td>Payer</td>
+      <td>Rent for N epochs</td>
+    </tr>
+    <tr>
+      <td>Compression incentive</td>
+      <td>11,000 lamports</td>
+      <td>Payer</td>
+      <td>Reserved for future compression</td>
+    </tr>
+    <tr>
+      <td>Transaction fee</td>
+      <td>5,000-10,000 lamports</td>
+      <td>Payer</td>
+      <td>Standard Solana tx fees</td>
+    </tr>
+  </tbody>
+</table>
+
+\* The rent sponsor PDA is the default rent sponsor. You can use a custom fee payer. 
+
+\** `N` = `num_prepaid_epochs` parameter (0 or 2+, never 1).
+
+**Rent Calculation:**
+```
+rent_per_epoch = 128 + (260 × 1) = 388 lamports per epoch
+total_prepaid = 388 × num_prepaid_epochs
+```
+
+### Top-ups per Transaction
+
+When creating a compressible account, you can configure `lamports_per_write` to automatically add rent on each write ("Top-Up").
+This prevents accounts from becoming compressible, i.e. keeps them decompressed.
+
+1. The payer's cost depends on the account's funding state.
+2. The protocol calculates this automatically on each write operation based on the account's current rent balance.
+
+<table>
+  <thead>
+    <tr>
+      <th style={{width: '30%', textAlign: 'left'}}>Account State</th>
+      <th style={{width: '25%', textAlign: 'left'}}>Payer Cost</th>
+      <th style={{width: '45%', textAlign: 'left'}}>Example</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Funded for 2+ epochs</td>
+      <td>0 lamports</td>
+      <td>Account has sufficient rent, no top-up needed</td>
+    </tr>
+    <tr>
+      <td>Funded for less than 2 epochs</td>
+      <td>`lamports_per_write`</td>
+      <td>If configured as 5,000 lamports, payer pays exactly 5,000 lamports</td>
+    </tr>
+    <tr>
+      <td>Compressible<br />(ran out of rent)</td>
+      <td>`lamports_per_write + rent_deficit`</td>
+      <td>If configured top-up is 5,000 lamports but account is 3,000 short on rent, payer pays 8,000 lamports</td>
+    </tr>
+  </tbody>
+</table>
+
+<Note>
+Top-ups are additional costs to Solana's transaction cost and compression cost per transaction (typically &lt;10,000 lamports).
+</Note>
+
+### Account Closure
+
+**Owner-initiated closure:**
+- Solana rent exemption → returned to owner
+- Unused rent (partial epoch) → returned to owner
+- Completed epoch rent → rent sponsor
+
+**Rent authority closure** (when compressible):
+- All lamports → rent sponsor
+- Compression incentive (11,000) → forester
+
+
 
 ```rust
 /// Compressible extension for cToken accounts and SPL token accounts.
@@ -47,9 +281,8 @@ pub struct CompressionInfo {
     pub rent_config: RentConfig,
 }
 ```
-## Examples 
 
-#### Token Account with Compressible Extension
+## cToken Account with Compressible Extension
 
 ```rust expandable
 use light_ctoken_types::state::{
@@ -83,41 +316,9 @@ let token_account = CToken {
 };
 ```
 
-#### cToken Account with Compressible Extension
-
-```rust expandable
-use light_ctoken_types::state::{
-    ctoken::CToken,
-    extensions::{ExtensionStruct, CompressionInfo},
-    AccountState,
-};
-use light_compressible::rent::RentConfig;
-
-// Complete CToken account with Compressible extension
-let ctoken = CToken {
-    mint: mint_pubkey,
-    owner: owner_pubkey,
-    amount: 1000,                            
-    delegate: None,                          
-    state: AccountState::Initialized,        
-    is_native: None,                         
-    delegated_amount: 0,                     
-    close_authority: None,                   // No close authority set
-    extensions: Some(vec![
-        ExtensionStruct::Compressible(CompressionInfo {
-            config_account_version: 1,
-            compress_to_pubkey: 0,           
-            account_version: 3,              
-            lamports_per_write: 5000,
-            compression_authority: authority_pubkey.to_bytes(),
-            rent_sponsor: sponsor_pubkey.to_bytes(),
-            last_claimed_slot: current_slot,
-            rent_config: RentConfig::default(),
-        })
-    ]),
-};
-```
-
+<Note>
+For associated cToken accounts derive the address with [owner, compressed_token_program_id, mint](https://solscan.io/account/cTokenmWW8bLPjZEBAUgYy3zKxQZW6VKi7bqNFEVv3m).
+</Note>
 
 ## Next Steps
 

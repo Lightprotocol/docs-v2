@@ -32,7 +32,7 @@ The [Compressed Token Program](https://github.com/Lightprotocol/light-protocol/t
       <td style={{textAlign: 'left'}}>Solana account</td>
       <td style={{textAlign: 'left'}}>
         <ul>
-          <li>**SPL-compatible token accounts** (derived from cMints)</li>
+          <li>**Token accounts** derived from cMints (**SPL-compatible**)</li>
           <li>Optional **sponsored rent** exemption via [compressible extension](#compressible)</li>
           <li>Use for token accounts with **frequent writes** (trading, etc.)</li>
         </ul>
@@ -46,7 +46,7 @@ The [Compressed Token Program](https://github.com/Lightprotocol/light-protocol/t
           <li>**Compressed account** with `TokenData` field</li>
           <li>**Rent-free** and SPL-compatible</li>
           <li>Use for **token distribution** (airdrops, payments, etc.)</li>
-          <li>Solana accounts with the **[compressible extension](#compressible) are automatically compressed/decompressed** when active/inactive.</li>
+          <li>cToken accounts with the **[compressible extension](#compressible) are automatically compressed/decompressed** when active/inactive.</li>
         </ul>
       </td>
     </tr>
@@ -54,9 +54,7 @@ The [Compressed Token Program](https://github.com/Lightprotocol/light-protocol/t
 </table>
 
 <Tip>
-* **SPL mints and tokens** owned by the [Token Program](https://github.com/solana-program/token) or [Token-2022](https://github.com/solana-program/token-2022) **require rent** by default. 
-* Use the **[compressible extension](/compressible/compressible) for sponsored rent exemption**.
-* Solana accounts with the [compressible extension](/compressible/compressible) are automatically compressed with no writes in 6300 slots (1.75 hours), and decompressed with new writes.
+**SPL mints and tokens** owned by the [Token Program](https://github.com/solana-program/token) or [Token-2022](https://github.com/solana-program/token-2022) **require rent** by default. 
 </Tip>
 
 # cMint Accounts
@@ -165,7 +163,8 @@ A cToken account holds token balances like SPL Token accounts:
 * A cToken account can only have one owner and hold units of one cMint.
 
 <Tip>
-Use the **[compressible extension](/compressible/compressible) to optimize rent**. Accounts are automatically compressed when inactive and decompressed when active.
+* Use the **[compressible extension](/compressible/compressible) for sponsored rent exemption**.
+* cToken accounts with this extension are **automatically compressed** with no writes in 6300 slots (1.75 hours), **and decompressed** with new writes.
 </Tip>
 
 <Tabs>
@@ -296,7 +295,7 @@ Find the [source code to associated cToken accounts here](https://github.com/Lig
 </Info>
 
 <Tip>
-**Both SPL and cToken ATAs** can implement the **[compressible extension](/compressible/compressible) for sponsored rent exemption**.
+cToken ATAs can implement the **[compressible extension](/compressible/compressible) for sponsored rent exemption**.
 </Tip>
 
 # Compressed Token Account
@@ -309,7 +308,7 @@ Find the [source code to associated cToken accounts here](https://github.com/Lig
 Compressed token accounts store token balance, owner, and other information for SPL tokens and cTokens. Any cToken or SPL token can be compressed at will. 
 
 <Tip>
-**Solana accounts** with the **[compressible extension](/compressible/compressible) are automatically compressed** with no writes in 6300 slots (1.75 hours), and decompressed with new writes.
+**cToken accounts** with the **[compressible extension](/compressible/compressible) are automatically compressed** with no writes in 6300 slots (1.75 hours), and decompressed with new writes.
 </Tip>
 
 <Tabs>
