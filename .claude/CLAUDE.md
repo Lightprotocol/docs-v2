@@ -31,7 +31,7 @@ Rule #1: If you want an exception to ANY rule, YOU MUST STOP and get explicit pe
 ## Project context
 - Format: MDX files with YAML frontmatter
 - Config: docs.json for navigation, theme, settings
-  - See the docs.json schema: https://mintlify.com/docs.json
+  - See the [docs.json schema](https://mintlify.com/docs.json) when building the docs.json file and site navigation
 - Components reference:
     - Quick reference: mintlify-docs/quick-reference/
     - All components: mintlify-docs/docs/components/
@@ -55,6 +55,7 @@ Rule #1: If you want an exception to ANY rule, YOU MUST STOP and get explicit pe
 - description: Concise summary for SEO/navigation
 
 ## Writing standards
+- See [avoid.md](.claude/avoid.md) for do/don't patterns
 - Second-person voice ("you")
 - Prerequisites at start of procedural content
 - Test all code examples before publishing

@@ -30,11 +30,10 @@ description: The compressible extension sponsors rent-exemption for any type of 
 Compressible accounts maintain the **functionality of Solana accounts** but with **rent-exemption sponsorship**: 
 
 1. The protocol funds the account's rent exemption (rent sponsor) at creation.
-2. The account creator top-ups the lamport balance with rent for at least two epochs (6300 slots / 42 min)
-3. The transaction payer that writes to compressible accounts top-ups the lamports balance to keep the account decompressed.
-4. The account will be automatically compressed when inactive for a period of 6300 slots (42 min).
+2. The account creator top-ups the lamport balance with rent for at least two epochs (12,600 slots / 84 min)
+3. The transaction payer top-ups the lamports balance with transactions that write to compressible accounts to keep the account decompressed.
+4. The account will be compressed when inactive for a period of 12,600 slots (84 min).
 5. When the account is written to, it's automatically decompressed.
-
 
 ### Cost Comparison 
 This extension makes cToken accounts 200x cheaper than SPL token accounts
@@ -44,7 +43,7 @@ This extension makes cToken accounts 200x cheaper than SPL token accounts
     | allocate | 0.000011 | 0.002 |
     | rent for 24h | 0.000005 | - |
 
-## Core Concepts: Solana Rent vs Compressible Accounts
+<Accordion title="Core Concepts: Solana Rent vs Compressible Accounts">
 
 The **creator of Solana accounts** pays the **rent exemption balance equal to 2 years of rent**.
 The rent-exempt balance is proportional to account size (calculated in lamports):
@@ -52,7 +51,7 @@ The rent-exempt balance is proportional to account size (calculated in lamports)
 ``` rust
 minimum_balance = (ACCOUNT_STORAGE_OVERHEAD + data_len) * lamports_per_byte * exemption_threshold
 
-/// Example 100 byte account: 
+/// Example 100 byte account:
 /// minimum_balance = (128 + 100) * 6960 = 1,586,880 lamports
 ```
 <Note>
@@ -61,24 +60,27 @@ minimum_balance = (ACCOUNT_STORAGE_OVERHEAD + data_len) * lamports_per_byte * ex
 </Note>
 
 **Compressible accounts** build on top of Solana's rent system, but use epochs with a length of 6300 slots to calculate rent.
-The **creator pays** the account with **rent for at least two epochs**: 
+The **creator pays** the account with **rent for at least two epochs**:
 
 ``` rust
 rent_per_epoch = base_rent + (data_len * lamports_per_byte_per_epoch)
 /// Example 100 byte account:  128 + (100 * 1) = 228 rent per epoch
 ```
 
-## Create cToken Account with Compressible Extension
+</Accordion>
+
+## Create a cToken Account with Compressible Extension
 
 Here are the steps to create a compressible account:
 
-1. Set the initial lamports balance for N epoch (must be at least 2 epochs)
-   * The account stays decompressed for at least N epochs.
-   * The amount can be customized based on the expected activity of the account.
-   * The initial lamports balance is paid by the account creator.
-2. Set the top-up amount for writes when the account balance falls below the set lamports balance.
-   * This amount determines how much lamports are added when the account needs a top-up.
-   * Top-ups are made by the transaction fee payer when the account is written to and is below the set lamports balance.
+1. **Set the initial lamports balance** to N epochs (must be at least 2 epochs)
+   * Customize N **based on expected account activity**.
+   * The account stays decompressed for N epochs.
+
+   * Paid by the **account creator**.
+2. **Set the top-up amount** for writes when the account balance falls below the set lamports balance.
+   * Determines how much lamports are added when the account needs a top-up.
+   * Top-ups are made by the **transaction fee payer** when the account is written to and is below the set lamports balance.
 
 <Note>
 * Accounts become compressible when they advance two epochs without new transactions that add lamports.
