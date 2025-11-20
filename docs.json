@@ -12,14 +12,108 @@
     "default": "light"
   },
   "navigation": {
-    "pages": [
-      "intro-pages/landing",
-      "intro-pages/quickstart",
-      "intro-pages/support",
+    "tabs": [
       {
-        "group": "Compressed Tokens",
-        "pages": [
-          "compressed-tokens/overview",
+        "tab": "Docs",
+        "groups": [
+          {
+            "group": "Getting Started",
+            "pages": [
+              "intro-pages/landing",
+              "intro-pages/quickstart",
+              "intro-pages/support"
+            ]
+          },
+          {
+            "group": "Resources",
+            "pages": [
+              "resources/cli-installation",
+              {
+                "group": "Error Cheatsheet",
+                "pages": [
+                  "resources/error-cheatsheet",
+                  "resources/error-cheatsheet/debug-0x179b-6043-proofverificationfailed"
+                ]
+              },
+              {
+                "group": "JSON RPC Methods",
+                "pages": [
+                  "resources/json-rpc-methods",
+                  "resources/json-rpc-methods/getcompressedaccount",
+                  "resources/json-rpc-methods/getcompressedaccountsbyowner",
+                  "resources/json-rpc-methods/getcompressedbalancebyowner",
+                  "resources/json-rpc-methods/getcompressedbalance",
+                  "resources/json-rpc-methods/getcompressedminttokenholders",
+                  "resources/json-rpc-methods/getcompressedtokenaccountbalance",
+                  "resources/json-rpc-methods/getcompressedtokenaccountbydelegate",
+                  "resources/json-rpc-methods/getcompressedtokenaccountsbyowner",
+                  "resources/json-rpc-methods/getcompressedtokenbalancesbyowner",
+                  "resources/json-rpc-methods/getcompressionsignaturesforaccount",
+                  "resources/json-rpc-methods/getcompressionsignaturesforaddress",
+                  "resources/json-rpc-methods/getcompressionsignaturesforowner",
+                  "resources/json-rpc-methods/getcompressionsignaturesfortokenowner",
+                  "resources/json-rpc-methods/getindexerhealth",
+                  "resources/json-rpc-methods/getindexerslot",
+                  "resources/json-rpc-methods/getlatestcompressionsignatures",
+                  "resources/json-rpc-methods/getlatestnonvotingsignatures",
+                  "resources/json-rpc-methods/getmultiplecompressedaccounts",
+                  "resources/json-rpc-methods/getmultiplenewaddressproofs",
+                  "resources/json-rpc-methods/gettransactionwithcompressioninfo",
+                  "resources/json-rpc-methods/getvalidityproof"
+                ]
+              },
+              {
+                "group": "SDKs",
+                "pages": [
+                  "resources/sdks",
+                  "resources/sdks/client-development",
+                  "resources/sdks/program-development"
+                ]
+              },
+              "resources/addresses-and-urls"
+            ]
+          },
+          {
+            "group": "References",
+            "pages": [
+              "references/whitepaper",
+              "references/node-operators",
+              "references/terminology",
+              "references/security"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Learn",
+        "groups": [
+          {
+            "group": "Core Concepts",
+            "pages": [
+              "learn/core-concepts",
+              "learn/core-concepts/compressed-account-model",
+              "learn/core-concepts/merkle-trees-validity-proofs",
+              "learn/core-concepts/transaction-lifecycle",
+              "learn/core-concepts/considerations"
+            ]
+          },
+          {
+            "group": "Tools",
+            "pages": [
+              "learn/ai-tools-guide"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Compressed Tokens",
+        "groups": [
+          {
+            "group": "Overview",
+            "pages": [
+              "compressed-tokens/overview"
+            ]
+          },
           {
             "group": "Guides",
             "pages": [
@@ -51,9 +145,14 @@
         ]
       },
       {
-        "group": "Compressed PDAs",
-        "pages": [
-          "compressed-pdas/create-a-program-with-compressed-pdas",
+        "tab": "Compressed PDAs",
+        "groups": [
+          {
+            "group": "Overview",
+            "pages": [
+              "compressed-pdas/create-a-program-with-compressed-pdas"
+            ]
+          },
           {
             "group": "Guides",
             "pages": [
@@ -65,81 +164,31 @@
               "compressed-pdas/guides/how-to-burn-compressed-accounts"
             ]
           },
-          "compressed-pdas/program-examples"
+          {
+            "group": "Examples",
+            "pages": [
+              "compressed-pdas/program-examples"
+            ]
+          }
         ]
       },
       {
-        "group": "Learn",
-        "pages": [
+        "tab": "Extensions & C-Token",
+        "groups": [
           {
-            "group": "Core Concepts",
+            "group": "Extensions",
             "pages": [
-              "learn/core-concepts",
-              "learn/core-concepts/compressed-account-model",
-              "learn/core-concepts/merkle-trees-validity-proofs",
-              "learn/core-concepts/transaction-lifecycle",
-              "learn/core-concepts/considerations"
-            ]
-          },
-          "learn/ai-tools-guide"
-        ]
-      },
-      {
-        "group": "Resources",
-        "pages": [
-          "resources/cli-installation",
-          {
-            "group": "Error Cheatsheet",
-            "pages": [
-              "resources/error-cheatsheet",
-              "resources/error-cheatsheet/debug-0x179b-6043-proofverificationfailed"
+              "extensions/extensions",
+              "extensions/compressible",
+              "extensions/token-metadata"
             ]
           },
           {
-            "group": "JSON RPC Methods",
+            "group": "C-Token",
             "pages": [
-              "resources/json-rpc-methods",
-              "resources/json-rpc-methods/getcompressedaccount",
-              "resources/json-rpc-methods/getcompressedaccountsbyowner",
-              "resources/json-rpc-methods/getcompressedbalancebyowner",
-              "resources/json-rpc-methods/getcompressedbalance",
-              "resources/json-rpc-methods/getcompressedminttokenholders",
-              "resources/json-rpc-methods/getcompressedtokenaccountbalance",
-              "resources/json-rpc-methods/getcompressedtokenaccountbydelegate",
-              "resources/json-rpc-methods/getcompressedtokenaccountsbyowner",
-              "resources/json-rpc-methods/getcompressedtokenbalancesbyowner",
-              "resources/json-rpc-methods/getcompressionsignaturesforaccount",
-              "resources/json-rpc-methods/getcompressionsignaturesforaddress",
-              "resources/json-rpc-methods/getcompressionsignaturesforowner",
-              "resources/json-rpc-methods/getcompressionsignaturesfortokenowner",
-              "resources/json-rpc-methods/getindexerhealth",
-              "resources/json-rpc-methods/getindexerslot",
-              "resources/json-rpc-methods/getlatestcompressionsignatures",
-              "resources/json-rpc-methods/getlatestnonvotingsignatures",
-              "resources/json-rpc-methods/getmultiplecompressedaccounts",
-              "resources/json-rpc-methods/getmultiplenewaddressproofs",
-              "resources/json-rpc-methods/gettransactionwithcompressioninfo",
-              "resources/json-rpc-methods/getvalidityproof"
+              "ctoken/c-token-program"
             ]
-          },
-          {
-            "group": "SDKs",
-            "pages": [
-              "resources/sdks",
-              "resources/sdks/client-development",
-              "resources/sdks/program-development"
-            ]
-          },
-          "resources/addresses-and-urls"
-        ]
-      },
-      {
-        "group": "References",
-        "pages": [
-          "references/whitepaper",
-          "references/node-operators",
-          "references/terminology",
-          "references/security"
+          }
         ]
       }
     ],

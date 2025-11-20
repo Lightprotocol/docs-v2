@@ -1,0 +1,353 @@
+---
+title: Compressed Token Program
+sidebarTitle: Compressed Token Program
+description: Overview of cMints, cTokens, and compressed token accounts.
+---
+
+# Overview
+
+The [Compressed Token Program](https://github.com/Lightprotocol/light-protocol/tree/main/programs/compressed-token) extends existing Solana token standards and is **fully compatible with SPL mints and tokens**.
+
+<table>
+  <thead>
+    <tr>
+      <th style={{width: '15%', textAlign: 'left'}}></th>
+      <th style={{width: '22%', textAlign: 'left'}}>Account Type</th>
+      <th style={{width: '63%', textAlign: 'left'}}>Key Features</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style={{textAlign: 'left'}}>**[cMint](#cmint-accounts)**</td>
+      <td style={{textAlign: 'left'}}>Compressed account</td>
+      <td style={{textAlign: 'left'}}>
+        <ul>
+          <li>**Rent-free mint accounts** (similar to SPL mints)</li>
+          <li>Optional [Token Metadata](#token-metadata) **extension**</li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td style={{textAlign: 'left'}}>**[cToken](#ctoken-account)**</td>
+      <td style={{textAlign: 'left'}}>Solana account</td>
+      <td style={{textAlign: 'left'}}>
+        <ul>
+          <li>**Token accounts** derived from cMints (**SPL-compatible**)</li>
+          <li>Optional **sponsored rent** exemption via [compressible extension](#compressible) (200x cheaper than SPL tokens)</li>
+          <li>Use for token accounts with **frequent writes** (trading, etc.)</li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td style={{textAlign: 'left'}}>**[Compressed Token](#compressed-token-account)**</td>
+      <td style={{textAlign: 'left'}}>Compressed account</td>
+      <td style={{textAlign: 'left'}}>
+        <ul>
+          <li>**Compressed account** with `TokenData` field</li>
+          <li>**Rent-free** and SPL-compatible</li>
+          <li>Use for **token distribution** (airdrops, payments, etc.)</li>
+          <li>cToken accounts with the **[compressible extension](#compressible) are automatically compressed/decompressed** when active/inactive.</li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<Tip>
+**SPL mints and tokens** owned by the [Token Program](https://github.com/solana-program/token) or [Token-2022](https://github.com/solana-program/token-2022) **require rent** by default. 
+</Tip>
+
+# cMint Accounts
+
+<Note>
+* **cMints are compressed accounts** and **cannot be decompressed**. 
+* SPL mints can not be compressed to cMints. 
+</Note>
+
+cMints **store data and uniquely identify tokens**, similar to SPL mint accounts with two core differences:
+1. cMint accounts are **rent-free**.
+2. Tokens created from cMints are **cTokens** (fully compatible with SPL tokens).
+
+<Tip>
+[Token Metadata](compressible/token-metadata) can be added to cMints in the `extensions` field.
+</Tip>
+
+<Tabs>
+  <Tab title="Diagram">
+    <Frame>
+      <img
+        src="/images/token-explainer.png"
+        alt="Diagram showing cMint compressed account structure with three components: Hash (identifier for cMint in purple box), Account (struct containing BaseMint with SPL-compatible fields, cMint Data for program state, and optional Extensions for Token Metadata), and BasemintData (containing Supply, Decimals, Mint Authority, and Freeze Authority fields) with Token Metadata extension"
+      />
+    </Frame>
+  </Tab>
+  <Tab title="Source Code">
+    ```rust
+    pub struct CompressedMint {
+        // SPL mint layout
+        pub base: BaseMint,
+        // cMint state used by the Compressed Token Program
+        pub metadata: CompressedMintMetadata
+        // Field for Token Metadata extension
+        pub extensions: Option<Vec<ExtensionStruct>>,
+    }
+    ```
+  </Tab>
+</Tabs>
+
+<Info>
+Find the [source code of cMints here](https://github.com/Lightprotocol/light-protocol/blob/main/program-libs/ctoken-types/src/state/mint/compressed_mint.rs).
+</Info>
+
+The `metadata` field is used by the Compressed Token Program to store the internal state of a cMint.
+
+The `BaseMint` field replicates the field layout and serialization format of [SPL Mint accounts](https://solana.com/docs/tokens#mint-account). The struct is serialized with Borsh to match the on-chain format of SPL tokens and mints.
+
+Here is how cMints and SPL mints compare:
+<table>
+  <thead>
+    <tr>
+      <th style={{width: '10%', textAlign: 'left'}}>Field</th>
+      <th style={{width: '45%', textAlign: 'center'}}>cMint</th>
+      <th style={{width: '30%', textAlign: 'center'}}>SPL Mint</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>mint_authority</td>
+      <td style={{textAlign: 'center'}}>✓</td>
+      <td style={{textAlign: 'center'}}>✓</td>
+    </tr>
+    <tr>
+      <td>supply</td>
+      <td style={{textAlign: 'center'}}>✓</td>
+      <td style={{textAlign: 'center'}}>✓</td>
+    </tr>
+    <tr>
+      <td>decimals</td>
+      <td style={{textAlign: 'center'}}>✓</td>
+      <td style={{textAlign: 'center'}}>✓</td>
+    </tr>
+    <tr>
+      <td>is_initialized</td>
+      <td style={{textAlign: 'center'}}>✓</td>
+      <td style={{textAlign: 'center'}}>✓</td>
+    </tr>
+    <tr>
+      <td>freeze_authority</td>
+      <td style={{textAlign: 'center'}}>✓</td>
+      <td style={{textAlign: 'center'}}>✓</td>
+    </tr>
+    <tr>
+      <td>cMint Data</td>
+      <td style={{textAlign: 'center'}}>✓</td>
+      <td style={{textAlign: 'center'}}>-</td>
+    </tr>
+    <tr>
+      <td>Extensions</td>
+      <td style={{textAlign: 'center'}}>✓</td>
+      <td style={{textAlign: 'center'}}>via Token-2022</td>
+    </tr>
+  </tbody>
+</table>
+
+# cToken Account
+
+<Note>
+**cToken accounts are Solana accounts**, not compressed accounts.
+</Note>
+
+A cToken account holds token balances like SPL Token accounts:
+* A wallet needs a cToken account for each cMint it wants to hold, with the wallet address set as the cToken account owner.
+* Each wallet can own multiple cToken accounts for the same cMint.
+* A cToken account can only have one owner and hold units of one cMint.
+
+<Tip>
+* Use the **[compressible extension](/compressible/compressible) for sponsored rent exemption**.
+* cToken accounts with this extension are **automatically compressed** with no writes in 6300 slots (1.75 hours), **and decompressed** with new writes.
+</Tip>
+
+<Tabs>
+  <Tab title="Diagram">
+    <Frame>
+      <img
+        src="/images/ctoken-explainer.png"
+        alt="Diagram showing cToken Solana account structure with three components: Address (identifier for cToken account in purple box), Account (struct containing Data bytes, Executable flag, Lamports balance, and Owner set to Compressed Token Program), and AccountData (containing Mint, Owner, Amount, and Extensions fields)"
+      />
+    </Frame>
+  </Tab>
+  <Tab title="Source Code">
+    ```rust
+    /// Ctoken account structure (with extensions).
+    pub struct CToken {
+        pub mint: Pubkey,
+        pub owner: Pubkey,
+        pub amount: u64,
+        pub delegate: Option<Pubkey>, // instruction not implemented yet
+        pub state: u8,
+        pub is_native: Option<u64>,
+        pub delegated_amount: u64, // instruction not implemented yet
+        pub close_authority: Option<Pubkey>,
+        pub extensions: Option<Vec<ExtensionStruct>>, // Optional extensions e.g. compressible
+    }
+    ```
+  </Tab>
+</Tabs>
+
+<Info>
+Find the [source code of cToken here](https://github.com/Lightprotocol/light-protocol/blob/main/program-libs/ctoken-types/src/state/ctoken/ctoken.rs).
+</Info>
+
+cToken accounts replicate the field layout and serialization format of [SPL Token accounts](https://solana.com/docs/tokens#token-account). The struct is serialized with Borsh to match the on-chain format of SPL tokens.
+
+Here is how cTokens and SPL tokens compare:
+<table>
+  <thead>
+    <tr>
+      <th style={{width: '10%', textAlign: 'left'}}>Field</th>
+      <th style={{width: '45%', textAlign: 'center'}}>cToken</th>
+      <th style={{width: '30%', textAlign: 'center'}}>SPL Token Account</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>mint</td>
+      <td style={{textAlign: 'center'}}>✓</td>
+      <td style={{textAlign: 'center'}}>✓</td>
+    </tr>
+    <tr>
+      <td>owner</td>
+      <td style={{textAlign: 'center'}}>✓</td>
+      <td style={{textAlign: 'center'}}>✓</td>
+    </tr>
+    <tr>
+      <td>amount</td>
+      <td style={{textAlign: 'center'}}>✓</td>
+      <td style={{textAlign: 'center'}}>✓</td>
+    </tr>
+    <tr>
+      <td>delegate</td>
+      <td style={{textAlign: 'center'}}>unimplemented</td>
+      <td style={{textAlign: 'center'}}>✓</td>
+    </tr>
+    <tr>
+      <td>state</td>
+      <td style={{textAlign: 'center'}}>✓</td>
+      <td style={{textAlign: 'center'}}>✓</td>
+    </tr>
+    <tr>
+      <td>is_native</td>
+      <td style={{textAlign: 'center'}}>✓</td>
+      <td style={{textAlign: 'center'}}>✓</td>
+    </tr>
+    <tr>
+      <td>delegated_amount</td>
+      <td style={{textAlign: 'center'}}>unimplemented</td>
+      <td style={{textAlign: 'center'}}>✓</td>
+    </tr>
+    <tr>
+      <td>close_authority</td>
+      <td style={{textAlign: 'center'}}>✓</td>
+      <td style={{textAlign: 'center'}}>✓</td>
+    </tr>
+    <tr>
+      <td>extensions</td>
+      <td style={{textAlign: 'center'}}>✓</td>
+      <td style={{textAlign: 'center'}}>via Token-2022</td>
+    </tr>
+  </tbody>
+</table>
+
+# Associated cToken Account
+
+**Associated cToken** accounts follow the same pattern as [associated token accounts](https://docs.solana.com/developing/programming-model/associated-token-account) (ATA):
+* Each wallet needs its own cToken account to hold tokens from the same cMint.
+* It's derived from the owner's address and the cMint account's address.
+* The only **difference** in ATA derivation is the **program ID parameter**.
+
+<table>
+  <thead>
+    <tr>
+      <th style={{width: '10%', textAlign: 'left'}}>Parameter</th>
+      <th style={{width: '45%', textAlign: 'left'}}>cToken ATA</th>
+      <th style={{width: '30%', textAlign: 'left'}}>SPL ATA</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>owner</td>
+      <td colspan="2" style={{textAlign: 'center'}}>wallet address</td>
+    </tr>
+    <tr>
+      <td>program_id</td>
+      <td>COMPRESSED_TOKEN_PROGRAM_ID</td>
+      <td>SPL_TOKEN_PROGRAM_ID</td>
+    </tr>
+    <tr>
+      <td>mint</td>
+      <td colspan="2" style={{textAlign: 'center'}}>mint address</td>
+    </tr>
+  </tbody>
+</table>
+
+<Info>
+Find the [source code to associated cToken accounts here](https://github.com/Lightprotocol/light-protocol/blob/main/programs/compressed-token/program/src/create_associated_token_account.rs).
+</Info>
+
+<Tip>
+cToken ATAs can implement the **[compressible extension](/compressible/compressible) for sponsored rent exemption**.
+</Tip>
+
+# Compressed Token Account
+
+<Note>
+* Compressed token accounts are stored as `TokenData` in **compressed accounts**.
+* Leading **wallets** like Phantom and Backpack **support compressed tokens**. The UI does not distinguish between SPL and compressed tokens.
+</Note>
+
+Compressed token accounts store token balance, owner, and other information for SPL tokens and cTokens. Any cToken or SPL token can be compressed at will. 
+
+<Tip>
+**cToken accounts** with the **[compressible extension](/compressible/compressible) are automatically compressed** with no writes in 6300 slots (1.75 hours), and decompressed with new writes.
+</Tip>
+
+<Tabs>
+  <Tab title="Diagram">
+    <Frame>
+      <img
+        src="/images/compressed-token-explainer.png"
+        alt="Diagram showing compressed token account structure with three components: Hash (identifier for compressed token account in purple box), Account (struct containing Data bytes, Executable flag, Lamports balance, and Address set to None), and AccountData (containing Mint, Owner, Amount, and Extensions fields marked as unimplemented)"
+      />
+    </Frame>
+  </Tab>
+  <Tab title="Source Code">
+    ```rust
+    pub struct TokenData {
+        pub mint: Pubkey,
+        pub owner: Pubkey,
+        pub amount: u64,
+        pub delegate: Option<Pubkey>,
+        pub state: u8,
+        /// Placeholder for TokenExtension tlv data (unimplemented)
+        pub tlv: Option<Vec<u8>>,
+    }
+    ```
+  </Tab>
+</Tabs>
+
+<Info>
+* Compressed token accounts use the hash as identifier by default. Find the [source code here](https://github.com/Lightprotocol/light-protocol/blob/main/programs/compressed-token/program/src/compressed_token_account.rs).
+* Addresses are optional, since ensuring that the address of a new account is unique incurs additional computational overhead.
+* This is different from cToken and SPL token accounts, which use the address as unique identifier.
+</Info>
+
+# Next Steps
+
+<Card
+  title=" Learn how to create cMints"
+  icon="chevron-right"
+  color="#0066ff"
+  href="/compressible/mint-actions"
+  horizontal
+>
+</Card>
