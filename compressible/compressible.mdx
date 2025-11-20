@@ -177,7 +177,7 @@ The payer's cost depends on the account's funding state:
     <tr>
       <td>Funded for less than 2 epochs</td>
       <td>`lamports_per_write`</td>
-      <td>Configured as 5,000 lamports → payer pays 5,000 lamports</td>
+      <td>Configured as 5,000 lamports <br />→ payer pays 5,000 lamports</td>
     </tr>
     <tr>
       <td>Compressible<br />(ran out of rent)</td>
@@ -247,39 +247,3 @@ Compressible accounts can be closed by two parties. How rent and lamports balanc
   horizontal
 >
 </Card>
-
-
-***
-
-
-<Tabs>
-  <Tab title="Diagram">
-
-  </Tab>
-  <Tab title="Source Code">
-``` rust
-let token_account = CToken {
-    mint: mint_pubkey,
-    owner: owner_pubkey,
-    amount: 0,
-    delegate: None,
-    state: AccountState::Initialized,
-    is_native: None,
-    delegated_amount: 0,
-    close_authority: None,
-    extensions: Some(vec![
-        ExtensionStruct::Compressible(CompressionInfo {
-            config_account_version: 1,
-            compress_to_pubkey: 0,
-            account_version: 3,
-            lamports_per_write: 5000,        // Rent top-up per write
-            compression_authority: authority_pubkey.to_bytes(),
-            rent_sponsor: sponsor_pubkey.to_bytes(), //by default the protocol
-            last_claimed_slot: current_slot,
-            rent_config: RentConfig::default(),
-        })
-    ]),
-};
-```
-  </Tab>
-</Tabs>
