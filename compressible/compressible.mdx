@@ -19,7 +19,7 @@ description: The compressible extension sponsors rent-exemption for any type of 
       </td>
       <td style={{textAlign: 'left'}}>
         * **Sponsored rent-exemption**
-        * Compress accounts with no writes in 6300 slots (42 min), and decompresses when written to.
+        * 200x cheaper than SPL tokens
         * Must be **added at account creation**
       </td>
     </tr>
@@ -29,41 +29,25 @@ description: The compressible extension sponsors rent-exemption for any type of 
 ## Key Points
 Compressible accounts maintain the **functionality of Solana accounts** but with **rent-exemption sponsorship**: 
 
-1. Apps and developers can create cToken accounts without funding the rent-exemption balance.
-2. The protocol funds the account's rent exemption (rent sponsor) at creation.
-3. Transactions that write to compressible accounts fund the accounts rent for a specified number of epochs, instead of the full rent-exemption.
-4. The account will be automatically compressed when inactive over a period of 6300 slots (42 min).
+1. The protocol funds the account's rent exemption (rent sponsor) at creation.
+2. The account creator top-ups the lamport balance with rent for at least two epochs (6300 slots / 42 min)
+3. The transaction payer that writes to compressible accounts top-ups the lamports balance to keep the account decompressed.
+4. The account will be automatically compressed when inactive for a period of 6300 slots (42 min).
 5. When the account is written to, it's automatically decompressed.
 
-## Performance comparison
-This extension makes cToken accounts 
-* 200x cheaper than SPL token accounts
-* 70%+ more compute efficient (CU) than SPL on hot paths
 
-<Tabs>
-  <Tab title="Creation Cost in SOL">
+### Cost Comparison 
+This extension makes cToken accounts 200x cheaper than SPL token accounts
+
     |  | cToken | SPL |
     |-----------|--------|-----|
     | allocate | 0.000011 | 0.002 |
     | rent for 24h | 0.000005 | - |
-  </Tab>
 
-  <Tab title="Compute Unit Consumption">
-    |  | cToken (CU) | SPL (CU) |
-    |-----------|-------------|----------|
-    | transfer | 312 - 1,885 | ~4,000 |
-    | createAssociatedTokenAccount | ~4,300 | ~20,000 |
-  </Tab>
-</Tabs>
+## Core Concepts: Solana Rent vs Compressible Accounts
 
-<Tip>
-Learn the core concepts or [start building](#create-a-compressible-account).
-</Tip>
-
-<Accordion title="Core Concepts: Solana Rent vs Compressible Accounts">
-
-At creation, Solana accounts require an **upfront rent exemption balance** proportional to account size.
-The rent-exempt balance is calculated based on 2 years of rent (in lamports):
+The **creator of Solana accounts** pays the **rent exemption balance equal to 2 years of rent**.
+The rent-exempt balance is proportional to account size (calculated in lamports):
 
 ``` rust
 minimum_balance = (ACCOUNT_STORAGE_OVERHEAD + data_len) * lamports_per_byte * exemption_threshold
@@ -76,59 +60,55 @@ minimum_balance = (ACCOUNT_STORAGE_OVERHEAD + data_len) * lamports_per_byte * ex
 * The creator still must pay the rent-exemption balance.
 </Note>
 
-**Compressible accounts** build on top of Solana's rent system, but use epochs with a length of 6300 slots to calculate rent:
+**Compressible accounts** build on top of Solana's rent system, but use epochs with a length of 6300 slots to calculate rent.
+The **creator pays** the account with **rent for at least two epochs**: 
+
 ``` rust
 rent_per_epoch = base_rent + (data_len * lamports_per_byte_per_epoch)
 /// Example 100 byte account:  128 + (100 * 1) = 228 rent per epoch
 ```
-1. The **rent-exemption balance is sponsored by the protocol** to create the account
-2. The account requires a carry-balance to stay decompressed. If the balance falls below this threshold for two consecutive epochs, the account becomes compressible.
-  * You top up the initial carry-balance for N epochs at account creation. 
-  * The lamports amount can be customized based on the expected activity of the account, but must be at least 2 epochs.
-  * When the lamports balance drops below the carry-balance for two epochs, the transaction payer of transactions that write to the account top-ups the lamports balance with a specified amount.
-3. Accounts become compressible when they advance two epochs without new transactions that add lamports.
-4. A forester node compresses the account after these two epochs
-  * The protocol reclaims the rent-exemption balance.
-  * The left-over lamports balance is returned to the owner.
+
+## Create cToken Account with Compressible Extension
+
+Here are the steps to create a compressible account:
+
+1. Set the initial lamports balance for N epoch (must be at least 2 epochs)
+   * The account stays decompressed for at least N epochs.
+   * The amount can be customized based on the expected activity of the account.
+   * The initial lamports balance is paid by the account creator.
+2. Set the top-up amount for writes when the account balance falls below the set lamports balance.
+   * This amount determines how much lamports are added when the account needs a top-up.
+   * Top-ups are made by the transaction fee payer when the account is written to and is below the set lamports balance.
 
 <Note>
-Ideas for 2nd rent term:
-- carry 
-Meaning: “cost required to hold a position over time.” (finance)
-
-Strength: very short; signals “ongoing cost to maintain an open position.”
-
-Usage:
-
-“account carry”
-
-“carry balance”
-
-Bias: neutral-sophisticated.
-
----
-
-epoch carry
-- represents the cost to keep an account active for one epoch
-- similar to "carry" in financial markets
-- reflects the ongoing cost of maintaining the account's decompressed state
-
----
-
-top-up balance
-- basically prepaid -> cost to use a service
-- signals "advance payment for future usage"
+* Accounts become compressible when they advance two epochs without new transactions that add lamports.
+* A forester node compresses the account after these two epochs and the protocol can reclaim the rent.
 </Note>
 
-</Accordion>
+```rust 
+use light_token_client::actions::{
+    create_compressible_token_account,
+    CreateCompressibleTokenAccountInputs,
+};
+use light_ctoken_types::state::TokenDataVersion;
 
-<Accordion title="Fee Structure and Account Closure">
+let token_account_pubkey = create_compressible_token_account(
+    &mut rpc,
+    CreateCompressibleTokenAccountInputs {
+        owner: owner_pubkey,
+        mint: mint_pubkey,
+        payer: &payer_keypair,
+        num_prepaid_epochs: 10,  // 0 or ≥2
+        lamports_per_write: Some(5_000), // lamports added per top-up
+        token_account_version: TokenDataVersion::ShaFlat,
+        token_account_keypair: None,  // SDK generates keypair
+    }
+).await?;
+```
 
-Compressible accounts have two fee components:
-1. [Creation costs](#creation-cost) paid by the account creator
-2. [Top-up payments](#top-ups-per-transaction) paid by the transactions fee payer (when balance falls below threshold)
-
-When a compressed account is closed, the [rent authority can reclaim the rent](#account-closure).
+<Note>
+For associated cToken accounts derive the address with [owner, compressed_token_program_id, mint](https://solscan.io/account/cTokenmWW8bLPjZEBAUgYy3zKxQZW6VKi7bqNFEVv3m).
+</Note>
 
 ### Creation Cost
 
@@ -158,9 +138,9 @@ Creating a compressible cToken account (260 bytes) incurs these costs:
     </tr>
     <tr>
       <td>Compression incentive</td>
-      <td>11,000 lamports</td>
+      <td>10,000 lamports <br /> + 1,000 lamports</td>
       <td>Payer <br />(Account creator)</td>
-      <td>Reserved for future compression</td>
+      <td>Base compression cost<br />+ protocol incentive</td>
     </tr>
     <tr>
       <td>Transaction fee</td>
@@ -211,7 +191,7 @@ The payer's cost depends on the account's funding state:
 Top-ups are additional to standard Solana transaction fees (typically &lt;10,000 lamports).
 </Note>
 
-### Account Closure
+### Closing compressible accounts
 
 Compressible accounts can be closed by two parties. How rent and lamports balance are distributed depends on which party closes the account.
 
@@ -257,48 +237,27 @@ Compressible accounts can be closed by two parties. How rent and lamports balanc
   </tbody>
 </table>
 
-</Accordion>
-## Create a compressible account
+## Next Steps
 
-When creating a compressible account, you specify:
-- **rent_payment**: Number of epochs to prepay (must be at least 2)
-- **lamports_per_write**: Amount of lamports added to the account per write operation
-
-### Authority roles
-
-Three distinct authorities control different aspects of a compressible account:
-
-| Authority | Role | Capabilities |
-|-----------|------|--------------|
-| **Owner** | Controls account tokens/data | Can compress or close account at any time |
-| **Compression Authority** | Compress/ Decompress accounts and claim rent | Compress when account is compressible and claims rent for sponsor |
-| **Rent Sponsor** | Funds rent exemption | Receives rent payments and exemption refund on account closure; must sign rent top-up transactions |
+<Card
+  title=" Learn about all relevant actions to cMints"
+  icon="chevron-right"
+  color="#0066ff"
+  href="/compressible/mint-actions"
+  horizontal
+>
+</Card>
 
 
-```rust
-/// Compressible extension for cToken accounts and SPL token accounts.
-pub struct CompressionInfo {
-    pub config_account_version: u16,
-    pub compress_to_pubkey: u8,
-    pub account_version: u8,
-    pub lamports_per_write: u32,
-    pub compression_authority: [u8; 32],
-    pub rent_sponsor: [u8; 32],
-    pub last_claimed_slot: u64,
-    pub rent_config: RentConfig,
-}
-```
+***
 
-## cToken Account with Compressible Extension
 
-```rust expandable
-use light_ctoken_types::state::{
-    ctoken::CToken,
-    extensions::{ExtensionStruct, CompressionInfo},
-    AccountState,
-};
-use light_compressible::rent::RentConfig;
+<Tabs>
+  <Tab title="Diagram">
 
+  </Tab>
+  <Tab title="Source Code">
+``` rust
 let token_account = CToken {
     mint: mint_pubkey,
     owner: owner_pubkey,
@@ -311,29 +270,16 @@ let token_account = CToken {
     extensions: Some(vec![
         ExtensionStruct::Compressible(CompressionInfo {
             config_account_version: 1,
-            compress_to_pubkey: 0,           // Compress to owner (0) or pubkey (1)
-            account_version: 3,              // Hashing scheme version
+            compress_to_pubkey: 0,
+            account_version: 3,
             lamports_per_write: 5000,        // Rent top-up per write
             compression_authority: authority_pubkey.to_bytes(),
-            rent_sponsor: sponsor_pubkey.to_bytes(),
+            rent_sponsor: sponsor_pubkey.to_bytes(), //by default the protocol
             last_claimed_slot: current_slot,
             rent_config: RentConfig::default(),
         })
     ]),
 };
 ```
-
-<Note>
-For associated cToken accounts derive the address with [owner, compressed_token_program_id, mint](https://solscan.io/account/cTokenmWW8bLPjZEBAUgYy3zKxQZW6VKi7bqNFEVv3m).
-</Note>
-
-## Next Steps
-
-<Card
-  title=" Learn about all relevant actions to cMints"
-  icon="chevron-right"
-  color="#0066ff"
-  href="/compressible/mint-actions"
-  horizontal
->
-</Card>
+  </Tab>
+</Tabs>
