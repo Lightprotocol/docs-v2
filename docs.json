@@ -13,9 +13,9 @@
   },
   "navigation": {
     "pages": [
-      "index",
-      "quickstart",
-      "support",
+      "intro-pages/landing",
+      "intro-pages/quickstart",
+      "intro-pages/support",
       {
         "group": "Compressed Tokens",
         "pages": [
@@ -141,10 +141,6 @@
           "references/terminology",
           "references/security"
         ]
-      },
-      {
-        "group": "Links",
-        "pages": ["github", "discord", "deepwiki"]
       }
     ],
     "global": {
