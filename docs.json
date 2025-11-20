@@ -1,138 +1,196 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
-  "name": "Mint Starter Kit",
+  "name": "Lightprotocol",
   "colors": {
-    "primary": "#0066ff",
-    "light": "#3388ff",
-    "dark": "#0044cc"
+    "primary": "#0066FF",
+    "light": "#0066FF",
+    "dark": "#0066FF"
   },
   "favicon": "/favicon.png",
-  "customCSS": "/styles.css",
-  "telemetry": {
-    "enabled": true
+  "appearance": {
+    "default": "light"
   },
   "navigation": {
-    "tableOfContentsDepth": 2,
-    "tabs": [
+    "pages": [
+      "intro-pages/landing",
+      "intro-pages/quickstart",
+      "intro-pages/support",
       {
-        "tab": "Docs",
-        "groups": [
+        "group": "Compressed Tokens",
+        "pages": [
+          "compressed-tokens/overview",
           {
-            "group": "Getting started",
+            "group": "Guides",
             "pages": [
-              "c-token/ctoken-overview",
-              "c-token/typescript"
-            ]
-          }
-        ]
-      },
-      {
-        "tab": "Compressed PDAs",
-        "groups": [
-          {
-            "group": "Client Guides",
-            "pages": [
-              "client-library/README"
+              "compressed-tokens/guides",
+              "compressed-tokens/guides/how-to-create-compressed-token-accounts",
+              "compressed-tokens/guides/how-to-mint-compressed-tokens",
+              "compressed-tokens/guides/how-to-transfer-compressed-token",
+              "compressed-tokens/guides/how-to-compress-and-decompress-spl-tokens",
+              "compressed-tokens/guides/how-to-compress-complete-spl-token-accounts",
+              "compressed-tokens/guides/how-to-create-and-register-a-mint-account-for-compression",
+              "compressed-tokens/guides/how-to-create-compressed-token-pools-for-mint-accounts",
+              "compressed-tokens/guides/how-to-merge-compressed-token-accounts",
+              "compressed-tokens/guides/how-to-approve-and-revoke-delegate-authority"
             ]
           },
           {
-            "group": "API Reference",
+            "group": "Advanced Guides",
             "pages": [
-              {
-                "group": "Overview",
-                "pages": [
-                  "api-reference-overview",
-                  "stateless-js",
-                  "compressed-token",
-                  "light-client",
-                  "light-sdk",
-                  "light-program-test"
-                ]
-              }
+              "compressed-tokens/advanced-guides",
+              "compressed-tokens/advanced-guides/how-to-combine-operations-in-one-transaction",
+              "compressed-tokens/advanced-guides/create-an-airdrop",
+              "compressed-tokens/advanced-guides/create-an-airdrop-with-claim",
+              "compressed-tokens/advanced-guides/add-wallet-support-for-compressed-tokens",
+              "compressed-tokens/advanced-guides/use-token-2022-with-compression",
+              "compressed-tokens/advanced-guides/example-web-client",
+              "compressed-tokens/advanced-guides/example-node-js"
             ]
           }
         ]
       },
       {
-        "tab": "Compressed Token Program",
-        "groups": [
+        "group": "Compressed PDAs",
+        "pages": [
+          "compressed-pdas/create-a-program-with-compressed-pdas",
           {
-            "group": "Overview",
+            "group": "Guides",
             "pages": [
-              "compressible/README",
-              "compressible/extensions",
-              "compressible/token-metadata",
-              "compressible/compressible"
+              "compressed-pdas/guides",
+              "compressed-pdas/guides/how-to-create-compressed-accounts",
+              "compressed-pdas/guides/how-to-update-compressed-accounts",
+              "compressed-pdas/guides/how-to-close-compressed-accounts",
+              "compressed-pdas/guides/how-to-reinitialize-compressed-accounts",
+              "compressed-pdas/guides/how-to-burn-compressed-accounts"
             ]
-          }
+          },
+          "compressed-pdas/program-examples"
         ]
       },
       {
-        "tab": "Update Your Client",
-        "groups": [
+        "group": "Learn",
+        "pages": [
           {
-            "group": "Overview",
+            "group": "Core Concepts",
             "pages": [
-              "ctoken-overview",
-              "typescript"
+              "learn/core-concepts",
+              "learn/core-concepts/compressed-account-model",
+              "learn/core-concepts/merkle-trees-validity-proofs",
+              "learn/core-concepts/transaction-lifecycle",
+              "learn/core-concepts/considerations"
             ]
-          }
+          },
+          "learn/ai-tools-guide"
         ]
       },
       {
-        "tab": "API Reference",
-        "groups": [
+        "group": "Resources",
+        "pages": [
+          "resources/cli-installation",
           {
-            "group": "Overview",
+            "group": "Error Cheatsheet",
             "pages": [
-              "api-reference-overview"
+              "resources/error-cheatsheet",
+              "resources/error-cheatsheet/debug-0x179b-6043-proofverificationfailed"
             ]
-          }
+          },
+          {
+            "group": "JSON RPC Methods",
+            "pages": [
+              "resources/json-rpc-methods",
+              "resources/json-rpc-methods/getcompressedaccount",
+              "resources/json-rpc-methods/getcompressedaccountsbyowner",
+              "resources/json-rpc-methods/getcompressedbalancebyowner",
+              "resources/json-rpc-methods/getcompressedbalance",
+              "resources/json-rpc-methods/getcompressedminttokenholders",
+              "resources/json-rpc-methods/getcompressedtokenaccountbalance",
+              "resources/json-rpc-methods/getcompressedtokenaccountbydelegate",
+              "resources/json-rpc-methods/getcompressedtokenaccountsbyowner",
+              "resources/json-rpc-methods/getcompressedtokenbalancesbyowner",
+              "resources/json-rpc-methods/getcompressionsignaturesforaccount",
+              "resources/json-rpc-methods/getcompressionsignaturesforaddress",
+              "resources/json-rpc-methods/getcompressionsignaturesforowner",
+              "resources/json-rpc-methods/getcompressionsignaturesfortokenowner",
+              "resources/json-rpc-methods/getindexerhealth",
+              "resources/json-rpc-methods/getindexerslot",
+              "resources/json-rpc-methods/getlatestcompressionsignatures",
+              "resources/json-rpc-methods/getlatestnonvotingsignatures",
+              "resources/json-rpc-methods/getmultiplecompressedaccounts",
+              "resources/json-rpc-methods/getmultiplenewaddressproofs",
+              "resources/json-rpc-methods/gettransactionwithcompressioninfo",
+              "resources/json-rpc-methods/getvalidityproof"
+            ]
+          },
+          {
+            "group": "SDKs",
+            "pages": [
+              "resources/sdks",
+              "resources/sdks/client-development",
+              "resources/sdks/program-development"
+            ]
+          },
+          "resources/addresses-and-urls"
         ]
-      }
-    ]
-  },
-  "logo": {
-    "light": "/logo/light.jpg",
-    "dark": "/logo/dark.jpg"
-  },
-  "navbar": {
-    "links": [
+      },
       {
-        "label": "GitHub",
-        "href": "https://github.com/Lightprotocol/light-protocol"
+        "group": "References",
+        "pages": [
+          "references/whitepaper",
+          "references/node-operators",
+          "references/terminology",
+          "references/security"
+        ]
       }
     ],
+    "global": {
+      "anchors": [
+        {
+          "anchor": "Community",
+          "href": "https://discord.gg/rpddh53TeG",
+          "icon": "discord"
+        },
+        {
+          "anchor": "About Us",
+          "href": "https://lightprotocol.com/blog#",
+          "icon": "users"
+        }
+      ]
+    }
+  },
+  "logo": {
+    "light": "/logo/light.svg",
+    "dark": "/logo/dark.svg"
+  },
+  "navbar": {
     "primary": {
-      "type": "button",
-      "label": "Support",
-      "href": "https://t.me/swen_light"
+      "type": "github",
+      "href": "https://github.com/Lightprotocol/light-protocol"
     }
   },
   "contextual": {
     "options": [
-     "copy",
-     {
-       "title": "Open DeepWiki",
-       "description": "Ask Devin for help with debugging",
-       "icon": "/images/deepwiki-logo.svg",
-       "href": {
-         "base": "https://deepwiki.com/Lightprotocol/light-protocol",
-         "query": [{
-           "key": "context",
-           "value": "$page"
-         }]
-       }
-     },
-     "mcp",
-     "chatgpt",
-     "claude",
-     "perplexity",
-     "cursor",
-     "vscode",
-     "view"
-   ]
+      "copy",
+      {
+        "title": "Open DeepWiki",
+        "description": "Ask Devin for help with debugging",
+        "icon": "/images/deepwiki-logo.svg",
+        "href": {
+          "base": "https://deepwiki.com/Lightprotocol/light-protocol",
+          "query": [{
+            "key": "context",
+            "value": "$page"
+          }]
+        }
+      },
+      "mcp",
+      "chatgpt",
+      "claude",
+      "perplexity",
+      "cursor",
+      "vscode",
+      "view"
+    ]
   },
   "footer": {
     "socials": {
