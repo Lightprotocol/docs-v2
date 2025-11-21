@@ -3,7 +3,7 @@ title: "Lifecycle of a Transaction"
 description: "Overview to the lifecycle of a transaction that interacts with compressed accounts."
 ---
 
-## Overview
+# Overview
 
 <Info>
 This guide assumes you are familiar with transactions on Solana. If you aren't, we recommend to read the [Solana documentation on transactions](https://solana.com/docs/core/transactions).
@@ -17,7 +17,7 @@ There are few nuances to build transactions with compressed accounts as compared
 - To read or write to a compressed account, the instruction must send the current account state on-chain and prove its validity.
 - Each unique state tree that gets read or written to (via any compressed account) needs to be specified as per Solana's regular on-chain [account access lists](https://solana.com/docs/core/transactions#array-of-account-addresses).
 
-## Reading Compressed Accounts
+# Reading Compressed Accounts
 
 Reading compressed accounts follows a similar pattern to Solana accounts.
 
@@ -115,7 +115,7 @@ See this [read-only program example](https://github.com/Lightprotocol/program-ex
 </Tab>
 </Tabs>
 
-## Writing to Compressed Accounts
+# Writing to Compressed Accounts
 
 Writing to compressed accounts can be described more generally as:
 
@@ -145,7 +145,7 @@ See this [guide to update a compressed account](/compressed-pdas/guides/how-to-u
 </Frame>
 
 
-## On-chain Execution
+# On-chain Execution
 
 To write compressed state, a program invokes the Light System Program via CPI. The system program then does the following:
 
@@ -171,6 +171,13 @@ An RPC node then parses the transaction and compressed state and provides the re
 </Tab>
 </Tabs>
 
-## Next Steps
+# Next Steps
 
-Take the last step and understand what the trade-offs for compressed accounts are.
+<Card
+  title="Understand the trade-offs for compressed accounts."
+  icon="chevron-right"
+  color="#0066ff"
+  href="/learn/core-concepts/considerations"
+  horizontal
+>
+</Card>

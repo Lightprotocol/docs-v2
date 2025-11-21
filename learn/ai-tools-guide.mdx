@@ -3,13 +3,13 @@ title: "AI Tools Guide"
 description: "Guidance to AI tools when working with ZK Compression. Includes MCP server, DeepWiki, and AI Search guides."
 ---
 
-## For Docs
+# For Docs
 
 - **Docs AI Search** - Search documentation with AI in the search bar.
 - **llms.txt** - Site index for LLM navigation: [https://zkcompression.com/llms.txt](https://zkcompression.com/llms.txt).
 - **Markdown Export** - Append `.md` to any page URL for raw markdown.
 
-## **For Development**
+# **For Development**
 
 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5em' }}>
   <h3 style={{ margin: 0 }}>DeepWiki</h3>
@@ -18,10 +18,9 @@ description: "Guidance to AI tools when working with ZK Compression. Includes MC
   </a>
 </div>
 
-Use DeepWiki and its search capabilities (AskDevin) to query the Light Protocol repository in natural language.
-
-* DeepWiki generates systematic documentation.
-* Use AskDevin for help with _debugging and technical questions_:
+<Tip>
+Use DeepWiki and its search capabilities **(AskDevin) for help** with **debugging and technical questions**.
+</Tip>
 
 <Frame>
   <iframe
@@ -40,11 +39,11 @@ Use DeepWiki and its search capabilities (AskDevin) to query the Light Protocol 
 You can index and query any public GitHub repository with DeepWiki to produce wikis with architecture diagrams, source links, and codebase summaries.
 </Info>
 
-## MCP
+# MCP
 
 The Model Context Protocol (MCP) is an open standard to connect AI apps to data sources and tools. The DeepWiki MCP server provides access to the Light Protocol repository with its search capabilities (AskDevin).
 
-### Installation
+## Installation
 
 <Tabs>
 <Tab title="Claude Code">
@@ -53,9 +52,9 @@ The Model Context Protocol (MCP) is an open standard to connect AI apps to data 
 claude mcp add -s user -t http deepwiki https://mcp.deepwiki.com/mcp
 ```
 
-<Check>
-We recommend to create a command that includes the tools listed below. Simply copy paste this snippet.
-</Check>
+<Tip>
+**We recommend to create a command** that includes the tools listed below. <br /> Simply **copy paste this snippet**.
+</Tip>
 
 ```markdown expandable
 ---
@@ -144,9 +143,9 @@ Include `file:line` references from DeepWiki responses.
 </Tab>
 </Tabs>
 
-### Tools
+## MCP-Tools
 
-The MCP server offers three main tools:
+The MCP server offers three tools:
 
 - **read\_wiki\_structure** - Get a list of documentation topics for a GitHub repository
 
@@ -166,27 +165,27 @@ mcp__deepwiki__read_wiki_contents("Lightprotocol/light-protocol")
 mcp__deepwiki__ask_question("Lightprotocol/light-protocol", "your question")
 ```
 
-<Check>
+<Tip>
 You can specify any public GitHub repo that is indexed with DeepWiki. When you connect to the MCP, you specify the repository when calling the tools. Learn more [here](https://docs.devin.ai/work-with-devin/deepwiki-mcp).
-</Check>
+</Tip>
 
-## Next Steps
+# Next Steps
 
 Start testing your AI tools with compressed tokens or PDAs.
 
 <CardGroup>
 <Card
   horizontal
-  icon="server"
   title="Compressed Tokens"
+  icon="chevron-right"
+  color="#0066ff"
   href="/compressed-tokens/overview"
 />
 <Card
   horizontal
-  icon="database"
   title="Compressed PDAs"
+  icon="chevron-right"
+  color="#0066ff"
   href="/compressed-pdas/create-a-program-with-compressed-pdas"
 />
-
-
 </CardGroup>
