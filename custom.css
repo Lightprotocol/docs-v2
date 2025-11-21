@@ -1,0 +1,24 @@
+/* Hide default pagination footer */
+#pagination {
+  display: none;
+}
+
+.pagination-next,
+.pagination-prev,
+.pagination-title {
+  display: none;
+}
+
+/* Move global anchors to bottom of sidebar */
+#Sidebar {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+}
+
+.nav-anchors {
+  order: 999 !important;
+  margin-top: auto !important;
+  padding-top: 1rem !important;
+  border-top: 1px solid rgba(0, 0, 0, 0.1) !important;
+}

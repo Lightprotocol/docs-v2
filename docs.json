@@ -11,6 +11,7 @@
   "appearance": {
     "default": "light"
   },
+  "customCSS": "/custom.css",
   "navigation": {
     "tabs": [
       {
@@ -235,14 +236,14 @@
     "global": {
       "anchors": [
         {
-          "anchor": "Community",
-          "href": "https://discord.gg/rpddh53TeG",
-          "icon": "discord"
+          "anchor": "GitHub",
+          "href": "https://github.com/Lightprotocol/light-protocol",
+          "icon": "github"
         },
         {
-          "anchor": "About Us",
-          "href": "https://lightprotocol.com/blog#",
-          "icon": "users"
+          "anchor": "Discord",
+          "href": "https://discord.com/invite/CYvjBgzRFP",
+          "icon": "discord"
         }
       ]
     }
@@ -260,7 +261,7 @@
     ],
     "primary": {
       "type": "button",
-      "label": "Support",
+      "label": "Get Support on Discord",
       "href": "https://discord.gg/rpddh53TeG"
     }
   },

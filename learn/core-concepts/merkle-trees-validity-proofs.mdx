@@ -3,7 +3,7 @@ title: "Merkle trees and Validity Proofs"
 description: "Learn the core concepts of state trees, address trees, and validity proofs for compressed accounts."
 ---
 
-## Overview
+# Overview
 
 The protocol uses two types of Merkle trees that serve different purposes:
 
@@ -12,31 +12,38 @@ The protocol uses two types of Merkle trees that serve different purposes:
 
 The protocol maintains multiple Merkle trees to reduce write-lock contention. Solana's runtime locks accounts during writes, wherefore a single tree would become a bottleneck. Multiple trees allow parallel transactions.
 
-<Check>
-Developers don't need to maintain or initialize Merkle trees themselves.
-</Check>
+<Note>
+Developers don't need to maintain or initialize Merkle trees themselves. The protocol maintains [Merkle trees at these addresses](/resources/addresses-and-urls#state-trees-&-queues-&-cpi-accounts).
+</Note>
 
-## State trees
+# State trees
 
 A state tree is a binary Merkle tree that stores data of millions of compressed Solana accounts in leaves for efficient cryptographic verification the integrity of all leaves in a tree.
 
 <Steps>
-<Step title="Merkle Tree Structure">
+<Step>
+
+## Merkle Tree Structure
 
 A Merkle tree compresses data by hashing adjacent leaves repeatedly into a single root hash, starting from the lowest level. The hash of a compressed Solana account is stored as a leaf in a State tree.
 </Step>
 
-<Step title="Merkle Root Hash">
+<Step>
+
+## Merkle Root Hash
 
 Only this root hash is stored on chain as single value on chain to secure the integrity of all compressed state in a tree. The raw state can thus be stored as calldata in the much cheaper Solana ledger space while preserving Solana's security guarantees.
 
-<Frame caption="A Binary state Merkle tree, with depth 3 and proof path for Leaf 1. For ZK Compression, 'Light' state trees have a depth of 26, i.e. contain ~67 million leaves with compressed account hashes per tree.">
+<Frame caption="A Binary state Merkle tree, with depth 3 and proof path for Leaf 1.
+For ZK Compression, 'Light' state trees have a depth of 26, i.e. contain ~67 million leaves with compressed account hashes per tree.">
   <img src="https://content.gitbook.com/content/GcNj6jjKQBC0HgPwNdGy/blobs/yYZGfWfsZriTXPIN0bIt/state%20merkle%20tree.png" />
 </Frame>
 
 </Step>
 
-<Step title="Leaf Hash Structure: Compressed Account Hashes">
+<Step>
+
+## Leaf Hash Structure: Compressed Account Hashes
 
 For compressed Solana accounts, the 32 byte leaf hashes effectively mirror the regular Solana account layout: `{DataHash, StateHash; Owner, Lamports`.
 
@@ -49,23 +56,26 @@ The `state_hash` ensures that each account hash is globally unique. It includes
 
 Lastly, `owner_hashed` determines which program owns this account and `lamports` show the account balance.
 
-<Note>
+<Info>
 For [details on the compressed account structure see this section](/learn/core-concepts/compressed-account-model#compressed-account-structure).
-</Note>
+</Info>
 
 <Frame caption="Compressed Account Data Structure in Leaf of Merkle Tree.">
   <img src="https://content.gitbook.com/content/GcNj6jjKQBC0HgPwNdGy/blobs/PpPbEKFXwnxGN6Y9FrlU/leaf%20hash%20structure%20state%20tree.png" />
 </Frame>
 </Step>
 
-<Step title="Merkle and Validity Proofs">
+<Step>
+
+## Merkle and Validity Proofs
 
 In state trees, a <Tooltip tip="are succinct zero-knowledge proofs (ZKPs)">validity proof</Tooltip> verifies that a compressed account exists in state trees with a constant 128-byte proof size. This proof must be included in every transaction once a compressed account is created to verify the on-chain state.
 
-<Check>
-- Developers don't need to generate validity proofs or learn about ZK to use ZK Compression.
-- ZK Compression uses [Groth16](https://docs.rs/groth16-solana/latest/groth16_solana/), a well-known [pairing-based](https://en.wikipedia.org/wiki/Pairing-based_cryptography) [zk-SNARK](https://www.helius.dev/blog/zero-knowledge-proofs-its-applications-on-solana#-zk-snarks-and-circuits), for its proof system.
-</Check>
+<Note>
+Developers don't need to generate validity proofs or learn about ZK to use ZK Compression.
+
+ZK Compression uses [Groth16](https://docs.rs/groth16-solana/latest/groth16_solana/), a well-known [pairing-based](https://en.wikipedia.org/wiki/Pairing-based_cryptography) [zk-SNARK](https://www.helius.dev/blog/zero-knowledge-proofs-its-applications-on-solana#-zk-snarks-and-circuits), for its proof system.
+</Note>
 
 The validity proof contains one or more merkle proofs:
 
@@ -101,7 +111,7 @@ When using V2 trees, RPC requests automatically choose the proof mechanism.
 </Step>
 </Steps>
 
-## Address trees
+# Address trees
 
 Address trees store addresses that serve as optional, persistent identifiers for compressed accounts.
 
@@ -110,19 +120,25 @@ Every address is unique within its address tree, but the same seeds can create d
 </Info>
 
 <Steps>
-<Step title="Address Tree Structure">
+<Step>
+
+## Address Tree Structure
 
 Address trees store derived addresses in an indexed structure. Unlike state trees that store account hashes, address trees store the actual address values along with pointers to maintain sorted order.
 
 These addresses are used only when compressed accounts require a persistent identifier that doesn't change when the account data updates.
 </Step>
 
-<Step title="Address Tree Root Hash">
+<Step>
+
+## Address Tree Root Hash
 
 Like state trees, only the root hash is stored on-chain to verify all addresses in the tree. The raw addresses are stored in the Solana ledger.
 </Step>
 
-<Step title="Merkle and Validity Proofs">
+<Step>
+
+## Merkle and Validity Proofs
 
 In address trees, validity proofs verify when creating a compressed account with an address that the address doesn't already exist in a specified address tree. This constant 128-byte proof must be included in the transaction only when creating accounts with addresses, not for subsequent compressed account interactions.
 
@@ -139,7 +155,7 @@ When using V2 trees, RPC requests automatically choose the proof mechanism.
 </Step>
 </Steps>
 
-## Resources on ZK
+# Resources on ZK
 
 For those interested in learning more about the fundamentals of ZK and its applications on Solana, we recommend reading the following:
 
@@ -160,6 +176,13 @@ For those interested in learning more about the fundamentals of ZK and its appli
 
 </CardGroup>
 
-## Next Steps
+# Next Steps
 
-Learn about the lifecycle of a transaction that interacts with compressed accounts.
+<Card
+  title="Learn about the lifecycle of a transaction with compressed accounts."
+  icon="chevron-right"
+  color="#0066ff"
+  href="/learn/core-concepts/transaction-lifecycle"
+  horizontal
+>
+</Card>

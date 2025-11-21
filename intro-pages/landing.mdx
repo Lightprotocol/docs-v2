@@ -30,7 +30,6 @@ ZK Compression is a Solana account primitive that lets you create tokens and PDA
   </Card>
 </CardGroup>
 
-
 ### Start Building
 
 <CardGroup cols={3}>
@@ -63,10 +62,14 @@ ZK Compression is a framework that reduces the storage cost of Solana accounts b
 
 <Steps>
   <Step title="State Compression">
-    Instead of storing account data in millions of on-chain accounts, state compression stores account data on the <Tooltip tip="The ledger is an immutable historical record of all Solana transactions signed by clients since the genesis block.">Solana ledger</Tooltip> with cryptographic security. Only a small fingerprint is stored on-chain. This fingerprint allows transactions to use the account data inside Solana's virtual machine as if it were stored on-chain.
+    * Normally data is stored in millions of on-chain accounts
+    * State compression stores account data on the <Tooltip tip="The ledger is an immutable historical record of all Solana transactions signed by clients since the genesis block.">Solana ledger</Tooltip>.
+    * Only a fingerprint is stored on-chain for cryptographic security - a hash of all compressed accounts. 
+    * This hash allows transactions to use the account data inside Solana's virtual machine as if it were stored on-chain.
   </Step>
   <Step title="ZK">
-    The protocol uses small zero-knowledge proofs (validity proofs) to verify the integrity of the compressed accounts. By default, this is all done under the hood. You can fetch validity proofs from RPC providers that support ZK Compression.
+    * The protocol uses small zero-knowledge proofs (validity proofs) to verify the integrity of the compressed accounts. 
+    * By default, this is all done under the hood. You can fetch validity proofs from RPC providers that support ZK Compression.
   </Step>
 </Steps>
 
@@ -94,7 +97,7 @@ Integrate ZK Compression in your existing AI workflow by following the steps bel
   <Card
     title="RPC Methods"
     href="/resources/json-rpc-methods"
-    icon="router"
+    icon="tower-broadcast"
     iconType="solid"
   >
     Browse ZK Compression's JSON RPC methods.
@@ -144,3 +147,14 @@ Integrate ZK Compression in your existing AI workflow by following the steps bel
     Join our Discord for support and discussions.
   </Card>
 </CardGroup>
+
+# Next Steps
+
+<Card
+  title="Create compressed tokens in under 5 minutes with our Quickstart guide"
+  icon="chevron-right"
+  color="#0066ff"
+  href="/intro-pages/quickstart"
+  horizontal
+>
+</Card>
