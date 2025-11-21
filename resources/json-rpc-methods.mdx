@@ -4,10 +4,6 @@ description: Overview of all available ZK compression JSON RPC endpoints on Sola
 sidebarTitle: "Overview"
 ---
 
-<Info>
-[Helius Labs](https://github.com/helius-labs) maintains the canonical RPC API and [Photon indexer implementation](https://github.com/helius-labs/photon).
-</Info>
-
 Interact with compressed accounts directly with the ZK Compression JSON RPC API. It's a thin wrapper extending [Solana's web3.js `Connection` class](https://solana-labs.github.io/solana-web3.js/classes/Connection.html) with compression-related endpoints.
 
 The API exposed by the indexer closely mirrors existing RPC calls, with one-to-one mapping:
@@ -19,19 +15,11 @@ The API exposed by the indexer closely mirrors existing RPC calls, with one-to-o
 | getTokenAccountsByOwner | getCompressedTokenAccountsByOwner |
 | getProgramAccounts      | getCompressedAccountsByOwner      |
 
-### Creating an RPC Connection
+<Info>
+[Helius Labs](https://github.com/helius-labs) maintains the canonical RPC API and [Photon indexer implementation](https://github.com/helius-labs/photon).
+</Info>
 
-
-<Check>
-<div style={{display: "flex", alignItems: "center", padding: 0, margin: 0}}>
-  <span style={{margin: 0, padding: 0, marginLeft: "8px"}}>Ask anything about the ZK Compression RPC API via</span>
-  <a href="https://deepwiki.com/Lightprotocol/light-protocol/3.3-rpc-and-indexer-integration" style={{padding: 0, margin: 0, display: "inline-block"}}>
-    <img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki" style={{padding:0, margin:0, verticalAlign: "middle"}} />
-  </a>
-</div>
-</Check>
-
-Connect to a specific RPC endpoint
+## Create an RPC Connection
 
 <Tabs>
 <Tab title="Mainnet">
@@ -69,7 +57,7 @@ console.log("connection", connection);
 </Tab>
 </Tabs>
 
-#### Best Practices
+## Best Practices
 
 | Best Practice         | Description                                                                                                    |
 |:----------------------|:----------------------------------------------------------------------------------------------------------------|
@@ -78,7 +66,16 @@ console.log("connection", connection);
 | **Batch Requests**   | Use batch requests when possible to improve efficiency and reduce API calls                                     |
 | **Caching**          | Cache frequently accessed data to reduce API calls and improve performance                                      |
 
-#### Error Codes
+## Error Codes
+
+<Tip>
+<div style={{display: "flex", alignItems: "center", padding: 0, margin: 0}}>
+  <span style={{margin: 0, padding: 0, marginLeft: "8px"}}>For help with debugging use</span>
+  <a href="https://deepwiki.com/Lightprotocol/light-protocol/3.3-rpc-and-indexer-integration" style={{padding: 0, margin: 0, display: "inline-block"}}>
+    <img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki" style={{padding:0, margin:0, verticalAlign: "middle"}} />
+  </a>
+</div>
+</Tip>
 
 | Code   | Message              | Description                                  |
 | :------ | :-------------------- | :-------------------------------------------- |
@@ -89,7 +86,7 @@ console.log("connection", connection);
 | -32000 | Account not found    | The compressed account was not found         |
 | -32001 | Invalid account hash | The provided account hash is invalid         |
 
-### Mainnet ZK Compression JSON RPC Methods
+## Mainnet ZK Compression JSON RPC Methods
 
 <CardGroup>
   <Card

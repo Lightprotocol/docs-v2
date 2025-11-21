@@ -3,6 +3,8 @@ title: Create a Program with Compressed PDAs
 description: Overview to compressed PDA core features and guide for program development
 ---
 
+import ProgramExamplesTable from '/snippets/program-examples-table.mdx';
+
 Compressed PDAs provide full functionality of accounts at PDAs, without per-account rent cost.
 
 | Creation      | Regular PDA Account    | Compressed PDA         | Cost Reduction     |
@@ -191,17 +193,8 @@ Caused by:
 </Accordion>
 
 ## Program Examples
-| Example | Description |
-|:---------|:------------|
-| [basic-operations/anchor](https://github.com/Lightprotocol/program-examples/tree/main/basic-operations/anchor) | Anchor programs to create, update, close, reinitialize and burn compressed accounts with Rust and TypeScript tests |
-| [basic-operations/native-rust](https://github.com/Lightprotocol/program-examples/tree/main/basic-operations/native-rust) | Native Solana program implementation to create, update, close, reinitialize and burn compressed accounts with Rust tests |
-| [Counter (Anchor)](https://github.com/Lightprotocol/program-examples/tree/main/counter/anchor) | Full compressed account lifecycle (create, increment, decrement, reset, close) using Anchor framework |
-| [Counter (Native)](https://github.com/Lightprotocol/program-examples/tree/main/counter/native) | Native Solana program implementation with Rust tests |
-| [Counter (Pinocchio)](https://github.com/Lightprotocol/program-examples/tree/main/counter/pinocchio) | Pinocchio implementation using light-sdk-pinocchio with Rust tests |
-| [Create-and-Update](https://github.com/Lightprotocol/program-examples/tree/main/create-and-update) | Create new compressed accounts and update existing ones within a single instruction and one validity proof |
-| [Read-Only](https://github.com/Lightprotocol/program-examples/tree/main/read-only) | Create compressed accounts and read them on-chain |
-| [Account Comparison](https://github.com/Lightprotocol/program-examples/tree/main/account-comparison) | Compare compressed accounts with standard Solana accounts |
-| [ZK-ID](https://github.com/Lightprotocol/program-examples/tree/main/zk-id) | Program that uses zero-knowledge proofs for identity verification with compressed accounts |
+
+<ProgramExamplesTable />
 
 
 ## Next Steps

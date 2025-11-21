@@ -15,7 +15,7 @@ Closing a compressed account
 Find [full code examples at the end](/compressed-pdas/guides/how-to-close-compressed-accounts#full-code-example) for Anchor and native Rust.
 </Check>
 
-## Implementation Guide
+# Implementation Guide
 
 This guide will cover the components of a Solana program that closes compressed accounts.
 Here is the complete flow to close compressed accounts:
@@ -32,7 +32,9 @@ Here is the complete flow to close compressed accounts:
 </div>
 
 <Steps>
-<Step title="Program Setup">
+<Step>
+
+### Program Setup
 
 <Accordion title="Dependencies, Constants, Compressed Account">
 
@@ -93,7 +95,9 @@ The traits listed above are required for `LightAccount`. `LightAccount` wraps `M
 </Accordion>
 </Step>
 
-<Step title="Instruction Data">
+<Step>
+
+### Instruction Data
 
 Define the instruction data with the following parameters:
 
@@ -142,7 +146,9 @@ Clients fetch the current account with `getCompressedAccount()` and populate `Co
 * This depends on your program logic. This example includes the `current_message` field.
 </Step>
 
-<Step title="Close Compressed Account">
+<Step>
+
+### Close Compressed Account
 
 Load the compressed account and mark it as closed with `LightAccount::new_close()`.
 
@@ -202,7 +208,9 @@ let my_compressed_account = LightAccount::<MyCompressedAccount>::new_close(
 </Info>
 </Step>
 
-<Step title="Light System Program CPI">
+<Step>
+
+### Light System Program CPI
 
 Invoke the Light System Program to close the compressed account. This empty account can be reinitialized with `LightAccount::new_empty()`.
 
@@ -289,7 +297,7 @@ LightSystemProgramCpi::new_cpi(LIGHT_CPI_SIGNER, instruction_data.proof)
 </Step>
 </Steps>
 
-## Full Code Example
+# Full Code Example
 
 The example programs below implement all steps from this guide. Make sure you have your [developer environment](https://www.zkcompression.com/compressed-pdas/create-a-program-with-compressed-pdas#start-building) set up first, or simply run:
 
@@ -577,6 +585,21 @@ fn close(accounts: &[AccountInfo], instruction_data: &[u8]) -> Result<(), LightS
 </Tab>
 </Tabs>
 
-## Next Steps
+# Next Steps
 
-Build a client for your program or learn how to reinitialize compressed accounts.
+<CardGroup>
+<Card
+  title="Build a client for your program"
+  icon="chevron-right"
+  color="#0066ff"
+  href="/compressed-pdas/client-library"
+  horizontal
+/>
+<Card
+  title="Learn how to reinitialize compressed accounts"
+  icon="chevron-right"
+  color="#0066ff"
+  href="/compressed-pdas/guides/how-to-reinitialize-compressed-accounts"
+  horizontal
+/>
+</CardGroup>

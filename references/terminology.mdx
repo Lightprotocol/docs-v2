@@ -341,15 +341,13 @@ Two state tree versions with different proof mechanisms are currently supported:
 
 A process to lower the amount of data stored on chain using Merkle trees.
 
-The process of state compression involves the following steps
+The process of state compression involves the following steps:
 
-<Steps>
-<Step title="millions of accounts are compressed into a 'fingerprint' - the Merkle tree root hash"/>
-<Step title="this 'fingerprint' is stored in one Solana account"/>
-<Step title="the account history is stored on the Solana ledger"/>
-<Step title="the latest compressed data is fetched from an indexer"/>
-<Step title="to verify the data, recompute the hashes and compare the final hash to the on chain root hash."/>
-</Steps>
+1. Millions of accounts are compressed into a 'fingerprint' - the Merkle tree root hash
+2. This 'fingerprint' is stored in one Solana account
+3. The account history is stored on the Solana ledger
+4. The latest compressed data is fetched from an indexer
+5. To verify the data, recompute the hashes and compare the final hash to the on chain root hash
 
 <Info>
 Learn more [on generalized state compression here](https://solana.com/developers/courses/state-compression/generalized-state-compression).

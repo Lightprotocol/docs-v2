@@ -129,7 +129,6 @@
               {
                 "group": "SDKs",
                 "pages": [
-                  "resources/sdks",
                   "resources/sdks/client-development",
                   "resources/sdks/program-development"
                 ]
