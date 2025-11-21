@@ -1,15 +1,12 @@
 ---
 title: Compress and Decompress SPL Tokens
-description: "Complete guide to compress SPL tokens with compress() and decompress with decompress(), troubleshooting and advanced configurations."
+description: "Guide to compress and decompress SPL tokens, troubleshooting and advanced configurations."
 ---
 
+import InstallDependencies from '/snippets/install-dependencies-codegroup.mdx';
+import SetupEnvironment from '/snippets/setup-environment-tabs.mdx';
+
 The `compress()` and `decompress()` functions convert SPL tokens between compressed and regular format.
-
-Before we convert formats, we need:
-
-* An SPL mint with a token pool for compression. This token pool can be created for new SPL mints via [`createMint()`](/compressed-tokens/guides/how-to-create-and-register-a-mint-account-for-compression) or added to existing SPL mints via [`createTokenPool()`](/compressed-tokens/guides/how-to-create-compressed-token-pools-for-mint-accounts).
-* For `compress()` SPL tokens in an Associated Token Account, or
-* For `decompress()` compressed token accounts with sufficient balance.
 
 <CodeGroup>
 ```typescript compress()
@@ -38,17 +35,18 @@ const transactionSignature = await decompress(
 ```
 </CodeGroup>
 
-<Check>
+<Note>
 **Function Difference and Best Practice:**
 
 * `compress(amount, sourceTokenAccount, toAddress)` compresses specific amounts from source to a specified recipient. Use for transfers and precise amounts.
 * `compressSplTokenAccount(tokenAccount, remainingAmount)` compresses the entire SPL token account balance minus optional remaining amount only to the same owner. Use to migrate complete token accounts with optional partial retention. [Here is how](/compressed-tokens/guides/how-to-compress-complete-spl-token-accounts).
-</Check>
+</Note>
 
-## Full Code Example
+# Full Code Example
 
 <Steps>
-<Step title="Prerequisites">
+<Step>
+### Prerequisites
 
 Make sure you have dependencies and developer environment set up!
 
@@ -56,98 +54,28 @@ Make sure you have dependencies and developer environment set up!
 
 **Dependencies**
 
-```bash
-npm install --save-dev typescript tsx @types/node && \
-npm install --save \
-    @lightprotocol/stateless.js \
-    @lightprotocol/compressed-token \
-    @solana/web3.js \
-    @solana/spl-token
-```
+<InstallDependencies />
 
-**Alternatives:**
+**Developer Environment**
 
-```bash
-yarn add --dev typescript tsx @types/node && \
-yarn add \
-    @lightprotocol/stateless.js \
-    @lightprotocol/compressed-token \
-    @solana/web3.js \
-    @solana/spl-token
-```
-
-```bash
-pnpm add --save-dev typescript tsx @types/node && \
-pnpm add \
-    @lightprotocol/stateless.js \
-    @lightprotocol/compressed-token \
-    @solana/web3.js \
-    @solana/spl-token
-```
-
-#### Developer Environment
-
-By default, this guide uses Localnet.
-
-```bash
-# Install the development CLI
-npm install @lightprotocol/zk-compression-cli
-```
-
-```bash
-# Start a local test validator
-light test-validator
-
-## ensure you have the Solana CLI accessible in your system PATH
-```
-
-```typescript
-// createRpc() defaults to local test validator endpoints
-import {
-  Rpc,
-  createRpc,
-} from "@lightprotocol/stateless.js";
-
-const connection: Rpc = createRpc();
-
-async function main() {
-  let slot = await connection.getSlot();
-  console.log(slot);
-
-  let health = await connection.getIndexerHealth(slot);
-  console.log(health);
-  // "Ok"
-}
-
-main();
-```
-
-**Alternative: Using Devnet**
-
-Follow these steps to create an RPC Connection. Replace `<your_api_key>` with your API key before running.
-
-<Info>
-[Get your API key here](https://www.helius.dev/zk-compression), if you don't have one yet.
-</Info>
-
-```typescript
-import { createRpc } from "@lightprotocol/stateless.js";
-
-// Helius exposes Solana and Photon RPC endpoints through a single URL
-const RPC_ENDPOINT = "https://devnet.helius-rpc.com?api-key=<your_api_key>";
-const connection = createRpc(RPC_ENDPOINT, RPC_ENDPOINT, RPC_ENDPOINT);
-
-console.log("Connection created!");
-console.log("RPC Endpoint:", RPC_ENDPOINT);
-```
-
+<SetupEnvironment />
 </Accordion>
 </Step>
-<Step title="Compress / Decompress Tokens">
+
+<Step>
+### Compress / Decompress Tokens
+
+Run this script to compress / decompress tokens!
+
+<Info>
+Before we can compress or decompresss, we need:
+
+* An SPL mint with a token pool for compression. This token pool can be created for new SPL mints via [`createMint()`](/compressed-tokens/guides/how-to-create-and-register-a-mint-account-for-compression) or added to existing SPL mints via [`createTokenPool()`](/compressed-tokens/guides/how-to-create-compressed-token-pools-for-mint-accounts).
+* For `compress()` SPL tokens in an Associated Token Account, or
+* For `decompress()` compressed token accounts with sufficient balance.
+</Info>
 <Tabs>
 <Tab title="Compress Tokens">
-Compress SPL tokens to compressed format.
-
 ```typescript compress-tokens.ts highlight={44-54} expandable
 // 1. Setup funded payer and connect to local validator
 // 2. Create SPL mint with token pool and mint SPL tokens to ATA
@@ -357,7 +285,7 @@ compressAndDecompressTokens().catch(console.error);
 </Step>
 </Steps>
 
-### Troubleshooting
+# Troubleshooting
 
 <AccordionGroup>
 <Accordion title="Insufficient balance between decompress and compress">
@@ -414,7 +342,7 @@ const compressTx = await compress(
 </Accordion>
 </AccordionGroup>
 
-### Advanced Configurations
+# Advanced Configuration
 
 <AccordionGroup>
 <Accordion title="Compress to Different Owner">
@@ -492,6 +420,12 @@ await decompressDelegated(
 </Accordion>
 </AccordionGroup>
 
-## Next Steps
+# Next Steps
 
-Learn how to compress complete token accounts in one transaction and reclaim rent afterwards.
+<Card
+  title="Learn how to compress complete token accounts to reclaim rent afterwards."
+  icon="chevron-right"
+  color="#0066ff"
+  href="/compressed-tokens/guides/how-to-compress-complete-spl-token-accounts"
+  horizontal
+/>

@@ -7,19 +7,19 @@ description: "Overview to ZK Compression's Core Concepts. Get a high-level syste
 <Steps>
 <Step>
 
-## Storage of Compressed State
+### Storage of Compressed State
 
 Compressed accounts store state as call data on <Tooltip tip="The ledger is an immutable historical record of all Solana transactions signed by clients since the genesis block.">Solana's ledger</Tooltip>, removing rent per account.
 </Step>
 <Step>
 
-## Accessing Compressed State
+### Accessing Compressed State
 
 Transactions specify state they access (read/write) and include it in the transaction payload.
 </Step>
 <Step>
 
-## State Validation
+### State Validation
 
 Solana Programs <Tooltip tip="A Cross Program Invocation (CPI) refers to when one program invokes the instructions of another program. This allows for the composability of Solana programs. Learn more about CPIs" cta="here" href="https://solana.com/docs/core/cpi">invoke</Tooltip> the <Tooltip tip="The system program enforces the compressed account layout with ownership and sum checks and verifies the validity of your input state. It is also invoked to create/write to compressed accounts and PDAs. See the program address here.">Light System Program</Tooltip> to update compressed state
 
@@ -29,20 +29,20 @@ Solana Programs <Tooltip tip="A Cross Program Invocation (CPI) refers to when on
 </Step>
 <Step>
 
-## State Updates
+### State Updates
 
 The new state is recorded as a log on the Solana ledger with each transaction.
 </Step>
 <Step>
 
-## Photon RPC Nodes
+### Photon RPC Nodes
 
 <Tooltip tip="RPC nodes index the Light Protocol programs. This allows clients to read and build transactions to interact with compressed state.The canonical ZK Compression indexer is named Photon, built by Helius Labs. See the Github repo for more info." cta="repo" href="https://github.com/helius-labs/photon">Photon RPC nodes</Tooltip> index the state changes, making the compressed account state available to clients via the ZK Compression RPC API.
 
 </Step>
 <Step>
 
-## Forester Nodes
+### Forester Nodes
 
 Keeper nodes that interact with the <Tooltip tip="Updates state and address trees. It is used by the Light System program.">Account Compression Program</Tooltip> to empty queues and rollover state trees.
 

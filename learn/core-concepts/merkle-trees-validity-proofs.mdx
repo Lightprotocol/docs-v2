@@ -23,14 +23,14 @@ A state tree is a binary Merkle tree that stores data of millions of compressed 
 <Steps>
 <Step>
 
-## Merkle Tree Structure
+### Merkle Tree Structure
 
 A Merkle tree compresses data by hashing adjacent leaves repeatedly into a single root hash, starting from the lowest level. The hash of a compressed Solana account is stored as a leaf in a State tree.
 </Step>
 
 <Step>
 
-## Merkle Root Hash
+### Merkle Root Hash
 
 Only this root hash is stored on chain as single value on chain to secure the integrity of all compressed state in a tree. The raw state can thus be stored as calldata in the much cheaper Solana ledger space while preserving Solana's security guarantees.
 
@@ -43,7 +43,7 @@ For ZK Compression, 'Light' state trees have a depth of 26, i.e. contain ~67 mil
 
 <Step>
 
-## Leaf Hash Structure: Compressed Account Hashes
+### Leaf Hash Structure: Compressed Account Hashes
 
 For compressed Solana accounts, the 32 byte leaf hashes effectively mirror the regular Solana account layout: `{DataHash, StateHash; Owner, Lamports`.
 
@@ -67,7 +67,7 @@ For [details on the compressed account structure see this section](/learn/core-c
 
 <Step>
 
-## Merkle and Validity Proofs
+### Merkle and Validity Proofs
 
 In state trees, a <Tooltip tip="are succinct zero-knowledge proofs (ZKPs)">validity proof</Tooltip> verifies that a compressed account exists in state trees with a constant 128-byte proof size. This proof must be included in every transaction once a compressed account is created to verify the on-chain state.
 
@@ -122,7 +122,7 @@ Every address is unique within its address tree, but the same seeds can create d
 <Steps>
 <Step>
 
-## Address Tree Structure
+### Address Tree Structure
 
 Address trees store derived addresses in an indexed structure. Unlike state trees that store account hashes, address trees store the actual address values along with pointers to maintain sorted order.
 
@@ -131,14 +131,14 @@ These addresses are used only when compressed accounts require a persistent iden
 
 <Step>
 
-## Address Tree Root Hash
+### Address Tree Root Hash
 
 Like state trees, only the root hash is stored on-chain to verify all addresses in the tree. The raw addresses are stored in the Solana ledger.
 </Step>
 
 <Step>
 
-## Merkle and Validity Proofs
+### Merkle and Validity Proofs
 
 In address trees, validity proofs verify when creating a compressed account with an address that the address doesn't already exist in a specified address tree. This constant 128-byte proof must be included in the transaction only when creating accounts with addresses, not for subsequent compressed account interactions.
 

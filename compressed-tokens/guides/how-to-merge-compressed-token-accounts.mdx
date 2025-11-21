@@ -3,6 +3,9 @@ title: Merge Compressed Token Accounts
 description: "Complete guide to merge multiple compressed token accounts into a single account with mergeTokenAccounts(), troubleshooting and advanced configurations."
 ---
 
+import InstallDependencies from '/snippets/install-dependencies-codegroup.mdx';
+import SetupEnvironment from '/snippets/setup-environment-tabs.mdx';
+
 The `mergeTokenAccounts()` function consolidates multiple compressed accounts of the same mint into a single compressed account.
 
 The function
@@ -10,18 +13,12 @@ The function
 1. consumes multiple compressed token accounts (up to 8 accounts), and
 2. creates a single output compressed token account with combined balance for the owner.
 
-Before we merge compressed accounts, we need
-
-* Multiple compressed token accounts of the same mint owned by the same wallet, and
-* an SPL mint with a token pool for compression. This token pool can be created for new SPL mints via [`createMint()`](/compressed-tokens/guides/how-to-create-and-register-a-mint-account-for-compression) or added to existing SPL mints via [`createTokenPool()`](/compressed-tokens/guides/how-to-create-compressed-token-pools-for-mint-accounts).
-
-<Check>
+<Tip>
 State trees where compressed account's are stored, are append only. `mergeTokenAccounts()` reduces account fragmentation to simplify balance calculations from `getCompressedTokenAccountsByOwner`.
-</Check>
+</Tip>
 
 <CodeGroup>
 ```typescript function-merge-accounts.ts
-```typescript
 // Combines multiple compressed token accounts into single compressed account
 const transactionSignature = await mergeTokenAccounts(
     rpc,
@@ -32,10 +29,11 @@ const transactionSignature = await mergeTokenAccounts(
 ```
 </CodeGroup>
 
-## Full Code Example
+# Full Code Example
 
 <Steps>
-<Step title="Prerequisites">
+<Step>
+### Prerequisites
 
 Make sure you have dependencies and developer environment set up!
 
@@ -43,96 +41,25 @@ Make sure you have dependencies and developer environment set up!
 
 **Dependencies**
 
-```bash
-npm install --save-dev typescript tsx @types/node && \
-npm install --save \
-    @lightprotocol/stateless.js \
-    @lightprotocol/compressed-token \
-    @solana/web3.js \
-    @solana/spl-token
-```
-
-**Alternatives:**
-
-```bash
-yarn add --dev typescript tsx @types/node && \
-yarn add \
-    @lightprotocol/stateless.js \
-    @lightprotocol/compressed-token \
-    @solana/web3.js \
-    @solana/spl-token
-```
-
-```bash
-pnpm add --save-dev typescript tsx @types/node && \
-pnpm add \
-    @lightprotocol/stateless.js \
-    @lightprotocol/compressed-token \
-    @solana/web3.js \
-    @solana/spl-token
-```
+<InstallDependencies />
 
 **Developer Environment**
 
-By default, this guide uses Localnet.
-
-```bash
-# Install the development CLI
-npm install @lightprotocol/zk-compression-cli
-```
-
-```bash
-# Start a local test validator
-light test-validator
-
-## ensure you have the Solana CLI accessible in your system PATH
-```
-
-```typescript
-// createRpc() defaults to local test validator endpoints
-import {
-  Rpc,
-  createRpc,
-} from "@lightprotocol/stateless.js";
-
-const connection: Rpc = createRpc();
-
-async function main() {
-  let slot = await connection.getSlot();
-  console.log(slot);
-
-  let health = await connection.getIndexerHealth(slot);
-  console.log(health);
-  // "Ok"
-}
-
-main();
-```
-
-**Alternative: Using Devnet**
-
-Follow these steps to develop create an RPC Connection. Replace `<your_api_key>` with your API key before running.
-
-<Info>
-[Get your API key here](https://www.helius.dev/zk-compression), if you don't have one yet.
-</Info>
-
-```typescript
-import { createRpc } from "@lightprotocol/stateless.js";
-
-// Helius exposes Solana and Photon RPC endpoints through a single URL
-const RPC_ENDPOINT = "https://devnet.helius-rpc.com?api-key=<your_api_key>";
-const connection = createRpc(RPC_ENDPOINT, RPC_ENDPOINT, RPC_ENDPOINT);
-
-console.log("Connection created!");
-console.log("RPC Endpoint:", RPC_ENDPOINT);
-```
-
+<SetupEnvironment />
 </Accordion>
 </Step>
-<Step title="Merging Compressed Accounts">
+
+<Step>
+### Merging Compressed Accounts
 
 Run this script to merge multiple compressed token accounts into one!
+
+<Info>
+Before we merge compressed accounts, we need
+
+* Multiple compressed token accounts of the same mint owned by the same wallet, and
+* an SPL mint with a token pool for compression. This token pool can be created for new SPL mints via [`createMint()`](/compressed-tokens/guides/how-to-create-and-register-a-mint-account-for-compression) or added to existing SPL mints via [`createTokenPool()`](/compressed-tokens/guides/how-to-create-compressed-token-pools-for-mint-accounts).
+</Info>
 
 ```typescript merge-compressed-accounts.ts highlight={60-67} expandable
 // 1: Setup funded payer and connect to local validator
@@ -234,7 +161,7 @@ mergeCompressedAccounts().catch(console.error);
 </Step>
 </Steps>
 
-### Troubleshooting
+# Troubleshooting
 
 <AccordionGroup>
 <Accordion title="No compressed token accounts found">
@@ -261,7 +188,7 @@ console.log(`Found ${accounts.items.length} accounts to merge`);
 </Accordion>
 </AccordionGroup>
 
-### Advanced Configuration
+# Advanced Configuration
 
 <AccordionGroup>
 <Accordion title="Conditional Merging">
@@ -318,6 +245,12 @@ for (const mint of mints) {
 </Accordion>
 </AccordionGroup>
 
-## Next Steps
+# Next Steps
 
-Learn how to approve and revoke delegate authority for compressed token accounts.
+<Card
+  title="Learn how to approve and revoke delegate authority for compressed token accounts."
+  icon="chevron-right"
+  color="#0066ff"
+  href="/compressed-tokens/guides/how-to-approve-and-revoke-delegate-authority"
+  horizontal
+/>

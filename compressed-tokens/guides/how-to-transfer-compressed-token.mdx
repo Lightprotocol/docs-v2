@@ -1,18 +1,18 @@
 ---
 title: Transfer Compressed Tokens
-description: Complete guide to transfer compressed SPL tokens between compressed or regular accounts with `transfer()`, troubleshooting and advanced configurations.
+description: Guide to transfer compressed SPL tokens between compressed or regular accounts with `transfer()`, troubleshooting and advanced configurations.
 ---
 
-The `transfer()` function moves compressed tokens between accounts. Unlike regular SPL transfers that update existing account balances, compressed transfers consume input accounts from the sender and create new output accounts for sender and recipient with updated balances.
+import InstallDependencies from '/snippets/install-dependencies-codegroup.mdx';
+import SetupEnvironment from '/snippets/setup-environment-tabs.mdx';
 
-Before we can transfer compressed tokens, we need:
+The `transfer()` function moves compressed tokens between accounts. 
+* SPL token transfers that update the existing account
+* Compressed token transfers consume input accounts from the sender and create new output accounts for sender and recipient with updated balances.
+<Tip>
+SPL token accounts can be compressed in the same transaction with `compress_or_decompress_amount`, if needed.
+</Tip>
 
-* An SPL mint with a token pool for compression. This token pool can be created for new SPL mints via [`createMint()`](/compressed-tokens/guides/how-to-create-and-register-a-mint-account-for-compression) or added to existing SPL mints via [`createTokenPool()`](/compressed-tokens/guides/how-to-create-compressed-token-pools-for-mint-accounts)., and
-* a source compressed token account with sufficient balance for the transfer amount.
-
-<Check>
-Regular SPL token accounts can be compressed in the same transaction with `compress_or_decompress_amount`, if needed.
-</Check>
 
 ```typescript function-transfer-compressed-tokens.ts
 // Transfer compressed tokens
@@ -26,108 +26,36 @@ const transactionSignature = await transfer(
 )
 ```
 
-## Full Code Example
+# Full Code Example
 
 <Steps>
-<Step title="Prerequisites">
+<Step>
+### Prerequisites
 
 Make sure you have dependencies and developer environment set up!
 
 <Accordion title="Prerequisites & Setup">
 
-#### Dependencies
+**Dependencies**
 
-```bash
-npm install --save-dev typescript tsx @types/node && \
-npm install --save \
-    @lightprotocol/stateless.js \
-    @lightprotocol/compressed-token \
-    @solana/web3.js \
-    @solana/spl-token
-```
+<InstallDependencies />
 
-**Alternatives:**
+**Developer Environment**
 
-```bash
-yarn add --dev typescript tsx @types/node && \
-yarn add \
-    @lightprotocol/stateless.js \
-    @lightprotocol/compressed-token \
-    @solana/web3.js \
-    @solana/spl-token
-```
-
-```bash
-pnpm add --save-dev typescript tsx @types/node && \
-pnpm add \
-    @lightprotocol/stateless.js \
-    @lightprotocol/compressed-token \
-    @solana/web3.js \
-    @solana/spl-token
-```
-
-#### Developer Environment
-
-By default, this guide uses Localnet.
-
-```bash
-# Install the development CLI
-npm install @lightprotocol/zk-compression-cli
-```
-
-```bash
-# Start a local test validator
-light test-validator
-
-## ensure you have the Solana CLI accessible in your system PATH
-```
-
-```typescript
-// createRpc() defaults to local test validator endpoints
-import {
-  Rpc,
-  createRpc,
-} from "@lightprotocol/stateless.js";
-
-const connection: Rpc = createRpc();
-
-async function main() {
-  let slot = await connection.getSlot();
-  console.log(slot);
-
-  let health = await connection.getIndexerHealth(slot);
-  console.log(health);
-  // "Ok"
-}
-
-main();
-```
-
-**Alternative: Using Devnet**
-
-Follow these steps to create an RPC Connection. Replace `<your_api_key>` with your API key before running.
-
-<Info>
-Get your API Key [here](https://www.helius.dev/zk-compression), if you don't have one yet.
-</Info>
-
-```typescript
-import { createRpc } from "@lightprotocol/stateless.js";
-
-// Helius exposes Solana and Photon RPC endpoints through a single URL
-const RPC_ENDPOINT = "https://devnet.helius-rpc.com?api-key=<your_api_key>";
-const connection = createRpc(RPC_ENDPOINT, RPC_ENDPOINT, RPC_ENDPOINT);
-
-console.log("Connection created!");
-console.log("RPC Endpoint:", RPC_ENDPOINT);
-```
-
+<SetupEnvironment />
 </Accordion>
 </Step>
-<Step title="Transferring Compressed Tokens">
+
+<Step>
+### Transfer Compressed Tokens
 
 Run this script to transfer compressed tokens to a recipient!
+<Info>
+Before we can transfer compressed tokens, we need:
 
+* An SPL mint with a token pool for compression. 
+* This token pool can be created for new SPL mints via [`createMint()`](/compressed-tokens/guides/how-to-create-and-register-a-mint-account-for-compression) <br /> or added to existing SPL mints via [`createTokenPool()`](/compressed-tokens/guides/how-to-create-compressed-token-pools-for-mint-accounts).
+</Info>
 ```typescript transfer-compressed-tokens.ts highlight={49-57} expandable
 // 1. Setup funded payer and connect to local validator
 // 2. Create SPL mint and token pool for compression with initial tokens
@@ -216,7 +144,7 @@ transferCompressedTokens().catch(console.error);
 </Step>
 </Steps>
 
-### Troubleshooting
+# Troubleshooting
 
 <AccordionGroup>
 <Accordion title="Insufficient balance for transfer">
@@ -286,7 +214,7 @@ if (transferAmount > maxTransferPerTx) {
 </Accordion>
 </AccordionGroup>
 
-### Advanced Configuration
+# Advanced Configuration
 
 <AccordionGroup>
 <Accordion title="Transfer to Multiple Recipients">
@@ -353,6 +281,12 @@ await transferDelegated(
 </Accordion>
 </AccordionGroup>
 
-## Next Steps
+# Next Steps
 
-Learn how compress and decompress SPL Tokens.
+<Card
+  title="Learn how to compress and decompress SPL tokens."
+  icon="chevron-right"
+  color="#0066ff"
+  href="/compressed-tokens/guides/how-to-compress-and-decompress-spl-tokens"
+  horizontal
+/>

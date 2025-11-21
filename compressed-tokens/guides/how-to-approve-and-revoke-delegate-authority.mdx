@@ -3,12 +3,10 @@ title: Approve and Revoke Delegate Authority
 description: "Complete guide to manage delegate authority for compressed tokens with `approve()` and `revoke()`, troubleshooting and advanced configurations."
 ---
 
-The `approve()` and `revoke()` functions grant and remove delegate spending authority for compressed tokens. Only the token owner can perform these operations.
+import InstallDependencies from '/snippets/install-dependencies-codegroup.mdx';
+import SetupEnvironment from '/snippets/setup-environment-tabs.mdx';
 
-Before we approve or revoke delegates, we need:
-
-* compressed token accounts to delegate or revoke delegation from, and
-* an SPL mint with a token pool for compression. This token pool can be created for new SPL mints via [`createMint()`](/compressed-tokens/guides/how-to-create-and-register-a-mint-account-for-compression) or added to existing SPL mints via [`createTokenPool()`](/compressed-tokens/guides/how-to-create-compressed-token-pools-for-mint-accounts).
+The `approve()` and `revoke()` functions grant and remove delegate spending authority for compressed tokens. Only the token owner can perform these instructions.
 
 <CodeGroup>
 ```typescript approve()
@@ -40,8 +38,10 @@ const revokeSignature = await revoke(
 ```
 </CodeGroup>
 
-## Full Code Example
+# Full Code Example
 
+<Steps>
+<Step>
 ### Prerequisites
 
 Make sure you have dependencies and developer environment set up!
@@ -50,95 +50,24 @@ Make sure you have dependencies and developer environment set up!
 
 **Dependencies**
 
-```bash
-npm install --save-dev typescript tsx @types/node && \
-npm install --save \
-    @lightprotocol/stateless.js \
-    @lightprotocol/compressed-token \
-    @solana/web3.js \
-    @solana/spl-token
-```
-
-**Alternatives:**
-
-```bash
-yarn add --dev typescript tsx @types/node && \
-yarn add \
-    @lightprotocol/stateless.js \
-    @lightprotocol/compressed-token \
-    @solana/web3.js \
-    @solana/spl-token
-```
-
-```bash
-pnpm add --save-dev typescript tsx @types/node && \
-pnpm add \
-    @lightprotocol/stateless.js \
-    @lightprotocol/compressed-token \
-    @solana/web3.js \
-    @solana/spl-token
-```
+<InstallDependencies />
 
 **Developer Environment**
 
-By default, this guide uses Localnet.
-
-```bash
-# Install the development CLI
-npm install @lightprotocol/zk-compression-cli
-```
-
-```bash
-# Start a local test validator
-light test-validator
-
-## ensure you have the Solana CLI accessible in your system PATH
-```
-
-```typescript
-// createRpc() defaults to local test validator endpoints
-import {
-  Rpc,
-  createRpc,
-} from "@lightprotocol/stateless.js";
-
-const connection: Rpc = createRpc();
-
-async function main() {
-  let slot = await connection.getSlot();
-  console.log(slot);
-
-  let health = await connection.getIndexerHealth(slot);
-  console.log(health);
-  // "Ok"
-}
-
-main();
-```
-
-**Alternative: Using Devnet**
-
-Follow these steps to create an RPC Connection. Replace `<your_api_key>` with your API key before running.
-
-<Info>
-Get your API Key [here](https://www.helius.dev/zk-compression), if you don't have one yet.
-</Info>
-
-```typescript
-import { createRpc } from "@lightprotocol/stateless.js";
-
-// Helius exposes Solana and Photon RPC endpoints through a single URL
-const RPC_ENDPOINT = "https://devnet.helius-rpc.com?api-key=<your_api_key>";
-const connection = createRpc(RPC_ENDPOINT, RPC_ENDPOINT, RPC_ENDPOINT);
-
-console.log("Connection created!");
-console.log("RPC Endpoint:", RPC_ENDPOINT);
-```
-
+<SetupEnvironment />
 </Accordion>
+</Step>
 
+<Step>
 ### Approve / Revoke Delegates
 
+Run these scripts to approve / revoke delegate authority!
+<Info>
+Before we approve or revoke delegates, we need:
+
+* compressed token accounts to delegate or revoke delegation from, and
+* an SPL mint with a token pool for compression. This token pool can be created for new SPL mints via [`createMint()`](/compressed-tokens/guides/how-to-create-and-register-a-mint-account-for-compression) or added to existing SPL mints via [`createTokenPool()`](/compressed-tokens/guides/how-to-create-compressed-token-pools-for-mint-accounts).
+</Info>
 <Tabs>
 <Tab title="Approve Delegate">
 Approve delegate authority for compressed tokens. The delegate can spend up to the approved amount.
@@ -358,8 +287,10 @@ approveAndRevokeDelegates().catch(console.error);
 ```
 </Tab>
 </Tabs>
+</Step>
+</Steps>
 
-### Troubleshooting
+# Troubleshooting
 
 <AccordionGroup>
 <Accordion title="Account is not delegated">
@@ -382,7 +313,7 @@ if (delegateAccounts.items.length === 0) {
 </Accordion>
 </AccordionGroup>
 
-### Advanced Configuration
+# Advanced Configuration
 
 <AccordionGroup>
 <Accordion title="Approve Multiple Delegates">
@@ -447,6 +378,12 @@ for (const delegate of delegates) {
 </Accordion>
 </AccordionGroup>
 
-## Next Steps
+# Next Steps
 
-That's it! Explore more guides in our cookbook section, or check out the advanced guides.
+<Card
+  title="Check out the advanced guides for airdrops, combining multiple instructions in one transaction, and examples."
+  icon="chevron-right"
+  color="#0066ff"
+  href="/compressed-tokens/advanced-guides"
+  horizontal
+/>

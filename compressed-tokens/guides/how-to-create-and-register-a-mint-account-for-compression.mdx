@@ -1,13 +1,18 @@
 ---
-title: Create and Register a Mint Account for Compression
-description: "Complete guide to create and register an SPL token mint account for compression with createMint(), troubleshooting and advanced configurations."
+title: Create a Mint Account for Compression
+description: "Create an SPL token mint account with token pool for compression with createMint(), troubleshooting and advanced configurations."
 ---
+
+import InstallDependencies from '/snippets/install-dependencies-codegroup.mdx';
+import SetupEnvironment from '/snippets/setup-environment-tabs.mdx';
 
 <Info>
 The mint account itself requires rent (like regular SPL mints), but individual compressed token accounts are rent-free.
 </Info>
 
-Compressed tokens use an SPL mint that is registered with the compressed token program. Connect an existing SPL mint with [`createTokenPool()`](/compressed-tokens/guides/how-to-create-compressed-token-pools-for-mint-accounts) or use `createMint()` to create a new one from scratch.
+Compressed tokens use an SPL mint with token pool for compression. The token pool locks SPL tokens while compressed and releases them when decompressed.
+
+Create a token pool for an existing SPL mint with [`createTokenPool()`](/compressed-tokens/guides/how-to-create-compressed-token-pools-for-mint-accounts) or use `createMint()` to create a new one from scratch.
 
 <CodeGroup>
 ```typescript createMint()
@@ -21,14 +26,15 @@ const { mint, transactionSignature } = await createMint(
 ```
 </CodeGroup>
 
-<Check>
-**Best Practice:** Each mint supports a maximum of 4 token pools total. During compression/decompression operations, token pools get write-locked. Use `addTokenPools()` to create additional pools that increase per-block write-lock capacity.
-</Check>
+<Tip>
+**Best Practice:** Each mint supports a maximum of 4 token pools total. During compression/decompression, token pools get write-locked. Use `addTokenPools()` to create additional pools that increase per-block write-lock capacity.
+</Tip>
 
-## Full Code Example
+# Full Code Example
 
 <Steps>
-<Step title="Prerequisites">
+<Step>
+### Prerequisites
 
 Make sure you have dependencies and developer environment set up!
 
@@ -36,94 +42,16 @@ Make sure you have dependencies and developer environment set up!
 
 **Dependencies**
 
-```bash
-npm install --save-dev typescript tsx @types/node &&
-npm install \
-    @lightprotocol/stateless.js \
-    @lightprotocol/compressed-token \
-    @solana/web3.js \
-    @solana/spl-token
-```
-
-**Alternatives:**
-
-```bash
-yarn add --dd typescript tsx @types/node &&
-yarn add \
-    @lightprotocol/stateless.js \
-    @lightprotocol/compressed-token \
-    @solana/web3.js \
-    @solana/spl-token
-```
-
-```bash
-pnpm add --save-dev typescript tsx @types/node &&
-pnpm add \
-    @lightprotocol/stateless.js \
-    @lightprotocol/compressed-token \
-    @solana/web3.js \
-    @solana/spl-token
-```
+<InstallDependencies />
 
 **Developer Environment**
 
-By default, this guide uses Localnet.
-
-```bash
-# Install the development CLI
-npm install @lightprotocol/zk-compression-cli
-```
-
-```bash
-# Start a local test validator
-light test-validator
-
-## ensure you have the Solana CLI accessible in your system PATH
-```
-
-```typescript
-// createRpc() defaults to local test validator endpoints
-import {
-  Rpc,
-  createRpc,
-} from "@lightprotocol/stateless.js";
-
-const connection: Rpc = createRpc();
-
-async function main() {
-  let slot = await connection.getSlot();
-  console.log(slot);
-
-  let health = await connection.getIndexerHealth(slot);
-  console.log(health);
-  // "Ok"
-}
-
-main();
-```
-
-**Alternative: Using Devnet**
-
-Follow these steps to create an RPC Connection. Replace `<your_api_key>` with your API key before running.
-
-<Info>
-Get your API Key [here](https://www.helius.dev/zk-compression), if you don't have one yet.
-</Info>
-
-```typescript
-import { createRpc } from "@lightprotocol/stateless.js";
-
-// Helius exposes Solana and Photon RPC endpoints through a single URL
-const RPC_ENDPOINT = "https://devnet.helius-rpc.com?api-key=<your_api_key>";
-const connection = createRpc(RPC_ENDPOINT, RPC_ENDPOINT, RPC_ENDPOINT);
-
-console.log("Connection created!");
-console.log("RPC Endpoint:", RPC_ENDPOINT);
-```
-
+<SetupEnvironment />
 </Accordion>
 </Step>
-<Step title="Create SPL Mint with Token Pool for Compression">
+
+<Step>
+### Create SPL Mint with Token Pool for Compression
 
 Run this script to create a mint account with token pool for compression.
 
@@ -162,7 +90,7 @@ createCompressedMint().catch(console.error);
 </Step>
 </Steps>
 
-### Advanced Configurations
+# Advanced Configuration
 
 <AccordionGroup>
 <Accordion title="Customize Mint Authority">
@@ -204,6 +132,12 @@ const { mint, transactionSignature } = await createMint(
 </Accordion>
 </AccordionGroup>
 
-## Next Steps
+# Next Steps
 
-Learn how to create additional compressed token pools for your SPL mint to increase write-lock limits.
+<Card
+  title="Learn how to create additional compressed token pools for your SPL mint to increase write-lock limits."
+  icon="chevron-right"
+  color="#0066ff"
+  href="/compressed-tokens/guides/how-to-create-compressed-token-pools-for-mint-accounts"
+  horizontal
+/>
