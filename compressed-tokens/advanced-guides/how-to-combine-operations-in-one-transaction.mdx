@@ -3,14 +3,18 @@ title: Combine Instructions in One Transaction
 description: Guide to combine multiple instructions in a single transaction. Full code example for token pool creation and for first-time compression of existing SPL tokens.
 ---
 
+import InstallDependencies from '/snippets/install-dependencies-codegroup.mdx';
+import SetupEnvironment from '/snippets/setup-environment-tabs.mdx';
+
 The SDK provides instruction-level APIs that return instructions without sending transactions. Combine these instructions to build custom transactions with multiple instructions.
-
+<Note>
 This guide demonstrates creating a token pool and compressing existing SPL tokens in a single transaction.
-
-## Full Code Example
+</Note>
+# Full Code Example
 
 <Steps>
-<Step title="Prerequisites">
+<Step>
+### Prerequisites
 
 Make sure you have dependencies and developer environment set up!
 
@@ -18,94 +22,16 @@ Make sure you have dependencies and developer environment set up!
 
 **Dependencies**
 
-```bash
-npm install --save-dev typescript tsx @types/node && \
-npm install --save \
-    @lightprotocol/stateless.js \
-    @lightprotocol/compressed-token \
-    @solana/web3.js \
-    @solana/spl-token
-```
-
-**Alternatives:**
-
-```bash
-yarn add --dev typescript tsx @types/node && \
-yarn add \
-    @lightprotocol/stateless.js \
-    @lightprotocol/compressed-token \
-    @solana/web3.js \
-    @solana/spl-token
-```
-
-```bash
-pnpm add --save-dev typescript tsx @types/node && \
-pnpm add \
-    @lightprotocol/stateless.js \
-    @lightprotocol/compressed-token \
-    @solana/web3.js \
-    @solana/spl-token
-```
+<InstallDependencies />
 
 **Developer Environment**
 
-By default, this guide uses Localnet.
-
-```bash
-# Install the development CLI
-npm install @lightprotocol/zk-compression-cli
-```
-
-```bash
-# Start a local test validator
-light test-validator
-
-## ensure you have the Solana CLI accessible in your system PATH
-```
-
-```typescript
-// createRpc() defaults to local test validator endpoints
-import {
-  Rpc,
-  createRpc,
-} from "@lightprotocol/stateless.js";
-
-const connection: Rpc = createRpc();
-
-async function main() {
-  let slot = await connection.getSlot();
-  console.log(slot);
-
-  let health = await connection.getIndexerHealth(slot);
-  console.log(health);
-  // "Ok"
-}
-
-main();
-```
-
-**Alternative: Using Devnet**
-
-Follow these steps to create an RPC Connection. Replace `<your_api_key>` with your API key before running.
-
-<Info>
-Get your API Key [here](https://www.helius.dev/zk-compression), if you don't have one yet.
-</Info>
-
-```typescript
-import { createRpc } from "@lightprotocol/stateless.js";
-
-// Helius exposes Solana and Photon RPC endpoints through a single URL
-const RPC_ENDPOINT = "https://devnet.helius-rpc.com?api-key=<your_api_key>";
-const connection = createRpc(RPC_ENDPOINT, RPC_ENDPOINT, RPC_ENDPOINT);
-
-console.log("Connection created!");
-console.log("RPC Endpoint:", RPC_ENDPOINT);
-```
-
+<SetupEnvironment />
 </Accordion>
 </Step>
-<Step title="Create Token Pool + Compress">
+
+<Step>
+### Create Token Pool + Compress
 
 ```typescript create-pool-and-compress.ts highlight={26,71} expandable
 // 1. Setup: Create regular SPL token and mint to ATA
@@ -260,6 +186,12 @@ createPoolAndCompress().catch(console.error);
 </Step>
 </Steps>
 
-## Next Steps
+# Next Steps
 
-Learn how to transfer compressed tokens.
+<Card
+  title="Create an Airdrop with Compressed Tokens."
+  icon="chevron-right"
+  color="#0066ff"
+  href="/compressed-tokens/advanced-guides/create-an-airdrop"
+  horizontal
+/>

@@ -3,11 +3,14 @@ title: Use Token-2022 with Compression
 description: Complete guide to mint, compress and transfer tokens with Token-2022 Metadata with ZK Compression.
 ---
 
-## What you will do
+import InstallDependencies from '/snippets/install-dependencies-codegroup.mdx';
+import SetupEnvironment from '/snippets/setup-environment-tabs.mdx';
+
+# What you will do
 
 With this guide you will mint, compress, and transfer tokens with Token-2022 Metadata.
 
-## Overview Token 2022 Extensions
+# Overview Token 2022 Extensions
 
 Token 2022 Extensions are optional features that can be added to Token 2022 mints on Solana to enable additional functionality.
 
@@ -27,7 +30,7 @@ All other extensions are not yet supported.
 If you require support for other mint-extensions, [let us know](https://t.me/swen_light)!
 </Info>
 
-## Get started
+# Get started
 
 <Steps>
 <Step title="Prerequisites">
@@ -46,85 +49,11 @@ Make sure you have dependencies and developer environment set up!
 
 **Dependencies**
 
-```bash
-npm install --save-dev typescript tsx @types/node && \
-npm install --save \
-    @lightprotocol/stateless.js \
-    @lightprotocol/compressed-token \
-    @solana/web3.js \
-    @solana/spl-token
-```
-
-**Alternatives:**
-
-```bash
-yarn add --dev typescript tsx @types/node && \
-yarn add \
-    @lightprotocol/stateless.js \
-    @lightprotocol/compressed-token \
-    @solana/web3.js \
-    @solana/spl-token
-```
-
-```bash
-pnpm add --save-dev typescript tsx @types/node && \
-pnpm add \
-    @lightprotocol/stateless.js \
-    @lightprotocol/compressed-token \
-    @solana/web3.js \
-    @solana/spl-token
-```
+<InstallDependencies />
 
 **Developer Environment**
 
-By default, this guide uses Localnet.
-
-```bash
-# Install the development CLI
-npm install @lightprotocol/zk-compression-cli
-```
-
-```bash
-# Start a local test validator
-light test-validator
-```
-
-```typescript
-// createRpc() defaults to local test validator endpoints
-import {
-  Rpc,
-  createRpc,
-} from "@lightprotocol/stateless.js";
-
-const connection: Rpc = createRpc();
-
-async function main() {
-  let slot = await connection.getSlot();
-  console.log(slot);
-
-  let health = await connection.getIndexerHealth(slot);
-  console.log(health);
-  // "Ok"
-}
-
-main();
-```
-
-**Alternative: Using Devnet**
-
-Follow these steps to create an RPC Connection. Replace \<your\_api\_key> with your API key before running.
-
-```typescript
-import { createRpc } from "@lightprotocol/stateless.js";
-
-// Helius exposes Solana and Photon RPC endpoints through a single URL
-const RPC_ENDPOINT = "https://devnet.helius-rpc.com?api-key=<your_api_key>";
-const connection = createRpc(RPC_ENDPOINT, RPC_ENDPOINT, RPC_ENDPOINT);
-
-console.log("Connection created!");
-console.log("RPC Endpoint:", RPC_ENDPOINT);
-```
-
+<SetupEnvironment />
 </Accordion>
 </Step>
 <Step title="Mint, compress, and transfer tokens with Token-2022 Metadata">
@@ -332,13 +261,16 @@ const connection = createRpc(); // defaults to localhost:8899
 })().catch(console.error);
 ```
 </Step>
-<Step title="Success!">
-
-You've just compressed Token-2022 tokens with metadata extensions and transferred them using ZK Compression.
-
-</Step>
 </Steps>
 
-## Next Steps
+# Next Steps
 
-Explore more guides in our cookbook section.
+
+<Card
+  title="Create an Airdrop with Compressed Tokens."
+  icon="chevron-right"
+  color="#0066ff"
+  href="/compressed-tokens/advanced-guides/create-an-airdrop"
+  horizontal
+/>
+

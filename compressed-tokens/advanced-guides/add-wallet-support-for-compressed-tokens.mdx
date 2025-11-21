@@ -3,17 +3,14 @@ title: Add Wallet Support for Compressed Tokens
 description: Guide to add Compressed Token Support to Your Wallet Application
 ---
 
-## Best Practices
+import InstallDependencies from '/snippets/install-dependencies-codegroup.mdx';
+import SetupEnvironment from '/snippets/setup-environment-tabs.mdx';
 
-* **Clear UI Indicators —** Provide clear visual distinctions between compressed and uncompressed SPL tokens
-* **Transaction History** — Provide detailed transaction histories for compressed tokens
-* **Decompression and Compression** — Provide a clear path for users to convert between compressed and uncompressed tokens when needed
-
-<Check>
+<Note>
 Leading Solana Wallets like Phantom and Backpack already support compressed tokens.
-</Check>
+</Note>
 
-## Integration Steps
+# Integration Steps
 
 <Tabs>
 <Tab title="Code Snippets">
@@ -25,37 +22,102 @@ import { Rpc, createRpc } from '@lightprotocol/stateless.js';
 import { PublicKey } from '@solana/web3.js';
 
 const connection: Rpc = createRpc();
-const publicKey = new PublicKey('CLEuMG7pzJX9xAuKCFzBP154uiG1GaNo4Fq7x6KAcAfG');
+const publicKey = new PublicKey('FWwR2s4TwpWN3nkCzVfhuPrpePG8kNzBXAxEbNsaDFNu');
 
 (async () => {
     const balances = await connection.getCompressedTokenBalancesByOwnerV2(publicKey);
-    console.log(balances);
+
+    if (balances.value.items.length === 0) {
+        console.log("No compressed token balances found");
+        return;
+    }
+
+    for (const item of balances.value.items) {
+        const balanceValue = typeof item.balance === 'string'
+            ? parseInt(item.balance, 16)
+            : item.balance;
+
+        const mintInfo = await connection.getAccountInfo(new PublicKey(item.mint));
+        const decimals = mintInfo.data[44];
+        const formattedBalance = balanceValue / Math.pow(10, decimals);
+
+        console.log(`Mint: ${item.mint}`);
+        console.log(`Balance: ${formattedBalance} tokens\n`);
+    }
 })();
 ```
 
 ### Get Transaction History
 
-```javascript
+```typescript
 import { Rpc, createRpc } from '@lightprotocol/stateless.js';
 import { PublicKey } from '@solana/web3.js';
 
 const connection: Rpc = createRpc();
-const publicKey = new PublicKey('CLEuMG7pzJX9xAuKCFzBP154uiG1GaNo4Fq7x6KAcAfG');
+const publicKey = new PublicKey('FWwR2s4TwpWN3nkCzVfhuPrpePG8kNzBXAxEbNsaDFNu');
 
 (async () => {
-    const signatures = await connection.getCompressionSignaturesForOwner(publicKey);
-    console.log(signatures);
+    const signatures = await connection.getCompressionSignaturesForTokenOwner(publicKey);
 
     if (signatures.items.length > 0) {
-        const parsedTransaction = await connection.getTransactionWithCompressionInfo(signatures.items[0].signature);
-        console.log(parsedTransaction);
+        console.log(`Signatures:`);
+        signatures.items.forEach((sig, index) => {
+            console.log(`${index + 1}. ${sig.signature}`);
+            console.log(`   Slot: ${sig.slot}`);
+            console.log(`   Time: ${new Date(sig.blockTime * 1000).toISOString()}`);
+        });
+    } else {
+        console.log("No transactions found");
     }
 })();
 ```
 
+<Accordion title="Get full transaction history on devnet or mainnet with getTransactionWithCompressionInfo">
+
+```typescript
+import { Rpc, createRpc } from '@lightprotocol/stateless.js';
+import { PublicKey } from '@solana/web3.js';
+
+const RPC_ENDPOINT = process.env.RPC_ENDPOINT || 'https://devnet.helius-rpc.com?api-key=<your-api-key>';
+
+const connection: Rpc = createRpc(RPC_ENDPOINT, RPC_ENDPOINT);
+const publicKey = new PublicKey('FWwR2s4TwpWN3nkCzVfhuPrpePG8kNzBXAxEbNsaDFNu');
+
+(async () => {
+    try {
+        const signatures = await connection.getCompressionSignaturesForTokenOwner(publicKey);
+
+        if (signatures.items.length === 0) {
+            console.log("No transactions found");
+            return;
+        }
+
+        console.log(`Latest Transaction:`);
+        console.log(`Signature: ${signatures.items[0].signature}`);
+        console.log(`Slot: ${signatures.items[0].slot}`);
+
+        const txInfo = await connection.getTransactionWithCompressionInfo(signatures.items[0].signature);
+
+        if (!txInfo) {
+            console.log('Transaction not found or has no compression info');
+            return;
+        }
+
+        if (txInfo.compressionInfo) {
+            console.log(`\nClosed Accounts: ${txInfo.compressionInfo.closedAccounts.length}`);
+            console.log(`Opened Accounts: ${txInfo.compressionInfo.openedAccounts.length}`);
+        }
+    } catch (error) {
+        console.error('Error fetching transaction history:', error);
+    }
+})();
+```
+
+</Accordion>
+
 ### Send Compressed Tokens
 
-```typescript send-compressed-tokens.ts expandable
+```typescript expandable
 import {
   Rpc,
   createRpc,
@@ -120,9 +182,9 @@ const amount = bn(1e8);
 </Tab>
 
 <Tab title="End-to-End Guide">
-
 <Steps>
-<Step title="Prerequisites">
+<Step>
+### Prerequisites
 
 Make sure you have dependencies and developer environment set up!
 
@@ -130,146 +192,91 @@ Make sure you have dependencies and developer environment set up!
 
 **Dependencies**
 
-```bash
-npm install --save-dev typescript tsx @types/node && \
-npm install --save \
-    @lightprotocol/stateless.js \
-    @lightprotocol/compressed-token \
-    @solana/web3.js \
-    @solana/spl-token
-```
-
-**Alternatives**
-
-```bash
-yarn add --dev typescript tsx @types/node && \
-yarn add \
-    @lightprotocol/stateless.js \
-    @lightprotocol/compressed-token \
-    @solana/web3.js \
-    @solana/spl-token
-```
-
-```bash
-pnpm add --save-dev typescript tsx @types/node && \
-pnpm add \
-    @lightprotocol/stateless.js \
-    @lightprotocol/compressed-token \
-    @solana/web3.js \
-    @solana/spl-token
-```
+<InstallDependencies />
 
 **Developer Environment**
 
-By default, this guide uses Localnet.
-
-```bash
-# Install the development CLI
-npm install @lightprotocol/zk-compression-cli
-```
-
-```bash
-# Start a local test validator
-light test-validator
-```
-
-```typescript
-// createRpc() defaults to local test validator endpoints
-import {
-  Rpc,
-  createRpc,
-} from "@lightprotocol/stateless.js";
-
-const connection: Rpc = createRpc();
-
-async function main() {
-  let slot = await connection.getSlot();
-  console.log(slot);
-
-  let health = await connection.getIndexerHealth(slot);
-  console.log(health);
-  // "Ok"
-}
-
-main();
-```
-
-**Alternative: Using Devnet**
-
-Follow these steps to create an RPC Connection. Replace \<your\_api\_key> with your API key before running.
-
-```typescript
-import { createRpc } from "@lightprotocol/stateless.js";
-
-// Helius exposes Solana and Photon RPC endpoints through a single URL
-const RPC_ENDPOINT = "https://devnet.helius-rpc.com?api-key=<your_api_key>";
-const connection = createRpc(RPC_ENDPOINT, RPC_ENDPOINT, RPC_ENDPOINT);
-
-console.log("Connection created!");
-console.log("RPC Endpoint:", RPC_ENDPOINT);
-```
+<SetupEnvironment />
 </Accordion>
 </Step>
 
-<Step title="Display Compressed Token Balances">
+<Step>
+### Display Compressed Token Balances
 
 This example fetches and displays all compressed token balances for a wallet address.
 
 ```javascript
 import { Rpc, createRpc } from '@lightprotocol/stateless.js';
-import { PublicKey } from '@solana/web3.js';
+import { Keypair, PublicKey } from '@solana/web3.js';
+import * as fs from 'fs';
+import * as os from 'os';
 
-// 1. Setup RPC connection to local test validator
-// 2. Call getCompressedTokenBalancesByOwnerV2() to fetch compressed token balances per mint
-// 3. Display results with balance amounts and mint addresses
+const connection: Rpc = createRpc();
 
-const connection: Rpc = createRpc(); // defaults to localhost:8899
-const publicKey = new PublicKey('CLEuMG7pzJX9xAuKCFzBP154uiG1GaNo4Fq7x6KAcAfG'); // public
-
-(async () => {
-    // Fetch compressed token balances for wallet address
-    // Returns balance for owner per mint - can optionally apply filter: {mint, limit, cursor}
-    const balances = await connection.getCompressedTokenBalancesByOwnerV2(publicKey);
-    console.log(balances);
-})();
-```
-</Step>
-
-<Step title="Get Transaction History">
-
-This example retrieves compression transaction signatures and detailed transaction information for wallet transaction history display.
-
-```javascript expandable
-import { Rpc, createRpc } from '@lightprotocol/stateless.js';
-import { PublicKey } from '@solana/web3.js';
-
-// 1. Setup RPC connection and fetch compression transaction signatures using getCompressionSignaturesForOwner()
-// 2. Retrieve detailed transaction data with getTransactionWithCompressionInfo() including pre/post balances
-// 3. Display transaction history with signature list and balance changes
-
-const connection: Rpc = createRpc(); // defaults to localhost:8899
-const publicKey = new PublicKey('CLEuMG7pzJX9xAuKCFzBP154uiG1GaNo4Fq7x6KAcAfG');
+const walletPath = `${os.homedir()}/.config/solana/id.json`;
+const secretKey = JSON.parse(fs.readFileSync(walletPath, 'utf8'));
+const payer = Keypair.fromSecretKey(Buffer.from(secretKey));
 
 (async () => {
-    // Fetch compression transaction signatures for wallet address
-    // Returns confirmed signatures for compression transactions involving the specified account owner
-    const signatures = await connection.getCompressionSignaturesForOwner(publicKey);
-    console.log(signatures);
+    const balances = await connection.getCompressedTokenBalancesByOwnerV2(payer.publicKey);
 
-    // Check if any signatures exist before trying to access them
-    if (signatures.items.length > 0) {
-        // Retrieve detailed transaction information with compression data
-        // Returns pre- and post-compressed token balances grouped by owner
-        const parsedTransaction = await connection.getTransactionWithCompressionInfo(signatures.items[0].signature);
-        console.log(parsedTransaction);
-    } else {
-        console.log("No compression transactions found for this address");
+    if (balances.value.items.length === 0) {
+        console.log("No compressed token balances found");
+        return;
+    }
+
+    for (const item of balances.value.items) {
+        const balanceValue = typeof item.balance === 'string'
+            ? parseInt(item.balance, 16)
+            : item.balance;
+
+        const mintInfo = await connection.getAccountInfo(new PublicKey(item.mint));
+        const decimals = mintInfo.data[44];
+        const formattedBalance = balanceValue / Math.pow(10, decimals);
+
+        console.log(`Mint: ${item.mint}`);
+        console.log(`Balance: ${formattedBalance} tokens\n`);
     }
 })();
 ```
 </Step>
 
-<Step title="Send Compressed Tokens">
+<Step>
+### Get Transaction History
+
+This example retrieves compression transaction signatures to display transaction history of the wallet.
+
+```javascript
+import { Rpc, createRpc } from '@lightprotocol/stateless.js';
+import { Keypair } from '@solana/web3.js';
+import * as fs from 'fs';
+import * as os from 'os';
+
+const connection: Rpc = createRpc();
+
+const walletPath = `${os.homedir()}/.config/solana/id.json`;
+const secretKey = JSON.parse(fs.readFileSync(walletPath, 'utf8'));
+const payer = Keypair.fromSecretKey(Buffer.from(secretKey));
+
+(async () => {
+    const signatures = await connection.getCompressionSignaturesForTokenOwner(payer.publicKey);
+
+    if (signatures.items.length > 0) {
+        console.log(`Signatures:`);
+        signatures.items.forEach((sig, index) => {
+            console.log(`${index + 1}. ${sig.signature}`);
+            console.log(`   Slot: ${sig.slot}`);
+            console.log(`   Time: ${new Date(sig.blockTime * 1000).toISOString()}`);
+        });
+    } else {
+        console.log("No transactions found");
+    }
+})();
+```
+</Step>
+
+<Step>
+### Send Compressed Tokens
 
 First, set up a test mint to and mint 10 compressed tokens to your filesystem wallet.
 
@@ -358,8 +365,8 @@ import * as os from 'os';
 
 // Step 1: Setup RPC connection and define transfer parameters
 const connection: Rpc = createRpc(); // defaults to localhost:8899
-<strong>const mint = new PublicKey("MINT ADDRESS"); // Replace with mint address
-</strong>
+const mint = new PublicKey("MINT ADDRESS"); // Replace with mint address
+
 // Load wallet from filesystem
 const walletPath = `${os.homedir()}/.config/solana/id.json`;
 const secretKey = JSON.parse(fs.readFileSync(walletPath, 'utf8'));
@@ -436,22 +443,19 @@ const amount = bn(1e8);
 })();
 ```
 </Step>
-
 </Steps>
-
 </Tab>
 </Tabs>
 
-## Advanced Integrations
+# Advanced Integrations
 
 Use these integrations to let users convert between regular and compressed format as needed.
 
-<AccordionGroup>
 <Accordion title="Decompress to Regular SPL">
 
 This example converts compressed tokens to regular SPL format using `CompressedTokenProgram.decompress().`
 
-```typescript
+```javascript
 import {
   bn,
   buildAndSignTx,
@@ -611,11 +615,9 @@ const amount = 1e5; // 100K tokens to compress
 ```
 
 </Accordion>
-</AccordionGroup>
 
-## Common Errors
+# Common Errors
 
-<AccordionGroup>
 <Accordion title="No compressed tokens found">
 
 If `getCompressedTokenBalancesByOwnerV2` returns empty:
@@ -624,9 +626,14 @@ If `getCompressedTokenBalancesByOwnerV2` returns empty:
 * Verify you're on the correct network (devnet/mainnet)
 
 </Accordion>
-</AccordionGroup>
 
-## Next Steps
+# Next Steps
 
-Take a look at other compressed token guides.
 
+<Card
+  title="Create an Airdrop with Compressed Tokens."
+  icon="chevron-right"
+  color="#0066ff"
+  href="/compressed-tokens/advanced-guides/create-an-airdrop"
+  horizontal
+/>

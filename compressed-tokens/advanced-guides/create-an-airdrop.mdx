@@ -3,20 +3,23 @@ title: Create an Airdrop without Claim
 description: Complete guide to create an airdrop – with or without code. Access to cost calculation and best practices. ZK compression is the most efficient way to distribute SPL tokens.
 ---
 
+import InstallDependencies from '/snippets/install-dependencies-codegroup.mdx';
+import SetupEnvironment from '/snippets/setup-environment-tabs.mdx';
+
 ## Guides
 
 There are two ways to use ZK Compression to distribute your SPL tokens.
 <CardGroup>
   <Card
     title="No-Code Airdrop Tool"
-    link="https://www.helius.dev/docs/airship/getting-started"
+    href="https://www.helius.dev/docs/airship/getting-started"
     icon="laptop-code"
   >
   Use **Airship by Helius Labs** to airdrop to up to 200,000 recipients via Webapp.
   </Card>
   <Card
     title="Custom Programmatic Airdrop"
-    link="/compressed-tokens/advanced-guides/how-to-create-an-airdrop-without-claim"
+    href="#programmatic-airdrop"
     icon="terminal"
   >
   Create a programmatic airdrop with this guide for more control.
@@ -56,7 +59,8 @@ Choose your implementation based on your needs:
 </Check>
 
 <Steps>
-<Step title="Prerequisites">
+<Step>
+### Prerequisites
 
 Make sure you have dependencies and developer environment set up!
 
@@ -69,91 +73,18 @@ System Requirements
 
 <Accordion title="Prerequisites & Setup">
 
-### Dependencies
+**Dependencies**
 
-```bash
-npm install --save-dev typescript tsx @types/node && \
-npm install --save \
-    @lightprotocol/stateless.js \
-    @lightprotocol/compressed-token \
-    @solana/web3.js \
-    @solana/spl-token
-```
+<InstallDependencies />
 
-**Alternatives:**
+**Developer Environment**
 
-```bash
-yarn add --dev typescript tsx @types/node && \
-yarn add \
-    @lightprotocol/stateless.js \
-    @lightprotocol/compressed-token \
-    @solana/web3.js \
-    @solana/spl-token
-```
-
-```bash
-pnpm add --save-dev typescript tsx @types/node && \
-pnpm add \
-    @lightprotocol/stateless.js \
-    @lightprotocol/compressed-token \
-    @solana/web3.js \
-    @solana/spl-token
-```
-
-#### Developer Environment
-
-By default, this guide uses Localnet.
-
-```bash
-# Install the development CLI
-npm install @lightprotocol/zk-compression-cli
-```
-
-```bash
-# Start a local test validator
-light test-validator
-```
-
-```typescript
-// createRpc() defaults to local test validator endpoints
-import {
-  Rpc,
-  createRpc,
-} from "@lightprotocol/stateless.js";
-
-const connection: Rpc = createRpc();
-
-async function main() {
-  let slot = await connection.getSlot();
-  console.log(slot);
-
-  let health = await connection.getIndexerHealth(slot);
-  console.log(health);
-  // "Ok"
-}
-
-main();
-```
-
-**Alternative: Using Devnet**
-
-Follow these steps to create an RPC Connection. Replace \<your\_api\_key> with your API key before running.
-
-```typescript
-import { createRpc } from "@lightprotocol/stateless.js";
-
-// Helius exposes Solana and Photon RPC endpoints through a single URL
-const RPC_ENDPOINT = "https://devnet.helius-rpc.com?api-key=<your_api_key>";
-const connection = createRpc(RPC_ENDPOINT, RPC_ENDPOINT, RPC_ENDPOINT);
-
-console.log("Connection created!");
-console.log("RPC Endpoint:", RPC_ENDPOINT);
-```
-
+<SetupEnvironment />
 </Accordion>
 </Step>
 
-<Step title="Mint SPL tokens to your wallet">
+<Step>
+### Mint SPL tokens to your wallet
 
 Run this `mint-spl-tokens.ts` to mint SPL tokens to your wallet.
 
@@ -219,7 +150,8 @@ const payer = Keypair.fromSecretKey(Buffer.from(secretKey));
 ```
 </Step>
 
-<Step title="Execute the Airdrop">
+<Step>
+### Execute the Airdrop
 
 Next, distribute the SPL tokens to all recipients.
 
@@ -360,7 +292,8 @@ For small airdrops (\<10,000 recipients). [View the source code here](https://gi
 </Check>
 
 <Steps>
-<Step title="Environment Setup">
+<Step>
+### Environment Setup
 
 Configure your environment variables:
 
@@ -370,7 +303,8 @@ MINT_ADDRESS=YOUR_MINT_ADDRESS
 ```
 </Step>
 
-<Step title="Mint SPL Tokens">
+<Step>
+### Mint SPL Tokens
 
 Mint SPL tokens to your wallet for distribution. See the [mint script example](https://github.com/Lightprotocol/example-token-distribution/blob/main/src/simple-airdrop/mint.ts).
 
@@ -379,7 +313,8 @@ You can also use an existing mint if you already have one.
 </Info>
 </Step>
 
-<Step title="Execute Airdrop">
+<Step>
+### Execute Airdrop
 
 Run the airdrop script with your configured environment:
 
@@ -511,7 +446,8 @@ This implementation creates the mint and executes the airdrop in a single operat
 </Info>
 
 <Steps>
-<Step title="Create Instructions">
+<Step>
+### Create Instructions
 
 Process recipients in chunks and create batched instructions with optimized compute limits.
 
@@ -626,7 +562,8 @@ export async function createAirdropInstructions({
 ```
 </Step>
 
-<Step title="Update Blockhash">
+<Step>
+### Update Blockhash
 
 Maintain fresh blockhashes with background refresh loop using `getLatestBlockhash()` every 30 seconds.
 
@@ -673,7 +610,8 @@ export async function updateBlockhash(
 ```
 </Step>
 
-<Step title="Sign and Send">
+<Step>
+### Sign and Send
 
 Execute batched transactions with `VersionedTransaction`, retry logic, and `sendAndConfirmTx()` confirmation.
 
@@ -795,7 +733,8 @@ export async function* signAndSendAirdropBatches(
 }
 ```
 </Step>
-<Step title="Main Airdrop File">
+<Step>
+### Main Airdrop File
 
 Put it all together in the main airdrop file.
 
@@ -928,7 +867,7 @@ const recipients = [
 </Tab>
 </Tabs>
 
-### Advanced Features
+# Advanced Features
 
 <Info>
 Solana Wallets like Phantom and Backpack already support compressed tokens.
@@ -1037,6 +976,12 @@ Set priority fees dynamically for decompression. Learn more [here](https://docs.
 
 If you have a custom FE, you can let users swap compressed tokens using the Jup-API. A reference implementation is available [here](https://github.com/Lightprotocol/example-jupiter-swap-node).
 
-## Next Steps
+# Next Steps
 
-Explore more guides in our cookbook.
+<Card
+  title="Create an airdrop with claim functionality."
+  icon="chevron-right"
+  color="#0066ff"
+  href="https://github.com/Lightprotocol/example-compressed-claim/blob/c9e4d049ab6c6c36fe06cb7e7770b79b072271ef/README.md"
+  horizontal
+/>
