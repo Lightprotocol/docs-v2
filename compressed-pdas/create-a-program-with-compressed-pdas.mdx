@@ -11,7 +11,7 @@ Compressed PDAs provide full functionality of accounts at PDAs, without per-acco
 | :------------- | :--------------------- | :---------------------- | :------------------ |
 | 100-byte PDA  | ~ 0.0016 SOL          | **~ 0.00001 SOL**      | ***160x***         |
 
-Compressed PDAs are derived using a specific program address and seed, like regular PDAs. Custom programs invoke the [Light System program](#user-content-fn-1)[^1] to create and update accounts, instead of the System program.
+Compressed PDAs are derived using a specific program address and seed, like regular PDAs. Custom programs invoke the <Tooltip tip="The program enforces compressed account layout with ownership and sum checks. It is invoked to create and interact with compressed accounts and tokens.">Light System program</Tooltip> to create and update accounts, instead of the System program.
 
 #### Compressed PDAs at a Glance
 
@@ -27,12 +27,14 @@ Compressed PDAs are derived using a specific program address and seed, like regu
 </Card>
 </CardGroup>
 
-## Start Building
+# Start Building
 
 Developing with compressed PDAs works similar to regular PDAs and involves minimal setup:
 
 <Steps>
-<Step title="Prerequisites">
+<Step>
+
+### Prerequisites
 
 <Info>
 Required versions:
@@ -70,7 +72,9 @@ light --version
 ```
 
 </Step>
-<Step title="Initialize your Program">
+<Step>
+
+### Initialize your Program
 
 Instantiate a template Solana program with compressed accounts with all required dependencies.
 
@@ -98,7 +102,9 @@ The `light init` command creates only Anchor-based projects . For Pinocchio prog
 
 </Accordion>
 </Step>
-<Step title="Build and Test">
+<Step>
+
+### Build and Test
 
 Now `cd testprogram` and run:
 
@@ -117,7 +123,7 @@ cargo test-sbf
 </Steps>
 
 
-### Common Errors
+## Common Errors
 
 <Accordion title="assert.h file not found - during compilation.">
 
@@ -197,6 +203,12 @@ Caused by:
 <ProgramExamplesTable />
 
 
-## Next Steps
+# Next Steps
 
-Start building with compressed accounts using our guides or program examples.
+<Card
+  title="Build a client for your program"
+  icon="chevron-right"
+  color="#0066ff"
+  href="/compressed-pdas/client-library"
+  horizontal
+/>

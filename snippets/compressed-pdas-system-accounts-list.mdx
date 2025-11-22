@@ -1,0 +1,66 @@
+<table>
+  <thead>
+    <tr>
+      <th style={{width: '5%', textAlign: 'left'}}></th>
+      <th style={{width: '30%', textAlign: 'left'}}>Name</th>
+      <th style={{width: '65%', textAlign: 'left'}}>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td><strong><Tooltip tip="SySTEM1eSU2p4BGQfQpimFEWWSC1XDFeun3Nqzz3rT7" cta="Program ID" href="https://solscan.io/account/SySTEM1eSU2p4BGQfQpimFEWWSC1XDFeun3Nqzz3rT7">Light System Program</Tooltip></strong></td>
+      <td>Verifies validity proofs, compressed account ownership checks, and CPIs the Account Compression Program to update tree accounts.</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td><strong>CPI Signer</strong></td>
+      <td>
+        - PDA to sign CPI calls from your program to the Light System Program.<br/>
+        - Verified by the Light System Program during CPI.<br/>
+        - Derived from your program ID.
+      </td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td><strong>Registered Program PDA</strong></td>
+      <td>Provides access control to the Account Compression Program.</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td><strong><Tooltip tip="noopb9bkMVfRPU8AsbpTUg8AQkHtKwMYZiFUjNRtMmV" cta="Program ID" href="https://solscan.io/account/noopb9bkMVfRPU8AsbpTUg8AQkHtKwMYZiFUjNRtMmV">Noop Program</Tooltip></strong></td>
+      <td>
+        - Logs compressed account state to the Solana ledger (used only in v1).<br/>
+        - Indexers parse transaction logs to reconstruct compressed account state.
+      </td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td><strong><Tooltip tip="PDA derived from Light System Program ID with seed b 'cpi_authority'.HZH7qSLcpAeDqCopVU4e5XkhT9j3JFsQiq8CmruY3aru" cta="Program ID" href="https://solscan.io/account/HZH7qSLcpAeDqCopVU4e5XkhT9j3JFsQiq8CmruY3aru">Account Compression Authority</Tooltip></strong></td>
+      <td>Signs CPI calls from the Light System Program to the Account Compression Program.</td>
+    </tr>
+    <tr>
+      <td>6</td>
+      <td><strong><Tooltip tip="compr6CUsB5m2jS4Y3831ztGSTnDpnKJTKS95d64XVq" cta="Program ID" href="https://solscan.io/account/compr6CUsB5m2jS4Y3831ztGSTnDpnKJTKS95d64XVq">Account Compression Program</Tooltip></strong></td>
+      <td>
+        - Writes to state and address tree accounts.<br/>
+        - Clients and the Account Compression Program do not interact directly — handled internally.
+      </td>
+    </tr>
+    <tr>
+      <td>7</td>
+      <td><strong>Invoking Program</strong></td>
+      <td>
+        Your program's ID, used by the Light System Program to:<br/>
+        - Derive the CPI Signer PDA.<br/>
+        - Verify the CPI Signer matches your program ID.<br/>
+        - Set the owner of created compressed accounts.
+      </td>
+    </tr>
+    <tr>
+      <td>8</td>
+      <td><strong><Tooltip tip="11111111111111111111111111111111" cta="Program ID" href="https://solscan.io/account/11111111111111111111111111111111">System Program</Tooltip></strong></td>
+      <td>Solana System Program used to transfer lamports.</td>
+    </tr>
+  </tbody>
+</table>

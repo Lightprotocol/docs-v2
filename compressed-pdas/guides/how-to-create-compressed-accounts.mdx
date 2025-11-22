@@ -3,6 +3,8 @@ title: Create Compressed Accounts
 description: Guide to create compressed accounts in Solana programs with full code examples.
 ---
 
+import CompressedPdasSystemAccountsList from '/snippets/compressed-pdas-system-accounts-list.mdx';
+
 Compressed accounts and addresses are created via CPI to the Light System Program.
 
 * Compressed and regular Solana accounts share the same functionality and are fully composable.
@@ -11,9 +13,9 @@ Compressed accounts and addresses are created via CPI to the Light System Progra
 * For Solana PDA like behavior your compressed account needs an address as persistent identifier.\
   Fungible state like [compressed token accounts](/compressed-tokens/guides/how-to-create-compressed-token-accounts) do not need addresses.
 
-<Check>
+<Note>
 Find [full code examples at the end](/compressed-pdas/guides/how-to-create-compressed-accounts#full-code-example) for Anchor and native Rust.
-</Check>
+</Note>
 
 # Implementation Guide
 
@@ -251,9 +253,9 @@ if address_tree != light_sdk::constants::ADDRESS_TREE_V2 {
 
 Initialize the compressed account struct with `LightAccount::new_init()`.
 
-<Check>
+<Note>
 `new_init()` creates a `LightAccount` instance similar to anchor `Account` and lets your program define the initial account data.
-</Check>
+</Note>
 
 <CodeGroup>
 ```rust Anchor
@@ -297,13 +299,13 @@ my_compressed_account.message = instruction_data.message;
 
 Invoke the Light System Program to create the compressed account and its address.
 
-<Check>
+<Note>
 The Light System Program
 
 * verifies the validity proof against the address tree's Merkle root,
 * inserts the address into the address tree, and
 * appends the new account hash to the state tree.
-</Check>
+</Note>
 
 <Tabs>
 <Tab title="Anchor">
@@ -368,16 +370,7 @@ LightSystemProgramCpi::new_cpi(LIGHT_CPI_SIGNER, instruction_data.proof)
 
 <Accordion title="System Accounts List">
 
-|  | Name | Description |
-|:---|:---|:---|
-| 1 | <Tooltip cta="Program ID" href="https://solscan.io/account/SySTEM1eSU2p4BGQfQpimFEWWSC1XDFeun3Nqzz3rT7" tip="SySTEM1eSU2p4BGQfQpimFEWWSC1XDFeun3Nqzz3rT7">Light System Program</Tooltip> | Verifies validity proofs, compressed account ownership checks, cpis the account compression program to update tree accounts |
-| 2 | CPI Signer | - PDA to sign CPI calls from your program to Light System Program<br/>- Verified by Light System Program during CPI<br/>- Derived from your program ID |
-| 3 | Registered Program PDA | - Access control to the Account Compression Program |
-| 4 | <Tooltip tip="noopb9bkMVfRPU8AsbpTUg8AQkHtKwMYZiFUjNRtMmV" cta="Program ID" href="https://solscan.io/account/noopb9bkMVfRPU8AsbpTUg8AQkHtKwMYZiFUjNRtMmV">Noop Program</Tooltip> | - Logs compressed account state to Solana ledger. Only used in v1.<br/>- Indexers parse transaction logs to reconstruct compressed account state |
-| 5 | <Tooltip cta="Program ID" tip="PDA derived from Light System Program ID with seed b 'cpi_authority' HZH7qSLcpAeDqCopVU4e5XkhT9j3JFsQiq8CmruY3aru" href="https://solscan.io/account/HZH7qSLcpAeDqCopVU4e5XkhT9j3JFsQiq8CmruY3aru">Account Compression Authority</Tooltip> | Signs CPI calls from Light System Program to Account Compression Program |
-| 6 | <Tooltip cta="Program ID" tip="compr6CUsB5m2jS4Y3831ztGSTnDpnKJTKS95d64XVq" href="https://solscan.io/account/compr6CUsB5m2jS4Y3831ztGSTnDpnKJTKS95d64XVq">Account Compression Program</Tooltip> | - Writes to state and address tree accounts<br/>- Client and the account compression program do not interact directly. |
-| 7 | Invoking Program | Your program's ID, used by Light System Program to:<br/>- Derive the CPI Signer PDA<br/>- Verify the CPI Signer matches your program ID<br/>- Set the owner of created compressed accounts |
-| 8 | <Tooltip cta="Program ID" tip="11111111111111111111111111111111" href="https://solscan.io/account/11111111111111111111111111111111">System Program</Tooltip> | Solana System Program to transfer lamports |
+<CompressedPdasSystemAccountsList />
 
 </Accordion>
 
