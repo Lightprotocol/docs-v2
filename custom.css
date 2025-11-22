@@ -22,3 +22,21 @@
   padding-top: 1rem !important;
   border-top: 1px solid rgba(0, 0, 0, 0.1) !important;
 }
+
+/* Logo size - navbar smaller, footer normal */
+#navbar img[alt*="logo"],
+#navbar img[src*="logo"],
+nav img[alt*="logo"],
+nav img[src*="logo"],
+header img[alt*="logo"],
+header img[src*="logo"] {
+  height: auto !important;
+  max-height: 40px !important;
+  width: auto !important;
+}
+
+footer img[alt*="logo"],
+footer img[src*="logo"] {
+  height: auto !important;
+  width: auto !important;
+}

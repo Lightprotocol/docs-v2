@@ -5,7 +5,7 @@
   "colors": {
     "primary": "#0066FF",
     "light": "#0066FF",
-    "dark": "#0066FF"
+    "dark": "#B6D3FF"
   },
   "favicon": "/favicon.png",
   "appearance": {
@@ -32,8 +32,7 @@
                   "learn/core-concepts/transaction-lifecycle",
                   "learn/core-concepts/considerations"
                 ]
-              },
-              "learn/ai-tools-guide"
+              }
             ]
           },
           {
@@ -144,6 +143,16 @@
               "references/terminology",
               "references/security"
             ]
+          },
+          {
+            "group": "Libraries",
+            "pages": [
+              "libraries/stateless-js",
+              "libraries/compressed-token",
+              "libraries/light-client",
+              "libraries/light-sdk",
+              "libraries/light-program-test"
+            ]
           }
         ]
       },
@@ -154,7 +163,6 @@
           {
             "group": "Guides",
             "pages": [
-              "compressed-tokens/guides",
               "compressed-tokens/guides/how-to-create-compressed-token-accounts",
               "compressed-tokens/guides/how-to-mint-compressed-tokens",
               "compressed-tokens/guides/how-to-transfer-compressed-token",
@@ -169,7 +177,6 @@
           {
             "group": "Advanced Guides",
             "pages": [
-              "compressed-tokens/advanced-guides",
               "compressed-tokens/advanced-guides/how-to-combine-operations-in-one-transaction",
               "compressed-tokens/advanced-guides/create-an-airdrop",
               "compressed-tokens/advanced-guides/create-an-airdrop-with-claim",
@@ -188,7 +195,6 @@
           {
             "group": "Guides",
             "pages": [
-              "compressed-pdas/guides",
               "compressed-pdas/guides/how-to-create-compressed-accounts",
               "compressed-pdas/guides/how-to-update-compressed-accounts",
               "compressed-pdas/guides/how-to-close-compressed-accounts",
@@ -203,9 +209,18 @@
         "tab": "API Reference",
         "pages": [
           {
+            "group": "Libraries",
+            "pages": [
+              "libraries/stateless-js",
+              "libraries/compressed-token",
+              "libraries/light-client",
+              "libraries/light-sdk",
+              "libraries/light-program-test"
+            ]
+          },
+          {
             "group": "JSON RPC Methods",
             "pages": [
-              "resources/json-rpc-methods",
               "resources/json-rpc-methods/getcompressedaccount",
               "resources/json-rpc-methods/getcompressedaccountsbyowner",
               "resources/json-rpc-methods/getcompressedbalancebyowner",
@@ -230,10 +245,21 @@
             ]
           }
         ]
+      },
+      {
+        "tab": "Changelog",
+        "pages": [
+          "changelog"
+        ]
       }
     ],
     "global": {
       "anchors": [
+        {
+          "anchor": "AI Tools",
+          "href": "https://zkcompression.com/learn/ai-tools-guide",
+          "icon": "bot"
+        },
         {
           "anchor": "GitHub",
           "href": "https://github.com/Lightprotocol/light-protocol",
