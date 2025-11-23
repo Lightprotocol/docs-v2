@@ -4,6 +4,7 @@ description: Overview to compressed PDA core features and guide for program deve
 ---
 
 import ProgramExamplesTable from '/snippets/program-examples-table.mdx';
+import DevelopmentEnvironmentSetup from '/snippets/development-environment-setup.mdx';
 
 Compressed PDAs provide full functionality of accounts at PDAs, without per-account rent cost.
 
@@ -35,7 +36,6 @@ Developing with compressed PDAs works similar to regular PDAs and involves minim
 <Step>
 
 ### Prerequisites
-
 <Info>
 Required versions:
 
@@ -45,31 +45,7 @@ Required versions:
 * **Zk compression CLI**: 0.27.0 or later
 * **Node.js**: 23.5.0 or later
 </Info>
-
-**Install Solana CLI:**
-
-```bash
-sh -c "$(curl -sSfL https://release.solana.com/v2.2.15/install)"
-```
-
-**Install Anchor CLI:**
-
-```bash
-cargo install --git https://github.com/coral-xyz/anchor avm --force
-avm install latest
-avm use latest
-```
-
-**Install the Light CLI:**
-
-```bash
-npm -g i @lightprotocol/zk-compression-cli
-```
-
-```bash
-### verify installation
-light --version
-```
+<DevelopmentEnvironmentSetup />
 
 </Step>
 <Step>
