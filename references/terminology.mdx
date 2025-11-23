@@ -21,16 +21,6 @@ Light Protocol's program that implements state and address trees for ZK Compress
  **Source**: https://github.com/Lightprotocol/light-protocol/tree/main/programs/account-compression
 </Info>
 
-## Account hash
-
-A 32-byte identifier uniquely representing a compressed account's state and position within a state tree.
-
-
-## Account derivation
-
-A process to create deterministic addresses for compressed PDAs by hashing program IDs and seed values.
-
-
 ## Address tree
 
 A Merkle tree that stores derived addresses that serves as optional, persistent identifiers for compressed accounts. These addresses serve as persistent identifiers that don't change when account data updates.
@@ -62,6 +52,9 @@ Compressed accounts at Program Derived Addresses.
 
 A data structure that holds arbitrary data, represented as a 32-byte hash stored in a leaf of a state Merkle tree. Compressed accounts do not require a rent exempt balance upon creation.
 
+## Compressed Account hash
+
+A 32-byte identifier uniquely that represents a compressed account's state, stored in a state tree.
 
 ## Token mint 
 

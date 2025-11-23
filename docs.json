@@ -5,7 +5,7 @@
   "colors": {
     "primary": "#0066FF",
     "light": "#0066FF",
-    "dark": "#B6D3FF"
+    "dark": "#0066FF"
   },
   "favicon": "/favicon.png",
   "appearance": {
@@ -88,6 +88,39 @@
             ]
           },
           {
+            "group": "JSON RPC Methods",
+            "pages": [
+              "api-reference/json-rpc-methods/overview",
+              {
+                "group": "Methods",
+                "pages": [
+                  "api-reference/json-rpc-methods/methods",
+                  "api-reference/json-rpc-methods/getcompressedaccount",
+                  "api-reference/json-rpc-methods/getcompressedaccountsbyowner",
+                  "api-reference/json-rpc-methods/getcompressedbalancebyowner",
+                  "api-reference/json-rpc-methods/getcompressedbalance",
+                  "api-reference/json-rpc-methods/getcompressedminttokenholders",
+                  "api-reference/json-rpc-methods/getcompressedtokenaccountbalance",
+                  "api-reference/json-rpc-methods/getcompressedtokenaccountbydelegate",
+                  "api-reference/json-rpc-methods/getcompressedtokenaccountsbyowner",
+                  "api-reference/json-rpc-methods/getcompressedtokenbalancesbyowner",
+                  "api-reference/json-rpc-methods/getcompressionsignaturesforaccount",
+                  "api-reference/json-rpc-methods/getcompressionsignaturesforaddress",
+                  "api-reference/json-rpc-methods/getcompressionsignaturesforowner",
+                  "api-reference/json-rpc-methods/getcompressionsignaturesfortokenowner",
+                  "api-reference/json-rpc-methods/getindexerhealth",
+                  "api-reference/json-rpc-methods/getindexerslot",
+                  "api-reference/json-rpc-methods/getlatestcompressionsignatures",
+                  "api-reference/json-rpc-methods/getlatestnonvotingsignatures",
+                  "api-reference/json-rpc-methods/getmultiplecompressedaccounts",
+                  "api-reference/json-rpc-methods/getmultiplenewaddressproofs",
+                  "api-reference/json-rpc-methods/gettransactionwithcompressioninfo",
+                  "api-reference/json-rpc-methods/getvalidityproof"
+                ]
+              }
+            ]
+          },
+          {
             "group": "Resources",
             "pages": [
               "resources/cli-installation",
@@ -96,33 +129,6 @@
                 "pages": [
                   "resources/error-cheatsheet",
                   "resources/error-cheatsheet/debug-0x179b-6043-proofverificationfailed"
-                ]
-              },
-              {
-                "group": "JSON RPC Methods",
-                "pages": [
-                  "resources/json-rpc-methods",
-                  "resources/json-rpc-methods/getcompressedaccount",
-                  "resources/json-rpc-methods/getcompressedaccountsbyowner",
-                  "resources/json-rpc-methods/getcompressedbalancebyowner",
-                  "resources/json-rpc-methods/getcompressedbalance",
-                  "resources/json-rpc-methods/getcompressedminttokenholders",
-                  "resources/json-rpc-methods/getcompressedtokenaccountbalance",
-                  "resources/json-rpc-methods/getcompressedtokenaccountbydelegate",
-                  "resources/json-rpc-methods/getcompressedtokenaccountsbyowner",
-                  "resources/json-rpc-methods/getcompressedtokenbalancesbyowner",
-                  "resources/json-rpc-methods/getcompressionsignaturesforaccount",
-                  "resources/json-rpc-methods/getcompressionsignaturesforaddress",
-                  "resources/json-rpc-methods/getcompressionsignaturesforowner",
-                  "resources/json-rpc-methods/getcompressionsignaturesfortokenowner",
-                  "resources/json-rpc-methods/getindexerhealth",
-                  "resources/json-rpc-methods/getindexerslot",
-                  "resources/json-rpc-methods/getlatestcompressionsignatures",
-                  "resources/json-rpc-methods/getlatestnonvotingsignatures",
-                  "resources/json-rpc-methods/getmultiplecompressedaccounts",
-                  "resources/json-rpc-methods/getmultiplenewaddressproofs",
-                  "resources/json-rpc-methods/gettransactionwithcompressioninfo",
-                  "resources/json-rpc-methods/getvalidityproof"
                 ]
               },
               {
@@ -145,13 +151,13 @@
             ]
           },
           {
-            "group": "Libraries",
+            "group": "Reference Libraries",
             "pages": [
-              "libraries/stateless-js",
-              "libraries/compressed-token",
-              "libraries/light-client",
-              "libraries/light-sdk",
-              "libraries/light-program-test"
+              "api-reference/libraries/stateless-js",
+              "api-reference/libraries/compressed-token",
+              "api-reference/libraries/light-client",
+              "api-reference/libraries/light-sdk",
+              "api-reference/libraries/light-program-test"
             ]
           }
         ]
@@ -209,39 +215,42 @@
         "tab": "API Reference",
         "pages": [
           {
-            "group": "Libraries",
+            "group": "Reference Libraries",
             "pages": [
-              "libraries/stateless-js",
-              "libraries/compressed-token",
-              "libraries/light-client",
-              "libraries/light-sdk",
-              "libraries/light-program-test"
+              "api-reference/index"
             ]
           },
           {
             "group": "JSON RPC Methods",
             "pages": [
-              "resources/json-rpc-methods/getcompressedaccount",
-              "resources/json-rpc-methods/getcompressedaccountsbyowner",
-              "resources/json-rpc-methods/getcompressedbalancebyowner",
-              "resources/json-rpc-methods/getcompressedbalance",
-              "resources/json-rpc-methods/getcompressedminttokenholders",
-              "resources/json-rpc-methods/getcompressedtokenaccountbalance",
-              "resources/json-rpc-methods/getcompressedtokenaccountbydelegate",
-              "resources/json-rpc-methods/getcompressedtokenaccountsbyowner",
-              "resources/json-rpc-methods/getcompressedtokenbalancesbyowner",
-              "resources/json-rpc-methods/getcompressionsignaturesforaccount",
-              "resources/json-rpc-methods/getcompressionsignaturesforaddress",
-              "resources/json-rpc-methods/getcompressionsignaturesforowner",
-              "resources/json-rpc-methods/getcompressionsignaturesfortokenowner",
-              "resources/json-rpc-methods/getindexerhealth",
-              "resources/json-rpc-methods/getindexerslot",
-              "resources/json-rpc-methods/getlatestcompressionsignatures",
-              "resources/json-rpc-methods/getlatestnonvotingsignatures",
-              "resources/json-rpc-methods/getmultiplecompressedaccounts",
-              "resources/json-rpc-methods/getmultiplenewaddressproofs",
-              "resources/json-rpc-methods/gettransactionwithcompressioninfo",
-              "resources/json-rpc-methods/getvalidityproof"
+              "api-reference/json-rpc-methods/overview",
+              {
+                "group": "Methods",
+                "pages": [
+                  "api-reference/json-rpc-methods/methods",
+                  "api-reference/json-rpc-methods/getcompressedaccount",
+                  "api-reference/json-rpc-methods/getcompressedaccountsbyowner",
+                  "api-reference/json-rpc-methods/getcompressedbalancebyowner",
+                  "api-reference/json-rpc-methods/getcompressedbalance",
+                  "api-reference/json-rpc-methods/getcompressedminttokenholders",
+                  "api-reference/json-rpc-methods/getcompressedtokenaccountbalance",
+                  "api-reference/json-rpc-methods/getcompressedtokenaccountbydelegate",
+                  "api-reference/json-rpc-methods/getcompressedtokenaccountsbyowner",
+                  "api-reference/json-rpc-methods/getcompressedtokenbalancesbyowner",
+                  "api-reference/json-rpc-methods/getcompressionsignaturesforaccount",
+                  "api-reference/json-rpc-methods/getcompressionsignaturesforaddress",
+                  "api-reference/json-rpc-methods/getcompressionsignaturesforowner",
+                  "api-reference/json-rpc-methods/getcompressionsignaturesfortokenowner",
+                  "api-reference/json-rpc-methods/getindexerhealth",
+                  "api-reference/json-rpc-methods/getindexerslot",
+                  "api-reference/json-rpc-methods/getlatestcompressionsignatures",
+                  "api-reference/json-rpc-methods/getlatestnonvotingsignatures",
+                  "api-reference/json-rpc-methods/getmultiplecompressedaccounts",
+                  "api-reference/json-rpc-methods/getmultiplenewaddressproofs",
+                  "api-reference/json-rpc-methods/gettransactionwithcompressioninfo",
+                  "api-reference/json-rpc-methods/getvalidityproof"
+                ]
+              }
             ]
           }
         ]

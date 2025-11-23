@@ -1,9 +1,76 @@
 ---
 title: "Changelog"
-description: "Product updates and announcements"
+description: "Latest Releases"
 rss: true
 ---
 
-<Update label="November 2025" description="Documentation">
-  Added Mintlify documentation to the project.
+<Update label="November 2025" description="Alpha Releases">
+
+### ZK Compression CLI
+
+<Tabs>
+  <Tab title="npm">
+    ```bash
+    npm install -g @lightprotocol/zk-compression-cli@0.27.1-alpha.2
+    ```
+  </Tab>
+  <Tab title="yarn">
+    ```bash
+    yarn global add @lightprotocol/zk-compression-cli@0.27.1-alpha.2
+    ```
+  </Tab>
+  <Tab title="pnpm">
+    ```bash
+    pnpm add -g @lightprotocol/zk-compression-cli@0.27.1-alpha.2
+    ```
+  </Tab>
+</Tabs>
+
+### TypeScript Client
+
+<Tabs>
+  <Tab title="npm">
+    ```bash
+    npm install @lightprotocol/stateless.js@0.22.1-alpha.1
+    npm install @lightprotocol/compressed-token
+    ```
+  </Tab>
+  <Tab title="yarn">
+    ```bash
+    yarn add @lightprotocol/stateless.js@0.22.1-alpha.1
+    yarn add @lightprotocol/compressed-token
+    ```
+  </Tab>
+  <Tab title="pnpm">
+    ```bash
+    pnpm add @lightprotocol/stateless.js@0.22.1-alpha.1
+    pnpm add @lightprotocol/compressed-token
+    ```
+  </Tab>
+</Tabs>
+
+<Tip>
+`TestRpc` for unit tests is built into `@lightprotocol/stateless.js`
+</Tip>
+
+### Rust Client
+
+```
+[dependencies]
+light-client = "0.16.0"
+light-sdk = "0.16.0"
+```
+
+## Program Development
+
+```toml
+[dependencies]
+light-sdk = "0.16.0"
+light-compressed-token-sdk = "0.1.0"
+
+[dev-dependencies]
+light-program-test = "1.2.1"
+```
+
+
 </Update>

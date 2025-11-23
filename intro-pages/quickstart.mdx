@@ -10,7 +10,9 @@ Compressed tokens are SPL compatible and supported by leading wallets such as Ph
 </Check>
 
 <Steps>
-<Step title="Install Dependencies">
+<Step>
+
+## Install Dependencies
 
 <Tabs>
 <Tab title="npm">
@@ -47,7 +49,9 @@ pnpm add \
 </Tab>
 </Tabs>
 </Step>
-<Step title="Create an RPC connection">
+<Step>
+
+## Create an RPC connection
 
 Run `test-connection.ts` to verify your setup:
 
@@ -66,7 +70,8 @@ console.log("Connection created");
 console.log("RPC Endpoint:", RPC_ENDPOINT);
 ```
 </Step>
-<Step title="Create and Mint Compressed Tokens">
+<Step>
+## Create and Mint Compressed Tokens
 
 <Accordion title="Generate your keypair, if you don't have one yet.">
 
@@ -168,7 +173,9 @@ const main = async () => {
 main().catch(console.error);
 ```
 </Step>
-<Step title="That's it!">
+<Step>
+
+## That's it!
 
 
 You've created and minted compressed tokens. The output shows:
