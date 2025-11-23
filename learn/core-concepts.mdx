@@ -9,7 +9,8 @@ description: "Overview to ZK Compression's Core Concepts. Get a high-level syste
 
 ### Storage of Compressed State
 
-Compressed accounts store state as call data on <Tooltip tip="The ledger is an immutable historical record of all Solana transactions signed by clients since the genesis block.">Solana's ledger</Tooltip>, removing rent per account.
+Compressed accounts store state as call data on <Tooltip tip="The ledger is an immutable historical record of all Solana transactions signed by clients since the genesis block.">Solana's ledger</Tooltip>.
+This maintains Solana's security and removes the need for rent-exemption per account.
 </Step>
 <Step>
 
@@ -35,9 +36,10 @@ The new state is recorded as a log on the Solana ledger with each transaction.
 </Step>
 <Step>
 
-### Photon RPC Nodes
+### RPC Nodes
 
-<Tooltip tip="RPC nodes index the Light Protocol programs. This allows clients to read and build transactions to interact with compressed state.The canonical ZK Compression indexer is named Photon, built by Helius Labs. See the Github repo for more info." cta="repo" href="https://github.com/helius-labs/photon">Photon RPC nodes</Tooltip> index the state changes, making the compressed account state available to clients via the ZK Compression RPC API.
+<Tooltip tip="RPC nodes index the Light Protocol programs. This allows clients to read and build transactions to interact with compressed state.The canonical ZK Compression indexer is named Photon, built by Helius Labs. See the Github repo for more info." cta="repo" href="https://github.com/helius-labs/photon">Photon RPC nodes</Tooltip> 
+index the state changes and make the compressed account state available to clients via the ZK Compression RPC API.
 
 </Step>
 <Step>
