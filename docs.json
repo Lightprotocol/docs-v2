@@ -273,6 +273,16 @@
       ]
     }
   },
+  "api": {
+    "playground": {
+      "display": "interactive"
+    },
+    "examples": {
+      "languages": ["curl", "javascript", "python"],
+      "defaults": "all",
+      "prefill": true
+    }
+  },
   "logo": {
     "light": "/logo/logo-black.svg",
     "dark": "/logo/logo-white.svg"
