@@ -74,7 +74,7 @@
             "pages": [
               "compressed-pdas/create-a-program-with-compressed-pdas",
               {
-                "group": "Guides",
+                "group": "Program Guides",
                 "pages": [
                   "compressed-pdas/guides",
                   "compressed-pdas/guides/how-to-create-compressed-accounts",
@@ -84,7 +84,8 @@
                   "compressed-pdas/guides/how-to-burn-compressed-accounts"
                 ]
               },
-              "compressed-pdas/program-examples"
+              "compressed-pdas/program-examples",
+              "client-library/client-guide"
             ]
           },
           {
