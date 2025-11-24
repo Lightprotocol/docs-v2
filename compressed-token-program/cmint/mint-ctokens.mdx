@@ -1,0 +1,33 @@
+---
+title: Mint cTokens to cToken Accounts
+description: Mint new tokens directly to decompressed CToken accounts.
+---
+
+Part of the MintAction batch instruction.
+
+**Use when:** Issuing new tokens of a specific compressed mint to users holding CToken accounts.
+
+**Key parameters:**
+
+- `account_index`: Index into remaining accounts for the recipient token account (u8)
+- `amount`: Number of tokens to mint (u64)
+
+**Example:**
+
+```rust
+use light_compressed_token_sdk::compressed_token::mint_action::{
+    MintActionCompressedInstructionData,
+    MintToCTokenAction,
+};
+
+let instruction_data = MintActionCompressedInstructionData::new_mint(
+    input.compressed_mint_with_context.address,
+    input.compressed_mint_with_context.root_index,
+    compressed_proof,
+    input.compressed_mint_with_context.mint.clone(),
+)
+.with_mint_to_ctoken(MintToCTokenAction {
+    account_index: 0, // First account in remaining accounts
+    amount: 1_000_000,
+});
+```

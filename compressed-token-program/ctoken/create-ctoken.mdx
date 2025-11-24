@@ -1,0 +1,66 @@
+---
+title: Create cToken Account with compressible extension
+description: The compressible extension sponsors rent-exemption for any type of Solana account except mints. 
+---
+
+<table>
+  <thead>
+    <tr>
+      <th style={{width: '20%', textAlign: 'left'}}></th>
+      <th style={{width: '20%', textAlign: 'left'}}>Supported Accounts</th>
+      <th style={{width: '45%', textAlign: 'left'}}>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style={{textAlign: 'left'}}>**Compressible**</td>
+      <td style={{textAlign: 'left'}}>
+        cToken accounts
+      </td>
+      <td style={{textAlign: 'left'}}>
+        * **Sponsored rent-exemption**
+        * 200x cheaper than SPL tokens
+        * Must be **added at account creation**
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+Creates a CToken Solana account (decompressed compressed token account). Can be created with or without a `Compressible` extension that enables automatic compression when rent balance is insufficient.
+
+**Use when:** You need to create a new token account for a user to hold compressed tokens, especially when you want flexible rent management through the Compressible extension.
+
+**Key parameters:**
+
+- `account_pubkey`: Public key of the CToken account to create
+- `mint_pubkey`: Public key of the associated mint
+- `owner_pubkey`: Public key of the account owner
+- `compressible_config`: (Optional) Configuration for Compressible extension:
+  - `rent_payment`: Number of epochs to prepay for rent (cannot be 1)
+  - `write_top_up`: Additional lamports for future write operations
+  - `compress_to_account_pubkey`: Optional specific pubkey for compression target (useful for PDA token accounts)
+
+**Example:**
+
+```rust
+use light_compressed_token_sdk::ctoken::create_token_account::{
+    create_compressible_token_account_instruction,
+    CreateCompressibleTokenAccount,
+};
+use light_ctoken_types::state::TokenDataVersion;
+
+let create_token_account_ix = create_compressible_token_account_instruction(
+    CreateCompressibleTokenAccount {
+        account_pubkey: token_account_keypair.pubkey(),
+        mint_pubkey: mint,
+        owner_pubkey: owner,
+        compressible_config,
+        rent_sponsor,
+        pre_pay_num_epochs: 2,
+        lamports_per_write: Some(100),
+        payer: payer.pubkey(),
+        compress_to_account_pubkey: None,
+        token_account_version: TokenDataVersion::ShaFlat,
+    },
+)?;
+```

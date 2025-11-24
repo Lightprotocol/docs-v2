@@ -1,0 +1,53 @@
+---
+title: Mint cTokens to cToken Accounts
+description: Mint new tokens directly to decompressed CToken accounts.
+---
+
+
+Transfers tokens between two decompressed CToken Solana accounts. Follows SPL Token semantics and includes automatic rent top-ups for compressible accounts.
+
+**Use when:** Performing standard token transfers between users who both hold decompressed CToken accounts.
+
+**Key parameters:**
+
+- `source`: Public key of the source CToken account
+- `destination`: Public key of the destination CToken account
+- `amount`: Number of tokens to transfer (u64)
+- `authority`: Public key of the authority (owner or delegate) that can spend from source
+- `payer`: (Optional) Public key paying for transaction fees and rent top-ups
+
+**Example:**
+
+```rust
+use light_client::rpc::Rpc;
+use light_token_client::actions::ctoken_transfer::create_transfer_ctoken_instruction;
+
+async fn example_ctoken_transfer<R: Rpc>(
+    rpc: &mut R,
+    source_pubkey: Pubkey,
+    destination_pubkey: Pubkey,
+    amount: u64,
+    authority_keypair: &Keypair,
+    payer_keypair: &Keypair,
+) -> Result<(), RpcError> {
+    let transfer_instruction = create_transfer_ctoken_instruction(
+        source_pubkey,
+        destination_pubkey,
+        amount,
+        authority_keypair.pubkey(),
+    )?;
+
+    let mut signers = vec![payer_keypair];
+    if authority_keypair.pubkey() != payer_keypair.pubkey() {
+        signers.push(authority_keypair);
+    }
+
+    rpc.create_and_send_transaction(
+        &[transfer_instruction],
+        &payer_keypair.pubkey(),
+        &signers
+    ).await?;
+
+    Ok(())
+}
+```
