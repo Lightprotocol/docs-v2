@@ -4,7 +4,7 @@ sidebarTitle: Overview New
 description: Overview of cMints, cTokens, and compressed token accounts.
 ---
 
-The [Compressed Token Program](https://github.com/Lightprotocol/light-protocol/tree/main/programs/compressed-token) extends existing Solana token standards and is **fully compatible with SPL mints and tokens**.
+The [Compressed Token Program](https://github.com/Lightprotocol/light-protocol/tree/main/programs/compressed-token) extends existing Solana token standards with cMints, cTokens and compressed tokens.
 
 <table>
   <thead>
@@ -21,7 +21,7 @@ The [Compressed Token Program](https://github.com/Lightprotocol/light-protocol/t
       <td style={{textAlign: 'left'}}>
         <ul>
           <li>**Rent-free mint accounts** (similar to SPL mints)</li>
-          <li>Optional [Token Metadata](#token-metadata) **extension**</li>
+          <li>Custom [Token Metadata](#token-metadata) **extension**</li>
         </ul>
       </td>
     </tr>
@@ -31,8 +31,8 @@ The [Compressed Token Program](https://github.com/Lightprotocol/light-protocol/t
       <td style={{textAlign: 'left'}}>
         <ul>
           <li>**Token accounts** derived from cMints (**SPL-compatible**)</li>
-          <li>Optional **sponsored rent** exemption via [compressible extension](#compressible) (200x cheaper than SPL tokens)</li>
-          <li>Use for token accounts with **frequent writes** (trading, etc.)</li>
+          <li>**Sponsored rent** exemption via [compressible extension](#compressible) (200x cheaper than SPL tokens)</li>
+          <li>Use for **active token accounts** with frequent writes (trading, etc.)</li>
         </ul>
       </td>
     </tr>
@@ -43,7 +43,7 @@ The [Compressed Token Program](https://github.com/Lightprotocol/light-protocol/t
         <ul>
           <li>**Compressed account** with `TokenData` field</li>
           <li>**Rent-free** and SPL-compatible</li>
-          <li>Use for **token distribution** (airdrops, payments, etc.)</li>
+          <li>Use for **token distribution** (airdrops, payments, etc.) and **storage of inactive tokens**</li>
           <li>cToken accounts with the **[compressible extension](#compressible) are automatically compressed/decompressed** when active/inactive.</li>
         </ul>
       </td>
@@ -52,7 +52,8 @@ The [Compressed Token Program](https://github.com/Lightprotocol/light-protocol/t
 </table>
 
 <Tip>
-**SPL mints and tokens** owned by the [Token Program](https://github.com/solana-program/token) or [Token-2022](https://github.com/solana-program/token-2022) **require rent** by default. 
+**SPL mints and tokens** owned by the [Token Program](https://github.com/solana-program/token) or [Token-2022](https://github.com/solana-program/token-2022) **require rent** by default.<br /> 
+You can **migrate SPL token accounts to cTokens** with compressible extension for **sponsored rent-exemption** while keeping the **same interoparability**.
 </Tip>
 
 # cMint Accounts
@@ -62,13 +63,9 @@ The [Compressed Token Program](https://github.com/Lightprotocol/light-protocol/t
 * SPL mints can not be compressed to cMints. 
 </Note>
 
-cMints **store data and uniquely identify tokens**, similar to SPL mint accounts with two core differences:
+cMints **uniquely represent a token on Solana and store its global metadata**, similar to SPL mint accounts with two core differences:
 1. cMint accounts are **rent-free**.
 2. Tokens created from cMints are **cTokens** (fully compatible with SPL tokens).
-
-<Tip>
-[Token Metadata](compressible/token-metadata) can be added to cMints in the `extensions` field.
-</Tip>
 
 <Tabs>
   <Tab title="Diagram">
@@ -298,13 +295,9 @@ cToken ATAs can implement the **[compressible extension](/compressible/compressi
 
 # Compressed Token Account
 
-<Note>
-* Compressed token accounts are stored as `TokenData` in **compressed accounts**.
-* Leading **wallets** like Phantom and Backpack **support compressed tokens**. The UI does not distinguish between SPL and compressed tokens.
-</Note>
+Compressed token accounts store token balance, owner, and other information like SPL and cTokens. Any cToken or SPL token can be compressed/decompressed at will.
 
-Compressed token accounts store token balance, owner, and other information for SPL tokens and cTokens. Any cToken or SPL token can be compressed at will. 
-
+We recommend to use compressed tokens for token distribution or storage of inactive tokens.
 <Tip>
 **cToken accounts** with the **[compressible extension](/compressible/compressible) are automatically compressed** with no writes in 6300 slots (1.75 hours), and decompressed with new writes.
 </Tip>
@@ -332,12 +325,6 @@ Compressed token accounts store token balance, owner, and other information for 
     ```
   </Tab>
 </Tabs>
-
-<Info>
-* Compressed token accounts use the hash as identifier by default. Find the [source code here](https://github.com/Lightprotocol/light-protocol/blob/main/programs/compressed-token/program/src/compressed_token_account.rs).
-* Addresses are optional, since ensuring that the address of a new account is unique incurs additional computational overhead.
-* This is different from cToken and SPL token accounts, which use the address as unique identifier.
-</Info>
 
 # Next Steps
 

@@ -40,9 +40,21 @@
             "pages": [
               "compressed-token-program/overview",
               "compressed-token-program/c-token-program",
-              "compressed-token-program/ctoken",
               {
-                "group": "Compressed Tokens",
+                "group": "cMint",
+                "pages": [
+                  "compressed-token-program/cmint/cmint",
+                  "compressed-token-program/cmint/update-metadata"
+                ]
+              },              
+              {
+                "group": "cToken",
+                "pages": [
+                  "compressed-token-program/ctoken/ctoken"
+                ]
+              },
+              {
+                "group": "Compressed Token",
                 "pages": [
                   "compressed-token-program/compressed-tokens/compressed-token-overview",
                   {
@@ -84,8 +96,7 @@
                     ]
                   }
                 ]
-              },
-              "compressed-token-program/extensions/token-metadata"
+              }
             ]
           },
           {
@@ -186,9 +197,21 @@
         "pages": [
           "compressed-token-program/overview",
           "compressed-token-program/c-token-program",
-          "compressed-token-program/ctoken",
           {
-            "group": "Compressed Tokens",
+            "group": "cMint",
+            "pages": [
+              "compressed-token-program/cmint/cmint",
+              "compressed-token-program/cmint/update-metadata"
+            ]
+          },
+          {
+            "group": "cToken",
+            "pages": [
+              "compressed-token-program/ctoken/ctoken"
+            ]
+          },
+          {
+            "group": "Compressed Token",
             "pages": [
               "compressed-token-program/compressed-tokens/compressed-token-overview",
               {
@@ -230,8 +253,7 @@
                 ]
               }
             ]
-          },
-          "compressed-token-program/extensions/token-metadata"
+          }
         ]
       },
       {

@@ -1,0 +1,145 @@
+---
+title: Create a cMint with Token Metadata
+description: Rent-free mint accounts with Token Metadata to store token information.
+---
+
+
+<table>
+  <thead>
+    <tr>
+      <th style={{width: '15%', textAlign: 'left'}}></th>
+      <th style={{width: '22%', textAlign: 'left'}}>Type</th>
+      <th style={{width: '63%', textAlign: 'left'}}>Key Features</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style={{textAlign: 'left'}}>**[cMint](#cmint-accounts)**</td>
+      <td style={{textAlign: 'left'}}>Compressed account</td>
+      <td style={{textAlign: 'left'}}>
+        <ul>
+          <li>**Rent-free mint accounts** (similar to SPL mints)</li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td style={{textAlign: 'left'}}>**Token Metadata**</td>
+      <td>Extension</td>  
+      <td style={{textAlign: 'left'}}>
+        * Stores information like name, symbol, URI, and custom fields.
+        * Must be added at creation of cMint
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+## Key Points
+
+cMints **uniquely represent a token on Solana and store its global metadata**, similar to SPL mint accounts with a few core differences:
+1. cMint accounts are **rent-free**.
+2. Tokens created from cMints are **cTokens** (fully compatible with SPL tokens).
+3. Token metadata (name, symbol, URI) is stored as an extension within the compressed mint account.
+
+<Tabs>
+  <Tab title="Diagram">
+    <Frame>
+      <img
+        src="/images/token-explainer.png"
+        alt="Diagram showing cMint compressed account structure with three components: Hash (identifier for cMint in purple box), Account (struct containing BaseMint with SPL-compatible fields, cMint Data for program state, and optional Extensions for Token Metadata), and BasemintData (containing Supply, Decimals, Mint Authority, and Freeze Authority fields) with Token Metadata extension"
+      />
+    </Frame>
+  </Tab>
+  <Tab title="Source Code">
+    ```rust
+    pub struct CompressedMint {
+        // SPL mint layout
+        pub base: BaseMint,
+        // cMint state used by the Compressed Token Program
+        pub metadata: CompressedMintMetadata
+        // Field for Token Metadata extension
+        pub extensions: Option<Vec<ExtensionStruct>>,
+    }
+    ```
+  </Tab>
+</Tabs>
+
+<Info>
+Find the [source code of cMints here](https://github.com/Lightprotocol/light-protocol/blob/main/program-libs/ctoken-types/src/state/mint/compressed_mint.rs).
+</Info>
+
+The `metadata` field is used by the Compressed Token Program to store the internal state of a cMint.
+
+The `BaseMint` field replicates the field layout and serialization format of [SPL Mint accounts](https://solana.com/docs/tokens#mint-account). The struct is serialized with Borsh to match the on-chain format of SPL tokens and mints.
+
+
+## Get Started 
+
+
+These are the steps to create a cMint with metadata:
+
+1. Generate a mint seed keypair
+2. Prepare token metadata
+3. Call the `create_mint` action
+4. Sign and send the transaction
+
+<Note>
+**Metadata fields must be set at cMint creation.**
+* Standard fields can be updated freely
+* For `additional_metadata`, only existing keys can be modified or removed.
+</Note>
+
+<Tabs>
+  <Tab title="TypeScript">
+
+
+    ```typescript
+    // Placeholder - not yet supported in TypeScript SDK
+
+    ```
+  </Tab>
+  <Tab title="Rust">
+    ```rust
+    use light_sdk::compressed_account::CompressedAccountWithMerkleContext;
+    use light_compressed_token::mint_sdk::create_mint;
+
+    // 1. Generate mint seed
+    let mint_seed = Keypair::new();
+
+    // 2. Prepare metadata
+    let metadata = Some(TokenMetadataInstructionData {
+        name: b"My Compressed Token".to_vec(),
+        symbol: b"MCT".to_vec(),
+        uri: b"https://example.com/token-metadata.json".to_vec(),
+        update_authority: mint_authority.pubkey(),
+        additional_metadata: vec![
+            AdditionalMetadata {
+                key: b"description".to_vec(),
+                value: b"A sample compressed token".to_vec(),
+            }
+        ],
+    });
+
+    // 3. Create the cMint with metadata
+    create_mint(
+        &rpc,
+        &mint_seed,
+        9, // decimals
+        &mint_authority,
+        None, // freeze_authority
+        metadata,
+        &payer,
+    ).await?;
+    ```
+  </Tab>
+</Tabs>
+
+## Next Steps
+
+<Card
+  title=" Learn about all relevant actions to cMints"
+  icon="chevron-right"
+  color="#0066ff"
+  href="/compressible/mint-actions"
+  horizontal
+>
+</Card>
