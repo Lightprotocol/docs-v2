@@ -1,0 +1,79 @@
+---
+title: Overview
+description: "Overview to compressed tokens and guides with full code examples."
+---
+
+import GuidesTable from '/snippets/compressed-tokens-guides-table.mdx';
+import AdvancedGuidesTable from '/snippets/compressed-tokens-advanced-guides-table.mdx';
+import SetupEnvironment from '/snippets/setup-environment-tabs.mdx';
+import InstallDependencies from '/snippets/install-dependencies-codegroup.mdx';
+
+<table>
+  <thead>
+    <tr>
+      <th style={{width: '15%', textAlign: 'left'}}></th>
+      <th style={{width: '22%', textAlign: 'left'}}>Account Type</th>
+      <th style={{width: '63%', textAlign: 'left'}}>Key Features</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style={{textAlign: 'left'}}>**[Compressed Token](#compressed-token-account)**</td>
+      <td style={{textAlign: 'left'}}>Compressed account</td>
+      <td style={{textAlign: 'left'}}>
+        <ul>
+          <li>**Compressed account** with `TokenData` field</li>
+          <li>**Rent-free** and SPL-compatible</li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+Compressed token accounts store token balance, owner, and other information like SPL and cTokens.
+* Any cToken or SPL token can be compressed/decompressed at will.
+
+* By default, **cTokens** with the **[compressible extension](#compressible) are automatically compressed/decompressed** when inactive/active.
+
+### Recommended usage of compressed token accounts
+
+* For **token distribution** (airdrops, payments, rewards, etc.) 
+* **Inactive SPL and cToken accounts**.
+  * Most (associated) token accounts are not frequently written to.
+  * Compressing these token accounts allows you to close the account and reclaim rent.
+  * Migrate to cTokens with compressible extension for automatic compression/decompression when inactive/active.
+
+
+<Note>
+Leading **wallets** like Phantom and Backpack **support compressed tokens**. The UI does not distinguish between SPL and compressed tokens.
+</Note>
+
+<Accordion title="Setup">
+<Steps>
+  <Step>
+
+### Install dependencies
+
+<InstallDependencies />
+</Step>
+
+<Step>
+
+### Set up your developer environment
+
+<SetupEnvironment />
+
+</Step>
+
+  <Step>
+
+### Get started
+  </Step>
+</Steps>
+</Accordion>
+
+## Basic Guides
+<GuidesTable />
+
+## Advanced Guides
+<AdvancedGuidesTable />
