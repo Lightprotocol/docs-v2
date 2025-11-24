@@ -1,0 +1,43 @@
+/* Hide default pagination footer */
+#pagination {
+  display: none;
+}
+
+.pagination-next,
+.pagination-prev,
+.pagination-title {
+  display: none;
+}
+
+/* Move global anchors to bottom of sidebar */
+#Sidebar {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+}
+
+.nav-anchors {
+  order: 999 !important;
+  margin-top: auto !important;
+  padding-top: 1rem !important;
+  border-top: 1px solid rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Logo size - navbar smaller, footer normal */
+#navbar img[alt*="logo"],
+#navbar img[src*="logo"],
+nav img[alt*="logo"],
+nav img[src*="logo"],
+header img[alt*="logo"],
+header img[src*="logo"] {
+  height: auto !important;
+  max-height: 40px !important;
+  width: auto !important;
+}
+
+footer img[alt*="logo"],
+footer img[src*="logo"] {
+  height: auto !important;
+  width: auto !important;
+}
+

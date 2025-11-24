@@ -1,0 +1,77 @@
+---
+title: Overview
+description: Compressed tokens provide full SPL token functionality without per-account rent cost.
+---
+
+import GuidesTable from '/snippets/compressed-tokens-guides-table.mdx';
+import AdvancedGuidesTable from '/snippets/compressed-tokens-advanced-guides-table.mdx';
+import SetupEnvironment from '/snippets/setup-environment-tabs.mdx';
+import InstallDependencies from '/snippets/install-dependencies-codegroup.mdx';
+
+| Creation             | Regular SPL Token | Compressed Token      | Cost Reduction |
+|:---------------------|:------------------|:----------------------|:---------------|
+| 100 Token Accounts   | ~ 0.2 SOL         | **~ 0.00004 SOL**     | **5000x**      |
+
+Compressed token accounts store information about an individual's ownership of a specific token (mint). Different from regular token accounts, they don't require an Associated Token Account (ATA) per token holder.
+
+For example, this simplifies [token distribution](https://github.com/Lightprotocol/developer-content/blob/main/zk-compression-docs/compressed-tokens/implementation-guides/create-an-airdrop.md), since you don't need to allocate a token account per recipient.
+
+#### Compressed Tokens at a Glance
+
+<CardGroup cols={3}>
+  <Card title="Rent-free tokens">
+    Create token accounts without upfront rent exempt balance.
+  </Card>
+  <Card title="SPL Compatibility">
+    Compatible with SPL tokens and Solana programs.
+  </Card>
+  <Card title="Wallet Support">
+    Supported by leading wallets including Phantom and Backpack.
+  </Card>
+</CardGroup>
+
+# Start building
+
+Developing with compressed tokens works similar SPL tokens and involves minimal setup:
+
+<Steps>
+  <Step>
+
+### Install dependencies
+
+<InstallDependencies />
+</Step>
+
+<Step>
+
+### Set up your developer environment
+
+<SetupEnvironment />
+
+</Step>
+
+  <Step>
+
+### Get started
+  </Step>
+</Steps>
+
+## Guides
+
+<GuidesTable />
+
+
+## Advanced Guides
+
+<AdvancedGuidesTable />
+
+
+# Next Steps
+
+<Card
+  title="Create compressed token accounts"
+  icon="chevron-right"
+  color="#0066ff"
+  href="/compressed-tokens/guides/how-to-create-compressed-token-accounts"
+  horizontal
+/>

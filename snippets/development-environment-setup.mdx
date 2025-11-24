@@ -1,0 +1,41 @@
+
+
+**Install Solana CLI:**
+
+```bash
+sh -c "$(curl -sSfL https://release.solana.com/v2.2.15/install)"
+```
+
+**Install Anchor CLI:**
+
+```bash
+cargo install --git https://github.com/coral-xyz/anchor avm --force
+avm install latest
+avm use latest
+```
+
+**Install the Light CLI:**
+
+<Tabs>
+  <Tab title="npm">
+    ```bash
+    npm install -g @lightprotocol/zk-compression-cli@0.27.1-alpha.2
+    ```
+  </Tab>
+  <Tab title="yarn">
+    ```bash
+    yarn global add @lightprotocol/zk-compression-cli@0.27.1-alpha.2
+    ```
+  </Tab>
+  <Tab title="pnpm">
+    ```bash
+    pnpm add -g @lightprotocol/zk-compression-cli@0.27.1-alpha.2
+    ```
+  </Tab>
+</Tabs>
+
+**Verify installation:**
+
+```bash
+light --version
+```

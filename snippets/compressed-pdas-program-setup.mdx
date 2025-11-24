@@ -1,0 +1,81 @@
+**Dependencies**
+
+Add dependencies to your program.
+
+<CodeGroup>
+```toml Anchor
+[dependencies]
+light-sdk = "0.16.0"
+anchor_lang = "0.31.1"
+```
+
+```toml Native Rust
+[dependencies]
+light-sdk = "0.16.0"
+borsh = "0.10.0"
+solana-program = "2.2"
+```
+</CodeGroup>
+
+* The `light-sdk` provides macros, wrappers and CPI interface to create and interact with compressed accounts.
+* Add the serialization library (`borsh` for native Rust, or use `AnchorSerialize`).
+
+**Constants**
+
+Set program address and derive the CPI authority PDA to call the Light System program.
+
+```rust
+declare_id!("rent4o4eAiMbxpkAM1HeXzks9YeGuz18SEgXEizVvPq");
+
+pub const LIGHT_CPI_SIGNER: CpiSigner =
+    derive_light_cpi_signer!("rent4o4eAiMbxpkAM1HeXzks9YeGuz18SEgXEizVvPq");
+```
+
+**`CPISigner`** is the configuration struct for CPI's to the Light System Program.
+
+* CPIs to the Light System program must be signed with a PDA derived by your program with the seed `b"authority"`
+* `derive_light_cpi_signer!` derives the CPI signer PDA for you at compile time.
+
+**Compressed Account**
+
+Define your compressed account struct.
+
+<CodeGroup>
+```rust Anchor
+#[event] // declared as event so that it is part of the idl.
+#[derive(
+    Clone,
+    Debug,
+    Default,
+    LightDiscriminator
+)]
+pub struct MyCompressedAccount {
+    pub owner: Pubkey,
+    pub message: String,
+}
+```
+```rust Native Rust
+#[derive(
+    Debug,
+    Default,
+    Clone,
+    BorshSerialize,
+    BorshDeserialize,
+    LightDiscriminator,
+)]
+pub struct MyCompressedAccount {
+    pub owner: Pubkey,
+    pub message: String,
+}
+```
+</CodeGroup>
+
+You derive
+
+* the standard traits (`Clone`, `Debug`, `Default`),
+* `borsh` or `AnchorSerialize` to serialize account data, and
+* `LightDiscriminator` to implements a unique type ID (8 bytes) to distinguish account types. The default compressed account layout enforces a discriminator in its _own field_, <Tooltip tip="The Anchor framework reserves the first 8 bytes of a *regular account's data field* for the discriminator." cta="Anchor" href="https://www.anchor-lang.com/">not the first 8 bytes of the data field</Tooltip>.
+
+<Info>
+The traits listed above are required for `LightAccount`. `LightAccount` wraps `MyCompressedAccount` in Step 3 to set the discriminator and create the compressed account's data.
+</Info>

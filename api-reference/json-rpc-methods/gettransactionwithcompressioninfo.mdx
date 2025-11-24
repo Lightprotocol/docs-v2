@@ -1,0 +1,101 @@
+---
+openapi: post /getTransactionWithCompressionInfo
+description: "Retrieve the transaction data for the transaction with the given signature along with parsed compression info. RPC method guide with use cases, tips and examples."
+---
+
+The`getTransactionWithCompressionInfo` RPC method returns transaction data along with compression information showing which compressed accounts were opened (created) and closed (consumed) during the transaction. This method helps with transaction analysis, account lifecycle tracking, and debugging of compression operations.
+
+<Info>
+You can test this method via the OpenAPI example or custom examples below.
+</Info>
+
+**Common Use Cases**
+
+- **Transaction Analysis**: Understand what compressed accounts were affected by a transaction
+- **Account Lifecycle Tracking**: Monitor when compressed accounts are created and consumed
+- **Debugging**: Identify which accounts changed during failed or unexpected transactions
+- **Audit Trails**: Track compressed account state changes for compliance
+
+**Parameters**
+
+1. `signature` (string, required): Base58-encoded transaction signature to query compression information for.
+
+**Note**: Only transactions involving compressed accounts will return compression data. Regular Solana transactions return null.
+
+**Response**
+
+The response contains compression information and transaction data, or null if transaction not found:
+
+- `compressionInfo` (object): Contains details about compressed account changes
+	- `closedAccounts` (array): Compressed accounts consumed (spent) in this transaction
+		- `account` (object): Complete compressed account data with merkle context
+		- `maybeTokenData` (object | null): Token data if this is a compressed token account
+	- `openedAccounts` (array): New compressed accounts created in this transaction
+		- `account` (object): Complete compressed account data with merkle context
+		- `maybeTokenData` (object | null): Token data if this is a compressed token account
+	- `preTokenBalances` (array, optional): Token balances before transaction
+		- `owner` (PublicKey): Public key of token account owner
+		- `mint` (PublicKey): Public key of token mint
+		- `amount` (BN): Token amount as BN object
+	- `postTokenBalances` (array, optional): Token balances after transaction
+		- `owner` (PublicKey): Public key of token account owner
+		- `mint` (PublicKey): Public key of token mint
+		- `amount` (BN): Token amount as BN object
+- `transaction` (object): Standard Solana transaction data
+
+**Developer Tips**
+
+- **Compression-only**: This method only works with transactions that involve compressed accounts
+- **Real signatures required**: Use actual transaction signatures from compression operations
+- **Account lifecycle**: opened = created, closed = consumed/spent in the transaction
+- **Token data**: maybeTokenData is null for regular compressed accounts, populated for token accounts
+- **Balance tracking**: Use pre/postTokenBalances for detailed token amount changes
+- **State analysis**: Compare opened vs closed accounts to understand transaction effects
+
+**Troubleshooting**
+
+<AccordionGroup>
+<Accordion title="Transaction not found">
+**Invalid or non-existent transaction signature**
+
+Verify the signature format and check transaction existence:
+
+```typescript
+const result = await connection.getTransactionWithCompressionInfo(signature);
+
+if (!result) {
+    console.log('Transaction not found or contains no compression operations');
+}
+```
+</Accordion>
+<Accordion title="No compression info">
+**Transaction exists but has no compression data**
+
+This method only returns data for transactions involving compressed accounts:
+
+```typescript
+const result = await connection.getTransactionWithCompressionInfo(signature);
+
+if (!result) {
+    console.log('Transaction does not involve compressed accounts');
+    console.log('Use regular getTransaction for non-compression transactions');
+}
+```
+</Accordion>
+<Accordion title="Empty account arrays">
+
+**Transaction has compression info but no account changes shown**
+
+Some compression operations may not create/consume accounts:
+
+```typescript
+const { compressionInfo } = result;
+
+if (compressionInfo.openedAccounts.length === 0 &&
+    compressionInfo.closedAccounts.length === 0) {
+    console.log('Compression transaction with no visible account changes');
+    console.log('May be a proof verification or state update operation');
+}
+```
+</Accordion>
+</AccordionGroup>
