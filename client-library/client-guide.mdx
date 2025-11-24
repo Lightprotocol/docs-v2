@@ -194,7 +194,7 @@ light test-validator
 </Step>
 
 <Step>
-## Address
+## Address (Create only)
 
 <Note>
 You only need to derive an address when you create a compressed account.
@@ -307,33 +307,6 @@ let (address, _) = derive_address(
 <Tip>
 **Use the same address** tree for all subsequent instructions **in client and program**.
 </Tip>
-</Tab>
-
-<Tab title="Update, Close, Reinit, Burn">
-Use the address from the existing compressed account. 
-
-Fetch the account with the RPC methods to get its address.
-
-<Tabs>
-<Tab title="Typescript">
-
-```typescript
-const compressedAccount = await rpc.getCompressedAccount(address);
-const accountAddress = compressedAccount.address;
-```
-
-</Tab>
-
-<Tab title="Rust">
-
-```rust
-let compressed_account = rpc.get_compressed_account(address).await?;
-let account_address = compressed_account.address;
-```
-
-</Tab>
-</Tabs>
-
 </Tab>
 </Tabs>
 </Step>
