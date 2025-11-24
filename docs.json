@@ -62,13 +62,25 @@
                   {
                     "group": "Advanced Guides",
                     "pages": [
-                      "compressed-token-program/compressed-tokens/advanced-guides/how-to-combine-operations-in-one-transaction",
-                      "compressed-token-program/compressed-tokens/advanced-guides/create-an-airdrop",
-                      "compressed-token-program/compressed-tokens/advanced-guides/create-an-airdrop-with-claim",
-                      "compressed-token-program/compressed-tokens/advanced-guides/add-wallet-support-for-compressed-tokens",
-                      "compressed-token-program/compressed-tokens/advanced-guides/use-token-2022-with-compression",
-                      "compressed-token-program/compressed-tokens/advanced-guides/example-web-client",
-                      "compressed-token-program/compressed-tokens/advanced-guides/example-node-js"
+                      {
+                        "group": "Integration",
+                        "expanded": true,
+                        "pages": [
+                          "compressed-token-program/compressed-tokens/advanced-guides/how-to-combine-operations-in-one-transaction",
+                          "compressed-token-program/compressed-tokens/advanced-guides/add-wallet-support-for-compressed-tokens",
+                          "compressed-token-program/compressed-tokens/advanced-guides/use-token-2022-with-compression"
+                        ]
+                      },
+                      {
+                        "group": "Examples",
+                        "expanded": true,
+                        "pages": [
+                          "compressed-token-program/compressed-tokens/advanced-guides/create-an-airdrop",
+                          "compressed-token-program/compressed-tokens/advanced-guides/create-an-airdrop-with-claim",
+                          "compressed-token-program/compressed-tokens/advanced-guides/example-web-client",
+                          "compressed-token-program/compressed-tokens/advanced-guides/example-node-js"
+                        ]
+                      }
                     ]
                   }
                 ]
@@ -196,13 +208,25 @@
               {
                 "group": "Advanced Guides",
                 "pages": [
-                  "compressed-token-program/compressed-tokens/advanced-guides/how-to-combine-operations-in-one-transaction",
-                  "compressed-token-program/compressed-tokens/advanced-guides/create-an-airdrop",
-                  "compressed-token-program/compressed-tokens/advanced-guides/create-an-airdrop-with-claim",
-                  "compressed-token-program/compressed-tokens/advanced-guides/add-wallet-support-for-compressed-tokens",
-                  "compressed-token-program/compressed-tokens/advanced-guides/use-token-2022-with-compression",
-                  "compressed-token-program/compressed-tokens/advanced-guides/example-web-client",
-                  "compressed-token-program/compressed-tokens/advanced-guides/example-node-js"
+                  {
+                    "group": "Integration",
+                    "expanded": true,
+                    "pages": [
+                      "compressed-token-program/compressed-tokens/advanced-guides/how-to-combine-operations-in-one-transaction",
+                      "compressed-token-program/compressed-tokens/advanced-guides/add-wallet-support-for-compressed-tokens",
+                      "compressed-token-program/compressed-tokens/advanced-guides/use-token-2022-with-compression"
+                    ]
+                  },
+                  {
+                    "group": "Examples",
+                    "expanded": true,
+                    "pages": [
+                      "compressed-token-program/compressed-tokens/advanced-guides/create-an-airdrop",
+                      "compressed-token-program/compressed-tokens/advanced-guides/create-an-airdrop-with-claim",
+                      "compressed-token-program/compressed-tokens/advanced-guides/example-web-client",
+                      "compressed-token-program/compressed-tokens/advanced-guides/example-node-js"
+                    ]
+                  }
                 ]
               }
             ]
