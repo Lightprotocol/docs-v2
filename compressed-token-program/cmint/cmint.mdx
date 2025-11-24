@@ -1,6 +1,6 @@
 ---
 title: Create a cMint with Token Metadata
-description: Rent-free mint accounts with Token Metadata to store token information.
+description: Guide to create a cMint, a rent-free mint account to store global metadata of tokens.
 ---
 
 
@@ -33,45 +33,9 @@ description: Rent-free mint accounts with Token Metadata to store token informat
   </tbody>
 </table>
 
-## Key Points
-
-cMints **uniquely represent a token on Solana and store its global metadata**, similar to SPL mint accounts with a few core differences:
-1. cMint accounts are **rent-free**.
-2. Tokens created from cMints are **cTokens** (fully compatible with SPL tokens).
-3. Token metadata (name, symbol, URI) is stored as an extension within the compressed mint account.
-
-<Tabs>
-  <Tab title="Diagram">
-    <Frame>
-      <img
-        src="/images/token-explainer.png"
-        alt="Diagram showing cMint compressed account structure with three components: Hash (identifier for cMint in purple box), Account (struct containing BaseMint with SPL-compatible fields, cMint Data for program state, and optional Extensions for Token Metadata), and BasemintData (containing Supply, Decimals, Mint Authority, and Freeze Authority fields) with Token Metadata extension"
-      />
-    </Frame>
-  </Tab>
-  <Tab title="Source Code">
-    ```rust
-    pub struct CompressedMint {
-        // SPL mint layout
-        pub base: BaseMint,
-        // cMint state used by the Compressed Token Program
-        pub metadata: CompressedMintMetadata
-        // Field for Token Metadata extension
-        pub extensions: Option<Vec<ExtensionStruct>>,
-    }
-    ```
-  </Tab>
-</Tabs>
-
 <Info>
-Find the [source code of cMints here](https://github.com/Lightprotocol/light-protocol/blob/main/program-libs/ctoken-types/src/state/mint/compressed_mint.rs).
+Learn the core concepts to cMints [here](/compressed-token-program/c-token-program#cmint-accounts).
 </Info>
-
-The `metadata` field is used by the Compressed Token Program to store the internal state of a cMint.
-
-The `BaseMint` field replicates the field layout and serialization format of [SPL Mint accounts](https://solana.com/docs/tokens#mint-account). The struct is serialized with Borsh to match the on-chain format of SPL tokens and mints.
-
-
 ## Get Started 
 
 

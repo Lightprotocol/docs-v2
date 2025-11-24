@@ -43,13 +43,16 @@ The [Compressed Token Program](https://github.com/Lightprotocol/light-protocol/t
         <ul>
           <li>**Compressed account** with `TokenData` field</li>
           <li>**Rent-free** and SPL-compatible</li>
-          <li>Use for **token distribution** (airdrops, payments, etc.) and **storage of inactive tokens**</li>
+          <li>Use for **storage of inactive tokens** or **token distribution**</li>
           <li>cToken accounts with the **[compressible extension](#compressible) are automatically compressed/decompressed** when active/inactive.</li>
         </ul>
       </td>
     </tr>
   </tbody>
 </table>
+
+_add graphic of all tokens here_
+
 
 <Tip>
 **SPL mints and tokens** owned by the [Token Program](https://github.com/solana-program/token) or [Token-2022](https://github.com/solana-program/token-2022) **require rent** by default.<br /> 
@@ -63,9 +66,10 @@ You can **migrate SPL token accounts to cTokens** with compressible extension fo
 * SPL mints can not be compressed to cMints. 
 </Note>
 
-cMints **uniquely represent a token on Solana and store its global metadata**, similar to SPL mint accounts with two core differences:
+cMints **uniquely represent a token on Solana and store its global metadata**, similar to SPL mint accounts with few core differences:
 1. cMint accounts are **rent-free**.
 2. Tokens created from cMints are **cTokens** (fully compatible with SPL tokens).
+3. Token metadata (name, symbol, URI) is stored as an extension within the compressed mint account.
 
 <Tabs>
   <Tab title="Diagram">
@@ -99,52 +103,76 @@ The `metadata` field is used by the Compressed Token Program to store the intern
 The `BaseMint` field replicates the field layout and serialization format of [SPL Mint accounts](https://solana.com/docs/tokens#mint-account). The struct is serialized with Borsh to match the on-chain format of SPL tokens and mints.
 
 Here is how cMints and SPL mints compare:
-<table>
-  <thead>
-    <tr>
-      <th style={{width: '10%', textAlign: 'left'}}>Field</th>
-      <th style={{width: '45%', textAlign: 'center'}}>cMint</th>
-      <th style={{width: '30%', textAlign: 'center'}}>SPL Mint</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>mint_authority</td>
-      <td style={{textAlign: 'center'}}>✓</td>
-      <td style={{textAlign: 'center'}}>✓</td>
-    </tr>
-    <tr>
-      <td>supply</td>
-      <td style={{textAlign: 'center'}}>✓</td>
-      <td style={{textAlign: 'center'}}>✓</td>
-    </tr>
-    <tr>
-      <td>decimals</td>
-      <td style={{textAlign: 'center'}}>✓</td>
-      <td style={{textAlign: 'center'}}>✓</td>
-    </tr>
-    <tr>
-      <td>is_initialized</td>
-      <td style={{textAlign: 'center'}}>✓</td>
-      <td style={{textAlign: 'center'}}>✓</td>
-    </tr>
-    <tr>
-      <td>freeze_authority</td>
-      <td style={{textAlign: 'center'}}>✓</td>
-      <td style={{textAlign: 'center'}}>✓</td>
-    </tr>
-    <tr>
-      <td>cMint Data</td>
-      <td style={{textAlign: 'center'}}>✓</td>
-      <td style={{textAlign: 'center'}}>-</td>
-    </tr>
-    <tr>
-      <td>Extensions</td>
-      <td style={{textAlign: 'center'}}>✓</td>
-      <td style={{textAlign: 'center'}}>via Token-2022</td>
-    </tr>
-  </tbody>
-</table>
+
+<Tabs>
+  <Tab title="Basemint vs SPL mint">
+    <table>
+      <thead>
+        <tr>
+          <th style={{width: '10%', textAlign: 'left'}}>Field</th>
+          <th style={{width: '45%', textAlign: 'center'}}>cMint</th>
+          <th style={{width: '30%', textAlign: 'center'}}>SPL Mint</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>mint_authority</td>
+          <td style={{textAlign: 'center'}}>✓</td>
+          <td style={{textAlign: 'center'}}>✓</td>
+        </tr>
+        <tr>
+          <td>supply</td>
+          <td style={{textAlign: 'center'}}>✓</td>
+          <td style={{textAlign: 'center'}}>✓</td>
+        </tr>
+        <tr>
+          <td>decimals</td>
+          <td style={{textAlign: 'center'}}>✓</td>
+          <td style={{textAlign: 'center'}}>✓</td>
+        </tr>
+        <tr>
+          <td>is_initialized</td>
+          <td style={{textAlign: 'center'}}>✓</td>
+          <td style={{textAlign: 'center'}}>✓</td>
+        </tr>
+        <tr>
+          <td>freeze_authority</td>
+          <td style={{textAlign: 'center'}}>✓</td>
+          <td style={{textAlign: 'center'}}>✓</td>
+        </tr>
+        <tr>
+          <td>cMint Data</td>
+          <td style={{textAlign: 'center'}}>✓</td>
+          <td style={{textAlign: 'center'}}>-</td>
+        </tr>
+        <tr>
+          <td>Extensions</td>
+          <td style={{textAlign: 'center'}}>✓</td>
+          <td style={{textAlign: 'center'}}>via Token-2022</td>
+        </tr>
+      </tbody>
+    </table>
+  </Tab>
+  <Tab title="BaseMint Struct">
+    ```rust
+    pub struct BaseMint {
+        /// Optional authority used to mint new tokens. The mint authority may only
+        /// be provided during mint creation. If no mint authority is present
+        /// then the mint has a fixed supply and no further tokens may be
+        /// minted.
+        pub mint_authority: Option<Pubkey>,
+        /// Total supply of tokens.
+        pub supply: u64,
+        /// Number of base 10 digits to the right of the decimal place.
+        pub decimals: u8,
+        /// Is initialized - for SPL compatibility
+        pub is_initialized: bool,
+        /// Optional authority to freeze token accounts.
+        pub freeze_authority: Option<Pubkey>,
+    }
+    ```
+  </Tab>
+</Tabs>
 
 # cToken Account
 
@@ -156,11 +184,6 @@ A cToken account holds token balances like SPL Token accounts:
 * A wallet needs a cToken account for each cMint it wants to hold, with the wallet address set as the cToken account owner.
 * Each wallet can own multiple cToken accounts for the same cMint.
 * A cToken account can only have one owner and hold units of one cMint.
-
-<Tip>
-* Use the **[compressible extension](/compressible/compressible) for sponsored rent exemption**.
-* cToken accounts with this extension are **automatically compressed** with no writes in 6300 slots (1.75 hours), **and decompressed** with new writes.
-</Tip>
 
 <Tabs>
   <Tab title="Diagram">
@@ -190,7 +213,7 @@ A cToken account holds token balances like SPL Token accounts:
 </Tabs>
 
 <Info>
-Find the [source code of cToken here](https://github.com/Lightprotocol/light-protocol/blob/main/program-libs/ctoken-types/src/state/ctoken/ctoken.rs).
+Find the [source code of cToken here](https://github.com/Lightprotocol/light-protocol/blob/main/program-libs/ctoken-types/src/state/ctoken/ctoken_struct.rs).
 </Info>
 
 cToken accounts replicate the field layout and serialization format of [SPL Token accounts](https://solana.com/docs/tokens#token-account). The struct is serialized with Borsh to match the on-chain format of SPL tokens.
@@ -253,37 +276,187 @@ Here is how cTokens and SPL tokens compare:
   </tbody>
 </table>
 
-# Associated cToken Account
+### Compressible Extension
 
-**Associated cToken** accounts follow the same pattern as [associated token accounts](https://docs.solana.com/developing/programming-model/associated-token-account) (ATA):
-* Each wallet needs its own cToken account to hold tokens from the same cMint.
-* It's derived from the owner's address and the cMint account's address.
-* The only **difference** in ATA derivation is the **program ID parameter**.
+Compressible accounts maintain the **functionality of Solana accounts** but with **rent-exemption sponsorship**: 
+
+1. The protocol funds the account's rent exemption (rent sponsor) at creation.
+2. The account creator top-ups the lamport balance with rent for at least two epochs (12,600 slots / 84 min)
+3. The transaction payer top-ups the lamports balance when the account's lamports balance is below 2 epochs.
+4. The account will be compressed when inactive for a period of 12,600 slots (84 min).
+5. When the account is written to, it's automatically decompressed.
+<Tip>
+We recommend to create cToken accounts always with the [compressible extension](/compressible/compressible) for sponsored rent exemption.
+</Tip>
+This extension makes cToken accounts 200x cheaper than SPL token accounts
+
+    |  | cToken | SPL |
+    |-----------|--------|-----|
+    | allocate | 0.000011 | 0.002 |
+    | rent for 24h | 0.000005 | - |
+
+<Accordion title="Compressible vs Solana Rent">
+
+### Initial Rent Top-Up
+The **creator of compressible accounts** tops-up the account with **rent for at least two epochs**. 
+Two epochs for compressible accounts have a length of **12,600 slots**.
+
+``` rust
+rent_per_epoch = base_rent + (data_len * lamports_per_byte_per_epoch)
+
+// For 260-byte cToken account: 
+// 128 + (260 * 1) = 388 lamports per epoch
+```
 
 <table>
   <thead>
     <tr>
-      <th style={{width: '10%', textAlign: 'left'}}>Parameter</th>
-      <th style={{width: '45%', textAlign: 'left'}}>cToken ATA</th>
-      <th style={{width: '30%', textAlign: 'left'}}>SPL ATA</th>
+      <th style={{width: '25%', textAlign: 'left'}}>Component</th>
+      <th style={{width: '25%', textAlign: 'left'}}>Amount</th>
+      <th style={{width: '50%', textAlign: 'left'}}>Description</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td>owner</td>
-      <td colspan="2" style={{textAlign: 'center'}}>wallet address</td>
+      <td>Prepaid rent</td>
+      <td>388 × N epochs*</td>
+      <td>Rent for N epochs</td>
     </tr>
     <tr>
-      <td>program_id</td>
-      <td>COMPRESSED_TOKEN_PROGRAM_ID</td>
-      <td>SPL_TOKEN_PROGRAM_ID</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
     </tr>
     <tr>
-      <td>mint</td>
-      <td colspan="2" style={{textAlign: 'center'}}>mint address</td>
+      <td>Compression cost & incentive</td>
+      <td>10,000 lamports <br /> + 1,000 lamports</td>
+      <td>Transaction cost for compression<br />+ protocol incentive</td>
+    </tr>
+    <tr>
+      <td>Transaction fee</td>
+      <td>5,000-10,000 lamports</td>
+      <td>Standard Solana tx fees</td>
     </tr>
   </tbody>
 </table>
+
+\* _`N` = `num_prepaid_epochs` parameter (0 or ≥ 2, set at creation)._
+
+Normally, the **creator of Solana accounts** pays the **rent exemption balance equal to 2 years of rent** proportional to account size:
+
+``` rust
+minimum_balance = (ACCOUNT_STORAGE_OVERHEAD + data_len) * lamports_per_byte * exemption_threshold
+
+/// Example 165 byte SPL token account:
+/// minimum_balance = (128 + 165) * 6960 = 2,039,280 lamports
+```
+<Note>
+* Most Solana accounts are rarely accessed after creation, but continue to lock up SOL for the account's lifetime.
+* The creator of Solana accounts still must pay the rent-exemption balance.
+* The creator of compressible accounts only needs to pay the rent for the first two epochs.
+</Note>
+
+
+### Top-ups per Transaction
+
+The **transaction payer tops-up** the account with rent **when the account's lamports balance is below 2 epochs**. This keeps accounts decompressed while active.
+
+<table>
+  <thead>
+    <tr>
+      <th style={{width: '30%', textAlign: 'left'}}>Account State</th>
+      <th style={{width: '25%', textAlign: 'left'}}>Payer Cost</th>
+      <th style={{width: '45%', textAlign: 'left'}}>Example</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Funded for 2+ epochs</td>
+      <td>0 lamports</td>
+      <td>No top-up required</td>
+    </tr>
+    <tr>
+      <td>Funded for less than 2 epochs</td>
+      <td>`lamports_per_write`</td>
+      <td>Configured as 5,000 lamports <br />→ payer pays 5,000 lamports</td>
+    </tr>
+    <tr>
+      <td>Compressible<br />(ran out of rent)</td>
+      <td>`lamports_per_write + rent_deficit`</td>
+      <td>Configured top-up: 5,000 lamports<br />Rent deficit: 3,000 lamports<br />Total payer cost: 8,000 lamports</td>
+    </tr>
+  </tbody>
+</table>
+
+<Note>
+Top-ups are additional to standard Solana transaction fees (typically &lt;10,000 lamports).
+</Note>
+
+### Closing compressible accounts
+
+Compressible accounts can be closed by two parties. How rent and lamports balance are distributed depends on which party closes the account.
+
+1. The **Account Owner** can close the account at any time, regardless of rent status. The account is not compressed in this case.
+
+<table>
+  <thead>
+    <tr>
+      <th style={{width: '35%', textAlign: 'left'}}>Component and Amount</th>
+      <th style={{width: '35%', textAlign: 'left'}}>Recipient</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Rent exemption + completed epoch rent</td>
+      <td>Rent sponsor</td>
+    </tr>
+    <tr>
+      <td>Remaining lamports from top-up (partial epoch)</td>
+      <td>Account Owner</td>
+    </tr>
+  </tbody>
+</table>
+
+2. The **Compression Authority** can compress and close the account when it becomes compressible
+
+<table>
+  <thead>
+    <tr>
+      <th style={{width: '35%', textAlign: 'left'}}>Component and Amount</th>
+      <th style={{width: '35%', textAlign: 'left'}}>Recipient</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Rent exemption + remaining epoch rent<br /></td>
+      <td>Rent sponsor</td>
+    </tr>
+    <tr>
+      <td>Compression incentive<br />(11,000 lamports)</td>
+      <td>Forester node</td>
+    </tr>
+  </tbody>
+</table>
+
+</Accordion>
+
+# Associated cToken Account
+
+**Associated cToken** accounts follow the same pattern as [associated token accounts](https://docs.solana.com/developing/programming-model/associated-token-account) (ATA):
+* Each wallet needs its own cToken account to hold tokens from the same cMint.
+* It's derived with the owner's address, program ID, and mint address.
+* The only **difference** in ATA derivation is the **program ID parameter** used in the seeds.
+
+
+```rust
+let seeds = [
+    owner.as_ref(),          // Wallet address (32 bytes)
+    program_id.as_ref(),     // Compressed Token Program ID (32 bytes)
+    mint.as_ref(),           // cMint address (32 bytes)
+    bump.as_ref(),           // Bump seed (1 byte)
+];
+```
 
 <Info>
 Find the [source code to associated cToken accounts here](https://github.com/Lightprotocol/light-protocol/blob/main/programs/compressed-token/program/src/create_associated_token_account.rs).
@@ -297,7 +470,7 @@ cToken ATAs can implement the **[compressible extension](/compressible/compressi
 
 Compressed token accounts store token balance, owner, and other information like SPL and cTokens. Any cToken or SPL token can be compressed/decompressed at will.
 
-We recommend to use compressed tokens for token distribution or storage of inactive tokens.
+We recommend to use compressed tokens for **token distribution** or **storage of inactive tokens**.
 <Tip>
 **cToken accounts** with the **[compressible extension](/compressible/compressible) are automatically compressed** with no writes in 6300 slots (1.75 hours), and decompressed with new writes.
 </Tip>
