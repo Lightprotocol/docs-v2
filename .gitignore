@@ -2,3 +2,5 @@ mintlify
 mintlify-docs/
 /CLAUDE.md
 .windsurf
+.claude
+.context
