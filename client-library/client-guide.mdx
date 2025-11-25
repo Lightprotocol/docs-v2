@@ -202,7 +202,7 @@ Derive a persistent address as a unique identifier for your compressed account, 
 
 You derive addresses in two scenarios:
 * **At account creation** - derive the address to create the account's persistent identifier, then pass it to `getValidityProofV0()` in the address array (see Step 3 "Validity Proof")
-* **Before building instructions** - derive the address to fetch existing accounts using `rpc.getCompressedAccount()`, then reference them in your transaction
+* **Before building instructions** - derive the address to fetch existing accounts using `rpc.getCompressedAccount()`
 
 ### Derivation
 Like PDAs, compressed account addresses don't belong to a private key; rather, they're derived from the program that owns them.
