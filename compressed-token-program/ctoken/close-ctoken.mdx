@@ -1,6 +1,7 @@
-
-### Close Token Account
-
+---
+title: Close cToken
+description: Guide to close a cToken, a rent-free mint account to store global metadata of tokens.
+---
 Permanently closes a decompressed CToken Solana account. Distributes remaining lamports to a destination account, then zeros out and resizes the account to 0 bytes to prevent revival attacks. Works with both regular and compressible token accounts.
 
 **Use when:** You want to permanently close a CToken account with a zero token balance and reclaim its rent exemption.

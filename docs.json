@@ -46,11 +46,24 @@
                   "compressed-token-program/cmint/cmint",
                   "compressed-token-program/cmint/update-metadata"
                 ]
-              },              
+              },
               {
                 "group": "cToken",
                 "pages": [
-                  "compressed-token-program/ctoken/ctoken"
+                  {
+                    "group": "Guides",
+                    "expanded": true,
+                    "pages": [
+                      "compressed-token-program/ctoken/create-ctoken",
+                      "compressed-token-program/ctoken/mint-ctokens",
+                      "compressed-token-program/ctoken/create-ata",
+                      "compressed-token-program/ctoken/ctoken-transfer",
+                      "compressed-token-program/ctoken/SPL-to-ctoken-transfer",
+                      "compressed-token-program/ctoken/ctoken-to-spl-decompress",
+                      "compressed-token-program/ctoken/compress-and-close",
+                      "compressed-token-program/ctoken/close-ctoken"
+                    ]
+                  }
                 ]
               },
               {
@@ -207,7 +220,20 @@
           {
             "group": "cToken",
             "pages": [
-              "compressed-token-program/ctoken/ctoken"
+              "compressed-token-program/ctoken/mint-actions",
+              {
+                "group": "Guides",
+                "pages": [
+                  "compressed-token-program/ctoken/ctoken",
+                  "compressed-token-program/ctoken/create-ctoken",
+                  "compressed-token-program/ctoken/create-ata",
+                  "compressed-token-program/ctoken/ctoken-transfer",
+                  "compressed-token-program/ctoken/SPL-to-ctoken-transfer",
+                  "compressed-token-program/ctoken/ctoken-to-spl-decompress",
+                  "compressed-token-program/ctoken/compress-and-close",
+                  "compressed-token-program/ctoken/close-ctoken"
+                ]
+              }
             ]
           },
           {

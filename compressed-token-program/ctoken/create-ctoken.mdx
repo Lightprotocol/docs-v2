@@ -1,66 +1,120 @@
 ---
-title: Create cToken Account with compressible extension
-description: The compressible extension sponsors rent-exemption for any type of Solana account except mints. 
+title: Create a cToken Account with Compressible Extension
+description: Guide to create a cToken account with compressible extension.
 ---
+
+import CompressibleVsSolanaRent from '/snippets/compressible-vs-solana-rent.mdx';
 
 <table>
   <thead>
     <tr>
-      <th style={{width: '20%', textAlign: 'left'}}></th>
-      <th style={{width: '20%', textAlign: 'left'}}>Supported Accounts</th>
-      <th style={{width: '45%', textAlign: 'left'}}>Description</th>
+      <th style={{width: '15%', textAlign: 'left'}}></th>
+      <th style={{width: '22%', textAlign: 'left'}}>Type</th>
+      <th style={{width: '63%', textAlign: 'left'}}>Key Features</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td style={{textAlign: 'left'}}>**Compressible**</td>
+      <td style={{textAlign: 'left'}}>**[cMint](#cmint-accounts)**</td>
+      <td style={{textAlign: 'left'}}>Solana account</td>
       <td style={{textAlign: 'left'}}>
-        cToken accounts
+        <ul>
+          <li>**SPL-compatible**</li>
+          <li>Use for **active token accounts** with frequent writes (trading, etc.)</li>
+        </ul>
       </td>
+    </tr>
+    <tr>
+      <td style={{textAlign: 'left'}}>**[Compressible](#compressible)**</td>
+      <td>Extension</td>  
       <td style={{textAlign: 'left'}}>
-        * **Sponsored rent-exemption**
-        * 200x cheaper than SPL tokens
-        * Must be **added at account creation**
+        <ul>
+          <li>**Sponsored rent-exemption** makes cTokens 200x cheaper than SPL tokens</li>
+          <li>Must be added at creation of cToken</li>
+        </ul>
       </td>
     </tr>
   </tbody>
 </table>
 
-Creates a CToken Solana account (decompressed compressed token account). Can be created with or without a `Compressible` extension that enables automatic compression when rent balance is insufficient.
 
-**Use when:** You need to create a new token account for a user to hold compressed tokens, especially when you want flexible rent management through the Compressible extension.
+<Info>
+Learn the core concepts to cTokens and compressible extension [here](/compressed-token-program/c-token-program#ctoken-accounts).
+</Info>
 
-**Key parameters:**
+<CompressibleVsSolanaRent />
 
-- `account_pubkey`: Public key of the CToken account to create
-- `mint_pubkey`: Public key of the associated mint
-- `owner_pubkey`: Public key of the account owner
-- `compressible_config`: (Optional) Configuration for Compressible extension:
-  - `rent_payment`: Number of epochs to prepay for rent (cannot be 1)
-  - `write_top_up`: Additional lamports for future write operations
-  - `compress_to_account_pubkey`: Optional specific pubkey for compression target (useful for PDA token accounts)
+## Get Started
 
-**Example:**
+<Steps>
 
-```rust
-use light_compressed_token_sdk::ctoken::create_token_account::{
-    create_compressible_token_account_instruction,
-    CreateCompressibleTokenAccount,
+<Step>
+### Initialize cToken Account
+
+
+</Step>
+
+<Step>
+### Configure Compressible Extension
+1. **Set the initial lamports balance** to N epochs (must be at least 2 epochs)
+   * Customize N **based on expected account activity**.
+   * You will top-up the account with rent for N epochs and it stays decompressed.
+``` rust
+rent_per_epoch = base_rent + (data_len * lamports_per_byte_per_epoch)
+
+// For 260-byte cToken account: 
+// 128 + (260 * 1) = 388 lamports per epoch
+```
+
+2. **Set the top-up amount** for writes when the account balance falls below the set lamports balance.
+   * Determines how much lamports are added when the account needs a top-up.
+   * Top-ups are made by the **transaction fee payer** when the account is written to and is below the set lamports balance.
+
+<Note>
+* Accounts become compressible when they advance two epochs without new transactions that add lamports.
+* A forester node compresses the account after these two epochs and the protocol can reclaim the rent.
+</Note>
+</Step>
+
+<Step>
+### Full Code Example
+
+```rust 
+use light_token_client::actions::{
+    create_compressible_token_account,
+    CreateCompressibleTokenAccountInputs,
 };
 use light_ctoken_types::state::TokenDataVersion;
 
-let create_token_account_ix = create_compressible_token_account_instruction(
-    CreateCompressibleTokenAccount {
-        account_pubkey: token_account_keypair.pubkey(),
-        mint_pubkey: mint,
-        owner_pubkey: owner,
-        compressible_config,
-        rent_sponsor,
-        pre_pay_num_epochs: 2,
-        lamports_per_write: Some(100),
-        payer: payer.pubkey(),
-        compress_to_account_pubkey: None,
+let token_account_pubkey = create_compressible_token_account(
+    &mut rpc,
+    CreateCompressibleTokenAccountInputs {
+        owner: owner_pubkey,
+        mint: mint_pubkey,
+        payer: &payer_keypair,
+        num_prepaid_epochs: 10,  // 0 or ≥2
+        lamports_per_write: Some(5_000), // lamports added per top-up
         token_account_version: TokenDataVersion::ShaFlat,
-    },
-)?;
+        token_account_keypair: None,  // SDK generates keypair
+    }
+).await?;
 ```
+
+<Note>
+For associated cToken accounts derive the address with [owner, compressed_token_program_id, mint](https://solscan.io/account/cTokenmWW8bLPjZEBAUgYy3zKxQZW6VKi7bqNFEVv3m).
+</Note>
+
+</Step>
+
+</Steps>
+
+## Next Steps
+
+<Card
+  title=" Learn about all relevant actions to cMints"
+  icon="chevron-right"
+  color="#0066ff"
+  href="/compressible/mint-actions"
+  horizontal
+>
+</Card>
