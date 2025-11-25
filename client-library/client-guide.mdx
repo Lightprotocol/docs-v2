@@ -5,6 +5,8 @@ description: >-
   implementation and full code examples.
 ---
 
+import SystemAccountsList from '/snippets/compressed-pdas-system-accounts-list.mdx';
+
 ZK Compression provides Rust and Typescript clients to interact with compressed accounts and tokens on Solana.
 
 <table>
@@ -194,19 +196,18 @@ light test-validator
 </Step>
 
 <Step>
-## Address (Create only)
+## Address
 
-<Note>
-You only need to derive an address when you create a compressed account.
-</Note>
-
-<Tabs>
-<Tab title="Create">
 Derive a persistent address as a unique identifier for your compressed account, similar to [program-derived addresses (PDAs)](https://solana.com/docs/core/pda).
 
-* Like PDAs, compressed account addresses don't belong to a private key; rather, they're derived from the program that owns them.
-* The key difference to PDAs is that compressed accounts require an **address tree** parameter.
-* An address tree is a Merkle tree that stores the compressed account addresses.
+You derive addresses in two scenarios:
+* **At account creation** - derive the address to create the account's persistent identifier, then pass it to `getValidityProofV0()` in the address array (see Step 3 "Validity Proof")
+* **Before building instructions** - derive the address to fetch existing accounts using `rpc.getCompressedAccount()`, then reference them in your transaction
+
+### Derivation
+Like PDAs, compressed account addresses don't belong to a private key; rather, they're derived from the program that owns them.
+* The key difference to PDAs is that compressed accounts you include an **address tree** parameter.
+* An address tree is a Merkle tree that stores the compressed account address.
 
 <Tip>
 The protocol maintains Merkle trees. You don't need to initialize custom trees. Find the [pubkeys for Merkle trees here](https://www.zkcompression.com/resources/addresses-and-urls).
@@ -303,12 +304,6 @@ let (address, _) = derive_address(
 * `&program_id`: Specify your program ID.
 </Tab>
 </Tabs>
-
-<Tip>
-**Use the same address** tree for all subsequent instructions **in client and program**.
-</Tip>
-</Tab>
-</Tabs>
 </Step>
 
 <Step>
@@ -320,7 +315,7 @@ Transactions with compressed accounts must include a validity proof:
 * You can **combine multiple addresses and hashes in one proof** to optimize compute cost and instruction data.
 
 <Info>
-You fetch a validity proof from your RPC provider that supports ZK Compression (Helius, Triton, ...).
+You fetch a validity proof from your RPC provider that supports ZK Compression, such as Helius or Triton.
 </Info>
 
 <Tabs>
@@ -447,19 +442,10 @@ Specify the **account hash**, `tree` and `queue` pubkeys from the compressed acc
 
 ### Optimize with Combined Proofs
 
-A single proof can contain:
+Depending on the **Merkle tree version** (V1 or V2) you are using, you can prove **in a single proof**:
 * multiple addresses,
 * multiple account hashes, or
-* a combination of addresses and account hashes
-
-<Tip>
-**Advantages of combined proofs**:
-* You only add **one 128 byte validity proof** to your instruction data **for multiple instructions**.
-* This can **optimize** your **transaction's size** to stay inside the 1232 byte limit.
-* **Compute unit consumption is reduced by at least 100k CU**, since combined proofs are verified in a single CPI by the Light System Program.
-</Tip>
-
-Depending on the **Merkle tree version** (V1 or V2) you are using, you can prove the following **in a single proof**:
+* a combination of addresses and account hashes.
 
 <Tabs>
 <Tab title="V1">
@@ -480,9 +466,12 @@ Depending on the **Merkle tree version** (V1 or V2) you are using, you can prove
 </Tab>
 </Tabs>
 
-<Note>
-View the [source code for the proof combinations here](https://github.com/Lightprotocol/light-protocol/tree/871215642b4b5b69d2bcd7eca22542346d0e2cfa/program-libs/verifier/src/verifying_keys).
-</Note>
+<Tip>
+**Advantages of combined proofs**:
+* You only add **one 128 byte validity proof** to your instruction data **for multiple instructions**.
+* This can **optimize** your **transaction's size** to stay inside the 1232 byte limit.
+* **Compute unit consumption is reduced by at least 100k CU**, since combined proofs are verified in a single CPI by the Light System Program.
+</Tip>
 
 ### Example Create Address & Update Account in one Proof
 
@@ -554,189 +543,46 @@ See the full [create-and-update program example for this proof combination with 
 
 <Step>
 ## Accounts
+In your instruction data, you reference in which [Merkle tree](/learn/core-concepts/merkle-trees-validity-proofs#state-trees) compressed accounts are or will be stored and other accounts required to interact with the <Tooltip tip="The system program enforces the compressed account layout with ownership and sum checks and verifies the validity of your input state. It is also invoked to create/write to compressed accounts and PDAs.">Light System Program</Tooltip>.
 
-Transactions with compressed accounts reference **custom accounts and `PackedAccounts`** in their instruction data in the accounts array:
-
-```
-                                    PackedAccounts
-                    ┌----------------------------------------------┐
- [custom accounts]  [pre accounts] [system accounts] [tree accounts]
-                          ↑                ↑                  ↑
-                      Signers,        Light System       State trees,
-                     fee payer         accounts         address trees,                                                          
-```
-<Note>
-The `PackedAccounts` helper allows you to **reference accounts by u8 indices instead of 32-byte pubkeys**.
-</Note>
-
-Program-specific (custom) accounts can be added to `PackedAccounts` using e.g. `add_pre_accounts_signer` or `add_pre_accounts_meta`.
-These are typically accounts that need to be at a specific, known position in the instruction's account list.
+* The SDK's include a `PackedAccounts` helper to optimize instruction data by adding the accounts' pubkeys to the account array.
+* The instruction data references these accounts by u8 indices instead of 32 byte pubkeys.
 
 <Accordion title="Light System Accounts Explained">
+
 **Light System accounts** are 8 required accounts for proof verification and CPI calls to update state and address trees.
 
-<table>
-  <thead>
-    <tr>
-      <th width="20">#</th>
-      <th width="200">Account</th>
-      <th>Description</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>1</td>
-      <td>Light System Program</td>
-      <td>Verifies validity proofs, compressed account ownership checks, CPIs the account compression program to update tree accounts</td>
-    </tr>
-    <tr>
-      <td>2</td>
-      <td>CPI Signer</td>
-      <td>PDA to sign CPI calls from your program to Light System Program. Verified by Light System Program during CPI. Derived from your program ID</td>
-    </tr>
-    <tr>
-      <td>3</td>
-      <td>Registered Program PDA</td>
-      <td>Access control to the Account Compression Program</td>
-    </tr>
-    <tr>
-      <td>4</td>
-      <td>Noop Program</td>
-      <td>Logs compressed account state to Solana ledger. Only used in v1. Indexers parse transaction logs to reconstruct compressed account state</td>
-    </tr>
-    <tr>
-      <td>5</td>
-      <td>Account Compression Authority</td>
-      <td>Signs CPI calls from Light System Program to Account Compression Program</td>
-    </tr>
-    <tr>
-      <td>6</td>
-      <td>Account Compression Program</td>
-      <td>Writes to state and address tree accounts. Client and the account compression program do not interact directly</td>
-    </tr>
-    <tr>
-      <td>7</td>
-      <td>Invoking Program</td>
-      <td>Your program's ID, used by Light System Program to derive the CPI Signer PDA, verify the CPI Signer matches your program ID, and set the owner of created compressed accounts</td>
-    </tr>
-    <tr>
-      <td>8</td>
-      <td>System Program</td>
-      <td>Solana System Program to transfer lamports</td>
-    </tr>
-  </tbody>
-</table>
+<SystemAccountsList />
 
 </Accordion>
 
+```
+                                  PackedAccounts
+                  ┌--------------------------------------------┐
+[custom accounts] [pre accounts][system accounts][tree accounts]
+                        ↑              ↑               ↑
+                     Signers,      Light System    State trees,
+                    fee payer        accounts     address trees,
+```
+Custom accounts are program-specific accounts you pass manually in your instruction, typically through Anchor's account struct.
 
-<Accordion title="Tree Accounts Explained">
-**Merkle tree accounts** are state trees, address trees, and their associated queues to store compressed accounts and addresses.
+* We recommend to append `PackedAccounts` after your program specific accounts and in anchor in `remaining_accounts`.
+* Custom accounts can be added to `PackedAccounts` using `add_pre_accounts_signer`, `add_pre_accounts_signer_mut` or `add_pre_accounts_meta`.
 
-Depending on your instruction you must include indices for different tree and queue accounts. 
-* For other instructions than create, **use the state tree of the existing compressed account** as output state tree.
-* The pubkey is automatically deduplicated when you pack accounts.
+<Accordion title="Pre Accounts Explained">
+Pre accounts are your program-specific accounts (signers, PDAs for CPIs) and other accounts added to the beginning of `PackedAccounts` at known positions.
 
-<Warning>
-When creating or updating multiple accounts in a single transaction, use one output state tree. 
-</Warning>
+Since the number of pre accounts varies per instruction, the on-chain program receives offsets in the instruction data to locate Light System accounts and tree accounts:
+* `system_accounts_start_offset` (u8) - where Light System accounts begin in `remaining_accounts` 
+* `packed_accounts_start_offset` (u8) - where tree accounts begin in `remaining_accounts`
 
-<Tip>
-V2 is on Devnet and reduces compute unit consumption by up to 70%.
-</Tip>
-<Tabs>
-<Tab title="V1 Trees">
-
-<table>
-  <thead>
-    <tr>
-      <th width="150">Instruction</th>
-      <th width="80" className="text-center">Address Tree</th>
-      <th width="80" className="text-center">State Tree</th>
-      <th width="100" className="text-center">Nullifier Queue</th>
-      <th width="120" className="text-center">Output State Tree</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>Create</td>
-      <td className="text-center">✓</td>
-      <td className="text-center">-</td>
-      <td className="text-center">-</td>
-      <td className="text-center">✓</td>
-    </tr>
-    <tr>
-      <td>Update / Close / Reinit</td>
-      <td className="text-center">-</td>
-      <td className="text-center">✓</td>
-      <td className="text-center">✓</td>
-      <td className="text-center">✓</td>
-    </tr>
-    <tr>
-      <td>Burn</td>
-      <td className="text-center">-</td>
-      <td className="text-center">✓</td>
-      <td className="text-center">✓</td>
-      <td className="text-center">-</td>
-    </tr>
-  </tbody>
-</table>
-
-* **Address tree**: only used to derive and store a new address.
-* **State tree**: used to reference the existing compressed account hash. Therefore not used by create.
-* **Nullifier queue**: used to nullify the existing compressed account hash to prevent double spending. Therefore not used by create.
-* **Output State tree**: used to store the new or updated compressed account hash. Burn does not produce output state.
-
-</Tab>
-
-<Tab title="V2 Trees">
-
-<table>
-  <thead>
-    <tr>
-      <th width="150">Instruction</th>
-      <th width="80" className="text-center">Address Tree</th>
-      <th width="200" className="text-center">State Tree (includes nullifier queue)</th>
-      <th width="90" className="text-center">Output Queue</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>Create</td>
-      <td className="text-center">✓</td>
-      <td className="text-center">-</td>
-      <td className="text-center">✓</td>
-    </tr>
-    <tr>
-      <td>Update / Close / Reinit</td>
-      <td className="text-center">-</td>
-      <td className="text-center">✓</td>
-      <td className="text-center">✓</td>
-    </tr>
-    <tr>
-      <td>Burn</td>
-      <td className="text-center">-</td>
-      <td className="text-center">✓</td>
-      <td className="text-center">-</td>
-    </tr>
-  </tbody>
-</table>
-
-* **Address tree**: only used to derive and store a new address.
-* **State tree**: used to reference the existing compressed account hash. Therefore not used by create. V2 combines the state tree and nullifier queue into a single account.
-* **Output State tree**: used to store the new or updated compressed account hash. Burn does not produce output state.
-* **Output Queue**: used to store compressed account hashes. A forester node updates the Merkle tree asynchronously.
-
-</Tab>
-</Tabs>
-
+`PackedAccounts.to_account_metas()` calculates these offsets on the client-side and passes them to the program.
 </Accordion>
 
-<Tip>
-In your instruction,
-1. Put your program-specific accounts first
-2. Append Packed accounts to end of the vector (recommended due to variable length)
-</Tip>
+<Note>
+Depending on your instruction you include different tree and queue accounts.
+You will learn about this after the code example of `PackedAccounts`.
+</Note>
 <Tabs>
 <Tab title="Typescript">
 
@@ -810,13 +656,6 @@ const { remainingAccounts }
 ```
 </Tab>
 </Tabs>
-
-<Note>
-* Create uses address tree and address queue from the new address derivation
-* Update/Close/Reinit/Burn use state tree and nullifier queue from the existing compressed account's TreeInfo
-* Create derives a new address (no existing account)
-* Update/Close/Reinit/Burn reference the existing compressed account
-</Note>
 </Tab>
 
 <Tab title="Rust">
@@ -872,13 +711,110 @@ let (remaining_accounts_metas, _, _)
 
 </Tab>
 </Tabs>
-<Note>
-* Create packs address tree for the new address, then adds output state tree separately
-* Update/Close/Reinit/Burn pack state tree that includes output tree automatically
-</Note>
 </Tab>
 
 </Tabs>
+
+**Tree Accounts Explained:**
+
+Depending on your instruction you must include different tree and queue accounts. 
+
+
+<Tabs>
+<Tab title="V1 Trees">
+
+<table>
+  <thead>
+    <tr>
+      <th width="150">Instruction</th>
+      <th width="80" className="text-center">Address Tree</th>
+      <th width="80" className="text-center">State Tree</th>
+      <th width="100" className="text-center">Nullifier Queue</th>
+      <th width="120" className="text-center">Output State Tree</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Create</td>
+      <td className="text-center">✓</td>
+      <td className="text-center">-</td>
+      <td className="text-center">-</td>
+      <td className="text-center">✓</td>
+    </tr>
+    <tr>
+      <td>Update / Close / Reinit</td>
+      <td className="text-center">-</td>
+      <td className="text-center">✓</td>
+      <td className="text-center">✓</td>
+      <td className="text-center">✓</td>
+    </tr>
+    <tr>
+      <td>Burn</td>
+      <td className="text-center">-</td>
+      <td className="text-center">✓</td>
+      <td className="text-center">✓</td>
+      <td className="text-center">-</td>
+    </tr>
+  </tbody>
+</table>
+
+* The **Address tree** is used to derive and store a new address (create-only)
+* The **State tree** is used to reference the existing compressed account hash. Therefore not used by create.
+* The **Nullifier queue** is used to nullify the existing compressed account hash to prevent double spending. Therefore not used by create.
+* The **Output State tree** is used to store the new or updated compressed account hash.
+  * **Create only** - Choose any available state tree, or use a pre-selected tree to store the new compressed account.
+  * **Update/Close/Reinit** - Use the state tree of the existing compressed account as output state tree.
+  * **Mixed instructions (create + update in same tx)** - Use the state tree from the existing account as output state tree.
+  * **Burn** - Burn does not produce output state and does not need an output state tree.
+
+</Tab>
+
+<Tab title="V2 Trees">
+
+<table>
+  <thead>
+    <tr>
+      <th width="150">Instruction</th>
+      <th width="80" className="text-center">Address Tree</th>
+      <th width="200" className="text-center">State Tree (includes nullifier queue)</th>
+      <th width="90" className="text-center">Output Queue</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Create</td>
+      <td className="text-center">✓</td>
+      <td className="text-center">-</td>
+      <td className="text-center">✓</td>
+    </tr>
+    <tr>
+      <td>Update / Close / Reinit</td>
+      <td className="text-center">-</td>
+      <td className="text-center">✓</td>
+      <td className="text-center">✓</td>
+    </tr>
+    <tr>
+      <td>Burn</td>
+      <td className="text-center">-</td>
+      <td className="text-center">✓</td>
+      <td className="text-center">-</td>
+    </tr>
+  </tbody>
+</table>
+
+* **Address tree**: only used to derive and store a new address.
+* **State tree**: used to reference the existing compressed account hash. Therefore not used by create. V2 combines the state tree and nullifier queue into a single account.
+* **Output Queue**: used to store compressed account hashes. A forester node updates the state tree asynchronously.
+  * **Create only** - Choose any available queue, or use a pre-selected queue to store the new compressed account.
+  * **Update/Close/Reinit** - Use the queue of the existing compressed account as output queue.
+  * **Mixed instructions (create + update in same tx)** - Use the queue from the existing account as output queue.
+  * **Burn** - Do not include an output queue.
+</Tab>
+</Tabs>
+
+<Tip>
+V2 is on Devnet and reduces compute unit consumption by up to 70%.
+</Tip>
 
 </Step>
 
@@ -1143,11 +1079,12 @@ let instruction_data = burn::instruction::BurnAccount {
 
 Build the instruction with your `program_id`, `accounts`, and `data` from Step 5.
 
-<Tip>
-In `accounts`,
-1. Put your program-specific accounts first
-2. Append Packed accounts to end of the vector (recommended due to variable length)
-</Tip>
+In `accounts`, put your program-specific accounts first and append `PackedAccounts` to end of the vector (recommended due to variable length)
+```
+            Accounts
+┌---------------------------------┐
+[custom accounts]  [PackedAccounts]
+```
 
 ```rust
 let instruction = Instruction {

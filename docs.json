@@ -85,6 +85,244 @@
                 ]
               },
               "compressed-pdas/program-examples",
+              {
+                "group": "Program Examples (Source)",
+                "hidden": true,
+                "pages": [
+                  "compressed-pdas/program-examples-mdx/README",
+                  {
+                    "group": "Account Comparison",
+                    "pages": [
+                      "compressed-pdas/program-examples-mdx/account-comparison/Anchor-toml",
+                      "compressed-pdas/program-examples-mdx/account-comparison/Cargo-toml",
+                      "compressed-pdas/program-examples-mdx/account-comparison/package-json",
+                      "compressed-pdas/program-examples-mdx/account-comparison/tsconfig-json",
+                      "compressed-pdas/program-examples-mdx/account-comparison/programs/account-comparison/Cargo-toml",
+                      "compressed-pdas/program-examples-mdx/account-comparison/programs/account-comparison/Xargo-toml",
+                      "compressed-pdas/program-examples-mdx/account-comparison/programs/account-comparison/src/lib-rs",
+                      "compressed-pdas/program-examples-mdx/account-comparison/programs/account-comparison/tests/test_compressed_account-rs",
+                      "compressed-pdas/program-examples-mdx/account-comparison/programs/account-comparison/tests/test_solana_account-rs"
+                    ]
+                  },
+                  {
+                    "group": "Basic Operations",
+                    "pages": [
+                      {
+                        "group": "Anchor",
+                        "pages": [
+                          "compressed-pdas/program-examples-mdx/basic-operations/anchor/README",
+                          "compressed-pdas/program-examples-mdx/basic-operations/anchor/package-json",
+                          {
+                            "group": "Burn",
+                            "pages": [
+                              "compressed-pdas/program-examples-mdx/basic-operations/anchor/burn/Anchor-toml",
+                              "compressed-pdas/program-examples-mdx/basic-operations/anchor/burn/Cargo-toml",
+                              "compressed-pdas/program-examples-mdx/basic-operations/anchor/burn/package-json",
+                              "compressed-pdas/program-examples-mdx/basic-operations/anchor/burn/tsconfig-json",
+                              "compressed-pdas/program-examples-mdx/basic-operations/anchor/burn/programs/burn/Cargo-toml",
+                              "compressed-pdas/program-examples-mdx/basic-operations/anchor/burn/programs/burn/Xargo-toml",
+                              "compressed-pdas/program-examples-mdx/basic-operations/anchor/burn/programs/burn/src/lib-rs",
+                              "compressed-pdas/program-examples-mdx/basic-operations/anchor/burn/programs/burn/tests/test-rs",
+                              "compressed-pdas/program-examples-mdx/basic-operations/anchor/burn/tests/burn-ts"
+                            ]
+                          },
+                          {
+                            "group": "Close",
+                            "pages": [
+                              "compressed-pdas/program-examples-mdx/basic-operations/anchor/close/Anchor-toml",
+                              "compressed-pdas/program-examples-mdx/basic-operations/anchor/close/Cargo-toml",
+                              "compressed-pdas/program-examples-mdx/basic-operations/anchor/close/package-json",
+                              "compressed-pdas/program-examples-mdx/basic-operations/anchor/close/tsconfig-json",
+                              "compressed-pdas/program-examples-mdx/basic-operations/anchor/close/programs/close/Cargo-toml",
+                              "compressed-pdas/program-examples-mdx/basic-operations/anchor/close/programs/close/Xargo-toml",
+                              "compressed-pdas/program-examples-mdx/basic-operations/anchor/close/programs/close/src/lib-rs",
+                              "compressed-pdas/program-examples-mdx/basic-operations/anchor/close/programs/close/tests/test-rs",
+                              "compressed-pdas/program-examples-mdx/basic-operations/anchor/close/tests/close-ts"
+                            ]
+                          },
+                          {
+                            "group": "Create",
+                            "pages": [
+                              "compressed-pdas/program-examples-mdx/basic-operations/anchor/create/Anchor-toml",
+                              "compressed-pdas/program-examples-mdx/basic-operations/anchor/create/Cargo-toml",
+                              "compressed-pdas/program-examples-mdx/basic-operations/anchor/create/package-json",
+                              "compressed-pdas/program-examples-mdx/basic-operations/anchor/create/tsconfig-json",
+                              "compressed-pdas/program-examples-mdx/basic-operations/anchor/create/programs/create/Cargo-toml",
+                              "compressed-pdas/program-examples-mdx/basic-operations/anchor/create/programs/create/Xargo-toml",
+                              "compressed-pdas/program-examples-mdx/basic-operations/anchor/create/programs/create/src/lib-rs",
+                              "compressed-pdas/program-examples-mdx/basic-operations/anchor/create/programs/create/tests/test-rs",
+                              "compressed-pdas/program-examples-mdx/basic-operations/anchor/create/tests/create-ts"
+                            ]
+                          },
+                          {
+                            "group": "Reinit",
+                            "pages": [
+                              "compressed-pdas/program-examples-mdx/basic-operations/anchor/reinit/Anchor-toml",
+                              "compressed-pdas/program-examples-mdx/basic-operations/anchor/reinit/Cargo-toml",
+                              "compressed-pdas/program-examples-mdx/basic-operations/anchor/reinit/package-json",
+                              "compressed-pdas/program-examples-mdx/basic-operations/anchor/reinit/tsconfig-json",
+                              "compressed-pdas/program-examples-mdx/basic-operations/anchor/reinit/programs/reinit/Cargo-toml",
+                              "compressed-pdas/program-examples-mdx/basic-operations/anchor/reinit/programs/reinit/Xargo-toml",
+                              "compressed-pdas/program-examples-mdx/basic-operations/anchor/reinit/programs/reinit/src/lib-rs",
+                              "compressed-pdas/program-examples-mdx/basic-operations/anchor/reinit/programs/reinit/tests/test-rs",
+                              "compressed-pdas/program-examples-mdx/basic-operations/anchor/reinit/tests/reinit-ts"
+                            ]
+                          },
+                          {
+                            "group": "Update",
+                            "pages": [
+                              "compressed-pdas/program-examples-mdx/basic-operations/anchor/update/Anchor-toml",
+                              "compressed-pdas/program-examples-mdx/basic-operations/anchor/update/Cargo-toml",
+                              "compressed-pdas/program-examples-mdx/basic-operations/anchor/update/package-json",
+                              "compressed-pdas/program-examples-mdx/basic-operations/anchor/update/tsconfig-json",
+                              "compressed-pdas/program-examples-mdx/basic-operations/anchor/update/programs/update/Cargo-toml",
+                              "compressed-pdas/program-examples-mdx/basic-operations/anchor/update/programs/update/Xargo-toml",
+                              "compressed-pdas/program-examples-mdx/basic-operations/anchor/update/programs/update/src/lib-rs",
+                              "compressed-pdas/program-examples-mdx/basic-operations/anchor/update/programs/update/tests/test-rs",
+                              "compressed-pdas/program-examples-mdx/basic-operations/anchor/update/tests/update-ts"
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "group": "Native",
+                        "pages": [
+                          "compressed-pdas/program-examples-mdx/basic-operations/native/README",
+                          "compressed-pdas/program-examples-mdx/basic-operations/native/Cargo-toml",
+                          "compressed-pdas/program-examples-mdx/basic-operations/native/package-json",
+                          "compressed-pdas/program-examples-mdx/basic-operations/native/tsconfig-json",
+                          {
+                            "group": "Burn",
+                            "pages": [
+                              "compressed-pdas/program-examples-mdx/basic-operations/native/programs/burn/Cargo-toml",
+                              "compressed-pdas/program-examples-mdx/basic-operations/native/programs/burn/src/lib-rs",
+                              "compressed-pdas/program-examples-mdx/basic-operations/native/programs/burn/src/test_helpers-rs",
+                              "compressed-pdas/program-examples-mdx/basic-operations/native/programs/burn/tests/test-rs"
+                            ]
+                          },
+                          {
+                            "group": "Close",
+                            "pages": [
+                              "compressed-pdas/program-examples-mdx/basic-operations/native/programs/close/Cargo-toml",
+                              "compressed-pdas/program-examples-mdx/basic-operations/native/programs/close/src/lib-rs",
+                              "compressed-pdas/program-examples-mdx/basic-operations/native/programs/close/src/test_helpers-rs",
+                              "compressed-pdas/program-examples-mdx/basic-operations/native/programs/close/tests/test-rs"
+                            ]
+                          },
+                          {
+                            "group": "Create",
+                            "pages": [
+                              "compressed-pdas/program-examples-mdx/basic-operations/native/programs/create/Cargo-toml",
+                              "compressed-pdas/program-examples-mdx/basic-operations/native/programs/create/Xargo-toml",
+                              "compressed-pdas/program-examples-mdx/basic-operations/native/programs/create/src/lib-rs",
+                              "compressed-pdas/program-examples-mdx/basic-operations/native/programs/create/src/test_helpers-rs",
+                              "compressed-pdas/program-examples-mdx/basic-operations/native/programs/create/tests/test-rs"
+                            ]
+                          },
+                          {
+                            "group": "Reinit",
+                            "pages": [
+                              "compressed-pdas/program-examples-mdx/basic-operations/native/programs/reinit/Cargo-toml",
+                              "compressed-pdas/program-examples-mdx/basic-operations/native/programs/reinit/src/lib-rs",
+                              "compressed-pdas/program-examples-mdx/basic-operations/native/programs/reinit/src/test_helpers-rs",
+                              "compressed-pdas/program-examples-mdx/basic-operations/native/programs/reinit/tests/test-rs"
+                            ]
+                          },
+                          {
+                            "group": "Update",
+                            "pages": [
+                              "compressed-pdas/program-examples-mdx/basic-operations/native/programs/update/Cargo-toml",
+                              "compressed-pdas/program-examples-mdx/basic-operations/native/programs/update/Xargo-toml",
+                              "compressed-pdas/program-examples-mdx/basic-operations/native/programs/update/src/lib-rs",
+                              "compressed-pdas/program-examples-mdx/basic-operations/native/programs/update/src/test_helpers-rs",
+                              "compressed-pdas/program-examples-mdx/basic-operations/native/programs/update/tests/test-rs"
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "group": "Counter",
+                    "pages": [
+                      {
+                        "group": "Anchor",
+                        "pages": [
+                          "compressed-pdas/program-examples-mdx/counter/anchor/README",
+                          "compressed-pdas/program-examples-mdx/counter/anchor/Anchor-toml",
+                          "compressed-pdas/program-examples-mdx/counter/anchor/Cargo-toml",
+                          "compressed-pdas/program-examples-mdx/counter/anchor/package-json",
+                          "compressed-pdas/program-examples-mdx/counter/anchor/tsconfig-json",
+                          "compressed-pdas/program-examples-mdx/counter/anchor/programs/counter/Cargo-toml",
+                          "compressed-pdas/program-examples-mdx/counter/anchor/programs/counter/Xargo-toml",
+                          "compressed-pdas/program-examples-mdx/counter/anchor/programs/counter/src/lib-rs",
+                          "compressed-pdas/program-examples-mdx/counter/anchor/programs/counter/tests/test-rs",
+                          "compressed-pdas/program-examples-mdx/counter/anchor/tests/test-ts"
+                        ]
+                      },
+                      {
+                        "group": "Native",
+                        "pages": [
+                          "compressed-pdas/program-examples-mdx/counter/native/Cargo-toml",
+                          "compressed-pdas/program-examples-mdx/counter/native/Xargo-toml",
+                          "compressed-pdas/program-examples-mdx/counter/native/src/lib-rs",
+                          "compressed-pdas/program-examples-mdx/counter/native/tests/test-rs"
+                        ]
+                      },
+                      {
+                        "group": "Pinocchio",
+                        "pages": [
+                          "compressed-pdas/program-examples-mdx/counter/pinocchio/Cargo-toml",
+                          "compressed-pdas/program-examples-mdx/counter/pinocchio/Xargo-toml",
+                          "compressed-pdas/program-examples-mdx/counter/pinocchio/src/lib-rs",
+                          "compressed-pdas/program-examples-mdx/counter/pinocchio/tests/test-rs"
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "group": "Create and Update",
+                    "pages": [
+                      "compressed-pdas/program-examples-mdx/create-and-update/README",
+                      "compressed-pdas/program-examples-mdx/create-and-update/Anchor-toml",
+                      "compressed-pdas/program-examples-mdx/create-and-update/Cargo-toml",
+                      "compressed-pdas/program-examples-mdx/create-and-update/package-json",
+                      "compressed-pdas/program-examples-mdx/create-and-update/tsconfig-json",
+                      "compressed-pdas/program-examples-mdx/create-and-update/programs/create-and-update/Cargo-toml",
+                      "compressed-pdas/program-examples-mdx/create-and-update/programs/create-and-update/Xargo-toml",
+                      "compressed-pdas/program-examples-mdx/create-and-update/programs/create-and-update/src/lib-rs",
+                      "compressed-pdas/program-examples-mdx/create-and-update/programs/create-and-update/tests/test-rs",
+                      "compressed-pdas/program-examples-mdx/create-and-update/programs/create-and-update/tests/test_create_two_accounts-rs",
+                      "compressed-pdas/program-examples-mdx/create-and-update/tests/create_and_update-ts"
+                    ]
+                  },
+                  {
+                    "group": "Read Only",
+                    "pages": [
+                      "compressed-pdas/program-examples-mdx/read-only/README",
+                      "compressed-pdas/program-examples-mdx/read-only/Cargo-toml",
+                      "compressed-pdas/program-examples-mdx/read-only/Xargo-toml",
+                      "compressed-pdas/program-examples-mdx/read-only/src/lib-rs",
+                      "compressed-pdas/program-examples-mdx/read-only/tests/test-rs"
+                    ]
+                  },
+                  {
+                    "group": "ZK ID",
+                    "pages": [
+                      "compressed-pdas/program-examples-mdx/zk-id/README",
+                      "compressed-pdas/program-examples-mdx/zk-id/Cargo-toml",
+                      "compressed-pdas/program-examples-mdx/zk-id/Xargo-toml",
+                      "compressed-pdas/program-examples-mdx/zk-id/build-rs",
+                      "compressed-pdas/program-examples-mdx/zk-id/package-json",
+                      "compressed-pdas/program-examples-mdx/zk-id/circuits/README",
+                      "compressed-pdas/program-examples-mdx/zk-id/src/lib-rs",
+                      "compressed-pdas/program-examples-mdx/zk-id/src/verifying_key-rs",
+                      "compressed-pdas/program-examples-mdx/zk-id/tests/circuit-rs",
+                      "compressed-pdas/program-examples-mdx/zk-id/tests/test-rs"
+                    ]
+                  }
+                ]
+              },
               "client-library/client-guide"
             ]
           },
