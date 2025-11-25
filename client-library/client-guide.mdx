@@ -1079,23 +1079,17 @@ let instruction_data = burn::instruction::BurnAccount {
 Build the instruction with your `program_id`, `accounts`, and `data` from Step 5.
 
 In `accounts`, put your program-specific accounts first and append `PackedAccounts` to end of the vector (recommended due to variable length)
-```
-            Accounts
-┌---------------------------------┐
-[custom accounts]  [PackedAccounts]
-```
-
 ```rust
+//          Accounts
+// ┌---------------------------------┐
+// [custom accounts]  [PackedAccounts]
+let accounts = [vec![AccountMeta::new(payer.pubkey(), true), remaining_accounts].concat();
+
 let instruction = Instruction {
     program_id: program_id,
-    accounts: [
-        vec![AccountMeta::new(payer.pubkey(), true)],
-        remaining_accounts,
-    ]
-    .concat(),
+    accounts,
     data: instruction_data,
 };
-```
 
 </Step>
 
