@@ -206,7 +206,9 @@ You derive addresses in two scenarios:
 
 ### Derivation
 Like PDAs, compressed account addresses don't have a private key; rather, they're derived from the program that owns them.
-* The key difference to PDAs is that compressed accounts you include an **address tree** parameter.
+* The key difference to PDAs is compressed addresses are stored in an address tree and include this tree in the address derivation.
+    -> every address is different
+    -> the same seeds can produce different addresses in different trees (you should check the address tree in your program)
 
 <Tip>
 The protocol maintains Merkle trees. You don't need to initialize custom trees. Find the [pubkeys for Merkle trees here](https://www.zkcompression.com/resources/addresses-and-urls).
