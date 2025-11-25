@@ -1,8 +1,8 @@
 ---
 title: Client Guide
 description: >-
-  Rust and Typescript client guides with step-by-step
-  implementation and full code examples.
+  Rust and Typescript client guides with step-by-step implementation and full
+  code examples.
 ---
 
 import SystemAccountsList from '/snippets/compressed-pdas-system-accounts-list.mdx';
@@ -36,6 +36,11 @@ ZK Compression provides Rust and Typescript clients to interact with compressed 
   </tbody>
 </table>
 
+# Key Points
+
+
+
+# Get Started
 <Steps>
 <Step>
 ## Setup
@@ -201,18 +206,8 @@ light test-validator
 Derive a persistent address as a unique identifier for your compressed account, similar to [program-derived addresses (PDAs)](https://solana.com/docs/core/pda).
 
 You derive addresses in two scenarios:
-* **At account creation** - derive the address to create the account's persistent identifier, then pass it to `getValidityProofV0()` in the address array (see Step 3 "Validity Proof")
+* **At account creation** - derive the address to create the account's persistent identifier, then pass it to `getValidityProofV0()` in the address array
 * **Before building instructions** - derive the address to fetch existing accounts using `rpc.getCompressedAccount()`
-
-### Derivation
-Like PDAs, compressed account addresses don't have a private key; rather, they're derived from the program that owns them.
-* The key difference to PDAs is compressed addresses are stored in an address tree and include this tree in the address derivation.
-    -> every address is different
-    -> the same seeds can produce different addresses in different trees (you should check the address tree in your program)
-
-<Tip>
-The protocol maintains Merkle trees. You don't need to initialize custom trees. Find the [pubkeys for Merkle trees here](https://www.zkcompression.com/resources/addresses-and-urls).
-</Tip>
 
 <Tabs>
 <Tab title="Typescript">
@@ -230,13 +225,6 @@ const address = deriveAddress(
   addressTree.tree
 );
 ```
-
-**1. Derive the seed**
-
-**2. Then, derive the address**:
-
-* Pass the derived 32-byte `seed` from the first step
-* Specify `addressTree.tree` pubkey to ensure an address is unique to an address tree. Different trees produce different addresses from identical seeds.
 </Tab>
 
 <Tab title="V2 Address Trees">
@@ -254,13 +242,6 @@ const address = deriveAddressV2(
 );
 ```
 
-**1. Derive the seed**
-
-**2. Then, derive the address**:
-
-* Pass the derived 32-byte `seed` from the first step.
-* Specify `addressTree.tree` pubkey to ensure an address is unique to an address tree. Different trees produce different addresses from identical seeds.
-* Specify your *`programId` in this step.*
 </Tab>
 </Tabs>
 </Tab>
@@ -294,25 +275,27 @@ let (address, _) = derive_address(
     &program_id,
 );
 ```
+</Tab>
+</Tabs>
 
 </Tab>
 </Tabs>
 
-**Pass these parameters**:
+Like PDAs, compressed account addresses don't have a private key; rather, they're derived from the program that owns them.
+* The key difference to PDAs is compressed addresses are stored in an address tree and include this tree in the address derivation.
+* Different trees produce different addresses from identical seeds. You should check the address tree in your program.
 
-* `&[b"my-seed"]`: Predefined inputs, such as strings, numbers or other account addresses.
-* `&address_tree_info.tree`: Specify the tree pubkey to ensure an address is unique to this address tree. Different trees produce different addresses from identical seeds.
-* `&program_id`: Specify your program ID.
-</Tab>
-</Tabs>
+<Tip>
+The protocol maintains Merkle trees. You don't need to initialize custom trees. Find the [pubkeys for Merkle trees here](https://www.zkcompression.com/resources/addresses-and-urls).
+</Tip>
 </Step>
 
 <Step>
 ## Validity Proof
 
 Transactions with compressed accounts must include a validity proof:
-* To **create** a compressed account, you prove the **address doesn't already exist** in the address tree.
-* In **other instructions**, you **prove its account hash exists** in a state tree.
+* To **create** a compressed account, you prove the **new address doesn't already exist** in the address tree.
+* In **other instructions**, you **prove  the compressed account hash exists** in a state tree.
 * You can **combine multiple addresses and hashes in one proof** to optimize compute cost and instruction data.
 
 <Info>
@@ -337,15 +320,17 @@ const proof = await rpc.getValidityProofV0(
 
 **1. Pass these parameters**:
 
-* **Specify the derived address**, `tree` and `queue` pubkeys from the address tree `TreeInfo`.
-* When you create an account you don't reference a compressed account hash in the hash array (`[]`).
+* **Specify the new address**, `tree` and `queue` pubkeys from the address tree `TreeInfo`.
+* When you create an account you don't reference a compressed account hash in the hash array (`[]`). The account doesn't exist in a state Merkle tree yet.
 <Note>
 For account creation, you prove the address does not exist yet in the address tree.
 </Note>
 **2. The RPC returns**:
 
-* `compressedProof` with the proof that the address does not exist in the address tree for your instruction data (Step 5)
-* `rootIndices` array with root index from the validity proof for the address tree.
+* The proof that the new address does not exist in the address tree. It is used in the instruction data.
+* `rootIndices` array with root index. 
+  * The root index points to the root in the address tree accounts root history array. 
+  * This root is used by the `LightSystemProgram` to verify the validity proof.
 </Tab>
 
 <Tab title="Update, Close, Reinit, Burn">
@@ -373,8 +358,8 @@ Specify the **account hash**, `tree` and `queue` pubkeys from the compressed acc
 
 **2. The RPC returns**:
 
-* `compressedProof` with the proof that the account hash exists in the state tree for your instruction data (Step 5)
-* `rootIndices` and `leafIndices` arrays with proof metadata to pack accounts (Step 4).
+* The proof that the account hash exists in the state tree for your instruction data.
+* `rootIndices` and `leafIndices` arrays with proof metadata to pack accounts.
 </Tab>
 </Tabs>
 </Tab>
@@ -399,7 +384,7 @@ let rpc_result = rpc
 
 
 **1. Pass these parameters**:
-* **Specify the derived address** and `tree` pubkey from the address tree `TreeInfo`. The `queue` pubkey is only required in TypeScript.
+* **Specify the new address** and `tree` pubkey from the address tree `TreeInfo`. The `queue` pubkey is only required in TypeScript.
 * When you create an account you don't reference a compressed account hash in the hash array (`vec![]`).
 <Note>
 For account creation, you prove the address does not exist yet in the address tree.
@@ -407,8 +392,8 @@ For account creation, you prove the address does not exist yet in the address tr
 
 **2. The RPC returns `ValidityProofWithContext`**:
 
-* `proof` with the proof that the address does not exist in the address tree for your instruction data (Step 5)
-* `addresses` with the public key and metadata of the address tree to pack accounts (Step 4).
+* The proof that the new address does not exist in the address tree for your instruction data.
+* `addresses` with the public key and metadata of the address tree to pack accounts.
 </Tab>
 
 <Tab title="Update, Close, Reinit, Burn">
@@ -434,8 +419,8 @@ Specify the **account hash**, `tree` and `queue` pubkeys from the compressed acc
 </Note>
 **2. The RPC returns `ValidityProofWithContext`**:
 
-* `proof` with the proof that the **account hash exists in the state tree** for your instruction data (Step 5)
-* `accounts` with the **public key and metadata of the state tree** to pack accounts (Step 4).
+* The proof that the **account hash exists in the state tree** for your instruction data
+* `accounts` with the **public key and metadata of the state tree** to pack accounts.
 </Tab>
 </Tabs>
 </Tab>
@@ -443,7 +428,7 @@ Specify the **account hash**, `tree` and `queue` pubkeys from the compressed acc
 
 ### Optimize with Combined Proofs
 
-Depending on the **Merkle tree version** (V1 or V2) you are using, you can prove **in a single proof**:
+Depending on the **Merkle tree version** (V1 or V2), you can prove **in a single proof**:
 * multiple addresses,
 * multiple account hashes, or
 * a combination of addresses and account hashes.
@@ -452,32 +437,31 @@ Depending on the **Merkle tree version** (V1 or V2) you are using, you can prove
 <Tab title="V1">
 |              |                  |
 | ----------------------- | --------------------------------------------------- |
-| Account Hash-only (bulk)        | 1, 2, 3, 4, or 8 hashes                            |
-| Address-only (bulk)     | 1, 2, 4, or 8 addresses                            |
-| Mixed (hash + address)  | Any combination of <br/>**1, 2, 3, 4, or 8** account hashes **and** <br/>**1, 2, 4, or 8** new addresses |
+| Account Hash-only         | 1, 2, 3, 4, or 8 hashes                            |
+| Address-only     | 1 and 2 addresses                            |
+| Mixed (hash + address)  | Any combination of <br/>**1, 2, 3, 4, or 8** account hashes **and** <br/>**1 or 2** new addresses |
 </Tab>
 
 <Tab title="V2">
 
 |              |                   |
 | ----------------------- | --------------------------------------------------- |
-| Account Hash-only (bulk)        | 1 to 20 hashes                                     |
-| Address-only (bulk)     | 1 to 32 addresses                                  |
-| Mixed (hash + address)  | Any combination of <br/>**1 to 4** account hashes **and** <br/>**1 to 4** new addresses |
+| Account Hash-only        | 1 to 8 hashes                                     |
+| Address-only      | 1 to 8 addresses                                  |
+| Mixed (hash + address)  | Any combination of <br/>**1 to 4** account hashes **and** <br/>**1 or 4** new addresses |
 </Tab>
 </Tabs>
 
 <Tip>
 **Advantages of combined proofs**:
 * You only add **one 128 byte validity proof** to your instruction data **for multiple instructions**.
-* This can **optimize** your **transaction's size** to stay inside the 1232 byte limit.
-* **Compute unit consumption is reduced by at least 100k CU**, since combined proofs are verified in a single CPI by the Light System Program.
+* This can **optimize** your **transaction's size** to stay inside the 1232 byte instruction data limit.
+* **Compute unit consumption is 100k CU** per `ValidityProof` verification by the Light System Program.
 </Tip>
 
 ### Example Create Address & Update Account in one Proof
 
-In this example, we generate one proof that proves that an account exists and that an address does not exist yet. 
-This updates an account and create the address for a new account.
+In this example, we generate one proof that proves that an account exists and that a new address does not exist yet. 
 
 <Tabs>
 <Tab title="Typescript">
@@ -500,12 +484,12 @@ const proof = await rpc.getValidityProofV0(
 **1. Pass these parameters**:
 
 * Specify one or more **account hashes**, `tree` and `queue` pubkeys from the compressed account's `TreeInfo`.
-* Specify one or more **derived addresses** with their `tree` and `queue` pubkeys from the address tree `TreeInfo`.
+* Specify one or more **new addresses** with their `tree` and `queue` pubkeys from the address tree `TreeInfo`.
 
 **2. The RPC returns**:
 
-* `compressedProof` with a single combined proof that verifies both the **account hash exists in the state tree** and the **address does not exist in the address tree** for your instruction data (Step 5)
-* `rootIndices` and `leafIndices` arrays with proof metadata to pack accounts (Step 4).
+* A single combined proof that proves both the **account hash exists in the state tree** and the **new address does not exist in the address tree** for your instruction data
+* `rootIndices` and `leafIndices` arrays with proof metadata to pack accounts.
 </Tab>
 
 <Tab title="Rust">
@@ -531,9 +515,9 @@ let rpc_result = rpc
 
 **2. The RPC returns `ValidityProofWithContext`**:
 
-* `proof` with a single combined proof that verifies both the **account hash exists in the state tree** and the **address does not exist in the address tree** for your instruction data (Step 5)
-* `addresses` with the public key and metadata of the address tree to pack accounts (Step 4).
-* `accounts` with the public key and metadata of the state tree to pack accounts (Step 4).
+* A single combined proof that verifies both the **account hash exists in the state tree** and the **new address does not exist in the address tree** for your instruction data
+* New `addresses` with the public key and metadata of the address tree to pack accounts.
+* `accounts` with the public key and metadata of the state tree to pack accounts.
 </Tab>
 </Tabs>
 
@@ -842,8 +826,8 @@ const instructionData = {
 };
 ```
 
-1. Include `compressedProof` from Step 3 to **prove the address does not exist** in the address tree
-2. Specify **Merkle trees to store address and account hash** from Step 4 where you packed accounts.
+1. Include `proof` to **prove the address does not exist** in the address tree
+2. Specify **Merkle trees to store address and account hash** to where you packed accounts.
 3. Pass **initial account data**
 </Tab>
 
@@ -866,7 +850,7 @@ const instructionData = {
 };
 ```
 
-1. Include `compressedProof` from **Step 3** to prove the **account hash exists** in the state tree
+1. Include `proof` to to prove the **account hash exists** in the state tree
 2. Specify the existing accounts address, its `packedStateTreeInfo` and the output state tree to store the updated compressed account hash.
 3. Pass **current account data** and **new data**
 <Tip>
@@ -892,7 +876,7 @@ const instructionData = {
 };
 ```
 
-1. Include `compressedProof` from **Step 3** to prove the **account hash exists** in the state tree
+1. Include `proof` to prove the **account hash exists** in the state tree
 2. Specify the existing accounts address, its `packedStateTreeInfo` and the output state tree to store the **hash with zero values** for the closed account.
 3. Pass **current account data**
 <Tip>
@@ -917,7 +901,7 @@ const instructionData = {
 };
 ```
 
-1. Include `compressedProof` from **Step 3** to prove the **account hash exists** in the state tree
+1. Include `proof` to prove the **account hash exists** in the state tree
 2. Specify the existing accounts address, its `packedStateTreeInfo` and the output state tree that will store the reinitialized account hash
 3. Reinitialize creates an account with **default-initialized values**
 * These values are `Pubkey` as all zeros, numbers as `0`, strings as empty.
@@ -944,7 +928,7 @@ const instructionData = {
 };
 ```
 
-1. Include `compressedProof` from **Step 3** to prove the **account hash exists** in the state tree
+1. Include `proof` to prove the **account hash exists** in the state tree
 2. Specify the existing accounts address and its `packedStateTreeInfo`. You don't need to specify the output state tree, since burn permanently removes the account.
 3. Pass **current account data**
 </Tab>
@@ -965,8 +949,8 @@ let instruction_data = create::instruction::CreateAccount {
 .data();
 ```
 
-1. Include `proof` from Step 3 to prove the **address does not exist** in the address tree
-2. Specify **address tree and output state tree** from Step 4 where you packed accounts
+1. Include `proof` to prove the **address does not exist** in the address tree
+2. Specify **address tree and output state tree** to where you packed accounts
 3. Pass **initial account data**
 </Tab>
 
@@ -990,7 +974,7 @@ let instruction_data = update::instruction::UpdateAccount {
 Use the state tree of the existing compressed account as output state tree.
 </Tip>
 
-1. Include `proof` from Step 3 to prove the **account hash exists** in the state tree
+1. Include `proof` to prove the **account hash exists** in the state tree
 2. Specify the existing accounts address, its `packed_tree_infos` and the output state tree to store the updated compressed account hash
 3. Pass **current account data** and **new data**
 
@@ -1015,7 +999,7 @@ let instruction_data = close::instruction::CloseAccount {
 Use the state tree of the existing compressed account as output state tree.
 </Tip>
 
-1. Include `proof` from Step 3 to prove the **account hash exists** in the state tree
+1. Include `proof` to prove the **account hash exists** in the state tree
 2. Specify the existing accounts address, its `packed_tree_infos` and the output state tree to store the **hash with zero values** for the closed account
 3. Pass **current account data**
 
@@ -1039,7 +1023,7 @@ let instruction_data = reinit::instruction::ReinitAccount {
 Use the state tree of the existing compressed account as output state tree.
 </Tip>
 
-1. Include `proof` from Step 3 to prove the **account hash exists** in the state tree
+1. Include `proof` to prove the **account hash exists** in the state tree
 2. Specify the existing accounts address, its `packed_tree_infos` and the output state tree that will store the reinitialized account hash
 3. Reinitialize creates an account with **default-initialized values**
 * These values are `Pubkey` as all zeros, numbers as `0`, strings as empty.
@@ -1060,7 +1044,7 @@ let instruction_data = burn::instruction::BurnAccount {
 .data();
 ```
 
-1. Include `proof` from Step 3 to prove the **account hash exists** in the state tree
+1. Include `proof` to prove the **account hash exists** in the state tree
 2. Specify the existing accounts address and its `packed_tree_infos`. You don't need to specify the output state tree, since burn permanently removes the account
 3. Pass **current account data**
 </Tab>
@@ -1078,7 +1062,7 @@ let instruction_data = burn::instruction::BurnAccount {
 <Step>
 ## Instruction
 
-Build the instruction with your `program_id`, `accounts`, and `data` from Step 5.
+Build the instruction with your `program_id`, `accounts`, and `data`.
 
 In `accounts`, put your program-specific accounts first and append `PackedAccounts` to end of the vector (recommended due to variable length)
 ```rust
@@ -1092,6 +1076,7 @@ let instruction = Instruction {
     accounts,
     data: instruction_data,
 };
+```
 
 </Step>
 
