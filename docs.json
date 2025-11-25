@@ -50,6 +50,7 @@
               {
                 "group": "cToken",
                 "pages": [
+                  "compressed-token-program/ctoken/mint-actions",
                   {
                     "group": "Guides",
                     "expanded": true,
