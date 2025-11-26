@@ -6,7 +6,7 @@ info:
     name: Apache-2.0
   version: 0.50.0
 servers:
-- url: https://devnet.helius-rpc.com?api-key=<api_key>
+- url: https://devnet.helius-rpc.com
 paths:
   /getBatchAddressUpdateInfo:
     summary: getBatchAddressUpdateInfo
