@@ -4,8 +4,6 @@ description: Overview JSON RPC endpoints on Solana, best practices, and error co
 sidebarTitle: "Overview"
 ---
 
-Interact with compressed accounts directly with the ZK Compression JSON RPC API. It's a thin wrapper extending [Solana's web3.js `Connection` class](https://solana-labs.github.io/solana-web3.js/classes/Connection.html) with compression-related endpoints.
-
 The API exposed by the indexer closely mirrors existing RPC calls, with one-to-one mapping:
 
 | Solana RPC              | Photon RPC Calls                  |
@@ -15,9 +13,13 @@ The API exposed by the indexer closely mirrors existing RPC calls, with one-to-o
 | getTokenAccountsByOwner | getCompressedTokenAccountsByOwner |
 | getProgramAccounts      | getCompressedAccountsByOwner      |
 
-<Info>
-[Helius Labs](https://github.com/helius-labs) maintains the canonical RPC API and [Photon indexer implementation](https://github.com/helius-labs/photon).
-</Info>
+<Card
+  title="View all RPC endpoints for ZK Compression"
+  icon="chevron-right"
+  color="#0066ff"
+  href="/api-reference/json-rpc-methods/methods"
+  horizontal
+/>
 
 ## Create an RPC Connection
 
@@ -89,7 +91,7 @@ console.log("connection", connection);
 # Next Steps
 
 <Card
-  title="Get an overview of all RPC endpoints for ZK Compression"
+  title="View all RPC endpoints for ZK Compression"
   icon="chevron-right"
   color="#0066ff"
   href="/api-reference/json-rpc-methods/methods"

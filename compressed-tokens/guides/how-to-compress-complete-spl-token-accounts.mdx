@@ -5,6 +5,7 @@ description: "Guide to compress complete SPL Token Accounts with compressSplToke
 
 import InstallDependencies from '/snippets/install-dependencies-codegroup.mdx';
 import SetupEnvironment from '/snippets/setup-environment-tabs.mdx';
+import MintPrereq from '/snippets/compressed-tokens-mint-prereq.mdx';
 
 The `compressSplTokenAccount` function compresses the balance of an SPL token account, with an optional `remainingAmount` parameter to leave tokens in the original account.
 
@@ -69,13 +70,6 @@ Make sure you have dependencies and developer environment set up!
 ### Compress SPL Token Accounts
 
 Run this script to compress the entire SPL token account balance.
-
-<Info>
-Before compressing SPL token accounts, you need:
-
-* An SPL mint with a token pool for compression. This token pool can be created for new SPL mints via [`createMint()`](/compressed-tokens/guides/how-to-create-and-register-a-mint-account-for-compression), and
-* SPL token account (ATA) with tokens to compress.
-</Info>
 
 ```typescript compress-full-account.ts highlight={48-55} expandable
 // 1. Setup funded payer and connect to local validator
@@ -168,6 +162,9 @@ async function compressFullAccount() {
 
 compressFullAccount().catch(console.error);
 ```
+
+<MintPrereq />
+
 </Step>
 </Steps>
 

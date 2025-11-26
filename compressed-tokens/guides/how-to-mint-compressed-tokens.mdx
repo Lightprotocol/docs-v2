@@ -5,6 +5,7 @@ description: "Guide to mint compressed tokens with mintTo(), troubleshooting, an
 
 import InstallDependencies from '/snippets/install-dependencies-codegroup.mdx';
 import SetupEnvironment from '/snippets/setup-environment-tabs.mdx';
+import MintPrereq from '/snippets/compressed-tokens-mint-prereq.mdx';
 
 The `mintTo()` function creates compressed token accounts for recipients and increases the mint's token supply. Only the mint authority can perform this operation.
 
@@ -45,12 +46,6 @@ Make sure you have dependencies and developer environment set up!
 
 
 Run this script to mint compressed tokens to a recipient!
-
-<Info>
-Before minting compressed tokens, you need an SPL mint with a token pool for compression. 
-
-This token pool can be created for new SPL mints via [`createMint()`](/compressed-tokens/guides/how-to-create-and-register-a-mint-account-for-compression) or added to existing SPL mints via [`createTokenPool()`](/compressed-tokens/guides/how-to-create-compressed-token-pools-for-mint-accounts).
-</Info>
 
 ```typescript mint-compressed-tokens.ts highlight={35-44} expandable
 // 1. Setup funded payer and connect to local validator
@@ -117,6 +112,8 @@ async function mintCompressedTokens() {
 
 mintCompressedTokens().catch(console.error);
 ```
+<MintPrereq />
+
 </Step>
 </Steps>
 

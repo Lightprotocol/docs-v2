@@ -5,6 +5,7 @@ description: Guide to update compressed accounts in Solana programs with full co
 
 import CompressedPdasProgramSetup from '/snippets/compressed-pdas-program-setup.mdx';
 import CompressedPdasSystemAccountsList from '/snippets/compressed-pdas-system-accounts-list.mdx';
+import DevelopmentEnvironmentSetup from '/snippets/development-environment-setup.mdx';
 
 Compressed accounts are updated via CPI to the Light System Program.
 
@@ -245,12 +246,11 @@ LightSystemProgramCpi::new_cpi(LIGHT_CPI_SIGNER, instruction_data.proof)
 
 # Full Code Example
 
-The example programs below implement all steps from this guide. Make sure you have your [developer environment](https://www.zkcompression.com/compressed-pdas/create-a-program-with-compressed-pdas#start-building) set up first, or simply run:
+The example programs below implement all steps from this guide.
 
-```bash
-npm -g i @lightprotocol/zk-compression-cli@0.27.1-alpha.2
-light init testprogram
-```
+<Accordion title="Setup">
+<DevelopmentEnvironmentSetup />
+</Accordion>
 
 <Warning>
 For help with debugging, see the [Error Cheatsheet](../../resources/error-cheatsheet/).

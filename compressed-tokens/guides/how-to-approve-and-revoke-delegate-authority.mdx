@@ -62,12 +62,7 @@ Make sure you have dependencies and developer environment set up!
 ### Approve / Revoke Delegates
 
 Run these scripts to approve / revoke delegate authority!
-<Info>
-Before we approve or revoke delegates, we need:
 
-* compressed token accounts to delegate or revoke delegation from, and
-* an SPL mint with a token pool for compression. This token pool can be created for new SPL mints via [`createMint()`](/compressed-tokens/guides/how-to-create-and-register-a-mint-account-for-compression) or added to existing SPL mints via [`createTokenPool()`](/compressed-tokens/guides/how-to-create-compressed-token-pools-for-mint-accounts).
-</Info>
 <Tabs>
 <Tab title="Approve Delegate">
 Approve delegate authority for compressed tokens. The delegate can spend up to the approved amount.
@@ -287,6 +282,14 @@ approveAndRevokeDelegates().catch(console.error);
 ```
 </Tab>
 </Tabs>
+
+<Info>
+Before we approve or revoke delegates, we need:
+
+* compressed token accounts to delegate or revoke delegation from, and
+* an SPL mint with a token pool for compression. This token pool can be created for new SPL mints via [`createMint()`](/compressed-tokens/guides/how-to-create-and-register-a-mint-account-for-compression) or added to existing SPL mints via [`createTokenPool()`](/compressed-tokens/guides/how-to-create-compressed-token-pools-for-mint-accounts).
+</Info>
+
 </Step>
 </Steps>
 

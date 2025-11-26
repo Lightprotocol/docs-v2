@@ -54,13 +54,6 @@ Make sure you have dependencies and developer environment set up!
 
 Run this script to merge multiple compressed token accounts into one!
 
-<Info>
-Before we merge compressed accounts, we need
-
-* Multiple compressed token accounts of the same mint owned by the same wallet, and
-* an SPL mint with a token pool for compression. This token pool can be created for new SPL mints via [`createMint()`](/compressed-tokens/guides/how-to-create-and-register-a-mint-account-for-compression) or added to existing SPL mints via [`createTokenPool()`](/compressed-tokens/guides/how-to-create-compressed-token-pools-for-mint-accounts).
-</Info>
-
 ```typescript merge-compressed-accounts.ts highlight={60-67} expandable
 // 1: Setup funded payer and connect to local validator
 // 2. Create mint and multiple compressed accounts
@@ -158,6 +151,15 @@ async function mergeCompressedAccounts() {
 
 mergeCompressedAccounts().catch(console.error);
 ```
+
+
+<Info>
+Before we merge compressed accounts, we need
+
+* Multiple compressed token accounts of the same mint owned by the same wallet, and
+* an SPL mint with a token pool for compression. This token pool can be created for new SPL mints via [`createMint()`](/compressed-tokens/guides/how-to-create-and-register-a-mint-account-for-compression) or added to existing SPL mints via [`createTokenPool()`](/compressed-tokens/guides/how-to-create-compressed-token-pools-for-mint-accounts).
+</Info>
+
 </Step>
 </Steps>
 
