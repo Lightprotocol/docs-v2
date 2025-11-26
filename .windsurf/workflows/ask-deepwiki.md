@@ -4,7 +4,7 @@ auto_execution_mode: 3
 ---
 
 ---
-argument-hint: <ask deep wiki>
+argument-hint: "`<ask deep wiki>`"
 description: Research and prepare to discuss a specific topic
 allowed-tools: WebSearch, WebFetch, read, edit, glob, grep, mcp__deepwiki__read_wiki_structure, mcp__deepwiki__read_wiki_contents, mcp__deepwiki__ask_question
 ---

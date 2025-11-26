@@ -38,10 +38,10 @@ ZK Compression provides Rust and Typescript clients to interact with compressed 
 
 # Key Points
 
-* **Fetch current and provide new data**: Include current and new account data in instructions for on-chain verification.
-* **Validity proof**: Every instruction includes a cryptographic proof from the RPC that verifies a new address does not exist and/or the current account state.
-* **Packed accounts**: Instructions require <Tooltip tip="The system program enforces the compressed account layout with ownership and sum checks and verifies the validity of your input state. It is also invoked to create/write to compressed accounts and PDAs.">Light System Program</Tooltip> and <Tooltip tip="Merkle tree accounts are the accounts of state tree and address trees that store compressed account hashes and addresses.">Merkle tree accounts</Tooltip>. `PackedAccounts` converts their pubkeys to `u8` indices pointing to accounts in the instruction.
-
+1. **Derive a new address** or **fetch compressed account** for on-chain verification.
+2. **Fetch validity proof** from the RPC that verifies a new address does not exist (create) and/or the account hash exists in the state tree (update, close, etc.).
+3. **Pack accounts** with the SDKs helper. Instructions require <Tooltip tip="The system program enforces the compressed account layout with ownership and sum checks and verifies the validity of your input state. It is also invoked to create/write to compressed accounts and PDAs.">Light System Program</Tooltip> and <Tooltip tip="Merkle tree accounts are the accounts of state tree and address trees that store compressed account hashes and addresses.">Merkle tree accounts</Tooltip>. `PackedAccounts` converts their pubkeys to `u8` indices pointing to accounts in the instruction.
+4. **Build the instruction** with the current account data, new data, packed accounts and validity proof.
 <Tabs>
   <Tab title="Create">
     <div className="hidden dark:block">
