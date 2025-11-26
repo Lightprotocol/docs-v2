@@ -36,6 +36,75 @@ ZK Compression provides Rust and Typescript clients to interact with compressed 
   </tbody>
 </table>
 
+# Key Points
+
+* **Fetch current and provide new data**: Include current and new account data in instructions for on-chain verification.
+* **Validity proof**: Every instruction includes a cryptographic proof from the RPC that verifies a new address does not exist and/or the current account state.
+* **Packed accounts**: Instructions require <Tooltip tip="The system program enforces the compressed account layout with ownership and sum checks and verifies the validity of your input state. It is also invoked to create/write to compressed accounts and PDAs.">Light System Program</Tooltip> and <Tooltip tip="Merkle tree accounts are the accounts of state tree and address trees that store compressed account hashes and addresses.">Merkle tree accounts</Tooltip>. `PackedAccounts` converts their pubkeys to `u8` indices pointing to accounts in the instruction.
+
+<Tabs>
+  <Tab title="Create">
+    <div className="hidden dark:block">
+    <Frame>
+      ![](/images/client-create%20(1).png)
+    </Frame>
+    </div>
+    <div className="block dark:hidden">
+      <Frame>
+        ![](/images/client-create.png)
+      </Frame>
+    </div>
+  </Tab>
+  <Tab title="Update">
+    <div className="hidden dark:block">
+    <Frame>
+      ![](/images/client-update%20(1).png)
+    </Frame>
+    </div>
+    <div className="block dark:hidden">
+      <Frame>
+      ![](/images/client-update.png)
+    </Frame>
+      </div>
+  </Tab>
+  <Tab title="Close">
+    <div className="hidden dark:block">
+    <Frame>
+      ![](/images/client-close%20(1).png)
+    </Frame>
+    </div>
+    <div className="block dark:hidden">
+      <Frame>
+      ![](/images/client-close.png)
+    </Frame>
+    </div>
+  </Tab>
+  <Tab title="Reinitialize">
+    <div className="hidden dark:block">
+    <Frame>
+      ![](/images/client-reinit%20(1).png)
+    </Frame>
+    </div>
+    <div className="block dark:hidden">
+      <Frame>
+      ![](/images/client-reinit.png)
+    </Frame>
+    </div>
+  </Tab>
+  <Tab title="Burn">
+    <div className="hidden dark:block">
+    <Frame>
+      ![](/images/client-burn%20(1).png)
+    </Frame>
+    </div>
+    <div className="block dark:hidden">
+      <Frame>
+      ![](/images/client-burn.png)
+    </Frame>
+    </div>
+  </Tab>
+</Tabs>
+
 # Get Started
 <Steps>
 <Step>
@@ -1066,6 +1135,28 @@ Build the instruction with your `program_id`, `accounts`, and `data`.
 * Accounts combine your program-specific accounts and `PackedAccounts`.
 * Data includes your compressed accounts, validity proof and other instruction data.
 
+<Tabs>
+<Tab title="Typescript">
+
+```typescript
+//             Accounts
+// ┌-------------------------------┐
+// .accounts()    .remainingAccounts()
+// [custom]         [PackedAccounts]
+
+const instruction = await program.methods
+  .yourInstruction(instructionData)
+  .accounts({
+    signer: signer.publicKey,
+  })
+  .remainingAccounts(remainingAccounts)
+  .instruction();
+```
+
+</Tab>
+
+<Tab title="Rust">
+
 ```rust
 //          Accounts
 // ┌---------------------------------┐
@@ -1078,6 +1169,9 @@ let instruction = Instruction {
     data: instruction_data,
 };
 ```
+
+</Tab>
+</Tabs>
 
 </Step>
 
