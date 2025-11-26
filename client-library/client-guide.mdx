@@ -454,7 +454,7 @@ Depending on the **Merkle tree version** (V1 or V2), you can prove **in a single
 
 <Tip>
 **Advantages of combined proofs**:
-* You only add **one 128 byte validity proof** to your instruction data **for multiple instructions**.
+* You only add **one 128 byte validity proof** to your instruction data.
 * This can **optimize** your **transaction's size** to stay inside the 1232 byte instruction data limit.
 * **Compute unit consumption is 100k CU** per `ValidityProof` verification by the Light System Program.
 </Tip>
@@ -528,18 +528,18 @@ See the full [create-and-update program example for this proof combination with 
 
 <Step>
 ## Accounts
-In your instruction data, you reference in which [Merkle tree](/learn/core-concepts/merkle-trees-validity-proofs#state-trees) compressed accounts are or will be stored and other accounts required to interact with the <Tooltip tip="The system program enforces the compressed account layout with ownership and sum checks and verifies the validity of your input state. It is also invoked to create/write to compressed accounts and PDAs.">Light System Program</Tooltip>.
 
-* The SDK's include a `PackedAccounts` helper to optimize instruction data by adding the accounts' pubkeys to the account array.
-* The instruction data references these accounts by u8 indices instead of 32 byte pubkeys.
+To interact with a compressed account you need System accounts such as the <Tooltip tip="The system program enforces the compressed account layout with ownership and sum checks and verifies the validity of your input state. It is also invoked to create/write to compressed accounts and PDAs.">Light System Program</Tooltip>,
+and <Tooltip tip="Merkle tree accounts are the accounts of state tree and address trees that store compressed account hashes and addresses.">Merkle tree accounts</Tooltip>.
 
-<Accordion title="Light System Accounts Explained">
+Compressed account metadata (`TreeInfo`) includes Merkle tree pubkeys.
+To optimize instruction data we pack the `pubkeys` of `TreeInfo` into the `u8` indices of `PackedTreeInfo`.
 
-**Light System accounts** are 8 required accounts for proof verification and CPI calls to update state and address trees.
+The `u8` indices point to the Merkle tree account in the instructions accounts.
+You can create the instructions accounts and indices with `PackedAccounts`.
 
-<SystemAccountsList />
+We recommend to append `PackedAccounts` after your program specific accounts and in anchor in `remaining_accounts`.
 
-</Accordion>
 
 ```
                                   PackedAccounts
@@ -549,25 +549,31 @@ In your instruction data, you reference in which [Merkle tree](/learn/core-conce
                      Signers,      Light System    State trees,
                     fee payer        accounts     address trees,
 ```
+<Accordion title="Custom Accounts">
 Custom accounts are program-specific accounts you pass manually in your instruction, typically through Anchor's account struct.
 
-* We recommend to append `PackedAccounts` after your program specific accounts and in anchor in `remaining_accounts`.
-* Custom accounts can be added to `PackedAccounts` using `add_pre_accounts_signer`, `add_pre_accounts_signer_mut` or `add_pre_accounts_meta`.
-
-<Accordion title="Pre Accounts Explained">
-Pre accounts are your program-specific accounts (signers, PDAs for CPIs) and other accounts added to the beginning of `PackedAccounts` at known positions.
-
-Since the number of pre accounts varies per instruction, the on-chain program receives offsets in the instruction data to locate Light System accounts and tree accounts:
-* `system_accounts_start_offset` (u8) - where Light System accounts begin in `remaining_accounts` 
-* `packed_accounts_start_offset` (u8) - where tree accounts begin in `remaining_accounts`
-
-`PackedAccounts.to_account_metas()` calculates these offsets on the client-side and passes them to the program.
 </Accordion>
 
-<Note>
-Depending on your instruction you include different tree and queue accounts.
-You will learn about this after the code example of `PackedAccounts`.
-</Note>
+<Accordion title="Pre Accounts">
+Optional, custom accounts (signers, PDAs for CPIs) and other accounts can be added to pre accounts.
+Pre accounts can simplify building the accounts for pinocchio and native programs.
+
+</Accordion>
+
+<Accordion title="Light System Accounts">
+
+**Light System accounts** are 6 required accounts for proof verification and CPI calls to update state and address trees.
+
+<SystemAccountsList />
+</Accordion>
+
+<Accordion title="Merkle Tree Accounts">
+
+**Merkle tree accounts** are the accounts of state tree and address trees that store compressed account hashes and addresses.
+
+
+</Accordion>
+
 <Tabs>
 <Tab title="Typescript">
 
@@ -699,8 +705,6 @@ let (remaining_accounts_metas, _, _)
 </Tab>
 
 </Tabs>
-
-**Tree Accounts Explained:**
 
 Depending on your instruction you must include different tree and queue accounts. 
 
@@ -1063,13 +1067,14 @@ let instruction_data = burn::instruction::BurnAccount {
 ## Instruction
 
 Build the instruction with your `program_id`, `accounts`, and `data`.
+* Accounts combine your program-specific accounts and `PackedAccounts`.
+* Data includes your compressed accounts, validity proof and other instruction data.
 
-In `accounts`, put your program-specific accounts first and append `PackedAccounts` to end of the vector (recommended due to variable length)
 ```rust
 //          Accounts
 // ┌---------------------------------┐
 // [custom accounts]  [PackedAccounts]
-let accounts = [vec![AccountMeta::new(payer.pubkey(), true), remaining_accounts].concat();
+let accounts = [vec![AccountMeta::new(payer.pubkey(), true)], remaining_accounts].concat();
 
 let instruction = Instruction {
     program_id: program_id,
