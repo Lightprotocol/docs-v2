@@ -1,7 +1,7 @@
 ---
 title: Welcome to ZK Compression
 sidebarTitle: Introduction
-description:
+description: ZK Compression is a Solana account primitive that lets you create tokens and PDAs without rent-exemption with L1 performance and security.
 icon: book-open
 ---
 
@@ -9,14 +9,11 @@ icon: book-open
   ![](/images/banner-image.png)
 </Frame>
 
-ZK Compression is a Solana account primitive that lets you create tokens and PDAs at a fraction of the cost. Scale your application to millions of users without sacrificing L1 performance and security guarantees.
-
-| Creation                | Solana Account   | Compressed Account     | Cost Reduction |
+|                 | Solana Account   | Compressed Account     | Cost Reduction |
 |:-------------------------|:------------------|:-----------------------|:----------------|
 | 100-byte PDA Account    | 0.0016 SOL       | **~ 0.00001 SOL**     | **160x**       |
 | 100 Token Accounts      | ~ 0.2 SOL        | **~ 0.00004 SOL**     | **5000x**      |
 
-### Core Features
 
 <CardGroup cols={3}>
   <Card title="Rent-free Accounts">
@@ -30,12 +27,9 @@ ZK Compression is a Solana account primitive that lets you create tokens and PDA
   </Card>
 </CardGroup>
 
-### Start Building
+## Features
 
-<CardGroup cols={3}>
-  <Card title="Quick Start" href="/intro-pages/quickstart" icon="bolt">
-  Test compressed tokens in less than 5 minutes.
-  </Card>
+<CardGroup cols={2}>
   <Card
     title="Compressed Tokens"
     href="/compressed-tokens/overview"
@@ -54,8 +48,41 @@ ZK Compression is a Solana account primitive that lets you create tokens and PDA
   </Card>
 </CardGroup>
 
+## Quickstart
 
-### What is ZK Compression?
+<Steps>
+<Step title="Install dependencies">
+<CodeGroup>
+```bash npm
+npm install \
+    @lightprotocol/stateless.js \
+    @lightprotocol/compressed-token \
+    @lightprotocol/zk-compression-cli
+```
+
+```bash yarn
+yarn add \
+    @lightprotocol/stateless.js \
+    @lightprotocol/compressed-token \
+    @lightprotocol/zk-compression-cli
+```
+
+```bash pnpm
+pnpm add \
+    @lightprotocol/stateless.js \
+    @lightprotocol/compressed-token \
+    @lightprotocol/zk-compression-cli
+```
+</CodeGroup>
+</Step>
+<Step title="Get started">
+<Card title="Mint Compressed Tokens in less than 5 minutes" href="/intro-pages/quickstart" icon="bolt">
+</Card>
+</Step>
+</Steps>
+
+
+## What is ZK Compression?
 
 ZK Compression is a framework that reduces the storage cost of Solana accounts by combining generalized state compression and <Tooltip tip="A cryptographic proof to verify the validity of a statement without revealing the underlying data. ZK Compression uses a Groth16 SNARK zk proof with a constant 128 bytes size">zero-knowledge proofs</Tooltip>.
 
@@ -73,17 +100,17 @@ ZK Compression is a framework that reduces the storage cost of Solana accounts b
   </Step>
 </Steps>
 
-### Using AI in the Docs
+## Using AI in the Docs
 
 <Tip>
-Look up documentation, code examples and guides using the Docs' AI search.
+Look up documentation, code examples and guides using the Docs' AI assistant.
 </Tip>
 
 <Frame>
   <iframe src="https://drive.google.com/file/d/1-oxTqNMQX8LqP8FYSCDiG3YzIixnPbiN/preview" width="100%" height="100%" allow="autoplay" className="rounded-xl aspect-video"></iframe>
 </Frame>
 
-### Using AI in Development
+## Using AI in Development
 
 | Tool                | Description                                                                  | Link                                 |
 |:---------------------|:------------------------------------------------------------------------------|:--------------------------------------|
@@ -99,7 +126,7 @@ Look up documentation, code examples and guides using the Docs' AI search.
 >
 </Card>
 
-### Resources
+## Resources
 <CardGroup cols={3}>
   <Card
     title="RPC Methods"
@@ -127,7 +154,7 @@ Look up documentation, code examples and guides using the Docs' AI search.
   </Card>
 </CardGroup>
 
-### Learn & Community
+## Learn & Community
 <CardGroup cols={3}>
   <Card
     title="Start Learning"
@@ -155,10 +182,10 @@ Look up documentation, code examples and guides using the Docs' AI search.
   </Card>
 </CardGroup>
 
-# Next Steps
+## Next Steps
 
 <Card
-  title="Create compressed tokens in under 5 minutes with our Quickstart guide"
+  title="Quickstart: Mint Compressed Tokens in less than 5 minutes"
   icon="chevron-right"
   color="#0066ff"
   href="/intro-pages/quickstart"
