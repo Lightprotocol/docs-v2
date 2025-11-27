@@ -1,0 +1,27 @@
+<table>
+  <colgroup>
+    <col style={{width: '25%', textAlign: 'left'}} />
+    <col style={{width: '75%'}} />
+  </colgroup>
+  <thead>
+    <tr>
+      <th style={{textAlign: 'left'}}></th>
+      <th style={{textAlign: 'left'}}></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style={{textAlign: 'left'}}><strong><Tooltip tip="Owned by LightRegistry program. Stores rent_sponsor, compression_delay, address_space, and rent_config.">Compressible Config</Tooltip></strong></td>
+      <td>
+        Protocol PDA that stores rent config and compression authorities.
+      </td>
+    </tr>
+    <tr>
+      <td style={{textAlign: 'left'}}><strong><Tooltip tip="CToken program PDA that manages rent for compressible accounts.">Rent Sponsor</Tooltip></strong></td>
+      <td>
+        - CToken program PDA that fronts rent exemption at creation.<br/>
+        - Claims rent when account compresses.
+      </td>
+    </tr>
+  </tbody>
+</table>

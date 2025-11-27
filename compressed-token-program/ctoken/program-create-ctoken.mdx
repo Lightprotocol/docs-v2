@@ -4,6 +4,8 @@ description: Program and client guide to create compressible cToken accounts wit
 ---
 
 import CTokenCreateAccountsList from '/snippets/ctoken-create-accounts-list.mdx';
+import CTokenCreateAccountsListClient from '/snippets/ctoken-create-accounts-list-client.mdx';
+import CTokenProtocolPDAs from '/snippets/ctoken-protocol-pdas.mdx';
 import CompressibleVsSolanaRent from '/snippets/compressible-vs-solana-rent.mdx';
 
 ## Key Points
@@ -26,8 +28,7 @@ cToken accounts are compressible with rent-exemption sponsorship:
 
 Compressible cToken accounts are created via CPI to the cToken Program.
 
-* For **user-owned accounts** use `invoke()` - the user's wallet signs the transaction
-* For **PDA-owned accounts** use `invoke_signed()` - the owner program provides the seeds to sign the transaction
+_Add key points_
 <Note>
 Find [full code examples at the end](#full-code-example).
 </Note>
@@ -95,7 +96,9 @@ Your program receives these accounts from the client.
 
 3. CPI to cToken Program
 
-Call `invoke()` for user-owned accounts or `invoke_signed()` for PDA-owned accounts.
+
+* For **user-owned accounts** use `invoke()` - the user's wallet signs the transaction
+* For **PDA-owned accounts** use `invoke_signed()` - the owner program provides the seeds to sign the transaction
 
 <Tabs>
 <Tab title="invoke (User-Owned)">
@@ -272,9 +275,344 @@ pub fn process_create_token_account_invoke_signed(
 ```
 </Tab>
 
-<Tab title="Client">
+<Tab title="Rust Client">
 
-Coming soon.
+Build and send instructions to your program that CPIs to the cToken Program.
+
+* For **user-owned accounts** use discriminator `2u8` - the cToken account keypair signs
+* For **PDA-owned accounts** use discriminator `3u8` - your program signs via `invoke_signed`
+
+<Note>
+Find [full code examples at the end](#full-code-example-1).
+</Note>
+
+<Steps>
+<Step>
+
+### Prerequisites
+
+#### Dependencies
+
+```toml
+[dependencies]
+light-compressed-token-sdk = "0.1.0"
+light-client = "0.16.0"
+solana-sdk = "2.2"
+borsh = "0.10.0"
+```
+
+#### Existing Mint 
+A cMint / SPL mint (with token pool) must exist before creating a cToken account.
+
+<Info>
+The full code example uses a [helper function to set up a mint](https://github.com/Lightprotocol/light-protocol/blob/main/sdk-tests/sdk-ctoken-test/tests/shared.rs).
+</Info>
+
+
+</Step>
+
+<Step>
+
+### Configure Rent & Instruction Data
+
+<CodeGroup>
+```rust invoke (User-Owned)
+let create_token_account_data = CreateTokenAccountData {
+    owner,
+    pre_pay_num_epochs: 2,
+    lamports_per_write: 1,
+};
+
+// Discriminator 2 = CreateTokenAccountInvoke
+let instruction_data = [
+    vec![2u8],
+    create_token_account_data.try_to_vec().unwrap()
+].concat();
+```
+
+```rust invoke_signed (PDA-Owned) highlight={7, 9}
+let create_token_account_data = CreateTokenAccountData {
+    owner,
+    pre_pay_num_epochs: 2,
+    lamports_per_write: 1,
+};
+
+// Discriminator 3 = CreateTokenAccountInvokeSigned
+let instruction_data = [
+    vec![3u8],
+    create_token_account_data.try_to_vec().unwrap()
+].concat();
+```
+</CodeGroup>
+
+
+
+1. Set `pre_pay_num_epochs` to **N epochs** to **top-up the account with rent (must be 0 or ≥2)**
+   * Customize N **based on expected account activity**.
+   * The account stays decompressed while it has rent for N epochs.
+
+2. Set `lamports_per_write` for the **top-up amount**.
+   * Top-ups are **made by** the **transaction fee payer** when the **lamports balance** falls **below two epochs of rent**.
+
+3. Select discriminator based on account ownership:
+    * For **user-owned accounts** use discriminator `2u8` - the cToken account keypair signs
+    * For **PDA-owned accounts** use discriminator `3u8` - your program signs via `invoke_signed`
+
+</Step>
+<Step>
+### Build Instruction
+
+Fetch the protocol accounts required for the creation of the cToken account and build the instruction.
+
+<Accordion title="Account List">
+<CTokenCreateAccountsListClient />
+</Accordion>
+<CodeGroup>
+```rust invoke (User-Owned)
+// Fetch Protocol Accounts
+let config = config_pda();
+let rent_sponsor = rent_sponsor_pda();
+
+let ctoken_account = Keypair::new();
+
+let instruction = Instruction {
+    program_id: YOUR_PROGRAM_ID,
+    accounts: vec![
+        AccountMeta::new(payer.pubkey(), true),           // payer (signer)
+        AccountMeta::new(ctoken_account.pubkey(), true),  // account (signer)
+        AccountMeta::new_readonly(mint_pda, false),       // mint
+        AccountMeta::new_readonly(config, false),         // compressible_config
+        AccountMeta::new_readonly(Pubkey::default(), false), // system_program
+        AccountMeta::new(rent_sponsor, false),            // rent_sponsor
+        AccountMeta::new_readonly(CTOKEN_PROGRAM_ID, false),
+    ],
+    data: instruction_data,
+};
+```
+
+```rust invoke_signed (PDA-Owned) highlight={5-7,13,23-26}
+// Fetch Protocol Accounts
+let config = config_pda();
+let rent_sponsor = rent_sponsor_pda();
+
+// Derive the PDA for the token account
+let token_account_seed: &[u8] = b"token_account";
+let (ctoken_account_pda, _bump) = Pubkey::find_program_address(&[token_account_seed], &YOUR_PROGRAM_ID);
+
+let instruction = Instruction {
+    program_id: YOUR_PROGRAM_ID,
+    accounts: vec![
+        AccountMeta::new(payer.pubkey(), true),           // payer (signer)
+        AccountMeta::new(ctoken_account_pda, false),      // PDA, not a signer
+        AccountMeta::new_readonly(mint_pda, false),       // mint
+        AccountMeta::new_readonly(config, false),         // compressible_config
+        AccountMeta::new_readonly(Pubkey::default(), false), // system_program
+        AccountMeta::new(rent_sponsor, false),            // rent_sponsor
+        AccountMeta::new_readonly(CTOKEN_PROGRAM_ID, false),
+    ],
+    data: instruction_data,
+};
+```
+</CodeGroup>
+
+</Step>
+
+<Step>
+### Send Transaction
+<CodeGroup>
+```rust invoke (User-Owned)
+// Payer signs
+rpc.create_and_send_transaction(
+    &[instruction],
+    &payer.pubkey(),
+    &[&payer]
+).await?;
+```
+
+```rust invoke_signed (PDA-Owned) highlight={5}
+// Both payer and ctoken_account sign
+rpc.create_and_send_transaction(
+    &[instruction],
+    &payer.pubkey(),
+    &[&payer, &ctoken_account]  
+).await?;
+```
+</CodeGroup>
+</Step>
+</Steps>
+
+## Full Code Example
+
+<Info>
+Find the source code [here](https://github.com/Lightprotocol/light-protocol/blob/main/sdk-tests/sdk-ctoken-test/tests/test_create_token_account.rs).
+</Info>
+
+<CodeGroup>
+
+```typescript TypeScript
+// Coming soon.
+```
+
+```rust Rust
+use borsh::{BorshDeserialize, BorshSerialize};
+use light_client::rpc::Rpc;
+use light_compressed_token_sdk::ctoken::CTOKEN_PROGRAM_ID;
+use light_program_test::{LightProgramTest, ProgramTestConfig};
+use native_ctoken_examples::{CreateTokenAccountData, ID};
+use shared::setup_create_compressed_mint;
+use solana_sdk::{
+    instruction::{AccountMeta, Instruction},
+    pubkey::Pubkey,
+    signature::Keypair,
+    signer::Signer,
+};
+
+/// Create a token account using CreateCTokenAccountInfos::invoke()
+async fn create_token_account_invoke() {
+    let mut rpc = LightProgramTest::new(ProgramTestConfig::new_v2(
+        false,
+        Some(vec![("native_ctoken_examples", ID)]),
+    ))
+    .await
+    .unwrap();
+
+    let payer = rpc.get_payer().insecure_clone();
+    let mint_authority = payer.pubkey();
+
+    // Create compressed mint first (using helper)
+    let (mint_pda, _compression_address, _) =
+        setup_create_compressed_mint(&mut rpc, &payer, mint_authority, 9, vec![]).await;
+
+    // Create ctoken account via wrapper program
+    let ctoken_account = Keypair::new();
+    let owner = payer.pubkey();
+
+    let create_token_account_data = CreateTokenAccountData {
+        owner,
+        pre_pay_num_epochs: 2,
+        lamports_per_write: 1,
+    };
+    let instruction_data = [vec![2u8], create_token_account_data.try_to_vec().unwrap()].concat();
+
+    use light_compressed_token_sdk::ctoken::{config_pda, rent_sponsor_pda};
+    let config = config_pda();
+    let rent_sponsor = rent_sponsor_pda();
+
+    let instruction = Instruction {
+        program_id: ID,
+        accounts: vec![
+            AccountMeta::new(payer.pubkey(), true),
+            AccountMeta::new(ctoken_account.pubkey(), true),
+            AccountMeta::new_readonly(mint_pda, false),
+            AccountMeta::new_readonly(config, false),
+            AccountMeta::new_readonly(Pubkey::default(), false), // system_program
+            AccountMeta::new(rent_sponsor, false),
+            AccountMeta::new_readonly(CTOKEN_PROGRAM_ID, false),
+        ],
+        data: instruction_data,
+    };
+
+    rpc.create_and_send_transaction(&[instruction], &payer.pubkey(), &[&payer, &ctoken_account])
+        .await
+        .unwrap();
+
+    // Verify ctoken account was created
+    let ctoken_account_data = rpc
+        .get_account(ctoken_account.pubkey())
+        .await
+        .unwrap()
+        .unwrap();
+
+    // Parse and verify account data
+    use light_ctoken_types::state::CToken;
+    let account_state = CToken::deserialize(&mut &ctoken_account_data.data[..]).unwrap();
+    assert_eq!(
+        account_state.mint.to_bytes(),
+        mint_pda.to_bytes(),
+        "Mint should match"
+    );
+    assert_eq!(
+        account_state.owner.to_bytes(),
+        owner.to_bytes(),
+        "Owner should match"
+    );
+    assert_eq!(account_state.amount, 0, "Initial amount should be 0");
+}
+
+/// Create a PDA-owned token account using CreateCTokenAccountInfos::invoke_signed()
+async fn create_token_account_invoke_signed() {
+    let mut rpc = LightProgramTest::new(ProgramTestConfig::new_v2(
+        false,
+        Some(vec![("native_ctoken_examples", ID)]),
+    ))
+    .await
+    .unwrap();
+
+    let payer = rpc.get_payer().insecure_clone();
+    let mint_authority = payer.pubkey();
+
+    // Create compressed mint first (using helper)
+    let (mint_pda, _compression_address, _) =
+        setup_create_compressed_mint(&mut rpc, &payer, mint_authority, 9, vec![]).await;
+
+    // Derive the PDA for the token account (same seeds as in the program)
+    let token_account_seed: &[u8] = b"token_account";
+    let (ctoken_account_pda, _bump) = Pubkey::find_program_address(&[token_account_seed], &ID);
+
+    let owner = payer.pubkey();
+
+    let create_token_account_data = CreateTokenAccountData {
+        owner,
+        pre_pay_num_epochs: 2,
+        lamports_per_write: 1,
+    };
+    // Discriminator 3 = CreateTokenAccountInvokeSigned
+    let instruction_data = [vec![3u8], create_token_account_data.try_to_vec().unwrap()].concat();
+
+    use light_compressed_token_sdk::ctoken::{config_pda, rent_sponsor_pda};
+    let config = config_pda();
+    let rent_sponsor = rent_sponsor_pda();
+
+    let instruction = Instruction {
+        program_id: ID,
+        accounts: vec![
+            AccountMeta::new(payer.pubkey(), true),
+            AccountMeta::new(ctoken_account_pda, false), // PDA, not a signer
+            AccountMeta::new_readonly(mint_pda, false),
+            AccountMeta::new_readonly(config, false),
+            AccountMeta::new_readonly(Pubkey::default(), false), // system_program
+            AccountMeta::new(rent_sponsor, false),
+            AccountMeta::new_readonly(CTOKEN_PROGRAM_ID, false),
+        ],
+        data: instruction_data,
+    };
+
+    // Note: only payer signs, the PDA account is signed by the program via invoke_signed
+    rpc.create_and_send_transaction(&[instruction], &payer.pubkey(), &[&payer])
+        .await
+        .unwrap();
+
+    // Verify ctoken account was created
+    let ctoken_account_data = rpc.get_account(ctoken_account_pda).await.unwrap().unwrap();
+
+    // Parse and verify account data
+    use light_ctoken_types::state::CToken;
+    let account_state = CToken::deserialize(&mut &ctoken_account_data.data[..]).unwrap();
+    assert_eq!(
+        account_state.mint.to_bytes(),
+        mint_pda.to_bytes(),
+        "Mint should match"
+    );
+    assert_eq!(
+        account_state.owner.to_bytes(),
+        owner.to_bytes(),
+        "Owner should match"
+    );
+    assert_eq!(account_state.amount, 0, "Initial amount should be 0");
+}
+```
+
+</CodeGroup>
 
 </Tab>
 </Tabs>
