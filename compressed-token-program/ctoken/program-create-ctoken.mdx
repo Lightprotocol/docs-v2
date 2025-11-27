@@ -277,10 +277,7 @@ pub fn process_create_token_account_invoke_signed(
 
 <Tab title="Rust Client">
 
-Build and send instructions to your program that CPIs to the cToken Program.
-
-* For **user-owned accounts** use discriminator `2u8` - the cToken account keypair signs
-* For **PDA-owned accounts** use discriminator `3u8` - your program signs via `invoke_signed`
+_add key points_
 
 <Note>
 Find [full code examples at the end](#full-code-example-1).
@@ -315,6 +312,8 @@ The full code example uses a [helper function to set up a mint](https://github.c
 
 ### Configure Rent & Instruction Data
 
+The discriminator must be set differently for **user-owned accounts** and **PDA-owned accounts**.
+
 <CodeGroup>
 ```rust invoke (User-Owned)
 let create_token_account_data = CreateTokenAccountData {
@@ -345,8 +344,6 @@ let instruction_data = [
 ```
 </CodeGroup>
 
-
-
 1. Set `pre_pay_num_epochs` to **N epochs** to **top-up the account with rent (must be 0 or ≥2)**
    * Customize N **based on expected account activity**.
    * The account stays decompressed while it has rent for N epochs.
@@ -354,10 +351,9 @@ let instruction_data = [
 2. Set `lamports_per_write` for the **top-up amount**.
    * Top-ups are **made by** the **transaction fee payer** when the **lamports balance** falls **below two epochs of rent**.
 
-3. Select discriminator based on account ownership:
+3. Set discriminator based on account ownership.
     * For **user-owned accounts** use discriminator `2u8` - the cToken account keypair signs
     * For **PDA-owned accounts** use discriminator `3u8` - your program signs via `invoke_signed`
-
 </Step>
 <Step>
 ### Build Instruction
@@ -373,8 +369,10 @@ Fetch the protocol accounts required for the creation of the cToken account and 
 let config = config_pda();
 let rent_sponsor = rent_sponsor_pda();
 
+// Generate cToken keypair
 let ctoken_account = Keypair::new();
 
+// Build instruction with accounts and data
 let instruction = Instruction {
     program_id: YOUR_PROGRAM_ID,
     accounts: vec![
@@ -390,7 +388,7 @@ let instruction = Instruction {
 };
 ```
 
-```rust invoke_signed (PDA-Owned) highlight={5-7,13,23-26}
+```rust invoke_signed (PDA-Owned) highlight={5-7,14,23-26}
 // Fetch Protocol Accounts
 let config = config_pda();
 let rent_sponsor = rent_sponsor_pda();
@@ -399,6 +397,7 @@ let rent_sponsor = rent_sponsor_pda();
 let token_account_seed: &[u8] = b"token_account";
 let (ctoken_account_pda, _bump) = Pubkey::find_program_address(&[token_account_seed], &YOUR_PROGRAM_ID);
 
+// Build instruction with accounts and data
 let instruction = Instruction {
     program_id: YOUR_PROGRAM_ID,
     accounts: vec![
@@ -421,20 +420,20 @@ let instruction = Instruction {
 ### Send Transaction
 <CodeGroup>
 ```rust invoke (User-Owned)
-// Payer signs
+// Both payer and ctoken_account keypair sign
+rpc.create_and_send_transaction(
+    &[instruction],
+    &payer.pubkey(),
+    &[&payer, &ctoken_account]
+).await?;
+```
+
+```rust invoke_signed (PDA-Owned) highlight={4}
+// Only payer signs; program signs for PDA via invoke_signed
 rpc.create_and_send_transaction(
     &[instruction],
     &payer.pubkey(),
     &[&payer]
-).await?;
-```
-
-```rust invoke_signed (PDA-Owned) highlight={5}
-// Both payer and ctoken_account sign
-rpc.create_and_send_transaction(
-    &[instruction],
-    &payer.pubkey(),
-    &[&payer, &ctoken_account]  
 ).await?;
 ```
 </CodeGroup>
