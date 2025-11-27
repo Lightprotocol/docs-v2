@@ -1,22 +1,14 @@
 ---
 title: Create cToken Accounts from Programs
-description: Guide to create compressible cToken accounts via CPI from Solana programs.
+description: Guide to create compressible cToken accounts from programs, and clients.
 ---
 
 import CTokenCreateAccountsList from '/snippets/ctoken-create-accounts-list.mdx';
 import CompressibleVsSolanaRent from '/snippets/compressible-vs-solana-rent.mdx';
 
+## Key Points
 
-Compressible cToken accounts are created via CPI to the cToken Program.
-
-* For **user-owned accounts** use `invoke()` - the user's wallet signs the transaction
-* For **PDA-owned accounts** use `invoke_signed()` - the owner program provides the seeds to sign the transaction
-<Note>
-Find [full code examples at the end](#full-code-example).
-</Note>
-### Key Points
-
-cToken accounts include the compressible extension with rent-exemption sponsorship:
+cToken accounts are compressible with rent-exemption sponsorship:
 
 1. The protocol funds the account's rent exemption at creation.
 2. The account creator top-ups the lamport balance with rent for at least two epochs (12,600 slots / 84 min)
@@ -28,6 +20,17 @@ cToken accounts include the compressible extension with rent-exemption sponsorsh
 
 # Implementation Guide
 
+
+<Tabs>
+<Tab title="Program">
+
+Compressible cToken accounts are created via CPI to the cToken Program.
+
+* For **user-owned accounts** use `invoke()` - the user's wallet signs the transaction
+* For **PDA-owned accounts** use `invoke_signed()` - the owner program provides the seeds to sign the transaction
+<Note>
+Find [full code examples at the end](#full-code-example).
+</Note>
 <Steps>
 <Step>
 
@@ -81,8 +84,15 @@ rent_per_epoch = base_rent + (data_len * lamports_per_byte_per_epoch)
 
 ### Build Account Infos
 
+Your program receives these accounts from the client.<br/> Bundle them for the CPI:
 
-Build `CompressibleParamsInfos` with the rent configuration:
+<Accordion title="Account List">
+
+<CTokenCreateAccountsList />
+
+</Accordion>
+
+#### 1. Configure Rent Parameters
 
 ```rust
 use light_compressed_token_sdk::ctoken::{CompressibleParamsInfos, CreateCTokenAccountInfos};
@@ -96,23 +106,17 @@ let compressible_params = CompressibleParamsInfos::new(
 );
 ```
 
-Build `CreateCTokenAccountInfos` with account references:
+#### 2. Configure Token Account
 
 ```rust
 let account_infos = CreateCTokenAccountInfos {
     payer: accounts[0].clone(),
     account: accounts[1].clone(),
-    mint: accounts[2].clone(),
+    mint: accounts[2].clone(), // can be SPL or cMint
     owner: data.owner,
     compressible: Some(compressible_params),
 };
 ```
-
-<Accordion title="Account List">
-
-<CTokenCreateAccountsList />
-
-</Accordion>
 
 </Step>
 
@@ -209,6 +213,14 @@ pub fn process_create_token_account_invoke_signed(
 
 </Step>
 </Steps>
+
+</Tab>
+<Tab title="Client">
+
+Coming soon.
+
+</Tab>
+</Tabs>
 
 # Full Code Example
 
