@@ -43,9 +43,7 @@
       <td style={{textAlign: 'left'}}><strong><Tooltip tip="Owned by LightRegistry program. Stores rent_sponsor, compression_delay, address_space, and rent_config.">Compressible Config</Tooltip></strong></td>
       <td>-</td>
       <td>
-        - Config account owned by LightRegistry.<br/>
-        - Stores rent parameters: `rent_sponsor`, `compression_delay`, `rent_config`.<br/>
-        - Defines `address_space` for allowed address trees.
+        Protocol PDA that stores rent config and compression authorities.
       </td>
     </tr>
     <tr>
@@ -59,8 +57,8 @@
       <td style={{textAlign: 'left'}}><strong><Tooltip tip="CToken program PDA that manages rent for compressible accounts.">Rent Sponsor</Tooltip></strong></td>
       <td>mutable</td>
       <td>
-        - CToken program PDA that fronts rent exemption (~0.002 SOL) at creation.<br/>
-        - Claims rent when account compresses.<br/>
+        - CToken program PDA that fronts rent exemption at creation.<br/>
+        - Claims rent when account compresses.
       </td>
     </tr>
   </tbody>
