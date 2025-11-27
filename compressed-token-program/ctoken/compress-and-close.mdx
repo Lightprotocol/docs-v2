@@ -1,0 +1,33 @@
+### CompressAndClose mode
+
+
+The `Transfer2` instruction provides a `CompressAndClose` mode that compresses the full balance of a CToken account and closes it in a single transaction.
+
+**Use when:** Optimizing storage and costs by moving tokens off-chain into compressed format while cleaning up the on-chain account.
+
+**Key parameters:**
+
+- `amount`: Full balance of the CToken account to compress
+- `mode`: Set to `CompressionMode::CompressAndClose`
+- `mint`: Index of the mint account
+- `source_or_recipient`: Index of the source CToken account
+- `authority`: Index of the owner/delegate account (must be signer)
+- `pool_account_index`: Used as `rent_sponsor_index` for CompressAndClose
+- `pool_index`: Used as `compressed_account_index` for CompressAndClose
+- `bump`: Used as `destination_index` for CompressAndClose
+
+**Example:**
+
+```rust
+use light_token_client::actions::compress_and_close::compress_and_close;
+
+// Compress full balance and close account
+compress_and_close(
+    &mut rpc,
+    ctoken_account_pubkey,
+    compressed_account_index,
+    &authority,
+    &payer,
+)
+.await?;
+```

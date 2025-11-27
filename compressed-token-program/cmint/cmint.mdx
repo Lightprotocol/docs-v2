@@ -1,0 +1,131 @@
+---
+title: Create cMint with Token Metadata
+description: Guide to create a cMint, a rent-free mint account to store global metadata of tokens.
+---
+
+
+<table>
+  <thead>
+    <tr>
+      <th style={{width: '15%', textAlign: 'left'}}></th>
+      <th style={{width: '22%', textAlign: 'left'}}>Type</th>
+      <th style={{width: '63%', textAlign: 'left'}}>Key Features</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style={{textAlign: 'left'}}>**[cMint](#cmint-accounts)**</td>
+      <td style={{textAlign: 'left'}}>Compressed account</td>
+      <td style={{textAlign: 'left'}}>
+        <ul>
+          <li>**Rent-free mint accounts** (similar to SPL mints)</li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td style={{textAlign: 'left'}}>**Token Metadata**</td>
+      <td>Extension</td>  
+      <td style={{textAlign: 'left'}}>
+        * Stores information like name, symbol, URI, and custom fields.
+        * Must be added at creation of cMint
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<Info>
+Learn the core concepts to cMints [here](/compressed-token-program/c-token-program#cmint-accounts).
+</Info>
+## Get Started 
+
+
+These are the steps to create a cMint with metadata:
+
+1. Generate a mint seed keypair
+2. Prepare token metadata
+3. Call the `create_mint` action
+4. Sign and send the transaction
+
+
+
+<Tabs>
+  <Tab title="TypeScript">
+
+
+```typescript
+const { transactionSignature, mint } = await createMint(
+	  rpc,
+	  payer,
+	  mintAuthority,
+	  null, // freezeAuthority
+	  decimals,
+	  Keypair.generate()  
+);
+```
+
+```typescript
+const { transactionSignature, mint } = await createMint(
+	  rpc,
+	  payer,
+	  mintAuthority,
+	  null, // freezeAuthority
+	  decimals,
+	  Keypair.generate(),
+	  createTokenMetadata(
+		    'name',
+		    'symbol',
+		    'ipfs://QmYwAPJzv5CZsnAzt8auVTL7oU4vNnB8L2xZ5C4X5PqW3R/metadata.json',
+	  ),
+);
+```
+  </Tab>
+  <Tab title="Rust">
+    ```rust
+    use light_sdk::compressed_account::CompressedAccountWithMerkleContext;
+    use light_compressed_token::mint_sdk::create_mint;
+
+    // 1. Generate mint seed
+    let mint_seed = Keypair::new();
+
+    // 2. Prepare metadata
+    let metadata = Some(TokenMetadataInstructionData {
+        name: b"My Compressed Token".to_vec(),
+        symbol: b"MCT".to_vec(),
+        uri: b"https://example.com/token-metadata.json".to_vec(),
+        update_authority: mint_authority.pubkey(),
+        additional_metadata: vec![
+            AdditionalMetadata {
+                key: b"description".to_vec(),
+                value: b"A sample compressed token".to_vec(),
+            }
+        ],
+    });
+
+    // 3. Create the cMint with metadata
+    create_mint(
+        &rpc,
+        &mint_seed,
+        9, // decimals
+        &mint_authority,
+        None, // freeze_authority
+        metadata,
+        &payer,
+    ).await?;
+    ```
+  </Tab>
+</Tabs>
+<Note>
+**Metadata fields must be set at cMint creation.**
+* Standard fields can be updated freely
+* For `additional_metadata`, only existing keys can be modified or removed.
+</Note>
+## Next Steps
+
+<Card
+  title=" Learn about all relevant actions to cMints"
+  icon="chevron-right"
+  color="#0066ff"
+  href="/compressible/mint-actions"
+  horizontal
+>
+</Card>
