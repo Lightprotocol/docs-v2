@@ -61,6 +61,7 @@
                     "expanded": true,
                     "pages": [
                       "compressed-token-program/ctoken/create-ctoken",
+                      "compressed-token-program/ctoken/program-create-ctoken",
                       "compressed-token-program/ctoken/mint-ctokens",
                       "compressed-token-program/ctoken/create-ata",
                       "compressed-token-program/ctoken/ctoken-transfer",
@@ -471,6 +472,7 @@
                 "pages": [
                   "compressed-token-program/ctoken/ctoken",
                   "compressed-token-program/ctoken/create-ctoken",
+                  "compressed-token-program/ctoken/program-create-ctoken",
                   "compressed-token-program/ctoken/create-ata",
                   "compressed-token-program/ctoken/ctoken-transfer",
                   "compressed-token-program/ctoken/SPL-to-ctoken-transfer",

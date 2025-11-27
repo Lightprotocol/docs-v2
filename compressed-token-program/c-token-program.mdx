@@ -280,16 +280,14 @@ Here is how cTokens and SPL tokens compare:
 
 ### Compressible Extension
 
-Compressible accounts maintain the **functionality of Solana accounts** but with **rent-exemption sponsorship**: 
+cToken accounts include the compressible extension with rent-exemption sponsorship:
 
 1. The protocol funds the account's rent exemption at creation.
 2. The account creator top-ups the lamport balance with rent for at least two epochs (12,600 slots / 84 min)
 3. The transaction payer top-ups the lamports balance when the account's lamports balance is below 2 epochs.
 4. The account will be compressed when inactive for a period of 12,600 slots (84 min).
 5. When the account is written to, it's automatically decompressed.
-<Tip>
-We recommend to create cToken accounts always with the [compressible extension](/compressible/compressible) for sponsored rent exemption.
-</Tip>
+
 This extension makes cToken accounts 200x cheaper than SPL token accounts
 
     |  | cToken | SPL |

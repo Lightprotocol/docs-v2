@@ -3,6 +3,7 @@ title: Create cMint with Token Metadata
 description: Guide to create a cMint, a rent-free mint account to store global metadata of tokens.
 ---
 
+import InstallDependencies from '/snippets/install-dependencies-codegroup.mdx';
 
 <table>
   <thead>
@@ -36,83 +37,109 @@ description: Guide to create a cMint, a rent-free mint account to store global m
 <Info>
 Learn the core concepts to cMints [here](/compressed-token-program/c-token-program#cmint-accounts).
 </Info>
-## Get Started 
-
-
-These are the steps to create a cMint with metadata:
-
-1. Generate a mint seed keypair
-2. Prepare token metadata
-3. Call the `create_mint` action
-4. Sign and send the transaction
-
-
+## Get Started
 
 <Tabs>
-  <Tab title="TypeScript">
+<Tab title="Client">
+<Steps>
 
+<Step>
+### Setup
 
-```typescript
-const { transactionSignature, mint } = await createMint(
-	  rpc,
-	  payer,
-	  mintAuthority,
-	  null, // freezeAuthority
-	  decimals,
-	  Keypair.generate()  
-);
+<Accordion title="Install Dependencies">
+
+<InstallDependencies />
+
+</Accordion>
+
+</Step>
+
+<Step>
+### Create cMint with Token Metadata
+
+*test*!
+<CodeGroup>
+
+```typescript Typescript
+import { createRpc, confirmTx } from '@lightprotocol/stateless.js';
+import { createMint, createTokenMetadata } from '@lightprotocol/compressed-token';
+import { Keypair } from '@solana/web3.js';
+
+const RPC_ENDPOINT = 'https://devnet.helius-rpc.com/?api-key=<YOUR_API_KEY>';
+const COMPRESSION_ENDPOINT = RPC_ENDPOINT;
+
+async function main() {
+    const rpc = createRpc(RPC_ENDPOINT, COMPRESSION_ENDPOINT);
+    const payer = Keypair.generate();
+    const mintAuthority = payer;
+    const decimals = 9;
+
+    // Fund payer (devnet only)
+    const airdropSig = await rpc.requestAirdrop(payer.publicKey, 1e9);
+    await confirmTx(rpc, airdropSig);
+
+    // Create cMint with token metadata
+    const { transactionSignature, mint } = await createMint(
+        rpc,
+        payer,
+        mintAuthority,
+        null, // freezeAuthority
+        decimals,
+        Keypair.generate(),
+        createTokenMetadata(
+            'My Token',
+            'MTK',
+            'ipfs://QmYwAPJzv5CZsnAzt8auVTL7oU4vNnB8L2xZ5C4X5PqW3R/metadata.json',
+        ),
+    );
+
+    console.log('cMint created:', mint.toBase58());
+}
+
+main().catch(console.error);
 ```
 
-```typescript
-const { transactionSignature, mint } = await createMint(
-	  rpc,
-	  payer,
-	  mintAuthority,
-	  null, // freezeAuthority
-	  decimals,
-	  Keypair.generate(),
-	  createTokenMetadata(
-		    'name',
-		    'symbol',
-		    'ipfs://QmYwAPJzv5CZsnAzt8auVTL7oU4vNnB8L2xZ5C4X5PqW3R/metadata.json',
-	  ),
-);
+```rust Rust
+use light_compressed_token::mint_sdk::create_mint;
+
+// Generate mint seed
+let mint_seed = Keypair::new();
+
+// Prepare metadata
+let metadata = Some(TokenMetadataInstructionData {
+    name: b"My Compressed Token".to_vec(),
+    symbol: b"MCT".to_vec(),
+    uri: b"https://example.com/token-metadata.json".to_vec(),
+    update_authority: mint_authority.pubkey(),
+    additional_metadata: vec![
+        AdditionalMetadata {
+            key: b"description".to_vec(),
+            value: b"A sample compressed token".to_vec(),
+        }
+    ],
+});
+
+// Create the cMint with metadata
+create_mint(
+    &rpc,
+    &mint_seed,
+    9, // decimals
+    &mint_authority,
+    None, // freeze_authority
+    metadata,
+    &payer,
+).await?;
 ```
-  </Tab>
-  <Tab title="Rust">
-    ```rust
-    use light_sdk::compressed_account::CompressedAccountWithMerkleContext;
-    use light_compressed_token::mint_sdk::create_mint;
 
-    // 1. Generate mint seed
-    let mint_seed = Keypair::new();
+</CodeGroup>
 
-    // 2. Prepare metadata
-    let metadata = Some(TokenMetadataInstructionData {
-        name: b"My Compressed Token".to_vec(),
-        symbol: b"MCT".to_vec(),
-        uri: b"https://example.com/token-metadata.json".to_vec(),
-        update_authority: mint_authority.pubkey(),
-        additional_metadata: vec![
-            AdditionalMetadata {
-                key: b"description".to_vec(),
-                value: b"A sample compressed token".to_vec(),
-            }
-        ],
-    });
+</Step>
 
-    // 3. Create the cMint with metadata
-    create_mint(
-        &rpc,
-        &mint_seed,
-        9, // decimals
-        &mint_authority,
-        None, // freeze_authority
-        metadata,
-        &payer,
-    ).await?;
-    ```
-  </Tab>
+</Steps>
+</Tab>
+<Tab title="Program">
+Coming soon.
+</Tab>
 </Tabs>
 <Note>
 **Metadata fields must be set at cMint creation.**
