@@ -1,0 +1,103 @@
+---
+title: CreateAssociatedTokenAccount
+description: Creates an associated token account (ATA) for compressed tokens
+---
+
+
+1. Creates an associated token account (ATA) for compressed tokens, passing `owner` and `mint` public keys as instruction data. Supports both basic and compressible accounts. Includes idempotent versions that succeed even if the account already exists.
+
+**Use when:** Creating an ATA where owner and mint public keys are readily available and can be included directly in instruction data.
+
+2. Creates an associated token account with `owner` and `mint` passed as account infos rather than instruction data. Use when the program needs to perform checks or operations directly on the owner or mint accounts (e.g., signature verification, accessing mint data).
+
+**Use when:** The program needs to access owner or mint accounts as AccountInfo objects for verification or data access beyond just knowing their public keys.
+
+**Key parameters:**
+
+Same as CreateAssociatedTokenAccount, but `owner` and `mint` are passed as `AccountMeta` entries instead of instruction data.
+
+
+### 1.
+**Key parameters:**
+
+- `payer`: Public key of the account paying for transaction and account creation
+- `owner`: Public key of the ATA owner
+- `mint`: Public key of the mint
+- `ata_pubkey`: Derived public key of the ATA (use `derive_ctoken_ata`)
+- `bump`: PDA bump seed for ATA derivation
+
+**Compressible-specific parameters:**
+
+- `compressible_config`: Public key of the CompressibleConfig account
+- `rent_sponsor`: Public key receiving lamports when account is closed by rent authority
+- `pre_pay_num_epochs`: Number of epochs of rent to prepay
+- `lamports_per_write`: (Optional) Initial lamports for rent top-ups
+- `token_account_version`: TokenDataVersion specifying hashing scheme
+
+**Example:**
+
+```rust
+use light_compressed_token_sdk::ctoken::create_associated_token_account::{
+    create_associated_token_account,
+    create_compressible_associated_token_account,
+    CreateCompressibleAssociatedTokenAccountInputs,
+};
+use light_ctoken_types::state::TokenDataVersion;
+
+// Basic ATA
+let basic_ata_ix = create_associated_token_account(
+    payer_pubkey,
+    owner_pubkey,
+    mint_pubkey,
+)?;
+
+// Compressible ATA
+let compressible_ata_ix = create_compressible_associated_token_account(
+    CreateCompressibleAssociatedTokenAccountInputs {
+        payer: payer_pubkey,
+        owner: owner_pubkey,
+        mint: mint_pubkey,
+        compressible_config,
+        rent_sponsor,
+        pre_pay_num_epochs: 0,
+        lamports_per_write: Some(150),
+        token_account_version: TokenDataVersion::ShaFlat,
+    },
+)?;
+```
+
+
+### 2.
+**Key parameters:**
+
+Same as CreateAssociatedTokenAccount, but `owner` and `mint` are passed as `AccountMeta` entries instead of instruction data.
+
+**Example:**
+
+```rust
+use light_compressed_token_sdk::ctoken::create_associated_token_account::{
+    create_associated_token_account2,
+    create_compressible_associated_token_account2,
+};
+
+// Basic ATA (version 2)
+let basic_ata2_ix = create_associated_token_account2(
+    payer_pubkey,
+    owner_pubkey,
+    mint_pubkey,
+)?;
+
+// Compressible ATA (version 2)
+let compressible_ata2_ix = create_compressible_associated_token_account2(
+    CreateCompressibleAssociatedTokenAccountInputs {
+        payer: payer_pubkey,
+        owner: owner_pubkey,
+        mint: mint_pubkey,
+        compressible_config,
+        rent_sponsor,
+        pre_pay_num_epochs: 0,
+        lamports_per_write: Some(150),
+        token_account_version: TokenDataVersion::ShaFlat,
+    },
+)?;
+```

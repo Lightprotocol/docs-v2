@@ -1,0 +1,36 @@
+---
+title: Migrate SPL to cToken
+description: Guide to migrate SPL tokens into compressed tokens and transfer them to a CToken account.
+---
+
+Converts SPL tokens into compressed tokens and transfers them to a CToken account. Interacts with a token pool PDA to synchronize supply between SPL and compressed tokens.
+
+**Use when:** Bridging tokens from the SPL ecosystem to compressed tokens, allowing users to deposit SPL tokens into their CToken accounts.
+
+**Key parameters:**
+
+- `source_spl_token_account`: Public key of the source SPL token account
+- `to`: Public key of the destination CToken account
+- `amount`: Number of tokens to transfer
+- `authority`: Authority of the source SPL token account (signer)
+- `mint`: Public key of the mint
+- `payer`: Transaction fee payer
+- `token_pool_pda`: Public key of the token pool PDA
+- `token_pool_pda_bump`: Bump seed for the token pool PDA
+- `spl_token_program`: Public key of the SPL Token program
+
+**Example:**
+
+```rust
+use light_token_client::actions::transfer2::spl_to_ctoken_transfer;
+
+spl_to_ctoken_transfer(
+    &mut rpc,
+    spl_token_account_keypair.pubkey(),
+    associated_token_account,
+    transfer_amount,
+    &sender,
+    &payer,
+)
+.await?;
+```
