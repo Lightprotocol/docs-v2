@@ -19,18 +19,9 @@
         "pages": [
           {
             "group": "Introduction",
-            "expanded": true,
             "pages": [
               "intro-pages/landing",
-              {
-                "group": "Quickstart",
-                "icon": "bolt",
-                "expanded": true,
-                "pages": [
-                  "intro-pages/quickstart",
-                  "intro-pages/quickstart-2"
-                ]
-              },
+              "intro-pages/quickstart",
               "intro-pages/support"
             ]
           },
