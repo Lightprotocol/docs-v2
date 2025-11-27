@@ -51,29 +51,49 @@ icon: book-open
 ## Quickstart
 
 <Steps>
-<Step title="Install dependencies">
-<CodeGroup>
-```bash npm
-npm install \
-    @lightprotocol/stateless.js \
-    @lightprotocol/compressed-token \
-    @lightprotocol/zk-compression-cli
-```
+<Step title="Installations">
+<Tabs>
+  <Tab title="npm">
 
-```bash yarn
-yarn add \
-    @lightprotocol/stateless.js \
-    @lightprotocol/compressed-token \
-    @lightprotocol/zk-compression-cli
-```
+  Install packages in your working directory:
+    ```bash
+    npm install \
+        @lightprotocol/stateless.js \
+        @lightprotocol/compressed-token
+    ```
+Install the CLI globally:
+    ```bash
+    npm install -g @lightprotocol/zk-compression-cli
+    ```
+  </Tab>
+  <Tab title="yarn">
+    Install packages in your working directory:
 
-```bash pnpm
-pnpm add \
-    @lightprotocol/stateless.js \
-    @lightprotocol/compressed-token \
-    @lightprotocol/zk-compression-cli
-```
-</CodeGroup>
+    ```bash
+    yarn add \
+        @lightprotocol/stateless.js \
+        @lightprotocol/compressed-token
+    ```
+Install the CLI globally:
+
+    ```bash
+    yarn global add @lightprotocol/zk-compression-cli
+    ```
+  </Tab>
+  <Tab title="pnpm">
+    Install packages in your working directory:
+    ```bash
+    pnpm add \
+        @lightprotocol/stateless.js \
+        @lightprotocol/compressed-token
+    ```
+Install the CLI globally:
+
+    ```bash
+    pnpm add -g @lightprotocol/zk-compression-cli
+    ```
+  </Tab>
+</Tabs>
 </Step>
 <Step title="Get started">
 <Card title="Mint Compressed Tokens in less than 5 minutes" href="/intro-pages/quickstart" icon="bolt">

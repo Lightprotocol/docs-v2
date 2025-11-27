@@ -5,49 +5,16 @@ sidebarTitle: Quickstart
 icon: bolt
 ---
 
-<Check>
-Compressed tokens are SPL compatible and supported by leading wallets such as Phantom or Backpack.
-</Check>
+import SdkInstall from '/snippets/versions/sdk-install-0.22.1-alpha.1.mdx';
 
 <Steps>
 <Step>
 
 ## Install Dependencies
 
-<Tabs>
-<Tab title="npm">
-```bash
-npm install --save-dev typescript tsx @types/node &&
-npm install \
-    @lightprotocol/stateless.js \
-    @lightprotocol/compressed-token \
-    @solana/web3.js \
-    @solana/spl-token
-```
-</Tab>
-
-<Tab title="yarn">
-```bash
-yarn add --dev typescript tsx @types/node &&
-yarn add \
-    @lightprotocol/stateless.js \
-    @lightprotocol/compressed-token \
-    @solana/web3.js \
-    @solana/spl-token
-```
-</Tab>
-
-<Tab title="pnpm">
-```bash
-pnpm add --save-dev typescript tsx @types/node &&
-pnpm add \
-    @lightprotocol/stateless.js \
-    @lightprotocol/compressed-token \
-    @solana/web3.js \
-    @solana/spl-token
-```
-</Tab>
-</Tabs>
+<Accordion title="Install dependencies">
+<SdkInstall />
+</Accordion>
 </Step>
 <Step>
 
