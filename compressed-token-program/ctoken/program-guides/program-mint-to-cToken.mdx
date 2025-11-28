@@ -1,0 +1,29 @@
+---
+title: Mint cTokens
+description: Program guide to mint cTokens with step-by-step implementation and full code examples.
+---
+
+import CTokenCreateAccountsList from '/snippets/ctoken-create-accounts-list.mdx';
+import CTokenProtocolPDAs from '/snippets/ctoken-protocol-pdas.mdx';
+import CompressibleVsSolanaRent from '/snippets/compressible-vs-solana-rent.mdx';
+
+## Key Points
+
+cTokens are minted via CPI to the cToken Program.
+
+1. cTokens hold token balances like SPL Token accounts.
+2. The rent-exemption is sponsored via the compressible extension.
+    * The account creator top-ups the lamport balance with rent for at least two epochs (12,600 slots / 84 min).
+    * The transaction payer top-ups the lamports balance when the account’s lamports balance is below 2 epochs.
+    * The account will be compressed when inactive for a period of two epochs.
+    * When the account is written to, it’s automatically decompressed.
+
+<Info>
+Learn the [core concepts to the cToken Program here](/compressed-token-program/c-token-program).
+</Info>
+
+<Note>
+Find [full code examples at the end](#full-code-example).
+</Note>
+
+# Implementation Guide
