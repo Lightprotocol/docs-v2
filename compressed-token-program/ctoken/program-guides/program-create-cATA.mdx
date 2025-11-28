@@ -30,8 +30,9 @@ Find [full code examples at the end](#full-code-example).
 
 <Steps>
 <Step>
+### Prerequisites
 
-### Dependencies
+#### Dependencies
 
 ```toml
 [dependencies]
@@ -39,12 +40,7 @@ light-compressed-token-sdk = "0.1.0"
 solana-program = "2.2"
 borsh = "0.10.0"
 ```
-
-</Step>
-
-<Step>
-
-### Configure Rent & Instruction Data
+#### Instruction Data
 
 ```rust
 #[derive(BorshSerialize, BorshDeserialize, Debug)]
@@ -54,9 +50,24 @@ pub struct CreateAtaData {
     pub lamports_per_write: u32,
 }
 ```
-<Tip>
-The bump is passed to the cToken program to verify the address.<br/>
-</Tip>
+* Define the Associated cToken Account struct to deserialize the instruction data correctly.
+* You will configure `pre_pay_num_epochs` and `lamports_per_write` in the next step.
+
+</Step>
+
+<Step>
+### Configure Rent & Associated cToken Account
+
+```rust
+let compressible_params = CompressibleParamsInfos::new(
+    data.pre_pay_num_epochs,
+    data.lamports_per_write,
+    accounts[5].clone(), // Compressible Config
+    accounts[6].clone(), // Rent Sponsor
+    accounts[4].clone(), // System Program
+);
+```
+
 1. Set `pre_pay_num_epochs` to **N epochs** to **top-up the account with rent (must be 0 or ≥2)**
    * Customize N **based on expected account activity**.
    * The account stays decompressed while it has rent for N epochs.
@@ -75,22 +86,21 @@ rent_per_epoch = base_rent + (data_len * lamports_per_byte_per_epoch)
 * A forester node compresses the account after these two epochs and the protocol can reclaim the rent.
 </Note>
 
+3. Accounts (add)
+
 </Step>
 
 <Step>
 
-### cToken Program CPI
+### CPI to cToken Program
 
 Build the instruction and CPI the cToken Program.
 
-1. Configure Rent Parameters
-2. Pass the accounts to the cToken Program
-3. CPI to cToken Program
+1. Pass the accounts to the cToken Program
+2. CPI to cToken Program
 <Accordion title="Account List">
 
 <CTokenCreateATAAccountsList />
-* When a CPI doesn't require PDA signers, the `invoke` function is used. 
-* When a CPI requires a PDA signer, the `invoke_signed` function is used. It takes the signer seeds used for deriving signer PDAs.
 
 </Accordion>
 <Note>
@@ -98,19 +108,13 @@ Build the instruction and CPI the cToken Program.
 
 The address is derived with `[owner, ctoken_program_id, mint]` and passed via `accounts[3]`.
 </Note>
+* When a CPI doesn't require PDA signers, the `invoke` function is used. 
+* When a CPI requires a PDA signer, the `invoke_signed` function is used. It takes the signer seeds used for deriving signer PDAs.
+
 <Tabs>
 <Tab title="invoke (External Signer)">
 
 ```rust
-// Build the compressible params
-let compressible_params = CompressibleParamsInfos::new(
-    data.pre_pay_num_epochs,
-    data.lamports_per_write,
-    accounts[5].clone(),
-    accounts[6].clone(),
-    accounts[4].clone(),
-);
-
 // Build the account infos struct
 // Invoke with user signer
 CreateAssociatedTokenAccount2Infos {
@@ -127,19 +131,9 @@ CreateAssociatedTokenAccount2Infos {
 ```
 
 </Tab>
-<Tab title="invoke_signed (PDA is signer)">
+<Tab title="invoke_signed (PDA is Signer)">
 
 ```rust
-// Build the compressible params
-let compressible_params = CompressibleParamsInfos::new(
-    data.pre_pay_num_epochs,
-    data.lamports_per_write,
-    accounts[5].clone(),
-    accounts[6].clone(),
-    accounts[4].clone(),
-);
-
-
 // Build the account infos struct
 // Invoke with PDA signer
 let signer_seeds: &[&[u8]] = &[ATA_SEED, &[bump]];
