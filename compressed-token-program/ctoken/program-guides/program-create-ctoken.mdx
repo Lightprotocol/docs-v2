@@ -28,11 +28,10 @@ Find [full code examples at the end](#full-code-example).
 
 # Implementation Guide
 
-
 <Steps>
 <Step>
-
-### Dependencies
+### Prerequisites 
+#### Dependencies
 
 ```toml
 [dependencies]
@@ -41,11 +40,7 @@ solana-program = "2.2"
 borsh = "0.10.0"
 ```
 
-</Step>
-
-<Step>
-
-### Configure Rent & Instruction Data
+#### Instruction Data
 
 ```rust
 #[derive(BorshSerialize, BorshDeserialize, Debug)]
@@ -55,6 +50,26 @@ pub struct CreateTokenAccountData {
     pub lamports_per_write: u32,
 }
 ```
+
+* Define the cToken struct to deserialize the instruction data correctly.
+* You will configure `pre_pay_num_epochs` and `lamports_per_write` in the next step.
+
+</Step>
+<Step>
+
+### Configure Rent & cToken Account
+
+```rust
+let compressible_params = CompressibleParamsInfos::new(
+    data.pre_pay_num_epochs,
+    data.lamports_per_write,
+    accounts[3].clone(), // Compressible Config
+    accounts[5].clone(), // Rent Sponsor
+    accounts[4].clone(), // System Program
+);
+```
+
+
 1. Set `pre_pay_num_epochs` to **N epochs** to **top-up the account with rent (must be 0 or ≥2)**
    * Customize N **based on expected account activity**.
    * The account stays decompressed while it has rent for N epochs.
@@ -73,17 +88,17 @@ rent_per_epoch = base_rent + (data_len * lamports_per_byte_per_epoch)
 * A forester node compresses the account after these two epochs and the protocol can reclaim the rent.
 </Note>
 
-</Step>
+3. Accounts (add)
 
+</Step>
 <Step>
 
 ### cToken Program CPI
 
 Build the instruction and CPI the cToken Program.
 
-1. Configure Rent Parameters
-2. Pass the accounts to the cToken Program
-3. CPI to cToken Program
+1. Pass the accounts to the cToken Program
+2. CPI to cToken Program
 
 <Accordion title="Account List">
 
@@ -98,15 +113,6 @@ Build the instruction and CPI the cToken Program.
 <Tab title="invoke (External signer)">
 
 ```rust
-// Build the compressible params 
-let compressible_params = CompressibleParamsInfos::new(
-    data.pre_pay_num_epochs,
-    data.lamports_per_write,
-    accounts[3].clone(),
-    accounts[5].clone(),
-    accounts[4].clone(),
-);
-
 // Build the account infos struct
 CreateCTokenAccountInfos {
     payer: accounts[0].clone(),
