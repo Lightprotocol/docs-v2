@@ -41,15 +41,26 @@
             ]
           },
           {
-            "group": "Compressed Token Program",
+            "group": "cToken Program",
             "pages": [
               "compressed-token-program/overview",
               "compressed-token-program/c-token-program",
               {
                 "group": "cMint",
                 "pages": [
-                  "compressed-token-program/cmint/cmint",
-                  "compressed-token-program/cmint/update-metadata"
+                  {
+                    "group": "Client Guides",
+                    "pages": [
+                      "compressed-token-program/cmint/client-guides/cmint",
+                      "compressed-token-program/cmint/client-guides/update-metadata"
+                    ]
+                  },
+                  {
+                    "group": "Program Guides",
+                    "pages": [
+                      "compressed-token-program/cmint/program-guides/program-create-cmint"
+                    ]
+                  }
                 ]
               },
               {
@@ -57,18 +68,19 @@
                 "pages": [
                   "compressed-token-program/ctoken/mint-actions",
                   {
-                    "group": "Guides",
-                    "expanded": true,
+                    "group": "Client Guides",
                     "pages": [
-                      "compressed-token-program/ctoken/create-ctoken",
-                      "compressed-token-program/ctoken/program-create-ctoken",
-                      "compressed-token-program/ctoken/mint-ctokens",
-                      "compressed-token-program/ctoken/create-ata",
-                      "compressed-token-program/ctoken/ctoken-transfer",
-                      "compressed-token-program/ctoken/SPL-to-ctoken-transfer",
-                      "compressed-token-program/ctoken/ctoken-to-spl-decompress",
-                      "compressed-token-program/ctoken/compress-and-close",
-                      "compressed-token-program/ctoken/close-ctoken"
+                      "compressed-token-program/ctoken/client-guides/client-create-ctoken",
+                      "compressed-token-program/ctoken/client-guides/client-create-cATA",
+                      "compressed-token-program/ctoken/client-guides/client-mint-to-ctoken"
+                    ]
+                  },
+                  {
+                    "group": "Program Guides",
+                    "pages": [
+                      "compressed-token-program/ctoken/program-guides/program-create-ctoken",
+                      "compressed-token-program/ctoken/program-guides/program-create-cATA",
+                      "compressed-token-program/ctoken/program-guides/program-mint-to-cToken"
                     ]
                   }
                 ]
@@ -76,19 +88,19 @@
               {
                 "group": "Compressed Token",
                 "pages": [
-                  "compressed-token-program/compressed-tokens/compressed-token-overview",
+                  "compressed-tokens/README",
                   {
                     "group": "Basic Guides",
                     "pages": [
-                      "compressed-token-program/compressed-tokens/basic-guides/how-to-create-compressed-token-accounts",
-                      "compressed-token-program/compressed-tokens/basic-guides/how-to-mint-compressed-tokens",
-                      "compressed-token-program/compressed-tokens/basic-guides/how-to-transfer-compressed-token",
-                      "compressed-token-program/compressed-tokens/basic-guides/how-to-compress-and-decompress-spl-tokens",
-                      "compressed-token-program/compressed-tokens/basic-guides/how-to-compress-complete-spl-token-accounts",
-                      "compressed-token-program/compressed-tokens/basic-guides/how-to-create-and-register-a-mint-account-for-compression",
-                      "compressed-token-program/compressed-tokens/basic-guides/how-to-create-compressed-token-pools-for-mint-accounts",
-                      "compressed-token-program/compressed-tokens/basic-guides/how-to-merge-compressed-token-accounts",
-                      "compressed-token-program/compressed-tokens/basic-guides/how-to-approve-and-revoke-delegate-authority"
+                      "compressed-tokens/basic-guides/how-to-create-compressed-token-accounts",
+                      "compressed-tokens/basic-guides/how-to-mint-compressed-tokens",
+                      "compressed-tokens/basic-guides/how-to-transfer-compressed-token",
+                      "compressed-tokens/basic-guides/how-to-compress-and-decompress-spl-tokens",
+                      "compressed-tokens/basic-guides/how-to-compress-complete-spl-token-accounts",
+                      "compressed-tokens/basic-guides/how-to-create-and-register-a-mint-account-for-compression",
+                      "compressed-tokens/basic-guides/how-to-create-compressed-token-pools-for-mint-accounts",
+                      "compressed-tokens/basic-guides/how-to-merge-compressed-token-accounts",
+                      "compressed-tokens/basic-guides/how-to-approve-and-revoke-delegate-authority"
                     ]
                   },
                   {
@@ -468,17 +480,26 @@
             "pages": [
               "compressed-token-program/ctoken/mint-actions",
               {
-                "group": "Guides",
+                "group": "Client Guides",
                 "pages": [
-                  "compressed-token-program/ctoken/ctoken",
-                  "compressed-token-program/ctoken/create-ctoken",
-                  "compressed-token-program/ctoken/program-create-ctoken",
-                  "compressed-token-program/ctoken/create-ata",
-                  "compressed-token-program/ctoken/ctoken-transfer",
-                  "compressed-token-program/ctoken/SPL-to-ctoken-transfer",
-                  "compressed-token-program/ctoken/ctoken-to-spl-decompress",
-                  "compressed-token-program/ctoken/compress-and-close",
-                  "compressed-token-program/ctoken/close-ctoken"
+                  "compressed-token-program/ctoken/client-guides/client-create-ctoken",
+                  "compressed-token-program/ctoken/client-guides/client-create-cmint",
+                  "compressed-token-program/ctoken/client-guides/client-create-cATA",
+                  "compressed-token-program/ctoken/client-guides/client-mint-to-ctoken"
+                ]
+              },
+              {
+                "group": "Program Guides",
+                "pages": [
+                  "compressed-token-program/ctoken/program-guides/create-ctoken",
+                  "compressed-token-program/ctoken/program-guides/program-create-ctoken",
+                  "compressed-token-program/ctoken/program-guides/mint-ctokens",
+                  "compressed-token-program/ctoken/program-guides/create-ata",
+                  "compressed-token-program/ctoken/program-guides/ctoken-transfer",
+                  "compressed-token-program/ctoken/program-guides/SPL-to-ctoken-transfer",
+                  "compressed-token-program/ctoken/program-guides/ctoken-to-spl-decompress",
+                  "compressed-token-program/ctoken/program-guides/compress-and-close",
+                  "compressed-token-program/ctoken/program-guides/close-ctoken"
                 ]
               }
             ]
