@@ -1,0 +1,36 @@
+<table>
+  <colgroup>
+    <col style={{width: '25%', textAlign: 'left'}} />
+    <col style={{width: '55%'}} />
+  </colgroup>
+  <thead>
+    <tr>
+      <th style={{textAlign: 'left'}}></th>
+      <th style={{textAlign: 'left'}}></th>
+      <th style={{textAlign: 'left'}}></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style={{textAlign: 'left'}}><strong>Payer</strong></td>
+      <td>signer, mutable</td>
+      <td>
+        - Pays transaction fee and compression incentive (prepaid epochs).<br/>
+        - Does NOT pay rent exemption (fronted by `rent_sponsor`).
+      </td>
+    </tr>
+    <tr>
+      <td style={{textAlign: 'left'}}><strong>Token Account</strong></td>
+      <td>signer*, mutable</td>
+      <td>
+        - The cToken account being created.<br/>
+        - *Must be signer for `invoke()`. For `invoke_signed()`, program signs via PDA seeds.
+      </td>
+    </tr>
+    <tr>
+      <td style={{textAlign: 'left'}}><strong>Mint</strong></td>
+      <td>-</td>
+      <td>The SPL or cMint token mint. Defines which token this account holds.</td>
+    </tr>
+  </tbody>
+</table>

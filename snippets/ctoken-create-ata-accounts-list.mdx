@@ -1,0 +1,77 @@
+<table>
+  <colgroup>
+    <col style={{width: '5%'}} />
+    <col style={{width: '25%', textAlign: 'left'}} />
+    <col style={{width: '15%'}} />
+    <col style={{width: '55%'}} />
+  </colgroup>
+  <thead>
+    <tr>
+      <th style={{textAlign: 'left'}}></th>
+      <th style={{textAlign: 'left'}}></th>
+      <th style={{textAlign: 'left'}}>Constraints</th>
+      <th style={{textAlign: 'left'}}>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>0</td>
+      <td style={{textAlign: 'left'}}><strong>Owner</strong></td>
+      <td>-</td>
+      <td>
+        - The wallet that will own this ATA.<br/>
+        - Used to derive the ATA address deterministically.
+      </td>
+    </tr>
+    <tr>
+      <td>1</td>
+      <td style={{textAlign: 'left'}}><strong>Mint</strong></td>
+      <td>-</td>
+      <td>
+        - The SPL or cMint token mint.<br/>
+        - Used to derive the ATA address deterministically.
+      </td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td style={{textAlign: 'left'}}><strong>Payer</strong></td>
+      <td>signer, mutable</td>
+      <td>
+        - Pays transaction fee and compression incentive (prepaid epochs).<br/>
+        - Does NOT pay rent exemption (fronted by `rent_sponsor`).
+      </td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td style={{textAlign: 'left'}}><strong>Associated Token Account</strong></td>
+      <td>mutable</td>
+      <td>
+        - The cATA being created.<br/>
+        - Address is derived from owner + mint + cToken program ID.<br/>
+      </td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td style={{textAlign: 'left'}}><strong><Tooltip tip="11111111111111111111111111111111" cta="Program ID" href="https://solscan.io/account/11111111111111111111111111111111">System Program</Tooltip></strong></td>
+      <td>-</td>
+      <td>Solana System Program. Required for CPI to create the on-chain account.</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td style={{textAlign: 'left'}}><strong><Tooltip tip="Owned by LightRegistry program. Stores rent_sponsor, compression_delay, address_space, and rent_config.">Compressible Config</Tooltip></strong></td>
+      <td>-</td>
+      <td>
+        Protocol PDA that stores rent config and compression authorities.
+      </td>
+    </tr>
+    <tr>
+      <td>6</td>
+      <td style={{textAlign: 'left'}}><strong><Tooltip tip="CToken program PDA that manages rent for compressible accounts.">Rent Sponsor</Tooltip></strong></td>
+      <td>mutable</td>
+      <td>
+        - CToken program PDA that fronts rent exemption at creation.<br/>
+        - Claims rent when account compresses.
+      </td>
+    </tr>
+  </tbody>
+</table>

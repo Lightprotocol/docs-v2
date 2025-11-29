@@ -1,0 +1,57 @@
+---
+title: Create a Compressed Token ATA
+description: Create an associated cToken account (cATA) using the cToken SDK.
+---
+
+<Tabs>
+<Tab title="Rust">
+
+```rust create_cata.rs
+use light_compressed_token_sdk::ctoken::{
+    derive_ctoken_ata, CompressibleParams, CreateAssociatedTokenAccount,
+};
+use light_client::{indexer::Indexer, rpc::Rpc};
+use solana_sdk::{pubkey::Pubkey, signature::Keypair, signer::Signer};
+
+async fn create_compressed_ata(
+    rpc: &mut (impl Rpc + Indexer),
+    payer: &Keypair,
+    owner: Pubkey,
+    mint_pda: Pubkey,
+) -> Pubkey {
+    // Derive the cToken ATA address
+    let (ata_address, _bump) = derive_ctoken_ata(&owner, &mint_pda);
+
+    // Create ATA instruction
+    let compressible_params = CompressibleParams::default();
+    let create_ata = CreateAssociatedTokenAccount::new(
+        payer.pubkey(),
+        owner,
+        mint_pda,
+        compressible_params,
+    );
+    let instruction = create_ata.instruction().unwrap();
+
+    // Send transaction
+    rpc.create_and_send_transaction(&[instruction], &payer.pubkey(), &[payer])
+        .await
+        .unwrap();
+
+    println!("cATA created!");
+    println!("cATA address: {}", ata_address);
+    println!("Owner: {}", owner);
+    println!("Mint: {}", mint_pda);
+
+    ata_address
+}
+```
+
+</Tab>
+<Tab title="TypeScript">
+
+```typescript create_cata.ts
+// TODO: Add TypeScript example
+```
+
+</Tab>
+</Tabs>

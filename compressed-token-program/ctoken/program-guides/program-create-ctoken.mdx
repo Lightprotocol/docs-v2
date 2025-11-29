@@ -1,0 +1,284 @@
+---
+title: Create cToken Accounts
+description: Program guide to create cToken accounts with step-by-step implementation and full code examples.
+---
+
+import CTokenCreateAccountsList from '/snippets/ctoken-create-accounts-list.mdx';
+import CTokenProtocolPDAs from '/snippets/ctoken-protocol-pdas.mdx';
+import CompressibleVsSolanaRent from '/snippets/compressible-vs-solana-rent.mdx';
+import { RentCalculator } from '/snippets/rent-calculator.jsx';
+
+## Key Points
+
+cToken accounts are Solana accounts and created via CPI to the cToken Program.
+
+1. cToken accounts hold token balances like SPL Token accounts.
+2. The rent-exemption is sponsored via the compressible extension.
+    * The account creator top-ups the lamport balance with rent for at least two epochs (12,600 slots / 84 min).
+    * The transaction payer top-ups the lamports balance when the account’s lamports balance is below 2 epochs.
+    
+
+<Info>
+Learn the [core concepts to the cToken Program here](/compressed-token-program/c-token-program).
+</Info>
+
+<Note>
+Find [full code examples at the end](#full-code-example).
+</Note>
+
+# Implementation Guide
+
+<Steps>
+<Step>
+
+### Configure Rent
+
+```rust 
+use light_compressed_token_sdk::ctoken::CompressibleParamsInfos;
+
+let compressible_params = CompressibleParamsInfos::new(
+    data.pre_pay_num_epochs,
+    data.lamports_per_write,
+    compressible_config.clone(),
+    rent_sponsor.clone(),
+    system_program.clone(),
+);
+```
+
+
+#### Rent Config
+1. `pre_pay_num_epochs` determines the number of epochs for which the account creator funds the account with rent. 
+    * This is set to 2 epochs (12,600 slots / 84 min or 766 lamports) by default.
+2. `lamports_per_write` determines the amount a the transaction payer top-ups the account with rent.
+    * This is set to 766 lamports by default.
+    * Top-ups are made when the lamports balance falls below two epochs of rent.
+3. The account is compressed after it is inactive for 2 epochs.
+4. When the account is written to, it’s automatically decompressed.
+    * The transaction payer tops up the account with 766 lamports.
+
+<Info>
+Learn the core concepts to the rent config [here](/compressed-token-program/rent-config). 
+You can customize the rent config based on expected account activity (must be 0 or ≥2).
+</Info>
+
+<RentCalculator />
+
+#### Accounts
+
+<table>
+  <colgroup>
+    <col style={{width: '25%', textAlign: 'left'}} />
+    <col style={{width: '55%'}} />
+  </colgroup>
+  <thead>
+    <tr>
+      <th style={{textAlign: 'left'}}></th>
+      <th style={{textAlign: 'left'}}></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style={{textAlign: 'left'}}><strong><Tooltip tip="Owned by LightRegistry program. Stores rent_sponsor, compression_delay, address_space, and rent_config.">Compressible Config</Tooltip></strong></td>
+      <td>
+        Protocol PDA that stores rent config and compression authorities.
+      </td>
+    </tr>
+    <tr>
+      <td style={{textAlign: 'left'}}><strong><Tooltip tip="CToken program PDA that manages rent for compressible accounts.">Rent Sponsor</Tooltip></strong></td>
+      <td>
+        - CToken program PDA that fronts rent exemption at creation.<br/>
+        - Claims rent when account compresses.
+      </td>
+    </tr>
+    <tr>
+      <td style={{textAlign: 'left'}}><strong><Tooltip tip="11111111111111111111111111111111" cta="Program ID" href="https://solscan.io/account/11111111111111111111111111111111">System Program</Tooltip></strong></td>
+      <td>Solana System Program. Required for CPI to create the on-chain account.</td>
+    </tr>
+  </tbody>
+</table>
+
+
+</Step>
+<Step>
+
+### cToken Program CPI
+
+Build the instruction and CPI the cToken Program.
+
+1. Pass the accounts to the cToken Program
+2. CPI to cToken Program
+
+<Accordion title="Account List">
+
+<CTokenCreateAccountsList />
+
+</Accordion>
+
+* When a CPI doesn't require PDA signers, the `invoke` function is used. 
+* When a CPI requires a PDA signer, the `invoke_signed` function is used. It takes the signer seeds used for deriving signer PDAs.
+
+<Tabs>
+<Tab title="invoke (External signer)">
+
+```rust
+use light_compressed_token_sdk::ctoken::CreateCTokenAccountInfos;
+
+CreateCTokenAccountInfos {
+    payer: payer.clone(),
+    account: account.clone(),
+    mint: mint.clone(),
+    owner: data.owner,
+    compressible: Some(compressible_params),
+}
+.invoke()?;
+```
+
+</Tab>
+<Tab title="invoke_signed (PDA is signer)">
+
+```rust
+use light_compressed_token_sdk::ctoken::CreateCTokenAccountInfos;
+
+let account_infos = CreateCTokenAccountInfos {
+    payer: payer.clone(),
+    account: account.clone(),
+    mint: mint.clone(),
+    owner: data.owner,
+    compressible: Some(compressible_params),
+};
+
+let signer_seeds: &[&[u8]] = &[TOKEN_ACCOUNT_SEED, &[bump]];
+account_infos.invoke_signed(&[signer_seeds])?;
+```
+
+</Tab>
+</Tabs>
+
+</Step>
+</Steps>
+
+# Full Code Example
+
+<Info>
+Find the source code [here](https://github.com/Lightprotocol/light-protocol/blob/main/sdk-tests/sdk-ctoken-test/src/create_token_account.rs).
+</Info>
+
+```rust expandable
+use borsh::{BorshDeserialize, BorshSerialize};
+use light_compressed_token_sdk::ctoken::{CompressibleParamsInfos, CreateCTokenAccountInfos};
+use solana_program::{account_info::AccountInfo, program_error::ProgramError, pubkey::Pubkey};
+
+use crate::{ID, TOKEN_ACCOUNT_SEED};
+
+/// Instruction data for create token account
+#[derive(BorshSerialize, BorshDeserialize, Debug)]
+pub struct CreateTokenAccountData {
+    pub owner: Pubkey,
+    pub pre_pay_num_epochs: u8,
+    pub lamports_per_write: u32,
+}
+
+/// Handler for creating a compressible token account (invoke)
+///
+/// Uses the builder pattern from the ctoken module. This demonstrates how to:
+/// 1. Build the account infos struct with compressible params
+/// 2. Call the invoke() method which handles instruction building and CPI
+///
+/// Account order:
+/// - accounts[0]: payer (signer)
+/// - accounts[1]: account to create (signer)
+/// - accounts[2]: mint
+/// - accounts[3]: compressible_config
+/// - accounts[4]: system_program
+/// - accounts[5]: rent_sponsor
+pub fn process_create_token_account_invoke(
+    accounts: &[AccountInfo],
+    data: CreateTokenAccountData,
+) -> Result<(), ProgramError> {
+    if accounts.len() < 6 {
+        return Err(ProgramError::NotEnoughAccountKeys);
+    }
+
+    // Build the compressible params using constructor
+    let compressible_params = CompressibleParamsInfos::new(
+        data.pre_pay_num_epochs,
+        data.lamports_per_write,
+        accounts[3].clone(),
+        accounts[5].clone(),
+        accounts[4].clone(),
+    );
+
+    // Build the account infos struct
+    CreateCTokenAccountInfos {
+        payer: accounts[0].clone(),
+        account: accounts[1].clone(),
+        mint: accounts[2].clone(),
+        owner: data.owner,
+        compressible: Some(compressible_params),
+    }
+    .invoke()?;
+
+    Ok(())
+}
+
+/// Handler for creating a compressible token account with PDA ownership (invoke_signed)
+///
+/// Account order:
+/// - accounts[0]: payer (signer)
+/// - accounts[1]: account to create (PDA, will be derived and verified)
+/// - accounts[2]: mint
+/// - accounts[3]: compressible_config
+/// - accounts[4]: system_program
+/// - accounts[5]: rent_sponsor
+pub fn process_create_token_account_invoke_signed(
+    accounts: &[AccountInfo],
+    data: CreateTokenAccountData,
+) -> Result<(), ProgramError> {
+    if accounts.len() < 6 {
+        return Err(ProgramError::NotEnoughAccountKeys);
+    }
+
+    // Derive the PDA for the token account
+    let (pda, bump) = Pubkey::find_program_address(&[TOKEN_ACCOUNT_SEED], &ID);
+
+    // Verify the account to create is the PDA
+    if &pda != accounts[1].key {
+        return Err(ProgramError::InvalidSeeds);
+    }
+
+    // Build the compressible params using constructor
+    let compressible_params = CompressibleParamsInfos::new(
+        data.pre_pay_num_epochs,
+        data.lamports_per_write,
+        accounts[3].clone(),
+        accounts[5].clone(),
+        accounts[4].clone(),
+    );
+
+    // Build the account infos struct
+    let account_infos = CreateCTokenAccountInfos {
+        payer: accounts[0].clone(),
+        account: accounts[1].clone(),
+        mint: accounts[2].clone(),
+        owner: data.owner,
+        compressible: Some(compressible_params),
+    };
+
+    // Invoke with PDA signing
+    let signer_seeds: &[&[u8]] = &[TOKEN_ACCOUNT_SEED, &[bump]];
+    account_infos.invoke_signed(&[signer_seeds])?;
+
+    Ok(())
+}
+```
+
+# Next Steps
+
+<Card
+  title="Learn how to transfer cTokens"
+  icon="chevron-right"
+  color="#0066ff"
+  href="/compressed-token-program/ctoken/ctoken-transfer"
+  horizontal
+/>
+

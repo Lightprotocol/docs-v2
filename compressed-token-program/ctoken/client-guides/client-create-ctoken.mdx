@@ -1,0 +1,139 @@
+---
+title: Create a cToken Account
+description: Guide to create a cToken account using the cSDK.
+---
+
+Create a cToken account with a new keypair (non-ATA). 
+
+<Tabs>
+<Tab title="Rust">
+
+```rust create-ctoken.rs
+
+```
+
+</Tab>
+<Tab title="TypeScript">
+
+```typescript create-ctoken.ts
+// TODO: TypeScript SDK coming soon
+```
+
+</Tab>
+</Tabs>
+
+<Info>
+cToken accounts are compressible with rent-exemption sponsorship. The protocol funds the account's rent exemption at creation, and the account compresses automatically when inactive for ~84 minutes (12,600 slots).
+</Info>
+
+# Full Code Example
+
+<Steps>
+<Step>
+### Prerequisites
+
+You need a compressed mint (cMint) before creating cToken accounts.
+
+<Accordion title="Create cMint First">
+
+See [Create a Compressed Mint](/compressed-token-program/ctoken/client-guides/client-create-cmint) for the full guide.
+
+</Accordion>
+</Step>
+
+<Step>
+### Create cToken Account
+
+<Tabs>
+<Tab title="Rust">
+
+```rust create_ctoken.rs expandable
+use borsh::{BorshDeserialize, BorshSerialize};
+use light_client::rpc::Rpc;
+use light_compressed_token_sdk::ctoken::{config_pda, rent_sponsor_pda, CTOKEN_PROGRAM_ID};
+use solana_sdk::{
+    instruction::{AccountMeta, Instruction},
+    pubkey::Pubkey,
+    signature::Keypair,
+    signer::Signer,
+};
+
+#[derive(BorshSerialize, BorshDeserialize)]
+pub struct CreateTokenAccountData {
+    pub owner: Pubkey,
+    pub pre_pay_num_epochs: u64,
+    pub lamports_per_write: u64,
+}
+
+async fn create_ctoken_account(
+    rpc: &mut impl Rpc,
+    payer: &Keypair,
+    mint_pda: Pubkey,
+    owner: Pubkey,
+    wrapper_program_id: Pubkey,
+) -> Pubkey {
+    // Step 1: Generate new keypair for cToken account
+    let ctoken_account = Keypair::new();
+
+    // Step 2: Build CreateTokenAccountData
+    let create_token_account_data = CreateTokenAccountData {
+        owner,
+        pre_pay_num_epochs: 2,
+        lamports_per_write: 1,
+    };
+    let instruction_data = [vec![2u8], create_token_account_data.try_to_vec().unwrap()].concat();
+
+    // Step 3: Get PDAs
+    let config = config_pda();
+    let rent_sponsor = rent_sponsor_pda();
+
+    // Step 4: Build instruction
+    let instruction = Instruction {
+        program_id: wrapper_program_id,
+        accounts: vec![
+            AccountMeta::new(payer.pubkey(), true),
+            AccountMeta::new(ctoken_account.pubkey(), true),
+            AccountMeta::new_readonly(mint_pda, false),
+            AccountMeta::new_readonly(config, false),
+            AccountMeta::new_readonly(Pubkey::default(), false), // system_program
+            AccountMeta::new(rent_sponsor, false),
+            AccountMeta::new_readonly(CTOKEN_PROGRAM_ID, false),
+        ],
+        data: instruction_data,
+    };
+
+    // Step 5: Send transaction (ctoken_account must sign)
+    rpc.create_and_send_transaction(&[instruction], &payer.pubkey(), &[payer, &ctoken_account])
+        .await
+        .unwrap();
+
+    println!("cToken account created!");
+    println!("Account: {}", ctoken_account.pubkey());
+    println!("Owner: {}", owner);
+    println!("Mint: {}", mint_pda);
+
+    ctoken_account.pubkey()
+}
+```
+
+</Tab>
+<Tab title="TypeScript">
+
+```typescript create_ctoken.ts expandable
+// TODO: TypeScript SDK coming soon
+```
+
+</Tab>
+</Tabs>
+</Step>
+</Steps>
+
+# Next Steps
+
+<Card
+  title="Mint tokens to your cToken account"
+  icon="chevron-right"
+  color="#0066ff"
+  href="/compressed-token-program/ctoken/client-guides/client-mint-to-ctoken"
+  horizontal
+/>
