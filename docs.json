@@ -37,7 +37,8 @@
                   "learn/core-concepts/transaction-lifecycle",
                   "learn/core-concepts/considerations"
                 ]
-              }
+              },
+              "rent"
             ]
           },
           {

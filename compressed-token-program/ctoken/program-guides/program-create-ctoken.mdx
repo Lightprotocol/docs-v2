@@ -6,6 +6,7 @@ description: Program guide to create cToken accounts with step-by-step implement
 import CTokenCreateAccountsList from '/snippets/ctoken-create-accounts-list.mdx';
 import CTokenProtocolPDAs from '/snippets/ctoken-protocol-pdas.mdx';
 import CompressibleVsSolanaRent from '/snippets/compressible-vs-solana-rent.mdx';
+import { RentCalculator } from '/snippets/rent-calculator.jsx';
 
 ## Key Points
 
@@ -15,8 +16,7 @@ cToken accounts are Solana accounts and created via CPI to the cToken Program.
 2. The rent-exemption is sponsored via the compressible extension.
     * The account creator top-ups the lamport balance with rent for at least two epochs (12,600 slots / 84 min).
     * The transaction payer top-ups the lamports balance when the account’s lamports balance is below 2 epochs.
-    * The account will be compressed when inactive for a period of two epochs.
-    * When the account is written to, it’s automatically decompressed.
+    
 
 <Info>
 Learn the [core concepts to the cToken Program here](/compressed-token-program/c-token-program).
@@ -30,65 +30,73 @@ Find [full code examples at the end](#full-code-example).
 
 <Steps>
 <Step>
-### Prerequisites 
-#### Dependencies
 
-```toml
-[dependencies]
-light-compressed-token-sdk = "0.1.0"
-solana-program = "2.2"
-borsh = "0.10.0"
-```
+### Configure Rent
 
-#### Instruction Data
+```rust 
+use light_compressed_token_sdk::ctoken::CompressibleParamsInfos;
 
-```rust
-#[derive(BorshSerialize, BorshDeserialize, Debug)]
-pub struct CreateTokenAccountData {
-    pub owner: Pubkey,
-    pub pre_pay_num_epochs: u8,
-    pub lamports_per_write: u32,
-}
-```
-
-* Define the cToken struct to deserialize the instruction data correctly.
-* You will configure `pre_pay_num_epochs` and `lamports_per_write` in the next step.
-
-</Step>
-<Step>
-
-### Configure Rent & cToken Account
-
-```rust
 let compressible_params = CompressibleParamsInfos::new(
     data.pre_pay_num_epochs,
     data.lamports_per_write,
-    accounts[3].clone(), // Compressible Config
-    accounts[5].clone(), // Rent Sponsor
-    accounts[4].clone(), // System Program
+    compressible_config.clone(),
+    rent_sponsor.clone(),
+    system_program.clone(),
 );
 ```
 
 
-1. Set `pre_pay_num_epochs` to **N epochs** to **top-up the account with rent (must be 0 or ≥2)**
-   * Customize N **based on expected account activity**.
-   * The account stays decompressed while it has rent for N epochs.
-``` rust
-rent_per_epoch = base_rent + (data_len * lamports_per_byte_per_epoch)
+#### Rent Config
+1. `pre_pay_num_epochs` determines the number of epochs for which the account creator funds the account with rent. 
+    * This is set to 2 epochs (12,600 slots / 84 min or 766 lamports) by default.
+2. `lamports_per_write` determines the amount a the transaction payer top-ups the account with rent.
+    * This is set to 766 lamports by default.
+    * Top-ups are made when the lamports balance falls below two epochs of rent.
+3. The account is compressed after it is inactive for 2 epochs.
+4. When the account is written to, it’s automatically decompressed.
+    * The transaction payer tops up the account with 766 lamports.
 
-// For 260-byte cToken account:
-// 128 + (260 * 1) = 388 lamports per epoch
-```
+<Info>
+Learn the core concepts to the rent config [here](/compressed-token-program/rent-config). 
+You can customize the rent config based on expected account activity (must be 0 or ≥2).
+</Info>
 
-2. **Set** in `lamports_per_write` the **top-up amount**.
-   * Top-ups are **made by** the **transaction fee payer** when the **lamports balance** falls **below two epochs of rent**.
+<RentCalculator />
 
-<Note>
-* Accounts become compressible when they advance two epochs without new transactions that add lamports.
-* A forester node compresses the account after these two epochs and the protocol can reclaim the rent.
-</Note>
+#### Accounts
 
-3. Accounts (add)
+<table>
+  <colgroup>
+    <col style={{width: '25%', textAlign: 'left'}} />
+    <col style={{width: '55%'}} />
+  </colgroup>
+  <thead>
+    <tr>
+      <th style={{textAlign: 'left'}}></th>
+      <th style={{textAlign: 'left'}}></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style={{textAlign: 'left'}}><strong><Tooltip tip="Owned by LightRegistry program. Stores rent_sponsor, compression_delay, address_space, and rent_config.">Compressible Config</Tooltip></strong></td>
+      <td>
+        Protocol PDA that stores rent config and compression authorities.
+      </td>
+    </tr>
+    <tr>
+      <td style={{textAlign: 'left'}}><strong><Tooltip tip="CToken program PDA that manages rent for compressible accounts.">Rent Sponsor</Tooltip></strong></td>
+      <td>
+        - CToken program PDA that fronts rent exemption at creation.<br/>
+        - Claims rent when account compresses.
+      </td>
+    </tr>
+    <tr>
+      <td style={{textAlign: 'left'}}><strong><Tooltip tip="11111111111111111111111111111111" cta="Program ID" href="https://solscan.io/account/11111111111111111111111111111111">System Program</Tooltip></strong></td>
+      <td>Solana System Program. Required for CPI to create the on-chain account.</td>
+    </tr>
+  </tbody>
+</table>
+
 
 </Step>
 <Step>
@@ -113,11 +121,12 @@ Build the instruction and CPI the cToken Program.
 <Tab title="invoke (External signer)">
 
 ```rust
-// Build the account infos struct
+use light_compressed_token_sdk::ctoken::CreateCTokenAccountInfos;
+
 CreateCTokenAccountInfos {
-    payer: accounts[0].clone(),
-    account: accounts[1].clone(),
-    mint: accounts[2].clone(),
+    payer: payer.clone(),
+    account: account.clone(),
+    mint: mint.clone(),
     owner: data.owner,
     compressible: Some(compressible_params),
 }
@@ -128,28 +137,18 @@ CreateCTokenAccountInfos {
 <Tab title="invoke_signed (PDA is signer)">
 
 ```rust
-// Build the compressible params 
-let compressible_params = CompressibleParamsInfos::new(
-    data.pre_pay_num_epochs,
-    data.lamports_per_write,
-    accounts[3].clone(),
-    accounts[5].clone(),
-    accounts[4].clone(),
-);
+use light_compressed_token_sdk::ctoken::CreateCTokenAccountInfos;
 
-// Build the account infos struct
-// Invoke with PDA-signer
 let account_infos = CreateCTokenAccountInfos {
-    payer: accounts[0].clone(),
-    account: accounts[1].clone(),
-    mint: accounts[2].clone(),
+    payer: payer.clone(),
+    account: account.clone(),
+    mint: mint.clone(),
     owner: data.owner,
     compressible: Some(compressible_params),
 };
+
 let signer_seeds: &[&[u8]] = &[TOKEN_ACCOUNT_SEED, &[bump]];
 account_infos.invoke_signed(&[signer_seeds])?;
-
-Ok(())
 ```
 
 </Tab>

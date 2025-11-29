@@ -30,47 +30,25 @@ Find [full code examples at the end](#full-code-example).
 
 <Steps>
 <Step>
-### Prerequisites
 
-#### Dependencies
-
-```toml
-[dependencies]
-light-compressed-token-sdk = "0.1.0"
-solana-program = "2.2"
-borsh = "0.10.0"
-```
-#### Instruction Data
-
-```rust
-#[derive(BorshSerialize, BorshDeserialize, Debug)]
-pub struct CreateAtaData {
-    pub bump: u8,  
-    pub pre_pay_num_epochs: u8,
-    pub lamports_per_write: u32,
-}
-```
-* Define the Associated cToken Account struct to deserialize the instruction data correctly.
-* You will configure `pre_pay_num_epochs` and `lamports_per_write` in the next step.
-
-</Step>
-
-<Step>
 ### Configure Rent & Associated cToken Account
 
 ```rust
+use light_compressed_token_sdk::ctoken::CompressibleParamsInfos;
+
 let compressible_params = CompressibleParamsInfos::new(
     data.pre_pay_num_epochs,
     data.lamports_per_write,
-    accounts[5].clone(), // Compressible Config
-    accounts[6].clone(), // Rent Sponsor
-    accounts[4].clone(), // System Program
+    compressible_config.clone(),
+    rent_sponsor.clone(),
+    system_program.clone(),
 );
 ```
 
 1. Set `pre_pay_num_epochs` to **N epochs** to **top-up the account with rent (must be 0 or ≥2)**
    * Customize N **based on expected account activity**.
    * The account stays decompressed while it has rent for N epochs.
+   
 ``` rust
 rent_per_epoch = base_rent + (data_len * lamports_per_byte_per_epoch)
 
@@ -115,14 +93,14 @@ The address is derived with `[owner, ctoken_program_id, mint]` and passed via `a
 <Tab title="invoke (External Signer)">
 
 ```rust
-// Build the account infos struct
-// Invoke with user signer
+use light_compressed_token_sdk::ctoken::CreateAssociatedTokenAccount2Infos;
+
 CreateAssociatedTokenAccount2Infos {
-    owner: accounts[0].clone(),
-    mint: accounts[1].clone(),
-    payer: accounts[2].clone(),
-    associated_token_account: accounts[3].clone(),
-    system_program: accounts[4].clone(),
+    owner: owner.clone(),
+    mint: mint.clone(),
+    payer: payer.clone(),
+    associated_token_account: associated_token_account.clone(),
+    system_program: system_program.clone(),
     bump: data.bump,
     compressible: Some(compressible_params),
     idempotent: false,
@@ -134,15 +112,15 @@ CreateAssociatedTokenAccount2Infos {
 <Tab title="invoke_signed (PDA is Signer)">
 
 ```rust
-// Build the account infos struct
-// Invoke with PDA signer
+use light_compressed_token_sdk::ctoken::CreateAssociatedTokenAccount2Infos;
+
 let signer_seeds: &[&[u8]] = &[ATA_SEED, &[bump]];
 CreateAssociatedTokenAccount2Infos {
-    owner: accounts[0].clone(),
-    mint: accounts[1].clone(),
-    payer: accounts[2].clone(), // PDA
-    associated_token_account: accounts[3].clone(),
-    system_program: accounts[4].clone(),
+    owner: owner.clone(),
+    mint: mint.clone(),
+    payer: payer.clone(),
+    associated_token_account: associated_token_account.clone(),
+    system_program: system_program.clone(),
     bump: data.bump,
     compressible: Some(compressible_params),
     idempotent: false,
