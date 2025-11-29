@@ -4,12 +4,15 @@ description: Calculate rent for Solana vs Compressed Accounts.
 ---
 
 import { SolanaRentCalculator } from '/snippets/solana-rent-calculator.jsx';
-import { RentCalculator } from '/snippets/rent-calculator.jsx';
+import { CompressibleRentCalculator } from '/snippets/compressible-rent-calculator.jsx';
+import { CostComparisonCalculator } from '/snippets/cost-comparison-calculator.jsx';
+import { BreakEvenCalculator } from '/snippets/break-even-calculator.jsx';
 
 ## Solana Rent
 
 Standard Solana accounts require a rent-exempt balance equal to 2 years of rent, locked for the account's lifetime.
 
+<SolanaRentCalculator />
 ```rust
 minimum_balance = (ACCOUNT_STORAGE_OVERHEAD + data_len) * lamports_per_byte
 
@@ -17,11 +20,11 @@ minimum_balance = (ACCOUNT_STORAGE_OVERHEAD + data_len) * lamports_per_byte
 // (128 + 165) * 6960 = 2,039,280 lamports
 ```
 
-<SolanaRentCalculator />
-
 ## Compressible Account Rent
 
 Compressible accounts only require rent for the prepaid epochs. Accounts auto-compress when inactive.
+
+<CompressibleRentCalculator />
 
 ```rust
 rent_per_epoch = base_rent + (data_len * lamports_per_byte_per_epoch)
@@ -30,4 +33,12 @@ rent_per_epoch = base_rent + (data_len * lamports_per_byte_per_epoch)
 // 128 + (260 * 1) = 388 lamports per epoch
 ```
 
-<RentCalculator />
+## Cost Comparison
+
+<CostComparisonCalculator />
+
+## Break-Even Analysis
+
+Find the break-even point where compressed accounts become more expensive than Solana accounts based on expected write frequency.
+
+<BreakEvenCalculator />
