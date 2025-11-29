@@ -25,46 +25,6 @@ Your program's responsibility:
 3. Call .invoke() or .invoke_signed()
 
 <Steps>
-<Step>
-
-### Dependencies
-
-```toml
-[dependencies]
-light-compressed-token-sdk = "0.1.0"
-solana-program = "2.2"
-borsh = "0.10.0"
-```
-
-</Step>
-
-<Step>
-### Instruction Data
-
-```rust
-#[derive(BorshSerialize, BorshDeserialize, Debug)]
-pub struct CreateCmintData {
-    pub decimals: u8,
-    pub address_merkle_tree_root_index: u16,
-    pub mint_authority: Pubkey,
-    pub proof: CompressedProof,
-    pub compression_address: [u8; 32],
-    pub mint: Pubkey,
-    pub freeze_authority: Option<Pubkey>,
-    pub extensions: Option<Vec<ExtensionInstructionData>>,
-}
-```
-
-* Define the cMint struct to deserialize the instruction data correctly.
-* The client passes a validity proof that proves the address of the cMint does not exist yet in the address tree. 
-Your program validates this proof by passing it to the CPI. 
-
-<Info>
-The address of a cMint is stored in an address Merkle tree. 
-You can safely ignore the `address_merkle_tree_root_index` - it tells your program where in the address tree the address is stored.
-</Info>
-
-</Step>
 
 <Step>
 
@@ -73,6 +33,8 @@ You can safely ignore the `address_merkle_tree_root_index` - it tells your progr
 Set `decimals`, `mint_authority`, `freeze_authority`, and `extensions`.
 
 ```rust
+use light_compressed_token_sdk::ctoken::CreateCMintParams;
+
 let params = CreateCMintParams {
     decimals: data.decimals,
     address_merkle_tree_root_index: data.address_merkle_tree_root_index,
@@ -98,14 +60,22 @@ The client includes them in the instruction.
 <CMintSystemAccountsList />
 </Accordion>
 
+
+<Info>
+The address of a cMint is stored in an address Merkle tree. 
+You can safely ignore the `address_merkle_tree_root_index` - it tells your program where in the address tree the address is stored.
+</Info>
+
 ```rust
+use light_compressed_token_sdk::ctoken::SystemAccountInfos;
+
 let system_accounts = SystemAccountInfos {
-    light_system_program: accounts[1].clone(),
-    cpi_authority_pda: accounts[5].clone(),
-    registered_program_pda: accounts[6].clone(),
-    account_compression_authority: accounts[7].clone(),
-    account_compression_program: accounts[8].clone(),
-    system_program: accounts[9].clone(),
+    light_system_program: light_system_program.clone(),
+    cpi_authority_pda: cpi_authority_pda.clone(),
+    registered_program_pda: registered_program_pda.clone(),
+    account_compression_authority: account_compression_authority.clone(),
+    account_compression_program: account_compression_program.clone(),
+    system_program: system_program.clone(),
 };
 ```
 
@@ -126,14 +96,14 @@ Build the instruction and invoke the Compressed Token Program.
 // mint_signer is a keypair - user signs the transaction
 
 ```rust
-// Build the account infos struct
-// In this case, payer == authority (accounts[3])
+use light_compressed_token_sdk::ctoken::CreateCMintAccountInfos;
+
 CreateCMintAccountInfos {
-    mint_signer: accounts[2].clone(),
-    authority: accounts[3].clone(),
-    payer: accounts[3].clone(),
-    address_tree: accounts[11].clone(),
-    output_queue: accounts[10].clone(),
+    mint_signer: mint_signer.clone(),
+    authority: authority.clone(),
+    payer: payer.clone(),
+    address_tree: address_tree.clone(),
+    output_queue: output_queue.clone(),
     system_accounts,
     cpi_context: None,
     cpi_context_account: None,
@@ -147,21 +117,20 @@ CreateCMintAccountInfos {
 // mint_signer is a PDA - program signs via invoke_signed
 
 ```rust
-// Build the account infos struct
-// In this case, payer == authority (accounts[3])
+use light_compressed_token_sdk::ctoken::CreateCMintAccountInfos;
+
 let account_infos = CreateCMintAccountInfos {
-    mint_signer: accounts[2].clone(),
-    authority: accounts[3].clone(),
-    payer: accounts[3].clone(),
-    address_tree: accounts[11].clone(),
-    output_queue: accounts[10].clone(),
+    mint_signer: mint_signer.clone(),
+    authority: authority.clone(),
+    payer: payer.clone(),
+    address_tree: address_tree.clone(),
+    output_queue: output_queue.clone(),
     system_accounts,
     cpi_context: None,
     cpi_context_account: None,
     params,
 };
 
-// Invoke with PDA signing
 let signer_seeds: &[&[u8]] = &[MINT_SIGNER_SEED, &[bump]];
 account_infos.invoke_signed(&[signer_seeds])?;
 ```
@@ -170,20 +139,20 @@ account_infos.invoke_signed(&[signer_seeds])?;
 <Tab title="invoke_signed (Two PDA signer)">
 
 ```rust
-// Build the account infos struct using SDK
+use light_compressed_token_sdk::ctoken::CreateCMintAccountInfos;
+
 let account_infos = CreateCMintAccountInfos {
-    mint_signer: accounts[2].clone(),
-    authority: accounts[3].clone(),
-    payer: accounts[4].clone(),
-    address_tree: accounts[11].clone(),
-    output_queue: accounts[10].clone(),
+    mint_signer: mint_signer.clone(),
+    authority: authority.clone(),
+    payer: payer.clone(),
+    address_tree: address_tree.clone(),
+    output_queue: output_queue.clone(),
     system_accounts,
     cpi_context: None,
     cpi_context_account: None,
     params,
 };
 
-// Invoke with both PDAs signing
 let mint_signer_seeds: &[&[u8]] = &[MINT_SIGNER_SEED, &[mint_signer_bump]];
 let authority_seeds: &[&[u8]] = &[MINT_AUTHORITY_SEED, &[authority_bump]];
 account_infos.invoke_signed(&[mint_signer_seeds, authority_seeds])?;

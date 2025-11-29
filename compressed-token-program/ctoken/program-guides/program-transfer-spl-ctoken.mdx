@@ -1,0 +1,343 @@
+---
+title: Transfer Between SPL and cTokens
+description: Program guide to transfer tokens between SPL and cToken accounts with step-by-step implementation and full code examples.
+---
+
+## Key Points
+
+SPL ↔ cToken transfers are executed via CPI to the Compressed Token Program.
+
+1. **SPL → cToken**: Deposits SPL tokens into a cToken account.
+2. **cToken → SPL**: Withdraws cTokens to an SPL token account.
+3. Uses a token pool PDA to bridge between the two token types.
+
+<Info>
+Learn the [core concepts to the cToken Program here](/compressed-token-program/c-token-program).
+</Info>
+
+<Note>
+Find [full code examples at the end](#full-code-example).
+</Note>
+
+# Implementation Guide
+
+<Steps>
+<Step>
+
+### SPL to cToken Transfer
+
+Transfer SPL tokens into a cToken account.
+
+<Tabs>
+<Tab title="invoke (External Signer)">
+
+```rust
+use light_compressed_token_sdk::ctoken::TransferSplToCtokenAccountInfos;
+
+TransferSplToCtokenAccountInfos {
+    source_spl_token_account: source_spl_token_account.clone(),
+    destination_ctoken_account: destination_ctoken_account.clone(),
+    amount: data.amount,
+    authority: authority.clone(),
+    mint: mint.clone(),
+    payer: payer.clone(),
+    token_pool_pda: token_pool_pda.clone(),
+    token_pool_pda_bump: data.token_pool_pda_bump,
+    spl_token_program: spl_token_program.clone(),
+    compressed_token_program_authority: compressed_token_program_authority.clone(),
+}
+.invoke()?;
+```
+
+</Tab>
+<Tab title="invoke_signed (PDA Authority)">
+
+```rust
+use light_compressed_token_sdk::ctoken::TransferSplToCtokenAccountInfos;
+
+let account_infos = TransferSplToCtokenAccountInfos {
+    source_spl_token_account: source_spl_token_account.clone(),
+    destination_ctoken_account: destination_ctoken_account.clone(),
+    amount: data.amount,
+    authority: authority.clone(),
+    mint: mint.clone(),
+    payer: payer.clone(),
+    token_pool_pda: token_pool_pda.clone(),
+    token_pool_pda_bump: data.token_pool_pda_bump,
+    spl_token_program: spl_token_program.clone(),
+    compressed_token_program_authority: compressed_token_program_authority.clone(),
+};
+
+let authority_seeds: &[&[u8]] = &[TRANSFER_AUTHORITY_SEED, &[authority_bump]];
+account_infos.invoke_signed(&[authority_seeds])?;
+```
+
+</Tab>
+</Tabs>
+
+</Step>
+
+<Step>
+
+### cToken to SPL Transfer
+
+Withdraw cTokens to an SPL token account.
+
+<Tabs>
+<Tab title="invoke (External Signer)">
+
+```rust
+use light_compressed_token_sdk::ctoken::TransferCtokenToSplAccountInfos;
+
+TransferCtokenToSplAccountInfos {
+    source_ctoken_account: source_ctoken_account.clone(),
+    destination_spl_token_account: destination_spl_token_account.clone(),
+    amount: data.amount,
+    authority: authority.clone(),
+    mint: mint.clone(),
+    payer: payer.clone(),
+    token_pool_pda: token_pool_pda.clone(),
+    token_pool_pda_bump: data.token_pool_pda_bump,
+    spl_token_program: spl_token_program.clone(),
+    compressed_token_program_authority: compressed_token_program_authority.clone(),
+}
+.invoke()?;
+```
+
+</Tab>
+<Tab title="invoke_signed (PDA Authority)">
+
+```rust
+use light_compressed_token_sdk::ctoken::TransferCtokenToSplAccountInfos;
+
+let account_infos = TransferCtokenToSplAccountInfos {
+    source_ctoken_account: source_ctoken_account.clone(),
+    destination_spl_token_account: destination_spl_token_account.clone(),
+    amount: data.amount,
+    authority: authority.clone(),
+    mint: mint.clone(),
+    payer: payer.clone(),
+    token_pool_pda: token_pool_pda.clone(),
+    token_pool_pda_bump: data.token_pool_pda_bump,
+    spl_token_program: spl_token_program.clone(),
+    compressed_token_program_authority: compressed_token_program_authority.clone(),
+};
+
+let authority_seeds: &[&[u8]] = &[TRANSFER_AUTHORITY_SEED, &[authority_bump]];
+account_infos.invoke_signed(&[authority_seeds])?;
+```
+
+</Tab>
+</Tabs>
+
+</Step>
+</Steps>
+
+# Full Code Example
+
+<Info>
+Find the source code [here](https://github.com/Lightprotocol/light-protocol/blob/main/sdk-tests/sdk-ctoken-test/src/transfer_spl_ctoken.rs).
+</Info>
+
+```rust expandable
+use borsh::{BorshDeserialize, BorshSerialize};
+use light_compressed_token_sdk::ctoken::{
+    TransferCtokenToSplAccountInfos, TransferSplToCtokenAccountInfos,
+};
+use solana_program::{account_info::AccountInfo, program_error::ProgramError, pubkey::Pubkey};
+
+use crate::ID;
+
+/// PDA seed for authority in invoke_signed variants
+pub const TRANSFER_AUTHORITY_SEED: &[u8] = b"transfer_authority";
+
+/// Instruction data for SPL to cToken transfer
+#[derive(BorshSerialize, BorshDeserialize, Debug)]
+pub struct TransferSplToCtokenData {
+    pub amount: u64,
+    pub token_pool_pda_bump: u8,
+}
+
+/// Instruction data for cToken to SPL transfer
+#[derive(BorshSerialize, BorshDeserialize, Debug)]
+pub struct TransferCtokenToSplData {
+    pub amount: u64,
+    pub token_pool_pda_bump: u8,
+}
+
+/// Handler for transferring SPL tokens to cToken (invoke)
+///
+/// Account order:
+/// - accounts[0]: compressed_token_program (for CPI)
+/// - accounts[1]: source_spl_token_account
+/// - accounts[2]: destination_ctoken_account (writable)
+/// - accounts[3]: authority (signer)
+/// - accounts[4]: mint
+/// - accounts[5]: payer (signer)
+/// - accounts[6]: token_pool_pda
+/// - accounts[7]: spl_token_program
+/// - accounts[8]: compressed_token_program_authority
+pub fn process_spl_to_ctoken_invoke(
+    accounts: &[AccountInfo],
+    data: TransferSplToCtokenData,
+) -> Result<(), ProgramError> {
+    if accounts.len() < 9 {
+        return Err(ProgramError::NotEnoughAccountKeys);
+    }
+
+    TransferSplToCtokenAccountInfos {
+        source_spl_token_account: accounts[1].clone(),
+        destination_ctoken_account: accounts[2].clone(),
+        amount: data.amount,
+        authority: accounts[3].clone(),
+        mint: accounts[4].clone(),
+        payer: accounts[5].clone(),
+        token_pool_pda: accounts[6].clone(),
+        token_pool_pda_bump: data.token_pool_pda_bump,
+        spl_token_program: accounts[7].clone(),
+        compressed_token_program_authority: accounts[8].clone(),
+    }
+    .invoke()?;
+
+    Ok(())
+}
+
+/// Handler for transferring SPL tokens to cToken with PDA authority (invoke_signed)
+///
+/// Account order:
+/// - accounts[0]: compressed_token_program (for CPI)
+/// - accounts[1]: source_spl_token_account
+/// - accounts[2]: destination_ctoken_account (writable)
+/// - accounts[3]: authority (PDA, not signer - program signs)
+/// - accounts[4]: mint
+/// - accounts[5]: payer (signer)
+/// - accounts[6]: token_pool_pda
+/// - accounts[7]: spl_token_program
+/// - accounts[8]: compressed_token_program_authority
+pub fn process_spl_to_ctoken_invoke_signed(
+    accounts: &[AccountInfo],
+    data: TransferSplToCtokenData,
+) -> Result<(), ProgramError> {
+    if accounts.len() < 9 {
+        return Err(ProgramError::NotEnoughAccountKeys);
+    }
+
+    let (authority_pda, authority_bump) =
+        Pubkey::find_program_address(&[TRANSFER_AUTHORITY_SEED], &ID);
+
+    if &authority_pda != accounts[3].key {
+        return Err(ProgramError::InvalidSeeds);
+    }
+
+    let account_infos = TransferSplToCtokenAccountInfos {
+        source_spl_token_account: accounts[1].clone(),
+        destination_ctoken_account: accounts[2].clone(),
+        amount: data.amount,
+        authority: accounts[3].clone(),
+        mint: accounts[4].clone(),
+        payer: accounts[5].clone(),
+        token_pool_pda: accounts[6].clone(),
+        token_pool_pda_bump: data.token_pool_pda_bump,
+        spl_token_program: accounts[7].clone(),
+        compressed_token_program_authority: accounts[8].clone(),
+    };
+
+    let authority_seeds: &[&[u8]] = &[TRANSFER_AUTHORITY_SEED, &[authority_bump]];
+    account_infos.invoke_signed(&[authority_seeds])?;
+
+    Ok(())
+}
+
+/// Handler for transferring cToken to SPL tokens (invoke)
+///
+/// Account order:
+/// - accounts[0]: compressed_token_program (for CPI)
+/// - accounts[1]: source_ctoken_account
+/// - accounts[2]: destination_spl_token_account
+/// - accounts[3]: authority (signer)
+/// - accounts[4]: mint
+/// - accounts[5]: payer (signer)
+/// - accounts[6]: token_pool_pda
+/// - accounts[7]: spl_token_program
+/// - accounts[8]: compressed_token_program_authority
+pub fn process_ctoken_to_spl_invoke(
+    accounts: &[AccountInfo],
+    data: TransferCtokenToSplData,
+) -> Result<(), ProgramError> {
+    if accounts.len() < 9 {
+        return Err(ProgramError::NotEnoughAccountKeys);
+    }
+
+    TransferCtokenToSplAccountInfos {
+        source_ctoken_account: accounts[1].clone(),
+        destination_spl_token_account: accounts[2].clone(),
+        amount: data.amount,
+        authority: accounts[3].clone(),
+        mint: accounts[4].clone(),
+        payer: accounts[5].clone(),
+        token_pool_pda: accounts[6].clone(),
+        token_pool_pda_bump: data.token_pool_pda_bump,
+        spl_token_program: accounts[7].clone(),
+        compressed_token_program_authority: accounts[8].clone(),
+    }
+    .invoke()?;
+
+    Ok(())
+}
+
+/// Handler for transferring cToken to SPL tokens with PDA authority (invoke_signed)
+///
+/// Account order:
+/// - accounts[0]: compressed_token_program (for CPI)
+/// - accounts[1]: source_ctoken_account
+/// - accounts[2]: destination_spl_token_account
+/// - accounts[3]: authority (PDA, not signer - program signs)
+/// - accounts[4]: mint
+/// - accounts[5]: payer (signer)
+/// - accounts[6]: token_pool_pda
+/// - accounts[7]: spl_token_program
+/// - accounts[8]: compressed_token_program_authority
+pub fn process_ctoken_to_spl_invoke_signed(
+    accounts: &[AccountInfo],
+    data: TransferCtokenToSplData,
+) -> Result<(), ProgramError> {
+    if accounts.len() < 9 {
+        return Err(ProgramError::NotEnoughAccountKeys);
+    }
+
+    let (authority_pda, authority_bump) =
+        Pubkey::find_program_address(&[TRANSFER_AUTHORITY_SEED], &ID);
+
+    if &authority_pda != accounts[3].key {
+        return Err(ProgramError::InvalidSeeds);
+    }
+
+    let account_infos = TransferCtokenToSplAccountInfos {
+        source_ctoken_account: accounts[1].clone(),
+        destination_spl_token_account: accounts[2].clone(),
+        amount: data.amount,
+        authority: accounts[3].clone(),
+        mint: accounts[4].clone(),
+        payer: accounts[5].clone(),
+        token_pool_pda: accounts[6].clone(),
+        token_pool_pda_bump: data.token_pool_pda_bump,
+        spl_token_program: accounts[7].clone(),
+        compressed_token_program_authority: accounts[8].clone(),
+    };
+
+    let authority_seeds: &[&[u8]] = &[TRANSFER_AUTHORITY_SEED, &[authority_bump]];
+    account_infos.invoke_signed(&[authority_seeds])?;
+
+    Ok(())
+}
+```
+
+# Next Steps
+
+<Card
+  title="Learn about the unified Transfer Interface"
+  icon="chevron-right"
+  color="#0066ff"
+  href="/compressed-token-program/ctoken/program-guides/program-transfer-interface"
+  horizontal
+/>

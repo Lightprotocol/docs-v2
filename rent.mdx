@@ -1,0 +1,33 @@
+---
+title: Rent Calculator
+description: Calculate rent for Solana vs Compressed Accounts.
+---
+
+import { SolanaRentCalculator } from '/snippets/solana-rent-calculator.jsx';
+import { RentCalculator } from '/snippets/rent-calculator.jsx';
+
+## Solana Rent
+
+Standard Solana accounts require a rent-exempt balance equal to 2 years of rent, locked for the account's lifetime.
+
+```rust
+minimum_balance = (ACCOUNT_STORAGE_OVERHEAD + data_len) * lamports_per_byte
+
+// Example 165-byte SPL token account:
+// (128 + 165) * 6960 = 2,039,280 lamports
+```
+
+<SolanaRentCalculator />
+
+## Compressible Account Rent
+
+Compressible accounts only require rent for the prepaid epochs. Accounts auto-compress when inactive.
+
+```rust
+rent_per_epoch = base_rent + (data_len * lamports_per_byte_per_epoch)
+
+// For 260-byte cToken account:
+// 128 + (260 * 1) = 388 lamports per epoch
+```
+
+<RentCalculator />
