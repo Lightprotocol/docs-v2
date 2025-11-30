@@ -33,6 +33,8 @@ Find [full code examples at the end](#full-code-example).
 
 ### Configure Rent
 
+Use `CompressibleParamsInfos`to configure rent:
+
 ```rust 
 use light_compressed_token_sdk::ctoken::CompressibleParamsInfos;
 
@@ -100,21 +102,13 @@ The rent config requires the following accounts:
 </Step>
 <Step>
 
-### cToken Program CPI
+### Build Account Infos and CPI the cToken Program
 
-Build the instruction and CPI the cToken Program.
-
-1. Pass the accounts to the cToken Program
-2. CPI to cToken Program
-
-<Accordion title="Account List">
-
-<CTokenCreateAccountsList />
-
-</Accordion>
-
-* When a CPI doesn't require PDA signers, the `invoke` function is used. 
-* When a CPI requires a PDA signer, the `invoke_signed` function is used. It takes the signer seeds used for deriving signer PDAs.
+1. Pass the required accounts
+2. Include rent config from `compressible_params`
+3. Use `invoke` or `invoke_signed`:
+    * When a CPI doesn't require PDA signers, the `invoke` function is used. 
+    * When a CPI requires a PDA signer, the `invoke_signed` function is used. It takes the signer seeds used for deriving signer PDAs.
 
 <Tabs>
 <Tab title="invoke (External signer)">
@@ -131,6 +125,7 @@ CreateCTokenAccountInfos {
 }
 .invoke()?;
 ```
+<CTokenCreateAccountsList />
 
 </Tab>
 <Tab title="invoke_signed (PDA is signer)">

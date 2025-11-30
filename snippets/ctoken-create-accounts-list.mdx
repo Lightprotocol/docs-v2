@@ -20,7 +20,7 @@
       </td>
     </tr>
     <tr>
-      <td style={{textAlign: 'left'}}><strong>Token Account</strong></td>
+      <td style={{textAlign: 'left'}}><strong>cToken Account</strong></td>
       <td>signer*, mutable</td>
       <td>
         - The cToken account being created.<br/>
@@ -30,7 +30,12 @@
     <tr>
       <td style={{textAlign: 'left'}}><strong>Mint</strong></td>
       <td>-</td>
-      <td>The SPL or cMint token mint. Defines which token this account holds.</td>
+      <td>The SPL or cMint token mint.</td>
+    </tr>
+    <tr>
+      <td style={{textAlign: 'left'}}><strong>Owner</strong></td>
+      <td>Pubkey</td>
+      <td>The owner of the token account. Controls transfers and other operations.</td>
     </tr>
   </tbody>
 </table>
