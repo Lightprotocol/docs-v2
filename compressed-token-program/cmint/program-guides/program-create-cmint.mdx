@@ -1,6 +1,6 @@
 ---
-title: Create cMint Accounts
-description: Program guide to create cMint accounts with step-by-step implementation and full code examples.
+title: Create cMint Accounts with Token Metadata
+description: Program guide to create cMint accounts with token metadata. Includes step-by-step implementation and full code examples.
 ---
 
 import CMintSystemAccountsList from '/snippets/cmint-system-accounts-list.mdx';
@@ -9,9 +9,13 @@ import CMintSystemAccountsList from '/snippets/cmint-system-accounts-list.mdx';
 
 cMints are compressed accounts and created via CPI to the Compressed Token Program.
 
-* cMints uniquely represent a token on Solana and store its global metadata.
-* cMints are rent-free.
-* The `mint_signer` keypair/PDA derives the mint address.
+1. cMints uniquely represent a token on Solana and store its global metadata.
+2. cMints are rent-free.
+3. The `mint_signer` keypair/PDA derives the mint address.
+
+<Info>
+Learn the [core concepts to the cToken Program here](/compressed-token-program/c-token-program).
+</Info>
 
 <Note>
 Find [full code examples at the end](#full-code-example).
@@ -22,10 +26,45 @@ Find [full code examples at the end](#full-code-example).
 <Steps>
 
 <Step>
+### Configure Token Metadata
 
+```rust
+use light_ctoken_types::{
+    instructions::extensions::{
+        token_metadata::TokenMetadataInstructionData,
+        ExtensionInstructionData,
+    },
+    state::AdditionalMetadata,
+};
+
+let token_metadata = ExtensionInstructionData::TokenMetadata(
+    TokenMetadataInstructionData {
+        update_authority: Some(authority.to_bytes().into()),
+        name: b"My Token".to_vec(),
+        symbol: b"MTK".to_vec(),
+        uri: b"https://example.com/metadata.json".to_vec(),
+        additional_metadata: Some(vec![
+            AdditionalMetadata {
+                key: b"category".to_vec(),
+                value: b"utility".to_vec(),
+            },
+        ]),
+    },
+);
+```
+
+<Note>
+**Fields must be set at cMint creation.**
+* Standard fields (`name`, `symbol`, `uri`) can be updated by `update_authority`.
+* For `additional_metadata`, only existing keys can be modified or removed. New keys cannot be added after creation.
+</Note>
+
+</Step>
+
+<Step>
 ### Configure cMint
 
-Set `decimals`, `mint_authority`, `freeze_authority`, and `extensions`.
+Set `decimals`, `mint_authority`, `freeze_authority`, and pass the `token_metadata` from the previous step.
 
 ```rust
 use light_compressed_token_sdk::ctoken::CreateCMintParams;
@@ -38,9 +77,13 @@ let cmint_params = CreateCMintParams {
     compression_address: data.compression_address,
     mint: data.mint,
     freeze_authority: data.freeze_authority,
-    extensions: data.extensions,
+    extensions: data.token_metadata,
 };
 ```
+<Info>
+* The client passes a validity proof that proves the cMint address does not exist in the address tree where it will be stored.
+* You can safely ignore `compression_address` and `address_merkle_tree_root_index`. The client passes these for proof verification.
+</Info>
 
 </Step>
 
@@ -54,11 +97,6 @@ The client includes them in the instruction.
 <Accordion title="System Accounts List">
 <CMintSystemAccountsList />
 </Accordion>
-
-<Info>
-The address of a cMint is stored in an address Merkle tree. 
-You can safely ignore the `address_merkle_tree_root_index` - it tells your program where in the address tree the address is stored.
-</Info>
 
 ```rust
 use light_compressed_token_sdk::ctoken::SystemAccountInfos;
@@ -76,9 +114,8 @@ let system_accounts = SystemAccountInfos {
 </Step>
 
 <Step>
-### CPI to Compressed Token Program
+### Build Account Infos and CPI the cToken Program
 
-Build the instruction and invoke the Compressed Token Program.
 1. Pass the required accounts
 2. Include `cmint_params` and `system_accounts` from the previous steps
 3. Use `invoke` or `invoke_signed`:
@@ -87,7 +124,7 @@ Build the instruction and invoke the Compressed Token Program.
     * When both `mint_signer` and `authority` are PDAs, use `invoke_signed` with both seeds.
 
 <Tabs>
-<Tab title="invoke (External Signer)">
+<Tab title="invoke (External signer)">
 
 
 ```rust
@@ -109,7 +146,6 @@ CreateCMintAccountInfos {
 </Tab> 
 
 <Tab title="invoke_signed (PDA mint_signer)">
-// mint_signer is a PDA - program signs via invoke_signed
 
 ```rust
 use light_compressed_token_sdk::ctoken::CreateCMintAccountInfos;
@@ -164,7 +200,7 @@ account_infos.invoke_signed(&[mint_signer_seeds, authority_seeds])?;
 # Full Code Example
 
 <Info>
-Find the source code [here](https://github.com/Lightprotocol/light-protocol/blob/main/sdk-tests/sdk-ctoken-test/src/create_token_account.rs).
+Find the source code [here](https://github.com/Lightprotocol/light-protocol/blob/main/sdk-tests/sdk-ctoken-test/src/create_cmint.rs).
 </Info>
 
 ```rust expandable
