@@ -14,9 +14,9 @@ import CTokenConfigureRent from '/snippets/ctoken-configure-rent.mdx';
 cToken accounts are Solana accounts and created via CPI to the cToken Program.
 
 1. cToken accounts hold token balances like SPL Token accounts.
-2. Top-up the account with rent for two epochs (12,600 slots / 84 min) to create the account, instead of funding the full rent-exemption.
-3. The transaction payer top-ups the lamports balance when the account’s lamports balance is below 2 epochs.
-4. When no transactions top up the lamports balance for two epochs, the account gets compressed.
+2. Fund the account with rent for 24h (~0.000030 SOL) when creating the account, instead of the full rent-exemption.
+3. The transaction payer tops-up the lamports balance when the account’s lamports balance is below 2 epochs (12,600 slots / 84 min).
+4. When no transactions top up the lamports balance for 2 epochs, the account gets compressed.
 5. When the account is written to, it’s automatically decompressed and the transaction payer tops-up the lamports balance.
 
 <Info>

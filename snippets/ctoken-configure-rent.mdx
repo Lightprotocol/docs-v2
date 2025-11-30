@@ -14,22 +14,23 @@ let compressible_params = CompressibleParamsInfos::new(
 
 #### Rent Config
 
-1. At creation set `pre_pay_num_epochs` to determine the number of epochs to fund the account with rent.
-    * This is set to 2 epochs (12,600 slots / 84 min or 766 lamports) by default.
-2. Set `lamports_per_write` to determine the amount a transaction payer top-ups the account with rent.
-    * This is set to 766 lamports by default.
-    * Top-ups are made when the lamports balance falls below two epochs of rent.
-3. The account is compressed when the lamports balance is at zero epochs.
-4. When the account is written to, the account gets decompressed and the transaction payer tops up the accounts with `lamports_per_write` again.
-
-You can customize the parameters based on the expected account activity.
-
-<CompressibleRentCalculator />
-
+The rent for compressible accounts is configured with default values:
+1. At creation, the account creator covers rent for 24 hours (~0.000030 SOL). <br/>`pre_pay_num_epochs` is set to ~35 epochs by default.
+2. The transaction payer top-ups the account with rent for ~1.5h of rent (2 epochs), set in `lamports_per_write` to 766 lamports by default.
+* Top ups are made when the account's lamports balance is below two epochs of rent (766 lamports).
+* The account gets compressed when the account is not topped up for two epochs and the lamports balance is below two epochs of rent (766 lamports).
+* When the account is written to, the account gets decompressed and the transaction payer tops up the accounts with `lamports_per_write` again.
+* The account creation and first write to decompress include another 11000 lamports for compression & protocol incentive.
 <Info>
-Learn the core concepts to the rent config [here](/compressed-token-program/rent-config).
-You can customize the rent config based on expected account activity (must be 0 or ≥2).
+We recommend to use default values, but you can customize the parameters based on the expected account activity.
+Learn the [core concepts of the rent config here](/compressed-token-program/rent-config).
 </Info>
+
+<Accordion title="Cost Calculator: Compressible Account Creation">
+1. Set the hours you will prepay rent
+2. Set the lamports per write a transaction payer will pay for top ups
+<CompressibleRentCalculator />
+</Accordion>
 
 #### Accounts
 
