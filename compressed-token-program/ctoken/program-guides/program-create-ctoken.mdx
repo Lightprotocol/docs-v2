@@ -13,10 +13,10 @@ import { CompressibleRentCalculator } from '/snippets/compressible-rent-calculat
 cToken accounts are Solana accounts and created via CPI to the cToken Program.
 
 1. cToken accounts hold token balances like SPL Token accounts.
-2. The rent-exemption is sponsored via the compressible extension.
-    * The account creator top-ups the lamport balance with rent for at least two epochs (12,600 slots / 84 min).
-    * The transaction payer top-ups the lamports balance when the account’s lamports balance is below 2 epochs.
-    
+2. Top-up the account with rent for two epochs (12,600 slots / 84 min) to create the account, instead of funding the rent-exemption.
+3. The transaction payer top-ups the lamports balance when the account’s lamports balance is below 2 epochs.
+4. When no transactions top up the lamports balance for two epochs, the account gets compressed.
+5. When the account is written to, it’s automatically decompressed and the transaction payer tops-up the lamports balance.
 
 <Info>
 Learn the [core concepts to the cToken Program here](/compressed-token-program/c-token-program).
@@ -49,22 +49,21 @@ let compressible_params = CompressibleParamsInfos::new(
 #### Rent Config
 1. `pre_pay_num_epochs` determines the number of epochs for which the account creator funds the account with rent. 
     * This is set to 2 epochs (12,600 slots / 84 min or 766 lamports) by default.
-2. `lamports_per_write` determines the amount a the transaction payer top-ups the account with rent.
+2. `lamports_per_write` determines the amount a transaction payer top-ups the account with rent.
     * This is set to 766 lamports by default.
     * Top-ups are made when the lamports balance falls below two epochs of rent.
-3. The account is compressed after it is inactive for 2 epochs.
-4. When the account is written to, it’s automatically decompressed.
-    * The transaction payer tops up the account with 766 lamports.
+3. The account is compressed when the lamports balance is at zero epochs.
+4. When the account is written to, the account gets decompressed and the transaction payer tops up the accounts with `lamports_per_write` again.
 
+You can calculate the parameters below based on the expected account activity.
+<CompressibleRentCalculator />
 <Info>
 Learn the core concepts to the rent config [here](/compressed-token-program/rent-config). 
 You can customize the rent config based on expected account activity (must be 0 or ≥2).
 </Info>
-
-<CompressibleRentCalculator />
-
 #### Accounts
 
+The rent config requires the following accounts: 
 <table>
   <colgroup>
     <col style={{width: '25%', textAlign: 'left'}} />

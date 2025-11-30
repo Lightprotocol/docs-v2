@@ -1,22 +1,19 @@
 export const CompressibleRentCalculator = () => {
-  const [numEpochs, setNumEpochs] = useState(2);
+  const [hours, setHours] = useState(2);
   const [lamportsPerWrite, setLamportsPerWrite] = useState(766);
 
   const DATA_LEN = 260;
   const BASE_RENT = 128;
   const LAMPORTS_PER_BYTE_PER_EPOCH = 1;
+  const MINUTES_PER_EPOCH = 42;
 
+  const numEpochs = Math.ceil((hours * 60) / MINUTES_PER_EPOCH);
   const rentPerEpoch = BASE_RENT + (DATA_LEN * LAMPORTS_PER_BYTE_PER_EPOCH);
   const totalPrepaidRent = rentPerEpoch * numEpochs;
-  const MINUTES_PER_EPOCH = 42;
-  const totalMinutes = numEpochs * MINUTES_PER_EPOCH;
-  const timeDisplay = totalMinutes >= 60
-    ? `${(totalMinutes / 60).toFixed(1)}h`
-    : `${totalMinutes} min`;
 
-  const handleEpochsChange = (value) => {
-    const num = Math.max(2, Math.min(1000, Number.parseInt(value) || 2));
-    setNumEpochs(num);
+  const handleHoursChange = (value) => {
+    const num = Math.max(1, Math.min(168, Number.parseInt(value) || 2));
+    setHours(num);
   };
 
   const handleLamportsChange = (value) => {
@@ -31,25 +28,45 @@ export const CompressibleRentCalculator = () => {
         <div className="space-y-4 px-3">
           <div className="block text-sm text-zinc-700 dark:text-white/80">
             <span className="flex justify-between items-center mb-2">
-              <span>Prepaid Epochs</span>
-              <input
-                type="number"
-                min="2"
-                max="1000"
-                value={numEpochs}
-                onChange={(e) => handleEpochsChange(e.target.value)}
-                className="w-20 px-2 py-1 text-right font-mono font-medium bg-black/[0.015] dark:bg-white/10 border border-black/[0.04] dark:border-white/20 rounded-lg backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50"
-              />
+              <span>Prepaid Epochs in Hours</span>
+              <span className="flex items-center gap-1">
+                <input
+                  type="number"
+                  min="1"
+                  max="168"
+                  value={hours}
+                  onChange={(e) => handleHoursChange(e.target.value)}
+                  className="w-16 px-2 py-1 text-right font-mono font-medium bg-black/[0.015] dark:bg-white/10 border border-black/[0.04] dark:border-white/20 rounded-lg backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                />
+                <span className="text-xs text-zinc-500 dark:text-white/50">hours</span>
+              </span>
             </span>
             <input
               type="range"
-              min="2"
-              max="100"
-              value={Math.min(numEpochs, 100)}
-              onChange={(e) => setNumEpochs(Number.parseInt(e.target.value))}
+              min="1"
+              max="48"
+              value={Math.min(hours, 48)}
+              onChange={(e) => setHours(Number.parseInt(e.target.value))}
               className="w-full h-1.5 bg-black/[0.03] dark:bg-white/20 rounded-full appearance-none cursor-pointer backdrop-blur-sm"
             />
-            <span className="text-xs text-zinc-500 dark:text-white/50 mt-1 block">≈ {timeDisplay}</span>
+            <span className="text-xs text-zinc-500 dark:text-white/50 mt-1 block">≈ {((hours * 60) / MINUTES_PER_EPOCH).toFixed(1)} epochs</span>
+
+            {/* Preset buttons */}
+            <div className="flex gap-2 mt-3">
+              {[2, 4, 6, 12, 24].map((h) => (
+                <button
+                  key={h}
+                  onClick={() => setHours(h)}
+                  className={`px-3 py-1.5 text-xs font-medium rounded-lg border backdrop-blur-sm transition-all ${
+                    hours === h
+                      ? 'bg-blue-500/20 border-blue-500/50 text-blue-600 dark:text-blue-400'
+                      : 'bg-black/[0.015] border-black/[0.04] text-zinc-600 dark:text-white/70 hover:bg-black/[0.03]'
+                  }`}
+                >
+                  {h}h
+                </button>
+              ))}
+            </div>
           </div>
 
           <div className="block text-sm text-zinc-700 dark:text-white/80">
@@ -92,6 +109,7 @@ export const CompressibleRentCalculator = () => {
               {totalPrepaidRent.toLocaleString()}
             </div>
             <div className="text-xs text-zinc-400 dark:text-white/40">lamports</div>
+            <div className="text-xs text-zinc-500 dark:text-white/50 mt-1">≈ {((hours * 60) / MINUTES_PER_EPOCH).toFixed(1)} epochs / {hours}h</div>
           </div>
 
           <div className="p-4 bg-black/[0.015] dark:bg-white/5 backdrop-blur-md rounded-2xl text-center border border-black/[0.04] dark:border-white/10 shadow-sm">
@@ -100,15 +118,14 @@ export const CompressibleRentCalculator = () => {
               {lamportsPerWrite.toLocaleString()}
             </div>
             <div className="text-xs text-zinc-400 dark:text-white/40">lamports</div>
-            <div className="text-xs text-zinc-500 dark:text-white/50 mt-1">≈ {(lamportsPerWrite / rentPerEpoch).toFixed(1)} epochs</div>
+            <div className="text-xs text-zinc-500 dark:text-white/50 mt-1">≈ {(lamportsPerWrite / rentPerEpoch).toFixed(1)} epochs / {((lamportsPerWrite / rentPerEpoch) * MINUTES_PER_EPOCH / 60).toFixed(1)}h</div>
           </div>
         </div>
 
         {/* Formula reference */}
         <div className="text-xs font-mono text-zinc-500 dark:text-white/40 pt-3 border-t border-black/[0.04] dark:border-white/10">
-          rent_per_epoch = base_rent + (data_len * lamports_per_byte_per_epoch)<br/>
-
-          For 260-byte cToken account:
+          rent_per_epoch = base_rent + (data_len × lamports_per_byte_per_epoch)<br/><br/>
+          For 260-byte cToken account:<br/>
           rent_per_epoch = {BASE_RENT} + ({DATA_LEN} × {LAMPORTS_PER_BYTE_PER_EPOCH}) = {rentPerEpoch} lamports
         </div>
       </div>
