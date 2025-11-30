@@ -62,6 +62,7 @@
               {
                 "group": "cMint",
                 "pages": [
+                  "compressed-token-program/cmint/cmint",
                   {
                     "group": "Client Guides",
                     "pages": [

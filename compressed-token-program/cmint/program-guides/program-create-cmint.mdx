@@ -7,11 +7,12 @@ import CMintSystemAccountsList from '/snippets/cmint-system-accounts-list.mdx';
 
 ## Key Points
 
-cMints are compressed accounts and created via CPI to the Compressed Token Program.
+cMints are created via CPI to the Compressed Token Program.
 
 1. cMints uniquely represent a token on Solana and store its global metadata.
-2. cMints are rent-free.
+2. cMints are compressed accounts and rent-free.
 3. The `mint_signer` keypair/PDA derives the mint address.
+4. Tokens created from cMints are cTokens.
 
 <Info>
 Learn the [core concepts to the cToken Program here](/compressed-token-program/c-token-program).
