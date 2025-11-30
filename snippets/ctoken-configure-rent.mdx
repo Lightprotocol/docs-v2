@@ -10,14 +10,11 @@ let compressible_params = CompressibleParamsInfos::new(
 );
 ```
 
-#### Rent Config
+#### Default Rent Config
 
-The rent for compressible accounts is configured with default values for the initial rent payment. 
-You don't need to pass the rent config in this struct.
-
-1. At creation, the account creator covers rent for 24 hours (~0.000022 SOL) ~16 epochs, by default.
-2. The transaction payer top-ups the account with 766 lamports to cover rent for ~3h / 2 epochs by default, when the account's lamports balance falls below two epochs of rent (766 lamports).
-
+You don't need to pass the rent config in this struct, the SDK sets default values for the rent config of compressible accounts:
+- Initial rent payment to 24 hours / ~16 epochs (~11,000 lamports)
+- Top-up amount to 766 lamports to cover rent for 3h / ~2 epochs
 <Info>
 We recommend to use default values, but you can customize the parameters based on the expected account activity.
 Learn the [core concepts of the rent config here](/compressed-token-program/rent-config).

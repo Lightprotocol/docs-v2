@@ -18,12 +18,6 @@ Find [full code examples at the end](#full-code-example).
 </Note>
 
 # Implementation Guide
-The mint_signer keypair/PDA derives both:
-The SPL mint address
-Your program's responsibility:
-1. Deserialize the instruction data
-2. Build the SDK structs (CreateCMintParams, SystemAccountInfos, CreateCMintAccountInfos)
-3. Call .invoke() or .invoke_signed()
 
 <Steps>
 
@@ -36,7 +30,7 @@ Set `decimals`, `mint_authority`, `freeze_authority`, and `extensions`.
 ```rust
 use light_compressed_token_sdk::ctoken::CreateCMintParams;
 
-let params = CreateCMintParams {
+let cmint_params = CreateCMintParams {
     decimals: data.decimals,
     address_merkle_tree_root_index: data.address_merkle_tree_root_index,
     mint_authority: data.mint_authority,
@@ -60,7 +54,6 @@ The client includes them in the instruction.
 <Accordion title="System Accounts List">
 <CMintSystemAccountsList />
 </Accordion>
-
 
 <Info>
 The address of a cMint is stored in an address Merkle tree. 
@@ -86,15 +79,16 @@ let system_accounts = SystemAccountInfos {
 ### CPI to Compressed Token Program
 
 Build the instruction and invoke the Compressed Token Program.
-
-
-*  Both mint_signer and authority are PDAs.
+1. Pass the required accounts
+2. Include `cmint_params` and `system_accounts` from the previous steps
+3. Use `invoke` or `invoke_signed`:
+    * When `mint_signer` is an external keypair, use `invoke`.
+    * When `mint_signer` is a PDA, use `invoke_signed` with its seeds.
+    * When both `mint_signer` and `authority` are PDAs, use `invoke_signed` with both seeds.
 
 <Tabs>
 <Tab title="invoke (External Signer)">
 
-
-// mint_signer is a keypair - user signs the transaction
 
 ```rust
 use light_compressed_token_sdk::ctoken::CreateCMintAccountInfos;
@@ -108,7 +102,7 @@ CreateCMintAccountInfos {
     system_accounts,
     cpi_context: None,
     cpi_context_account: None,
-    params,
+    cmint_params,
 }
 .invoke()?;
 ```
@@ -129,7 +123,7 @@ let account_infos = CreateCMintAccountInfos {
     system_accounts,
     cpi_context: None,
     cpi_context_account: None,
-    params,
+    cmint_params,
 };
 
 let signer_seeds: &[&[u8]] = &[MINT_SIGNER_SEED, &[bump]];
@@ -137,7 +131,7 @@ account_infos.invoke_signed(&[signer_seeds])?;
 ```
 </Tab> 
 
-<Tab title="invoke_signed (Two PDA signer)">
+<Tab title="invoke_signed (Two PDA signers)">
 
 ```rust
 use light_compressed_token_sdk::ctoken::CreateCMintAccountInfos;
@@ -151,7 +145,7 @@ let account_infos = CreateCMintAccountInfos {
     system_accounts,
     cpi_context: None,
     cpi_context_account: None,
-    params,
+    cmint_params,
 };
 
 let mint_signer_seeds: &[&[u8]] = &[MINT_SIGNER_SEED, &[mint_signer_bump]];
