@@ -1,13 +1,13 @@
 export const CompressibleRentCalculator = () => {
-  const [hours, setHours] = useState(2);
-  const [lamportsPerWrite, setLamportsPerWrite] = useState(800);
+  const [hours, setHours] = useState(24);
+  const [lamportsPerWrite, setLamportsPerWrite] = useState(766);
   const [showCustomHours, setShowCustomHours] = useState(false);
   const [showCustomLamports, setShowCustomLamports] = useState(false);
 
   const DATA_LEN = 260;
   const BASE_RENT = 128;
   const LAMPORTS_PER_BYTE_PER_EPOCH = 1;
-  const MINUTES_PER_EPOCH = 42;
+  const MINUTES_PER_EPOCH = 90;
   const COMPRESSION_INCENTIVE = 11000;
   const TX_COST = 5000;
   const LAMPORTS_PER_SOL = 1_000_000_000;
@@ -21,7 +21,7 @@ export const CompressibleRentCalculator = () => {
   const totalCreationCost = totalPrepaidRent + COMPRESSION_INCENTIVE + TX_COST;
 
   const handleHoursChange = (value) => {
-    const num = Math.max(1, Math.min(168, Number.parseInt(value) || 2));
+    const num = Math.max(3, Math.min(168, Number.parseInt(value) || 3));
     setHours(num);
   };
 
@@ -30,8 +30,8 @@ export const CompressibleRentCalculator = () => {
     setLamportsPerWrite(num);
   };
 
-  const hoursPresets = [2, 8, 24];
-  const lamportsPresets = [800, 1600, 3200];
+  const hoursPresets = [24];
+  const lamportsPresets = [766];
 
   const SliderMarkers = ({ max, step }) => {
     const marks = [];
@@ -66,13 +66,13 @@ export const CompressibleRentCalculator = () => {
                       : 'bg-black/[0.015] dark:bg-white/5 border-black/[0.04] dark:border-white/20 text-zinc-600 dark:text-white/70 hover:bg-black/[0.03]'
                   }`}
                 >
-                  {h}h
+                  {h === 24 ? 'Default' : `${h}h`}
                 </button>
               ))}
               {showCustomHours ? (
                 <input
                   type="number"
-                  min="1"
+                  min="3"
                   max="168"
                   value={hours}
                   onChange={(e) => handleHoursChange(e.target.value)}
@@ -91,13 +91,13 @@ export const CompressibleRentCalculator = () => {
           </div>
           <div className="flex items-center">
             <span className="w-1/3 text-xs text-zinc-500 dark:text-white/50 whitespace-nowrap">
-              ≈ {numEpochs} epochs / {hours}h
+              ≈ {((hours * 60) / MINUTES_PER_EPOCH).toFixed(1)} epochs / {hours.toFixed(1)}h
             </span>
             <div className="w-2/3 relative">
               <SliderMarkers max={HOURS_MAX} step={2} />
               <input
                 type="range"
-                min="1"
+                min="3"
                 max={HOURS_MAX}
                 value={Math.min(hours, HOURS_MAX)}
                 onChange={(e) => { setHours(Number.parseInt(e.target.value)); setShowCustomHours(false); }}
@@ -122,7 +122,7 @@ export const CompressibleRentCalculator = () => {
                       : 'bg-black/[0.015] dark:bg-white/5 border-black/[0.04] dark:border-white/20 text-zinc-600 dark:text-white/70 hover:bg-black/[0.03]'
                   }`}
                 >
-                  {l.toLocaleString()}
+                  {l === 766 ? 'Default' : l.toLocaleString()}
                 </button>
               ))}
               {showCustomLamports ? (

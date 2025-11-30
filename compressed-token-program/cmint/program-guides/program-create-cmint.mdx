@@ -11,14 +11,15 @@ cMints are compressed accounts and created via CPI to the Compressed Token Progr
 
 * cMints uniquely represent a token on Solana and store its global metadata.
 * cMints are rent-free.
-* The `mint_signer` keypair/PDA derives both the SPL mint address and the cMint's `compression_address`.
+* The `mint_signer` keypair/PDA derives the mint address.
 
 <Note>
 Find [full code examples at the end](#full-code-example).
 </Note>
 
 # Implementation Guide
-
+The mint_signer keypair/PDA derives both:
+The SPL mint address
 Your program's responsibility:
 1. Deserialize the instruction data
 2. Build the SDK structs (CreateCMintParams, SystemAccountInfos, CreateCMintAccountInfos)
