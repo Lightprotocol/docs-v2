@@ -4,17 +4,20 @@ description: Program guide to mint cTokens with step-by-step implementation and 
 ---
 
 import CMintSystemAccountsList from '/snippets/cmint-system-accounts-list.mdx';
+import CMintToCTokenAccountsList from '/snippets/cmint-to-ctoken-accounts-list.mdx';
 
 ## Key Points
 
+
 cTokens are minted via CPI to the Compressed Token Program and do not require rent-exemption.
 
-1. Minting creates new token balances in existing cToken accounts.
-2. The mint authority must sign the transaction (or be a PDA with invoke_signed).
+1. Mint cTokens from an existing cMint to existing cToken accounts.
+2. The mint authority must sign the transaction (or be a PDA with `invoke_signed`).
 
-<Info>
-Learn the [core concepts to the cToken Program here](/compressed-token-program/c-token-program).
-</Info>
+<Tip>
+* `MintToCToken` mints from a cMint to cToken Solana accounts. Use when you need SPL-compatible accounts for interoperability with DeFi, etc.
+* `MintToCompressed` mints from a cMint to compressed token accounts. Use for token distribution (Airdrops, payments, ...).
+</Tip>
 
 <Note>
 Find [full code examples at the end](#full-code-example).
@@ -30,7 +33,7 @@ Find [full code examples at the end](#full-code-example).
 ```rust
 use light_compressed_token_sdk::ctoken::MintToCTokenParams;
 
-let params = MintToCTokenParams::new(
+let mint_params = MintToCTokenParams::new(
     data.compressed_mint_inputs,
     data.amount,
     data.mint_authority,
@@ -38,10 +41,8 @@ let params = MintToCTokenParams::new(
 );
 ```
 
-1. `compressed_mint_inputs` - The compressed mint context with proof data
-2. `amount` - Number of tokens to mint
-3. `mint_authority` - The authority allowed to mint tokens
-4. `proof` - Validity proof for the compressed state
+Include your mint, the amount of tokens to be minted and the pubkey of the mint authority. 
+The client passes a validity proof that <Tooltip tip="cMints are compressed accounts. Compressed accounts are stored in state Merkle trees. Only the root hash is stored on chain - every transaction that accesses the cMint includes a validity proof to verify the compressed state.">proves the cMint exists</Tooltip>.
 
 </Step>
 
@@ -49,7 +50,7 @@ let params = MintToCTokenParams::new(
 
 ### System Accounts
 
-Include system accounts required to interact with compressed state. The client includes them in the instruction.
+Build system accounts info required to interact with compressed state. The client includes them in the instruction.
 
 <Accordion title="System Accounts List">
 <CMintSystemAccountsList />
@@ -72,12 +73,13 @@ let system_accounts = SystemAccountInfos {
 
 <Step>
 
-### CPI to Compressed Token Program
+### Build Mint to cToken Infos and CPI the cToken Program
 
-Build the instruction and invoke the Compressed Token Program.
-
-* When a CPI doesn't require PDA signers, the `invoke` function is used.
-* When a CPI requires a PDA signer, the `invoke_signed` function is used.
+1. Pass the required accounts, including the destination cToken accounts.
+2. Include `mint_params` and `system_accounts` from the previous steps
+3. Use `invoke` or `invoke_signed`:
+    * When a CPI doesn't require PDA signers, the `invoke` function is used.
+    * When a CPI requires a PDA signer, the `invoke_signed` function is used.
 
 <Tabs>
 <Tab title="invoke (External Signer)">
@@ -95,7 +97,7 @@ MintToCTokenInfos {
     system_accounts,
     cpi_context: None,
     cpi_context_account: None,
-    params,
+    mint_params,
 }
 .invoke()?;
 ```
@@ -116,7 +118,7 @@ let account_infos = MintToCTokenInfos {
     system_accounts,
     cpi_context: None,
     cpi_context_account: None,
-    params,
+    mint_params,
 };
 
 let signer_seeds: &[&[u8]] = &[MINT_AUTHORITY_SEED, &[bump]];
@@ -125,6 +127,10 @@ account_infos.invoke_signed(&[signer_seeds])?;
 
 </Tab>
 </Tabs>
+
+<Accordion title="Accounts List">
+<CMintToCTokenAccountsList />
+</Accordion>
 
 </Step>
 </Steps>

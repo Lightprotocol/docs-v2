@@ -22,8 +22,10 @@ let compressible_params = CompressibleParamsInfos::new(
 3. The account is compressed when the lamports balance is at zero epochs.
 4. When the account is written to, the account gets decompressed and the transaction payer tops up the accounts with `lamports_per_write` again.
 
-You can calculate the parameters below based on the expected account activity.
+You can customize the parameters based on the expected account activity.
+
 <CompressibleRentCalculator />
+
 <Info>
 Learn the core concepts to the rent config [here](/compressed-token-program/rent-config).
 You can customize the rent config based on expected account activity (must be 0 or ≥2).
