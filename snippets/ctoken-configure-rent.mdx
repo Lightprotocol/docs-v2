@@ -20,14 +20,14 @@ The rent for compressible accounts is configured with default values:
 * Top ups are made when the account's lamports balance is below two epochs of rent (766 lamports).
 * The account gets compressed when the account is not topped up for two epochs and the lamports balance is below two epochs of rent (766 lamports).
 * When the account is written to, the account gets decompressed and the transaction payer tops up the accounts with `lamports_per_write` again.
-* The account creation and first write to decompress include another 11000 lamports for compression & protocol incentive.
+* The account creation and writes to decompress include additional <Tooltip tip="Covers transaction cost to compress accounts (10,000) and protocol incentive (1,000).">11,000 lamports for compression & protocol incentive</Tooltip>.
 <Info>
 We recommend to use default values, but you can customize the parameters based on the expected account activity.
 Learn the [core concepts of the rent config here](/compressed-token-program/rent-config).
 </Info>
 
 <Accordion title="Cost Calculator: Compressible Account Creation">
-1. Set the hours you will prepay rent
+1. Set the hours to determine the amount of prepaid rent
 2. Set the lamports per write a transaction payer will pay for top ups
 <CompressibleRentCalculator />
 </Accordion>
