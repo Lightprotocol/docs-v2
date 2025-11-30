@@ -1,0 +1,65 @@
+Use `CompressibleParamsInfos` to configure rent:
+
+```rust
+use light_compressed_token_sdk::ctoken::CompressibleParamsInfos;
+
+let compressible_params = CompressibleParamsInfos::new(
+    data.pre_pay_num_epochs,
+    data.lamports_per_write,
+    compressible_config.clone(),
+    rent_sponsor.clone(),
+    system_program.clone(),
+);
+```
+
+#### Rent Config
+
+1. At creation set `pre_pay_num_epochs` to determine the number of epochs to fund the account with rent.
+    * This is set to 2 epochs (12,600 slots / 84 min or 766 lamports) by default.
+2. Set `lamports_per_write` to determine the amount a transaction payer top-ups the account with rent.
+    * This is set to 766 lamports by default.
+    * Top-ups are made when the lamports balance falls below two epochs of rent.
+3. The account is compressed when the lamports balance is at zero epochs.
+4. When the account is written to, the account gets decompressed and the transaction payer tops up the accounts with `lamports_per_write` again.
+
+You can calculate the parameters below based on the expected account activity.
+<CompressibleRentCalculator />
+<Info>
+Learn the core concepts to the rent config [here](/compressed-token-program/rent-config).
+You can customize the rent config based on expected account activity (must be 0 or ≥2).
+</Info>
+
+#### Accounts
+
+The rent config requires the following accounts:
+<table>
+  <colgroup>
+    <col style={{width: '25%', textAlign: 'left'}} />
+    <col style={{width: '55%'}} />
+  </colgroup>
+  <thead>
+    <tr>
+      <th style={{textAlign: 'left'}}></th>
+      <th style={{textAlign: 'left'}}></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style={{textAlign: 'left'}}><strong><Tooltip tip="Owned by LightRegistry program. Stores rent_sponsor, compression_delay, address_space, and rent_config.">Compressible Config</Tooltip></strong></td>
+      <td>
+        Protocol PDA that stores account rent config.
+      </td>
+    </tr>
+    <tr>
+      <td style={{textAlign: 'left'}}><strong><Tooltip tip="CToken program PDA that manages rent for compressible accounts.">Rent Sponsor</Tooltip></strong></td>
+      <td>
+        - CToken program PDA that fronts rent exemption at creation.<br/>
+        - Claims rent when account compresses.
+      </td>
+    </tr>
+    <tr>
+      <td style={{textAlign: 'left'}}><strong><Tooltip tip="11111111111111111111111111111111" cta="Program ID" href="https://solscan.io/account/11111111111111111111111111111111">System Program</Tooltip></strong></td>
+      <td>Solana System Program to create the on-chain account.</td>
+    </tr>
+  </tbody>
+</table>

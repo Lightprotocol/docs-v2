@@ -6,17 +6,18 @@ description: Program guide to create associated cToken accounts with step-by-ste
 import CTokenCreateATAAccountsList from '/snippets/ctoken-create-ata-accounts-list.mdx';
 import CTokenProtocolPDAs from '/snippets/ctoken-protocol-pdas.mdx';
 import CompressibleVsSolanaRent from '/snippets/compressible-vs-solana-rent.mdx';
+import { CompressibleRentCalculator } from '/snippets/compressible-rent-calculator.jsx';
+import CTokenConfigureRent from '/snippets/ctoken-configure-rent.mdx';
 
 ## Key Points
 
 Associated cToken accounts (cATA) are Solana accounts and created via CPI to the cToken Program.
 
 1. The address for cATAs is deterministically derived with the owner's address, *cToken program ID*, and mint address.
-2. The rent-exemption is sponsored via the compressible extension.
-    * The account creator top-ups the lamport balance with rent for at least two epochs (12,600 slots / 84 min).
-    * The transaction payer top-ups the lamports balance when the account’s lamports balance is below 2 epochs.
-    * The account will be compressed when inactive for a period of two epochs.
-    * When the account is written to, it’s automatically decompressed.
+2. Top-up the account with rent for two epochs (12,600 slots / 84 min) to create the account, instead of funding the full rent-exemption.
+3. The transaction payer top-ups the lamports balance when the account’s lamports balance is below 2 epochs.
+4. When no transactions top up the lamports balance for two epochs, the account gets compressed.
+5. When the account is written to, it’s automatically decompressed and the transaction payer tops-up the lamports balance.
 
 <Info>
 Learn the [core concepts to the cToken Program here](/compressed-token-program/c-token-program).
@@ -31,66 +32,28 @@ Find [full code examples at the end](#full-code-example).
 <Steps>
 <Step>
 
-### Configure Rent & Associated cToken Account
+### Configure Rent
 
-```rust
-use light_compressed_token_sdk::ctoken::CompressibleParamsInfos;
-
-let compressible_params = CompressibleParamsInfos::new(
-    data.pre_pay_num_epochs,
-    data.lamports_per_write,
-    compressible_config.clone(),
-    rent_sponsor.clone(),
-    system_program.clone(),
-);
-```
-
-1. Set `pre_pay_num_epochs` to **N epochs** to **top-up the account with rent (must be 0 or ≥2)**
-   * Customize N **based on expected account activity**.
-   * The account stays decompressed while it has rent for N epochs.
-   
-``` rust
-rent_per_epoch = base_rent + (data_len * lamports_per_byte_per_epoch)
-
-// For 260-byte cToken account:
-// 128 + (260 * 1) = 388 lamports per epoch
-```
-
-2. **Set** in `lamports_per_write` the **top-up amount**.
-   * Top-ups are **made by** the **transaction fee payer** when the **lamports balance** falls **below two epochs of rent**.
-
-<Note>
-* Accounts become compressible when they advance two epochs without new transactions that add lamports.
-* A forester node compresses the account after these two epochs and the protocol can reclaim the rent.
-</Note>
-
-3. Accounts (add)
+<CTokenConfigureRent />
 
 </Step>
 
 <Step>
 
-### CPI to cToken Program
+### Build Account Infos and CPI the cToken Program
 
-Build the instruction and CPI the cToken Program.
+1. Pass the required accounts
+2. Include rent config from `compressible_params`
+3. Use `invoke` or `invoke_signed`:
+    * When a CPI doesn't require PDA signers, the `invoke` function is used.
+    * When a CPI requires a PDA signer, the `invoke_signed` function is used. It takes the signer seeds used for deriving signer PDAs.
 
-1. Pass the accounts to the cToken Program
-2. CPI to cToken Program
-<Accordion title="Account List">
-
-<CTokenCreateATAAccountsList />
-
-</Accordion>
 <Note>
-**Owner and mint are passed in accounts** (`accounts[0]` and `accounts[1]`), not in the instruction data.
-
-The address is derived with `[owner, ctoken_program_id, mint]` and passed via `accounts[3]`.
+The cATA address is derived from `[owner, ctoken_program_id, mint]`. Unlike cToken accounts, owner and mint are passed as accounts, not in instruction data.
 </Note>
-* When a CPI doesn't require PDA signers, the `invoke` function is used. 
-* When a CPI requires a PDA signer, the `invoke_signed` function is used. It takes the signer seeds used for deriving signer PDAs.
 
 <Tabs>
-<Tab title="invoke (External Signer)">
+<Tab title="invoke (External signer)">
 
 ```rust
 use light_compressed_token_sdk::ctoken::CreateAssociatedTokenAccount2Infos;
@@ -107,9 +70,10 @@ CreateAssociatedTokenAccount2Infos {
 }
 .invoke()?;
 ```
+<CTokenCreateATAAccountsList />
 
 </Tab>
-<Tab title="invoke_signed (PDA is Signer)">
+<Tab title="invoke_signed (PDA is signer)">
 
 ```rust
 use light_compressed_token_sdk::ctoken::CreateAssociatedTokenAccount2Infos;

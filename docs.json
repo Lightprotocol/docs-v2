@@ -12,6 +12,19 @@
     "default": "light"
   },
   "customCSS": "/custom.css",
+  "seo": {
+    "metatags": {
+      "canonical": "https://www.zkcompression.com",
+      "keywords": "solana, compression, zk compression, solana rent, solana rent free, account rent, compressed tokens, compressed accounts, solana pda, program derived address, airdrop, cheap airdrop, solana aidrop, SPL tokens, token distribution, stablecoin payments, solana pay, solana mobile, state compression, zero-knowledge proofs, zk proofs, validity proofs, merkle trees, rent-free accounts, solana scalability, L1 scalability, Light Protocol, Helius, Solana Foundation, solana SDK, solana development, web3 infrastructure, blockchain scalability, cheap token accounts, token account compression, scale Solana, Solana problems, Solana token accounts, compressed accounts, compressed NFTs, state compression, Metaplex, Solana Superteam, DePin, getMinimumBalanceForRentExemption, fetchSysvarRent(rpc, config?), getAccountInfo"
+    }
+  },
+  "errors": {
+    "404": {
+      "redirect": false,
+      "title": "Oops ... rent not found",
+      "description": "Use our AI assistant to find what you are looking for!"
+    }
+  },
   "navigation": {
     "tabs": [
       {
