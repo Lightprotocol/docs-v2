@@ -5,6 +5,7 @@ description: Overview of cMints, cTokens, and compressed token accounts.
 ---
 
 import CompressibleVsSolanaRent from '/snippets/compressible-vs-solana-rent.mdx';
+import { CompressibleRentCalculator } from '/snippets/compressible-rent-calculator.jsx';
 
 The [Compressed Token Program](https://github.com/Lightprotocol/light-protocol/tree/main/programs/compressed-token) extends existing Solana token standards with cMints, cTokens and compressed tokens.
 
@@ -293,13 +294,15 @@ This extension makes cToken accounts 200x cheaper than SPL token accounts
     |  | cToken | SPL |
     |-----------|--------|-----|
     | allocate | 0.000011 | 0.002 |
-    | rent for 24h | 0.000005 | - |
-
+    | rent for 24h | 0.00005 | - |
 
 <Accordion title="Compressible vs Solana Rent">
 
 <CompressibleVsSolanaRent />
 </Accordion>
+
+<CompressibleRentCalculator />
+
 
 # Associated cToken Account
 
