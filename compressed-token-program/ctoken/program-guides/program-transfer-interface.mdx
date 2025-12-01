@@ -1,5 +1,5 @@
 ---
-title: Transfer Interface for cToken <> SPL Token
+title: Transfer Interface for cToken <> SPL Tokens
 description: Program guide for the unified transfer interface that auto-detects account types and routes cToken <> SPL token transfers.
 ---
 
@@ -11,8 +11,8 @@ import TransferInterfaceAccountsListSpl2 from '/snippets/transfer-interface-acco
 The `TransferInterface` is a unified API that automatically detects account types and routes to the appropriate transfer via CPI to the cToken Program:
 
 1. **cToken → cToken**: Transfer of cTokens between cToken accounts.
-2. **cToken → SPL**: Withdraw cTokens to an SPL token account
-3. **SPL → cToken**: Deposit SPL tokens to a cToken account
+2. **cToken → SPL**: Transfer cTokens to an SPL token account
+3. **SPL → cToken**: Transfer SPL tokens to a cToken account
 
 <Info>
 Learn the [core concepts to the cToken Program here](/compressed-token-program/c-token-program).
@@ -54,7 +54,7 @@ let mut transfer = TransferInterface::new(
 
 <Step>
 
-### SPL Interface
+### SPL Transfer Interface
 
 ```rust
 transfer = transfer.with_spl_interface(
@@ -65,12 +65,12 @@ transfer = transfer.with_spl_interface(
 )?;
 ```
 
-The SPL interface requires for SPL ↔ cToken transfers the `token_pool_pda` as escrow account:
-    * **SPL → cToken**: SPL tokens are transferred locked in this pool, cTokens are minted to cToken accounts
-    * **cToken → SPL**: cTokens are burned, SPL tokens withdrawn to SPL token accounts
-
+SPL ↔ cToken transfers require a `token_pool_pda`:
+    * **SPL → cToken**: SPL tokens are locked by the cToken Program in the PDA, cTokens are minted to cToken accounts
+    * **cToken → SPL**: cTokens are burned, SPL tokens transferred to SPL token accounts
+<Info>
 The token pool is derived from the `mint` pubkey and pool seed.
-
+</Info>
 <Accordion title="SPL Interface Accounts">
 <TransferInterfaceAccountsListSpl2 />
 </Accordion>
