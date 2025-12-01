@@ -5,6 +5,7 @@ description: Complete guide to create an airdrop – with or without code. Acces
 
 import InstallDependencies from '/snippets/install-dependencies-codegroup.mdx';
 import SetupEnvironment from '/snippets/setup-environment-tabs.mdx';
+import { TokenAccountCompressedVsSpl } from '/snippets/token-account-compressed-vs-spl.jsx';
 
 ## Guides
 
@@ -29,17 +30,7 @@ There are two ways to use ZK Compression to distribute your SPL tokens.
 
 ### Cost Comparison
 
-<Info>
-You can use the [Airship Calculator ](https://airship.helius.dev/calculator)to anticipate the cost of your airdrop.
-</Info>
-
-| Airdrop Size | Regular Airdrop        | ZK Compression Airdrop      |
-| :----------- | :--------------------- | :-------------------------- |
-| 10,000       | 20.4 SOL (*$4,080)    | **0.0065 SOL (*$1.3)**      |
-| 100,000      | 203.96 SOL (*$40,080) | **0.065 SOL (*$13)**        |
-| 1,000,000    | 2039.28 SOL (*$400,080)| **0.65 SOL (*$130)**        |
-
-_\*\* assuming $200 per SOL_
+<TokenAccountCompressedVsSpl />
 
 ## Programmatic Airdrop
 
