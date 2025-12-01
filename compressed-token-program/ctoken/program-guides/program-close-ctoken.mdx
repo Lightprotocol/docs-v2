@@ -7,7 +7,7 @@ description: Program guide to close cToken accounts with step-by-step implementa
 
 cToken accounts are closed via CPI to the cToken Program.
 
-1. Closing transfers remaining lamports to a destination account.
+1. Closing a cToken accounts transfers remaining lamports to a destination account.
 2. The account owner must sign the transaction (or be a PDA with invoke_signed).
 3. The rent sponsor can reclaim sponsored rent.
 
@@ -24,7 +24,7 @@ Find [full code examples at the end](#full-code-example).
 <Steps>
 <Step>
 
-### cToken Program CPI
+### Build Account Infos and CPI the cToken Program
 
 Build the close instruction and invoke the cToken Program.
 
