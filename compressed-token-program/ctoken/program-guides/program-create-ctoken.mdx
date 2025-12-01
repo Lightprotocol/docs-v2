@@ -14,14 +14,16 @@ import CTokenConfigureRent from '/snippets/ctoken-configure-rent.mdx';
 cToken accounts are Solana accounts and created via CPI to the cToken Program.
 
 1. cToken accounts hold token balances similar to SPL Token accounts.
-2. cToken accounts are compressible, which means you
-<Tooltip tip="1 rent-epoch ≈ 13,500 slots at 400ms per slot"> pay rent per rent-epoch</Tooltip>, instead of the rent-exemption upfront.
-    * The rent-exemption to create the Solana account is sponsored by Light Protocol.
-    * Rent for 24h (16 epochs) is <Tooltip tip="Rent for 260-byte cToken account per epoch: 360 lamports. Learn more in the core concepts to compressible rent.">11,000 lamports</Tooltip> and paid at account creation.
-3. Transactions to cToken accounts top-up rent, when the account's rent is below two epochs (766 lamports).
+2. cToken accounts are compressible, which means
+    * the **rent-exemption** for the Solana account is **sponsored** by Light Protocol,
+    * you pay <Tooltip tip="1 rent-epoch ≈ 1.5h ≈ 13,500 slots at 400ms per slot"> **rent per rent-epoch**</Tooltip> **instead** of the rent-exemption upfront,
+    * accounts with <Tooltip tip="Rent for 260-byte cToken account per epoch: 360 lamports.">rent for less than 1 epoch</Tooltip> are compressed (360 lamports), and
+    * compressed cToken accounts are decompressed with the same state when written to.
+    
+3. **Rent for 24h** (16 epochs) is **11,000 lamports** and paid at account creation.
+4. Transactions to cToken accounts top-up rent, when the account's rent is below two epochs (766 lamports).
     * The top-up is configured to 766 lamports by default (rent for ~3h / 2 epochs).
-4. Inactive accounts are compressed when the lamports balance does not cover rent for the current epoch (388 lamports) and the protocol reclaims the rent.
-    * The compressed cToken account gets reinstantiated with the same state (decompressed), when written to.
+    * Write transactions to compressed cToken accounts decompress the account.
 5. The account creation and writes to decompress cost additional <Tooltip tip="Covers transaction cost to compress accounts (10,000) and protocol incentive (1,000). Transaction cost might vary.">11,000 lamports for compression & protocol incentive</Tooltip>.
 
 <Info>
