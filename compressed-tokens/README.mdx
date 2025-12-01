@@ -39,7 +39,7 @@ Compressed token accounts store token balance, owner, and other information like
   #### Storage of Inactive Token Accounts
   * Most (associated) token accounts are not frequently written to.
   * **Store token accounts rent-free** when inactive
-  * Use or migrate to [cTokens](/compressed-token-program/ctoken/ctoken) for **sponsored rent-exemption**.
+  * [cTokens](/compressed-token-program/ctoken/ctoken) are automatically compressed/decompressed, when active/inactive and include **sponsored rent-exemption**. [Learn more here](/compressed-token-program/ctoken/ctoken).
   </Card>
   <Card title="">
   #### [Token Distribution](#advanced-guides)
@@ -50,7 +50,11 @@ Compressed token accounts store token balance, owner, and other information like
 <Note>
 Leading **wallets** like Phantom and Backpack **support compressed tokens**. The UI does not distinguish between SPL and compressed tokens.
 </Note>
-<Accordion title="Setup">
+
+<Steps>
+<Step>
+### Get Started
+<Accordion title="Installation & Setup">
 <Steps>
   <Step>
 
@@ -67,15 +71,20 @@ Leading **wallets** like Phantom and Backpack **support compressed tokens**. The
 
 </Step>
 
-  <Step>
-
-### Get started
-  </Step>
 </Steps>
+
 </Accordion>
 
-## Basic Guides
-<GuidesTable />
+</Step>
 
+<Step>
+### Basic Guides
+<GuidesTable />
+</Step>
+
+<Step>
 ## Advanced Guides
 <AdvancedGuidesTable />
+</Step>
+
+</Steps>

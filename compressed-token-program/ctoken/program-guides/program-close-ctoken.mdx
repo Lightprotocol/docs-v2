@@ -13,8 +13,8 @@ cToken accounts are closed via CPI to the cToken Program.
 2. cToken accounts can be closed
     * by the account owner at any time.
     * by the <Tooltip tip="The `compression_authority` is a PDA of the Light Registry program. It claims rent for the rent sponsor from compressible accounts that are compressed and closed.">`compression_authority`</Tooltip>
-     when the account becomes <Tooltip tip="An account is compressible when it has rent for less than 1 epoch (360 lamports for a 260-byte cToken account).">compressible</Tooltip>. The account is compressed and closed - it can be reinstated with the same state (decompressed).
-    * You can think of compressed cToken accounts as storage of inactive accounts that can be reactivated.
+     when the account becomes <Tooltip tip="An account is compressible when it has rent for less than 1 epoch (360 lamports for a 260-byte cToken account).">compressible</Tooltip>. The account is <Tooltip tip="You can think of compressed cToken accounts as storage of inactive accounts that can be reactivated."> compressed and closed</Tooltip> - it can be reinstated with the same state (decompressed).
+
 <Info>
 Learn the [core concepts to the cToken Program here](/compressed-token-program/c-token-program).
 </Info>
@@ -163,12 +163,23 @@ pub fn process_close_account_invoke_signed(accounts: &[AccountInfo]) -> Result<(
 
 # Next Steps
 
-Learn how to use the transfer interface for cToken ↔ SPL transfers.
-
+<CardGroup>
 <Card
-  title="Learn how to transfer between SPL and cTokens"
+  title="Client Guide"
   icon="chevron-right"
   color="#0066ff"
-  href="/compressed-token-program/ctoken/program-guides/program-transfer-interface"
+  href="/compressed-token-program/ctoken/client-guides/client-close-ctoken"
   horizontal
-/>
+>
+  Close cToken Accounts
+</Card>
+<Card
+  title="Compressed Tokens"
+  icon="chevron-right"
+  color="#0066ff"
+  href="/compressed-tokens/README"
+  horizontal
+>
+  Learn about compressed tokens 
+</Card>
+</CardGroup>

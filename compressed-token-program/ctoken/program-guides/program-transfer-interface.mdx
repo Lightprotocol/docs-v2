@@ -53,8 +53,9 @@ let mut transfer = TransferInterface::new(
 
 <Step>
 
-### SPL Transfer Interface
+### SPL Transfer Interface (Optional)
 
+The SPL transfer interface is only needed for SPL ↔ cToken transfers.
 ```rust
 transfer = transfer.with_spl_interface(
     Some(mint.clone()),
@@ -218,12 +219,23 @@ pub fn process_transfer_interface_invoke_signed(
 
 # Next Steps
 
-Learn how to close cToken accounts.
-
+<CardGroup>
 <Card
-  title="Program Guide: Close cToken Accounts"
+  title="Client Guide"
+  icon="chevron-right"
+  color="#0066ff"
+  href="/compressed-token-program/ctoken/client-guides/client-transfer-interface"
+  horizontal
+>
+  Transfer Interface
+</Card>
+<Card
+  title="Program Guide"
   icon="chevron-right"
   color="#0066ff"
   href="/compressed-token-program/ctoken/program-guides/program-close-ctoken"
   horizontal
-/>
+>
+  Close cToken Accounts
+</Card>
+</CardGroup>
