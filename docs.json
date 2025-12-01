@@ -87,7 +87,9 @@
                     "pages": [
                       "compressed-token-program/ctoken/client-guides/client-create-ctoken",
                       "compressed-token-program/ctoken/client-guides/client-create-cATA",
-                      "compressed-token-program/ctoken/client-guides/client-mint-to-ctoken"
+                      "compressed-token-program/ctoken/client-guides/client-mint-to-ctoken",
+                      "compressed-token-program/ctoken/client-guides/client-transfer-interface",
+                      "compressed-token-program/ctoken/client-guides/client-close-ctoken"
                     ]
                   },
                   {
