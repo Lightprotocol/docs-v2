@@ -28,9 +28,29 @@ Find [full code examples at the end](#full-code-example).
 <Steps>
 <Step>
 
-### Build Account Infos
+### Build Account Infos and CPI the cToken Program
 
-Define the cToken account to close and where remaining lamports should go.
+1. Define the cToken account to close and where remaining lamports should go
+2. Use `invoke` or `invoke_signed`, when a CPI requires a PDA signer.
+
+<Tabs>
+<Tab title="invoke (External Signer)">
+
+```rust
+use light_compressed_token_sdk::ctoken::CloseAccountInfos;
+
+CloseAccountInfos {
+    token_program: token_program.clone(),
+    account: account.clone(),
+    destination: destination.clone(),
+    owner: owner.clone(),
+    rent_sponsor: Some(rent_sponsor.clone()),
+}
+.invoke()?;
+```
+
+</Tab>
+<Tab title="invoke_signed (PDA Owner)">
 
 ```rust
 use light_compressed_token_sdk::ctoken::CloseAccountInfos;
@@ -42,39 +62,17 @@ let close_account_infos = CloseAccountInfos {
     owner: owner.clone(),
     rent_sponsor: Some(rent_sponsor.clone()),
 };
-```
 
-<Accordion title="Account List">
-<CloseAccountInfosAccountsList />
-</Accordion>
-
-</Step>
-
-<Step>
-
-### CPI the cToken Program
-
-Use `invoke` or `invoke_signed`:
-* When a CPI doesn't require PDA signers, the `invoke` function is used.
-* When a CPI requires a PDA signer, the `invoke_signed` function is used.
-
-<Tabs>
-<Tab title="invoke (External Signer)">
-
-```rust
-close_account_infos.invoke()?;
-```
-
-</Tab>
-<Tab title="invoke_signed (PDA Owner)">
-
-```rust
 let signer_seeds: &[&[u8]] = &[TOKEN_ACCOUNT_SEED, &[bump]];
 close_account_infos.invoke_signed(&[signer_seeds])?;
 ```
 
 </Tab>
 </Tabs>
+
+<Accordion title="Account List">
+<CloseAccountInfosAccountsList />
+</Accordion>
 
 </Step>
 </Steps>
@@ -171,6 +169,6 @@ Learn how to use the transfer interface for cToken ↔ SPL transfers.
   title="Learn how to transfer between SPL and cTokens"
   icon="chevron-right"
   color="#0066ff"
-  href="/compressed-token-program/ctoken/program-guides/program-transfer-spl-ctoken"
+  href="/compressed-token-program/ctoken/program-guides/program-transfer-interface"
   horizontal
 />

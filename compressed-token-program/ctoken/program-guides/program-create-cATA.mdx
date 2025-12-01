@@ -48,10 +48,7 @@ Find [full code examples at the end](#full-code-example).
 
 1. Pass the required accounts
 2. Include rent config from `compressible_params`
-3. Use `invoke` or `invoke_signed`:
-    * When a CPI doesn't require PDA signers, the `invoke` function is used.
-    * When a CPI requires a PDA signer, the `invoke_signed` function is used. It takes the signer seeds used for deriving signer PDAs.
-
+3. Use `invoke` or `invoke_signed`, when a CPI requires a PDA signer.
 <Note>
 The cATA address is derived from `[owner, ctoken_program_id, mint]`. Unlike cToken accounts, owner and mint are passed as accounts, not in instruction data.
 </Note>
@@ -74,7 +71,6 @@ CreateAssociatedTokenAccount2Infos {
 }
 .invoke()?;
 ```
-<CTokenCreateATAAccountsList />
 
 </Tab>
 <Tab title="invoke_signed (PDA is signer)">
@@ -98,6 +94,7 @@ CreateAssociatedTokenAccount2Infos {
 
 </Tab>
 </Tabs>
+<CTokenCreateATAAccountsList />
 
 </Step>
 </Steps>
@@ -225,14 +222,14 @@ Learn how to mint cTokens to cToken accounts.
   title="Client Guide"
   icon="chevron-right"
   color="#0066ff"
-  href="/compressed-token-program/ctoken/client-guide"
+  href="/compressed-token-program/ctoken/client-guides/client-create-cATA"
   horizontal
 />
 <Card
   title="Program Guide"
   icon="chevron-right"
   color="#0066ff"
-  href="/compressed-token-program/ctoken/program-transfer-interface"
+  href="/compressed-token-program/ctoken/program-guides/program-mint-to-cToken"
   horizontal
 />
 </CardGroup>

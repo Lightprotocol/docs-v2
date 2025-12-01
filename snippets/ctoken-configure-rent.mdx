@@ -1,4 +1,6 @@
-Use `CompressibleParamsInfos` to pass the default rent config and accounts:
+Define `CompressibleParamsInfos` with the standard rent config and accounts:
+- Rent for 24 hours (~11,000 lamports)
+- Top-up amount 766 lamports (3h rent)
 
 ```rust
 use light_compressed_token_sdk::ctoken::CompressibleParamsInfos;
@@ -10,25 +12,8 @@ let compressible_params = CompressibleParamsInfos::new(
 );
 ```
 
-#### Default Rent Config
-
-You don't need to pass the rent config in this struct, the SDK sets default values for the rent config of compressible accounts:
-- Initial rent payment to 24 hours / ~16 epochs (~11,000 lamports)
-- Top-up amount to 766 lamports to cover rent for 3h / ~2 epochs
-<Info>
-We recommend to use default values, but you can customize the parameters based on the expected account activity.
-Learn the [core concepts of the rent config here](/compressed-token-program/rent-config).
-</Info>
-
-<Accordion title="Cost Calculator: Compressible Account Creation">
-1. Set the hours to determine the amount of prepaid rent
-2. Set the lamports per write a transaction payer will pay for top ups
-<CompressibleRentCalculator />
-</Accordion>
-
 #### Accounts
 
-The rent config requires the following accounts:
 <table>
   <colgroup>
     <col style={{width: '25%', textAlign: 'left'}} />
@@ -60,3 +45,12 @@ The rent config requires the following accounts:
     </tr>
   </tbody>
 </table>
+<Info>
+We recommend to use default values, but you can customize the parameters based on the expected account activity.
+</Info>
+
+<Accordion title="Cost Calculator: Compressible Account Creation">
+1. Set the hours to determine the amount of prepaid rent
+2. Set the lamports per write a transaction payer will pay for top ups
+<CompressibleRentCalculator />
+</Accordion>

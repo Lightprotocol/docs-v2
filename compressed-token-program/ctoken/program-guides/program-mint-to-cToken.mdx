@@ -78,10 +78,7 @@ let system_accounts = SystemAccountInfos {
 
 1. Pass the required accounts, including the destination cToken accounts.
 2. Include `mint_params` and `system_accounts` from the previous steps
-3. Use `invoke` or `invoke_signed`:
-    * When a CPI doesn't require PDA signers, the `invoke` function is used.
-    * When a CPI requires a PDA signer, the `invoke_signed` function is used.
-
+3. Use `invoke` or `invoke_signed`, when a CPI requires a PDA signer.
 <Tabs>
 <Tab title="invoke (External Signer)">
 
@@ -306,14 +303,14 @@ Learn how to use the transfer interface for cToken ↔ SPL transfers.
   title="Client Guide"
   icon="chevron-right"
   color="#0066ff"
-  href="/compressed-token-program/ctoken/client-guide"
+  href="/compressed-token-program/ctoken/client-guides/client-mint-to-ctoken"
   horizontal
 />
 <Card
   title="Program Guide"
   icon="chevron-right"
   color="#0066ff"
-  href="/compressed-token-program/ctoken/program-transfer-interface"
+  href="/compressed-token-program/ctoken/program-guides/program-transfer-interface"
   horizontal
 />
 </CardGroup>

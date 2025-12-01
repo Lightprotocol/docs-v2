@@ -36,7 +36,7 @@ Find [full code examples at the end](#full-code-example).
 <Steps>
 <Step>
 
-### Rent Config Accounts
+### Configure Rent
 
 <CTokenConfigureRent />
 
@@ -47,10 +47,7 @@ Find [full code examples at the end](#full-code-example).
 
 1. Pass the required accounts
 2. Include rent config from `compressible_params`
-3. Use `invoke` or `invoke_signed`:
-    * When a CPI doesn't require PDA signers, the `invoke` function is used. 
-    * When a CPI requires a PDA signer, the `invoke_signed` function is used. It takes the signer seeds used for deriving signer PDAs.
-
+3. Use `invoke` or `invoke_signed`, when a CPI requires a PDA signer.
 <Tabs>
 <Tab title="invoke (External signer)">
 
@@ -216,14 +213,14 @@ Learn how to mint cTokens to cToken accounts.
   title="Client Guide"
   icon="chevron-right"
   color="#0066ff"
-  href="/compressed-token-program/ctoken/client-guide"
+  href="/compressed-token-program/ctoken/client-guides/client-create-ctoken"
   horizontal
 />
 <Card
   title="Program Guide"
   icon="chevron-right"
   color="#0066ff"
-  href="/compressed-token-program/ctoken/program-mint-to-cToken"
+  href="/compressed-token-program/ctoken/program-guides/program-mint-to-cToken"
   horizontal
 />
 </CardGroup>

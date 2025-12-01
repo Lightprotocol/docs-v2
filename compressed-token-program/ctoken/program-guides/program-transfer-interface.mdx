@@ -78,30 +78,7 @@ The token pool is derived from the `mint` pubkey and pool seed.
 
 <Step>
 
-### CPI the cToken Program
-
-Use `invoke` or `invoke_signed`:
-    * When a CPI doesn't require PDA signers, the `invoke` function is used.
-    * When a CPI requires a PDA signer, the `invoke_signed` function is used.
-
-<Tabs>
-<Tab title="invoke (External Signer)">
-
-```rust
-transfer.invoke()?;
-```
-
-</Tab>
-<Tab title="invoke_signed (PDA Authority)">
-
-```rust
-let authority_seeds: &[&[u8]] = &[TRANSFER_INTERFACE_AUTHORITY_SEED, &[authority_bump]];
-transfer.invoke_signed(&[authority_seeds])?;
-```
-
-</Tab>
-</Tabs>
-
+### <Tooltip tip="Use invoke() when a CPI doesn't require PDA signers. Use invoke_signed() when a CPI requires a PDA signer.">CPI the cToken Program</Tooltip>
 
 </Step>
 </Steps>
@@ -243,19 +220,10 @@ pub fn process_transfer_interface_invoke_signed(
 
 Learn how to close cToken accounts.
 
-<CardGroup>
 <Card
-  title="Client Guide"
+  title="Program Guide: Close cToken Accounts"
   icon="chevron-right"
   color="#0066ff"
-  href="/compressed-token-program/ctoken/client-guide"
+  href="/compressed-token-program/ctoken/program-guides/program-close-ctoken"
   horizontal
 />
-<Card
-  title="Program Guide"
-  icon="chevron-right"
-  color="#0066ff"
-  href="/compressed-token-program/ctoken/program-close-ctoken"
-  horizontal
-/>
-</CardGroup>
