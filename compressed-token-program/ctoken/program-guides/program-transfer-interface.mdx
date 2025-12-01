@@ -1,20 +1,21 @@
 ---
-title: Unified Transfer Interface
-description: Program guide for the unified transfer interface that auto-detects account types and routes transfers.
+title: Transfer Interface for cToken <> SPL Token
+description: Program guide for the unified transfer interface that auto-detects account types and routes cToken <> SPL token transfers.
 ---
+
+import TransferInterfaceAccountsListCtoken1 from '/snippets/transfer-interface-accounts-list-ctoken-1.mdx';
+import TransferInterfaceAccountsListSpl2 from '/snippets/transfer-interface-accounts-list-spl-2.mdx';
 
 ## Key Points
 
-The `TransferInterface` is a unified API that automatically detects account types and routes to the appropriate transfer:
+The `TransferInterface` is a unified API that automatically detects account types and routes to the appropriate transfer via CPI to the cToken Program:
 
-1. **cToken → cToken**: Direct compressed token transfer
-2. **cToken → SPL**: Withdraw to SPL token account
-3. **SPL → cToken**: Deposit from SPL token account
+1. **cToken → cToken**: Transfer of cTokens between cToken accounts.
+2. **cToken → SPL**: Withdraw cTokens to an SPL token account
+3. **SPL → cToken**: Deposit SPL tokens to a cToken account
 
 <Info>
-This is an advanced interface. For explicit transfers, see the individual guides:
-- [cToken Transfer](/compressed-token-program/ctoken/program-guides/program-transfer-ctoken)
-- [SPL ↔ cToken Transfer](/compressed-token-program/ctoken/program-guides/program-transfer-spl-ctoken)
+Learn the [core concepts to the cToken Program here](/compressed-token-program/c-token-program).
 </Info>
 
 <Note>
@@ -26,12 +27,12 @@ Find [full code examples at the end](#full-code-example).
 <Steps>
 <Step>
 
-### Build Transfer Interface
+### cToken Transfer Interface
 
-Create the transfer interface and optionally configure SPL bridge support.
-
-<Tabs>
-<Tab title="invoke (External Signer)">
+ 
+* Define the number of cTokens / SPL tokens to transfer,
+* from which SPL or cToken account to transfer, and
+* to which SPL or cToken account to transfer.
 
 ```rust
 use light_compressed_token_sdk::ctoken::TransferInterface;
@@ -44,15 +45,50 @@ let mut transfer = TransferInterface::new(
     payer.clone(),
     compressed_token_program_authority.clone(),
 );
+```
+<Accordion title="cToken Interface Accounts">
+<TransferInterfaceAccountsListCtoken1 />
+</Accordion>
 
-// Add SPL bridge config if needed for SPL<->cToken transfers
+</Step>
+
+<Step>
+
+### SPL Interface
+
+```rust
 transfer = transfer.with_spl_interface(
     Some(mint.clone()),
     Some(spl_token_program.clone()),
     Some(token_pool_pda.clone()),
     data.token_pool_pda_bump,
 )?;
+```
 
+The SPL interface requires for SPL ↔ cToken transfers the `token_pool_pda` as escrow account:
+    * **SPL → cToken**: SPL tokens are transferred locked in this pool, cTokens are minted to cToken accounts
+    * **cToken → SPL**: cTokens are burned, SPL tokens withdrawn to SPL token accounts
+
+The token pool is derived from the `mint` pubkey and pool seed.
+
+<Accordion title="SPL Interface Accounts">
+<TransferInterfaceAccountsListSpl2 />
+</Accordion>
+
+</Step>
+
+<Step>
+
+### CPI to the cToken Program
+
+Use `invoke` or `invoke_signed`:
+    * When a CPI doesn't require PDA signers, the `invoke` function is used.
+    * When a CPI requires a PDA signer, the `invoke_signed` function is used.
+
+<Tabs>
+<Tab title="invoke (External Signer)">
+
+```rust
 transfer.invoke()?;
 ```
 
@@ -60,31 +96,13 @@ transfer.invoke()?;
 <Tab title="invoke_signed (PDA Authority)">
 
 ```rust
-use light_compressed_token_sdk::ctoken::TransferInterface;
-
-let mut transfer = TransferInterface::new(
-    data.amount,
-    source_account.clone(),
-    destination_account.clone(),
-    authority.clone(),
-    payer.clone(),
-    compressed_token_program_authority.clone(),
-);
-
-// Add SPL bridge config if needed
-transfer = transfer.with_spl_interface(
-    Some(mint.clone()),
-    Some(spl_token_program.clone()),
-    Some(token_pool_pda.clone()),
-    data.token_pool_pda_bump,
-)?;
-
 let authority_seeds: &[&[u8]] = &[TRANSFER_INTERFACE_AUTHORITY_SEED, &[authority_bump]];
 transfer.invoke_signed(&[authority_seeds])?;
 ```
 
 </Tab>
 </Tabs>
+
 
 </Step>
 </Steps>
@@ -109,25 +127,25 @@ pub const TRANSFER_INTERFACE_AUTHORITY_SEED: &[u8] = b"transfer_interface_author
 #[derive(BorshSerialize, BorshDeserialize, Debug)]
 pub struct TransferInterfaceData {
     pub amount: u64,
-    /// Required for SPL<->CToken transfers, None for CToken->CToken
+    /// Required for SPL<->cToken transfers, None for cToken->cToken
     pub token_pool_pda_bump: Option<u8>,
 }
 
 /// Handler for TransferInterface (invoke)
 ///
 /// This unified interface automatically detects account types and routes to:
-/// - CToken -> CToken transfer
-/// - CToken -> SPL transfer
-/// - SPL -> CToken transfer
+/// - cToken -> cToken transfer
+/// - cToken -> SPL transfer
+/// - SPL -> cToken transfer
 ///
 /// Account order:
 /// - accounts[0]: compressed_token_program (for CPI)
-/// - accounts[1]: source_account (SPL or CToken)
-/// - accounts[2]: destination_account (SPL or CToken)
+/// - accounts[1]: source_account (SPL or cToken)
+/// - accounts[2]: destination_account (SPL or cToken)
 /// - accounts[3]: authority (signer)
 /// - accounts[4]: payer (signer)
 /// - accounts[5]: compressed_token_program_authority
-///   For SPL bridge (optional, required for SPL<->CToken):
+///   For SPL interface (required for SPL<->cToken):
 /// - accounts[6]: mint
 /// - accounts[7]: token_pool_pda
 /// - accounts[8]: spl_token_program
@@ -148,7 +166,7 @@ pub fn process_transfer_interface_invoke(
         accounts[5].clone(), // compressed_token_program_authority
     );
 
-    // Add SPL bridge config if provided
+    // Add SPL interface config if provided
     if accounts.len() >= 9 && data.token_pool_pda_bump.is_some() {
         transfer = transfer.with_spl_interface(
             Some(accounts[6].clone()), // mint
@@ -169,12 +187,12 @@ pub fn process_transfer_interface_invoke(
 ///
 /// Account order:
 /// - accounts[0]: compressed_token_program (for CPI)
-/// - accounts[1]: source_account (SPL or CToken)
-/// - accounts[2]: destination_account (SPL or CToken)
+/// - accounts[1]: source_account (SPL or cToken)
+/// - accounts[2]: destination_account (SPL or cToken)
 /// - accounts[3]: authority (PDA, not signer - program signs)
 /// - accounts[4]: payer (signer)
 /// - accounts[5]: compressed_token_program_authority
-///   For SPL bridge (optional, required for SPL<->CToken):
+///   For SPL interface (required for SPL<->cToken):
 /// - accounts[6]: mint
 /// - accounts[7]: token_pool_pda
 /// - accounts[8]: spl_token_program
@@ -204,7 +222,7 @@ pub fn process_transfer_interface_invoke_signed(
         accounts[5].clone(), // compressed_token_program_authority
     );
 
-    // Add SPL bridge config if provided
+    // Add SPL interface config if provided
     if accounts.len() >= 9 && data.token_pool_pda_bump.is_some() {
         transfer = transfer.with_spl_interface(
             Some(accounts[6].clone()), // mint

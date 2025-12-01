@@ -96,7 +96,7 @@
                       "compressed-token-program/ctoken/program-guides/program-create-ctoken",
                       "compressed-token-program/ctoken/program-guides/program-create-cATA",
                       "compressed-token-program/ctoken/program-guides/program-mint-to-cToken",
-                      "compressed-token-program/ctoken/program-guides/program-transfer-ctoken"
+                      "compressed-token-program/ctoken/program-guides/program-transfer-interface"
                     ]
                   }
                 ]
@@ -514,6 +514,7 @@
                   "compressed-token-program/ctoken/program-guides/ctoken-transfer",
                   "compressed-token-program/ctoken/program-guides/SPL-to-ctoken-transfer",
                   "compressed-token-program/ctoken/program-guides/ctoken-to-spl-decompress",
+                  "compressed-token-program/ctoken/program-guides/program-transfer-interface",
                   "compressed-token-program/ctoken/program-guides/compress-and-close",
                   "compressed-token-program/ctoken/program-guides/close-ctoken"
                 ]
