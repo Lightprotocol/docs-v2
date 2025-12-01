@@ -109,15 +109,15 @@
                   {
                     "group": "Basic Guides",
                     "pages": [
-                      "compressed-tokens/basic-guides/how-to-create-compressed-token-accounts",
-                      "compressed-tokens/basic-guides/how-to-mint-compressed-tokens",
-                      "compressed-tokens/basic-guides/how-to-transfer-compressed-token",
-                      "compressed-tokens/basic-guides/how-to-compress-and-decompress-spl-tokens",
-                      "compressed-tokens/basic-guides/how-to-compress-complete-spl-token-accounts",
-                      "compressed-tokens/basic-guides/how-to-create-and-register-a-mint-account-for-compression",
-                      "compressed-tokens/basic-guides/how-to-create-compressed-token-pools-for-mint-accounts",
-                      "compressed-tokens/basic-guides/how-to-merge-compressed-token-accounts",
-                      "compressed-tokens/basic-guides/how-to-approve-and-revoke-delegate-authority"
+                      "compressed-tokens/guides/how-to-create-compressed-token-accounts",
+                      "compressed-tokens/guides/how-to-mint-compressed-tokens",
+                      "compressed-tokens/guides/how-to-transfer-compressed-token",
+                      "compressed-tokens/guides/how-to-compress-and-decompress-spl-tokens",
+                      "compressed-tokens/guides/how-to-compress-complete-spl-token-accounts",
+                      "compressed-tokens/guides/how-to-create-and-register-a-mint-account-for-compression",
+                      "compressed-tokens/guides/how-to-create-compressed-token-pools-for-mint-accounts",
+                      "compressed-tokens/guides/how-to-merge-compressed-token-accounts",
+                      "compressed-tokens/guides/how-to-approve-and-revoke-delegate-authority"
                     ]
                   },
                   {
@@ -127,19 +127,19 @@
                         "group": "Integration",
                         "expanded": true,
                         "pages": [
-                          "compressed-token-program/compressed-tokens/advanced-guides/how-to-combine-operations-in-one-transaction",
-                          "compressed-token-program/compressed-tokens/advanced-guides/add-wallet-support-for-compressed-tokens",
-                          "compressed-token-program/compressed-tokens/advanced-guides/use-token-2022-with-compression"
+                          "compressed-tokens/advanced-guides/how-to-combine-operations-in-one-transaction",
+                          "compressed-tokens/advanced-guides/add-wallet-support-for-compressed-tokens",
+                          "compressed-tokens/advanced-guides/use-token-2022-with-compression"
                         ]
                       },
                       {
                         "group": "Examples",
                         "expanded": true,
                         "pages": [
-                          "compressed-token-program/compressed-tokens/advanced-guides/create-an-airdrop",
-                          "compressed-token-program/compressed-tokens/advanced-guides/create-an-airdrop-with-claim",
-                          "compressed-token-program/compressed-tokens/advanced-guides/example-web-client",
-                          "compressed-token-program/compressed-tokens/advanced-guides/example-node-js"
+                          "compressed-tokens/advanced-guides/create-an-airdrop",
+                          "compressed-tokens/advanced-guides/create-an-airdrop-with-claim",
+                          "compressed-tokens/advanced-guides/example-web-client",
+                          "compressed-tokens/advanced-guides/example-node-js"
                         ]
                       }
                     ]
@@ -529,15 +529,15 @@
               {
                 "group": "Basic Guides",
                 "pages": [
-                  "compressed-token-program/compressed-tokens/basic-guides/how-to-create-compressed-token-accounts",
-                  "compressed-token-program/compressed-tokens/basic-guides/how-to-mint-compressed-tokens",
-                  "compressed-token-program/compressed-tokens/basic-guides/how-to-transfer-compressed-token",
-                  "compressed-token-program/compressed-tokens/basic-guides/how-to-compress-and-decompress-spl-tokens",
-                  "compressed-token-program/compressed-tokens/basic-guides/how-to-compress-complete-spl-token-accounts",
-                  "compressed-token-program/compressed-tokens/basic-guides/how-to-create-and-register-a-mint-account-for-compression",
-                  "compressed-token-program/compressed-tokens/basic-guides/how-to-create-compressed-token-pools-for-mint-accounts",
-                  "compressed-token-program/compressed-tokens/basic-guides/how-to-merge-compressed-token-accounts",
-                  "compressed-token-program/compressed-tokens/basic-guides/how-to-approve-and-revoke-delegate-authority"
+                  "compressed-tokens/guides/how-to-create-compressed-token-accounts",
+                  "compressed-tokens/guides/how-to-mint-compressed-tokens",
+                  "compressed-tokens/guides/how-to-transfer-compressed-token",
+                  "compressed-tokens/guides/how-to-compress-and-decompress-spl-tokens",
+                  "compressed-tokens/guides/how-to-compress-complete-spl-token-accounts",
+                  "compressed-tokens/guides/how-to-create-and-register-a-mint-account-for-compression",
+                  "compressed-tokens/guides/how-to-create-compressed-token-pools-for-mint-accounts",
+                  "compressed-tokens/guides/how-to-merge-compressed-token-accounts",
+                  "compressed-tokens/guides/how-to-approve-and-revoke-delegate-authority"
                 ]
               },
               {
@@ -547,19 +547,19 @@
                     "group": "Integration",
                     "expanded": true,
                     "pages": [
-                      "compressed-token-program/compressed-tokens/advanced-guides/how-to-combine-operations-in-one-transaction",
-                      "compressed-token-program/compressed-tokens/advanced-guides/add-wallet-support-for-compressed-tokens",
-                      "compressed-token-program/compressed-tokens/advanced-guides/use-token-2022-with-compression"
+                      "compressed-tokens/advanced-guides/how-to-combine-operations-in-one-transaction",
+                      "compressed-tokens/advanced-guides/add-wallet-support-for-compressed-tokens",
+                      "compressed-tokens/advanced-guides/use-token-2022-with-compression"
                     ]
                   },
                   {
                     "group": "Examples",
                     "expanded": true,
                     "pages": [
-                      "compressed-token-program/compressed-tokens/advanced-guides/create-an-airdrop",
-                      "compressed-token-program/compressed-tokens/advanced-guides/create-an-airdrop-with-claim",
-                      "compressed-token-program/compressed-tokens/advanced-guides/example-web-client",
-                      "compressed-token-program/compressed-tokens/advanced-guides/example-node-js"
+                      "compressed-tokens/advanced-guides/create-an-airdrop",
+                      "compressed-tokens/advanced-guides/create-an-airdrop-with-claim",
+                      "compressed-tokens/advanced-guides/example-web-client",
+                      "compressed-tokens/advanced-guides/example-node-js"
                     ]
                   }
                 ]
