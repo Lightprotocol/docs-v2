@@ -9,13 +9,12 @@ import CMintToCTokenAccountsList from '/snippets/cmint-to-ctoken-accounts-list.m
 ## Key Points
 
 
-cTokens are minted via CPI to the Compressed Token Program and do not require rent-exemption.
-
-1. Mint cTokens from an existing cMint to existing cToken accounts.
-2. The mint authority must sign the transaction (or be a PDA with `invoke_signed`).
+cTokens are minted via CPI to the Compressed Token Program and increase the supply of a cMint.
+1. The destination cToken accounts must exist to receive the minted cTokens.
+2. Only the mint authority can mint new cTokens.
 
 <Tip>
-* `MintToCToken` mints from a cMint to cToken Solana accounts. Use when you need SPL-compatible accounts for interoperability with DeFi, etc.
+* `MintToCToken` mints from a cMint to cToken Solana accounts. Use when you need Solana accounts for interoperability with DeFi, etc.
 * `MintToCompressed` mints from a cMint to compressed token accounts. Use for token distribution (Airdrops, payments, ...).
 </Tip>
 
