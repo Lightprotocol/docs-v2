@@ -5,7 +5,7 @@ description: Calculate rent for Solana vs Compressed Accounts.
 
 import { SolanaRentCalculator } from '/snippets/solana-rent-calculator.jsx';
 import { CompressibleRentCalculator } from '/snippets/compressible-rent-calculator.jsx';
-import { CostComparisonCalculator } from '/snippets/cost-comparison-calculator.jsx';
+import { TokenAccountCompressedVsSpl } from '/snippets/token-account-compressed-vs-spl.jsx';
 import { BreakEvenCalculator } from '/snippets/break-even-calculator.jsx';
 
 ## Solana Rent
@@ -35,7 +35,7 @@ rent_per_epoch = base_rent + (data_len * lamports_per_byte_per_epoch)
 
 ## Cost Comparison
 
-<CostComparisonCalculator />
+<TokenAccountCompressedVsSpl />
 
 ## Break-Even Analysis
 

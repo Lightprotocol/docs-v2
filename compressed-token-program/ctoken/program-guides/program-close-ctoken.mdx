@@ -3,12 +3,16 @@ title: Close cToken Accounts
 description: Program guide to close cToken accounts with step-by-step implementation and full code examples.
 ---
 
+import CloseAccountInfosAccountsList from '/snippets/close-account-infos-accounts-list.mdx';
+
 ## Key Points
 
 cToken accounts are closed via CPI to the cToken Program.
 
-1. Closing a cToken accounts transfers remaining lamports to a destination account.
-2. The account owner must sign the transaction (or be a PDA with invoke_signed).
+1. Closing a cToken account transfers remaining lamports to a destination account.
+2. cToken accounts are compressible and can be closed:
+    * by the account owner at any time.
+    * by the rent authority when account becomes compressible. The account can be reinstatiated with the same state.
 3. The rent sponsor can reclaim sponsored rent.
 
 <Info>
@@ -24,9 +28,33 @@ Find [full code examples at the end](#full-code-example).
 <Steps>
 <Step>
 
-### Build Account Infos and CPI the cToken Program
+### Build Account Infos
 
+Define the cToken account to close and where remaining lamports should go.
 
+```rust
+use light_compressed_token_sdk::ctoken::CloseAccountInfos;
+
+let close_account_infos = CloseAccountInfos {
+    token_program: token_program.clone(),
+    account: account.clone(),
+    destination: destination.clone(),
+    owner: owner.clone(),
+    rent_sponsor: Some(rent_sponsor.clone()),
+};
+```
+
+<Accordion title="Account List">
+<CloseAccountInfosAccountsList />
+</Accordion>
+
+</Step>
+
+<Step>
+
+### CPI the cToken Program
+
+Use `invoke` or `invoke_signed`:
 * When a CPI doesn't require PDA signers, the `invoke` function is used.
 * When a CPI requires a PDA signer, the `invoke_signed` function is used.
 
@@ -34,33 +62,15 @@ Find [full code examples at the end](#full-code-example).
 <Tab title="invoke (External Signer)">
 
 ```rust
-use light_compressed_token_sdk::ctoken::CloseAccountInfos;
-
-CloseAccountInfos {
-    token_program: token_program.clone(),
-    account: account.clone(),
-    destination: destination.clone(),
-    owner: owner.clone(),
-    rent_sponsor: Some(rent_sponsor.clone()), // or None
-}
-.invoke()?;
+close_account_infos.invoke()?;
 ```
 
 </Tab>
 <Tab title="invoke_signed (PDA Owner)">
 
 ```rust
-use light_compressed_token_sdk::ctoken::CloseAccountInfos;
-
 let signer_seeds: &[&[u8]] = &[TOKEN_ACCOUNT_SEED, &[bump]];
-CloseAccountInfos {
-    token_program: token_program.clone(),
-    account: account.clone(),
-    destination: destination.clone(),
-    owner: owner.clone(),
-    rent_sponsor: Some(rent_sponsor.clone()), // or None
-}
-.invoke_signed(&[signer_seeds])?;
+close_account_infos.invoke_signed(&[signer_seeds])?;
 ```
 
 </Tab>
@@ -154,6 +164,8 @@ pub fn process_close_account_invoke_signed(accounts: &[AccountInfo]) -> Result<(
 ```
 
 # Next Steps
+
+Learn how to use the transfer interface for cToken ↔ SPL transfers.
 
 <Card
   title="Learn how to transfer between SPL and cTokens"

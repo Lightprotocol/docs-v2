@@ -7,6 +7,7 @@ import GuidesTable from '/snippets/compressed-tokens-guides-table.mdx';
 import AdvancedGuidesTable from '/snippets/compressed-tokens-advanced-guides-table.mdx';
 import SetupEnvironment from '/snippets/setup-environment-tabs.mdx';
 import InstallDependencies from '/snippets/install-dependencies-codegroup.mdx';
+import { TokenAccountCompressedVsSpl } from '/snippets/token-account-compressed-vs-spl.jsx';
 
 <table>
   <thead>
@@ -35,32 +36,16 @@ Compressed token accounts store token balance, owner, and other information like
 ## Recommended Usage of Compressed Tokens
 
   <Card title="">
-  #### [Token Distribution](#advanced-guides)
-    * Distribute tokens without paying up front rent per recipient.
-    * Cost reduction for airdrops, payments, rewards, etc:
-    <table>
-      <thead>
-        <tr>
-          <th style={{textAlign: 'left'}}></th>
-          <th style={{textAlign: 'left'}}>SPL Token</th>
-          <th style={{textAlign: 'left'}}>Compressed Token</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td style={{textAlign: 'left'}}>100,000 Token Accounts</td>
-          <td style={{textAlign: 'left'}}>~ 200 SOL</td>
-          <td style={{textAlign: 'left'}}><strong>~ 0.004 SOL</strong></td>
-        </tr>
-      </tbody>
-    </table>
-  </Card>
-  <Card title="">
   #### Storage of Inactive Token Accounts
   * Most (associated) token accounts are not frequently written to.
   * **Store token accounts rent-free** when inactive
-  * Use or migrate to [cTokens with compressible extension](/compressed-token-program/ctoken/ctoken) for **automatic compression/decompression** when inactive/active.
-  * The compressible extension allows users to **only pay rent, when token accounts are active**.
+  * Use or migrate to [cTokens](/compressed-token-program/ctoken/ctoken) for **sponsored rent-exemption**.
+  </Card>
+  <Card title="">
+  #### [Token Distribution](#advanced-guides)
+    * Distribute tokens without paying up front rent per recipient.
+    * Cost reduction for airdrops, payments, rewards, etc:
+    <TokenAccountCompressedVsSpl />
   </Card>
 <Note>
 Leading **wallets** like Phantom and Backpack **support compressed tokens**. The UI does not distinguish between SPL and compressed tokens.

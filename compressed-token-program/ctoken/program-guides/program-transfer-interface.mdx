@@ -1,6 +1,6 @@
 ---
 title: Transfer Interface for cToken <> SPL Tokens
-description: Program guide for the unified transfer interface that auto-detects account types and routes cToken <> SPL token transfers.
+description: Program guide for the unified transfer interface for cToken <> SPL token transfers and to migrate SPL to cTokens.
 ---
 
 import TransferInterfaceAccountsListCtoken1 from '/snippets/transfer-interface-accounts-list-ctoken-1.mdx';
@@ -8,11 +8,11 @@ import TransferInterfaceAccountsListSpl2 from '/snippets/transfer-interface-acco
 
 ## Key Points
 
-The `TransferInterface` is a unified API that automatically detects account types and routes to the appropriate transfer via CPI to the cToken Program:
+The `TransferInterface` is a unified API that detects account types and routes to the appropriate transfer via CPI to the cToken Program:
 
 1. **cToken → cToken**: Transfer of cTokens between cToken accounts.
 2. **cToken → SPL**: Transfer cTokens to an SPL token account
-3. **SPL → cToken**: Transfer SPL tokens to a cToken account
+3. **SPL → cToken**: Transfer SPL tokens to cToken accounts to migrate SPL tokens
 
 <Info>
 Learn the [core concepts to the cToken Program here](/compressed-token-program/c-token-program).
@@ -29,10 +29,9 @@ Find [full code examples at the end](#full-code-example).
 
 ### cToken Transfer Interface
 
- 
-* Define the number of cTokens / SPL tokens to transfer,
-* from which SPL or cToken account to transfer, and
-* to which SPL or cToken account to transfer.
+Define the number of cTokens / SPL tokens to transfer
+- from which SPL or cToken account, and
+- to which SPL or cToken account.
 
 ```rust
 use light_compressed_token_sdk::ctoken::TransferInterface;
@@ -242,10 +241,21 @@ pub fn process_transfer_interface_invoke_signed(
 
 # Next Steps
 
+Learn how to close cToken accounts.
+
+<CardGroup>
 <Card
-  title="Explore the cToken Program concepts"
+  title="Client Guide"
   icon="chevron-right"
   color="#0066ff"
-  href="/compressed-token-program/c-token-program"
+  href="/compressed-token-program/ctoken/client-guide"
   horizontal
 />
+<Card
+  title="Program Guide"
+  icon="chevron-right"
+  color="#0066ff"
+  href="/compressed-token-program/ctoken/program-close-ctoken"
+  horizontal
+/>
+</CardGroup>
