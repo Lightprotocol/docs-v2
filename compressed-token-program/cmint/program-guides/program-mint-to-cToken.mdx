@@ -1,17 +1,14 @@
 ---
 title: Mint cTokens
-description: Program guide to mint cTokens with step-by-step implementation and full code examples.
+description: Program guide to mint cTokens to a cMint via CPI to the Compressed Token Program with step-by-step implementation and full code examples.
 ---
 
 import CMintSystemAccountsList from '/snippets/cmint-system-accounts-list.mdx';
 import CMintToCTokenAccountsList from '/snippets/cmint-to-ctoken-accounts-list.mdx';
 
-## Key Points
-
-
-cTokens are minted via CPI to the Compressed Token Program and increase the supply of a cMint.
-1. The destination cToken accounts must exist to receive the minted cTokens.
-2. Only the mint authority can mint new cTokens.
+1. cTokens increase the supply of a cMint.
+2. The destination cToken accounts must exist to receive the minted cTokens.
+3. Only the mint authority can mint new cTokens.
 
 <Note>
 Find [full code examples at the end](#full-code-example).
@@ -23,6 +20,8 @@ Find [full code examples at the end](#full-code-example).
 <Step>
 
 ### Configure Mint Parameters
+Include your mint, the amount of tokens to be minted and the pubkey of the mint authority. 
+The client passes a validity proof that <Tooltip tip="cMints are compressed accounts. Compressed accounts are stored in state Merkle trees. Only the root hash is stored on chain - every transaction that accesses the cMint includes a validity proof to verify the compressed state.">proves the cMint exists</Tooltip>.
 
 ```rust
 use light_compressed_token_sdk::ctoken::MintToCTokenParams;
@@ -35,8 +34,6 @@ let mint_params = MintToCTokenParams::new(
 );
 ```
 
-Include your mint, the amount of tokens to be minted and the pubkey of the mint authority. 
-The client passes a validity proof that <Tooltip tip="cMints are compressed accounts. Compressed accounts are stored in state Merkle trees. Only the root hash is stored on chain - every transaction that accesses the cMint includes a validity proof to verify the compressed state.">proves the cMint exists</Tooltip>.
 
 </Step>
 
