@@ -1,22 +1,48 @@
 ---
-title: Transfer Interface for cToken <> SPL Tokens
-description: Program guide for the unified transfer interface for cToken <> SPL token transfers and to migrate SPL to cTokens.
+title: Transfer Interface
+description: Program guide for transfers between cToken and SPL token accounts via CPI. The interface detects account types and invokes the right programs.
+
 ---
 
 import TransferInterfaceAccountsListCtoken1 from '/snippets/transfer-interface-accounts-list-ctoken-1.mdx';
 import TransferInterfaceAccountsListSpl2 from '/snippets/transfer-interface-accounts-list-spl-2.mdx';
 
-## Key Points
+<table>
+  <tbody>
+    <tr>
+      <td style={{width: '33%'}}>**cToken → cToken Account**</td>
+      <td>
+        <ul>
+          <li>Transfers cTokens between cToken accounts</li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td>**SPL token → cToken Account**</td>
+      <td>
+        <ul>
+            <li>Transfers SPL tokens to cToken accounts</li>
+          <li>SPL tokens are locked in interface PDA</li>
+          <li>cTokens are minted to cToken account</li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td>**cToken → SPL Account**</td>
+      <td>
+        <ul>
+          <li>Releases SPL tokens from interface PDA to SPL account</li>
+          <li>Burns cTokens in source cToken account</li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
 
-The `TransferInterface` is a unified API that detects account types and routes to the appropriate transfer via CPI to the cToken Program:
-
-1. **cToken → cToken**: Transfer of cTokens between cToken accounts.
-2. **cToken → SPL**: Transfer cTokens to an SPL token account
-3. **SPL → cToken**: Transfer SPL tokens to cToken accounts to migrate SPL tokens
-
-<Info>
-Learn the [core concepts to the cToken Program here](/compressed-token-program/c-token-program).
-</Info>
+<Tip>
+* For example, **SPL → cToken** can be used for transfers from Alice's SPL token account to her own cToken account.
+* You can use this to **convert existing SPL tokens to cTokens** with **sponsored rent-exemption**. Learn more in the [core concepts to the cToken program](/compressed-token-program/ctoken/README).
+</Tip>
 
 <Note>
 Find [full code examples at the end](#full-code-example).
@@ -60,16 +86,16 @@ The SPL transfer interface is only needed for SPL ↔ cToken transfers.
 transfer = transfer.with_spl_interface(
     Some(mint.clone()),
     Some(spl_token_program.clone()),
-    Some(token_pool_pda.clone()),
-    data.token_pool_pda_bump,
+    Some(spl_interface_pda.clone()),
+    data.spl_interface_pda_bump,
 )?;
 ```
 
-SPL ↔ cToken transfers require a `token_pool_pda`:
+SPL ↔ cToken transfers require a `spl_interface_pda`:
     * **SPL → cToken**: SPL tokens are locked by the cToken Program in the PDA, cTokens are minted to cToken accounts
     * **cToken → SPL**: cTokens are burned, SPL tokens transferred to SPL token accounts
 <Info>
-The token pool is derived from the `mint` pubkey and pool seed.
+The interface PDA is derived from the `mint` pubkey and pool seed.
 </Info>
 <Accordion title="SPL Interface Accounts">
 <TransferInterfaceAccountsListSpl2 />
@@ -79,7 +105,24 @@ The token pool is derived from the `mint` pubkey and pool seed.
 
 <Step>
 
-### <Tooltip tip="Use invoke() when a CPI doesn't require PDA signers. Use invoke_signed() when a CPI requires a PDA signer.">CPI the cToken Program</Tooltip>
+### CPI the cToken Program
+
+CPI the cToken program to execute the transfer. 
+Use `invoke()`, or `invoke_signed()` when a CPI requires a PDA signer.
+
+<Tabs>
+<Tab title="invoke (External signer)">
+```rust
+transfer.invoke()?;
+```
+</Tab>
+<Tab title="invoke_signed (PDA is signer)">
+```rust
+let authority_seeds: &[&[u8]] = &[TRANSFER_INTERFACE_AUTHORITY_SEED, &[authority_bump]];
+transfer.invoke_signed(&[authority_seeds])?;
+```
+</Tab>
+</Tabs>
 
 </Step>
 </Steps>

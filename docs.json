@@ -62,19 +62,20 @@
               {
                 "group": "cMint",
                 "pages": [
-                  "compressed-token-program/cmint/cmint",
+                  "compressed-token-program/cmint/README",
                   {
                     "group": "Client Guides",
                     "pages": [
                       "compressed-token-program/cmint/client-guides/cmint",
-                      "compressed-token-program/cmint/client-guides/update-metadata"
+                      "compressed-token-program/cmint/client-guides/update-metadata",
+                      "compressed-token-program/cmint/client-guides/client-mint-to-ctoken"
                     ]
                   },
                   {
                     "group": "Program Guides",
                     "pages": [
                       "compressed-token-program/cmint/program-guides/program-create-cmint",
-                      "compressed-token-program/ctoken/program-guides/program-mint-to-cToken"
+                      "compressed-token-program/cmint/program-guides/program-mint-to-cToken"
                     ]
                   }
                 ]
@@ -82,13 +83,12 @@
               {
                 "group": "cToken",
                 "pages": [
-                  "compressed-token-program/ctoken/mint-actions",
+                  "compressed-token-program/ctoken/README",
                   {
                     "group": "Client Guides",
                     "pages": [
                       "compressed-token-program/ctoken/client-guides/client-create-ctoken",
                       "compressed-token-program/ctoken/client-guides/client-create-cATA",
-                      "compressed-token-program/ctoken/client-guides/client-mint-to-ctoken",
                       "compressed-token-program/ctoken/client-guides/client-transfer-interface",
                       "compressed-token-program/ctoken/client-guides/client-close-ctoken"
                     ]
@@ -490,36 +490,45 @@
           {
             "group": "cMint",
             "pages": [
-              "compressed-token-program/cmint/cmint",
-              "compressed-token-program/cmint/update-metadata"
-            ]
-          },
-          {
-            "group": "cToken",
-            "pages": [
-              "compressed-token-program/ctoken/mint-actions",
+              "compressed-token-program/cmint/README",
               {
                 "group": "Client Guides",
                 "pages": [
-                  "compressed-token-program/ctoken/client-guides/client-create-ctoken",
-                  "compressed-token-program/ctoken/client-guides/client-create-cmint",
-                  "compressed-token-program/ctoken/client-guides/client-create-cATA",
-                  "compressed-token-program/ctoken/client-guides/client-mint-to-ctoken"
+                  "compressed-token-program/cmint/client-guides/cmint",
+                  "compressed-token-program/cmint/client-guides/client-create-cmint",
+                  "compressed-token-program/cmint/client-guides/update-metadata"
                 ]
               },
               {
                 "group": "Program Guides",
                 "pages": [
-                  "compressed-token-program/ctoken/program-guides/create-ctoken",
+                  "compressed-token-program/cmint/program-guides/program-create-cmint"
+                ]
+              }
+            ]
+          },
+          {
+            "group": "cToken",
+            "pages": [
+              "compressed-token-program/ctoken/README",
+              {
+                "group": "Client Guides",
+                "pages": [
+                  "compressed-token-program/ctoken/client-guides/client-create-ctoken",
+                  "compressed-token-program/ctoken/client-guides/client-create-cATA",
+                  "compressed-token-program/ctoken/client-guides/client-mint-to-ctoken",
+                  "compressed-token-program/ctoken/client-guides/client-transfer-interface",
+                  "compressed-token-program/ctoken/client-guides/client-close-ctoken"
+                ]
+              },
+              {
+                "group": "Program Guides",
+                "pages": [
                   "compressed-token-program/ctoken/program-guides/program-create-ctoken",
-                  "compressed-token-program/ctoken/program-guides/mint-ctokens",
-                  "compressed-token-program/ctoken/program-guides/create-ata",
-                  "compressed-token-program/ctoken/program-guides/ctoken-transfer",
-                  "compressed-token-program/ctoken/program-guides/SPL-to-ctoken-transfer",
-                  "compressed-token-program/ctoken/program-guides/ctoken-to-spl-decompress",
+                  "compressed-token-program/ctoken/program-guides/program-create-cATA",
+                  "compressed-token-program/ctoken/program-guides/program-mint-to-cToken",
                   "compressed-token-program/ctoken/program-guides/program-transfer-interface",
-                  "compressed-token-program/ctoken/program-guides/compress-and-close",
-                  "compressed-token-program/ctoken/program-guides/close-ctoken"
+                  "compressed-token-program/ctoken/program-guides/program-close-ctoken"
                 ]
               }
             ]
@@ -527,7 +536,7 @@
           {
             "group": "Compressed Token",
             "pages": [
-              "compressed-token-program/compressed-tokens/compressed-token-overview",
+              "compressed-tokens/README",
               {
                 "group": "Basic Guides",
                 "pages": [
