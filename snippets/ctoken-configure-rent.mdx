@@ -1,6 +1,4 @@
-Define `CompressibleParamsInfos` with the standard rent config and accounts:
-- Rent for 24 hours (~11,000 lamports)
-- Top-up amount to 766 lamports (3h rent)
+Define `CompressibleParamsInfos` with accounts for the default rent config:
 
 ```rust
 use light_compressed_token_sdk::ctoken::CompressibleParamsInfos;
@@ -46,7 +44,7 @@ let compressible_params = CompressibleParamsInfos::new(
   </tbody>
 </table>
 <Info>
-We recommend to use default values, but you can customize the parameters based on the expected account activity.
+We recommend to use default values, but you can customize the rent config based on the expected account activity.
 </Info>
 <Accordion title="Custom Rent Config & Interactive Cost Calculator">
 

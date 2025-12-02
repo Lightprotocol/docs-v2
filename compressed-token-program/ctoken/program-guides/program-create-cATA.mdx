@@ -9,26 +9,17 @@ import CompressibleVsSolanaRent from '/snippets/compressible-vs-solana-rent.mdx'
 import { CompressibleRentCalculator } from '/snippets/compressible-rent-calculator.jsx';
 import CTokenConfigureRent from '/snippets/ctoken-configure-rent.mdx';
 
-## Key Points
+1. Associated cToken accounts (cATA) are Solana accounts that hold balances of cTokens and SPL tokens.
+2. The address for cATAs is deterministically derived with the owner's address, *cToken program ID*, and mint address.
+3. cATAs <Tooltip tip="Compressible means the rent-exemption is sponsored by Light Protocol, 388 lamports is paid per rent-epoch instead, accounts with rent for less than one epoch are compressed, and transfers decompress the account.">accounts are compressible</Tooltip> with a default rent config:
+    1. Rent for <Tooltip tip="1 rent-epoch ≈ 1.5h ≈ 13,500 slots at 400ms per slot">24h (16 epochs)</Tooltip> is 11,000 lamports and paid at account creation.
+    2. Top-ups to 766 lamports for 3h of rent (2 epochs), paid by the transaction payer when the account’s rent is below two epochs,
+    3. The account creation and transfers to decompress cost additional <Tooltip tip="Covers transaction cost to compress accounts (10,000) and protocol incentive (1,000). Transaction cost might vary.">11,000 lamports for compression & protocol incentive</Tooltip>.
 
-Associated cToken accounts (cATA) are Solana accounts and created via CPI to the cToken Program.
+| Creation Cost Comparison  | cToken Account | SPL Token Account |
+|--|----------------|-------------------|
+|  | 22,208 lamports | 2,039,280 lamports |
 
-1. The address for cATAs is deterministically derived with the owner's address, *cToken program ID*, and mint address.
-2. cATAs accounts are compressible, which means
-    * the **rent-exemption** for the Solana account is **sponsored** by Light Protocol,
-    * you pay <Tooltip tip="1 rent-epoch ≈ 1.5h ≈ 13,500 slots at 400ms per slot"> **rent per rent-epoch**</Tooltip> **instead** of the rent-exemption upfront,
-    * accounts with <Tooltip tip="Rent for 260-byte cToken account per epoch: 360 lamports.">rent for less than 1 epoch</Tooltip> are compressed (360 lamports), and
-    * compressed cToken accounts are decompressed with the same state when written to.
-    
-3. **Rent for 24h** (16 epochs) is **11,000 lamports** and paid at account creation.
-4. Transactions to cToken accounts top-up rent, when the account's rent is below two epochs (766 lamports).
-    * The top-up is configured to 766 lamports by default (rent for ~3h / 2 epochs).
-    * Write transactions to compressed cToken accounts decompress the account.
-5. The account creation and writes to decompress cost additional <Tooltip tip="Covers transaction cost to compress accounts (10,000) and protocol incentive (1,000). Transaction cost might vary.">11,000 lamports for compression & protocol incentive</Tooltip>.
-
-<Info>
-Learn the [core concepts to the cToken Program here](/compressed-token-program/c-token-program).
-</Info>
 
 <Note>
 Find [full code examples at the end](#full-code-example).
@@ -39,7 +30,7 @@ Find [full code examples at the end](#full-code-example).
 <Steps>
 <Step>
 
-### Configure Rent
+### Define Rent Config
 
 <CTokenConfigureRent />
 
