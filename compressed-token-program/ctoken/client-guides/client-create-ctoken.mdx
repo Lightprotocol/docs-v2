@@ -1,32 +1,41 @@
 ---
 title: Create cToken Accounts
-description: Client guide to create cToken accounts with step-by-step implementation and full code examples.
+description: "Guide to create cToken accounts with CreateCTokenAccount builder."
 ---
+import CTokenAccountProperties from '/snippets/ctoken-account-properties.mdx';
 
-Create a cToken account with a new keypair (non-ATA). 
+cToken accounts are Solana accounts.
+
+<CTokenAccountProperties />
 
 <Tabs>
 <Tab title="Rust">
 
-```rust create-ctoken.rs
-
+```rust
+let instruction = CreateCTokenAccount::new(
+    payer.pubkey(),
+    account.pubkey(),
+    mint,
+    owner,
+    CompressibleParams::default(),
+).instruction()?;
 ```
 
 </Tab>
 <Tab title="TypeScript">
 
-```typescript create-ctoken.ts
+```typescript create-ctoken-account.ts
 // TODO: TypeScript SDK coming soon
 ```
 
 </Tab>
 </Tabs>
 
-<Info>
-cToken accounts are compressible with rent-exemption sponsorship. The protocol funds the account's rent exemption at creation, and the account compresses automatically when inactive for ~3 hours (27,000 slots).
-</Info>
-
 # Full Code Example
+
+Run the full code example by
+1. clone xy
+2. Run `cargo test`
 
 <Steps>
 <Step>
@@ -34,7 +43,21 @@ cToken accounts are compressible with rent-exemption sponsorship. The protocol f
 
 You need a compressed mint (cMint) before creating cToken accounts.
 
-<Accordion title="Create cMint First">
+<Accordion title="Prerequisites & Setup">
+
+**Dependencies**
+
+```toml Cargo.toml
+[dependencies]
+light-compressed-token-sdk = "0.1"
+light-client = "0.1"
+light-ctoken-types = "0.1"
+solana-sdk = "2.2"
+borsh = "0.10"
+tokio = { version = "1.36", features = ["full"] }
+```
+
+**Create cMint First**
 
 See [Create a Compressed Mint](/compressed-token-program/ctoken/client-guides/client-create-cmint) for the full guide.
 
@@ -47,79 +70,59 @@ See [Create a Compressed Mint](/compressed-token-program/ctoken/client-guides/cl
 <Tabs>
 <Tab title="Rust">
 
-```rust create_ctoken.rs expandable
-use borsh::{BorshDeserialize, BorshSerialize};
+```rust create_ctoken_account.rs expandable
+use borsh::BorshDeserialize;
 use light_client::rpc::Rpc;
-use light_compressed_token_sdk::ctoken::{config_pda, rent_sponsor_pda, CTOKEN_PROGRAM_ID};
-use solana_sdk::{
-    instruction::{AccountMeta, Instruction},
-    pubkey::Pubkey,
-    signature::Keypair,
-    signer::Signer,
-};
-
-#[derive(BorshSerialize, BorshDeserialize)]
-pub struct CreateTokenAccountData {
-    pub owner: Pubkey,
-    pub pre_pay_num_epochs: u64,
-    pub lamports_per_write: u64,
-}
+use light_compressed_token_sdk::ctoken::{CreateCTokenAccount, CompressibleParams};
+use light_ctoken_types::state::CToken;
+use solana_sdk::{signature::Keypair, signer::Signer, pubkey::Pubkey};
 
 async fn create_ctoken_account(
     rpc: &mut impl Rpc,
     payer: &Keypair,
-    mint_pda: Pubkey,
+    mint: Pubkey,
     owner: Pubkey,
-    wrapper_program_id: Pubkey,
 ) -> Pubkey {
-    // Step 1: Generate new keypair for cToken account
-    let ctoken_account = Keypair::new();
+    // Step 1: Generate new keypair for the cToken account
+    let account = Keypair::new();
 
-    // Step 2: Build CreateTokenAccountData
-    let create_token_account_data = CreateTokenAccountData {
+    // Step 2: Build instruction using SDK builder
+    let instruction = CreateCTokenAccount::new(
+        payer.pubkey(),
+        account.pubkey(),
+        mint,
         owner,
-        pre_pay_num_epochs: 2,
-        lamports_per_write: 1,
-    };
-    let instruction_data = [vec![2u8], create_token_account_data.try_to_vec().unwrap()].concat();
+        CompressibleParams::default(),
+    )
+    .instruction()
+    .unwrap();
 
-    // Step 3: Get PDAs
-    let config = config_pda();
-    let rent_sponsor = rent_sponsor_pda();
+    // Step 3: Send transaction
+    rpc.create_and_send_transaction(
+        &[instruction],
+        &payer.pubkey(),
+        &[payer, &account],
+    )
+    .await
+    .unwrap();
 
-    // Step 4: Build instruction
-    let instruction = Instruction {
-        program_id: wrapper_program_id,
-        accounts: vec![
-            AccountMeta::new(payer.pubkey(), true),
-            AccountMeta::new(ctoken_account.pubkey(), true),
-            AccountMeta::new_readonly(mint_pda, false),
-            AccountMeta::new_readonly(config, false),
-            AccountMeta::new_readonly(Pubkey::default(), false), // system_program
-            AccountMeta::new(rent_sponsor, false),
-            AccountMeta::new_readonly(CTOKEN_PROGRAM_ID, false),
-        ],
-        data: instruction_data,
-    };
+    // Step 4: Verify account creation
+    let account_data = rpc.get_account(account.pubkey()).await.unwrap().unwrap();
+    let ctoken_state = CToken::deserialize(&mut &account_data.data[..]).unwrap();
 
-    // Step 5: Send transaction (ctoken_account must sign)
-    rpc.create_and_send_transaction(&[instruction], &payer.pubkey(), &[payer, &ctoken_account])
-        .await
-        .unwrap();
+    assert_eq!(ctoken_state.mint, mint);
+    assert_eq!(ctoken_state.owner, owner);
+    assert_eq!(ctoken_state.amount, 0);
 
-    println!("cToken account created!");
-    println!("Account: {}", ctoken_account.pubkey());
-    println!("Owner: {}", owner);
-    println!("Mint: {}", mint_pda);
-
-    ctoken_account.pubkey()
+    println!("cToken account created: {}", account.pubkey());
+    account.pubkey()
 }
 ```
 
 </Tab>
 <Tab title="TypeScript">
 
-```typescript create_ctoken.ts expandable
+```typescript create_ctoken_account.ts expandable
 // TODO: TypeScript SDK coming soon
 ```
 
@@ -132,21 +135,12 @@ async fn create_ctoken_account(
 
 <CardGroup>
 <Card
-  title="Program Guide"
-  icon="chevron-right"
-  color="#0066ff"
-  href="/compressed-token-program/ctoken/program-guides/program-create-ctoken"
-  horizontal
->
-  Create cToken Accounts
-</Card>
-<Card
-  title="Client Guide"
+  title="Mint to cToken"
   icon="chevron-right"
   color="#0066ff"
   href="/compressed-token-program/ctoken/client-guides/client-mint-to-ctoken"
   horizontal
 >
-  Mint cTokens
+  Mint tokens to your cToken account
 </Card>
 </CardGroup>

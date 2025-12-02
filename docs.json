@@ -73,7 +73,8 @@
                   {
                     "group": "Program Guides",
                     "pages": [
-                      "compressed-token-program/cmint/program-guides/program-create-cmint"
+                      "compressed-token-program/cmint/program-guides/program-create-cmint",
+                      "compressed-token-program/ctoken/program-guides/program-mint-to-cToken"
                     ]
                   }
                 ]
@@ -97,7 +98,6 @@
                     "pages": [
                       "compressed-token-program/ctoken/program-guides/program-create-ctoken",
                       "compressed-token-program/ctoken/program-guides/program-create-cATA",
-                      "compressed-token-program/ctoken/program-guides/program-mint-to-cToken",
                       "compressed-token-program/ctoken/program-guides/program-transfer-interface",
                       "compressed-token-program/ctoken/program-guides/program-close-ctoken"
                     ]
