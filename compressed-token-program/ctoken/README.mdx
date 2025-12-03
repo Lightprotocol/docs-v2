@@ -8,8 +8,8 @@ import CompressibleRentExplained from '/snippets/compressible-rent-explained.mdx
 import CompressibleDefaultRentConfig from '/snippets/compressible-default-rent-config.mdx';
 import CTokenProgramGuidesTable from '/snippets/overview-tables/ctoken-program-guides-table.mdx';
 
-1. cToken & associated cToken accounts (cATAs) are Solana accounts that hold balances of tokens of cMints, SPL mints, or Token 2022 mints.
-2. cToken accounts and cATAs are compressible with a default rent config that reduces creation cost.
+1. cToken & associated cToken accounts (cATAs) are **Solana accounts** that hold **balances of tokens** of **cMints, SPL mints, or Token 2022 mints**.
+2. cToken accounts and cATAs are **compressible with a default rent config** that reduces creation cost.
 
 |  | cToken account | SPL token account |
 |-----------|--------|-----|
@@ -39,7 +39,7 @@ The layout of cToken accounts mirrors the SPL token account layout.
         pub is_native: Option<u64>,
         pub delegated_amount: u64, // instruction not implemented yet
         pub close_authority: Option<Pubkey>,
-        pub extensions: Option<Vec<ExtensionStruct>>, // Optional extensions e.g. compressible
+        pub extensions: Option<Vec<ExtensionStruct>>, // Optional Token 2022 extensions
     }
     ```
   </Tab>
@@ -51,25 +51,17 @@ Find the [source code of cToken here](https://github.com/Lightprotocol/light-pro
 
 ## Compressible Rent
 
+The compressible extension implements a custom rent config for cTokens and cATAs:
+
 <CompressibleRentExplained />
 
-<Accordion title="Custom Rent Config & Interactive Cost Calculator">
 
+<CompressibleDefaultRentConfig />
+We recommend to use default values, but you can customize the rent config based on the expected account activity.
+<Accordion title="Custom Rent Config & Interactive Cost Calculator">
 
 1. Set the hours to determine the amount of prepaid rent
 2. Set the lamports per write a transaction payer will pay for top ups
-
-```rust
-CompressibleParamsInfos{
-      compressible_config,
-      rent_sponsor,
-      system_program,
-      pre_pay_num_epochs: 35,
-      lamports_per_write: Some(788),
-      compress_to_account_pubkey: None,
-      token_account_version: TokenDataVersion::ShaFlat,
-  }
-```
 
 <CompressibleRentCalculator />
 </Accordion>
