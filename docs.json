@@ -147,7 +147,8 @@
                     ]
                   }
                 ]
-              }
+              },
+              "compressed-token-program/ctoken/extensions"
             ]
           },
           {
@@ -576,7 +577,8 @@
                 ]
               }
             ]
-          }
+          },
+          "compressed-token-program/ctoken/extensions"
         ]
       },
       {
