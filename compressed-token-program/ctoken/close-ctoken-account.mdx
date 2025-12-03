@@ -4,6 +4,8 @@ description: Program guide to close cToken accounts via CPI to the cToken Progra
 ---
 
 import CloseAccountInfosAccountsList from '/snippets/accounts-list/close-account-infos-accounts-list.mdx';
+import CTokenClientPrerequisites from '/snippets/ctoken-guides/ctoken-client-prerequisites.mdx';
+import ClientCustomRentConfig from '/snippets/ctoken-guides/client-custom-rent-config.mdx';
 
 1. Closing a cToken account transfers remaining lamports to a destination account and the rent sponsor can reclaim sponsored rent.
 2. cToken accounts can be closed
@@ -19,7 +21,18 @@ import CloseAccountInfosAccountsList from '/snippets/accounts-list/close-account
 </Tab>
 
 <Tab title="Rust Client">
+<Steps>
+<Step>
+### Prerequisites
 
+<CTokenClientPrerequisites />
+
+</Step>
+
+<Step>
+### Close cToken Account
+</Step>
+</Steps>
 </Tab>
 
 <Tab title="Program Guide">

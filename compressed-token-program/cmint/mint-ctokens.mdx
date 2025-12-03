@@ -1,0 +1,345 @@
+---
+title: Mint cTokens
+description: Program guide to mint cTokens to a cMint via CPI to the Compressed Token Program with step-by-step implementation and full code examples.
+---
+
+import CMintSystemAccountsList from '/snippets/accounts-list/cmint-system-accounts-list.mdx';
+import CMintToCTokenAccountsList from '/snippets/accounts-list/cmint-to-ctoken-accounts-list.mdx';
+import CTokenClientPrerequisites from '/snippets/ctoken-guides/ctoken-client-prerequisites.mdx';
+import ClientCustomRentConfig from '/snippets/ctoken-guides/client-custom-rent-config.mdx';
+
+
+1. cTokens increase the supply of a cMint.
+2. The destination cToken accounts must exist to receive the minted cTokens.
+3. Only the mint authority can mint new cTokens.
+
+<Note>
+Find [full code examples at the end](#full-code-example).
+</Note>
+
+
+# Get Started
+
+<Tabs>
+<Tab title="TypeScript Client">
+
+```typescript
+// TODO: TypeScript SDK coming soon
+```
+
+</Tab>
+
+<Tab title="Rust Client">
+<Steps>
+<Step>
+### Prerequisites
+
+<CTokenClientPrerequisites />
+
+</Step>
+
+<Step>
+### Mint cTokens
+</Step>
+</Steps>
+</Tab>
+
+<Tab title="Program Guide">
+
+<Note>
+Find [a full code example at the end](#full-code-example).
+</Note>
+
+<Steps>
+<Step>
+
+### Configure Mint Parameters
+Include your mint, the amount of tokens to be minted and the pubkey of the mint authority. 
+The client passes a validity proof that <Tooltip tip="cMints are compressed accounts. Compressed accounts are stored in state Merkle trees. Only the root hash is stored on chain - every transaction that accesses the cMint includes a validity proof to verify the compressed state.">proves the cMint exists</Tooltip>.
+
+```rust
+use light_compressed_token_sdk::ctoken::MintToCTokenParams;
+
+let mint_params = MintToCTokenParams::new(
+    data.compressed_mint_inputs,
+    data.amount,
+    data.mint_authority,
+    data.proof,
+);
+```
+
+
+</Step>
+
+<Step>
+
+### System Accounts
+
+Compressed accounts like cMints require system accounts like the Light System Program account for interactions and proof verification. 
+The client includes them in the instruction.
+
+<Accordion title="System Accounts List">
+<CMintSystemAccountsList />
+</Accordion>
+
+```rust
+use light_compressed_token_sdk::ctoken::SystemAccountInfos;
+
+let system_accounts = SystemAccountInfos {
+    light_system_program: light_system_program.clone(),
+    cpi_authority_pda: cpi_authority_pda.clone(),
+    registered_program_pda: registered_program_pda.clone(),
+    account_compression_authority: account_compression_authority.clone(),
+    account_compression_program: account_compression_program.clone(),
+    system_program: system_program.clone(),
+};
+```
+
+</Step>
+
+<Step>
+
+### Build Account Infos and CPI the cToken Program
+
+1. Pass the required accounts, including the destination cToken accounts.
+2. Include `mint_params` and `system_accounts` from the previous steps
+3. Use `invoke` or `invoke_signed`, when a CPI requires a PDA signer.
+<Tabs>
+<Tab title="invoke (External Signer)">
+
+```rust
+use light_compressed_token_sdk::ctoken::MintToCTokenInfos;
+
+MintToCTokenInfos {
+    authority: authority.clone(),
+    payer: payer.clone(),
+    state_tree: state_tree.clone(),
+    input_queue: input_queue.clone(),
+    output_queue: output_queue.clone(),
+    ctoken_accounts,
+    system_accounts,
+    cpi_context: None,
+    cpi_context_account: None,
+    mint_params,
+}
+.invoke()?;
+```
+
+</Tab>
+<Tab title="invoke_signed (PDA Authority)">
+
+```rust
+use light_compressed_token_sdk::ctoken::MintToCTokenInfos;
+
+let account_infos = MintToCTokenInfos {
+    authority: authority.clone(),
+    payer: payer.clone(),
+    state_tree: state_tree.clone(),
+    input_queue: input_queue.clone(),
+    output_queue: output_queue.clone(),
+    ctoken_accounts,
+    system_accounts,
+    cpi_context: None,
+    cpi_context_account: None,
+    mint_params,
+};
+
+let signer_seeds: &[&[u8]] = &[MINT_AUTHORITY_SEED, &[bump]];
+account_infos.invoke_signed(&[signer_seeds])?;
+```
+
+</Tab>
+</Tabs>
+
+<Accordion title="Accounts List">
+<CMintToCTokenAccountsList />
+</Accordion>
+
+</Step>
+</Steps>
+
+# Full Code Example
+
+<Info>
+Find the source code [here](https://github.com/Lightprotocol/light-protocol/blob/main/sdk-tests/sdk-ctoken-test/src/mint_to_ctoken.rs).
+</Info>
+
+```rust expandable
+use borsh::{BorshDeserialize, BorshSerialize};
+use light_compressed_token_sdk::ctoken::{
+    MintToCTokenInfos, MintToCTokenParams, SystemAccountInfos,
+};
+use light_ctoken_types::instructions::mint_action::CompressedMintWithContext;
+use light_sdk::instruction::ValidityProof;
+use solana_program::{account_info::AccountInfo, program_error::ProgramError, pubkey::Pubkey};
+
+use crate::ID;
+
+/// PDA seed for mint authority in invoke_signed variant
+pub const MINT_AUTHORITY_SEED: &[u8] = b"mint_authority";
+
+/// Instruction data for mint_to_ctoken operations
+#[derive(BorshSerialize, BorshDeserialize, Debug)]
+pub struct MintToCTokenData {
+    pub compressed_mint_inputs: CompressedMintWithContext,
+    pub amount: u64,
+    pub mint_authority: Pubkey,
+    pub proof: ValidityProof,
+}
+
+/// Handler for minting tokens to compressed token accounts (invoke)
+///
+/// Account order:
+/// - accounts[0]: compressed_token_program (for CPI)
+/// - accounts[1]: light_system_program
+/// - accounts[2]: authority (mint_authority)
+/// - accounts[3]: fee_payer
+/// - accounts[4]: cpi_authority_pda
+/// - accounts[5]: registered_program_pda
+/// - accounts[6]: account_compression_authority
+/// - accounts[7]: account_compression_program
+/// - accounts[8]: system_program
+/// - accounts[9]: output_queue
+/// - accounts[10]: state_tree
+/// - accounts[11]: input_queue
+/// - accounts[12..]: ctoken_accounts (destination accounts)
+pub fn process_mint_to_ctoken(
+    accounts: &[AccountInfo],
+    data: MintToCTokenData,
+) -> Result<(), ProgramError> {
+    if accounts.len() < 13 {
+        return Err(ProgramError::NotEnoughAccountKeys);
+    }
+
+    // Build params using the constructor
+    let params = MintToCTokenParams::new(
+        data.compressed_mint_inputs,
+        data.amount,
+        data.mint_authority,
+        data.proof,
+    );
+
+    // Build system accounts struct
+    let system_accounts = SystemAccountInfos {
+        light_system_program: accounts[1].clone(),
+        cpi_authority_pda: accounts[4].clone(),
+        registered_program_pda: accounts[5].clone(),
+        account_compression_authority: accounts[6].clone(),
+        account_compression_program: accounts[7].clone(),
+        system_program: accounts[8].clone(),
+    };
+
+    // Collect ctoken accounts from remaining accounts
+    let ctoken_accounts: Vec<AccountInfo> = accounts[12..].to_vec();
+
+    MintToCTokenInfos {
+        authority: accounts[2].clone(),
+        payer: accounts[3].clone(),
+        state_tree: accounts[10].clone(),
+        input_queue: accounts[11].clone(),
+        output_queue: accounts[9].clone(),
+        ctoken_accounts,
+        system_accounts,
+        cpi_context: None,
+        cpi_context_account: None,
+        params,
+    }
+    .invoke()?;
+
+    Ok(())
+}
+
+/// Handler for minting tokens with PDA mint authority (invoke_signed)
+///
+/// Account order:
+/// - accounts[0]: compressed_token_program (for CPI)
+/// - accounts[1]: light_system_program
+/// - accounts[2]: authority (PDA mint_authority)
+/// - accounts[3]: fee_payer
+/// - accounts[4]: cpi_authority_pda
+/// - accounts[5]: registered_program_pda
+/// - accounts[6]: account_compression_authority
+/// - accounts[7]: account_compression_program
+/// - accounts[8]: system_program
+/// - accounts[9]: output_queue
+/// - accounts[10]: state_tree
+/// - accounts[11]: input_queue
+/// - accounts[12..]: ctoken_accounts (destination accounts)
+pub fn process_mint_to_ctoken_invoke_signed(
+    accounts: &[AccountInfo],
+    data: MintToCTokenData,
+) -> Result<(), ProgramError> {
+    if accounts.len() < 13 {
+        return Err(ProgramError::NotEnoughAccountKeys);
+    }
+
+    // Derive the PDA for the mint authority
+    let (pda, bump) = Pubkey::find_program_address(&[MINT_AUTHORITY_SEED], &ID);
+
+    // Verify the authority account is the PDA
+    if &pda != accounts[2].key {
+        return Err(ProgramError::InvalidSeeds);
+    }
+
+    let params = MintToCTokenParams::new(
+        data.compressed_mint_inputs,
+        data.amount,
+        data.mint_authority,
+        data.proof,
+    );
+
+    let system_accounts = SystemAccountInfos {
+        light_system_program: accounts[1].clone(),
+        cpi_authority_pda: accounts[4].clone(),
+        registered_program_pda: accounts[5].clone(),
+        account_compression_authority: accounts[6].clone(),
+        account_compression_program: accounts[7].clone(),
+        system_program: accounts[8].clone(),
+    };
+
+    let ctoken_accounts: Vec<AccountInfo> = accounts[12..].to_vec();
+
+    let account_infos = MintToCTokenInfos {
+        authority: accounts[2].clone(),
+        payer: accounts[3].clone(),
+        state_tree: accounts[10].clone(),
+        input_queue: accounts[11].clone(),
+        output_queue: accounts[9].clone(),
+        ctoken_accounts,
+        system_accounts,
+        cpi_context: None,
+        cpi_context_account: None,
+        params,
+    };
+
+    let signer_seeds: &[&[u8]] = &[MINT_AUTHORITY_SEED, &[bump]];
+    account_infos.invoke_signed(&[signer_seeds])?;
+
+    Ok(())
+}
+```
+</Tab>
+</Tabs>
+
+# Next Steps
+
+<CardGroup>
+<Card
+  title="Client Guide"
+  icon="chevron-right"
+  color="#0066ff"
+  href="/compressed-token-program/ctoken/client-guides/client-mint-to-ctoken"
+  horizontal
+>
+  Mint cTokens
+</Card>
+<Card
+  title="Program Guide"
+  icon="chevron-right"
+  color="#0066ff"
+  href="/compressed-token-program/ctoken/program-guides/program-close-ctoken"
+  horizontal
+>
+  Transfer Interface cToken
+</Card>
+</CardGroup>

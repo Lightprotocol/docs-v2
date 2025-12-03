@@ -9,6 +9,8 @@ import { CompressibleRentCalculator } from '/snippets/jsx/compressible-rent-calc
 import CTokenConfigureRent from '/snippets/ctoken-configure-rent.mdx';
 import CAtaIntro from '/snippets/ctoken-guides/cata-intro.mdx';
 import CompressibleRentExplained from '/snippets/compressible-rent-explained.mdx';
+import CTokenClientPrerequisites from '/snippets/ctoken-guides/ctoken-client-prerequisites.mdx';
+import ClientCustomRentConfig from '/snippets/ctoken-guides/client-custom-rent-config.mdx';
 
 1. Associated cToken accounts (cATA) are Solana accounts that hold token balances of cMints, SPL mints, or Token 2022 mints.
 2. The address for cATAs is deterministically derived with the owner’s address, cToken program ID, and mint address.
@@ -33,8 +35,24 @@ import CompressibleRentExplained from '/snippets/compressible-rent-explained.mdx
 
 <Tab title="Rust Client">
 
-</Tab>
+<Steps>
+    <Step>
 
+### Prerequisites
+
+<CTokenClientPrerequisites />
+
+</Step>
+
+<Step>
+
+### Create cATA
+
+</Step>
+
+</Steps>
+
+</Tab>
 <Tab title="Program Guide">
 
 <Note>

@@ -6,6 +6,8 @@ description: Guide for transfers between cToken and SPL token accounts via CPI. 
 import TransferInterfaceAccountsListCtoken1 from '/snippets/accounts-list/transfer-interface-accounts-list-ctoken-1.mdx';
 import TransferInterfaceAccountsListSpl2 from '/snippets/accounts-list/transfer-interface-accounts-list-spl-2.mdx';
 import TransferInterfaceIntro from '/snippets/ctoken-guides/transfer-interface-intro.mdx';
+import CTokenClientPrerequisites from '/snippets/ctoken-guides/ctoken-client-prerequisites.mdx';
+import ClientCustomRentConfig from '/snippets/ctoken-guides/client-custom-rent-config.mdx';
 
 <table>
   <tbody>
@@ -56,7 +58,18 @@ import TransferInterfaceIntro from '/snippets/ctoken-guides/transfer-interface-i
 </Tab>
 
 <Tab title="Rust Client">
+<Steps>
+<Step>
+### Prerequisites
 
+<CTokenClientPrerequisites />
+
+</Step>
+
+<Step>
+### Close cToken Account
+</Step>
+</Steps>
 </Tab>
 
 <Tab title="Program Guide">
