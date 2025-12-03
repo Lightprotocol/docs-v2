@@ -10,9 +10,11 @@ import CTokenClientPrerequisites from '/snippets/ctoken-guides/ctoken-client-pre
 
 <CTokenAccountProperties />
 
-<Tabs>
-<Tab title="Rust">
 
+# Full Code Example
+
+1. Create a test cMint. You can use existing SPL or Token 2022 mints as well.
+2. Build instruction using `CreateCTokenAccount` with the default rent config.
 ```rust
 let instruction = CreateCTokenAccount::new(
     payer.pubkey(),
@@ -22,22 +24,17 @@ let instruction = CreateCTokenAccount::new(
     CompressibleParams::default(),
 ).instruction()?;
 ```
+3. Send transaction & verify cToken account creation with `get_account`. <br/>
+cToken accounts are Solana accounts and use your familiar RPC methods.
 
-</Tab>
-<Tab title="TypeScript">
+<Tabs>
+<Tab title="Rust">
 
-```typescript create-ctoken-account.ts
-// TODO: TypeScript SDK coming soon
+```bash
+git clone https://github.com/Lightprotocol/light-protocol
+cd light-protocol
+cargo test
 ```
-
-</Tab>
-</Tabs>
-
-# Full Code Example
-
-Run the full code example by
-1. clone xy
-2. Run `cargo test`
 
 <Steps>
 <Step>
@@ -50,10 +47,7 @@ Run the full code example by
 <Step>
 ### Create cToken Account
 
-<Tabs>
-<Tab title="Rust">
-
-```rust create_ctoken_account.rs expandable
+```rust
 use borsh::BorshDeserialize;
 use light_client::rpc::Rpc;
 use light_compressed_token_sdk::ctoken::{CompressibleParams, CreateCTokenAccount};
@@ -169,17 +163,23 @@ pub async fn create_compressed_mint<R: Rpc + Indexer>(
 }
 ```
 
+
+</Step>
+</Steps>
+
 </Tab>
 <Tab title="TypeScript">
 
-```typescript create_ctoken_account.ts expandable
+```typescript 
+// TODO: TypeScript SDK coming soon
+```
+
+```typescript expandable
 // TODO: TypeScript SDK coming soon
 ```
 
 </Tab>
 </Tabs>
-</Step>
-</Steps>
 
 # Next Steps
 
