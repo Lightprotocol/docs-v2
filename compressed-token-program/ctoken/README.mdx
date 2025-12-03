@@ -8,7 +8,7 @@ import CompressibleRentExplained from '/snippets/compressible-rent-explained.mdx
 import CompressibleDefaultRentConfig from '/snippets/compressible-default-rent-config.mdx';
 import CTokenProgramGuidesTable from '/snippets/overview-tables/ctoken-program-guides-table.mdx';
 
-1. cToken & associated cToken accounts (cATAs) are **Solana accounts** that hold **balances** of **cMint, SPL mint, or Token 2022 mint** tokens.
+1. cToken & associated cToken accounts (cATAs) are **Solana accounts** that<br/> **hold balances** of **cMint, SPL mint, or Token 2022 mint** tokens.
 2. cToken accounts and cATAs are **compressible** that reduces account creation cost.
 
 |  | cToken account | SPL token account |
@@ -17,20 +17,97 @@ import CTokenProgramGuidesTable from '/snippets/overview-tables/ctoken-program-g
 
 ## Compressible Rent
 
-The compressible extension implements a custom rent config for cTokens and cATAs:
+For cTokens and cATAs, the compressible extension implements a **custom rent config**:
 
 <CompressibleRentExplained />
 
-
-<CompressibleDefaultRentConfig />
-We recommend to use default values, but you can customize the rent config based on the expected account activity.
-<Accordion title="Custom Rent Config & Interactive Cost Calculator">
-
-1. Set the hours to determine the amount of prepaid rent
-2. Set the lamports per write a transaction payer will pay for top ups
-
-<CompressibleRentCalculator />
-</Accordion>
+### Example
+```markdown expandable
+┌─────────────┐
+│   Created   │
+│ (24h rent)  │
+├─────────────┤
+│   Active    │
+└──────┬──────┘
+       │ T+0
+       ▼
+┌─────────────┐
+│  Transfer   │
+│ (16h rent)  │
+│  no top-up  │
+├─────────────┤
+│   Active    │
+└──────┬──────┘
+       │ T+8h
+       ▼
+┌─────────────┐
+│  Transfer   │
+│ (10h rent)  │
+│  no top-up  │
+├─────────────┤
+│   Active    │
+└──────┬──────┘
+       │ T+14h
+       ▼
+┌─────────────┐
+│  Transfer   │
+│(4h→7h rent) │
+│   top-up    │
+├─────────────┤
+│   Active    │
+└──────┬──────┘
+       │ T+20h
+       ▼
+┌─────────────┐
+│  Transfer   │
+│ (5h rent)   │
+│  no top-up  │
+├─────────────┤
+│   Active    │
+└──────┬──────┘
+       │ T+22h
+       ▼
+┌─────────────┐
+│ No activity │
+│ (1h rent)   │
+├─────────────┤
+│Compressible │
+└──────┬──────┘
+       │ T+28h
+       ▼
+┌─────────────┐
+│ Compressed  │
+│     —       │
+├─────────────┤
+│  Inactive   │
+└──────┬──────┘
+       │ T+29h
+       ▼
+┌─────────────┐
+│  Transfer   │
+│ (3h rent)   │
+│   top-up    │
+├─────────────┤
+│ Reactivated │
+└──────┬──────┘
+       │ T+32h
+       ▼
+┌─────────────┐
+│ No activity │
+│ (1h rent)   │
+├─────────────┤
+│Compressible │
+└──────┬──────┘
+       │ T+34h
+       ▼
+┌─────────────┐
+│ Compressed  │
+│     —       │
+├─────────────┤
+│  Inactive   │
+└─────────────┘
+  T+35h
+```
 
 ## Get started
 
