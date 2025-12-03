@@ -6,43 +6,9 @@ description: Program guide for transfers between cToken and SPL token accounts v
 
 import TransferInterfaceAccountsListCtoken1 from '/snippets/accounts-list/transfer-interface-accounts-list-ctoken-1.mdx';
 import TransferInterfaceAccountsListSpl2 from '/snippets/accounts-list/transfer-interface-accounts-list-spl-2.mdx';
+import TransferInterfaceIntro from '/snippets/ctoken-guides/transfer-interface-intro.mdx';
 
-<table>
-  <tbody>
-    <tr>
-      <td style={{width: '33%'}}>**cToken → cToken Account**</td>
-      <td>
-        <ul>
-          <li>Transfers cTokens between cToken accounts</li>
-        </ul>
-      </td>
-    </tr>
-    <tr>
-      <td>**SPL token → cToken Account**</td>
-      <td>
-        <ul>
-            <li>Transfers SPL tokens to cToken accounts</li>
-          <li>SPL tokens are locked in interface PDA</li>
-          <li>cTokens are minted to cToken account</li>
-        </ul>
-      </td>
-    </tr>
-    <tr>
-      <td>**cToken → SPL Account**</td>
-      <td>
-        <ul>
-          <li>Releases SPL tokens from interface PDA to SPL account</li>
-          <li>Burns cTokens in source cToken account</li>
-        </ul>
-      </td>
-    </tr>
-  </tbody>
-</table>
-
-<Tip>
-* For example, **SPL → cToken** can be used for transfers from Alice's SPL token account to her own cToken account.
-* You can use this to **convert existing SPL tokens to cTokens** with **sponsored rent-exemption**. Learn more in the [core concepts to the cToken program](/compressed-token-program/ctoken/README).
-</Tip>
+<TransferInterfaceIntro />
 
 <Note>
 Find [full code examples at the end](#full-code-example).

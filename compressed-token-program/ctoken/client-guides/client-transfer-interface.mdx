@@ -2,6 +2,72 @@
 title: Transfer Interface
 description: Client guide for the unified transfer interface for cToken <> SPL token transfers with step-by-step implementation and full code examples.
 ---
+import TransferInterfaceIntro from '/snippets/ctoken-guides/transfer-interface-intro.mdx';
+import CTokenClientPrerequisites from '/snippets/ctoken-guides/ctoken-client-prerequisites.mdx';
+
+<TransferInterfaceIntro />
+
+<Tabs>
+<Tab title="Rust">
+
+```rust
+let transfer = TransferInterface::new(
+    amount,
+    source_account,
+    destination_account,
+    authority,
+    payer,
+    compressed_token_program_authority,
+);
+
+transfer.invoke()?;
+```
+
+</Tab>
+<Tab title="TypeScript">
+
+```typescript transfer_interface.ts
+// TODO: TypeScript SDK coming soon
+```
+
+</Tab>
+</Tabs>
+
+# Full Code Example
+
+Run the full code example:
+1. Clone the repository
+2. Run `cargo test`
+
+<Steps>
+<Step>
+### Prerequisites
+
+<CTokenClientPrerequisites />
+
+</Step>
+
+<Step>
+### Transfer Interface
+
+<Tabs>
+<Tab title="Rust">
+
+```rust transfer_interface.rs expandable
+// TODO: Full code example
+```
+
+</Tab>
+<Tab title="TypeScript">
+
+```typescript transfer_interface.ts expandable
+// TODO: TypeScript SDK coming soon
+```
+
+</Tab>
+</Tabs>
+</Step>
+</Steps>
 
 # Next Steps
 

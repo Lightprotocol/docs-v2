@@ -3,8 +3,10 @@ title: Create cToken Accounts
 description: "Guide to create cToken accounts with CreateCTokenAccount builder."
 ---
 import CTokenAccountProperties from '/snippets/ctoken-account-properties.mdx';
+import CTokenIntro from '/snippets/ctoken-guides/ctoken-intro.mdx';
+import CTokenClientPrerequisites from '/snippets/ctoken-guides/ctoken-client-prerequisites.mdx';
 
-cToken accounts are Solana accounts.
+<CTokenIntro />
 
 <CTokenAccountProperties />
 
@@ -41,27 +43,8 @@ Run the full code example by
 <Step>
 ### Prerequisites
 
-You need a compressed mint (cMint) before creating cToken accounts.
+<CTokenClientPrerequisites />
 
-<Accordion title="Prerequisites & Setup">
-
-**Dependencies**
-
-```toml Cargo.toml
-[dependencies]
-light-compressed-token-sdk = "0.1"
-light-client = "0.1"
-light-ctoken-types = "0.1"
-solana-sdk = "2.2"
-borsh = "0.10"
-tokio = { version = "1.36", features = ["full"] }
-```
-
-**Create cMint First**
-
-See [Create a Compressed Mint](/compressed-token-program/ctoken/client-guides/client-create-cmint) for the full guide.
-
-</Accordion>
 </Step>
 
 <Step>
@@ -73,18 +56,30 @@ See [Create a Compressed Mint](/compressed-token-program/ctoken/client-guides/cl
 ```rust create_ctoken_account.rs expandable
 use borsh::BorshDeserialize;
 use light_client::rpc::Rpc;
-use light_compressed_token_sdk::ctoken::{CreateCTokenAccount, CompressibleParams};
+use light_compressed_token_sdk::ctoken::{CompressibleParams, CreateCTokenAccount};
 use light_ctoken_types::state::CToken;
-use solana_sdk::{signature::Keypair, signer::Signer, pubkey::Pubkey};
+use light_program_test::{LightProgramTest, ProgramTestConfig};
+use solana_sdk::{signature::Keypair, signer::Signer};
+use light_client::indexer::{AddressWithTree, Indexer};
+use light_compressed_token_sdk::ctoken::{CreateCMint, CreateCMintParams};
+use solana_sdk::{pubkey::Pubkey};
 
-async fn create_ctoken_account(
-    rpc: &mut impl Rpc,
-    payer: &Keypair,
-    mint: Pubkey,
-    owner: Pubkey,
-) -> Pubkey {
+
+#[tokio::test(flavor = "multi_thread")]
+async fn test_create_ctoken_account() {
+    // Create simulated test environment with Light programs
+    let mut rpc = LightProgramTest::new(ProgramTestConfig::new_v2(false, None))
+        .await
+        .unwrap();
+
+    let payer = rpc.get_payer().insecure_clone();
+
+    // Create compressed mint first (prerequisite)
+    let (mint, _compression_address) = create_compressed_mint(&mut rpc, &payer, 9).await;
+
     // Step 1: Generate new keypair for the cToken account
     let account = Keypair::new();
+    let owner = payer.pubkey();
 
     // Step 2: Build instruction using SDK builder
     let instruction = CreateCTokenAccount::new(
@@ -98,24 +93,79 @@ async fn create_ctoken_account(
     .unwrap();
 
     // Step 3: Send transaction
-    rpc.create_and_send_transaction(
-        &[instruction],
-        &payer.pubkey(),
-        &[payer, &account],
-    )
-    .await
-    .unwrap();
+    rpc.create_and_send_transaction(&[instruction], &payer.pubkey(), &[&payer, &account])
+        .await
+        .unwrap();
 
     // Step 4: Verify account creation
     let account_data = rpc.get_account(account.pubkey()).await.unwrap().unwrap();
     let ctoken_state = CToken::deserialize(&mut &account_data.data[..]).unwrap();
 
-    assert_eq!(ctoken_state.mint, mint);
-    assert_eq!(ctoken_state.owner, owner);
+    assert_eq!(ctoken_state.mint, mint.to_bytes());
+    assert_eq!(ctoken_state.owner, owner.to_bytes());
     assert_eq!(ctoken_state.amount, 0);
 
-    println!("cToken account created: {}", account.pubkey());
-    account.pubkey()
+}
+pub async fn create_compressed_mint<R: Rpc + Indexer>(
+    rpc: &mut R,
+    payer: &Keypair,
+    decimals: u8,
+) -> (Pubkey, [u8; 32]) {
+    let mint_signer = Keypair::new();
+    let address_tree = rpc.get_address_tree_v2();
+    let output_queue = rpc.get_random_state_tree_info().unwrap().queue;
+
+    // Derive compression address
+    let compression_address = light_compressed_token_sdk::ctoken::derive_compressed_mint_address(
+        &mint_signer.pubkey(),
+        &address_tree.tree,
+    );
+
+    let mint_pda =
+        light_compressed_token_sdk::ctoken::find_spl_mint_address(&mint_signer.pubkey()).0;
+
+    // Get validity proof for the address
+    let rpc_result = rpc
+        .get_validity_proof(
+            vec![],
+            vec![AddressWithTree {
+                address: compression_address,
+                tree: address_tree.tree,
+            }],
+            None,
+        )
+        .await
+        .unwrap()
+        .value;
+
+    // Build params
+    let params = CreateCMintParams {
+        decimals,
+        address_merkle_tree_root_index: rpc_result.addresses[0].root_index,
+        mint_authority: payer.pubkey(),
+        proof: rpc_result.proof.0.unwrap(),
+        compression_address,
+        mint: mint_pda,
+        freeze_authority: None,
+        extensions: None,
+    };
+
+    // Create instruction
+    let create_cmint = CreateCMint::new(
+        params,
+        mint_signer.pubkey(),
+        payer.pubkey(),
+        address_tree.tree,
+        output_queue,
+    );
+    let instruction = create_cmint.instruction().unwrap();
+
+    // Send transaction
+    rpc.create_and_send_transaction(&[instruction], &payer.pubkey(), &[payer, &mint_signer])
+        .await
+        .unwrap();
+
+    (mint_pda, compression_address)
 }
 ```
 
