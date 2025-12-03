@@ -64,8 +64,10 @@
                 "pages": [
                   "compressed-token-program/cmint/README",
                   "compressed-token-program/cmint/create-cmint",
+                  "compressed-token-program/cmint/client-guides/update-metadata",
                   {
                     "group": "Client Guides",
+                    "hidden": true,
                     "pages": [
                       "compressed-token-program/cmint/client-guides/cmint",
                       "compressed-token-program/cmint/client-guides/update-metadata",
@@ -74,6 +76,7 @@
                   },
                   {
                     "group": "Program Guides",
+                    "hidden": true,
                     "pages": [
                       "compressed-token-program/cmint/program-guides/program-create-cmint",
                       "compressed-token-program/cmint/program-guides/program-mint-to-cToken"
@@ -85,8 +88,13 @@
                 "group": "cToken",
                 "pages": [
                   "compressed-token-program/ctoken/README",
+                  "compressed-token-program/ctoken/create-ctoken",
+                  "compressed-token-program/ctoken/create-cata",
+                  "compressed-token-program/ctoken/transfer-interface",
+                  "compressed-token-program/ctoken/close-ctoken-account",
                   {
                     "group": "Client Guides",
+                    "hidden": true,
                     "pages": [
                       "compressed-token-program/ctoken/client-guides/client-create-ctoken",
                       "compressed-token-program/ctoken/client-guides/client-create-cATA",
@@ -96,6 +104,7 @@
                   },
                   {
                     "group": "Program Guides",
+                    "hidden": true,
                     "pages": [
                       "compressed-token-program/ctoken/program-guides/program-create-ctoken",
                       "compressed-token-program/ctoken/program-guides/program-create-cATA",

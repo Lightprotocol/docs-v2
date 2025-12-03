@@ -1,0 +1,301 @@
+---
+title: Transfer Interface
+description: Guide for transfers between cToken and SPL token accounts via CPI. The interface detects account types and invokes the right programs.
+---
+
+import TransferInterfaceAccountsListCtoken1 from '/snippets/accounts-list/transfer-interface-accounts-list-ctoken-1.mdx';
+import TransferInterfaceAccountsListSpl2 from '/snippets/accounts-list/transfer-interface-accounts-list-spl-2.mdx';
+import TransferInterfaceIntro from '/snippets/ctoken-guides/transfer-interface-intro.mdx';
+
+<table>
+  <tbody>
+    <tr>
+      <td style={{width: '33%'}}>**cToken → cToken Account**</td>
+      <td>
+        <ul>
+          <li>Transfers cTokens between cToken accounts</li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td>**SPL token → cToken Account**</td>
+      <td>
+        <ul>
+          <li>Transfers SPL tokens to cToken accounts</li>
+          <li>SPL tokens are locked in interface PDA</li>
+          <li>cTokens are minted to cToken account</li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td>**cToken → SPL Account**</td>
+      <td>
+        <ul>
+          <li>Releases SPL tokens from interface PDA to SPL account</li>
+          <li>Burns cTokens in source cToken account</li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<Tip>
+* For example, **SPL → cToken** can be used for transfers from Alice's SPL token account to her own cToken account.
+* You can use this to **convert existing SPL tokens to cTokens** with **sponsored rent-exemption**. Learn more in the [core concepts to the cToken program](/compressed-token-program/ctoken/README).
+</Tip>
+
+# Get Started
+
+<Tabs>
+<Tab title="TypeScript Client">
+
+```typescript
+// TODO: TypeScript SDK coming soon
+```
+
+</Tab>
+
+<Tab title="Rust Client">
+
+</Tab>
+
+<Tab title="Program Guide">
+
+<Note>
+Find [a full code example at the end](#full-code-example).
+</Note>
+<Steps>
+<Step>
+
+### cToken Transfer Interface
+
+Define the number of cTokens / SPL tokens to transfer
+- from which SPL or cToken account, and
+- to which SPL or cToken account.
+
+```rust
+use light_compressed_token_sdk::ctoken::TransferInterface;
+
+let mut transfer = TransferInterface::new(
+    data.amount,
+    source_account.clone(),
+    destination_account.clone(),
+    authority.clone(),
+    payer.clone(),
+    compressed_token_program_authority.clone(),
+);
+```
+<Accordion title="cToken Interface Accounts">
+<TransferInterfaceAccountsListCtoken1 />
+</Accordion>
+
+</Step>
+
+<Step>
+
+### SPL Transfer Interface (Optional)
+
+The SPL transfer interface is only needed for SPL ↔ cToken transfers.
+```rust
+transfer = transfer.with_spl_interface(
+    Some(mint.clone()),
+    Some(spl_token_program.clone()),
+    Some(spl_interface_pda.clone()),
+    data.spl_interface_pda_bump,
+)?;
+```
+
+SPL ↔ cToken transfers require a `spl_interface_pda`:
+    * **SPL → cToken**: SPL tokens are locked by the cToken Program in the PDA, cTokens are minted to cToken accounts
+    * **cToken → SPL**: cTokens are burned, SPL tokens transferred to SPL token accounts
+<Info>
+The interface PDA is derived from the `mint` pubkey and pool seed.
+</Info>
+<Accordion title="SPL Interface Accounts">
+<TransferInterfaceAccountsListSpl2 />
+</Accordion>
+
+</Step>
+
+<Step>
+
+### CPI the cToken Program
+
+CPI the cToken program to execute the transfer. 
+Use `invoke()`, or `invoke_signed()` when a CPI requires a PDA signer.
+
+<Tabs>
+<Tab title="invoke (External signer)">
+```rust
+transfer.invoke()?;
+```
+</Tab>
+<Tab title="invoke_signed (PDA is signer)">
+```rust
+let authority_seeds: &[&[u8]] = &[TRANSFER_INTERFACE_AUTHORITY_SEED, &[authority_bump]];
+transfer.invoke_signed(&[authority_seeds])?;
+```
+</Tab>
+</Tabs>
+
+</Step>
+</Steps>
+
+# Full Code Example
+
+<Info>
+Find the source code [here](https://github.com/Lightprotocol/light-protocol/blob/main/sdk-tests/sdk-ctoken-test/src/transfer_interface.rs).
+</Info>
+
+```rust expandable
+use borsh::{BorshDeserialize, BorshSerialize};
+use light_compressed_token_sdk::ctoken::TransferInterface;
+use solana_program::{account_info::AccountInfo, program_error::ProgramError, pubkey::Pubkey};
+
+use crate::ID;
+
+/// PDA seed for authority in invoke_signed variants
+pub const TRANSFER_INTERFACE_AUTHORITY_SEED: &[u8] = b"transfer_interface_authority";
+
+/// Instruction data for TransferInterface
+#[derive(BorshSerialize, BorshDeserialize, Debug)]
+pub struct TransferInterfaceData {
+    pub amount: u64,
+    /// Required for SPL<->cToken transfers, None for cToken->cToken
+    pub token_pool_pda_bump: Option<u8>,
+}
+
+/// Handler for TransferInterface (invoke)
+///
+/// This unified interface automatically detects account types and routes to:
+/// - cToken -> cToken transfer
+/// - cToken -> SPL transfer
+/// - SPL -> cToken transfer
+///
+/// Account order:
+/// - accounts[0]: compressed_token_program (for CPI)
+/// - accounts[1]: source_account (SPL or cToken)
+/// - accounts[2]: destination_account (SPL or cToken)
+/// - accounts[3]: authority (signer)
+/// - accounts[4]: payer (signer)
+/// - accounts[5]: compressed_token_program_authority
+///   For SPL interface (required for SPL<->cToken):
+/// - accounts[6]: mint
+/// - accounts[7]: token_pool_pda
+/// - accounts[8]: spl_token_program
+pub fn process_transfer_interface_invoke(
+    accounts: &[AccountInfo],
+    data: TransferInterfaceData,
+) -> Result<(), ProgramError> {
+    if accounts.len() < 6 {
+        return Err(ProgramError::NotEnoughAccountKeys);
+    }
+
+    let mut transfer = TransferInterface::new(
+        data.amount,
+        accounts[1].clone(), // source_account
+        accounts[2].clone(), // destination_account
+        accounts[3].clone(), // authority
+        accounts[4].clone(), // payer
+        accounts[5].clone(), // compressed_token_program_authority
+    );
+
+    // Add SPL interface config if provided
+    if accounts.len() >= 9 && data.token_pool_pda_bump.is_some() {
+        transfer = transfer.with_spl_interface(
+            Some(accounts[6].clone()), // mint
+            Some(accounts[8].clone()), // spl_token_program
+            Some(accounts[7].clone()), // token_pool_pda
+            data.token_pool_pda_bump,
+        )?;
+    }
+
+    transfer.invoke()?;
+
+    Ok(())
+}
+
+/// Handler for TransferInterface with PDA authority (invoke_signed)
+///
+/// The authority is a PDA derived from TRANSFER_INTERFACE_AUTHORITY_SEED.
+///
+/// Account order:
+/// - accounts[0]: compressed_token_program (for CPI)
+/// - accounts[1]: source_account (SPL or cToken)
+/// - accounts[2]: destination_account (SPL or cToken)
+/// - accounts[3]: authority (PDA, not signer - program signs)
+/// - accounts[4]: payer (signer)
+/// - accounts[5]: compressed_token_program_authority
+///   For SPL interface (required for SPL<->cToken):
+/// - accounts[6]: mint
+/// - accounts[7]: token_pool_pda
+/// - accounts[8]: spl_token_program
+pub fn process_transfer_interface_invoke_signed(
+    accounts: &[AccountInfo],
+    data: TransferInterfaceData,
+) -> Result<(), ProgramError> {
+    if accounts.len() < 6 {
+        return Err(ProgramError::NotEnoughAccountKeys);
+    }
+
+    // Derive the PDA for the authority
+    let (authority_pda, authority_bump) =
+        Pubkey::find_program_address(&[TRANSFER_INTERFACE_AUTHORITY_SEED], &ID);
+
+    // Verify the authority account is the PDA
+    if &authority_pda != accounts[3].key {
+        return Err(ProgramError::InvalidSeeds);
+    }
+
+    let mut transfer = TransferInterface::new(
+        data.amount,
+        accounts[1].clone(), // source_account
+        accounts[2].clone(), // destination_account
+        accounts[3].clone(), // authority (PDA)
+        accounts[4].clone(), // payer
+        accounts[5].clone(), // compressed_token_program_authority
+    );
+
+    // Add SPL interface config if provided
+    if accounts.len() >= 9 && data.token_pool_pda_bump.is_some() {
+        transfer = transfer.with_spl_interface(
+            Some(accounts[6].clone()), // mint
+            Some(accounts[8].clone()), // spl_token_program
+            Some(accounts[7].clone()), // token_pool_pda
+            data.token_pool_pda_bump,
+        )?;
+    }
+
+    // Invoke with PDA signing
+    let authority_seeds: &[&[u8]] = &[TRANSFER_INTERFACE_AUTHORITY_SEED, &[authority_bump]];
+    transfer.invoke_signed(&[authority_seeds])?;
+
+    Ok(())
+}
+```
+</Tab>
+
+</Tabs>
+
+# Next Steps
+
+<CardGroup>
+<Card
+  title="Client Guide"
+  icon="chevron-right"
+  color="#0066ff"
+  href="/compressed-token-program/ctoken/client-guides/client-transfer-interface"
+  horizontal
+>
+  Transfer Interface
+</Card>
+<Card
+  title="Program Guide"
+  icon="chevron-right"
+  color="#0066ff"
+  href="/compressed-token-program/ctoken/program-guides/program-close-ctoken"
+  horizontal
+>
+  Close cToken Accounts
+</Card>
+</CardGroup>

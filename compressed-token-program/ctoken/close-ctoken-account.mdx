@@ -1,0 +1,190 @@
+---
+title: Close cToken Accounts
+description: Program guide to close cToken accounts via CPI to the cToken Program with step-by-step implementation and full code examples.
+---
+
+import CloseAccountInfosAccountsList from '/snippets/accounts-list/close-account-infos-accounts-list.mdx';
+
+1. Closing a cToken account transfers remaining lamports to a destination account and the rent sponsor can reclaim sponsored rent.
+2. cToken accounts can be closed
+    * by the account owner at any time.
+    * by the <Tooltip tip="The `compression_authority` is a PDA of the Light Registry program. It claims rent for the rent sponsor from compressible accounts that are compressed and closed.">`compression_authority`</Tooltip>
+     when the account becomes <Tooltip tip="An account is compressible when it has rent for less than 1 epoch (360 lamports for a 260-byte cToken account).">compressible</Tooltip>. The account is <Tooltip tip="You can think of compressed cToken accounts as storage of inactive accounts that can be reactivated."> compressed and closed</Tooltip> - it can be reinstated with the same state (decompressed).
+
+# Get Started
+
+<Tabs>
+<Tab title="TypeScript Client">
+
+</Tab>
+
+<Tab title="Rust Client">
+
+</Tab>
+
+<Tab title="Program Guide">
+
+<Note>
+Find [a full code example at the end](#full-code-example).
+</Note>
+<Steps>
+<Step>
+
+### Build Account Infos and CPI the cToken Program
+
+1. Define the cToken account to close and where remaining lamports should go
+2. Use `invoke` or `invoke_signed`, when a CPI requires a PDA signer.
+
+<Tabs>
+<Tab title="invoke (External Signer)">
+
+```rust
+use light_compressed_token_sdk::ctoken::CloseAccountInfos;
+
+CloseAccountInfos {
+    token_program: token_program.clone(),
+    account: account.clone(),
+    destination: destination.clone(),
+    owner: owner.clone(),
+    rent_sponsor: Some(rent_sponsor.clone()),
+}
+.invoke()?;
+```
+
+</Tab>
+<Tab title="invoke_signed (PDA Owner)">
+
+```rust
+use light_compressed_token_sdk::ctoken::CloseAccountInfos;
+
+let close_account_infos = CloseAccountInfos {
+    token_program: token_program.clone(),
+    account: account.clone(),
+    destination: destination.clone(),
+    owner: owner.clone(),
+    rent_sponsor: Some(rent_sponsor.clone()),
+};
+
+let signer_seeds: &[&[u8]] = &[TOKEN_ACCOUNT_SEED, &[bump]];
+close_account_infos.invoke_signed(&[signer_seeds])?;
+```
+
+</Tab>
+</Tabs>
+
+<Accordion title="Account List">
+<CloseAccountInfosAccountsList />
+</Accordion>
+
+</Step>
+</Steps>
+
+# Full Code Example
+
+<Info>
+Find the source code [here](https://github.com/Lightprotocol/light-protocol/blob/main/sdk-tests/sdk-ctoken-test/src/close.rs).
+</Info>
+
+```rust expandable
+use light_compressed_token_sdk::ctoken::CloseAccountInfos;
+use solana_program::{account_info::AccountInfo, program_error::ProgramError, pubkey::Pubkey};
+
+use crate::{ID, TOKEN_ACCOUNT_SEED};
+
+/// Handler for closing a compressed token account (invoke)
+///
+/// Account order:
+/// - accounts[0]: token_program (ctoken program)
+/// - accounts[1]: account to close (writable)
+/// - accounts[2]: destination for lamports (writable)
+/// - accounts[3]: owner/authority (signer)
+/// - accounts[4]: rent_sponsor (optional, writable)
+pub fn process_close_account_invoke(accounts: &[AccountInfo]) -> Result<(), ProgramError> {
+    if accounts.len() < 4 {
+        return Err(ProgramError::NotEnoughAccountKeys);
+    }
+
+    let rent_sponsor = if accounts.len() > 4 {
+        Some(accounts[4].clone())
+    } else {
+        None
+    };
+
+    CloseAccountInfos {
+        token_program: accounts[0].clone(),
+        account: accounts[1].clone(),
+        destination: accounts[2].clone(),
+        owner: accounts[3].clone(),
+        rent_sponsor,
+    }
+    .invoke()?;
+
+    Ok(())
+}
+
+/// Handler for closing a PDA-owned compressed token account (invoke_signed)
+///
+/// Account order:
+/// - accounts[0]: token_program (ctoken program)
+/// - accounts[1]: account to close (writable)
+/// - accounts[2]: destination for lamports (writable)
+/// - accounts[3]: PDA owner/authority (not signer, program signs)
+/// - accounts[4]: rent_sponsor (optional, writable)
+pub fn process_close_account_invoke_signed(accounts: &[AccountInfo]) -> Result<(), ProgramError> {
+    if accounts.len() < 4 {
+        return Err(ProgramError::NotEnoughAccountKeys);
+    }
+
+    // Derive the PDA for the authority
+    let (pda, bump) = Pubkey::find_program_address(&[TOKEN_ACCOUNT_SEED], &ID);
+
+    // Verify the authority account is the PDA
+    if &pda != accounts[3].key {
+        return Err(ProgramError::InvalidSeeds);
+    }
+
+    let rent_sponsor = if accounts.len() > 4 {
+        Some(accounts[4].clone())
+    } else {
+        None
+    };
+
+    let signer_seeds: &[&[u8]] = &[TOKEN_ACCOUNT_SEED, &[bump]];
+    CloseAccountInfos {
+        token_program: accounts[0].clone(),
+        account: accounts[1].clone(),
+        destination: accounts[2].clone(),
+        owner: accounts[3].clone(),
+        rent_sponsor,
+    }
+    .invoke_signed(&[signer_seeds])?;
+
+    Ok(())
+}
+```
+</Tab>
+
+</Tabs>
+
+# Next Steps
+
+<CardGroup>
+<Card
+  title="Client Guide"
+  icon="chevron-right"
+  color="#0066ff"
+  href="/compressed-token-program/ctoken/client-guides/client-close-ctoken"
+  horizontal
+>
+  Close cToken Accounts
+</Card>
+<Card
+  title="Compressed Tokens"
+  icon="chevron-right"
+  color="#0066ff"
+  href="/compressed-tokens/README"
+  horizontal
+>
+  Learn about compressed tokens 
+</Card>
+</CardGroup>

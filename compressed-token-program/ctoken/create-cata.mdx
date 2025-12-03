@@ -1,0 +1,246 @@
+---
+title: Create Associated cToken Accounts
+description: Client and program guide to create associated cToken accounts with step-by-step implementation and full code examples.
+---
+
+import CTokenCreateATAAccountsList from '/snippets/accounts-list/ctoken-create-ata-accounts-list.mdx';
+import CompressibleVsSolanaRent from '/snippets/compressible-vs-solana-rent.mdx';
+import { CompressibleRentCalculator } from '/snippets/jsx/compressible-rent-calculator.jsx';
+import CTokenConfigureRent from '/snippets/ctoken-configure-rent.mdx';
+import CAtaIntro from '/snippets/ctoken-guides/cata-intro.mdx';
+import CompressibleRentExplained from '/snippets/compressible-rent-explained.mdx';
+
+1. Associated cToken accounts (cATA) are Solana accounts that hold token balances of cMints, SPL mints, or Token 2022 mints.
+2. The address for cATAs is deterministically derived with the owner’s address, cToken program ID, and mint address.
+3. cATAs are compressible with a default rent config.
+    1. At account creation, you pay ~22,208 lamports <Tooltip tip="24 h = 16 epochs, where 1 rent-epoch ≈ 1.5h ≈ 13,500 slots at 400ms per slot">for 24h of rent</Tooltip> <br/>and <Tooltip tip="Covers transaction cost to compress accounts (10,000) and protocol incentive (1,000). Transaction cost might vary.">compression incentive</Tooltip> (the rent-exemption is sponsored by the protocol)
+    2. Transfers keep the account funded <Tooltip tip="2 epochs = 3h">with rent for 3h</Tooltip> via top-ups. The transaction payer tops up 766 lamports when the account's rent is below 3h.
+
+<Accordion title="Compressible Rent Explained">
+<CompressibleRentExplained />
+</Accordion>
+
+# Get Started
+
+<Tabs>
+<Tab title="TypeScript Client">
+
+```typescript
+// TODO: TypeScript SDK coming soon
+```
+
+</Tab>
+
+<Tab title="Rust Client">
+
+</Tab>
+
+<Tab title="Program Guide">
+
+<Note>
+Find [a full code example at the end](#full-code-example).
+</Note>
+<Steps>
+<Step>
+
+### Define Rent Config Accounts
+
+<CTokenConfigureRent />
+
+</Step>
+
+<Step>
+
+### Build Account Infos and CPI the cToken Program
+
+1. Pass the required accounts
+2. Include rent config from `compressible_params`
+3. Use `invoke` or `invoke_signed`, when a CPI requires a PDA signer.
+<Note>
+The cATA address is derived from `[owner, ctoken_program_id, mint]`. Unlike cToken accounts, owner and mint are passed as accounts, not in instruction data.
+</Note>
+
+<Tabs>
+<Tab title="invoke (External signer)">
+
+```rust
+use light_compressed_token_sdk::ctoken::CreateAssociatedTokenAccount2Infos;
+
+CreateAssociatedTokenAccount2Infos {
+    owner: owner.clone(),
+    mint: mint.clone(),
+    payer: payer.clone(),
+    associated_token_account: associated_token_account.clone(),
+    system_program: system_program.clone(),
+    bump: data.bump,
+    compressible: Some(compressible_params),
+    idempotent: false,
+}
+.invoke()?;
+```
+
+</Tab>
+<Tab title="invoke_signed (PDA is signer)">
+
+```rust
+use light_compressed_token_sdk::ctoken::CreateAssociatedTokenAccount2Infos;
+
+let signer_seeds: &[&[u8]] = &[ATA_SEED, &[bump]];
+CreateAssociatedTokenAccount2Infos {
+    owner: owner.clone(),
+    mint: mint.clone(),
+    payer: payer.clone(),
+    associated_token_account: associated_token_account.clone(),
+    system_program: system_program.clone(),
+    bump: data.bump,
+    compressible: Some(compressible_params),
+    idempotent: false,
+}
+.invoke_signed(&[signer_seeds])?;
+```
+
+</Tab>
+</Tabs>
+<CTokenCreateATAAccountsList />
+
+</Step>
+</Steps>
+# Full Code Example
+
+<Info>
+Find the source code [here](https://github.com/Lightprotocol/light-protocol/blob/main/sdk-tests/sdk-ctoken-test/src/create_token_account.rs).
+</Info>
+
+```rust expandable
+use borsh::{BorshDeserialize, BorshSerialize};
+use light_compressed_token_sdk::ctoken::{
+    CompressibleParamsInfos, CreateAssociatedTokenAccount2Infos,
+};
+use solana_program::{account_info::AccountInfo, program_error::ProgramError, pubkey::Pubkey};
+
+use crate::{ATA_SEED, ID};
+
+/// Instruction data for create ATA V2 (owner/mint as accounts)
+#[derive(BorshSerialize, BorshDeserialize, Debug)]
+pub struct CreateAta2Data {
+    pub bump: u8,
+    pub pre_pay_num_epochs: u8,
+    pub lamports_per_write: u32,
+}
+
+/// Handler for creating ATA using V2 variant (invoke)
+///
+/// Account order:
+/// - accounts[0]: owner (readonly)
+/// - accounts[1]: mint (readonly)
+/// - accounts[2]: payer (signer, writable)
+/// - accounts[3]: associated_token_account (writable)
+/// - accounts[4]: system_program
+/// - accounts[5]: compressible_config
+/// - accounts[6]: rent_sponsor (writable)
+pub fn process_create_ata2_invoke(
+    accounts: &[AccountInfo],
+    data: CreateAta2Data,
+) -> Result<(), ProgramError> {
+    if accounts.len() < 7 {
+        return Err(ProgramError::NotEnoughAccountKeys);
+    }
+
+    let compressible_params = CompressibleParamsInfos::new(
+        data.pre_pay_num_epochs,
+        data.lamports_per_write,
+        accounts[5].clone(),
+        accounts[6].clone(),
+        accounts[4].clone(),
+    );
+
+    CreateAssociatedTokenAccount2Infos {
+        owner: accounts[0].clone(),
+        mint: accounts[1].clone(),
+        payer: accounts[2].clone(),
+        associated_token_account: accounts[3].clone(),
+        system_program: accounts[4].clone(),
+        bump: data.bump,
+        compressible: Some(compressible_params),
+        idempotent: false,
+    }
+    .invoke()?;
+
+    Ok(())
+}
+
+/// Handler for creating ATA using V2 variant with PDA ownership (invoke_signed)
+///
+/// Account order:
+/// - accounts[0]: owner (PDA, readonly)
+/// - accounts[1]: mint (readonly)
+/// - accounts[2]: payer (PDA, writable, not signer - program signs)
+/// - accounts[3]: associated_token_account (writable)
+/// - accounts[4]: system_program
+/// - accounts[5]: compressible_config
+/// - accounts[6]: rent_sponsor (writable)
+pub fn process_create_ata2_invoke_signed(
+    accounts: &[AccountInfo],
+    data: CreateAta2Data,
+) -> Result<(), ProgramError> {
+    if accounts.len() < 7 {
+        return Err(ProgramError::NotEnoughAccountKeys);
+    }
+
+    // Derive the PDA that will act as payer
+    let (pda, bump) = Pubkey::find_program_address(&[ATA_SEED], &ID);
+
+    // Verify the payer is the PDA
+    if &pda != accounts[2].key {
+        return Err(ProgramError::InvalidSeeds);
+    }
+
+    let compressible_params = CompressibleParamsInfos::new(
+        data.pre_pay_num_epochs,
+        data.lamports_per_write,
+        accounts[5].clone(),
+        accounts[6].clone(),
+        accounts[4].clone(),
+    );
+
+    let signer_seeds: &[&[u8]] = &[ATA_SEED, &[bump]];
+    CreateAssociatedTokenAccount2Infos {
+        owner: accounts[0].clone(),
+        mint: accounts[1].clone(),
+        payer: accounts[2].clone(), // PDA
+        associated_token_account: accounts[3].clone(),
+        system_program: accounts[4].clone(),
+        bump: data.bump,
+        compressible: Some(compressible_params),
+        idempotent: false,
+    }
+    .invoke_signed(&[signer_seeds])?;
+
+    Ok(())
+}
+```
+</Tab>
+
+</Tabs>
+# Next Steps
+
+<CardGroup>
+<Card
+  title="Client Guide"
+  icon="chevron-right"
+  color="#0066ff"
+  href="/compressed-token-program/ctoken/client-guides/client-create-cATA"
+  horizontal
+>
+  Create Associated cToken Accounts
+</Card>
+<Card
+  title="Program Guide"
+  icon="chevron-right"
+  color="#0066ff"
+  href="/compressed-token-program/ctoken/program-guides/program-mint-to-cToken"
+  horizontal
+>
+  Mint cTokens
+</Card>
+</CardGroup>
