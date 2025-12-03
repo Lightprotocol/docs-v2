@@ -1,0 +1,85 @@
+import CliInstall from '/snippets/versions/cli-install-0.27.1-alpha.2.mdx';
+
+<Tabs>
+<Tab title="In-Memory (LightProgramTest)">
+
+Test without a light-validator.
+
+```bash
+# Initialize project
+cargo init my-light-project
+cd my-light-project
+
+# Run tests
+cargo test
+```
+
+```rust
+use light_program_test::{LightProgramTest, ProgramTestConfig};
+use solana_sdk::signer::Signer;
+
+#[tokio::test]
+async fn test_example() {
+    // In-memory test environment - no external validator
+    let mut rpc = LightProgramTest::new(ProgramTestConfig::default())
+        .await
+        .unwrap();
+
+    let payer = rpc.get_payer().insecure_clone();
+    println!("Payer: {}", payer.pubkey());
+}
+```
+
+</Tab>
+<Tab title="Localnet (LightClient)">
+
+Connects to a local test validator.
+
+<CliInstall />
+
+```bash
+# Initialize project
+cargo init my-light-project
+cd my-light-project
+
+# Start local test validator (in separate terminal)
+light test-validator
+```
+
+```rust
+use light_client::rpc::{LightClient, LightClientConfig, Rpc};
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // Connects to http://localhost:8899
+    let rpc = LightClient::new(LightClientConfig::local()).await?;
+
+    let slot = rpc.get_slot().await?;
+    println!("Current slot: {}", slot);
+
+    Ok(())
+}
+```
+
+</Tab>
+<Tab title="Devnet (LightClient)">
+
+Replace `<your-api-key>` with your actual API key. [Get your API key here](https://www.helius.dev/zk-compression).
+
+```rust
+use light_client::rpc::{LightClient, LightClientConfig, Rpc};
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let rpc_url = "https://devnet.helius-rpc.com?api-key=<your_api_key>";
+    let rpc = LightClient::new(
+        LightClientConfig::new(rpc_url.to_string(), None, None)
+    ).await?;
+
+    println!("Connected to Devnet");
+    Ok(())
+}
+```
+
+</Tab>
+</Tabs>

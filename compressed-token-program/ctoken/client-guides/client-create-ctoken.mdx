@@ -5,41 +5,38 @@ description: "Client guide to create cToken accounts with CreateCTokenAccount bu
 import CTokenIntro from '/snippets/ctoken-guides/ctoken-intro.mdx';
 import CTokenClientPrerequisites from '/snippets/ctoken-guides/ctoken-client-prerequisites.mdx';
 import CTokenConfigureRent from '/snippets/ctoken-configure-rent.mdx';
+import ClientCustomRentConfig from '/snippets/ctoken-guides/client-custom-rent-config.mdx';
 
 <CTokenIntro />
 
 
 # Full Code Example
 
-1. Create a test cMint. You can use existing SPL or Token 2022 mints as well.
-2. Build instruction with the default rent config in `CompressibleParams::default()`.
+<Tabs>
+<Tab title="Rust">
+
+1. The example creates a test cMint. You can use existing cMints, SPL or Token 2022 mints as well.
+2. Build instruction with `CreateCTokenAccount`. It automatically includes the default rent config.
 ```rust
-use light_compressed_token_sdk::ctoken::{CompressibleParams, CreateCTokenAccount};
+use light_compressed_token_sdk::ctoken::{CreateCTokenAccount};
 
 let instruction = CreateCTokenAccount::new(
     payer.pubkey(),
     account.pubkey(),
     mint,
     owner,
-    CompressibleParams::default(),
 ).instruction()?;
 ```
-<Accordion title="CompressibleParams">
-This struct contains the default rent config and associated accounts.
-<CTokenConfigureRent />
+<Accordion title="Custom Rent Config">
+
+<ClientCustomRentConfig />
+
 </Accordion>
 
 3. Send transaction & verify cToken account creation with `get_account`. <br/>
 cToken accounts are Solana accounts and use your familiar RPC methods.
 
-<Tabs>
-<Tab title="Rust">
 
-```bash
-git clone https://github.com/Lightprotocol/light-protocol
-cd light-protocol
-cargo test
-```
 
 <Steps>
 <Step>
