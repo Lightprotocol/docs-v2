@@ -1,21 +1,21 @@
 ---
 title: Create cToken Accounts
-description: "Guide to create cToken accounts with CreateCTokenAccount builder."
+description: "Client guide to create cToken accounts with CreateCTokenAccount builder."
 ---
-import CTokenAccountProperties from '/snippets/ctoken-account-properties.mdx';
 import CTokenIntro from '/snippets/ctoken-guides/ctoken-intro.mdx';
 import CTokenClientPrerequisites from '/snippets/ctoken-guides/ctoken-client-prerequisites.mdx';
+import CTokenConfigureRent from '/snippets/ctoken-configure-rent.mdx';
 
 <CTokenIntro />
-
-<CTokenAccountProperties />
 
 
 # Full Code Example
 
 1. Create a test cMint. You can use existing SPL or Token 2022 mints as well.
-2. Build instruction using `CreateCTokenAccount` with the default rent config.
+2. Build instruction with the default rent config in `CompressibleParams::default()`.
 ```rust
+use light_compressed_token_sdk::ctoken::{CompressibleParams, CreateCTokenAccount};
+
 let instruction = CreateCTokenAccount::new(
     payer.pubkey(),
     account.pubkey(),
@@ -24,6 +24,11 @@ let instruction = CreateCTokenAccount::new(
     CompressibleParams::default(),
 ).instruction()?;
 ```
+<Accordion title="CompressibleParams">
+This struct contains the default rent config and associated accounts.
+<CTokenConfigureRent />
+</Accordion>
+
 3. Send transaction & verify cToken account creation with `get_account`. <br/>
 cToken accounts are Solana accounts and use your familiar RPC methods.
 
