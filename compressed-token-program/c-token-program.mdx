@@ -5,7 +5,7 @@ description: Overview of cMints, cTokens, and compressed token accounts.
 ---
 
 import CompressibleVsSolanaRent from '/snippets/compressible-vs-solana-rent.mdx';
-import { CompressibleRentCalculator } from '/snippets/compressible-rent-calculator.jsx';
+import { CompressibleRentCalculator } from '/snippets/jsx/compressible-rent-calculator.jsx';
 
 The [Compressed Token Program](https://github.com/Lightprotocol/light-protocol/tree/main/programs/compressed-token) extends existing Solana token standards with cMints, cTokens and compressed tokens.
 
@@ -33,8 +33,9 @@ The [Compressed Token Program](https://github.com/Lightprotocol/light-protocol/t
       <td style={{textAlign: 'left'}}>Solana account</td>
       <td style={{textAlign: 'left'}}>
         <ul>
-          <li>**Token accounts** derived from cMints (**SPL-compatible**)</li>
-          <li>**Sponsored rent** exemption via [compressible extension](#compressible) (200x cheaper than SPL tokens)</li>
+          <li>**Token accounts** derived from cMints</li>
+          <li>Can hold cTokens and SPL tokens</li>
+          <li>**Sponsored rent** exemption via [compressible extension](#compressible)</li>
           <li>Use for **active token accounts** with frequent writes (trading, etc.)</li>
         </ul>
       </td>
@@ -46,8 +47,8 @@ The [Compressed Token Program](https://github.com/Lightprotocol/light-protocol/t
         <ul>
           <li>**Compressed account** with `TokenData` field</li>
           <li>**Rent-free** and SPL-compatible</li>
-          <li>Use for **storage of inactive tokens** or **token distribution**</li>
-          <li>cToken accounts with the **[compressible extension](#compressible) are automatically compressed/decompressed** when active/inactive.</li>
+          <li>Use for **storage of inactive tokens** and **token distribution**</li>
+          <li>cToken accounts are automatically compressed/decompressed when active/inactive.</li>
         </ul>
       </td>
     </tr>

@@ -13,7 +13,7 @@ export const SolanaRentCalculator = () => {
   };
 
   return (
-    <div className="p-5 rounded-3xl not-prose mt-4 dark:bg-white/5 backdrop-blur-xl border border-black/[0.04] dark:border-white/10 shadow-lg">
+    <div className="p-5 rounded-3xl not-prose mt-4 dark:bg-white/5 backdrop-blur-xl border border-black/[0.04] dark:border-white/10 shadow-lg" style={{ fontFamily: 'Inter, sans-serif' }}>
       <div className="space-y-5">
         {/* Slider */}
         <div className="px-3">

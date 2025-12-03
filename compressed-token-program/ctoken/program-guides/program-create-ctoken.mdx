@@ -3,18 +3,22 @@ title: Create cToken Accounts
 description: Program guide to create cToken accounts with step-by-step implementation and full code examples.
 ---
 
-import CTokenCreateAccountsList from '/snippets/ctoken-create-accounts-list.mdx';
-import CTokenProtocolPDAs from '/snippets/ctoken-protocol-pdas.mdx';
+import CTokenCreateAccountsList from '/snippets/accounts-list/ctoken-create-accounts-list.mdx';
 import CompressibleVsSolanaRent from '/snippets/compressible-vs-solana-rent.mdx';
-import { CompressibleRentCalculator } from '/snippets/compressible-rent-calculator.jsx';
+import { CompressibleRentCalculator } from '/snippets/jsx/compressible-rent-calculator.jsx';
 import CTokenConfigureRent from '/snippets/ctoken-configure-rent.mdx';
-import CTokenAccountProperties from '/snippets/ctoken-account-properties.mdx';
+import CompressibleRentExplained from '/snippets/compressible-rent-explained.mdx';
+import CompressibleDefaultRentConfig from '/snippets/compressible-default-rent-config.mdx';
 
 ## Key Points
 
-cToken accounts are Solana accounts and created via CPI to the cToken Program.
+1. cToken accounts are Solana accounts that hold balances of tokens of cMints, SPL mints, or Token 2022 mints.
+2. cToken accounts are compressible with a default rent config.
 
-<CTokenAccountProperties />
+<Accordion title="Compressible Rent Explained">
+<CompressibleRentExplained />
+</Accordion>
+<CompressibleDefaultRentConfig />
 
 <Info>
 Learn the [core concepts to the cToken Program here](/compressed-token-program/c-token-program).

@@ -1,0 +1,8 @@
+Compressible means
+1. The rent-exemption for the Solana account is sponsored by Light Protocol
+2. Rent is paid <Tooltip tip="1 rent-epoch ≈ 1.5h ≈ 13,500 slots at 400ms per slot">per rent-epoch instead: 388 lamports for 1.5h</Tooltip>.
+    * The account creator pays the initial rent for 24h by default (11,000 lamports).
+    * Transfers top up the account with rent for 3h by default (766 lamports),<br/> when the account's rent is below two epochs.
+3. "Inactive" accounts, where rent is below one epoch, are compressed and the rent-exemption can be claimed by the rent sponsor.
+4. Transfers to the account "re-activate" it with the same state (decompress).
+5. The account creation and transfers to reactivate incur additional <Tooltip tip="Covers transaction cost to compress accounts (10,000) and protocol incentive (1,000). Transaction cost might vary.">11,000 lamports for compression & protocol incentive</Tooltip>.

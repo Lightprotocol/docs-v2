@@ -3,6 +3,7 @@ export const CompressibleRentCalculator = () => {
   const [lamportsPerWrite, setLamportsPerWrite] = useState(766);
   const [showCustomHours, setShowCustomHours] = useState(false);
   const [showCustomLamports, setShowCustomLamports] = useState(false);
+  const [showFormula, setShowFormula] = useState(false);
 
   const DATA_LEN = 260;
   const BASE_RENT = 128;
@@ -49,7 +50,7 @@ export const CompressibleRentCalculator = () => {
   };
 
   return (
-    <div className="p-5 rounded-3xl not-prose mt-4 dark:bg-white/5 backdrop-blur-xl border border-black/[0.04] dark:border-white/10 shadow-lg">
+    <div className="p-5 rounded-3xl not-prose mt-4 dark:bg-white/5 backdrop-blur-xl border border-black/[0.04] dark:border-white/10 shadow-lg" style={{ fontFamily: 'Inter, sans-serif' }}>
       <div className="space-y-5">
         {/* Prepaid Epochs in Hours */}
         <div className="space-y-2 px-3">
@@ -185,13 +186,24 @@ export const CompressibleRentCalculator = () => {
           </div>
         </div>
 
-        {/* Formula reference */}
-        <div className="text-xs font-mono text-zinc-500 dark:text-white/40 pt-3 border-t border-black/[0.04] dark:border-white/10">
-          <div className="text-zinc-600 dark:text-white/60 mb-2">Total cost for {DATA_LEN}-byte cToken account:</div>
-          total_creation_cost = prepaid_rent + compression_incentive + tx_cost<br/><br/>
-          rent_per_epoch = base_rent + (data_len × lamports_per_byte_per_epoch)<br/>
-          rent_per_epoch = {BASE_RENT} + ({DATA_LEN} × {LAMPORTS_PER_BYTE_PER_EPOCH}) = {rentPerEpoch} lamports<br/>
-          compression_incentive = {COMPRESSION_INCENTIVE.toLocaleString()} lamports
+        {/* Formula reference - toggleable */}
+        <div className="pt-3 border-t border-black/[0.04] dark:border-white/10">
+          <button
+            onClick={() => setShowFormula(!showFormula)}
+            className="flex items-center gap-2 text-xs text-zinc-500 dark:text-white/50 hover:text-zinc-700 dark:hover:text-white/70 transition-colors"
+          >
+            <span className={`transition-transform ${showFormula ? 'rotate-90' : ''}`}>▶</span>
+            Show formula
+          </button>
+          {showFormula && (
+            <div className="text-xs font-mono text-zinc-500 dark:text-white/40 mt-3">
+              <div className="text-zinc-600 dark:text-white/60 mb-2">Total cost for {DATA_LEN}-byte cToken account:</div>
+              total_creation_cost = prepaid_rent + compression_incentive + tx_cost<br/><br/>
+              rent_per_epoch = base_rent + (data_len × lamports_per_byte_per_epoch)<br/>
+              rent_per_epoch = {BASE_RENT} + ({DATA_LEN} × {LAMPORTS_PER_BYTE_PER_EPOCH}) = {rentPerEpoch} lamports<br/>
+              compression_incentive = {COMPRESSION_INCENTIVE.toLocaleString()} lamports
+            </div>
+          )}
         </div>
       </div>
     </div>
