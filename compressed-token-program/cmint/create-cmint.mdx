@@ -1,6 +1,6 @@
 ---
 title: Create cMint
-description: Program guide to create a cMint with token metadata via CPI to the cToken Program. Includes step-by-step implementation and full code examples.
+description: Program and client guide to create a cMint with token metadata via CPI to the cToken Program. Includes step-by-step implementation and full code examples.
 ---
 
 import CMintSystemAccountsList from '/snippets/accounts-list/cmint-system-accounts-list.mdx';
@@ -13,12 +13,30 @@ import CMintSystemAccountsList from '/snippets/accounts-list/cmint-system-accoun
 Learn the [core concepts to the cToken Program here](/compressed-token-program/c-token-program).
 </Info>
 
+# Get Started
+
+<Tabs>
+<Tab title="TypeScript Client">
+
+```typescript
+// TODO: TypeScript SDK coming soon
+```
+
+</Tab>
+
+<Tab title="Rust Client">
+
+```rust
+// TODO: Rust client example coming soon
+```
+
+</Tab>
+
+<Tab title="Program Guide">
+
 <Note>
 Find [full code examples at the end](#full-code-example).
 </Note>
-
-# Implementation Guide
-
 <Steps>
 
 <Step>
@@ -463,6 +481,10 @@ pub fn process_create_cmint_with_pda_authority(
     Ok(())
 }
 ```
+
+</Tab>
+
+</Tabs>
 
 # Next Steps
 

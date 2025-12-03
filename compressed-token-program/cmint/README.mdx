@@ -12,7 +12,9 @@ import { SolanaRentCalculator } from '/snippets/jsx/solana-rent-calculator.jsx';
 |  | cMint account | SPL mint account |
 |-----------|--------|-----|
 | creation cost | <Tooltip tip="10,000 lamports to create address + 5,000 to create compressed account + 5,000-10,000 for tx signature">25,000 lamports</Tooltip> | 1,461,600 lamports |
-
+<Info>
+Learn the [core concepts to the cToken Program here](/compressed-token-program/c-token-program).
+</Info>
 ## Account Struct
 
 <Tabs>
@@ -118,20 +120,48 @@ Here is how cMints and SPL mints compare:
   </Tab>
 </Tabs>
 
+### Extensions
+
+* cMints only support a custom Token Metadata extension.
+* Use more Token 2022 extensions via a [Token 2022 mint account with cTokens](/compressed-token-program/ctoken/extensions).
+
+```rust
+let token_metadata = ExtensionInstructionData::TokenMetadata(
+    TokenMetadataInstructionData {
+        update_authority: Some(authority.to_bytes().into()),
+        name: b"My Token".to_vec(),
+        symbol: b"MTK".to_vec(),
+        uri: b"https://example.com/metadata.json".to_vec(),
+        additional_metadata: Some(vec![
+            AdditionalMetadata {
+                key: b"category".to_vec(),
+                value: b"utility".to_vec(),
+            },
+        ]),
+    }
+);
+```
 # Get Started
 
-## Client Guides
+<Accordion title="Setup">
 
-table for client guides
+</Accordion>
 
-## Program Guides
 
-table for program guides 
-## Examples 
+<Steps>
+<Step>
+### Guides
+
+table for
+</Step>
+<Step>
+### Examples 
 
 add github link
+</Step>
+</Steps>
 
-## Next Steps
+# Next Steps
 
 Follow our client or program guides for cMints.
 

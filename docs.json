@@ -63,6 +63,7 @@
                 "group": "cMint",
                 "pages": [
                   "compressed-token-program/cmint/README",
+                  "compressed-token-program/cmint/create-cmint",
                   {
                     "group": "Client Guides",
                     "pages": [
@@ -492,6 +493,7 @@
             "group": "cMint",
             "pages": [
               "compressed-token-program/cmint/README",
+              "compressed-token-program/cmint/create-cmint",
               {
                 "group": "Client Guides",
                 "pages": [
