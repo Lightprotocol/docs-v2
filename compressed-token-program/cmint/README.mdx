@@ -5,46 +5,19 @@ description: Overview to cMint accounts.
 
 import { SolanaRentCalculator } from '/snippets/jsx/solana-rent-calculator.jsx';
 
-## Key Points
-
-A cMint is a compressed account that represents a token mint on Solana. cMints store the same global metadata as SPL token mints but without requiring rent.
-
-<SolanaRentCalculator />
-## Extensions 
-
-## Extensions
-
-cTokens support a number of Token 22 extensions:
+1. A cMint is a compressed account that represents a token mint on Solana. 
+2. cMints are rent-free.
 
 
-<table style={{fontSize: '0.85em'}}>
-  <thead>
-    <tr>
-      <th style={{textAlign: 'left'}}>Extension Name</th>
-      <th style={{textAlign: 'left'}}>Description</th>
-      <th style={{textAlign: 'center'}}>cToken</th>
-      <th style={{textAlign: 'center'}}>Compressed Token</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr><td>MetadataPointer</td><td>-</td><td style={{textAlign: 'center'}}>✓</td><td style={{textAlign: 'center'}}>✓</td></tr>
-    <tr><td>TokenMetadata</td><td>-</td><td style={{textAlign: 'center'}}>✓</td><td style={{textAlign: 'center'}}>✓</td></tr>
-    <tr><td>InterestBearingConfig</td><td>-</td><td style={{textAlign: 'center'}}>✓</td><td style={{textAlign: 'center'}}>✓</td></tr>
-    <tr><td>GroupPointer</td><td>-</td><td style={{textAlign: 'center'}}>✓</td><td style={{textAlign: 'center'}}>✓</td></tr>
-    <tr><td>GroupMemberPointer</td><td>-</td><td style={{textAlign: 'center'}}>✓</td><td style={{textAlign: 'center'}}>✓</td></tr>
-    <tr><td>TokenGroup</td><td>-</td><td style={{textAlign: 'center'}}>✓</td><td style={{textAlign: 'center'}}>✓</td></tr>
-    <tr><td>TokenGroupMember</td><td>-</td><td style={{textAlign: 'center'}}>✓</td><td style={{textAlign: 'center'}}>✓</td></tr>
-    <tr><td>MintCloseAuthority</td><td>-</td><td style={{textAlign: 'center'}}>✓</td><td style={{textAlign: 'center'}}>-</td></tr>
-    <tr><td>TransferFeeConfig</td><td>fees must be zero</td><td style={{textAlign: 'center'}}>✓</td><td style={{textAlign: 'center'}}>-</td></tr>
-    <tr><td>DefaultAccountState</td><td>any state allowed</td><td style={{textAlign: 'center'}}>✓</td><td style={{textAlign: 'center'}}>-</td></tr>
-    <tr><td>PermanentDelegate</td><td>-</td><td style={{textAlign: 'center'}}>✓</td><td style={{textAlign: 'center'}}>-</td></tr>
-    <tr><td>TransferHook</td><td>program_id must be nil</td><td style={{textAlign: 'center'}}>✓</td><td style={{textAlign: 'center'}}>-</td></tr>
-    <tr><td>Pausable</td><td>-</td><td style={{textAlign: 'center'}}>✓</td><td style={{textAlign: 'center'}}>-</td></tr>
-    <tr><td>ConfidentialTransferMint</td><td>initialized but not enabled</td><td style={{textAlign: 'center'}}>✓</td><td style={{textAlign: 'center'}}>-</td></tr>
-    <tr><td>ConfidentialTransferFeeConfig</td><td>fees must be zero</td><td style={{textAlign: 'center'}}>✓</td><td style={{textAlign: 'center'}}>-</td></tr>
-    <tr><td>ConfidentialMintBurn</td><td>initialized but not enabled</td><td style={{textAlign: 'center'}}>✓</td><td style={{textAlign: 'center'}}>-</td></tr>
-  </tbody>
-</table>
+|  | cMint account | SPL mint account |
+|-----------|--------|-----|
+| creation cost | 25,000 lamports | 1,461,600 lamports |
+
+## Account Struct
+
+The layout of cMint accounts mirrors the SPL mint account layout.
+
+
 
 ## Client Guides
 
