@@ -11,45 +11,18 @@ description: "Guidance to AI tools when working with ZK Compression. Includes MC
 
 # For Development
 
-<div style={{ display: 'flex', alignItems: 'center', gap: '0.5em' }}>
-  <h3 style={{ margin: 0 }}>DeepWiki</h3>
-  <a href="https://deepwiki.com/Lightprotocol/light-protocol" style={{ margin: 0 }}>
-    <img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki" style={{ marginTop: 0, marginBottom: 0, verticalAlign: 'middle' }} />
-  </a>
-</div>
-
-<Tip>
-**Use DeepWiki's AskDevin for help with debugging**.
-</Tip>
-
-<Frame>
-  <iframe
-    width="100%"
-    height="420"
-    src="https://drive.google.com/file/d/1irbZC4NpSE6F1XctIel0yXyVmwvRsjaU/preview"
-    title="DeepWiki Video"
-    frameborder="0"
-    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-    referrerpolicy="strict-origin-when-cross-origin"
-    allowfullscreen
-  ></iframe>
-</Frame>
-
-<Info>
-You can index and query any public GitHub repository with DeepWiki to produce wikis with architecture diagrams, source links, and codebase summaries.
-</Info>
-
-# MCP
+## MCP
 
 The Model Context Protocol (MCP) is an open standard to connect AI apps to data sources and tools. The DeepWiki MCP server provides access to the Light Protocol repository with its search capabilities (AskDevin).
 
-## Installation
+### Installation
 
 <Tabs>
 <Tab title="Claude Code">
 
 ```bash
 claude mcp add -s user -t http deepwiki https://mcp.deepwiki.com/mcp
+claude mcp add -s user -t http zkcompression https://www.zkcompression.com/mcp
 ```
 
 <Tip>
@@ -130,12 +103,25 @@ Include `file:line` references from DeepWiki responses.
 
 </Tab>
 
+<Tab title="Codex">
+
+```bash
+codex mcp add zkcompression -- npx -y mcp-remote@latest https://www.zkcompression.com/mcp
+codex mcp add deepwiki -- npx -y mcp-remote@latest https://mcp.deepwiki.com/mcp
+```
+
+</Tab>
+
 <Tab title="Most Clients (Windsurf, Cursor, ...)">
 ```json
 {
   "mcpServers": {
     "deepwiki": {
       "serverUrl": "https://mcp.deepwiki.com/sse"
+    },
+    "zkcompression": {
+      "command": "npx",
+      "args": ["-y", "mcp-remote@latest", "https://www.zkcompression.com/mcp"]
     }
   }
 }
@@ -143,9 +129,7 @@ Include `file:line` references from DeepWiki responses.
 </Tab>
 </Tabs>
 
-## MCP-Tools
-
-The MCP server offers three tools:
+### DeepWiki MCP-Tools
 
 - **read\_wiki\_structure** - Get a list of documentation topics for a GitHub repository
 
@@ -168,6 +152,28 @@ mcp__deepwiki__ask_question("Lightprotocol/light-protocol", "your question")
 <Tip>
 You can specify any public GitHub repo that is indexed with DeepWiki. When you connect to the MCP, you specify the repository when calling the tools. Learn more [here](https://docs.devin.ai/work-with-devin/deepwiki-mcp).
 </Tip>
+
+<div style={{ display: 'flex', alignItems: 'center', gap: '0.5em' }}>
+  <h3 style={{ margin: 0 }}>Alternative: DeepWiki Web</h3>
+  <a href="https://deepwiki.com/Lightprotocol/light-protocol" style={{ margin: 0 }}>
+    <img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki" style={{ marginTop: 0, marginBottom: 0, verticalAlign: 'middle' }} />
+  </a>
+</div>
+
+If you don't have the MCP installed we recommend to use AskDevin in your browser.
+
+<Frame>
+  <iframe
+    width="100%"
+    height="420"
+    src="https://drive.google.com/file/d/1irbZC4NpSE6F1XctIel0yXyVmwvRsjaU/preview"
+    title="DeepWiki Video"
+    frameborder="0"
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+    referrerpolicy="strict-origin-when-cross-origin"
+    allowfullscreen
+  ></iframe>
+</Frame>
 
 # Next Steps
 
