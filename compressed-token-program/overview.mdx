@@ -22,17 +22,20 @@ import CTokenProgramGuidesTable from '/snippets/overview-tables/ctoken-program-g
 | **Mint Account**    | 1,461,600 lamports        | ~<Tooltip tip="10,000 lamports to create address + 5,000 to create compressed account + 5,000-10,000 for tx signature">25,000 lamports</Tooltip>     |
 | **Token Account**   | 	2,039,280 lamports         | ~22,288 lamports     |
 
-## c-Mint Accounts
-
-1. c-Mints uniquely represent a token on Solana and store its global metadata.
-2. Tokens created from c-Mints are c-Tokens. The mint's address serves as the token's unique identifier.
-3. c-Mints are compressed accounts and rent-free.
-
-## c-Token Accounts
-
-1. c-Token & associated c-Token accounts (c-ATAs) are **Solana accounts** that<br/> **hold balances** of **c-Mint, SPL mint, or Token 2022 mint** tokens.
-2. Existing **SPL tokens can be converted** to c-Tokens and back on demand.
-3. The compressible extension implements a **custom rent config**.
+<CardGroup cols={2}>
+  <Card title="" icon="coins">
+  ## c-Mint Accounts
+    * Uniquely represent a token and store its global metadata.
+    * Mint's address serves as the token's unique identifier.
+    * c-Mints are compressed accounts and rent-free.
+  </Card>
+  <Card title="" icon="wallet">
+  ## c-Token Accounts
+    * Hold token balances of c-Mint, SPL mint, or Token 2022 mints.
+    * SPL tokens can be converted to <br/>c-Tokens and back on demand.
+    * Custom rent config via compressible extension.
+  </Card>
+</CardGroup>
 
 #### Custom Rent Config
 
