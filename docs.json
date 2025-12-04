@@ -454,12 +454,6 @@
         "tab": "API Reference",
         "pages": [
           {
-            "group": "SDK Reference",
-            "pages": [
-              "api-reference/index"
-            ]
-          },
-          {
             "group": "JSON RPC Methods",
             "pages": [
               "api-reference/json-rpc-methods/overview",
@@ -578,25 +572,5 @@
       "github": "https://github.com/Lightprotocol/light-protocol",
       "discord": "https://discord.com/invite/CYvjBgzRFP"
     },
-    "links": [
-      {
-        "header": "Compressed by Light Protocol",
-        "items": [
-          {
-            "label": "lightprotocol.com",
-            "href": "https://lightprotocol.com"
-          }
-        ]
-      },
-      {
-        "header": "Indexed by Helius",
-        "items": [
-          {
-            "label": "helius.dev",
-            "href": "https://helius.dev"
-          }
-        ]
-      }
-    ]
   }
 }
