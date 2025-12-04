@@ -1,15 +1,15 @@
 ---
-title: Create cMint
-description: Program and client guide to create a cMint with token metadata via CPI to the c-Token Program. Includes step-by-step implementation and full code examples.
+title: Create c-Mint
+description: Program and client guide to create a c-Mint with token metadata via CPI to the c-Token Program. Includes step-by-step implementation and full code examples.
 ---
 
 import CMintSystemAccountsList from '/snippets/accounts-list/cmint-system-accounts-list.mdx';
 import CTokenClientPrerequisites from '/snippets/ctoken-guides/ctoken-client-prerequisites.mdx';
 import ClientCustomRentConfig from '/snippets/ctoken-guides/client-custom-rent-config.mdx';
 
-1. cMints uniquely represent a token on Solana and store its global metadata.
-2. cMints are compressed accounts and rent-free.
-3. Tokens created from cMints are c-Tokens.
+1. c-Mints uniquely represent a token on Solana and store its global metadata.
+2. c-Mints are compressed accounts and rent-free.
+3. Tokens created from c-Mints are c-Tokens.
 
 <Info>
 Learn the [core concepts to the c-Token Program here](/compressed-token-program/c-token-program).
@@ -77,7 +77,7 @@ let token_metadata = ExtensionInstructionData::TokenMetadata(
 ```
 
 <Note>
-**Fields must be set at cMint creation.**
+**Fields must be set at c-Mint creation.**
 * Standard fields (`name`, `symbol`, `uri`) can be updated by `update_authority`.
 * For `additional_metadata`, only existing keys can be modified or removed. New keys cannot be added after creation.
 </Note>
@@ -85,7 +85,7 @@ let token_metadata = ExtensionInstructionData::TokenMetadata(
 </Step>
 
 <Step>
-### Configure cMint
+### Configure c-Mint
 
 Set `decimals`, `mint_authority`, `freeze_authority`, and pass the `token_metadata` from the previous step.
 
@@ -104,7 +104,7 @@ let cmint_params = CreateCMintParams {
 };
 ```
 <Info>
-* The client passes a validity proof that proves the cMint address does not exist in the address tree where it will be stored.
+* The client passes a validity proof that proves the c-Mint address does not exist in the address tree where it will be stored.
 * You can safely ignore `compression_address` and `address_merkle_tree_root_index`. The client passes these for proof verification.
 </Info>
 

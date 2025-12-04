@@ -32,7 +32,7 @@
                 "group": "Cookbook",
                 "pages": [
                   {
-                    "group": "cMint",
+                    "group": "c-Mint",
                     "expanded": true,
                     "pages": [
                       "compressed-token-program/cmint/create-cmint",

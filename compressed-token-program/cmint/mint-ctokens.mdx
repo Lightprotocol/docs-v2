@@ -1,6 +1,6 @@
 ---
 title: Mint c-Tokens
-description: Program guide to mint c-Tokens to a cMint via CPI to the Compressed Token Program with step-by-step implementation and full code examples.
+description: Program guide to mint c-Tokens to a c-Mint via CPI to the Compressed Token Program with step-by-step implementation and full code examples.
 ---
 
 import CMintSystemAccountsList from '/snippets/accounts-list/cmint-system-accounts-list.mdx';
@@ -9,7 +9,7 @@ import CTokenClientPrerequisites from '/snippets/ctoken-guides/ctoken-client-pre
 import ClientCustomRentConfig from '/snippets/ctoken-guides/client-custom-rent-config.mdx';
 
 
-1. c-Tokens increase the supply of a cMint.
+1. c-Tokens increase the supply of a c-Mint.
 2. The destination c-Token accounts must exist to receive the minted c-Tokens.
 3. Only the mint authority can mint new c-Tokens.
 
@@ -55,7 +55,7 @@ Find [a full code example at the end](#full-code-example).
 
 ### Configure Mint Parameters
 Include your mint, the amount of tokens to be minted and the pubkey of the mint authority. 
-The client passes a validity proof that <Tooltip tip="cMints are compressed accounts. Compressed accounts are stored in state Merkle trees. Only the root hash is stored on chain - every transaction that accesses the cMint includes a validity proof to verify the compressed state.">proves the cMint exists</Tooltip>.
+The client passes a validity proof that <Tooltip tip="c-Mints are compressed accounts. Compressed accounts are stored in state Merkle trees. Only the root hash is stored on chain - every transaction that accesses the c-Mint includes a validity proof to verify the compressed state.">proves the c-Mint exists</Tooltip>.
 
 ```rust
 use light_compressed_token_sdk::ctoken::MintToCTokenParams;
@@ -75,7 +75,7 @@ let mint_params = MintToCTokenParams::new(
 
 ### System Accounts
 
-Compressed accounts like cMints require system accounts like the Light System Program account for interactions and proof verification. 
+Compressed accounts like c-Mints require system accounts like the Light System Program account for interactions and proof verification. 
 The client includes them in the instruction.
 
 <Accordion title="System Accounts List">
