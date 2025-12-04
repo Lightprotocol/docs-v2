@@ -22,6 +22,23 @@ import CTokenProgramGuidesTable from '/snippets/overview-tables/ctoken-program-g
 | **Mint Account**    | 1,461,600 lamports        | ~<Tooltip tip="10,000 lamports to create address + 5,000 to create compressed account + 5,000-10,000 for tx signature">25,000 lamports</Tooltip>     |
 | **Token Account**   | 	2,039,280 lamports         | ~22,288 lamports     |
 
+## c-Mint Accounts
+
+1. c-Mints uniquely represent a token on Solana and store its global metadata.
+2. Tokens created from c-Mints are c-Tokens. The mint's address serves as the token's unique identifier.
+3. c-Mints are compressed accounts and rent-free.
+
+## c-Token Accounts
+
+1. c-Token & associated c-Token accounts (c-ATAs) are **Solana accounts** that<br/> **hold balances** of **c-Mint, SPL mint, or Token 2022 mint** tokens.
+2. Existing **SPL tokens can be converted** to c-Tokens and back on demand.
+3. The compressible extension implements a **custom rent config**.
+
+#### Custom Rent Config
+
+<CompressibleRentExplained />
+
+
 <Info>
 Learn the core concepts to the [c-Token program here](/learn/c-token-program).
 </Info>
@@ -50,32 +67,21 @@ Learn the core concepts to the [c-Token program here](/learn/c-token-program).
 ### Get Started
   </Step>
 </Steps>
-## c-Mint Accounts
-
-1. cMints uniquely represent a token on Solana and store its global metadata.
-2. Tokens created from cMints are c-Tokens. The mint's address serves as the token's unique identifier.
-3. cMints are compressed accounts and rent-free.
-
-## c-Token Accounts
-
-1. c-Token & associated c-Token accounts (c-ATAs) are **Solana accounts** that<br/> **hold balances** of **cMint, SPL mint, or Token 2022 mint** tokens.
-2. Existing **SPL tokens can be converted** to c-Tokens and back on demand.
-3. The compressible extension implements a **custom rent config**.
-
-#### Custom Rent Config
-
-<CompressibleRentExplained />
-
-### Guides
-
-<CTokenProgramGuidesTable />
-
 
 ## Integrate c-Token
 
 ADD TABLE OF "FOR"
 
-## Next Steps
+## Cookbook
+
+<CTokenProgramGuidesTable />
+
+
+## Example Programs and Client
+
+ADD TABLE OF github repository
+
+# Next Steps
 
 <Card
   title="Create compressed token accounts"
