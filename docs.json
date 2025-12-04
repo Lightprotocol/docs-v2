@@ -17,11 +17,10 @@
         "tab": "Docs",
         "pages": [
           {
-            "group": "Introduction",
+            "group": "Get Started",
             "pages": [
-              "intro-pages/landing",
-              "intro-pages/quickstart",
-              "intro-pages/support"
+              "/landing",
+              "/quickstart"
             ]
           },
           {
@@ -508,14 +507,9 @@
           "icon": "robot"
         },
         {
-          "anchor": "GitHub",
-          "href": "https://github.com/Lightprotocol/light-protocol",
-          "icon": "github"
-        },
-        {
-          "anchor": "Discord",
-          "href": "https://discord.com/invite/CYvjBgzRFP",
-          "icon": "discord"
+          "anchor": "Support",
+          "href": "https://www.zkcompression.com/support",
+          "icon": "headset"
         }
       ]
     }
