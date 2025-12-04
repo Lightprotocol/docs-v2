@@ -1,16 +1,16 @@
 ---
 title: Create cMint
-description: Program guide to create a cMint with token metadata via CPI to the cToken Program. Includes step-by-step implementation and full code examples.
+description: Program guide to create a cMint with token metadata via CPI to the c-Token Program. Includes step-by-step implementation and full code examples.
 ---
 
 import CMintSystemAccountsList from '/snippets/accounts-list/cmint-system-accounts-list.mdx';
 
 1. cMints uniquely represent a token on Solana and store its global metadata.
 2. cMints are compressed accounts and rent-free.
-3. Tokens created from cMints are cTokens.
+3. Tokens created from cMints are c-Tokens.
 
 <Info>
-Learn the [core concepts to the cToken Program here](/compressed-token-program/c-token-program).
+Learn the [core concepts to the c-Token Program here](/compressed-token-program/c-token-program).
 </Info>
 
 <Note>
@@ -110,7 +110,7 @@ let system_accounts = SystemAccountInfos {
 </Step>
 
 <Step>
-### Build Account Infos and CPI the cToken Program
+### Build Account Infos and CPI the c-Token Program
 
 1. Pass the required accounts
 2. Include `cmint_params` and `system_accounts` from the previous steps
@@ -467,10 +467,10 @@ pub fn process_create_cmint_with_pda_authority(
 # Next Steps
 
 <Card
-  title="Learn how to mint cTokens"
+  title="Learn how to mint c-Tokens"
   icon="chevron-right"
   color="#0066ff"
-  href="/compressed-token-program/ctoken/program-mint-cToken"
+  href="/compressed-token-program/ctoken/program-mint-c-Token"
   horizontal
 />
 

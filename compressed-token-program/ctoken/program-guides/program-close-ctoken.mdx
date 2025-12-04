@@ -1,6 +1,6 @@
 ---
-title: Close cToken Accounts
-description: Program guide to close cToken accounts via CPI to the cToken Program with step-by-step implementation and full code examples.
+title: Close c-Token Accounts
+description: Program guide to close c-Token accounts via CPI to the c-Token Program with step-by-step implementation and full code examples.
 ---
 
 import CloseAccountInfosAccountsList from '/snippets/accounts-list/close-account-infos-accounts-list.mdx';
@@ -17,9 +17,9 @@ Find [full code examples at the end](#full-code-example).
 <Steps>
 <Step>
 
-### Build Account Infos and CPI the cToken Program
+### Build Account Infos and CPI the c-Token Program
 
-1. Define the cToken account to close and where remaining lamports should go
+1. Define the c-Token account to close and where remaining lamports should go
 2. Use `invoke` or `invoke_signed`, when a CPI requires a PDA signer.
 
 <Tabs>
@@ -160,7 +160,7 @@ pub fn process_close_account_invoke_signed(accounts: &[AccountInfo]) -> Result<(
   href="/compressed-token-program/ctoken/client-guides/client-close-ctoken"
   horizontal
 >
-  Close cToken Accounts
+  Close c-Token Accounts
 </Card>
 <Card
   title="Compressed Tokens"

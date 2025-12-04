@@ -1,17 +1,17 @@
 ---
-title: Close cToken Accounts
-description: Program guide to close cToken accounts via CPI to the cToken Program with step-by-step implementation and full code examples.
+title: Close c-Token Accounts
+description: Program guide to close c-Token accounts via CPI to the c-Token Program with step-by-step implementation and full code examples.
 ---
 
 import CloseAccountInfosAccountsList from '/snippets/accounts-list/close-account-infos-accounts-list.mdx';
 import CTokenClientPrerequisites from '/snippets/ctoken-guides/ctoken-client-prerequisites.mdx';
 import ClientCustomRentConfig from '/snippets/ctoken-guides/client-custom-rent-config.mdx';
 
-1. Closing a cToken account transfers remaining lamports to a destination account and the rent sponsor can reclaim sponsored rent.
-2. cToken accounts can be closed
+1. Closing a c-Token account transfers remaining lamports to a destination account and the rent sponsor can reclaim sponsored rent.
+2. c-Token accounts can be closed
     * by the account owner at any time.
     * by the <Tooltip tip="The `compression_authority` is a PDA of the Light Registry program. It claims rent for the rent sponsor from compressible accounts that are compressed and closed.">`compression_authority`</Tooltip>
-     when the account becomes <Tooltip tip="An account is compressible when it has rent for less than 1 epoch (360 lamports for a 260-byte cToken account).">compressible</Tooltip>. The account is <Tooltip tip="You can think of compressed cToken accounts as storage of inactive accounts that can be reactivated."> compressed and closed</Tooltip> - it can be reinstated with the same state (decompressed).
+     when the account becomes <Tooltip tip="An account is compressible when it has rent for less than 1 epoch (360 lamports for a 260-byte c-Token account).">compressible</Tooltip>. The account is <Tooltip tip="You can think of compressed c-Token accounts as storage of inactive accounts that can be reactivated."> compressed and closed</Tooltip> - it can be reinstated with the same state (decompressed).
 
 # Get Started
 
@@ -30,7 +30,7 @@ import ClientCustomRentConfig from '/snippets/ctoken-guides/client-custom-rent-c
 </Step>
 
 <Step>
-### Close cToken Account
+### Close c-Token Account
 </Step>
 </Steps>
 </Tab>
@@ -43,9 +43,9 @@ Find [a full code example at the end](#full-code-example).
 <Steps>
 <Step>
 
-### Build Account Infos and CPI the cToken Program
+### Build Account Infos and CPI the c-Token Program
 
-1. Define the cToken account to close and where remaining lamports should go
+1. Define the c-Token account to close and where remaining lamports should go
 2. Use `invoke` or `invoke_signed`, when a CPI requires a PDA signer.
 
 <Tabs>
@@ -182,7 +182,7 @@ pub fn process_close_account_invoke_signed(accounts: &[AccountInfo]) -> Result<(
 # Next Steps
 
   <Card
-    title="Create cATA Accounts"
+    title="Create c-ATA Accounts"
     icon="chevron-right"
     color="#0066ff"
     href="/compressed-token-program/ctoken/create-cata"

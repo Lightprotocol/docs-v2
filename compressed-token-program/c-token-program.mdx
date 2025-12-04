@@ -1,7 +1,7 @@
 ---
 title: Compressed Token Program
 sidebarTitle: Overview New
-description: Overview of cMints, cTokens, and compressed token accounts.
+description: Overview of cMints, c-Tokens, and compressed token accounts.
 ---
 
 import CompressibleVsSolanaRent from '/snippets/compressible-vs-solana-rent.mdx';
@@ -10,7 +10,7 @@ import CompressibleRentExplained from '/snippets/compressible-rent-explained.mdx
 import CompressibleDefaultRentConfig from '/snippets/compressible-default-rent-config.mdx';
 
 
-The [Compressed Token Program](https://github.com/Lightprotocol/light-protocol/tree/main/programs/compressed-token) extends existing Solana token standards with cMints, cTokens and compressed tokens.
+The [Compressed Token Program](https://github.com/Lightprotocol/light-protocol/tree/main/programs/compressed-token) extends existing Solana token standards with cMints, c-Tokens and compressed tokens.
 
 <table>
   <thead>
@@ -32,7 +32,7 @@ The [Compressed Token Program](https://github.com/Lightprotocol/light-protocol/t
       </td>
     </tr>
     <tr>
-      <td style={{textAlign: 'left'}}>**[cToken](#ctoken-account)**</td>
+      <td style={{textAlign: 'left'}}>**[c-Token](#ctoken-account)**</td>
       <td style={{textAlign: 'left'}}>Solana account</td>
       <td style={{textAlign: 'left'}}>
         <ul>
@@ -50,7 +50,7 @@ The [Compressed Token Program](https://github.com/Lightprotocol/light-protocol/t
           <li>**Compressed account** with `TokenData` field</li>
           <li>**Rent-free** and SPL-compatible</li>
           <li>Use for **storage of inactive tokens** and **token distribution**</li>
-          <li>cToken accounts are automatically compressed/decompressed when active/inactive.</li>
+          <li>c-Token accounts are automatically compressed/decompressed when active/inactive.</li>
         </ul>
       </td>
     </tr>
@@ -62,7 +62,7 @@ _add graphic of all tokens here_
 
 <Tip>
 **SPL mints and tokens** owned by the [Token Program](https://github.com/solana-program/token) or [Token-2022](https://github.com/solana-program/token-2022) **require rent** by default.<br /> 
-You can **migrate SPL token accounts to cTokens** with compressible extension for **sponsored rent-exemption** while keeping the **same interoparability**.
+You can **migrate SPL token accounts to c-Tokens** with compressible extension for **sponsored rent-exemption** while keeping the **same interoparability**.
 </Tip>
 
 # cMint Accounts
@@ -74,7 +74,7 @@ You can **migrate SPL token accounts to cTokens** with compressible extension fo
 
 cMints **uniquely represent a token on Solana and store its global metadata**, similar to SPL mint accounts with few core differences:
 1. cMint accounts are **rent-free**.
-2. Tokens created from cMints are **cTokens** (fully compatible with SPL tokens).
+2. Tokens created from cMints are **c-Tokens** (fully compatible with SPL tokens).
 3. Token metadata (name, symbol, URI) is stored as an extension within the compressed mint account.
 
 <Tabs>
@@ -180,23 +180,23 @@ Here is how cMints and SPL mints compare:
   </Tab>
 </Tabs>
 
-# cToken Account
+# c-Token Account
 
 <Note>
-**cToken accounts are Solana accounts**, not compressed accounts.
+**c-Token accounts are Solana accounts**, not compressed accounts.
 </Note>
 
-A cToken account holds token balances like SPL Token accounts:
-* A wallet needs a cToken account for each cMint it wants to hold, with the wallet address set as the cToken account owner.
-* Each wallet can own multiple cToken accounts for the same cMint.
-* A cToken account can only have one owner and hold units of one cMint.
+A c-Token account holds token balances like SPL Token accounts:
+* A wallet needs a c-Token account for each cMint it wants to hold, with the wallet address set as the c-Token account owner.
+* Each wallet can own multiple c-Token accounts for the same cMint.
+* A c-Token account can only have one owner and hold units of one cMint.
 
 <Tabs>
   <Tab title="Diagram">
     <Frame>
       <img
         src="/images/ctoken-explainer.png"
-        alt="Diagram showing cToken Solana account structure with three components: Address (identifier for cToken account in purple box), Account (struct containing Data bytes, Executable flag, Lamports balance, and Owner set to Compressed Token Program), and AccountData (containing Mint, Owner, Amount, and Extensions fields)"
+        alt="Diagram showing c-Token Solana account structure with three components: Address (identifier for c-Token account in purple box), Account (struct containing Data bytes, Executable flag, Lamports balance, and Owner set to Compressed Token Program), and AccountData (containing Mint, Owner, Amount, and Extensions fields)"
       />
     </Frame>
   </Tab>
@@ -219,17 +219,17 @@ A cToken account holds token balances like SPL Token accounts:
 </Tabs>
 
 <Info>
-Find the [source code of cToken here](https://github.com/Lightprotocol/light-protocol/blob/main/program-libs/ctoken-types/src/state/ctoken/ctoken_struct.rs).
+Find the [source code of c-Token here](https://github.com/Lightprotocol/light-protocol/blob/main/program-libs/ctoken-types/src/state/ctoken/ctoken_struct.rs).
 </Info>
 
-cToken accounts replicate the field layout and serialization format of [SPL Token accounts](https://solana.com/docs/tokens#token-account). The struct is serialized with Borsh to match the on-chain format of SPL tokens.
+c-Token accounts replicate the field layout and serialization format of [SPL Token accounts](https://solana.com/docs/tokens#token-account). The struct is serialized with Borsh to match the on-chain format of SPL tokens.
 
-Here is how cTokens and SPL tokens compare:
+Here is how c-Tokens and SPL tokens compare:
 <table>
   <thead>
     <tr>
       <th style={{width: '10%', textAlign: 'left'}}>Field</th>
-      <th style={{width: '45%', textAlign: 'center'}}>cToken</th>
+      <th style={{width: '45%', textAlign: 'center'}}>c-Token</th>
       <th style={{width: '30%', textAlign: 'center'}}>SPL Token Account</th>
     </tr>
   </thead>
@@ -284,13 +284,13 @@ Here is how cTokens and SPL tokens compare:
 
 ### Compressible Extension
 
-cToken accounts are compressible:
+c-Token accounts are compressible:
 
 <CompressibleRentExplained />
 
-This extension makes cToken accounts 200x cheaper than SPL token accounts
+This extension makes c-Token accounts 200x cheaper than SPL token accounts
 
-    |  | cToken | SPL |
+    |  | c-Token | SPL |
     |-----------|--------|-----|
     | allocate | 0.000011 | 0.002 |
     | rent for 24h | 0.000011 | - |
@@ -306,11 +306,11 @@ This extension makes cToken accounts 200x cheaper than SPL token accounts
 <CompressibleRentCalculator />
 
 
-# Associated cToken Account
+# Associated c-Token Account
 
-**Associated cToken** accounts (cATAs) follow the same pattern as [associated token accounts](https://docs.solana.com/developing/programming-model/associated-token-account) (ATA):
-* Each wallet needs its own cToken account to hold tokens from the same cMint.
-* The address for cATAs is deterministically derived with the owner’s address, cToken program ID, and mint address.
+**Associated c-Token** accounts (c-ATAs) follow the same pattern as [associated token accounts](https://docs.solana.com/developing/programming-model/associated-token-account) (ATA):
+* Each wallet needs its own c-Token account to hold tokens from the same cMint.
+* The address for c-ATAs is deterministically derived with the owner’s address, c-Token program ID, and mint address.
 
 ```rust
 let seeds = [
@@ -322,17 +322,17 @@ let seeds = [
 ```
 
 <Info>
-Find the [source code to associated cToken accounts here](https://github.com/Lightprotocol/light-protocol/blob/main/programs/compressed-token/program/src/create_associated_token_account.rs).
+Find the [source code to associated c-Token accounts here](https://github.com/Lightprotocol/light-protocol/blob/main/programs/compressed-token/program/src/create_associated_token_account.rs).
 </Info>
 
 # Compressed Token Account
 
-Compressed token accounts store token balance, owner, and other information like SPL and cTokens. Any cToken or SPL token can be compressed/decompressed at will.
+Compressed token accounts store token balance, owner, and other information like SPL and c-Tokens. Any c-Token or SPL token can be compressed/decompressed at will.
 
 We recommend to use compressed tokens for **token distribution** or **storage of inactive tokens**.
 
 <Tip>
-**cToken accounts** with the **[compressible extension](/compressible/compressible) are automatically compressed** with no writes in 27,000 slots (3h) and decompressed with new writes.
+**c-Token accounts** with the **[compressible extension](/compressible/compressible) are automatically compressed** with no writes in 27,000 slots (3h) and decompressed with new writes.
 </Tip>
 
 <Tabs>

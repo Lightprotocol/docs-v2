@@ -1,6 +1,6 @@
 ---
-title: Mint cTokens
-description: Program guide to mint cTokens to a cMint via CPI to the Compressed Token Program with step-by-step implementation and full code examples.
+title: Mint c-Tokens
+description: Program guide to mint c-Tokens to a cMint via CPI to the Compressed Token Program with step-by-step implementation and full code examples.
 ---
 
 import CMintSystemAccountsList from '/snippets/accounts-list/cmint-system-accounts-list.mdx';
@@ -9,9 +9,9 @@ import CTokenClientPrerequisites from '/snippets/ctoken-guides/ctoken-client-pre
 import ClientCustomRentConfig from '/snippets/ctoken-guides/client-custom-rent-config.mdx';
 
 
-1. cTokens increase the supply of a cMint.
-2. The destination cToken accounts must exist to receive the minted cTokens.
-3. Only the mint authority can mint new cTokens.
+1. c-Tokens increase the supply of a cMint.
+2. The destination c-Token accounts must exist to receive the minted c-Tokens.
+3. Only the mint authority can mint new c-Tokens.
 
 <Note>
 Find [full code examples at the end](#full-code-example).
@@ -39,7 +39,7 @@ Find [full code examples at the end](#full-code-example).
 </Step>
 
 <Step>
-### Mint cTokens
+### Mint c-Tokens
 </Step>
 </Steps>
 </Tab>
@@ -99,9 +99,9 @@ let system_accounts = SystemAccountInfos {
 
 <Step>
 
-### Build Account Infos and CPI the cToken Program
+### Build Account Infos and CPI the c-Token Program
 
-1. Pass the required accounts, including the destination cToken accounts.
+1. Pass the required accounts, including the destination c-Token accounts.
 2. Include `mint_params` and `system_accounts` from the previous steps
 3. Use `invoke` or `invoke_signed`, when a CPI requires a PDA signer.
 <Tabs>
@@ -331,7 +331,7 @@ pub fn process_mint_to_ctoken_invoke_signed(
   href="/compressed-token-program/ctoken/client-guides/client-mint-to-ctoken"
   horizontal
 >
-  Mint cTokens
+  Mint c-Tokens
 </Card>
 <Card
   title="Program Guide"
@@ -340,6 +340,6 @@ pub fn process_mint_to_ctoken_invoke_signed(
   href="/compressed-token-program/ctoken/program-guides/program-close-ctoken"
   horizontal
 >
-  Transfer Interface cToken
+  Transfer Interface c-Token
 </Card>
 </CardGroup>

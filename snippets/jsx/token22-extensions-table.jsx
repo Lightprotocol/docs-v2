@@ -156,7 +156,7 @@ export const Token22ExtensionsTable = () => {
             <tr>
               <th style={{textAlign: 'left'}}>Extension Name</th>
               <th style={{textAlign: 'left'}}>Description</th>
-              <th style={{textAlign: 'center'}}>cToken</th>
+              <th style={{textAlign: 'center'}}>c-Token</th>
               <th style={{textAlign: 'center'}}>Compressed Token</th>
             </tr>
           </thead>

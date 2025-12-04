@@ -1,6 +1,6 @@
 ---
 title: Overview
-description: "Overview to cTokens and reference to client guides, program guides, and example repository."
+description: "Overview to c-Tokens and reference to client guides, program guides, and example repository."
 ---
 import { CTokenVsSplCalculator } from '/snippets/jsx/ctoken-vs-spl-calculator.jsx';
 import { CompressibleRentCalculator } from '/snippets/jsx/compressible-rent-calculator.jsx';
@@ -8,16 +8,16 @@ import CompressibleRentExplained from '/snippets/compressible-rent-explained.mdx
 import CompressibleDefaultRentConfig from '/snippets/compressible-default-rent-config.mdx';
 import CTokenProgramGuidesTable from '/snippets/overview-tables/ctoken-program-guides-table.mdx';
 
-1. cToken & associated cToken accounts (cATAs) are **Solana accounts** that<br/> **hold balances** of **cMint, SPL mint, or Token 2022 mint** tokens.
-2. cToken accounts and cATAs are **compressible** that reduces account creation cost.
+1. c-Token & associated c-Token accounts (c-ATAs) are **Solana accounts** that<br/> **hold balances** of **cMint, SPL mint, or Token 2022 mint** tokens.
+2. c-Token accounts and c-ATAs are **compressible** that reduces account creation cost.
 
-|  | cToken account | SPL token account |
+|  | c-Token account | SPL token account |
 |-----------|--------|-----|
 | **Creation Cost** | 22,288 lamports | 2,039,280 lamports |
 
 ## Compressible Rent
 
-For cTokens and cATAs, the compressible extension implements a **custom rent config**:
+For c-Tokens and c-ATAs, the compressible extension implements a **custom rent config**:
 
 <CompressibleRentExplained />
 
@@ -131,7 +131,7 @@ add github link
 ## Next Steps
 
   <Card
-    title="Create cToken Accounts"
+    title="Create c-Token Accounts"
     icon="chevron-right"
     color="#0066ff"
     href="/compressed-token-program/ctoken/create-ctoken"

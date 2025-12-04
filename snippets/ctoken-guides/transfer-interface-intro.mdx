@@ -1,29 +1,29 @@
 <table>
   <tbody>
     <tr>
-      <td style={{width: '33%'}}>**cToken → cToken Account**</td>
+      <td style={{width: '33%'}}>**c-Token → c-Token Account**</td>
       <td>
         <ul>
-          <li>Transfers cTokens between cToken accounts</li>
+          <li>Transfers c-Tokens between c-Token accounts</li>
         </ul>
       </td>
     </tr>
     <tr>
-      <td>**SPL token → cToken Account**</td>
+      <td>**SPL token → c-Token Account**</td>
       <td>
         <ul>
-          <li>Transfers SPL tokens to cToken accounts</li>
+          <li>Transfers SPL tokens to c-Token accounts</li>
           <li>SPL tokens are locked in interface PDA</li>
-          <li>cTokens are minted to cToken account</li>
+          <li>c-Tokens are minted to c-Token account</li>
         </ul>
       </td>
     </tr>
     <tr>
-      <td>**cToken → SPL Account**</td>
+      <td>**c-Token → SPL Account**</td>
       <td>
         <ul>
           <li>Releases SPL tokens from interface PDA to SPL account</li>
-          <li>Burns cTokens in source cToken account</li>
+          <li>Burns c-Tokens in source c-Token account</li>
         </ul>
       </td>
     </tr>
@@ -31,6 +31,6 @@
 </table>
 
 <Tip>
-* For example, **SPL → cToken** can be used for transfers from Alice's SPL token account to her own cToken account.
-* You can use this to **convert existing SPL tokens to cTokens** with **sponsored rent-exemption**. Learn more in the [core concepts to the cToken program](/compressed-token-program/ctoken/README).
+* For example, **SPL → c-Token** can be used for transfers from Alice's SPL token account to her own c-Token account.
+* You can use this to **convert existing SPL tokens to c-Tokens** with **sponsored rent-exemption**. Learn more in the [core concepts to the c-Token program](/compressed-token-program/ctoken/README).
 </Tip>

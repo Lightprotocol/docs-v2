@@ -10,8 +10,8 @@ import InstallDependencies from '/snippets/setup/install-dependencies-codegroup.
 import { TokenAccountCompressedVsSpl } from '/snippets/jsx/token-account-compressed-vs-spl.jsx';
 
 1. Compressed tokens are compressed accounts with `TokenData` and rent-free.
-2. Compressed token accounts store token balance, owner, and other information of tokens like SPL and cTokens. 
-3. Any cToken or SPL token can be compressed/decompressed at will.
+2. Compressed token accounts store token balance, owner, and other information of tokens like SPL and c-Tokens. 
+3. Any c-Token or SPL token can be compressed/decompressed at will.
 
 ## Recommended Usage of Compressed Tokens
 
@@ -19,7 +19,7 @@ import { TokenAccountCompressedVsSpl } from '/snippets/jsx/token-account-compres
   #### Storage of Inactive Token Accounts
   * Most (associated) token accounts are not frequently written to.
   * **Store token accounts rent-free** when inactive
-  * [cTokens](/compressed-token-program/ctoken/README) are automatically compressed/decompressed, when active/inactive and include **sponsored rent-exemption**. [Learn more here](/compressed-token-program/ctoken/README).
+  * [c-Tokens](/compressed-token-program/ctoken/README) are automatically compressed/decompressed, when active/inactive and include **sponsored rent-exemption**. [Learn more here](/compressed-token-program/ctoken/README).
   </Card>
   <Card title="">
   #### [Token Distribution](#advanced-guides)

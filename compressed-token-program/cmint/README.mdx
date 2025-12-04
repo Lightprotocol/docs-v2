@@ -7,140 +7,15 @@ import { SolanaRentCalculator } from '/snippets/jsx/solana-rent-calculator.jsx';
 
 1. cMints uniquely represent a token on Solana and store its global metadata.
 2. cMints are compressed accounts and rent-free.
-3. Tokens created from cMints are cTokens. The mint's address serves as the token's unique identifier.
+3. Tokens created from cMints are c-Tokens. The mint's address serves as the token's unique identifier.
 
 |  | cMint account | SPL mint account |
 |-----------|--------|-----|
 | creation cost | <Tooltip tip="10,000 lamports to create address + 5,000 to create compressed account + 5,000-10,000 for tx signature">25,000 lamports</Tooltip> | 1,461,600 lamports |
 <Info>
-Learn the [core concepts to the cToken Program here](/compressed-token-program/c-token-program).
-</Info>
-## Account Struct
-
-<Tabs>
-  <Tab title="Diagram">
-    <Frame>
-      <img
-        src="/images/token-explainer.png"
-        alt="Diagram showing cMint compressed account structure with three components: Hash (identifier for cMint in purple box), Account (struct containing BaseMint with SPL-compatible fields, cMint Data for program state, and optional Extensions for Token Metadata), and BasemintData (containing Supply, Decimals, Mint Authority, and Freeze Authority fields) with Token Metadata extension"
-      />
-    </Frame>
-  </Tab>
-  <Tab title="Source Code">
-    ```rust
-    pub struct CompressedMint {
-        // SPL mint layout
-        pub base: BaseMint,
-        // cMint state used by the Compressed Token Program
-        pub metadata: CompressedMintMetadata
-        // Field for Token Metadata extension
-        pub extensions: Option<Vec<ExtensionStruct>>,
-    }
-    ```
-  </Tab>
-</Tabs>
-
-<Info>
-Find the [source code of cMints here](https://github.com/Lightprotocol/light-protocol/blob/main/program-libs/ctoken-types/src/state/mint/compressed_mint.rs).
+Learn the [core concepts to the c-Token Program here](/compressed-token-program/c-token-program).
 </Info>
 
-The `metadata` field is used by the Compressed Token Program to store the internal state of a cMint.
-
-The `BaseMint` field replicates the field layout and serialization format of [SPL Mint accounts](https://solana.com/docs/tokens#mint-account). The struct is serialized with Borsh to match the on-chain format of SPL tokens and mints.
-
-Here is how cMints and SPL mints compare:
-
-<Tabs>
-  <Tab title="Basemint vs SPL mint">
-    <table>
-      <thead>
-        <tr>
-          <th style={{width: '10%', textAlign: 'left'}}>Field</th>
-          <th style={{width: '45%', textAlign: 'center'}}>cMint</th>
-          <th style={{width: '30%', textAlign: 'center'}}>SPL Mint</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>mint_authority</td>
-          <td style={{textAlign: 'center'}}>✓</td>
-          <td style={{textAlign: 'center'}}>✓</td>
-        </tr>
-        <tr>
-          <td>supply</td>
-          <td style={{textAlign: 'center'}}>✓</td>
-          <td style={{textAlign: 'center'}}>✓</td>
-        </tr>
-        <tr>
-          <td>decimals</td>
-          <td style={{textAlign: 'center'}}>✓</td>
-          <td style={{textAlign: 'center'}}>✓</td>
-        </tr>
-        <tr>
-          <td>is_initialized</td>
-          <td style={{textAlign: 'center'}}>✓</td>
-          <td style={{textAlign: 'center'}}>✓</td>
-        </tr>
-        <tr>
-          <td>freeze_authority</td>
-          <td style={{textAlign: 'center'}}>✓</td>
-          <td style={{textAlign: 'center'}}>✓</td>
-        </tr>
-        <tr>
-          <td>cMint Data</td>
-          <td style={{textAlign: 'center'}}>✓</td>
-          <td style={{textAlign: 'center'}}>-</td>
-        </tr>
-        <tr>
-          <td>Extensions</td>
-          <td style={{textAlign: 'center'}}>✓</td>
-          <td style={{textAlign: 'center'}}>via Token-2022</td>
-        </tr>
-      </tbody>
-    </table>
-  </Tab>
-  <Tab title="BaseMint Struct">
-    ```rust
-    pub struct BaseMint {
-        /// Optional authority used to mint new tokens. The mint authority may only
-        /// be provided during mint creation. If no mint authority is present
-        /// then the mint has a fixed supply and no further tokens may be
-        /// minted.
-        pub mint_authority: Option<Pubkey>,
-        /// Total supply of tokens.
-        pub supply: u64,
-        /// Number of base 10 digits to the right of the decimal place.
-        pub decimals: u8,
-        /// Is initialized - for SPL compatibility
-        pub is_initialized: bool,
-        /// Optional authority to freeze token accounts.
-        pub freeze_authority: Option<Pubkey>,
-    }
-    ```
-  </Tab>
-</Tabs>
-
-### Extensions
-
-* cMints only support a custom Token Metadata extension.
-* Use more Token 2022 extensions via a [Token 2022 mint account with cTokens](/compressed-token-program/ctoken/extensions).
-
-```rust
-let token_metadata = ExtensionInstructionData::TokenMetadata(
-    TokenMetadataInstructionData {
-        update_authority: Some(authority.to_bytes().into()),
-        name: b"My Token".to_vec(),
-        symbol: b"MTK".to_vec(),
-        uri: b"https://example.com/metadata.json".to_vec(),
-        additional_metadata: Some(vec![
-            AdditionalMetadata {
-                key: b"category".to_vec(),
-                value: b"utility".to_vec(),
-            },
-        ]),
-    }
-);
-```
 # Get Started
 
 <Accordion title="Setup">

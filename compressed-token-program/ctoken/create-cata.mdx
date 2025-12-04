@@ -1,6 +1,6 @@
 ---
-title: Create Associated cToken Accounts
-description: Client and program guide to create associated cToken accounts with step-by-step implementation and full code examples.
+title: Create Associated c-Token Accounts
+description: Client and program guide to create associated c-Token accounts with step-by-step implementation and full code examples.
 ---
 
 import CTokenCreateATAAccountsList from '/snippets/accounts-list/ctoken-create-ata-accounts-list.mdx';
@@ -12,9 +12,9 @@ import CompressibleRentExplained from '/snippets/compressible-rent-explained.mdx
 import CTokenClientPrerequisites from '/snippets/ctoken-guides/ctoken-client-prerequisites.mdx';
 import ClientCustomRentConfig from '/snippets/ctoken-guides/client-custom-rent-config.mdx';
 
-1. Associated cToken accounts (cATA) are Solana accounts that hold token balances of cMints, SPL mints, or Token 2022 mints.
-2. The address for cATAs is deterministically derived with the owner’s address, cToken program ID, and mint address.
-3. cATAs are compressible with a default rent config.
+1. Associated c-Token accounts (c-ATA) are Solana accounts that hold token balances of cMints, SPL mints, or Token 2022 mints.
+2. The address for c-ATAs is deterministically derived with the owner’s address, c-Token program ID, and mint address.
+3. c-ATAs are compressible with a default rent config.
     1. At account creation, you pay ~22,208 lamports <Tooltip tip="24 h = 16 epochs, where 1 rent-epoch ≈ 1.5h ≈ 13,500 slots at 400ms per slot">for 24h of rent</Tooltip> <br/>and <Tooltip tip="Covers transaction cost to compress accounts (10,000) and protocol incentive (1,000). Transaction cost might vary.">compression incentive</Tooltip> (the rent-exemption is sponsored by the protocol)
     2. Transfers keep the account funded <Tooltip tip="2 epochs = 3h">with rent for 3h</Tooltip> via top-ups. The transaction payer tops up 766 lamports when the account's rent is below 3h.
 
@@ -46,7 +46,7 @@ import ClientCustomRentConfig from '/snippets/ctoken-guides/client-custom-rent-c
 
 <Step>
 
-### Create cATA
+### Create c-ATA
 
 </Step>
 
@@ -69,13 +69,13 @@ Find [a full code example at the end](#full-code-example).
 
 <Step>
 
-### Build Account Infos and CPI the cToken Program
+### Build Account Infos and CPI the c-Token Program
 
 1. Pass the required accounts
 2. Include rent config from `compressible_params`
 3. Use `invoke` or `invoke_signed`, when a CPI requires a PDA signer.
 <Note>
-The cATA address is derived from `[owner, ctoken_program_id, mint]`. Unlike cToken accounts, owner and mint are passed as accounts, not in instruction data.
+The c-ATA address is derived from `[owner, ctoken_program_id, mint]`. Unlike c-Token accounts, owner and mint are passed as accounts, not in instruction data.
 </Note>
 
 <Tabs>
@@ -243,7 +243,7 @@ pub fn process_create_ata2_invoke_signed(
 # Next Steps
 
   <Card
-    title="Mint cTokens"
+    title="Mint c-Tokens"
     icon="chevron-right"
     color="#0066ff"
     href="/compressed-token-program/cmint/mint-ctoken"

@@ -1,6 +1,6 @@
 ---
-title: Mint cTokens
-description: Client guide to mint compressed tokens to cToken accounts with step-by-step implementation and full code examples.
+title: Mint c-Tokens
+description: Client guide to mint compressed tokens to c-Token accounts with step-by-step implementation and full code examples.
 ---
 
 <Tabs>
@@ -86,7 +86,7 @@ async fn mint_to_ctoken(
         .await
         .unwrap();
 
-    println!("Tokens minted to cToken ATAs!");
+    println!("Tokens minted to c-Token ATAs!");
     for (ata, amount) in ata_pubkeys.iter().zip(amounts.iter()) {
         println!("  {} -> {} tokens", ata, amount);
     }
@@ -110,10 +110,10 @@ async fn mint_to_ctoken(
   title="Program Guide"
   icon="chevron-right"
   color="#0066ff"
-  href="/compressed-token-program/ctoken/program-guides/program-mint-to-cToken"
+  href="/compressed-token-program/ctoken/program-guides/program-mint-to-c-Token"
   horizontal
 >
-  Mint cTokens
+  Mint c-Tokens
 </Card>
 <Card
   title="Client Guide"

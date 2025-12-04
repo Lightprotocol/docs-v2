@@ -1,6 +1,6 @@
 ---
 title: Transfer Interface
-description: Guide for transfers between cToken and SPL token accounts via CPI. The interface detects account types and invokes the right programs.
+description: Guide for transfers between c-Token and SPL token accounts via CPI. The interface detects account types and invokes the right programs.
 ---
 
 import TransferInterfaceAccountsListCtoken1 from '/snippets/accounts-list/transfer-interface-accounts-list-ctoken-1.mdx';
@@ -12,29 +12,29 @@ import ClientCustomRentConfig from '/snippets/ctoken-guides/client-custom-rent-c
 <table>
   <tbody>
     <tr>
-      <td style={{width: '33%'}}>**cToken → cToken Account**</td>
+      <td style={{width: '33%'}}>**c-Token → c-Token Account**</td>
       <td>
         <ul>
-          <li>Transfers cTokens between cToken accounts</li>
+          <li>Transfers c-Tokens between c-Token accounts</li>
         </ul>
       </td>
     </tr>
     <tr>
-      <td>**SPL token → cToken Account**</td>
+      <td>**SPL token → c-Token Account**</td>
       <td>
         <ul>
-          <li>Transfers SPL tokens to cToken accounts</li>
+          <li>Transfers SPL tokens to c-Token accounts</li>
           <li>SPL tokens are locked in interface PDA</li>
-          <li>cTokens are minted to cToken account</li>
+          <li>c-Tokens are minted to c-Token account</li>
         </ul>
       </td>
     </tr>
     <tr>
-      <td>**cToken → SPL Account**</td>
+      <td>**c-Token → SPL Account**</td>
       <td>
         <ul>
           <li>Releases SPL tokens from interface PDA to SPL account</li>
-          <li>Burns cTokens in source cToken account</li>
+          <li>Burns c-Tokens in source c-Token account</li>
         </ul>
       </td>
     </tr>
@@ -42,8 +42,8 @@ import ClientCustomRentConfig from '/snippets/ctoken-guides/client-custom-rent-c
 </table>
 
 <Tip>
-* For example, **SPL → cToken** can be used for transfers from Alice's SPL token account to her own cToken account.
-* You can use this to **convert existing SPL tokens to cTokens** with **sponsored rent-exemption**. Learn more in the [core concepts to the cToken program](/compressed-token-program/ctoken/README).
+* For example, **SPL → c-Token** can be used for transfers from Alice's SPL token account to her own c-Token account.
+* You can use this to **convert existing SPL tokens to c-Tokens** with **sponsored rent-exemption**. Learn more in the [core concepts to the c-Token program](/compressed-token-program/ctoken/README).
 </Tip>
 
 # Get Started
@@ -67,7 +67,7 @@ import ClientCustomRentConfig from '/snippets/ctoken-guides/client-custom-rent-c
 </Step>
 
 <Step>
-### Close cToken Account
+### Close c-Token Account
 </Step>
 </Steps>
 </Tab>
@@ -80,11 +80,11 @@ Find [a full code example at the end](#full-code-example).
 <Steps>
 <Step>
 
-### cToken Transfer Interface
+### c-Token Transfer Interface
 
-Define the number of cTokens / SPL tokens to transfer
-- from which SPL or cToken account, and
-- to which SPL or cToken account.
+Define the number of c-Tokens / SPL tokens to transfer
+- from which SPL or c-Token account, and
+- to which SPL or c-Token account.
 
 ```rust
 use light_compressed_token_sdk::ctoken::TransferInterface;
@@ -98,7 +98,7 @@ let mut transfer = TransferInterface::new(
     compressed_token_program_authority.clone(),
 );
 ```
-<Accordion title="cToken Interface Accounts">
+<Accordion title="c-Token Interface Accounts">
 <TransferInterfaceAccountsListCtoken1 />
 </Accordion>
 
@@ -108,7 +108,7 @@ let mut transfer = TransferInterface::new(
 
 ### SPL Transfer Interface (Optional)
 
-The SPL transfer interface is only needed for SPL ↔ cToken transfers.
+The SPL transfer interface is only needed for SPL ↔ c-Token transfers.
 ```rust
 transfer = transfer.with_spl_interface(
     Some(mint.clone()),
@@ -118,9 +118,9 @@ transfer = transfer.with_spl_interface(
 )?;
 ```
 
-SPL ↔ cToken transfers require a `spl_interface_pda`:
-    * **SPL → cToken**: SPL tokens are locked by the cToken Program in the PDA, cTokens are minted to cToken accounts
-    * **cToken → SPL**: cTokens are burned, SPL tokens transferred to SPL token accounts
+SPL ↔ c-Token transfers require a `spl_interface_pda`:
+    * **SPL → c-Token**: SPL tokens are locked by the c-Token Program in the PDA, c-Tokens are minted to c-Token accounts
+    * **c-Token → SPL**: c-Tokens are burned, SPL tokens transferred to SPL token accounts
 <Info>
 The interface PDA is derived from the `mint` pubkey and pool seed.
 </Info>
@@ -132,9 +132,9 @@ The interface PDA is derived from the `mint` pubkey and pool seed.
 
 <Step>
 
-### CPI the cToken Program
+### CPI the c-Token Program
 
-CPI the cToken program to execute the transfer. 
+CPI the c-Token program to execute the transfer. 
 Use `invoke()`, or `invoke_signed()` when a CPI requires a PDA signer.
 
 <Tabs>
@@ -174,25 +174,25 @@ pub const TRANSFER_INTERFACE_AUTHORITY_SEED: &[u8] = b"transfer_interface_author
 #[derive(BorshSerialize, BorshDeserialize, Debug)]
 pub struct TransferInterfaceData {
     pub amount: u64,
-    /// Required for SPL<->cToken transfers, None for cToken->cToken
+    /// Required for SPL<->c-Token transfers, None for c-Token->c-Token
     pub token_pool_pda_bump: Option<u8>,
 }
 
 /// Handler for TransferInterface (invoke)
 ///
 /// This unified interface automatically detects account types and routes to:
-/// - cToken -> cToken transfer
-/// - cToken -> SPL transfer
-/// - SPL -> cToken transfer
+/// - c-Token -> c-Token transfer
+/// - c-Token -> SPL transfer
+/// - SPL -> c-Token transfer
 ///
 /// Account order:
 /// - accounts[0]: compressed_token_program (for CPI)
-/// - accounts[1]: source_account (SPL or cToken)
-/// - accounts[2]: destination_account (SPL or cToken)
+/// - accounts[1]: source_account (SPL or c-Token)
+/// - accounts[2]: destination_account (SPL or c-Token)
 /// - accounts[3]: authority (signer)
 /// - accounts[4]: payer (signer)
 /// - accounts[5]: compressed_token_program_authority
-///   For SPL interface (required for SPL<->cToken):
+///   For SPL interface (required for SPL<->c-Token):
 /// - accounts[6]: mint
 /// - accounts[7]: token_pool_pda
 /// - accounts[8]: spl_token_program
@@ -234,12 +234,12 @@ pub fn process_transfer_interface_invoke(
 ///
 /// Account order:
 /// - accounts[0]: compressed_token_program (for CPI)
-/// - accounts[1]: source_account (SPL or cToken)
-/// - accounts[2]: destination_account (SPL or cToken)
+/// - accounts[1]: source_account (SPL or c-Token)
+/// - accounts[2]: destination_account (SPL or c-Token)
 /// - accounts[3]: authority (PDA, not signer - program signs)
 /// - accounts[4]: payer (signer)
 /// - accounts[5]: compressed_token_program_authority
-///   For SPL interface (required for SPL<->cToken):
+///   For SPL interface (required for SPL<->c-Token):
 /// - accounts[6]: mint
 /// - accounts[7]: token_pool_pda
 /// - accounts[8]: spl_token_program
@@ -293,7 +293,7 @@ pub fn process_transfer_interface_invoke_signed(
 # Next Steps
 
   <Card
-    title="Transfer Interface for cToken <> SPL token transfers"
+    title="Transfer Interface for c-Token <> SPL token transfers"
     icon="chevron-right"
     color="#0066ff"
     href="/compressed-token-program/ctoken/transfer-interface"

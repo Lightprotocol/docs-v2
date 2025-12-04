@@ -11,151 +11,100 @@
   "appearance": {
     "default": "light"
   },
-  "customCSS": "/custom.css",
-  "seo": {
-    "metatags": {
-      "canonical": "https://www.zkcompression.com",
-      "keywords": "solana, compression, zk compression, solana rent, solana rent free, account rent, compressed tokens, compressed accounts, solana pda, program derived address, airdrop, cheap airdrop, solana aidrop, SPL tokens, token distribution, stablecoin payments, solana pay, solana mobile, state compression, zero-knowledge proofs, zk proofs, validity proofs, merkle trees, rent-free accounts, solana scalability, L1 scalability, Light Protocol, Helius, Solana Foundation, solana SDK, solana development, web3 infrastructure, blockchain scalability, cheap token accounts, token account compression, scale Solana, Solana problems, Solana token accounts, compressed accounts, compressed NFTs, state compression, Metaplex, Solana Superteam, DePin, getMinimumBalanceForRentExemption, fetchSysvarRent(rpc, config?), getAccountInfo"
-    }
-  },
-  "errors": {
-    "404": {
-      "redirect": false,
-      "title": "Oops ... rent not found",
-      "description": "Use our AI assistant to find what you are looking for!"
-    }
-  },
   "navigation": {
     "tabs": [
       {
         "tab": "Docs",
         "pages": [
           {
-            "group": "Introduction",
+            "group": "Get Started",
             "pages": [
-              "intro-pages/landing",
-              "intro-pages/quickstart",
-              "intro-pages/support"
+              "/landing",
+              "/quickstart",
+              "learn/ai-tools-guide"
             ]
           },
           {
-            "group": "Learn",
-            "pages": [
-              {
-                "group": "Core Concepts",
-                "pages": [
-                  "learn/core-concepts",
-                  "learn/core-concepts/compressed-account-model",
-                  "learn/core-concepts/merkle-trees-validity-proofs",
-                  "learn/core-concepts/transaction-lifecycle",
-                  "learn/core-concepts/considerations"
-                ]
-              },
-              "rent",
-              "learn/c-token-program"
-            ]
-          },
-          {
-            "group": "cToken Program",
+            "group": "c-Token",
             "pages": [
               "compressed-token-program/overview",
               {
-                "group": "cMint",
+                "group": "Cookbook",
                 "pages": [
-                  "compressed-token-program/cmint/README",
-                  "compressed-token-program/cmint/create-cmint",
-                  "compressed-token-program/cmint/update-metadata",
-                  "compressed-token-program/cmint/mint-ctokens",
                   {
-                    "group": "Client Guides",
-                    "hidden": true,
+                    "group": "cMint",
+                    "expanded": true,
                     "pages": [
-                      "compressed-token-program/cmint/client-guides/cmint",
-                      "compressed-token-program/cmint/client-guides/update-metadata",
-                      "compressed-token-program/cmint/client-guides/client-mint-to-ctoken"
+                      "compressed-token-program/cmint/create-cmint",
+                      "compressed-token-program/cmint/update-metadata",
+                      "compressed-token-program/cmint/mint-ctokens"
                     ]
                   },
                   {
-                    "group": "Program Guides",
-                    "hidden": true,
+                    "group": "c-Token",
+                    "expanded": true,
                     "pages": [
-                      "compressed-token-program/cmint/program-guides/program-create-cmint",
-                      "compressed-token-program/cmint/program-guides/program-mint-to-cToken"
+                      "compressed-token-program/ctoken/create-ctoken",
+                      "compressed-token-program/ctoken/create-cata",
+                      "compressed-token-program/ctoken/transfer-interface",
+                      "compressed-token-program/ctoken/close-ctoken-account"
                     ]
                   }
                 ]
               },
               {
-                "group": "cToken",
+                "group": "Integrate c-Token",
+                "expanded": true,
                 "pages": [
-                  "compressed-token-program/ctoken/README",
-                  "compressed-token-program/ctoken/create-ctoken",
-                  "compressed-token-program/ctoken/create-cata",
-                  "compressed-token-program/ctoken/transfer-interface",
-                  "compressed-token-program/ctoken/close-ctoken-account",
-                  "compressed-token-program/ctoken/extensions",
-                  {
-                    "group": "Client Guides",
-                    "hidden": true,
-                    "pages": [
-                      "compressed-token-program/ctoken/client-guides/client-create-ctoken",
-                      "compressed-token-program/ctoken/client-guides/client-create-cATA",
-                      "compressed-token-program/ctoken/client-guides/client-transfer-interface",
-                      "compressed-token-program/ctoken/client-guides/client-close-ctoken"
-                    ]
-                  },
-                  {
-                    "group": "Program Guides",
-                    "hidden": true,
-                    "pages": [
-                      "compressed-token-program/ctoken/program-guides/program-create-ctoken",
-                      "compressed-token-program/ctoken/program-guides/program-create-cATA",
-                      "compressed-token-program/ctoken/program-guides/program-transfer-interface",
-                      "compressed-token-program/ctoken/program-guides/program-close-ctoken"
-                    ]
-                  }
+                  "compressed-token-program/integrate/for-aggregators",
+                  "compressed-token-program/integrate/for-dexs",
+                  "compressed-token-program/integrate/for-defi-markets",
+                  "compressed-token-program/integrate/for-trading-apps",
+                  "compressed-token-program/integrate/for-wallet-applications",
+                  "compressed-token-program/integrate/for-payment-companies"
+                ]
+              },
+              "compressed-token-program/ctoken/extensions"
+            ]
+          },
+          {
+            "group": "Compressed Tokens",
+            "pages": [
+              "compressed-tokens/README",
+              {
+                "group": "Cookbook",
+                "pages": [
+                  "compressed-tokens/guides/how-to-create-compressed-token-accounts",
+                  "compressed-tokens/guides/how-to-mint-compressed-tokens",
+                  "compressed-tokens/guides/how-to-transfer-compressed-token",
+                  "compressed-tokens/guides/how-to-compress-and-decompress-spl-tokens",
+                  "compressed-tokens/guides/how-to-compress-complete-spl-token-accounts",
+                  "compressed-tokens/guides/how-to-create-and-register-a-mint-account-for-compression",
+                  "compressed-tokens/guides/how-to-create-compressed-token-pools-for-mint-accounts",
+                  "compressed-tokens/guides/how-to-merge-compressed-token-accounts",
+                  "compressed-tokens/guides/how-to-approve-and-revoke-delegate-authority"
                 ]
               },
               {
-                "group": "Compressed Token",
+                "group": "Implementation Guides",
                 "pages": [
-                  "compressed-tokens/README",
                   {
-                    "group": "Basic Guides",
+                    "group": "Integration",
+                    "expanded": true,
                     "pages": [
-                      "compressed-tokens/guides/how-to-create-compressed-token-accounts",
-                      "compressed-tokens/guides/how-to-mint-compressed-tokens",
-                      "compressed-tokens/guides/how-to-transfer-compressed-token",
-                      "compressed-tokens/guides/how-to-compress-and-decompress-spl-tokens",
-                      "compressed-tokens/guides/how-to-compress-complete-spl-token-accounts",
-                      "compressed-tokens/guides/how-to-create-and-register-a-mint-account-for-compression",
-                      "compressed-tokens/guides/how-to-create-compressed-token-pools-for-mint-accounts",
-                      "compressed-tokens/guides/how-to-merge-compressed-token-accounts",
-                      "compressed-tokens/guides/how-to-approve-and-revoke-delegate-authority"
+                      "compressed-tokens/advanced-guides/how-to-combine-operations-in-one-transaction",
+                      "compressed-tokens/advanced-guides/add-wallet-support-for-compressed-tokens",
+                      "compressed-tokens/advanced-guides/use-token-2022-with-compression"
                     ]
                   },
                   {
-                    "group": "Advanced Guides",
+                    "group": "Examples",
+                    "expanded": true,
                     "pages": [
-                      {
-                        "group": "Integration",
-                        "expanded": true,
-                        "pages": [
-                          "compressed-tokens/advanced-guides/how-to-combine-operations-in-one-transaction",
-                          "compressed-tokens/advanced-guides/add-wallet-support-for-compressed-tokens",
-                          "compressed-tokens/advanced-guides/use-token-2022-with-compression"
-                        ]
-                      },
-                      {
-                        "group": "Examples",
-                        "expanded": true,
-                        "pages": [
-                          "compressed-tokens/advanced-guides/create-an-airdrop",
-                          "compressed-tokens/advanced-guides/create-an-airdrop-with-claim",
-                          "compressed-tokens/advanced-guides/example-web-client",
-                          "compressed-tokens/advanced-guides/example-node-js"
-                        ]
-                      }
+                      "compressed-tokens/advanced-guides/create-an-airdrop",
+                      "compressed-tokens/advanced-guides/create-an-airdrop-with-claim",
+                      "compressed-tokens/advanced-guides/example-web-client",
+                      "compressed-tokens/advanced-guides/example-node-js"
                     ]
                   }
                 ]
@@ -163,7 +112,7 @@
             ]
           },
           {
-            "group": "Compressed PDAs",
+            "group": "PDAs",
             "pages": [
               "compressed-pdas/create-a-program-with-compressed-pdas",
               {
@@ -453,6 +402,23 @@
             ]
           },
           {
+            "group": "Learn",
+            "pages": [
+              {
+                "group": "Core Concepts",
+                "pages": [
+                  "learn/core-concepts",
+                  "learn/core-concepts/compressed-account-model",
+                  "learn/core-concepts/merkle-trees-validity-proofs",
+                  "learn/core-concepts/transaction-lifecycle",
+                  "learn/core-concepts/considerations"
+                ]
+              },
+              "rent",
+              "learn/c-token-program"
+            ]
+          },
+          {
             "group": "Resources",
             "pages": [
               "resources/cli-installation",
@@ -485,6 +451,7 @@
           {
             "group": "SDK Reference",
             "pages": [
+              "changelog",
               "api-reference/libraries/stateless-js",
               "api-reference/libraries/compressed-token",
               "api-reference/libraries/light-client",
@@ -493,190 +460,14 @@
             ]
           }
         ]
-      },
-      {
-        "tab": "cToken Program",
-        "pages": [
-          "compressed-token-program/overview",
-          "compressed-token-program/c-token-program",
-          {
-            "group": "cMint",
-            "pages": [
-              "compressed-token-program/cmint/README",
-              "compressed-token-program/cmint/create-cmint",
-              {
-                "group": "Client Guides",
-                "pages": [
-                  "compressed-token-program/cmint/client-guides/cmint",
-                  "compressed-token-program/cmint/client-guides/client-create-cmint",
-                  "compressed-token-program/cmint/client-guides/update-metadata"
-                ]
-              },
-              {
-                "group": "Program Guides",
-                "pages": [
-                  "compressed-token-program/cmint/program-guides/program-create-cmint"
-                ]
-              }
-            ]
-          },
-          {
-            "group": "cToken",
-            "pages": [
-              "compressed-token-program/ctoken/README",
-              {
-                "group": "Client Guides",
-                "pages": [
-                  "compressed-token-program/ctoken/client-guides/client-create-ctoken",
-                  "compressed-token-program/ctoken/client-guides/client-create-cATA",
-                  "compressed-token-program/ctoken/client-guides/client-mint-to-ctoken",
-                  "compressed-token-program/ctoken/client-guides/client-transfer-interface",
-                  "compressed-token-program/ctoken/client-guides/client-close-ctoken"
-                ]
-              },
-              {
-                "group": "Program Guides",
-                "pages": [
-                  "compressed-token-program/ctoken/program-guides/program-create-ctoken",
-                  "compressed-token-program/ctoken/program-guides/program-create-cATA",
-                  "compressed-token-program/ctoken/program-guides/program-mint-to-cToken",
-                  "compressed-token-program/ctoken/program-guides/program-transfer-interface",
-                  "compressed-token-program/ctoken/program-guides/program-close-ctoken"
-                ]
-              }
-            ]
-          },
-          {
-            "group": "Compressed Token",
-            "pages": [
-              "compressed-tokens/README",
-              {
-                "group": "Basic Guides",
-                "pages": [
-                  "compressed-tokens/guides/how-to-create-compressed-token-accounts",
-                  "compressed-tokens/guides/how-to-mint-compressed-tokens",
-                  "compressed-tokens/guides/how-to-transfer-compressed-token",
-                  "compressed-tokens/guides/how-to-compress-and-decompress-spl-tokens",
-                  "compressed-tokens/guides/how-to-compress-complete-spl-token-accounts",
-                  "compressed-tokens/guides/how-to-create-and-register-a-mint-account-for-compression",
-                  "compressed-tokens/guides/how-to-create-compressed-token-pools-for-mint-accounts",
-                  "compressed-tokens/guides/how-to-merge-compressed-token-accounts",
-                  "compressed-tokens/guides/how-to-approve-and-revoke-delegate-authority"
-                ]
-              },
-              {
-                "group": "Advanced Guides",
-                "pages": [
-                  {
-                    "group": "Integration",
-                    "expanded": true,
-                    "pages": [
-                      "compressed-tokens/advanced-guides/how-to-combine-operations-in-one-transaction",
-                      "compressed-tokens/advanced-guides/add-wallet-support-for-compressed-tokens",
-                      "compressed-tokens/advanced-guides/use-token-2022-with-compression"
-                    ]
-                  },
-                  {
-                    "group": "Examples",
-                    "expanded": true,
-                    "pages": [
-                      "compressed-tokens/advanced-guides/create-an-airdrop",
-                      "compressed-tokens/advanced-guides/create-an-airdrop-with-claim",
-                      "compressed-tokens/advanced-guides/example-web-client",
-                      "compressed-tokens/advanced-guides/example-node-js"
-                    ]
-                  }
-                ]
-              }
-            ]
-          },
-          "compressed-token-program/ctoken/extensions"
-        ]
-      },
-      {
-        "tab": "Compressed PDAs",
-        "pages": [
-          "compressed-pdas/create-a-program-with-compressed-pdas",
-          {
-            "group": "Guides",
-            "pages": [
-              "compressed-pdas/guides/how-to-create-compressed-accounts",
-              "compressed-pdas/guides/how-to-update-compressed-accounts",
-              "compressed-pdas/guides/how-to-close-compressed-accounts",
-              "compressed-pdas/guides/how-to-reinitialize-compressed-accounts",
-              "compressed-pdas/guides/how-to-burn-compressed-accounts"
-            ]
-          },
-          "compressed-pdas/program-examples"
-        ]
-      },
-      {
-        "tab": "API Reference",
-        "pages": [
-          {
-            "group": "SDK Reference",
-            "pages": [
-              "api-reference/index"
-            ]
-          },
-          {
-            "group": "JSON RPC Methods",
-            "pages": [
-              "api-reference/json-rpc-methods/overview",
-              {
-                "group": "Methods",
-                "pages": [
-                  "api-reference/json-rpc-methods/methods",
-                  "api-reference/json-rpc-methods/getcompressedaccount",
-                  "api-reference/json-rpc-methods/getcompressedaccountsbyowner",
-                  "api-reference/json-rpc-methods/getcompressedbalancebyowner",
-                  "api-reference/json-rpc-methods/getcompressedbalance",
-                  "api-reference/json-rpc-methods/getcompressedminttokenholders",
-                  "api-reference/json-rpc-methods/getcompressedtokenaccountbalance",
-                  "api-reference/json-rpc-methods/getcompressedtokenaccountbydelegate",
-                  "api-reference/json-rpc-methods/getcompressedtokenaccountsbyowner",
-                  "api-reference/json-rpc-methods/getcompressedtokenbalancesbyowner",
-                  "api-reference/json-rpc-methods/getcompressionsignaturesforaccount",
-                  "api-reference/json-rpc-methods/getcompressionsignaturesforaddress",
-                  "api-reference/json-rpc-methods/getcompressionsignaturesforowner",
-                  "api-reference/json-rpc-methods/getcompressionsignaturesfortokenowner",
-                  "api-reference/json-rpc-methods/getindexerhealth",
-                  "api-reference/json-rpc-methods/getindexerslot",
-                  "api-reference/json-rpc-methods/getlatestcompressionsignatures",
-                  "api-reference/json-rpc-methods/getlatestnonvotingsignatures",
-                  "api-reference/json-rpc-methods/getmultiplecompressedaccounts",
-                  "api-reference/json-rpc-methods/getmultiplenewaddressproofs",
-                  "api-reference/json-rpc-methods/gettransactionwithcompressioninfo",
-                  "api-reference/json-rpc-methods/getvalidityproof"
-                ]
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "tab": "Changelog",
-        "pages": [
-          "changelog"
-        ]
       }
     ],
     "global": {
       "anchors": [
         {
-          "anchor": "AI Tools",
-          "href": "https://zkcompression.com/learn/ai-tools-guide",
-          "icon": "bot"
-        },
-        {
-          "anchor": "GitHub",
-          "href": "https://github.com/Lightprotocol/light-protocol",
-          "icon": "github"
-        },
-        {
-          "anchor": "Discord",
-          "href": "https://discord.com/invite/CYvjBgzRFP",
-          "icon": "discord"
+          "anchor": "Support",
+          "href": "https://www.zkcompression.com/support",
+          "icon": "headset"
         }
       ]
     }
@@ -737,26 +528,6 @@
       "x": "https://x.com/lightprotocol",
       "github": "https://github.com/Lightprotocol/light-protocol",
       "discord": "https://discord.com/invite/CYvjBgzRFP"
-    },
-    "links": [
-      {
-        "header": "Compressed by Light Protocol",
-        "items": [
-          {
-            "label": "lightprotocol.com",
-            "href": "https://lightprotocol.com"
-          }
-        ]
-      },
-      {
-        "header": "Indexed by Helius",
-        "items": [
-          {
-            "label": "helius.dev",
-            "href": "https://helius.dev"
-          }
-        ]
-      }
-    ]
+    }
   }
 }

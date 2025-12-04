@@ -1,6 +1,6 @@
 ---
-title: Create cToken Accounts
-description: Program guide to create cToken accounts with step-by-step implementation and full code examples.
+title: Create c-Token Accounts
+description: Program guide to create c-Token accounts with step-by-step implementation and full code examples.
 ---
 
 import CTokenCreateAccountsList from '/snippets/ctoken-create-accounts-list.mdx';
@@ -16,8 +16,8 @@ import ClientCustomRentConfig from '/snippets/ctoken-guides/client-custom-rent-c
 import CompressibleRentExplained from '/snippets/compressible-rent-explained.mdx';
 import CompressibleDefaultRentConfig from '/snippets/compressible-default-rent-config.mdx';
 
-1. cToken accounts are Solana accounts that hold token balances of cMints, SPL mints, or Token 2022 mints.
-2. cToken accounts are compressible with a default rent config.
+1. c-Token accounts are Solana accounts that hold token balances of cMints, SPL mints, or Token 2022 mints.
+2. c-Token accounts are compressible with a default rent config.
     1. At account creation, you pay ~22,208 lamports <Tooltip tip="24 h = 16 epochs, where 1 rent-epoch ≈ 1.5h ≈ 13,500 slots at 400ms per slot">for 24h of rent</Tooltip> <br/>and <Tooltip tip="Covers transaction cost to compress accounts (10,000) and protocol incentive (1,000). Transaction cost might vary.">compression incentive</Tooltip> (the rent-exemption is sponsored by the protocol)
     2. Transfers keep the account funded <Tooltip tip="2 epochs = 3h">with rent for 3h</Tooltip> via top-ups. The transaction payer tops up 766 lamports when the account's rent is below 3h.
 
@@ -52,8 +52,8 @@ let instruction = CreateCTokenAccount::new(
 ).instruction()?;
 ```
 
-3. Send transaction & verify cToken account creation with `get_account`. <br/>
-cToken accounts are Solana accounts and use your familiar RPC methods.
+3. Send transaction & verify c-Token account creation with `get_account`. <br/>
+c-Token accounts are Solana accounts and use your familiar RPC methods.
 
 
 
@@ -66,7 +66,7 @@ cToken accounts are Solana accounts and use your familiar RPC methods.
 </Step>
 
 <Step>
-### Create cToken Account
+### Create c-Token Account
 
 ```rust
 use borsh::BorshDeserialize;
@@ -92,7 +92,7 @@ async fn test_create_ctoken_account() {
     // Create compressed mint first (prerequisite)
     let (mint, _compression_address) = create_compressed_mint(&mut rpc, &payer, 9).await;
 
-    // Step 1: Generate new keypair for the cToken account
+    // Step 1: Generate new keypair for the c-Token account
     let account = Keypair::new();
     let owner = payer.pubkey();
 
@@ -205,7 +205,7 @@ Find [a full code example at the end](#full-code-example).
 </Step>
 <Step>
 
-### Build Account Infos and CPI the cToken Program
+### Build Account Infos and CPI the c-Token Program
 
 1. Pass the required accounts
 2. Include rent config from `compressible_params`
@@ -370,7 +370,7 @@ pub fn process_create_token_account_invoke_signed(
 </Tabs>
 # Next Steps
   <Card
-    title="Mint cTokens"
+    title="Mint c-Tokens"
     icon="chevron-right"
     color="#0066ff"
     href="/compressed-token-program/cmint/mint-ctoken"

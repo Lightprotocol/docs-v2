@@ -1,6 +1,6 @@
 ---
-title: Create Associated cToken Accounts
-description: Program guide to create associated cToken accounts with step-by-step implementation and full code examples.
+title: Create Associated c-Token Accounts
+description: Program guide to create associated c-Token accounts with step-by-step implementation and full code examples.
 ---
 
 import CTokenCreateATAAccountsList from '/snippets/accounts-list/ctoken-create-ata-accounts-list.mdx';
@@ -28,13 +28,13 @@ Find [full code examples at the end](#full-code-example).
 
 <Step>
 
-### Build Account Infos and CPI the cToken Program
+### Build Account Infos and CPI the c-Token Program
 
 1. Pass the required accounts
 2. Include rent config from `compressible_params`
 3. Use `invoke` or `invoke_signed`, when a CPI requires a PDA signer.
 <Note>
-The cATA address is derived from `[owner, ctoken_program_id, mint]`. Unlike cToken accounts, owner and mint are passed as accounts, not in instruction data.
+The c-ATA address is derived from `[owner, ctoken_program_id, mint]`. Unlike c-Token accounts, owner and mint are passed as accounts, not in instruction data.
 </Note>
 
 <Tabs>
@@ -204,18 +204,18 @@ pub fn process_create_ata2_invoke_signed(
   title="Client Guide"
   icon="chevron-right"
   color="#0066ff"
-  href="/compressed-token-program/ctoken/client-guides/client-create-cATA"
+  href="/compressed-token-program/ctoken/client-guides/client-create-c-ATA"
   horizontal
 >
-  Create Associated cToken Accounts
+  Create Associated c-Token Accounts
 </Card>
 <Card
   title="Program Guide"
   icon="chevron-right"
   color="#0066ff"
-  href="/compressed-token-program/ctoken/program-guides/program-mint-to-cToken"
+  href="/compressed-token-program/ctoken/program-guides/program-mint-to-c-Token"
   horizontal
 >
-  Mint cTokens
+  Mint c-Tokens
 </Card>
 </CardGroup>

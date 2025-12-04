@@ -2,9 +2,9 @@
 2. Compressible rent is paid <Tooltip tip="1 rent-epoch ≈ 1.5h ≈ 13,500 slots at 400ms per slot">per rent-epoch: 388 lamports for 1.5h</Tooltip>, <br/> 
 paid by account creator and transaction payers to keep accounts "active".
 3. "Inactive" accounts, where rent is below one epoch, are compressed <br/>and the rent-exemption can be claimed by the rent sponsor.
-4. Transfers to inactive accounts <Tooltip tip="Compressed state is stored in leaves of Merkle trees (≃ disk). cToken accounts are Solana accounts that store state on chain (≃ RAM). Load means to load state from 'disk' to 'RAM', i.e. decompress accounts.">"load" it with the same state </Tooltip> (decompress).
+4. Transfers to inactive accounts <Tooltip tip="Compressed state is stored in leaves of Merkle trees (≃ disk). c-Token accounts are Solana accounts that store state on chain (≃ RAM). Load means to load state from 'disk' to 'RAM', i.e. decompress accounts.">"load" it with the same state </Tooltip> (decompress).
 
-Compressible rent is paid in three scenarios:
+This way rent is only paid when accounts are used:
 
 <table>
   <thead>
@@ -19,21 +19,21 @@ Compressible rent is paid in three scenarios:
       <td><strong>Account Creation</strong></td>
       <td>
         <strong>Total: 22,208 lamports</strong><br/>
-        11,208 lamports (24h rent)<br/>
+        11,208 lamports (adds 24h rent)<br/>
         11,000 lamports (<Tooltip tip="Covers transaction cost to compress inactive accounts (10,000) and protocol incentive (1,000). Transaction cost might vary.">compression incentive</Tooltip>)<br/>
       </td>
-      <td>Account creator</td>
-    </tr>
-    <tr>
-      <td><strong>Top ups</strong><br/>(when rent &lt; 2 epochs)</td>
-      <td><strong>766 lamports</strong> (3h rent)</td>
       <td>Transaction payer</td>
     </tr>
     <tr>
-      <td><strong><Tooltip tip="Compressed state is stored in leaves of Merkle trees (≃ disk). cToken accounts are Solana accounts that store state on chain (≃ RAM). Load means to load state from 'disk' to 'RAM', i.e. decompress accounts.">Load Account</Tooltip></strong></td>
+      <td><strong>Top ups</strong><br/>(when rent &lt; 3h)</td>
+      <td><strong>766 lamports</strong> <br/>(adds 3h rent)<br/></td>
+      <td>Transaction payer</td>
+    </tr>
+    <tr>
+      <td><strong><Tooltip tip="Compressed state is stored in leaves of Merkle trees (≃ disk). c-Token accounts are Solana accounts that store state on chain (≃ RAM). Load means to load state from 'disk' to 'RAM', i.e. decompress accounts.">Load Account</Tooltip></strong><br/>(when account inactive)</td>
       <td>
         <strong>Total: 22,208 lamports</strong><br/>
-        11,208 lamports (24h rent)<br/>
+        11,208 lamports (adds 24h rent)<br/>
         11,000 lamports (<Tooltip tip="Covers transaction cost to compress inactive accounts (10,000) and protocol incentive (1,000). Transaction cost might vary.">compression incentive</Tooltip>)<br/>
       </td>
       <td>Transaction payer</td>

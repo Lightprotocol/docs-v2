@@ -1,6 +1,6 @@
 ---
-title: Create cToken Accounts
-description: "Client guide to create cToken accounts with CreateCTokenAccount builder."
+title: Create c-Token Accounts
+description: "Client guide to create c-Token accounts with CreateCTokenAccount builder."
 ---
 import CTokenIntro from '/snippets/ctoken-guides/ctoken-intro.mdx';
 import CTokenClientPrerequisites from '/snippets/ctoken-guides/ctoken-client-prerequisites.mdx';
@@ -33,8 +33,8 @@ let instruction = CreateCTokenAccount::new(
 
 </Accordion>
 
-3. Send transaction & verify cToken account creation with `get_account`. <br/>
-cToken accounts are Solana accounts and use your familiar RPC methods.
+3. Send transaction & verify c-Token account creation with `get_account`. <br/>
+c-Token accounts are Solana accounts and use your familiar RPC methods.
 
 
 
@@ -47,7 +47,7 @@ cToken accounts are Solana accounts and use your familiar RPC methods.
 </Step>
 
 <Step>
-### Create cToken Account
+### Create c-Token Account
 
 ```rust
 use borsh::BorshDeserialize;
@@ -73,7 +73,7 @@ async fn test_create_ctoken_account() {
     // Create compressed mint first (prerequisite)
     let (mint, _compression_address) = create_compressed_mint(&mut rpc, &payer, 9).await;
 
-    // Step 1: Generate new keypair for the cToken account
+    // Step 1: Generate new keypair for the c-Token account
     let account = Keypair::new();
     let owner = payer.pubkey();
 
@@ -187,12 +187,12 @@ pub async fn create_compressed_mint<R: Rpc + Indexer>(
 
 <CardGroup>
 <Card
-  title="Mint to cToken"
+  title="Mint to c-Token"
   icon="chevron-right"
   color="#0066ff"
   href="/compressed-token-program/ctoken/client-guides/client-mint-to-ctoken"
   horizontal
 >
-  Mint tokens to your cToken account
+  Mint tokens to your c-Token account
 </Card>
 </CardGroup>
