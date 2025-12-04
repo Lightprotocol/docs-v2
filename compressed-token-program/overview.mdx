@@ -1,6 +1,7 @@
 ---
 title: Overview
-description: Compressed tokens provide full SPL token functionality without per-account rent cost.
+description: The Compressed Token Program extends existing Solana token standards with cMints, cTokens and compressed tokens.
+
 ---
 
 import GuidesTable from '/snippets/overview-tables/compressed-tokens-guides-table.mdx';
@@ -8,9 +9,18 @@ import AdvancedGuidesTable from '/snippets/overview-tables/compressed-tokens-adv
 import SetupEnvironment from '/snippets/setup/setup-environment-tabs.mdx';
 import InstallDependencies from '/snippets/setup/install-dependencies-codegroup.mdx';
 
-| Creation             | SPL Token | Compressed Token      | Cost Reduction |
-|:---------------------|:------------------|:----------------------|:---------------|
-| 100 Token Accounts   | ~ 0.2 SOL         | **~ 0.00004 SOL**     | **5000x**      |
+* TODO add recommended usage
+
+|              | SPL  | cToken      |
+|:---------------------|:------------------|:----------------------|
+| **Mint**    | 1,461,600 lamports        | ~15,000 lamports     |
+| **Token**   | 	2,039,280 lamports         | ~22,288 lamports     |
+| **Compressed Token**   | 2,039,280 lamports        | ~5,000 lamports     |
+
+
+<Info>
+Learn the core concepts to the [cToken program here](/learn/c-token-program).
+</Info>
 
 # Start building
 

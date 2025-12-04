@@ -3,7 +3,7 @@ import CliInstall from '/snippets/versions/cli-install-0.27.1-alpha.2.mdx';
 <Tabs>
 <Tab title="In-Memory (LightProgramTest)">
 
-Test without external dependencies.
+Test with Lite-SVM (...)
 
 ```bash
 # Initialize project
@@ -20,7 +20,7 @@ use solana_sdk::signer::Signer;
 
 #[tokio::test]
 async fn test_example() {
-    // In-memory test environment - no external validator
+    // In-memory test environment 
     let mut rpc = LightProgramTest::new(ProgramTestConfig::default())
         .await
         .unwrap();

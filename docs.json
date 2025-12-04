@@ -51,14 +51,14 @@
                   "learn/core-concepts/considerations"
                 ]
               },
-              "rent"
+              "rent",
+              "learn/c-token-program"
             ]
           },
           {
             "group": "cToken Program",
             "pages": [
               "compressed-token-program/overview",
-              "compressed-token-program/c-token-program",
               {
                 "group": "cMint",
                 "pages": [
@@ -93,6 +93,7 @@
                   "compressed-token-program/ctoken/create-cata",
                   "compressed-token-program/ctoken/transfer-interface",
                   "compressed-token-program/ctoken/close-ctoken-account",
+                  "compressed-token-program/ctoken/extensions",
                   {
                     "group": "Client Guides",
                     "hidden": true,
@@ -158,8 +159,7 @@
                     ]
                   }
                 ]
-              },
-              "compressed-token-program/ctoken/extensions"
+              }
             ]
           },
           {
