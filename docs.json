@@ -11,15 +11,19 @@
   "appearance": {
     "default": "light"
   },
-  "customCSS": "/custom.css",
   "navigation": {
     "tabs": [
       {
         "tab": "Docs",
         "pages": [
-          "intro-pages/landing",
-          "intro-pages/quickstart",
-          "intro-pages/support",
+          {
+            "group": "Introduction",
+            "pages": [
+              "intro-pages/landing",
+              "intro-pages/quickstart",
+              "intro-pages/support"
+            ]
+          },
           {
             "group": "Learn",
             "pages": [
@@ -392,6 +396,7 @@
           {
             "group": "SDK Reference",
             "pages": [
+              "changelog",
               "api-reference/libraries/stateless-js",
               "api-reference/libraries/compressed-token",
               "api-reference/libraries/light-client",
@@ -489,7 +494,7 @@
         ]
       },
       {
-        "tab": "Changelog",
+        "tab": "Releases",
         "pages": [
           "changelog"
         ]
@@ -500,7 +505,7 @@
         {
           "anchor": "AI Tools",
           "href": "https://zkcompression.com/learn/ai-tools-guide",
-          "icon": "bot"
+          "icon": "robot"
         },
         {
           "anchor": "GitHub",
@@ -571,6 +576,6 @@
       "x": "https://x.com/lightprotocol",
       "github": "https://github.com/Lightprotocol/light-protocol",
       "discord": "https://discord.com/invite/CYvjBgzRFP"
-    },
+    }
   }
 }
