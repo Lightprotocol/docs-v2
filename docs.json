@@ -12,15 +12,12 @@
     "default": "light"
   },
   "navigation": {
-    "tabs": [
+    "groups": [
       {
-        "tab": "Docs",
-        "pages": [
-          {
             "group": "Get Started",
             "pages": [
-              "/landing",
-              "/quickstart",
+              "landing",
+              "quickstart",
               "learn/ai-tools-guide"
             ]
           },
@@ -459,8 +456,6 @@
               "api-reference/libraries/light-program-test"
             ]
           }
-        ]
-      }
     ],
     "global": {
       "anchors": [
