@@ -1,0 +1,76 @@
+---
+title: Overview
+description: "Overview to compressed tokens and guides with full code examples. Use for token distribution or storage of inactive token accounts"
+---
+
+import GuidesTable from '/snippets/overview-tables/compressed-tokens-guides-table.mdx';
+import AdvancedGuidesTable from '/snippets/overview-tables/compressed-tokens-advanced-guides-table.mdx';
+import SetupEnvironment from '/snippets/setup/setup-environment-tabs.mdx';
+import InstallDependencies from '/snippets/setup/install-dependencies-codegroup.mdx';
+import { TokenAccountCompressedVsSpl } from '/snippets/jsx/token-account-compressed-vs-spl.jsx';
+
+1. Compressed tokens are compressed accounts with `TokenData` and rent-free.
+2. Compressed token accounts store token balance, owner, and other information of tokens like SPL and c-Tokens. 
+3. Any c-Token or SPL token can be compressed/decompressed at will.
+
+## Recommended Usage of Compressed Tokens
+
+  <Card title="">
+  #### [Token Distribution](#advanced-guides)
+    * Distribute tokens without paying up front rent per recipient.
+    * Cost reduction for airdrops, rewards, etc:
+    <TokenAccountCompressedVsSpl />
+<Card
+  title="Create an Airdrop"
+  icon="chevron-right"
+  color="#0066ff"
+  href="/compressed-tokens/advanced-guides/create-an-airdrop"
+  horizontal
+/>
+  </Card>
+
+    <Card title="">
+  #### Storage of Inactive Token Accounts
+  * Most (associated) token accounts are not frequently written to.
+  * **Store token accounts rent-free** when inactive
+  * [c-Tokens](/compressed-token-program/README.mdx) are automatically compressed/decompressed, when active/inactive and include **sponsored rent-exemption**. [Learn more here](/compressed-token-program/README.mdx).
+  </Card>
+<Note>
+Leading **wallets** like Phantom and Backpack **support compressed tokens**. The UI does not distinguish between SPL and compressed tokens.
+</Note>
+
+# Get Started
+<Accordion title="Installation & Setup">
+<Steps>
+  <Step>
+
+### Install dependencies
+
+<InstallDependencies />
+</Step>
+
+<Step>
+
+### Set up your developer environment
+
+<SetupEnvironment />
+
+</Step>
+
+</Steps>
+
+</Accordion>
+
+<Steps>
+
+<Step>
+### Basic Guides
+<GuidesTable />
+</Step>
+
+<Step>
+### Advanced Guides
+<AdvancedGuidesTable />
+</Step>
+
+</Steps>

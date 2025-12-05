@@ -155,3 +155,20 @@
   background: rgba(239, 68, 68, 0.08) !important;
   border-color: rgba(239, 68, 68, 0.3) !important;
 }
+
+/* Page Transition Animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Target Mintlify's main content area */
+article,
+[data-testid="content"],
+main > div:first-child {
+  animation: fadeIn 0.6s ease-out;
+}

@@ -15,7 +15,7 @@ Query the Light Protocol repository via DeepWiki MCP with precise technical answ
 
 **MANDATORY STEPS BEFORE EXECUTION:**
 1. Read this complete file
-2. Read [Global CLAUDE.md](/home/tilo/.claude/CLAUDE.md)
+2. Read Global CLAUDE.md
 3. Read terminology reference for precision rules
 
 **VERIFICATION CHECKLIST:**
@@ -23,7 +23,7 @@ Query the Light Protocol repository via DeepWiki MCP with precise technical answ
 - [ ] Are you familiar with precision rules (avoid vague verbs)?
 - [ ] Will you provide file:line references?
 
-**Navigation**: [Global README](/home/tilo/.claude/README.md) | [Commands](/home/tilo/.claude/commands/) | [Global CLAUDE.md](/home/tilo/.claude/CLAUDE.md)
+**Navigation**: Global README | Commands | Global CLAUDE.md
 
 ## Command Process
 

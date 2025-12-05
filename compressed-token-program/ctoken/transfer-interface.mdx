@@ -1,0 +1,478 @@
+---
+title: Transfer Interface
+description: Guide for transfers between c-Token and SPL token accounts via CPI. The interface detects account types and invokes the right programs.
+---
+
+import TransferInterfaceAccountsListCtoken1 from '/snippets/accounts-list/transfer-interface-accounts-list-ctoken-1.mdx';
+import TransferInterfaceAccountsListSpl2 from '/snippets/accounts-list/transfer-interface-accounts-list-spl-2.mdx';
+import TransferInterfaceIntro from '/snippets/ctoken-guides/transfer-interface-intro.mdx';
+import CTokenClientPrerequisites from '/snippets/ctoken-guides/ctoken-client-prerequisites.mdx';
+import ClientCustomRentConfig from '/snippets/ctoken-guides/client-custom-rent-config.mdx';
+
+<table>
+  <tbody>
+    <tr>
+      <td style={{width: '33%'}}>**c-Token -> c-Token Account**</td>
+      <td>
+        <ul>
+          <li>Transfers c-Tokens between c-Token accounts</li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td>**SPL token -> c-Token Account**</td>
+      <td>
+        <ul>
+          <li>Transfers SPL tokens to c-Token accounts</li>
+          <li>SPL tokens are locked in interface PDA</li>
+          <li>c-Tokens are minted to c-Token account</li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td>**c-Token -> SPL Account**</td>
+      <td>
+        <ul>
+          <li>Releases SPL tokens from interface PDA to SPL account</li>
+          <li>Burns c-Tokens in source c-Token account</li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<Tip>
+* For example, **SPL -> c-Token** can be used for transfers from Alice's SPL token account to her own c-Token account.
+* You can use this to **convert existing SPL tokens to c-Tokens** with **sponsored rent-exemption**.
+</Tip>
+
+# Get Started
+
+<Tabs>
+
+<Tab title="Rust Client">
+
+The example transfers SPL token -> c-Token and c-Token -> c-Token:
+1. Create SPL mint, SPL token accounts, and mint SPL tokens
+2. Send SPL tokens to c-Token account to mint c-Tokens.
+3. Transfer c-Tokens to another c-Token account.
+
+<Steps>
+<Step>
+### Prerequisites
+
+<CTokenClientPrerequisites />
+
+</Step>
+
+<Step>
+### Transfer Interface 
+</Step>
+</Steps>
+
+```rust
+use borsh::BorshDeserialize;
+use light_client::rpc::Rpc;
+use light_compressed_token_sdk::{
+    ctoken::{
+        derive_ctoken_ata, CreateAssociatedTokenAccount, TransferCtoken,
+        TransferSplToCtoken,
+    },
+    token_pool::find_token_pool_pda_with_index,
+};
+use light_compressed_token_types::CPI_AUTHORITY_PDA;
+use light_ctoken_types::state::CToken;
+use light_program_test::{LightProgramTest, ProgramTestConfig};
+use light_test_utils::spl::{create_mint_helper, create_token_2022_account, mint_spl_tokens};
+use solana_sdk::{pubkey::Pubkey, signature::Keypair, signer::Signer};
+use spl_token_2022::state::Account as TokenAccount;
+use solana_program::program_pack::Pack;
+use anchor_spl;
+
+
+#[tokio::test(flavor = "multi_thread")]
+async fn test_client_transfer_spl_to_ctoken_to_ctoken() {
+    // Step 1: Setup test environment
+    let mut rpc = LightProgramTest::new(ProgramTestConfig::new_v2(false, None))
+        .await
+        .unwrap();
+
+    let payer = rpc.get_payer().insecure_clone();
+    let sender = Keypair::new();
+    light_test_utils::airdrop_lamports(&mut rpc, &sender.pubkey(), 1_000_000_000)
+        .await
+        .unwrap();
+
+    // Step 2: Create SPL mint
+    let mint = create_mint_helper(&mut rpc, &payer).await;
+    let initial_amount = 10000u64;
+    let spl_to_ctoken_amount = 7000u64;
+    let ctoken_transfer_amount = 3000u64;
+
+    // Step 3: Create SPL token account and mint tokens
+    let spl_token_account = Keypair::new();
+    create_token_2022_account(&mut rpc, &mint, &spl_token_account, &sender, false)
+        .await
+        .unwrap();
+
+    mint_spl_tokens(
+        &mut rpc,
+        &mint,
+        &spl_token_account.pubkey(),
+        &payer.pubkey(),
+        &payer,
+        initial_amount,
+        false,
+    )
+    .await
+    .unwrap();
+
+    // Step 4: Create sender cToken ATA
+    let (sender_ctoken_ata, _) = derive_ctoken_ata(&sender.pubkey(), &mint);
+
+    let create_sender_ata = CreateAssociatedTokenAccount::new(
+        payer.pubkey(),
+        sender.pubkey(),
+        mint,
+    )
+    .instruction()
+    .unwrap();
+
+    rpc.create_and_send_transaction(&[create_sender_ata], &payer.pubkey(), &[&payer])
+        .await
+        .unwrap();
+
+    // Step 5: Convert SPL tokens to cToken (7000 tokens)
+    let (token_pool_pda, token_pool_pda_bump) = find_token_pool_pda_with_index(&mint, 0);
+    let cpi_authority_pda = Pubkey::new_from_array(CPI_AUTHORITY_PDA);
+
+    let spl_token_program = anchor_spl::token::ID;
+
+    let spl_to_ctoken_instruction = TransferSplToCtoken {
+        amount: spl_to_ctoken_amount,
+        token_pool_pda_bump,
+        source_spl_token_account: spl_token_account.pubkey(),
+        destination_ctoken_account: sender_ctoken_ata,
+        authority: sender.pubkey(),
+        mint,
+        payer: payer.pubkey(),
+        token_pool_pda,
+        spl_token_program,
+    }
+    .instruction()
+    .unwrap();
+
+    rpc.create_and_send_transaction(
+        &[spl_to_ctoken_instruction],
+        &payer.pubkey(),
+        &[&payer, &sender],
+    )
+    .await
+    .unwrap();
+
+    // Step 6: Create recipient cToken ATA
+    let recipient = Keypair::new();
+    light_test_utils::airdrop_lamports(&mut rpc, &recipient.pubkey(), 1_000_000_000)
+        .await
+        .unwrap();
+
+    let (recipient_ctoken_ata, _) = derive_ctoken_ata(&recipient.pubkey(), &mint);
+
+    let create_recipient_ata = CreateAssociatedTokenAccount::new(
+        payer.pubkey(),
+        recipient.pubkey(),
+        mint,
+    )
+    .instruction()
+    .unwrap();
+
+    rpc.create_and_send_transaction(&[create_recipient_ata], &payer.pubkey(), &[&payer])
+        .await
+        .unwrap();
+
+    // Step 7: Transfer cToken to cToken (3000 tokens)
+    let transfer_instruction = TransferCtoken {
+        source: sender_ctoken_ata,
+        destination: recipient_ctoken_ata,
+        amount: ctoken_transfer_amount,
+        authority: sender.pubkey(),
+    }
+    .instruction()
+    .unwrap();
+
+    rpc.create_and_send_transaction(
+        &[transfer_instruction],
+        &payer.pubkey(),
+        &[&payer, &sender],
+    )
+    .await
+    .unwrap();
+
+    // Step 8: Verify balances
+    let sender_account_data = rpc.get_account(sender_ctoken_ata).await.unwrap().unwrap();
+    let sender_state = CToken::deserialize(&mut &sender_account_data.data[..]).unwrap();
+
+    let recipient_account_data = rpc
+        .get_account(recipient_ctoken_ata)
+        .await
+        .unwrap()
+        .unwrap();
+    let recipient_state = CToken::deserialize(&mut &recipient_account_data.data[..]).unwrap();
+
+    // Sender should have: 7000 (converted) - 3000 (transferred) = 4000
+    assert_eq!(
+        sender_state.amount,
+        spl_to_ctoken_amount - ctoken_transfer_amount,
+        "Sender cToken balance should be 4000"
+    );
+
+    // Recipient should have: 3000 (received)
+    assert_eq!(
+        recipient_state.amount, ctoken_transfer_amount,
+        "Recipient cToken balance should be 3000"
+    );
+
+    // Verify SPL account still has remaining tokens: 10000 - 7000 = 3000
+    let spl_account_data = rpc
+        .get_account(spl_token_account.pubkey())
+        .await
+        .unwrap()
+        .unwrap();
+    let spl_account = TokenAccount::unpack(&spl_account_data.data).unwrap();
+    assert_eq!(
+        spl_account.amount,
+        initial_amount - spl_to_ctoken_amount,
+        "SPL account should have 3000 remaining"
+    );
+}
+```
+
+</Tab>
+
+<Tab title="Program Guide">
+
+<Note>
+Find [a full code example at the end](#full-code-example).
+</Note>
+<Steps>
+<Step>
+
+### c-Token Transfer Interface
+
+Define the number of c-Tokens / SPL tokens to transfer
+- from which SPL or c-Token account, and
+- to which SPL or c-Token account.
+
+```rust
+use light_compressed_token_sdk::ctoken::TransferInterface;
+
+let mut transfer = TransferInterface::new(
+    data.amount,
+    source_account.clone(),
+    destination_account.clone(),
+    authority.clone(),
+    payer.clone(),
+    compressed_token_program_authority.clone(),
+);
+```
+<Accordion title="c-Token Interface Accounts">
+<TransferInterfaceAccountsListCtoken1 />
+</Accordion>
+
+</Step>
+
+<Step>
+
+### SPL Transfer Interface (Optional)
+
+The SPL transfer interface is only needed for SPL ↔ c-Token transfers.
+```rust
+transfer = transfer.with_spl_interface(
+    Some(mint.clone()),
+    Some(spl_token_program.clone()),
+    Some(spl_interface_pda.clone()),
+    data.spl_interface_pda_bump,
+)?;
+```
+
+SPL ↔ c-Token transfers require a `spl_interface_pda`:
+    * **SPL → c-Token**: SPL tokens are locked by the c-Token Program in the PDA, c-Tokens are minted to c-Token accounts
+    * **c-Token → SPL**: c-Tokens are burned, SPL tokens transferred to SPL token accounts
+<Info>
+The interface PDA is derived from the `mint` pubkey and pool seed.
+</Info>
+<Accordion title="SPL Interface Accounts">
+<TransferInterfaceAccountsListSpl2 />
+</Accordion>
+
+</Step>
+
+<Step>
+
+### CPI the c-Token Program
+
+CPI the c-Token program to execute the transfer. 
+Use `invoke()`, or `invoke_signed()` when a CPI requires a PDA signer.
+
+<Tabs>
+<Tab title="invoke (External signer)">
+```rust
+transfer.invoke()?;
+```
+</Tab>
+<Tab title="invoke_signed (PDA is signer)">
+```rust
+let authority_seeds: &[&[u8]] = &[TRANSFER_INTERFACE_AUTHORITY_SEED, &[authority_bump]];
+transfer.invoke_signed(&[authority_seeds])?;
+```
+</Tab>
+</Tabs>
+
+</Step>
+</Steps>
+
+# Full Code Example
+
+<Info>
+Find the source code [here](https://github.com/Lightprotocol/light-protocol/blob/main/sdk-tests/sdk-ctoken-test/src/transfer_interface.rs).
+</Info>
+
+```rust expandable
+use borsh::{BorshDeserialize, BorshSerialize};
+use light_compressed_token_sdk::ctoken::TransferInterface;
+use solana_program::{account_info::AccountInfo, program_error::ProgramError, pubkey::Pubkey};
+
+use crate::ID;
+
+/// PDA seed for authority in invoke_signed variants
+pub const TRANSFER_INTERFACE_AUTHORITY_SEED: &[u8] = b"transfer_interface_authority";
+
+/// Instruction data for TransferInterface
+#[derive(BorshSerialize, BorshDeserialize, Debug)]
+pub struct TransferInterfaceData {
+    pub amount: u64,
+    /// Required for SPL<->c-Token transfers, None for c-Token->c-Token
+    pub token_pool_pda_bump: Option<u8>,
+}
+
+/// Handler for TransferInterface (invoke)
+///
+/// This unified interface automatically detects account types and routes to:
+/// - c-Token -> c-Token transfer
+/// - c-Token -> SPL transfer
+/// - SPL -> c-Token transfer
+///
+/// Account order:
+/// - accounts[0]: compressed_token_program (for CPI)
+/// - accounts[1]: source_account (SPL or c-Token)
+/// - accounts[2]: destination_account (SPL or c-Token)
+/// - accounts[3]: authority (signer)
+/// - accounts[4]: payer (signer)
+/// - accounts[5]: compressed_token_program_authority
+///   For SPL interface (required for SPL<->c-Token):
+/// - accounts[6]: mint
+/// - accounts[7]: token_pool_pda
+/// - accounts[8]: spl_token_program
+pub fn process_transfer_interface_invoke(
+    accounts: &[AccountInfo],
+    data: TransferInterfaceData,
+) -> Result<(), ProgramError> {
+    if accounts.len() < 6 {
+        return Err(ProgramError::NotEnoughAccountKeys);
+    }
+
+    let mut transfer = TransferInterface::new(
+        data.amount,
+        accounts[1].clone(), // source_account
+        accounts[2].clone(), // destination_account
+        accounts[3].clone(), // authority
+        accounts[4].clone(), // payer
+        accounts[5].clone(), // compressed_token_program_authority
+    );
+
+    // Add SPL interface config if provided
+    if accounts.len() >= 9 && data.token_pool_pda_bump.is_some() {
+        transfer = transfer.with_spl_interface(
+            Some(accounts[6].clone()), // mint
+            Some(accounts[8].clone()), // spl_token_program
+            Some(accounts[7].clone()), // token_pool_pda
+            data.token_pool_pda_bump,
+        )?;
+    }
+
+    transfer.invoke()?;
+
+    Ok(())
+}
+
+/// Handler for TransferInterface with PDA authority (invoke_signed)
+///
+/// The authority is a PDA derived from TRANSFER_INTERFACE_AUTHORITY_SEED.
+///
+/// Account order:
+/// - accounts[0]: compressed_token_program (for CPI)
+/// - accounts[1]: source_account (SPL or c-Token)
+/// - accounts[2]: destination_account (SPL or c-Token)
+/// - accounts[3]: authority (PDA, not signer - program signs)
+/// - accounts[4]: payer (signer)
+/// - accounts[5]: compressed_token_program_authority
+///   For SPL interface (required for SPL<->c-Token):
+/// - accounts[6]: mint
+/// - accounts[7]: token_pool_pda
+/// - accounts[8]: spl_token_program
+pub fn process_transfer_interface_invoke_signed(
+    accounts: &[AccountInfo],
+    data: TransferInterfaceData,
+) -> Result<(), ProgramError> {
+    if accounts.len() < 6 {
+        return Err(ProgramError::NotEnoughAccountKeys);
+    }
+
+    // Derive the PDA for the authority
+    let (authority_pda, authority_bump) =
+        Pubkey::find_program_address(&[TRANSFER_INTERFACE_AUTHORITY_SEED], &ID);
+
+    // Verify the authority account is the PDA
+    if &authority_pda != accounts[3].key {
+        return Err(ProgramError::InvalidSeeds);
+    }
+
+    let mut transfer = TransferInterface::new(
+        data.amount,
+        accounts[1].clone(), // source_account
+        accounts[2].clone(), // destination_account
+        accounts[3].clone(), // authority (PDA)
+        accounts[4].clone(), // payer
+        accounts[5].clone(), // compressed_token_program_authority
+    );
+
+    // Add SPL interface config if provided
+    if accounts.len() >= 9 && data.token_pool_pda_bump.is_some() {
+        transfer = transfer.with_spl_interface(
+            Some(accounts[6].clone()), // mint
+            Some(accounts[8].clone()), // spl_token_program
+            Some(accounts[7].clone()), // token_pool_pda
+            data.token_pool_pda_bump,
+        )?;
+    }
+
+    // Invoke with PDA signing
+    let authority_seeds: &[&[u8]] = &[TRANSFER_INTERFACE_AUTHORITY_SEED, &[authority_bump]];
+    transfer.invoke_signed(&[authority_seeds])?;
+
+    Ok(())
+}
+```
+</Tab>
+
+</Tabs>
+
+# Next Steps
+
+  <Card
+    title="Transfer Interface for c-Token <> SPL token transfers"
+    icon="chevron-right"
+    color="#0066ff"
+    href="/compressed-token-program/ctoken/transfer-interface"
+    horizontal
+  />
