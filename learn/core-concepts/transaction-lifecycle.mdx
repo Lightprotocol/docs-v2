@@ -38,7 +38,7 @@ The API exposed by the indexer closely mirrors existing RPC calls, with one-to-o
 Clients read compressed accounts similar to Solana accounts:
 
 1. Fetch the compressed account data from your RPC provider using its address or hash
-   * Here you use [`getCompressedAccount()`](/resources/json-rpc-methods/getcompressedaccount), similar to `getAccountInfo()`.
+   * Here you use [`getCompressedAccount()`](/api-reference/json-rpc-methods/getcompressedaccount), similar to `getAccountInfo()`.
 2. Deserialize the account's data field into the appropriate data structure.
 
 <CodeGroup>
@@ -73,7 +73,7 @@ let account_data = deserialize(&compressed_account.data)?;
 On-chain reading within programs requires a validity proof to verify the account exists in the state tree.
 
 1. Fetch the compressed account data from your RPC provider using its address or hash
-2. Fetch a validity proof using the account hash via [`getValidityProof()`](/resources/json-rpc-methods/getvalidityproof).
+2. Fetch a validity proof using the account hash via [`getValidityProof()`](/api-reference/json-rpc-methods/getvalidityproof).
 3. Clients pass the proof to the on-chain program in the instruction data.
 
 <CodeGroup>
@@ -126,7 +126,7 @@ Writing to compressed accounts can be described more generally as:
 **Writing to a compressed account involves these steps:**
 
 1. Fetch the compressed account data from your RPC provider using its address or hash
-2. Fetch a validity proof from your RPC provider using the account hash via [`getValidityProof()`](/resources/json-rpc-methods/getvalidityproof) to prove the account hash exists in the state tree.
+2. Fetch a validity proof from your RPC provider using the account hash via [`getValidityProof()`](/api-reference/json-rpc-methods/getvalidityproof) to prove the account hash exists in the state tree.
 
 The Solana program executing the state transition _**Data**_** -> **_**Data'**_ requires its client to pack the instructions with:
 

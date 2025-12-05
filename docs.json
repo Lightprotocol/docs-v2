@@ -20,22 +20,8 @@
             "group": "Get Started",
             "pages": [
               "/landing",
-              "/quickstart"
-            ]
-          },
-          {
-            "group": "Learn",
-            "pages": [
-              {
-                "group": "Core Concepts",
-                "pages": [
-                  "learn/core-concepts",
-                  "learn/core-concepts/compressed-account-model",
-                  "learn/core-concepts/merkle-trees-validity-proofs",
-                  "learn/core-concepts/transaction-lifecycle",
-                  "learn/core-concepts/considerations"
-                ]
-              }
+              "/quickstart",
+              "learn/ai-tools-guide"
             ]
           },
           {
@@ -363,6 +349,21 @@
             ]
           },
           {
+            "group": "Learn",
+            "pages": [
+              {
+                "group": "Core Concepts",
+                "pages": [
+                  "learn/core-concepts",
+                  "learn/core-concepts/compressed-account-model",
+                  "learn/core-concepts/merkle-trees-validity-proofs",
+                  "learn/core-concepts/transaction-lifecycle",
+                  "learn/core-concepts/considerations"
+                ]
+              }
+            ]
+          },
+          {
             "group": "Resources",
             "pages": [
               "resources/cli-installation",
@@ -501,11 +502,6 @@
     ],
     "global": {
       "anchors": [
-        {
-          "anchor": "AI Tools",
-          "href": "https://zkcompression.com/learn/ai-tools-guide",
-          "icon": "robot"
-        },
         {
           "anchor": "Support",
           "href": "https://www.zkcompression.com/support",
