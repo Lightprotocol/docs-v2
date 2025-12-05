@@ -27,6 +27,31 @@ Learn the [core concepts to the c-Token Program here](/compressed-token-program/
 </Tab>
 
 <Tab title="Rust Client">
+
+The example creates a c-Mint with token metadata.
+1. Derive the mint address and 
+fetch a validity proof from your RPC that proves the address does not exist yet. 
+
+TODO: ADD TOOLTIP TO VALIDITY PROOF
+
+3. Define your Token Metadata (name, symbol, URI, additional metadata)
+4. Build the instruction with `CreateCMint::new()`:
+```rust
+use light_compressed_token_sdk::ctoken::CreateCMint;
+
+let create_cmint = CreateCMint::new(
+    params,
+    mint_signer.pubkey(),
+    payer.pubkey(),
+    address_tree.tree,
+    output_queue,
+);
+let instruction = create_cmint.instruction()?;
+```
+
+5. Send transaction with both `payer` and `mint_signer` as signers. <br/>
+c-Mint addresses are derived from the mint signer and address tree.
+
 <Steps>
 <Step>
 ### Prerequisites
@@ -38,8 +63,7 @@ Learn the [core concepts to the c-Token Program here](/compressed-token-program/
 <Step>
 ### Create c-Mint with Token Metadata
 
-```rust// Test for: client-create-cmint.mdx
-
+```rust
 use light_client::indexer::{AddressWithTree, Indexer};
 use light_client::rpc::Rpc;
 use light_compressed_token_sdk::ctoken::{CreateCMint, CreateCMintParams};
