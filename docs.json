@@ -26,7 +26,7 @@
             ]
           },
           {
-            "group": "c-Token (on Devnet)",
+            "group": "c-Token (Localnet & Devnet)",
             "pages": [
               "compressed-token-program/README",
               {
@@ -37,7 +37,6 @@
                     "expanded": true,
                     "pages": [
                       "compressed-token-program/cmint/create-cmint",
-                      "compressed-token-program/cmint/update-metadata",
                       "compressed-token-program/cmint/mint-ctokens"
                     ]
                   },
