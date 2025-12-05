@@ -8,10 +8,9 @@ import DevelopmentEnvironmentSetup from '/snippets/setup/development-environment
 
 Compressed PDAs provide full functionality of accounts at PDAs, without per-account rent cost.
 
-| Creation      | Regular PDA Account    | Compressed PDA         | Cost Reduction     |
-| :------------- | :--------------------- | :---------------------- | :------------------ |
-| 100-byte PDA  | ~ 0.0016 SOL          | **~ 0.00001 SOL**      | ***160x***         |
-
+| Creation      | Regular PDA Account    | Compressed PDA         | 
+| :------------- | :--------------------- | :---------------------- |
+| 100-byte PDA  | 	~1,600,000          | 15,000     | 
 Compressed PDAs are derived using a specific program address and seed, like regular PDAs. Custom programs invoke the <Tooltip tip="The program enforces compressed account layout with ownership and sum checks. It is invoked to create and interact with compressed accounts and tokens.">Light System program</Tooltip> to create and update accounts, instead of the System program.
 
 #### Compressed PDAs at a Glance
