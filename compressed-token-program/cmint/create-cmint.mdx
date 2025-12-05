@@ -12,7 +12,7 @@ import ClientCustomRentConfig from '/snippets/ctoken-guides/client-custom-rent-c
 3. Tokens created from c-Mints are c-Tokens.
 
 <Info>
-Learn the [core concepts to the c-Token Program here](/compressed-token-program/c-token-program).
+Learn the [core concepts to the c-Token Program here](/compressed-token-program/README.mdx).
 </Info>
 
 # Get Started
@@ -30,12 +30,13 @@ Learn the [core concepts to the c-Token Program here](/compressed-token-program/
 
 The example creates a c-Mint with token metadata.
 1. Derive the mint address and 
-fetch a validity proof from your RPC that proves the address does not exist yet. 
+fetch a <Tooltip tip="Validity proofs are 128 byte zero-knowledge proofs (ZKP). Your RPC generates the validity proof for you.">validity proof</Tooltip> from your RPC that proves the address does not exist yet. 
 
 TODO: ADD TOOLTIP TO VALIDITY PROOF
 
-3. Define your Token Metadata (name, symbol, URI, additional metadata)
-4. Build the instruction with `CreateCMint::new()`:
+3. Configure mint and your token metadata (name, symbol, URI, additional metadata)
+4. Build the instruction with `CreateCMint::new()`.
+
 ```rust
 use light_compressed_token_sdk::ctoken::CreateCMint;
 

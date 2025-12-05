@@ -12,7 +12,7 @@
     "default": "light"
   },
   "banner": {
-    "content": "c-Token is live on Devnet. <a href=\"/compressed-token-program/overview\" style=\"color:#FFFFFF; text-decoration: underline;\">Start testing and create mints or tokens</a> without rent-exemption!",
+    "content": "c-Token is live on Devnet. <a href=\"/compressed-token-program/README\" style=\"color:#FFFFFF; text-decoration: underline;\">Start testing and create mints or tokens</a> without rent-exemption!",
     "dismissible": false
   },
   "navigation": {
@@ -26,9 +26,9 @@
             ]
           },
           {
-            "group": "c-Token",
+            "group": "c-Token (on Devnet)",
             "pages": [
-              "compressed-token-program/overview",
+              "compressed-token-program/README",
               {
                 "group": "Cookbook",
                 "pages": [
@@ -64,8 +64,7 @@
                   "compressed-token-program/integrate/for-wallet-applications",
                   "compressed-token-program/integrate/for-payment-companies"
                 ]
-              },
-              "compressed-token-program/ctoken/extensions"
+              }
             ]
           },
           {
