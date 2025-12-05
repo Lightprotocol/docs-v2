@@ -5,7 +5,6 @@ description: Client and program guide to create associated c-Token accounts with
 
 import CTokenCreateATAAccountsList from '/snippets/accounts-list/ctoken-create-ata-accounts-list.mdx';
 import CompressibleVsSolanaRent from '/snippets/compressible-vs-solana-rent.mdx';
-import { CompressibleRentCalculator } from '/snippets/jsx/compressible-rent-calculator.jsx';
 import CTokenConfigureRent from '/snippets/ctoken-configure-rent.mdx';
 import CAtaIntro from '/snippets/ctoken-guides/cata-intro.mdx';
 import CompressibleRentExplained from '/snippets/compressible-rent-explained.mdx';
@@ -35,11 +34,22 @@ import ClientCustomRentConfig from '/snippets/ctoken-guides/client-custom-rent-c
 
 <Tab title="Rust Client">
 
-TODO: RM COMPRESSIBLE PARAMS
+<Steps>
+<Step>
+
+### Prerequisites
+
+<CTokenClientPrerequisites />
+
+</Step>
+
+<Step>
+
+### Create c-ATA
 
 1. The example creates a test c-Mint. You can use existing c-Mints, SPL or Token 2022 mints as well.
 2. Derive the address from mint and owner pubkey.
-2. Build the instruction with `CreateAssociatedTokenAccount2`. It automatically includes the default rent config:
+3. Build the instruction with `CreateAssociatedTokenAccount2`. It automatically includes the default rent config:
 ```rust
 use light_compressed_token_sdk::ctoken::CreateAssociatedTokenAccount2;
 
@@ -52,9 +62,8 @@ let instruction = CreateAssociatedTokenAccount2::new(
 .instruction()?;
 ```
 
-3. Send transaction & verify c-ATA creation with `get_account`. <br/>
+4. Send transaction & verify c-ATA creation with `get_account`. <br/>
 c-ATAs are Solana accounts and use your familiar RPC methods.
-
 
 ```rust
 use borsh::BorshDeserialize;
@@ -170,21 +179,8 @@ pub async fn create_compressed_mint<R: Rpc + Indexer>(
     (mint_pda, compression_address)
 }
 ```
-<Steps>
-    <Step>
-
-### Prerequisites
-
-<CTokenClientPrerequisites />
 
 </Step>
-
-<Step>
-
-### Create c-ATA
-
-</Step>
-
 </Steps>
 
 </Tab>
