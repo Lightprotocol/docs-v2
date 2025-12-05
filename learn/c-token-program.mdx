@@ -273,27 +273,11 @@ Here is how c-Tokens and SPL tokens compare:
   </tbody>
 </table>
 
-### Compressible Extension
-
-c-Token accounts are compressible:
+### Rent Config for c-Tokens
 
 <CompressibleRentExplained />
 
-This extension makes c-Token accounts 200x cheaper than SPL token accounts
-
-    |  | c-Token | SPL |
-    |-----------|--------|-----|
-    | allocate | 0.000011 | 0.002 |
-    | rent for 24h | 0.000011 | - |
-
-<CompressibleDefaultRentConfig />
-
-
-<Accordion title="Compressible vs Solana Rent">
-
-<CompressibleVsSolanaRent />
-</Accordion>
-
+We recommend to use default values, but you can customize prepaid rent and top ups:
 <CompressibleRentCalculator />
 
 
@@ -353,10 +337,10 @@ We recommend to use compressed tokens for **token distribution** or **storage of
 # Next Steps
 
 <Card
-  title=" Learn how to create c-Mints"
+  title="Create c-Token Accounts"
   icon="chevron-right"
   color="#0066ff"
-  href="/compressed-token-program/cmint/create-cmint"
+  href="/compressed-token-program/ctoken/create-ctoken"
   horizontal
 >
 </Card>
