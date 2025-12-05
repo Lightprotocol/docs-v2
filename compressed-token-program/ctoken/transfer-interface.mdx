@@ -59,6 +59,18 @@ import ClientCustomRentConfig from '/snippets/ctoken-guides/client-custom-rent-c
 
 <Tab title="Rust Client">
 
+<Steps>
+<Step>
+### Prerequisites
+
+<CTokenClientPrerequisites />
+
+</Step>
+
+<Step>
+### Transfer Interface 
+</Step>
+</Steps>
 
 <Tabs>
 <Tab title="c-Mint: cToken -> cToken">
@@ -276,8 +288,6 @@ pub async fn create_compressed_mint<R: Rpc + Indexer>(
 <Tab title="SPL Mint: SPLToken -> cToken and cToken -> cToken">
 
 ```rust
-// Test for: transfer-interface.mdx
-
 use borsh::BorshDeserialize;
 use light_client::rpc::Rpc;
 use light_compressed_token_sdk::{
@@ -457,18 +467,7 @@ async fn test_client_transfer_spl_to_ctoken_to_ctoken() {
 ```
 </Tab>
 </Tabs>
-<Steps>
-<Step>
-### Prerequisites
 
-<CTokenClientPrerequisites />
-
-</Step>
-
-<Step>
-### Close c-Token Account
-</Step>
-</Steps>
 </Tab>
 
 <Tab title="Program Guide">
