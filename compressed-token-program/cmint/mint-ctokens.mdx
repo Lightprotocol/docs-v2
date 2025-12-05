@@ -33,10 +33,9 @@ Find [full code examples at the end](#full-code-example).
 
 The example mints c-Tokens to existing c-Token accounts.
 1. Prerequisite: The example creates a test c-Mint and destination c-Token account.
-
-TODO: ADD MORE steps
-
-2. Build the instruction with `MintToCToken::new()`.
+2. Get c-Mint account infos and prove it exists <Tooltip tip="c-Mints are compressed accounts. Compressed accounts are stored in state Merkle trees. Only the root hash is stored on chain - every transaction that accesses the c-Mint includes a validity proof to verify the compressed state.">with a validity proof</Tooltip>..
+3. Set the amount of tokens you will mint and the mint authority. Only the mint authority can mint new c-Tokens.
+4. Build the instruction with `MintToCToken::new()` and send the transaction.
 ```rust
 use light_compressed_token_sdk::ctoken::MintToCToken;
 
@@ -50,9 +49,6 @@ let instruction = MintToCToken::new(
 )
 .instruction()?;
 ```
-
-3. Send transaction with payer as signer. <br/>
-Only the mint authority can mint new c-Tokens.
 
 <Steps>
 <Step>

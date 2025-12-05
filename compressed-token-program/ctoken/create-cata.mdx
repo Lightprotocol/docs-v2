@@ -34,6 +34,23 @@ import ClientCustomRentConfig from '/snippets/ctoken-guides/client-custom-rent-c
 
 <Tab title="Rust Client">
 
+1. The example creates a test c-Mint. You can use existing c-Mints, SPL or Token 2022 mints as well.
+2. Derive the address from mint and owner pubkey.
+3. Build the instruction with `CreateAssociatedTokenAccount`. It automatically includes the default rent config:
+```rust
+use light_compressed_token_sdk::ctoken::CreateAssociatedTokenAccount;
+
+let instruction = CreateAssociatedTokenAccount::new(
+    payer.pubkey(),
+    owner,
+    mint,
+)
+.instruction()?;
+```
+
+4. Send transaction & verify c-ATA creation with `get_account`. <br/>
+c-ATAs are Solana accounts and use your familiar RPC methods.
+
 <Steps>
 <Step>
 
@@ -46,24 +63,6 @@ import ClientCustomRentConfig from '/snippets/ctoken-guides/client-custom-rent-c
 <Step>
 
 ### Create c-ATA
-
-1. The example creates a test c-Mint. You can use existing c-Mints, SPL or Token 2022 mints as well.
-2. Derive the address from mint and owner pubkey.
-3. Build the instruction with `CreateAssociatedTokenAccount2`. It automatically includes the default rent config:
-```rust
-use light_compressed_token_sdk::ctoken::CreateAssociatedTokenAccount2;
-
-let instruction = CreateAssociatedTokenAccount2::new(
-    payer.pubkey(),
-    owner,
-    mint,
-    CompressibleParams::default(),
-)
-.instruction()?;
-```
-
-4. Send transaction & verify c-ATA creation with `get_account`. <br/>
-c-ATAs are Solana accounts and use your familiar RPC methods.
 
 ```rust
 use borsh::BorshDeserialize;
@@ -202,9 +201,8 @@ Find [a full code example at the end](#full-code-example).
 
 ### Build Account Infos and CPI the c-Token Program
 
-1. Pass the required accounts
-2. Include rent config from `compressible_params`
-3. Use `invoke` or `invoke_signed`, when a CPI requires a PDA signer.
+1. Pass the required accounts that include the rent config.
+2. Use `invoke` or `invoke_signed`, when a CPI requires a PDA signer.
 <Note>
 The c-ATA address is derived from `[owner, ctoken_program_id, mint]`. Unlike c-Token accounts, owner and mint are passed as accounts, not in instruction data.
 </Note>
@@ -213,9 +211,9 @@ The c-ATA address is derived from `[owner, ctoken_program_id, mint]`. Unlike c-T
 <Tab title="invoke (External signer)">
 
 ```rust
-use light_compressed_token_sdk::ctoken::CreateAssociatedTokenAccount2Infos;
+use light_compressed_token_sdk::ctoken::CreateAssociatedTokenAccountInfos;
 
-CreateAssociatedTokenAccount2Infos {
+CreateAssociatedTokenAccountInfos {
     owner: owner.clone(),
     mint: mint.clone(),
     payer: payer.clone(),

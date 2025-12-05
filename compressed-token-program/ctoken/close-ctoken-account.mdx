@@ -21,6 +21,19 @@ import ClientCustomRentConfig from '/snippets/ctoken-guides/client-custom-rent-c
 </Tab>
 
 <Tab title="Rust Client">
+
+1. The example creates a test c-Mint and c-token account.
+2. Build the instruction with `CloseAccount`:
+```rust
+let close_instruction = CloseAccount::new(
+    CTOKEN_PROGRAM_ID,
+    account.pubkey(),
+    payer.pubkey(), // Destination for remaining lamports
+    owner,
+)
+.instruction()
+```
+
 <Steps>
 <Step>
 ### Prerequisites
