@@ -11,6 +11,10 @@
   "appearance": {
     "default": "light"
   },
+  "banner": {
+    "content": "c-Token is live on Devnet. <a href=\"/compressed-token-program/overview\" style=\"color:#FFFFFF; text-decoration: underline;\">Start testing and create mints or tokens</a> without rent-exemption!",
+    "dismissible": false
+  },
   "navigation": {
     "groups": [
       {
