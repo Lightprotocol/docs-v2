@@ -109,7 +109,7 @@
             ]
           },
           {
-            "group": "PDAs",
+            "group": "Compressed PDAs",
             "pages": [
               "compressed-pdas/create-a-program-with-compressed-pdas",
               {
