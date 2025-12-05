@@ -46,7 +46,7 @@ use borsh::BorshDeserialize;
 use light_client::indexer::{AddressWithTree, Indexer};
 use light_client::rpc::Rpc;
 use light_compressed_token_sdk::ctoken::{
-    CloseAccount, CompressibleParams, CreateCMint, CreateCMintParams, CreateCTokenAccount,
+    CloseAccount, CreateCMint, CreateCMintParams, CreateCTokenAccount,
     CTOKEN_PROGRAM_ID,
 };
 use light_ctoken_types::state::CToken;
@@ -75,7 +75,6 @@ async fn test_close_ctoken_account() {
         account.pubkey(),
         mint,
         owner,
-        CompressibleParams::default(),
     )
     .instruction()
     .unwrap();

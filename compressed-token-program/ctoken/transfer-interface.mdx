@@ -75,7 +75,7 @@ use borsh::BorshDeserialize;
 use light_client::rpc::Rpc;
 use light_compressed_token_sdk::{
     ctoken::{
-        derive_ctoken_ata, CompressibleParams, CreateAssociatedTokenAccount2, TransferCtoken,
+        derive_ctoken_ata, CreateAssociatedTokenAccount, TransferCtoken,
         TransferSplToCtoken,
     },
     token_pool::find_token_pool_pda_with_index,
@@ -130,11 +130,10 @@ async fn test_client_transfer_spl_to_ctoken_to_ctoken() {
     // Step 4: Create sender cToken ATA
     let (sender_ctoken_ata, _) = derive_ctoken_ata(&sender.pubkey(), &mint);
 
-    let create_sender_ata = CreateAssociatedTokenAccount2::new(
+    let create_sender_ata = CreateAssociatedTokenAccount::new(
         payer.pubkey(),
         sender.pubkey(),
         mint,
-        CompressibleParams::default(),
     )
     .instruction()
     .unwrap();
@@ -179,11 +178,10 @@ async fn test_client_transfer_spl_to_ctoken_to_ctoken() {
 
     let (recipient_ctoken_ata, _) = derive_ctoken_ata(&recipient.pubkey(), &mint);
 
-    let create_recipient_ata = CreateAssociatedTokenAccount2::new(
+    let create_recipient_ata = CreateAssociatedTokenAccount::new(
         payer.pubkey(),
         recipient.pubkey(),
         mint,
-        CompressibleParams::default(),
     )
     .instruction()
     .unwrap();

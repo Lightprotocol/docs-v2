@@ -42,7 +42,8 @@ let instruction = CreateCTokenAccount::new(
     account.pubkey(),
     mint,
     owner,
-).instruction()?;
+)
+.instruction()?;
 ```
 
 3. Send transaction & verify c-Token account creation with `get_account`.
@@ -62,7 +63,7 @@ let instruction = CreateCTokenAccount::new(
 ```rust
 use borsh::BorshDeserialize;
 use light_client::rpc::Rpc;
-use light_compressed_token_sdk::ctoken::{CompressibleParams, CreateCTokenAccount};
+use light_compressed_token_sdk::ctoken::CreateCTokenAccount;
 use light_ctoken_types::state::CToken;
 use light_program_test::{LightProgramTest, ProgramTestConfig};
 use solana_sdk::{signature::Keypair, signer::Signer};
@@ -93,7 +94,6 @@ async fn test_create_ctoken_account() {
         account.pubkey(),
         mint,
         owner,
-        CompressibleParams::default(),
     )
     .instruction()
     .unwrap();

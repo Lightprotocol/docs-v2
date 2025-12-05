@@ -61,7 +61,7 @@ use borsh::BorshDeserialize;
 use light_client::indexer::{AddressWithTree, Indexer};
 use light_client::rpc::Rpc;
 use light_compressed_token_sdk::ctoken::{
-    derive_ctoken_ata, CompressibleParams, CreateAssociatedTokenAccount2, CreateCMint,
+    derive_ctoken_ata, CreateAssociatedTokenAccount, CreateCMint,
     CreateCMintParams,
 };
 use light_ctoken_types::state::CToken;
@@ -86,11 +86,10 @@ async fn test_create_cata_client() {
     let (ata_address, _bump) = derive_ctoken_ata(&owner, &mint);
 
     // Step 4: Build instruction using SDK builder
-    let instruction = CreateAssociatedTokenAccount2::new(
+    let instruction = CreateAssociatedTokenAccount::new(
         payer.pubkey(),
         owner,
         mint,
-        CompressibleParams::default(),
     )
     .instruction()
     .unwrap();
@@ -222,10 +221,10 @@ CreateAssociatedTokenAccountInfos {
 <Tab title="invoke_signed (PDA is signer)">
 
 ```rust
-use light_compressed_token_sdk::ctoken::CreateAssociatedTokenAccount2Infos;
+use light_compressed_token_sdk::ctoken::CreateAssociatedTokenAccountInfos;
 
 let signer_seeds: &[&[u8]] = &[ATA_SEED, &[bump]];
-CreateAssociatedTokenAccount2Infos {
+CreateAssociatedTokenAccountInfos {
     owner: owner.clone(),
     mint: mint.clone(),
     payer: payer.clone(),
@@ -253,21 +252,21 @@ Find the source code [here](https://github.com/Lightprotocol/light-protocol/blob
 ```rust expandable
 use borsh::{BorshDeserialize, BorshSerialize};
 use light_compressed_token_sdk::ctoken::{
-    CompressibleParamsInfos, CreateAssociatedTokenAccount2Infos,
+    CompressibleParamsInfos, CreateAssociatedTokenAccountInfos,
 };
 use solana_program::{account_info::AccountInfo, program_error::ProgramError, pubkey::Pubkey};
 
 use crate::{ATA_SEED, ID};
 
-/// Instruction data for create ATA V2 (owner/mint as accounts)
+/// Instruction data for create ATA (owner/mint as accounts)
 #[derive(BorshSerialize, BorshDeserialize, Debug)]
-pub struct CreateAta2Data {
+pub struct CreateAtaData {
     pub bump: u8,
     pub pre_pay_num_epochs: u8,
     pub lamports_per_write: u32,
 }
 
-/// Handler for creating ATA using V2 variant (invoke)
+/// Handler for creating ATA (invoke)
 ///
 /// Account order:
 /// - accounts[0]: owner (readonly)
@@ -277,9 +276,9 @@ pub struct CreateAta2Data {
 /// - accounts[4]: system_program
 /// - accounts[5]: compressible_config
 /// - accounts[6]: rent_sponsor (writable)
-pub fn process_create_ata2_invoke(
+pub fn process_create_ata_invoke(
     accounts: &[AccountInfo],
-    data: CreateAta2Data,
+    data: CreateAtaData,
 ) -> Result<(), ProgramError> {
     if accounts.len() < 7 {
         return Err(ProgramError::NotEnoughAccountKeys);
@@ -293,7 +292,7 @@ pub fn process_create_ata2_invoke(
         accounts[4].clone(),
     );
 
-    CreateAssociatedTokenAccount2Infos {
+    CreateAssociatedTokenAccountInfos {
         owner: accounts[0].clone(),
         mint: accounts[1].clone(),
         payer: accounts[2].clone(),
@@ -308,7 +307,7 @@ pub fn process_create_ata2_invoke(
     Ok(())
 }
 
-/// Handler for creating ATA using V2 variant with PDA ownership (invoke_signed)
+/// Handler for creating ATA with PDA ownership (invoke_signed)
 ///
 /// Account order:
 /// - accounts[0]: owner (PDA, readonly)
@@ -318,9 +317,9 @@ pub fn process_create_ata2_invoke(
 /// - accounts[4]: system_program
 /// - accounts[5]: compressible_config
 /// - accounts[6]: rent_sponsor (writable)
-pub fn process_create_ata2_invoke_signed(
+pub fn process_create_ata_invoke_signed(
     accounts: &[AccountInfo],
-    data: CreateAta2Data,
+    data: CreateAtaData,
 ) -> Result<(), ProgramError> {
     if accounts.len() < 7 {
         return Err(ProgramError::NotEnoughAccountKeys);
@@ -343,7 +342,7 @@ pub fn process_create_ata2_invoke_signed(
     );
 
     let signer_seeds: &[&[u8]] = &[ATA_SEED, &[bump]];
-    CreateAssociatedTokenAccount2Infos {
+    CreateAssociatedTokenAccountInfos {
         owner: accounts[0].clone(),
         mint: accounts[1].clone(),
         payer: accounts[2].clone(), // PDA
