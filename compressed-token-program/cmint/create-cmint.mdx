@@ -203,7 +203,7 @@ Set `decimals`, `mint_authority`, `freeze_authority`, and pass the `token_metada
 ```rust
 use light_ctoken_sdk::ctoken::CreateCMintParams;
 
-let cmint_params = CreateCMintParams {
+let params = CreateCMintParams {
     decimals: data.decimals,
     address_merkle_tree_root_index: data.address_merkle_tree_root_index,
     mint_authority: data.mint_authority,
@@ -211,7 +211,7 @@ let cmint_params = CreateCMintParams {
     compression_address: data.compression_address,
     mint: data.mint,
     freeze_authority: data.freeze_authority,
-    extensions: data.token_metadata,
+    extensions: data.extensions,
 };
 ```
 <Info>
@@ -251,7 +251,7 @@ let system_accounts = SystemAccountInfos {
 ### Build Account Infos and CPI the c-Token Program
 
 1. Pass the required accounts
-2. Include `cmint_params` and `system_accounts` from the previous steps
+2. Include `params` and `system_accounts` from the previous steps
 3. Use `invoke` or `invoke_signed`:
     * When `mint_signer` is an external keypair, use `invoke`.
     * When `mint_signer` is a PDA, use `invoke_signed` with its seeds.
@@ -273,7 +273,7 @@ CreateCMintAccountInfos {
     system_accounts,
     cpi_context: None,
     cpi_context_account: None,
-    cmint_params,
+    params,
 }
 .invoke()?;
 ```
@@ -293,7 +293,7 @@ let account_infos = CreateCMintAccountInfos {
     system_accounts,
     cpi_context: None,
     cpi_context_account: None,
-    cmint_params,
+    params,
 };
 
 let signer_seeds: &[&[u8]] = &[MINT_SIGNER_SEED, &[bump]];
@@ -315,7 +315,7 @@ let account_infos = CreateCMintAccountInfos {
     system_accounts,
     cpi_context: None,
     cpi_context_account: None,
-    cmint_params,
+    params,
 };
 
 let mint_signer_seeds: &[&[u8]] = &[MINT_SIGNER_SEED, &[mint_signer_bump]];
