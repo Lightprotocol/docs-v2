@@ -8,6 +8,7 @@ export const RentLifecycleVisualizer = () => {
   const [activeArrows, setActiveArrows] = useState([]);
   const [activeLines, setActiveLines] = useState([]);
   const [isButtonPressed, setIsButtonPressed] = useState(false);
+  const [flyingArrows, setFlyingArrows] = useState([]);
 
   // Constants from rent config
   const RENT_PER_EPOCH = 388;
@@ -45,6 +46,15 @@ export const RentLifecycleVisualizer = () => {
   const colorToRgba = (c, alpha = 1) => `rgba(${c.r}, ${c.g}, ${c.b}, ${alpha})`;
 
   const arrowIdRef = useRef(0);
+  const flyingArrowIdRef = useRef(0);
+
+  const triggerFlyingArrow = () => {
+    const id = flyingArrowIdRef.current++;
+    setFlyingArrows((prev) => [...prev, id]);
+    setTimeout(() => {
+      setFlyingArrows((prev) => prev.filter((a) => a !== id));
+    }, 600);
+  };
 
   const triggerHighlight = () => {
     setIsHighlighted(true);
@@ -89,13 +99,15 @@ export const RentLifecycleVisualizer = () => {
   };
 
   const handleTopup = () => {
-    setLamports((l) => l + TOPUP_LAMPORTS);
+    // If balance is 0, initialize with full amount; otherwise add top-up amount
+    setLamports((l) => l === 0 ? INITIAL_LAMPORTS : l + TOPUP_LAMPORTS);
     setLastTopupTime(time);
     if (phase === 'uninitialized' || phase === 'cold') {
       setPhase('hot');
     }
     triggerHighlight();
     triggerTransaction(getNextLineIndex());
+    triggerFlyingArrow();
     setIsButtonPressed(true);
     setTimeout(() => setIsButtonPressed(false), 200);
   };
@@ -108,8 +120,10 @@ export const RentLifecycleVisualizer = () => {
     setIsRunning(true);
     setActiveLines([]);
     setActiveArrows([]);
+    setFlyingArrows([]);
     txLineIndexRef.current = 0;
     arrowIdRef.current = 0;
+    flyingArrowIdRef.current = 0;
   };
 
   // Track last second for 1-second lamport decreases
@@ -269,12 +283,12 @@ export const RentLifecycleVisualizer = () => {
           overflow: hidden;
           background: rgba(120, 140, 180, 0.08);
           border-color: rgba(120, 140, 180, 0.25);
-          color: rgb(90, 110, 150);
+          color: rgb(0, 0, 0);
         }
         .dark .btn-interactive {
           background: rgba(120, 140, 180, 0.12);
           border-color: rgba(120, 140, 180, 0.3);
-          color: rgba(180, 200, 230, 0.9);
+          color: rgb(255, 255, 255);
         }
         .btn-interactive::before {
           content: '';
@@ -300,13 +314,21 @@ export const RentLifecycleVisualizer = () => {
           box-shadow: 0 4px 12px rgba(120, 140, 180, 0.15);
         }
         @keyframes arrowUp {
-          0% { opacity: 0; transform: translateY(4px); }
+          0% { opacity: 0; transform: translateY(calc(-50% + 4px)); }
           20% { opacity: 1; }
           80% { opacity: 1; }
-          100% { opacity: 0; transform: translateY(-8px); }
+          100% { opacity: 0; transform: translateY(calc(-50% - 8px)); }
         }
         .arrow-up {
           animation: arrowUp 0.5s ease-out forwards;
+        }
+        @keyframes arrowFlyUp {
+          0% { opacity: 1; transform: translateY(calc(-50% + 24px)); }
+          80% { opacity: 1; }
+          100% { opacity: 0; transform: translateY(calc(-50% - 8px)); }
+        }
+        .arrow-fly-up {
+          animation: arrowFlyUp 0.4s ease-out forwards;
         }
       `}</style>
 
@@ -420,19 +442,38 @@ export const RentLifecycleVisualizer = () => {
         </div>
 
         {/* Right: Rent Balance at 55% */}
-        <div className="text-center" style={{ width: '55%' }}>
+        <div className="text-center" style={{ width: '55%', position: 'relative' }}>
+          {/* Arrows container - positioned absolutely so it doesn't move with lamports */}
+          <div
+            className="absolute flex items-center"
+            style={{
+              left: 'calc(50% - 5.5rem/2 - 1.2rem - 0.25rem - 2.5rem)',
+              top: 0,
+              height: '1.8rem',
+              width: '1.2rem',
+            }}
+          >
+            {activeArrows.map((arrowId) => (
+              <span
+                key={arrowId}
+                className="arrow-up absolute"
+                style={{ color: 'rgb(34, 197, 94)', fontSize: '1.3rem', left: 0, top: '50%', transform: 'translateY(-50%)', lineHeight: 1 }}
+              >
+                ↑
+              </span>
+            ))}
+            {/* Flying arrows from button */}
+            {flyingArrows.map((id) => (
+              <span
+                key={id}
+                className="arrow-fly-up absolute"
+                style={{ color: 'rgb(34, 197, 94)', fontSize: '1.3rem', left: 0, top: '50%', lineHeight: 1 }}
+              >
+                ↑
+              </span>
+            ))}
+          </div>
           <div style={{ height: '1.8rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <div className="relative flex items-center" style={{ width: '1.2rem', marginRight: '0.25rem', height: '1.3rem' }}>
-              {activeArrows.map((arrowId) => (
-                <span
-                  key={arrowId}
-                  className="arrow-up absolute"
-                  style={{ color: 'rgb(34, 197, 94)', fontSize: '1.3rem', left: 0, lineHeight: 1 }}
-                >
-                  ↑
-                </span>
-              ))}
-            </div>
             <span
               className="font-mono text-zinc-700 dark:text-white/80 transition-all duration-150"
               style={{
@@ -440,6 +481,9 @@ export const RentLifecycleVisualizer = () => {
                 fontWeight: isHighlighted ? 700 : 500,
                 transformOrigin: 'center',
                 transform: isHighlighted ? 'scale(1.05)' : 'scale(1)',
+                fontVariantNumeric: 'tabular-nums',
+                minWidth: '5.5rem',
+                textAlign: 'right',
               }}
             >
               {lamports.toLocaleString()}
@@ -447,8 +491,8 @@ export const RentLifecycleVisualizer = () => {
             <span
               className="text-zinc-400 dark:text-white/40 transition-all duration-150 ml-1"
               style={{
-                fontSize: isHighlighted ? '1rem' : '0.875rem',
-                fontWeight: isHighlighted ? 700 : 400,
+                fontSize: isHighlighted ? '1.1rem' : '0.875rem',
+                fontWeight: isHighlighted ? 800 : 400,
               }}
             >lamports</span>
           </div>
@@ -458,29 +502,30 @@ export const RentLifecycleVisualizer = () => {
         </div>
       </div>
 
-      {/* Buttons */}
-      <div className="flex items-start mt-4">
+      {/* Buttons row: Back to Start under Time, Top Up centered under Rent Balance */}
+      <div className="flex items-center mt-3">
         <div className="text-center" style={{ width: '45%', paddingLeft: '20%' }}>
           <button
             onClick={handleReset}
             className="font-medium rounded-lg border backdrop-blur-sm transition-all btn-interactive"
-            style={{ padding: '0.6rem 1.15rem', fontSize: '0.9rem' }}
+            style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }}
           >
             Back to Start
           </button>
         </div>
-        <div className="text-center" style={{ width: '55%', height: '3rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ width: '55%', display: 'flex', justifyContent: 'center' }}>
+          {/* Top Up button centered under Rent Balance */}
           <button
             onClick={handleTopup}
             className={`rounded-lg border backdrop-blur-sm transition-all btn-interactive
-              topup-pulse ${isButtonPressed ? 'font-bold' : 'font-medium'}`}
+              ${isButtonPressed ? 'font-bold' : 'font-medium'} ${!isButtonPressed ? 'topup-pulse' : ''}`}
             style={{
-              padding: '0.6rem 1.15rem',
-              fontSize: isButtonPressed ? '1rem' : '0.9rem',
+              padding: '0.5rem 1rem',
+              fontSize: isButtonPressed ? '0.95rem' : '0.85rem',
               transform: isButtonPressed ? 'scale(1.15)' : 'scale(1)',
             }}
           >
-            Top Up
+            Press for Top Up
           </button>
         </div>
       </div>
