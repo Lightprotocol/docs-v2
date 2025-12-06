@@ -5,6 +5,7 @@ export const RentLifecycleVisualizer = () => {
   const [lastTopupTime, setLastTopupTime] = useState(0);
   const [phase, setPhase] = useState('uninitialized');
   const [isHighlighted, setIsHighlighted] = useState(false);
+  const [activeArrows, setActiveArrows] = useState([]);
   const [activeLines, setActiveLines] = useState([]);
   const [isButtonPressed, setIsButtonPressed] = useState(false);
 
@@ -43,9 +44,18 @@ export const RentLifecycleVisualizer = () => {
 
   const colorToRgba = (c, alpha = 1) => `rgba(${c.r}, ${c.g}, ${c.b}, ${alpha})`;
 
+  const arrowIdRef = useRef(0);
+
   const triggerHighlight = () => {
     setIsHighlighted(true);
     setTimeout(() => setIsHighlighted(false), 500);
+
+    // Add a new arrow with unique ID
+    const arrowId = arrowIdRef.current++;
+    setActiveArrows((prev) => [...prev, arrowId]);
+    setTimeout(() => {
+      setActiveArrows((prev) => prev.filter((id) => id !== arrowId));
+    }, 500);
   };
 
   const triggerTransaction = (lineIndex) => {
@@ -97,7 +107,9 @@ export const RentLifecycleVisualizer = () => {
     setLastTopupTime(0);
     setIsRunning(true);
     setActiveLines([]);
+    setActiveArrows([]);
     txLineIndexRef.current = 0;
+    arrowIdRef.current = 0;
   };
 
   // Track last second for 1-second lamport decreases
@@ -247,10 +259,54 @@ export const RentLifecycleVisualizer = () => {
         }
         @keyframes pulse {
           0%, 100% { opacity: 1; transform: scale(1); font-weight: 500; }
-          50% { opacity: 0.85; transform: scale(1.06); font-weight: 700; }
+          50% { opacity: 0.8; transform: scale(1.12); font-weight: 700; }
         }
         .topup-pulse {
           animation: pulse 2s ease-in-out infinite;
+        }
+        .btn-interactive {
+          position: relative;
+          overflow: hidden;
+          background: rgba(120, 140, 180, 0.08);
+          border-color: rgba(120, 140, 180, 0.25);
+          color: rgb(90, 110, 150);
+        }
+        .dark .btn-interactive {
+          background: rgba(120, 140, 180, 0.12);
+          border-color: rgba(120, 140, 180, 0.3);
+          color: rgba(180, 200, 230, 0.9);
+        }
+        .btn-interactive::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(90deg, transparent, rgba(120, 140, 180, 0.15), transparent);
+          transition: left 0.5s ease;
+        }
+        .btn-interactive:hover::before {
+          left: 100%;
+        }
+        .btn-interactive:hover {
+          background: rgba(120, 140, 180, 0.15);
+          border-color: rgba(120, 140, 180, 0.4);
+          transform: translateY(-1px);
+          box-shadow: 0 4px 12px rgba(120, 140, 180, 0.2);
+        }
+        .dark .btn-interactive:hover {
+          background: rgba(120, 140, 180, 0.2);
+          box-shadow: 0 4px 12px rgba(120, 140, 180, 0.15);
+        }
+        @keyframes arrowUp {
+          0% { opacity: 0; transform: translateY(4px); }
+          20% { opacity: 1; }
+          80% { opacity: 1; }
+          100% { opacity: 0; transform: translateY(-8px); }
+        }
+        .arrow-up {
+          animation: arrowUp 0.5s ease-out forwards;
         }
       `}</style>
 
@@ -366,6 +422,17 @@ export const RentLifecycleVisualizer = () => {
         {/* Right: Rent Balance at 55% */}
         <div className="text-center" style={{ width: '55%' }}>
           <div style={{ height: '1.8rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div className="relative flex items-center" style={{ width: '1.2rem', marginRight: '0.25rem', height: '1.3rem' }}>
+              {activeArrows.map((arrowId) => (
+                <span
+                  key={arrowId}
+                  className="arrow-up absolute"
+                  style={{ color: 'rgb(34, 197, 94)', fontSize: '1.3rem', left: 0, lineHeight: 1 }}
+                >
+                  ↑
+                </span>
+              ))}
+            </div>
             <span
               className="font-mono text-zinc-700 dark:text-white/80 transition-all duration-150"
               style={{
@@ -396,25 +463,21 @@ export const RentLifecycleVisualizer = () => {
         <div className="text-center" style={{ width: '45%', paddingLeft: '20%' }}>
           <button
             onClick={handleReset}
-            className="font-medium rounded-lg border backdrop-blur-sm transition-all
-              bg-black/[0.02] dark:bg-white/5 border-black/[0.06] dark:border-white/15
-              text-zinc-600 dark:text-white/70 hover:bg-black/[0.04] dark:hover:bg-white/10"
+            className="font-medium rounded-lg border backdrop-blur-sm transition-all btn-interactive"
             style={{ padding: '0.6rem 1.15rem', fontSize: '0.9rem' }}
           >
             Back to Start
           </button>
         </div>
-        <div className="text-center" style={{ width: '55%' }}>
+        <div className="text-center" style={{ width: '55%', height: '3rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <button
             onClick={handleTopup}
-            className={`rounded-lg border backdrop-blur-sm transition-all
-              bg-black/[0.02] dark:bg-white/5 border-black/[0.06] dark:border-white/15
-              text-zinc-600 dark:text-white/70 hover:bg-black/[0.04] dark:hover:bg-white/10
+            className={`rounded-lg border backdrop-blur-sm transition-all btn-interactive
               topup-pulse ${isButtonPressed ? 'font-bold' : 'font-medium'}`}
             style={{
               padding: '0.6rem 1.15rem',
               fontSize: isButtonPressed ? '1rem' : '0.9rem',
-              transform: isButtonPressed ? 'scale(1.1)' : 'scale(1)',
+              transform: isButtonPressed ? 'scale(1.15)' : 'scale(1)',
             }}
           >
             Top Up
