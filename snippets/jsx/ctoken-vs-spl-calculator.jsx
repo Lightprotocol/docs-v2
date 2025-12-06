@@ -5,7 +5,7 @@ export const CTokenVsSplCalculator = () => {
   const ACCOUNT_STORAGE_OVERHEAD = 128;
   const LAMPORTS_PER_BYTE = 6960;
   const DATA_LEN = 165; // SPL token account size
-  const CTOKEN_DEFAULT_CREATION_COST = 22208; // Default rent config: 11,000 rent + 11,000 compression + 208 base
+  const CTOKEN_DEFAULT_CREATION_COST = 17208; // Default rent config: 6,208 prepaid rent (24h) + 11,000 compression incentive
   const LAMPORTS_PER_SOL = 1_000_000_000;
 
   const ACCOUNTS_MAX = 1000000;

@@ -73,15 +73,14 @@ The example transfers SPL token -> c-Token and c-Token -> c-Token:
 ```rust
 use borsh::BorshDeserialize;
 use light_client::rpc::Rpc;
-use light_compressed_token_sdk::{
+use light_ctoken_sdk::{
     ctoken::{
         derive_ctoken_ata, CreateAssociatedTokenAccount, TransferCtoken,
         TransferSplToCtoken,
     },
     token_pool::find_token_pool_pda_with_index,
 };
-use light_compressed_token_types::CPI_AUTHORITY_PDA;
-use light_ctoken_types::state::CToken;
+use light_ctoken_interface::state::CToken;
 use light_program_test::{LightProgramTest, ProgramTestConfig};
 use light_test_utils::spl::{create_mint_helper, create_token_2022_account, mint_spl_tokens};
 use solana_sdk::{pubkey::Pubkey, signature::Keypair, signer::Signer};
@@ -144,8 +143,6 @@ async fn test_client_transfer_spl_to_ctoken_to_ctoken() {
 
     // Step 5: Convert SPL tokens to cToken (7000 tokens)
     let (token_pool_pda, token_pool_pda_bump) = find_token_pool_pda_with_index(&mint, 0);
-    let cpi_authority_pda = Pubkey::new_from_array(CPI_AUTHORITY_PDA);
-
     let spl_token_program = anchor_spl::token::ID;
 
     let spl_to_ctoken_instruction = TransferSplToCtoken {
@@ -264,7 +261,7 @@ Define the number of c-Tokens / SPL tokens to transfer
 - to which SPL or c-Token account.
 
 ```rust
-use light_compressed_token_sdk::ctoken::TransferInterface;
+use light_ctoken_sdk::ctoken::TransferInterface;
 
 let mut transfer = TransferInterface::new(
     data.amount,
@@ -339,7 +336,7 @@ Find the source code [here](https://github.com/Lightprotocol/light-protocol/blob
 
 ```rust expandable
 use borsh::{BorshDeserialize, BorshSerialize};
-use light_compressed_token_sdk::ctoken::TransferInterface;
+use light_ctoken_sdk::ctoken::TransferInterface;
 use solana_program::{account_info::AccountInfo, program_error::ProgramError, pubkey::Pubkey};
 
 use crate::ID;
@@ -351,25 +348,25 @@ pub const TRANSFER_INTERFACE_AUTHORITY_SEED: &[u8] = b"transfer_interface_author
 #[derive(BorshSerialize, BorshDeserialize, Debug)]
 pub struct TransferInterfaceData {
     pub amount: u64,
-    /// Required for SPL<->c-Token transfers, None for c-Token->c-Token
+    /// Required for SPL<->CToken transfers, None for CToken->CToken
     pub token_pool_pda_bump: Option<u8>,
 }
 
 /// Handler for TransferInterface (invoke)
 ///
 /// This unified interface automatically detects account types and routes to:
-/// - c-Token -> c-Token transfer
-/// - c-Token -> SPL transfer
-/// - SPL -> c-Token transfer
+/// - CToken -> CToken transfer
+/// - CToken -> SPL transfer
+/// - SPL -> CToken transfer
 ///
 /// Account order:
 /// - accounts[0]: compressed_token_program (for CPI)
-/// - accounts[1]: source_account (SPL or c-Token)
-/// - accounts[2]: destination_account (SPL or c-Token)
+/// - accounts[1]: source_account (SPL or CToken)
+/// - accounts[2]: destination_account (SPL or CToken)
 /// - accounts[3]: authority (signer)
 /// - accounts[4]: payer (signer)
 /// - accounts[5]: compressed_token_program_authority
-///   For SPL interface (required for SPL<->c-Token):
+///   For SPL bridge (optional, required for SPL<->CToken):
 /// - accounts[6]: mint
 /// - accounts[7]: token_pool_pda
 /// - accounts[8]: spl_token_program
@@ -390,7 +387,7 @@ pub fn process_transfer_interface_invoke(
         accounts[5].clone(), // compressed_token_program_authority
     );
 
-    // Add SPL interface config if provided
+    // Add SPL bridge config if provided
     if accounts.len() >= 9 && data.token_pool_pda_bump.is_some() {
         transfer = transfer.with_spl_interface(
             Some(accounts[6].clone()), // mint
@@ -411,12 +408,12 @@ pub fn process_transfer_interface_invoke(
 ///
 /// Account order:
 /// - accounts[0]: compressed_token_program (for CPI)
-/// - accounts[1]: source_account (SPL or c-Token)
-/// - accounts[2]: destination_account (SPL or c-Token)
+/// - accounts[1]: source_account (SPL or CToken)
+/// - accounts[2]: destination_account (SPL or CToken)
 /// - accounts[3]: authority (PDA, not signer - program signs)
 /// - accounts[4]: payer (signer)
 /// - accounts[5]: compressed_token_program_authority
-///   For SPL interface (required for SPL<->c-Token):
+///   For SPL bridge (optional, required for SPL<->CToken):
 /// - accounts[6]: mint
 /// - accounts[7]: token_pool_pda
 /// - accounts[8]: spl_token_program
@@ -432,7 +429,7 @@ pub fn process_transfer_interface_invoke_signed(
     let (authority_pda, authority_bump) =
         Pubkey::find_program_address(&[TRANSFER_INTERFACE_AUTHORITY_SEED], &ID);
 
-    // Verify the authority account is the PDA
+    // Verify the authority account is the PDA we expect
     if &authority_pda != accounts[3].key {
         return Err(ProgramError::InvalidSeeds);
     }
@@ -446,7 +443,7 @@ pub fn process_transfer_interface_invoke_signed(
         accounts[5].clone(), // compressed_token_program_authority
     );
 
-    // Add SPL interface config if provided
+    // Add SPL bridge config if provided
     if accounts.len() >= 9 && data.token_pool_pda_bump.is_some() {
         transfer = transfer.with_spl_interface(
             Some(accounts[6].clone()), // mint

@@ -1,6 +1,6 @@
 export const CompressibleRentCalculator = () => {
   const [hours, setHours] = useState(24);
-  const [lamportsPerWrite, setLamportsPerWrite] = useState(766);
+  const [lamportsPerWrite, setLamportsPerWrite] = useState(776);
   const [showCustomHours, setShowCustomHours] = useState(false);
   const [showCustomLamports, setShowCustomLamports] = useState(false);
   const [showFormula, setShowFormula] = useState(false);
@@ -10,7 +10,6 @@ export const CompressibleRentCalculator = () => {
   const LAMPORTS_PER_BYTE_PER_EPOCH = 1;
   const MINUTES_PER_EPOCH = 90;
   const COMPRESSION_INCENTIVE = 11000;
-  const TX_COST = 5000;
   const LAMPORTS_PER_SOL = 1_000_000_000;
 
   const HOURS_MAX = 36;
@@ -19,7 +18,7 @@ export const CompressibleRentCalculator = () => {
   const numEpochs = Math.ceil((hours * 60) / MINUTES_PER_EPOCH);
   const rentPerEpoch = BASE_RENT + (DATA_LEN * LAMPORTS_PER_BYTE_PER_EPOCH);
   const totalPrepaidRent = rentPerEpoch * numEpochs;
-  const totalCreationCost = totalPrepaidRent + COMPRESSION_INCENTIVE + TX_COST;
+  const totalCreationCost = totalPrepaidRent + COMPRESSION_INCENTIVE;
 
   const handleHoursChange = (value) => {
     const num = Math.max(3, Math.min(168, Number.parseInt(value) || 3));
@@ -32,7 +31,7 @@ export const CompressibleRentCalculator = () => {
   };
 
   const hoursPresets = [24];
-  const lamportsPresets = [766];
+  const lamportsPresets = [776];
 
   const SliderMarkers = ({ max, step }) => {
     const marks = [];
@@ -123,7 +122,7 @@ export const CompressibleRentCalculator = () => {
                       : 'bg-black/[0.015] dark:bg-white/5 border-black/[0.04] dark:border-white/20 text-zinc-600 dark:text-white/70 hover:bg-black/[0.03]'
                   }`}
                 >
-                  {l === 766 ? 'Default' : l.toLocaleString()}
+                  {l === 776 ? 'Default' : l.toLocaleString()}
                 </button>
               ))}
               {showCustomLamports ? (
@@ -198,7 +197,7 @@ export const CompressibleRentCalculator = () => {
           {showFormula && (
             <div className="text-xs font-mono text-zinc-500 dark:text-white/40 mt-3">
               <div className="text-zinc-600 dark:text-white/60 mb-2">Total cost for {DATA_LEN}-byte c-Token account:</div>
-              total_creation_cost = prepaid_rent + compression_incentive + tx_cost<br/><br/>
+              total_creation_cost = prepaid_rent + compression_incentive<br/><br/>
               rent_per_epoch = base_rent + (data_len × lamports_per_byte_per_epoch)<br/>
               rent_per_epoch = {BASE_RENT} + ({DATA_LEN} × {LAMPORTS_PER_BYTE_PER_EPOCH}) = {rentPerEpoch} lamports<br/>
               compression_incentive = {COMPRESSION_INCENTIVE.toLocaleString()} lamports

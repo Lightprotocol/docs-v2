@@ -29,7 +29,7 @@ The example creates a c-Mint with token metadata.
 4. Build the instruction with `CreateCMint::new()` and send the transaction.
 
 ```rust
-use light_compressed_token_sdk::ctoken::CreateCMint;
+use light_ctoken_sdk::ctoken::CreateCMint;
 
 let create_cmint = CreateCMint::new(
     params,
@@ -55,10 +55,10 @@ let instruction = create_cmint.instruction()?;
 ```rust
 use light_client::indexer::{AddressWithTree, Indexer};
 use light_client::rpc::Rpc;
-use light_compressed_token_sdk::ctoken::{CreateCMint, CreateCMintParams};
-use light_ctoken_types::instructions::extensions::token_metadata::TokenMetadataInstructionData;
-use light_ctoken_types::instructions::extensions::ExtensionInstructionData;
-use light_ctoken_types::state::AdditionalMetadata;
+use light_ctoken_sdk::ctoken::{CreateCMint, CreateCMintParams};
+use light_ctoken_interface::instructions::extensions::token_metadata::TokenMetadataInstructionData;
+use light_ctoken_interface::instructions::extensions::ExtensionInstructionData;
+use light_ctoken_interface::state::AdditionalMetadata;
 use light_program_test::{LightProgramTest, ProgramTestConfig};
 use solana_sdk::{pubkey::Pubkey, signature::Keypair, signer::Signer};
 
@@ -85,13 +85,13 @@ pub async fn create_compressed_mint<R: Rpc + Indexer>(
     let output_queue = rpc.get_random_state_tree_info().unwrap().queue;
 
     // Derive address
-    let compression_address = light_compressed_token_sdk::ctoken::derive_compressed_mint_address(
+    let compression_address = light_ctoken_sdk::ctoken::derive_compressed_mint_address(
         &mint_signer.pubkey(),
         &address_tree.tree,
     );
 
     let mint_pda =
-        light_compressed_token_sdk::ctoken::find_spl_mint_address(&mint_signer.pubkey()).0;
+        light_ctoken_sdk::ctoken::find_spl_mint_address(&mint_signer.pubkey()).0;
 
     // Get validity proof for the address
     let rpc_result = rpc
@@ -163,7 +163,7 @@ Find [a full code example at the end](#full-code-example).
 ### Configure Token Metadata
 
 ```rust
-use light_ctoken_types::{
+use light_ctoken_interface::{
     instructions::extensions::{
         token_metadata::TokenMetadataInstructionData,
         ExtensionInstructionData,
@@ -201,7 +201,7 @@ let token_metadata = ExtensionInstructionData::TokenMetadata(
 Set `decimals`, `mint_authority`, `freeze_authority`, and pass the `token_metadata` from the previous step.
 
 ```rust
-use light_compressed_token_sdk::ctoken::CreateCMintParams;
+use light_ctoken_sdk::ctoken::CreateCMintParams;
 
 let cmint_params = CreateCMintParams {
     decimals: data.decimals,
@@ -233,7 +233,7 @@ The client includes them in the instruction.
 </Accordion>
 
 ```rust
-use light_compressed_token_sdk::ctoken::SystemAccountInfos;
+use light_ctoken_sdk::ctoken::SystemAccountInfos;
 
 let system_accounts = SystemAccountInfos {
     light_system_program: light_system_program.clone(),
@@ -262,7 +262,7 @@ let system_accounts = SystemAccountInfos {
 
 
 ```rust
-use light_compressed_token_sdk::ctoken::CreateCMintAccountInfos;
+use light_ctoken_sdk::ctoken::CreateCMintAccountInfos;
 
 CreateCMintAccountInfos {
     mint_signer: mint_signer.clone(),
@@ -282,7 +282,7 @@ CreateCMintAccountInfos {
 <Tab title="invoke_signed (PDA mint_signer)">
 
 ```rust
-use light_compressed_token_sdk::ctoken::CreateCMintAccountInfos;
+use light_ctoken_sdk::ctoken::CreateCMintAccountInfos;
 
 let account_infos = CreateCMintAccountInfos {
     mint_signer: mint_signer.clone(),
@@ -304,7 +304,7 @@ account_infos.invoke_signed(&[signer_seeds])?;
 <Tab title="invoke_signed (Two PDA signers)">
 
 ```rust
-use light_compressed_token_sdk::ctoken::CreateCMintAccountInfos;
+use light_ctoken_sdk::ctoken::CreateCMintAccountInfos;
 
 let account_infos = CreateCMintAccountInfos {
     mint_signer: mint_signer.clone(),
@@ -339,7 +339,7 @@ Find the source code [here](https://github.com/Lightprotocol/light-protocol/blob
 
 ```rust expandable
 use borsh::{BorshDeserialize, BorshSerialize};
-use light_compressed_token_sdk::{
+use light_ctoken_sdk::{
     ctoken::{
         CreateCMintAccountInfos, CreateCMintParams, ExtensionInstructionData, SystemAccountInfos,
     },
