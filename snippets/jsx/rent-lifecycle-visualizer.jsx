@@ -10,12 +10,13 @@ export const RentLifecycleVisualizer = () => {
   const [flyingArrows, setFlyingArrows] = useState([]);
 
   // Constants from rent config
-  const RENT_PER_EPOCH = 388;           // 388 lamports per epoch (1.5h)
+  const LAMPORTS_PER_TICK = 77.6;       // 388 per epoch / 5 ticks = smooth decrement
+  const LAMPORTS_PER_TICK_SLOW = 25;    // Slower in critical zone (776-388) for visibility
   const INITIAL_RENT = 6208;            // 24h of rent (16 epochs × 388)
   const TOPUP_LAMPORTS = 776;           // 3h worth (2 epochs)
   const TOPUP_THRESHOLD = 776;          // Top up when below 3h of rent
   const COLD_THRESHOLD = 388;           // Cold when below 1 epoch of rent
-  // Time scale: 0.5s per epoch → 16 epochs = 8s to deplete, 12s total cycle
+  // Time scale: 0.5s per epoch → 16 epochs = 8s to deplete, 30s total cycle
 
   // Colors
   const GREY = { r: 161, g: 161, b: 170 };
@@ -44,6 +45,24 @@ export const RentLifecycleVisualizer = () => {
   };
 
   const colorToRgba = (c, alpha = 1) => `rgba(${c.r}, ${c.g}, ${c.b}, ${alpha})`;
+
+  // Format lamports: ~rounded above 1000, then 776 → 388 as discrete steps, then ticks
+  const formatLamports = (l) => {
+    if (l > 1000) {
+      const rounded = Math.round(l / 500) * 500;
+      return `~${rounded.toLocaleString()}`;
+    }
+    if (l > 776) {
+      return '~1,000';  // approaching threshold
+    }
+    if (l > 388) {
+      return '776';     // at top-up threshold
+    }
+    if (l > 0) {
+      return '388';     // at cold threshold
+    }
+    return '0';
+  };
 
   const arrowIdRef = useRef(0);
   const flyingArrowIdRef = useRef(0);
@@ -125,25 +144,25 @@ export const RentLifecycleVisualizer = () => {
     // Otherwise just the transaction happens (no rent top-up needed)
   };
 
-  // Track epoch ticks (every 0.5s = 1.5h = 1 epoch)
-  const lastEpochRef = useRef(0);
-  // 30-second transaction schedule with varied patterns for good DX
+  // 30-second transaction schedule with realistic spam patterns
   const txTimesRef = useRef([
-    // Phase 1: Burst of activity (0-5s) - shows active account
-    0.5, 1, 1.5, 2, 2.5, 3, 4, 5,
-    // Phase 2: Top-ups as rent depletes (~7-10s)
-    7.6, 8.7, 9.7,
-    // Phase 3: Account goes cold ~11s, reinit at 11.3s
-    11.3,
-    // Phase 4: Second cycle activity (12-16s)
-    12.5, 13.5, 14.5, 15.5,
-    // Phase 5: Top-ups again (~17-19s)
-    17.5, 18.5, 19.5,
-    // Phase 6: Goes cold ~21s, reinit at 21.5s
-    21.5,
-    // Phase 7: Final burst (22-26s)
-    22.5, 23.5, 24.5, 25.5,
-    // Phase 8: Let it drain and go cold before loop (26-30s)
+    // Phase 1: Heavy burst at start (0-5s) - shows active account
+    0.3, 0.6, 0.9, 1.2, 1.6, 2, 2.4, 2.8, 3.2, 3.7, 4.2, 4.8,
+    // Phase 2: Continued activity (5-7s)
+    5.3, 5.9, 6.4,
+    // Phase 3: Top-ups as rent depletes (~7-10s)
+    7.2, 7.8, 8.4, 9, 9.6,
+    // Phase 4: Goes cold, reinit
+    10.8,
+    // Phase 5: Second cycle spam (11-15s)
+    11.3, 11.8, 12.3, 12.9, 13.4, 14, 14.6, 15.2,
+    // Phase 6: Top-ups again (~16-18s)
+    16, 16.7, 17.3, 18,
+    // Phase 7: Goes cold, reinit
+    19.5,
+    // Phase 8: Final burst (20-25s)
+    20, 20.5, 21, 21.6, 22.2, 22.8, 23.5, 24.2, 25,
+    // Phase 9: Let it drain and go cold before loop (25-30s)
   ]);
 
   const handleReset = () => {
@@ -157,7 +176,6 @@ export const RentLifecycleVisualizer = () => {
     txLineIndexRef.current = 0;
     arrowIdRef.current = 0;
     flyingArrowIdRef.current = 0;
-    lastEpochRef.current = 0;
   };
 
   useEffect(() => {
@@ -166,8 +184,6 @@ export const RentLifecycleVisualizer = () => {
     const interval = setInterval(() => {
       setTime((t) => {
         const newTime = t + 0.1;
-        // 0.5s per epoch: epoch = floor(time / 0.5) = floor(time * 2)
-        const currentEpoch = Math.floor(newTime * 2);
 
         // Initialize at t=0 (instant)
         if (t === 0 && newTime > 0) {
@@ -175,7 +191,6 @@ export const RentLifecycleVisualizer = () => {
           setPhase('hot');
           triggerHighlight();
           triggerTransaction(getNextLineIndex());
-          lastEpochRef.current = 0;
         }
 
         // Check for scheduled transactions
@@ -205,17 +220,18 @@ export const RentLifecycleVisualizer = () => {
           }
         });
 
-        // Decrease lamports every epoch (0.5s = 1.5h) when hot
-        if (phase === 'hot' && currentEpoch > lastEpochRef.current && newTime > 0.1) {
+        // Smooth lamport decrement every tick (100ms) when hot
+        // Slower in critical zone (below 1000) so users can see the 776→388 transition
+        if (phase === 'hot' && newTime > 0.1) {
           setLamports((l) => {
-            const newLamports = Math.max(0, l - RENT_PER_EPOCH);
+            const tickAmount = l < 1000 ? LAMPORTS_PER_TICK_SLOW : LAMPORTS_PER_TICK;
+            const newLamports = Math.max(0, l - tickAmount);
             // Go cold when lamports below cold threshold
             if (newLamports < COLD_THRESHOLD) {
               setPhase('cold');
             }
             return newLamports;
           });
-          lastEpochRef.current = currentEpoch;
         }
 
         // Loop at 30s
@@ -223,7 +239,6 @@ export const RentLifecycleVisualizer = () => {
           setPhase('uninitialized');
           setLamports(0);
           txLineIndexRef.current = 0;
-          lastEpochRef.current = 0;
           return 0;
         }
 
@@ -300,37 +315,35 @@ export const RentLifecycleVisualizer = () => {
         .btn-interactive {
           position: relative;
           overflow: hidden;
-          background: rgba(120, 140, 180, 0.08);
-          border-color: rgba(120, 140, 180, 0.25);
+          background: rgba(120, 140, 180, 0.06);
+          border: 1px solid rgba(120, 140, 180, 0.2);
+          border-bottom-color: rgba(0, 0, 0, 0.08);
+          box-shadow: 0 1px 2px rgba(0,0,0,0.05);
           color: rgb(0, 0, 0);
         }
         .dark .btn-interactive {
-          background: rgba(120, 140, 180, 0.12);
-          border-color: rgba(120, 140, 180, 0.3);
+          background: rgba(120, 140, 180, 0.1);
+          border: 1px solid rgba(120, 140, 180, 0.25);
+          border-bottom-color: rgba(0, 0, 0, 0.2);
+          box-shadow: 0 1px 2px rgba(0,0,0,0.1);
           color: rgb(255, 255, 255);
         }
-        .btn-interactive::before {
-          content: '';
-          position: absolute;
-          top: 0;
-          left: -100%;
-          width: 100%;
-          height: 100%;
-          background: linear-gradient(90deg, transparent, rgba(120, 140, 180, 0.15), transparent);
-          transition: left 0.5s ease;
-        }
-        .btn-interactive:hover::before {
-          left: 100%;
-        }
         .btn-interactive:hover {
-          background: rgba(120, 140, 180, 0.15);
-          border-color: rgba(120, 140, 180, 0.4);
-          transform: translateY(-1px);
-          box-shadow: 0 4px 12px rgba(120, 140, 180, 0.2);
+          background: rgba(120, 140, 180, 0.1);
+          box-shadow: 0 2px 4px rgba(0,0,0,0.08);
         }
         .dark .btn-interactive:hover {
-          background: rgba(120, 140, 180, 0.2);
-          box-shadow: 0 4px 12px rgba(120, 140, 180, 0.15);
+          background: rgba(120, 140, 180, 0.15);
+          box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+        }
+        .btn-interactive:active {
+          background: rgba(120, 140, 180, 0.12);
+          box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
+          transform: translateY(0.5px);
+        }
+        .dark .btn-interactive:active {
+          background: rgba(120, 140, 180, 0.18);
+          box-shadow: inset 0 1px 2px rgba(0,0,0,0.2);
         }
         @keyframes arrowUp {
           0% { opacity: 0; transform: translateY(calc(-50% + 4px)); }
@@ -499,7 +512,7 @@ export const RentLifecycleVisualizer = () => {
                 textAlign: 'right',
               }}
             >
-              {lamports.toLocaleString()}
+              {formatLamports(lamports)}
             </span>
             <span
               className="text-zinc-400 dark:text-white/40 transition-all duration-150 ml-1"
