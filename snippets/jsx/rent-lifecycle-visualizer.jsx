@@ -1,14 +1,17 @@
 export const RentLifecycleVisualizer = () => {
   const [, setTime] = useState(0);
   const [lamports, setLamports] = useState(0);
-  const [isRunning, setIsRunning] = useState(true);
+  const [isRunning, setIsRunning] = useState(false);
   const [phase, setPhase] = useState('uninitialized');
+  const [hasStarted, setHasStarted] = useState(false);
+  const containerRef = useRef(null);
   const [isHighlighted, setIsHighlighted] = useState(false);
   const [activeArrows, setActiveArrows] = useState([]);
   const [activeLines, setActiveLines] = useState([]);
   const [isButtonPressed, setIsButtonPressed] = useState(false);
   const [flyingArrows, setFlyingArrows] = useState([]);
   const [floatingAmounts, setFloatingAmounts] = useState([]);
+  const [resetCount, setResetCount] = useState(0);
 
   // Constants from rent config
   const LAMPORTS_PER_TICK = 77.6;       // 388 per epoch / 5 ticks = smooth decrement
@@ -181,10 +184,33 @@ export const RentLifecycleVisualizer = () => {
     setActiveLines([]);
     setActiveArrows([]);
     setFlyingArrows([]);
+    setResetCount((c) => c + 1);
     txLineIndexRef.current = 0;
     arrowIdRef.current = 0;
     flyingArrowIdRef.current = 0;
   };
+
+  // Start animation when component scrolls into view
+  useEffect(() => {
+    if (hasStarted) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsRunning(true);
+          setHasStarted(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.5 }
+    );
+
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, [hasStarted]);
 
   useEffect(() => {
     if (!isRunning) return;
@@ -242,8 +268,8 @@ export const RentLifecycleVisualizer = () => {
           });
         }
 
-        // Loop at 34s (extra 4s for cold fade)
-        if (newTime >= 34) {
+        // Loop at 34.5s (extra 4s for cold fade)
+        if (newTime >= 34.5) {
           setPhase('uninitialized');
           setLamports(0);
           txLineIndexRef.current = 0;
@@ -289,6 +315,7 @@ export const RentLifecycleVisualizer = () => {
 
   return (
     <div
+      ref={containerRef}
       className="relative p-6 my-4 overflow-hidden"
       style={{ fontFamily: "'Inter', 'IBM Plex Mono'" }}
     >
@@ -299,7 +326,7 @@ export const RentLifecycleVisualizer = () => {
           to { transform: translateX(-170rem); }
         }
         .timeline-scroll {
-          animation: scrollTimeline 34s linear infinite;
+          animation: scrollTimeline 34.5s linear infinite;
         }
         @keyframes bobbleMove {
           0% { offset-distance: 0%; opacity: 0; }
@@ -309,13 +336,6 @@ export const RentLifecycleVisualizer = () => {
         }
         .tx-bobble {
           animation: bobbleMove 0.5s ease-out forwards;
-        }
-        @keyframes pulse {
-          0%, 100% { opacity: 1; transform: scale(1); font-weight: 500; }
-          50% { opacity: 0.8; transform: scale(1.12); font-weight: 700; }
-        }
-        .topup-pulse {
-          animation: pulse 2s ease-in-out infinite;
         }
         .btn-interactive {
           position: relative;
@@ -444,7 +464,7 @@ export const RentLifecycleVisualizer = () => {
         >
           {/* Continuously scrolling tick marks with hour labels below */}
           <div className="absolute inset-0 flex items-center overflow-hidden">
-            <div className="flex items-center timeline-scroll" style={{ gap: '5rem' }}>
+            <div key={resetCount} className="flex items-center timeline-scroll" style={{ gap: '5rem' }}>
               {[...Array(34).keys()].map(i => i * 3).concat([...Array(34).keys()].map(i => i * 3)).map((h, i) => (
                 <div key={i} className="flex flex-col items-center flex-shrink-0">
                   <span
@@ -558,12 +578,14 @@ export const RentLifecycleVisualizer = () => {
         </button>
         <button
           onClick={handleTopup}
-          className={`rounded-lg border backdrop-blur-sm transition-all btn-interactive
-            ${isButtonPressed ? 'font-bold' : 'font-medium'} ${!isButtonPressed ? 'topup-pulse' : ''}`}
+          className={`rounded-lg border backdrop-blur-sm transition-all ${isButtonPressed ? 'font-bold' : 'font-medium'}`}
           style={{
             padding: '0.5rem 1rem',
             fontSize: isButtonPressed ? '0.95rem' : '0.85rem',
             transform: isButtonPressed ? 'scale(1.15)' : 'scale(1)',
+            background: '#0066ff',
+            borderColor: '#0066ff',
+            color: '#fff',
           }}
         >
           Send Tx
