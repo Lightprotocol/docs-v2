@@ -12,7 +12,7 @@ export const RentLifecycleVisualizer = () => {
 
   // Constants from rent config
   const LAMPORTS_PER_TICK = 77.6;       // 388 per epoch / 5 ticks = smooth decrement
-  const LAMPORTS_PER_TICK_SLOW = 25;    // Slower in critical zone (776-388) for visibility
+  const LAMPORTS_PER_TICK_SLOW = 50;    // Faster drain in cold zone to reach 0 before loop
   const INITIAL_RENT = 6208;            // 24h of rent (16 epochs × 388)
   const TOPUP_LAMPORTS = 776;           // 3h worth (2 epochs)
   const TOPUP_THRESHOLD = 776;          // Top up when below 3h of rent
@@ -161,16 +161,16 @@ export const RentLifecycleVisualizer = () => {
     // Phase 3: Top-ups as rent depletes (~7-9s) - 3 top-ups
     7.2, 8, 8.8,
     // Phase 4: Goes cold, reinit
-    10.8,
-    // Phase 5: Second cycle spam (11-15s)
-    11.3, 11.8, 12.3, 12.9, 13.4, 14, 14.6, 15.2,
-    // Phase 6: Top-ups again (~16-17s) - 2 top-ups
-    16, 17,
+    11.8,
+    // Phase 5: Second cycle spam (12-16s)
+    12.3, 12.8, 13.3, 13.9, 14.4, 15, 15.6, 16.2,
+    // Phase 6: Top-ups again (~17-18s) - 2 top-ups
+    17, 18,
     // Phase 7: Goes cold, reinit
-    19.5,
-    // Phase 8: Final burst (20-25s)
-    20, 20.5, 21, 21.6, 22.2, 22.8, 23.5, 24.2, 25,
-    // Phase 9: Let it drain and go cold before loop (25-30s)
+    20.5,
+    // Phase 8: Final burst (21-26s)
+    21, 21.5, 22, 22.6, 23.2, 23.8, 24.5, 25.2, 26,
+    // Phase 9: Let it drain and go cold before loop (26-34s)
   ]);
 
   const handleReset = () => {
@@ -228,9 +228,9 @@ export const RentLifecycleVisualizer = () => {
           }
         });
 
-        // Smooth lamport decrement every tick (100ms) when hot
+        // Smooth lamport decrement every tick (100ms) when hot or cold
         // Slower in critical zone (below 1000) so users can see the 776→388 transition
-        if (phase === 'hot' && newTime > 0.1) {
+        if ((phase === 'hot' || phase === 'cold') && newTime > 0.1) {
           setLamports((l) => {
             const tickAmount = l < 1000 ? LAMPORTS_PER_TICK_SLOW : LAMPORTS_PER_TICK;
             const newLamports = Math.max(0, l - tickAmount);
@@ -242,8 +242,8 @@ export const RentLifecycleVisualizer = () => {
           });
         }
 
-        // Loop at 33s (extra 3s for cold fade)
-        if (newTime >= 33) {
+        // Loop at 34s (extra 4s for cold fade)
+        if (newTime >= 34) {
           setPhase('uninitialized');
           setLamports(0);
           txLineIndexRef.current = 0;
@@ -299,7 +299,7 @@ export const RentLifecycleVisualizer = () => {
           to { transform: translateX(-170rem); }
         }
         .timeline-scroll {
-          animation: scrollTimeline 33s linear infinite;
+          animation: scrollTimeline 34s linear infinite;
         }
         @keyframes bobbleMove {
           0% { offset-distance: 0%; opacity: 0; }
