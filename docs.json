@@ -67,6 +67,12 @@
             ]
           },
           {
+            "group": "Integration Guides",
+            "pages": [
+              "integration-guides/privy"
+            ]
+          },
+          {
             "group": "Compressed Tokens",
             "pages": [
               "compressed-tokens/README",
