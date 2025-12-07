@@ -50,18 +50,11 @@ export const RentLifecycleVisualizer = () => {
 
   const colorToRgba = (c, alpha = 1) => `rgba(${c.r}, ${c.g}, ${c.b}, ${alpha})`;
 
-  // Format lamports: ~rounded above 2000, then discrete steps matching rent calculations
-  // 1,552 = 4 epochs, 776 = 2 epochs (top-up), 388 = 1 epoch (cold)
+  // Format lamports: always ~X,XXX rounded to nearest 500
   const formatLamports = (l) => {
-    if (l > 2000) {
-      const rounded = Math.round(l / 500) * 500;
-      return `~${rounded.toLocaleString()}`;
-    }
-    if (l > 1552) return '~2,000';
-    if (l > 776) return '1,552';   // 4 epochs
-    if (l > 388) return '776';     // 2 epochs (top-up threshold)
-    if (l > 260) return '388';     // 1 epoch (cold threshold) - shows for ~1.5h
-    return '0';                    // depleted
+    if (l <= 0) return '0';
+    const rounded = Math.round(l / 500) * 500;
+    return `~${rounded.toLocaleString()}`;
   };
 
   const arrowIdRef = useRef(0);
@@ -155,25 +148,25 @@ export const RentLifecycleVisualizer = () => {
     // Otherwise just the transaction happens (no rent top-up needed)
   };
 
-  // 30-second transaction schedule with realistic spam patterns
+  // 38-second transaction schedule with realistic spam patterns (10% slower)
   const txTimesRef = useRef([
-    // Phase 1: Heavy burst at start (0.5-5.5s) - shows active account
-    0.8, 1.1, 1.4, 1.7, 2.1, 2.5, 2.9, 3.3, 3.7, 4.2, 4.7, 5.3,
-    // Phase 2: Continued activity (5.5-7.5s)
-    5.8, 6.4, 6.9,
-    // Phase 3: Top-ups as rent depletes (~7.5-9.5s) - 3 top-ups
-    7.7, 8.5, 9.3,
+    // Phase 1: Heavy burst at start (0.5-6s) - shows active account
+    0.9, 1.2, 1.5, 1.9, 2.3, 2.8, 3.2, 3.6, 4.1, 4.6, 5.2, 5.8,
+    // Phase 2: Continued activity (6-8.5s)
+    6.4, 7.0, 7.6,
+    // Phase 3: Top-ups as rent depletes (~8.5-10.5s) - 3 top-ups
+    8.5, 9.4, 10.2,
     // Phase 4: Goes cold, reinit
-    12.3,
-    // Phase 5: Second cycle spam (12.5-16.5s)
-    12.8, 13.3, 13.8, 14.4, 14.9, 15.5, 16.1, 16.7,
-    // Phase 6: Top-ups again (~17.5-18.5s) - 2 top-ups
-    17.5, 18.5,
+    13.5,
+    // Phase 5: Second cycle spam (14-18.5s)
+    14.1, 14.6, 15.2, 15.8, 16.4, 17.1, 17.7, 18.4,
+    // Phase 6: Top-ups again (~19-20.5s) - 2 top-ups
+    19.3, 20.4,
     // Phase 7: Goes cold, reinit
-    21,
-    // Phase 8: Final burst (21.5-26.5s)
-    21.5, 22, 22.5, 23.1, 23.7, 24.3, 25, 25.7, 26.5,
-    // Phase 9: Let it drain and go cold before loop (26.5-34.5s)
+    23.1,
+    // Phase 8: Final burst (23.5-29.5s)
+    23.7, 24.2, 24.8, 25.4, 26.1, 26.7, 27.5, 28.3, 29.2,
+    // Phase 9: Let it drain and go cold before loop (29-38s)
   ]);
 
   const handleReset = () => {
@@ -268,8 +261,8 @@ export const RentLifecycleVisualizer = () => {
           });
         }
 
-        // Loop at 34.5s (extra 4s for cold fade)
-        if (newTime >= 34.5) {
+        // Loop at 38s (extra 4s for cold fade)
+        if (newTime >= 38) {
           setPhase('uninitialized');
           setLamports(0);
           txLineIndexRef.current = 0;
@@ -326,7 +319,7 @@ export const RentLifecycleVisualizer = () => {
           to { transform: translateX(-170rem); }
         }
         .timeline-scroll {
-          animation: scrollTimeline 34.5s linear infinite;
+          animation: scrollTimeline 38s linear infinite;
         }
         @keyframes bobbleMove {
           0% { offset-distance: 0%; opacity: 0; }
