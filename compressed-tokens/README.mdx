@@ -12,6 +12,7 @@ import { TokenAccountCompressedVsSpl } from '/snippets/jsx/token-account-compres
 1. Compressed tokens are compressed accounts with `TokenData` and rent-free.
 2. Compressed token accounts store token balance, owner, and other information of tokens like SPL and c-Tokens. 
 3. Any c-Token or SPL token can be compressed/decompressed at will.
+4. Wallets like Phantom and Backpack support compressed tokens. The UI does not distinguish between SPL and compressed tokens.
 
 ## Recommended Usage of Compressed Tokens
 
@@ -29,17 +30,24 @@ import { TokenAccountCompressedVsSpl } from '/snippets/jsx/token-account-compres
 />
   </Card>
 
-    <Card title="">
+  <Card title="">
   #### Storage of Inactive Token Accounts
-  * Most (associated) token accounts are not frequently written to.
-  * **Store token accounts rent-free** when inactive
-  * [c-Tokens](/compressed-token-program/README.mdx) are automatically compressed/decompressed, when active/inactive and include **sponsored rent-exemption**. [Learn more here](/compressed-token-program/README.mdx).
-  </Card>
-<Note>
-Leading **wallets** like Phantom and Backpack **support compressed tokens**. The UI does not distinguish between SPL and compressed tokens.
-</Note>
+    * Most (associated) token accounts are not frequently written to.
+    * **Store token accounts rent-free** when inactive
+    * [c-Tokens](/compressed-token-program/README.mdx) are automatically compressed/decompressed, when active/inactive and include **sponsored rent-exemption**.
 
-# Get Started
+<Card
+  title="Learn about c-Token"
+  icon="chevron-right"
+  color="#0066ff"
+  href="/compressed-token-program/README.mdx"
+  horizontal
+/>
+  </Card>
+
+
+# Get Started 
+
 <Accordion title="Installation & Setup">
 <Steps>
   <Step>
