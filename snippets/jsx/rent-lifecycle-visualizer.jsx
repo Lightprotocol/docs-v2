@@ -8,6 +8,7 @@ export const RentLifecycleVisualizer = () => {
   const [activeLines, setActiveLines] = useState([]);
   const [isButtonPressed, setIsButtonPressed] = useState(false);
   const [flyingArrows, setFlyingArrows] = useState([]);
+  const [floatingAmounts, setFloatingAmounts] = useState([]);
 
   // Constants from rent config
   const LAMPORTS_PER_TICK = 77.6;       // 388 per epoch / 5 ticks = smooth decrement
@@ -46,33 +47,38 @@ export const RentLifecycleVisualizer = () => {
 
   const colorToRgba = (c, alpha = 1) => `rgba(${c.r}, ${c.g}, ${c.b}, ${alpha})`;
 
-  // Format lamports: ~rounded above 1000, then 776 → 388 as discrete steps, then ticks
+  // Format lamports: ~rounded above 2000, then discrete steps matching rent calculations
+  // 1,552 = 4 epochs, 776 = 2 epochs (top-up), 388 = 1 epoch (cold)
   const formatLamports = (l) => {
-    if (l > 1000) {
+    if (l > 2000) {
       const rounded = Math.round(l / 500) * 500;
       return `~${rounded.toLocaleString()}`;
     }
-    if (l > 776) {
-      return '~1,000';  // approaching threshold
-    }
-    if (l > 388) {
-      return '776';     // at top-up threshold
-    }
-    if (l > 0) {
-      return '388';     // at cold threshold
-    }
+    if (l > 1552) return '~2,000';
+    if (l > 776) return '1,552';   // 4 epochs
+    if (l > 388) return '776';     // 2 epochs (top-up threshold)
+    if (l > 0) return '388';       // 1 epoch (cold threshold)
     return '0';
   };
 
   const arrowIdRef = useRef(0);
   const flyingArrowIdRef = useRef(0);
+  const floatingAmountIdRef = useRef(0);
 
-  const triggerFlyingArrow = () => {
+  const triggerFlyingArrow = (amount, lineIndex) => {
     const id = flyingArrowIdRef.current++;
     setFlyingArrows((prev) => [...prev, id]);
     setTimeout(() => {
       setFlyingArrows((prev) => prev.filter((a) => a !== id));
     }, 600);
+
+    // Also show floating amount at the source of the transaction line
+    const amountId = floatingAmountIdRef.current++;
+    const line = txLines[lineIndex] || txLines[0];
+    setFloatingAmounts((prev) => [...prev, { id: amountId, amount, x: line.x1, y: line.y1 }]);
+    setTimeout(() => {
+      setFloatingAmounts((prev) => prev.filter((a) => a.id !== amountId));
+    }, 800);
   };
 
   const triggerHighlight = () => {
@@ -96,9 +102,11 @@ export const RentLifecycleVisualizer = () => {
 
   // Cycle through lines for transactions
   const txLineIndexRef = useRef(0);
+  const lastLineIndexRef = useRef(0);
   const getNextLineIndex = () => {
     const index = txLineIndexRef.current;
     txLineIndexRef.current = (txLineIndexRef.current + 1) % txLines.length;
+    lastLineIndexRef.current = index;
     return index;
   };
 
@@ -131,7 +139,7 @@ export const RentLifecycleVisualizer = () => {
       setLamports(INITIAL_RENT);
       setPhase('hot');
       triggerHighlight();
-      triggerFlyingArrow();
+      triggerFlyingArrow(INITIAL_RENT, lastLineIndexRef.current);
       return;
     }
 
@@ -139,7 +147,7 @@ export const RentLifecycleVisualizer = () => {
     if (lamports < TOPUP_THRESHOLD) {
       setLamports((l) => l + TOPUP_LAMPORTS);
       triggerHighlight();
-      triggerFlyingArrow();
+      triggerFlyingArrow(TOPUP_LAMPORTS, lastLineIndexRef.current);
     }
     // Otherwise just the transaction happens (no rent top-up needed)
   };
@@ -150,14 +158,14 @@ export const RentLifecycleVisualizer = () => {
     0.3, 0.6, 0.9, 1.2, 1.6, 2, 2.4, 2.8, 3.2, 3.7, 4.2, 4.8,
     // Phase 2: Continued activity (5-7s)
     5.3, 5.9, 6.4,
-    // Phase 3: Top-ups as rent depletes (~7-10s)
-    7.2, 7.8, 8.4, 9, 9.6,
+    // Phase 3: Top-ups as rent depletes (~7-9s) - 3 top-ups
+    7.2, 8, 8.8,
     // Phase 4: Goes cold, reinit
     10.8,
     // Phase 5: Second cycle spam (11-15s)
     11.3, 11.8, 12.3, 12.9, 13.4, 14, 14.6, 15.2,
-    // Phase 6: Top-ups again (~16-18s)
-    16, 16.7, 17.3, 18,
+    // Phase 6: Top-ups again (~16-17s) - 2 top-ups
+    16, 17,
     // Phase 7: Goes cold, reinit
     19.5,
     // Phase 8: Final burst (20-25s)
@@ -205,13 +213,13 @@ export const RentLifecycleVisualizer = () => {
               setLamports(INITIAL_RENT);
               setPhase('hot');
               triggerHighlight();
-              triggerFlyingArrow();
+              triggerFlyingArrow(INITIAL_RENT, lastLineIndexRef.current);
             } else if (phase === 'hot') {
               // Only top up if below threshold (3h = 776 lamports = 2 epochs)
               setLamports((currentLamports) => {
                 if (currentLamports > 0 && currentLamports < TOPUP_THRESHOLD) {
                   triggerHighlight();
-                  triggerFlyingArrow();
+                  triggerFlyingArrow(TOPUP_LAMPORTS, lastLineIndexRef.current);
                   return currentLamports + TOPUP_LAMPORTS;
                 }
                 return currentLamports;
@@ -362,6 +370,14 @@ export const RentLifecycleVisualizer = () => {
         .arrow-fly-up {
           animation: arrowFlyUp 0.4s ease-out forwards;
         }
+        @keyframes amountFlyUp {
+          0% { opacity: 1; transform: translateY(0); }
+          70% { opacity: 1; }
+          100% { opacity: 0; transform: translateY(-20px); }
+        }
+        .amount-fly-up {
+          animation: amountFlyUp 0.8s ease-out forwards;
+        }
       `}</style>
 
       {/* Main visualization area */}
@@ -400,6 +416,25 @@ export const RentLifecycleVisualizer = () => {
               </g>
             );
           })}
+          {/* Floating amounts at transaction source */}
+          {floatingAmounts.map(({ id, amount, x, y }) => (
+            <text
+              key={id}
+              x={x}
+              y={y}
+              className="amount-fly-up"
+              style={{
+                fill: 'rgb(34, 197, 94)',
+                fontSize: '8px',
+                fontWeight: 700,
+                fontFamily: 'ui-monospace, monospace',
+                textAnchor: 'middle',
+                dominantBaseline: 'middle',
+              }}
+            >
+              +{amount.toLocaleString()}
+            </text>
+          ))}
         </svg>
 
         {/* Timeline with fading edges */}
