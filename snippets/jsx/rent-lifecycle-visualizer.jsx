@@ -2,7 +2,6 @@ export const RentLifecycleVisualizer = () => {
   const [time, setTime] = useState(0);
   const [lamports, setLamports] = useState(0);
   const [isRunning, setIsRunning] = useState(true);
-  const [lastTopupTime, setLastTopupTime] = useState(0);
   const [phase, setPhase] = useState('uninitialized');
   const [isHighlighted, setIsHighlighted] = useState(false);
   const [activeArrows, setActiveArrows] = useState([]);
@@ -11,11 +10,12 @@ export const RentLifecycleVisualizer = () => {
   const [flyingArrows, setFlyingArrows] = useState([]);
 
   // Constants from rent config
-  const RENT_PER_EPOCH = 388;
-  const INITIAL_LAMPORTS = 17208;
-  const TOPUP_LAMPORTS = 776;
-  // 388 lamports per second (decreased every 1s tick)
-  const LAMPORTS_PER_SECOND = RENT_PER_EPOCH;
+  const RENT_PER_EPOCH = 388;           // 388 lamports per epoch (1.5h)
+  const INITIAL_RENT = 6208;            // 24h of rent (16 epochs × 388)
+  const TOPUP_LAMPORTS = 776;           // 3h worth (2 epochs)
+  const TOPUP_THRESHOLD = 776;          // Top up when below 3h of rent
+  const COLD_THRESHOLD = 388;           // Cold when below 1 epoch of rent
+  // Time scale: 0.5s per epoch → 16 epochs = 8s to deplete, 12s total cycle
 
   // Colors
   const GREY = { r: 161, g: 161, b: 170 };
@@ -85,38 +85,71 @@ export const RentLifecycleVisualizer = () => {
 
   const getAccountColor = () => {
     if (phase === 'uninitialized') return GREY;
+    if (phase === 'cold') return BLUE;
 
-    const timeSinceTopup = time - lastTopupTime;
-
-    // Stay red for 0.8s, then fade directly to blue over 3s
-    if (timeSinceTopup < 0.8) {
+    // Color based on lamports threshold
+    if (lamports > TOPUP_THRESHOLD) {
+      // Above 776: stay red (hot)
       return RED;
-    } else {
-      // Red directly to blue (stays at blue once transition completes)
-      const t = Math.min(1, (timeSinceTopup - 0.8) / 3);
+    } else if (lamports > COLD_THRESHOLD) {
+      // Between 776 and 388: fade red → blue
+      const t = 1 - (lamports - COLD_THRESHOLD) / (TOPUP_THRESHOLD - COLD_THRESHOLD);
       return interpolateColor(RED, BLUE, t);
+    } else {
+      // Below 388: cold (blue)
+      return BLUE;
     }
   };
 
   const handleTopup = () => {
-    // If balance is 0, initialize with full amount; otherwise add top-up amount
-    setLamports((l) => l === 0 ? INITIAL_LAMPORTS : l + TOPUP_LAMPORTS);
-    setLastTopupTime(time);
-    if (phase === 'uninitialized' || phase === 'cold') {
-      setPhase('hot');
-    }
-    triggerHighlight();
+    // Always trigger a transaction
     triggerTransaction(getNextLineIndex());
-    triggerFlyingArrow();
     setIsButtonPressed(true);
     setTimeout(() => setIsButtonPressed(false), 200);
+
+    // If cold/uninitialized, re-initialize with full amount
+    if (phase === 'uninitialized' || phase === 'cold' || lamports === 0) {
+      setLamports(INITIAL_RENT);
+      setPhase('hot');
+      triggerHighlight();
+      triggerFlyingArrow();
+      return;
+    }
+
+    // Only top up if below threshold (3h = 776 lamports)
+    if (lamports < TOPUP_THRESHOLD) {
+      setLamports((l) => l + TOPUP_LAMPORTS);
+      triggerHighlight();
+      triggerFlyingArrow();
+    }
+    // Otherwise just the transaction happens (no rent top-up needed)
   };
+
+  // Track epoch ticks (every 0.5s = 1.5h = 1 epoch)
+  const lastEpochRef = useRef(0);
+  // 30-second transaction schedule with varied patterns for good DX
+  const txTimesRef = useRef([
+    // Phase 1: Burst of activity (0-5s) - shows active account
+    0.5, 1, 1.5, 2, 2.5, 3, 4, 5,
+    // Phase 2: Top-ups as rent depletes (~7-10s)
+    7.6, 8.7, 9.7,
+    // Phase 3: Account goes cold ~11s, reinit at 11.3s
+    11.3,
+    // Phase 4: Second cycle activity (12-16s)
+    12.5, 13.5, 14.5, 15.5,
+    // Phase 5: Top-ups again (~17-19s)
+    17.5, 18.5, 19.5,
+    // Phase 6: Goes cold ~21s, reinit at 21.5s
+    21.5,
+    // Phase 7: Final burst (22-26s)
+    22.5, 23.5, 24.5, 25.5,
+    // Phase 8: Let it drain and go cold before loop (26-30s)
+  ]);
 
   const handleReset = () => {
     setTime(0);
     setLamports(0);
     setPhase('uninitialized');
-    setLastTopupTime(0);
     setIsRunning(true);
     setActiveLines([]);
     setActiveArrows([]);
@@ -124,10 +157,8 @@ export const RentLifecycleVisualizer = () => {
     txLineIndexRef.current = 0;
     arrowIdRef.current = 0;
     flyingArrowIdRef.current = 0;
+    lastEpochRef.current = 0;
   };
-
-  // Track last second for 1-second lamport decreases
-  const lastSecondRef = useRef(0);
 
   useEffect(() => {
     if (!isRunning) return;
@@ -135,79 +166,65 @@ export const RentLifecycleVisualizer = () => {
     const interval = setInterval(() => {
       setTime((t) => {
         const newTime = t + 0.1;
-        const currentSecond = Math.floor(newTime);
+        // 0.5s per epoch: epoch = floor(time / 0.5) = floor(time * 2)
+        const currentEpoch = Math.floor(newTime * 2);
 
         // Initialize at t=0 (instant)
         if (t === 0 && newTime > 0) {
-          setLamports(INITIAL_LAMPORTS);
-          setLastTopupTime(0);
+          setLamports(INITIAL_RENT);
           setPhase('hot');
           triggerHighlight();
           triggerTransaction(getNextLineIndex());
-          lastSecondRef.current = 0;
+          lastEpochRef.current = 0;
         }
 
-        // Auto top-ups (faster cycle)
-        if (newTime >= 2 && t < 2) {
-          setLamports((l) => l + TOPUP_LAMPORTS);
-          setLastTopupTime(2);
-          triggerHighlight();
-          triggerTransaction(getNextLineIndex());
-        }
-        if (newTime >= 2.5 && t < 2.5) {
-          setLamports((l) => l + TOPUP_LAMPORTS);
-          setLastTopupTime(2.5);
-          triggerHighlight();
-          triggerTransaction(getNextLineIndex());
-        }
-        if (newTime >= 3 && t < 3) {
-          setLamports((l) => l + TOPUP_LAMPORTS);
-          setLastTopupTime(3);
-          triggerHighlight();
-          triggerTransaction(getNextLineIndex());
-        }
-        if (newTime >= 3.3 && t < 3.3) {
-          setLamports((l) => l + TOPUP_LAMPORTS);
-          setLastTopupTime(3.3);
-          triggerHighlight();
-          triggerTransaction(getNextLineIndex());
+        // Check for scheduled transactions
+        txTimesRef.current.forEach((txTime) => {
+          if (newTime >= txTime && t < txTime) {
+            // Transaction happens - show line animation
+            triggerTransaction(getNextLineIndex());
+
+            // Handle based on current state
+            if (phase === 'cold') {
+              // Reinitialize from cold state
+              setLamports(INITIAL_RENT);
+              setPhase('hot');
+              triggerHighlight();
+              triggerFlyingArrow();
+            } else if (phase === 'hot') {
+              // Only top up if below threshold (3h = 776 lamports = 2 epochs)
+              setLamports((currentLamports) => {
+                if (currentLamports > 0 && currentLamports < TOPUP_THRESHOLD) {
+                  triggerHighlight();
+                  triggerFlyingArrow();
+                  return currentLamports + TOPUP_LAMPORTS;
+                }
+                return currentLamports;
+              });
+            }
+          }
+        });
+
+        // Decrease lamports every epoch (0.5s = 1.5h) when hot
+        if (phase === 'hot' && currentEpoch > lastEpochRef.current && newTime > 0.1) {
+          setLamports((l) => {
+            const newLamports = Math.max(0, l - RENT_PER_EPOCH);
+            // Go cold when lamports below cold threshold
+            if (newLamports < COLD_THRESHOLD) {
+              setPhase('cold');
+            }
+            return newLamports;
+          });
+          lastEpochRef.current = currentEpoch;
         }
 
-        // First cold at ~5.5s
-        if (newTime >= 5.5 && t < 5.5) {
-          setPhase('cold');
-          setLamports(0);
-        }
-
-        // Re-initialize (Load) at 6s
-        if (newTime >= 6 && t < 6) {
-          setLamports(INITIAL_LAMPORTS);
-          setLastTopupTime(6);
-          setPhase('hot');
-          triggerHighlight();
-          triggerTransaction(getNextLineIndex());
-        }
-
-        // Second cold at ~8.5s
-        if (newTime >= 8.5 && t < 8.5) {
-          setPhase('cold');
-          setLamports(0);
-        }
-
-        // Loop at 10s
-        if (newTime >= 10) {
+        // Loop at 30s
+        if (newTime >= 30) {
           setPhase('uninitialized');
           setLamports(0);
-          setLastTopupTime(0);
           txLineIndexRef.current = 0;
-          lastSecondRef.current = 0;
+          lastEpochRef.current = 0;
           return 0;
-        }
-
-        // Decrease lamports every 1 second when hot
-        if (phase === 'hot' && currentSecond > lastSecondRef.current) {
-          setLamports((l) => Math.max(0, l - LAMPORTS_PER_SECOND));
-          lastSecondRef.current = currentSecond;
         }
 
         return newTime;
@@ -217,7 +234,9 @@ export const RentLifecycleVisualizer = () => {
     return () => clearInterval(interval);
   }, [isRunning, phase]);
 
-  const displayHours = Math.round(time);
+  // 0.5 second = 1 epoch = 1.5 hours, so 1 second = 3 hours
+  // Round to nearest 3h for cleaner display
+  const displayHours = Math.round(time * 3 / 3) * 3;
   const accountColor = getAccountColor();
 
   // Diamond dots pattern
@@ -402,16 +421,10 @@ export const RentLifecycleVisualizer = () => {
             left: '50%',
             top: '50%',
             transform: 'translate(-50%, -50%)',
-            filter: (() => {
-              const timeSinceTopup = time - lastTopupTime;
-              if (timeSinceTopup < 1.5) {
-                // Hot glow fading out
-                const intensity = Math.max(0, 1 - timeSinceTopup / 1.5);
-                return `drop-shadow(0 0 ${20 * intensity + 5}px rgba(227, 89, 48, ${0.7 * intensity})) drop-shadow(0 0 ${8 * intensity + 2}px rgba(255, 150, 50, ${0.8 * intensity}))`;
-              }
-              return 'none';
-            })(),
-            transition: 'filter 0.3s ease',
+            filter: activeLines.length > 0
+              ? 'drop-shadow(0 0 25px rgba(227, 89, 48, 0.7)) drop-shadow(0 0 10px rgba(255, 150, 50, 0.8))'
+              : 'none',
+            transition: 'filter 0.15s ease',
           }}
         >
           <svg width="138" height="138" viewBox="0 0 100 100">
@@ -525,7 +538,7 @@ export const RentLifecycleVisualizer = () => {
               transform: isButtonPressed ? 'scale(1.15)' : 'scale(1)',
             }}
           >
-            Press for Top Up
+            Send Tx
           </button>
         </div>
       </div>
