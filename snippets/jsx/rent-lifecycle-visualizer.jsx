@@ -290,7 +290,7 @@ export const RentLifecycleVisualizer = () => {
   return (
     <div
       className="relative p-6 my-4 overflow-hidden"
-      style={{ fontFamily: 'Inter, sans-serif' }}
+      style={{ fontFamily: "'Inter', 'IBM Plex Mono'" }}
     >
       {/* CSS for animations */}
       <style>{`
@@ -523,16 +523,16 @@ export const RentLifecycleVisualizer = () => {
               </span>
             ))}
           </div>
-          <div style={{ height: '1.8rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ height: '2.2rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <span
               className="font-mono text-zinc-700 dark:text-white/80 transition-all duration-150"
               style={{
-                fontSize: isHighlighted ? '1.45rem' : '1.3rem',
+                fontSize: isHighlighted ? '1.9rem' : '1.7rem',
                 fontWeight: isHighlighted ? 700 : 500,
                 transformOrigin: 'center',
                 transform: isHighlighted ? 'scale(1.05)' : 'scale(1)',
                 fontVariantNumeric: 'tabular-nums',
-                minWidth: '5.5rem',
+                minWidth: '6.5rem',
                 textAlign: 'right',
               }}
             >
@@ -541,12 +541,12 @@ export const RentLifecycleVisualizer = () => {
             <span
               className="text-zinc-400 dark:text-white/40 transition-all duration-150 ml-1"
               style={{
-                fontSize: isHighlighted ? '1.1rem' : '0.875rem',
+                fontSize: isHighlighted ? '1.45rem' : '1.15rem',
                 fontWeight: isHighlighted ? 800 : 400,
               }}
             >lamports</span>
           </div>
-          <div className="text-zinc-500 dark:text-white/50 uppercase tracking-wide" style={{ fontSize: '0.7rem' }}>
+          <div className="text-zinc-500 dark:text-white/50 uppercase tracking-wide" style={{ fontSize: '0.9rem' }}>
             Rent Balance
           </div>
         </div>
