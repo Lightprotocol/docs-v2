@@ -1,6 +1,6 @@
 ---
 title: Overview
-description: "Overview to compressed tokens and guides with full code examples. Use for token distribution or storage of inactive token accounts"
+description: "Overview to compressed tokens and guides with full code examples. Use for token distribution or storage of inactive token accounts."
 ---
 
 import GuidesTable from '/snippets/overview-tables/compressed-tokens-guides-table.mdx';
@@ -9,18 +9,22 @@ import SetupEnvironment from '/snippets/setup/setup-environment-tabs.mdx';
 import InstallDependencies from '/snippets/setup/install-dependencies-codegroup.mdx';
 import { TokenAccountCompressedVsSpl } from '/snippets/jsx/token-account-compressed-vs-spl.jsx';
 
-1. Compressed tokens are compressed accounts with `TokenData` and rent-free.
-2. Compressed token accounts store token balance, owner, and other information of tokens like SPL and c-Tokens. 
-3. Any c-Token or SPL token can be compressed/decompressed at will.
-4. Wallets like Phantom and Backpack support compressed tokens. The UI does not distinguish between SPL and compressed tokens.
+| Creation      | Solana    | Compressed         |
+| :------------- | :--------------------- | :---------------------- |
+| **Token Account** | 	~2,000,000 lamports          | **17,000** lamports     |
 
+1. Compressed token accounts store token balance, owner, and other information of tokens like SPL and c-Tokens. 
+2. Compressed token accounts are rent-free.
+3. Any c-Token or SPL token can be compressed/decompressed at will.
+<Info>
+Wallets like Phantom and Backpack support compressed tokens. The UI does not distinguish between SPL and compressed tokens.
+</Info>
 ## Recommended Usage of Compressed Tokens
 
   <Card title="">
-  #### [Token Distribution](#advanced-guides)
+  ### [Token Distribution](#advanced-guides)
     * Distribute tokens without paying up front rent per recipient.
-    * Cost reduction for airdrops, rewards, etc:
-    <TokenAccountCompressedVsSpl />
+
 <Card
   title="Create an Airdrop"
   icon="chevron-right"
@@ -31,7 +35,7 @@ import { TokenAccountCompressedVsSpl } from '/snippets/jsx/token-account-compres
   </Card>
 
   <Card title="">
-  #### Storage of Inactive Token Accounts
+  ### Storage of Inactive Token Accounts
     * Most (associated) token accounts are not frequently written to.
     * **Store token accounts rent-free** when inactive
     * [c-Tokens](/compressed-token-program/README.mdx) are automatically compressed/decompressed, when active/inactive and include **sponsored rent-exemption**.
