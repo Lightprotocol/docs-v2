@@ -154,23 +154,23 @@ export const RentLifecycleVisualizer = () => {
 
   // 30-second transaction schedule with realistic spam patterns
   const txTimesRef = useRef([
-    // Phase 1: Heavy burst at start (0-5s) - shows active account
-    0.3, 0.6, 0.9, 1.2, 1.6, 2, 2.4, 2.8, 3.2, 3.7, 4.2, 4.8,
-    // Phase 2: Continued activity (5-7s)
-    5.3, 5.9, 6.4,
-    // Phase 3: Top-ups as rent depletes (~7-9s) - 3 top-ups
-    7.2, 8, 8.8,
+    // Phase 1: Heavy burst at start (0.5-5.5s) - shows active account
+    0.8, 1.1, 1.4, 1.7, 2.1, 2.5, 2.9, 3.3, 3.7, 4.2, 4.7, 5.3,
+    // Phase 2: Continued activity (5.5-7.5s)
+    5.8, 6.4, 6.9,
+    // Phase 3: Top-ups as rent depletes (~7.5-9.5s) - 3 top-ups
+    7.7, 8.5, 9.3,
     // Phase 4: Goes cold, reinit
-    11.8,
-    // Phase 5: Second cycle spam (12-16s)
-    12.3, 12.8, 13.3, 13.9, 14.4, 15, 15.6, 16.2,
-    // Phase 6: Top-ups again (~17-18s) - 2 top-ups
-    17, 18,
+    12.3,
+    // Phase 5: Second cycle spam (12.5-16.5s)
+    12.8, 13.3, 13.8, 14.4, 14.9, 15.5, 16.1, 16.7,
+    // Phase 6: Top-ups again (~17.5-18.5s) - 2 top-ups
+    17.5, 18.5,
     // Phase 7: Goes cold, reinit
-    20.5,
-    // Phase 8: Final burst (21-26s)
-    21, 21.5, 22, 22.6, 23.2, 23.8, 24.5, 25.2, 26,
-    // Phase 9: Let it drain and go cold before loop (26-34s)
+    21,
+    // Phase 8: Final burst (21.5-26.5s)
+    21.5, 22, 22.5, 23.1, 23.7, 24.3, 25, 25.7, 26.5,
+    // Phase 9: Let it drain and go cold before loop (26.5-34.5s)
   ]);
 
   const handleReset = () => {
@@ -193,8 +193,8 @@ export const RentLifecycleVisualizer = () => {
       setTime((t) => {
         const newTime = t + 0.1;
 
-        // Initialize at t=0 (instant)
-        if (t === 0 && newTime > 0) {
+        // Initialize at t=0.5 (after brief pause showing uninitialized state)
+        if (t < 0.5 && newTime >= 0.5) {
           setLamports(INITIAL_RENT);
           setPhase('hot');
           triggerHighlight();
