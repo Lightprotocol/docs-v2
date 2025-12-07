@@ -57,8 +57,8 @@ export const RentLifecycleVisualizer = () => {
     if (l > 1552) return '~2,000';
     if (l > 776) return '1,552';   // 4 epochs
     if (l > 388) return '776';     // 2 epochs (top-up threshold)
-    if (l > 0) return '388';       // 1 epoch (cold threshold)
-    return '0';
+    if (l > 260) return '388';     // 1 epoch (cold threshold) - shows for ~1.5h
+    return '0';                    // depleted
   };
 
   const arrowIdRef = useRef(0);
@@ -493,36 +493,31 @@ export const RentLifecycleVisualizer = () => {
 
       {/* Rent Balance - centered */}
       <div className="flex justify-center mt-4">
-        <div className="text-center relative">
-          {/* Arrows container */}
-          <div
-            className="absolute flex items-center"
-            style={{
-              left: 'calc(50% - 5.5rem/2 - 1.2rem - 0.25rem)',
-              top: 0,
-              height: '1.8rem',
-              width: '1.2rem',
-            }}
-          >
-            {activeArrows.map((arrowId) => (
-              <span
-                key={arrowId}
-                className="arrow-up absolute"
-                style={{ color: 'rgb(34, 197, 94)', fontSize: '1.3rem', left: 0, top: '50%', transform: 'translateY(-50%)', lineHeight: 1 }}
-              >
-                ↑
-              </span>
-            ))}
-            {flyingArrows.map((id) => (
-              <span
-                key={id}
-                className="arrow-fly-up absolute"
-                style={{ color: 'rgb(34, 197, 94)', fontSize: '1.3rem', left: 0, top: '50%', lineHeight: 1 }}
-              >
-                ↑
-              </span>
-            ))}
-          </div>
+        {/* Arrows container - separate from number */}
+        <div
+          className="relative flex items-center justify-end mr-2"
+          style={{ width: '1.5rem', height: '2.2rem' }}
+        >
+          {activeArrows.map((arrowId) => (
+            <span
+              key={arrowId}
+              className="arrow-up absolute"
+              style={{ color: 'rgb(34, 197, 94)', fontSize: '1.7rem', right: 0, top: '50%', transform: 'translateY(-50%)', lineHeight: 1 }}
+            >
+              ↑
+            </span>
+          ))}
+          {flyingArrows.map((id) => (
+            <span
+              key={id}
+              className="arrow-fly-up absolute"
+              style={{ color: 'rgb(34, 197, 94)', fontSize: '1.7rem', right: 0, top: '50%', lineHeight: 1 }}
+            >
+              ↑
+            </span>
+          ))}
+        </div>
+        <div className="text-center">
           <div style={{ height: '2.2rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <span
               className="font-mono text-zinc-700 dark:text-white/80 transition-all duration-150"
