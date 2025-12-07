@@ -1,5 +1,5 @@
 export const RentLifecycleVisualizer = () => {
-  const [time, setTime] = useState(0);
+  const [, setTime] = useState(0);
   const [lamports, setLamports] = useState(0);
   const [isRunning, setIsRunning] = useState(true);
   const [phase, setPhase] = useState('uninitialized');
@@ -242,8 +242,8 @@ export const RentLifecycleVisualizer = () => {
           });
         }
 
-        // Loop at 30s
-        if (newTime >= 30) {
+        // Loop at 33s (extra 3s for cold fade)
+        if (newTime >= 33) {
           setPhase('uninitialized');
           setLamports(0);
           txLineIndexRef.current = 0;
@@ -257,9 +257,6 @@ export const RentLifecycleVisualizer = () => {
     return () => clearInterval(interval);
   }, [isRunning, phase]);
 
-  // 0.5 second = 1 epoch = 1.5 hours, so 1 second = 3 hours
-  // Round to nearest 3h for cleaner display
-  const displayHours = Math.round(time * 3 / 3) * 3;
   const accountColor = getAccountColor();
 
   // Diamond dots pattern
@@ -299,10 +296,10 @@ export const RentLifecycleVisualizer = () => {
       <style>{`
         @keyframes scrollTimeline {
           from { transform: translateX(0); }
-          to { transform: translateX(-32px); }
+          to { transform: translateX(-170rem); }
         }
         .timeline-scroll {
-          animation: scrollTimeline 0.5s linear infinite;
+          animation: scrollTimeline 33s linear infinite;
         }
         @keyframes bobbleMove {
           0% { offset-distance: 0%; opacity: 0; }
@@ -445,15 +442,19 @@ export const RentLifecycleVisualizer = () => {
             WebkitMaskImage: 'linear-gradient(to right, transparent, black 15%, black 35%, transparent 45%, transparent 55%, black 65%, black 85%, transparent)',
           }}
         >
-          {/* Continuously scrolling tick marks */}
+          {/* Continuously scrolling tick marks with hour labels below */}
           <div className="absolute inset-0 flex items-center overflow-hidden">
-            <div className="flex items-center gap-8 timeline-scroll">
-              {Array.from({ length: 40 }).map((_, i) => (
-                <div
-                  key={i}
-                  className="bg-zinc-300 dark:bg-white/20 flex-shrink-0"
-                  style={{ width: '1px', height: '0.875rem' }}
-                />
+            <div className="flex items-center timeline-scroll" style={{ gap: '5rem' }}>
+              {[...Array(34).keys()].map(i => i * 3).concat([...Array(34).keys()].map(i => i * 3)).map((h, i) => (
+                <div key={i} className="flex flex-col items-center flex-shrink-0">
+                  <span
+                    className="font-mono text-zinc-300 dark:text-white/20 mb-2"
+                    style={{ fontSize: '1rem' }}
+                  >
+                    {h}h
+                  </span>
+                  <div className="w-px h-3 bg-zinc-200 dark:bg-white/20" />
+                </div>
               ))}
             </div>
           </div>
@@ -490,25 +491,14 @@ export const RentLifecycleVisualizer = () => {
         </div>
       </div>
 
-      {/* Counters */}
-      <div className="flex items-start mt-4">
-        {/* Left: Time at 45% with padding to push right */}
-        <div className="text-center" style={{ width: '45%', paddingLeft: '20%' }}>
-          <div className="font-mono font-medium text-zinc-700 dark:text-white/80" style={{ fontSize: '1.3rem' }}>
-            {displayHours}h
-          </div>
-          <div className="text-zinc-500 dark:text-white/50 uppercase tracking-wide" style={{ fontSize: '0.7rem' }}>
-            Time
-          </div>
-        </div>
-
-        {/* Right: Rent Balance at 55% */}
-        <div className="text-center" style={{ width: '55%', position: 'relative' }}>
-          {/* Arrows container - positioned absolutely so it doesn't move with lamports */}
+      {/* Rent Balance - centered */}
+      <div className="flex justify-center mt-4">
+        <div className="text-center relative">
+          {/* Arrows container */}
           <div
             className="absolute flex items-center"
             style={{
-              left: 'calc(50% - 5.5rem/2 - 1.2rem - 0.25rem - 2.5rem)',
+              left: 'calc(50% - 5.5rem/2 - 1.2rem - 0.25rem)',
               top: 0,
               height: '1.8rem',
               width: '1.2rem',
@@ -523,7 +513,6 @@ export const RentLifecycleVisualizer = () => {
                 ↑
               </span>
             ))}
-            {/* Flying arrows from button */}
             {flyingArrows.map((id) => (
               <span
                 key={id}
@@ -563,32 +552,27 @@ export const RentLifecycleVisualizer = () => {
         </div>
       </div>
 
-      {/* Buttons row: Back to Start under Time, Top Up centered under Rent Balance */}
-      <div className="flex items-center mt-3">
-        <div className="text-center" style={{ width: '45%', paddingLeft: '20%' }}>
-          <button
-            onClick={handleReset}
-            className="font-medium rounded-lg border backdrop-blur-sm transition-all btn-interactive"
-            style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }}
-          >
-            Back to Start
-          </button>
-        </div>
-        <div style={{ width: '55%', display: 'flex', justifyContent: 'center' }}>
-          {/* Top Up button centered under Rent Balance */}
-          <button
-            onClick={handleTopup}
-            className={`rounded-lg border backdrop-blur-sm transition-all btn-interactive
-              ${isButtonPressed ? 'font-bold' : 'font-medium'} ${!isButtonPressed ? 'topup-pulse' : ''}`}
-            style={{
-              padding: '0.5rem 1rem',
-              fontSize: isButtonPressed ? '0.95rem' : '0.85rem',
-              transform: isButtonPressed ? 'scale(1.15)' : 'scale(1)',
-            }}
-          >
-            Send Tx
-          </button>
-        </div>
+      {/* Buttons row - centered, side by side */}
+      <div className="flex justify-center gap-4 mt-3">
+        <button
+          onClick={handleReset}
+          className="font-medium rounded-lg border backdrop-blur-sm transition-all btn-interactive"
+          style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }}
+        >
+          Back to Start
+        </button>
+        <button
+          onClick={handleTopup}
+          className={`rounded-lg border backdrop-blur-sm transition-all btn-interactive
+            ${isButtonPressed ? 'font-bold' : 'font-medium'} ${!isButtonPressed ? 'topup-pulse' : ''}`}
+          style={{
+            padding: '0.5rem 1rem',
+            fontSize: isButtonPressed ? '0.95rem' : '0.85rem',
+            transform: isButtonPressed ? 'scale(1.15)' : 'scale(1)',
+          }}
+        >
+          Send Tx
+        </button>
       </div>
     </div>
   );
