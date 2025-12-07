@@ -4,7 +4,7 @@ to keep accounts "active".
 3. "Inactive" accounts, where rent is below one epoch, are compressed <br/>and the rent-exemption can be claimed by the rent sponsor.
 4. Transfers to inactive accounts <Tooltip tip="Compressed state is stored in leaves of Merkle trees (≃ disk). c-Token accounts are Solana accounts that store state on chain (≃ RAM). Load means to load state from 'disk' to 'RAM', i.e. decompress accounts.">"load" it with the same state </Tooltip> (decompress).
 
-This way rent is only paid when accounts are used:
+This way rent is automatically paid when accounts are used:
 
 <table>
   <thead>
@@ -18,27 +18,19 @@ This way rent is only paid when accounts are used:
   <tbody>
     <tr>
       <td><strong>Account Creation</strong></td>
-      <td>
-        <strong>Total: 17,208 lamports</strong><br/>
-        6,208 lamports<br/>
-        11,000 lamports (<Tooltip tip="Covers transaction cost to compress inactive accounts (10,000) and protocol incentive (1,000). Transaction cost might vary.">compression incentive</Tooltip>)<br/>
-      </td>
+      <td><strong><Tooltip tip="6,208 lamports (24h rent) + 11,000 lamports (compression cost & protocol incentive)">17,208 lamports</Tooltip></strong></td>
       <td>Transaction payer</td>
       <td>Funds 24h rent</td>
     </tr>
     <tr>
       <td><strong>Top ups</strong><br/>(when rent &lt; 3h)</td>
-      <td><strong>776 lamports</strong><br/></td>
+      <td><strong>776 lamports</strong></td>
       <td>Transaction payer</td>
       <td>Funds 3h rent</td>
     </tr>
     <tr>
       <td><strong><Tooltip tip="Compressed state is stored in leaves of Merkle trees (≃ disk). c-Token accounts are Solana accounts that store state on chain (≃ RAM). Load means to load state from 'disk' to 'RAM', i.e. decompress accounts.">Load Account</Tooltip></strong><br/>(when account inactive)</td>
-      <td>
-        <strong>Total: 17,208 lamports</strong><br/>
-        6,208 lamports<br/>
-        11,000 lamports (<Tooltip tip="Covers transaction cost to compress inactive accounts (10,000) and protocol incentive (1,000). Transaction cost might vary.">compression incentive</Tooltip>)<br/>
-      </td>
+      <td><strong><Tooltip tip="6,208 lamports (24h rent) + 11,000 lamports (compression cost & protocol incentive)">17,208 lamports</Tooltip></strong></td>
       <td>Transaction payer</td>
       <td>Funds 24h rent</td>
     </tr>
