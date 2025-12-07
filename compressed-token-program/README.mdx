@@ -17,7 +17,8 @@ import CTokenGuidesTable from '/snippets/overview-tables/ctoken-guides-table.mdx
 import CMintGuidesTable from '/snippets/overview-tables/cmint-guides-table.mdx';
 
 1. c-Mints and c-Tokens are equivalents to SPL mints and tokens.
-2. The key difference is c-Mints and c-Tokens do not require rent-exemption upon creation.
+2. The key difference is c-Mint and c-Token accounts do not require rent-exemption upon creation.
+3. c-Token accounts can hold token balances of c-Mints, SPL mints, or Token 2022 mints. SPL tokens can be converted to c-Tokens and back on demand.
 
 |  Creation Cost         | SPL  | c-Token      |
 |:---------------------|:------------------|:----------------------|
@@ -29,13 +30,11 @@ import CMintGuidesTable from '/snippets/overview-tables/cmint-guides-table.mdx';
   <Card title="" icon="coins">
   ## c-Mint Accounts
     * Uniquely represent a token and store its global metadata.
-    * Mint address serves as the token's unique identifier.
     * c-Mints are compressed accounts and rent-free.
   </Card>
   <Card title="" icon="wallet">
   ## c-Token Accounts
-    * Hold token balances of c-Mints, SPL mints, or Token 2022 mints.
-    * SPL tokens can be converted to <br/>c-Tokens and back on demand.
+    * Each c-Token account can hold units of one c-Mint, SPL mint, or Token-2022 mint.
     * Custom rent config reduces account creation cost.
   </Card>
 </CardGroup>
