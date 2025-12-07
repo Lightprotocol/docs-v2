@@ -437,12 +437,12 @@ export const RentLifecycleVisualizer = () => {
           ))}
         </svg>
 
-        {/* Timeline with fading edges */}
+        {/* Timeline with fading edges and gap behind diamond */}
         <div
           className="absolute inset-0 flex items-center justify-center"
           style={{
-            maskImage: 'linear-gradient(to right, transparent, black 15%, black 85%, transparent)',
-            WebkitMaskImage: 'linear-gradient(to right, transparent, black 15%, black 85%, transparent)',
+            maskImage: 'linear-gradient(to right, transparent, black 15%, black 35%, transparent 45%, transparent 55%, black 65%, black 85%, transparent)',
+            WebkitMaskImage: 'linear-gradient(to right, transparent, black 15%, black 35%, transparent 45%, transparent 55%, black 65%, black 85%, transparent)',
           }}
         >
           {/* Continuously scrolling tick marks */}
