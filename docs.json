@@ -55,7 +55,7 @@
                 ]
               },
               {
-                "group": "Toolkit",
+                "group": "Toolkits",
                 "expanded": true,
                 "pages": [
                   "c-token-program/c-token-toolkits/for-payments",
