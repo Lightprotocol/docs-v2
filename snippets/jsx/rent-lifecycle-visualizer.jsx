@@ -189,10 +189,7 @@ export const RentLifecycleVisualizer = () => {
     if (!hasUserClicked) {
       setHasUserClicked(true);
       setIsRunning(true);
-      // Show controls after 500ms delay
-      setTimeout(() => {
-        setShowControls(true);
-      }, 500);
+      setShowControls(true);
     }
   };
 
