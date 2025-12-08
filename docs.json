@@ -20,7 +20,6 @@
       {
             "group": "Get Started",
             "pages": [
-              "home",
               "welcome",
               "quickstart",
               "learn/ai-tools-guide"

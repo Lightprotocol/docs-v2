@@ -172,7 +172,7 @@ export const CodeCompare = ({
     <>
       <div
         ref={containerRef}
-        className="p-0 rounded-3xl not-prose mt-4 dark:bg-white/5 backdrop-blur-xl border border-black/[0.04] dark:border-white/10 overflow-hidden"
+        className="p-0 rounded-3xl not-prose mt-4 dark:bg-white/5 backdrop-blur-xl border border-zinc-300 dark:border-zinc-600 overflow-hidden"
         style={{
           fontFamily: 'Inter, sans-serif',
           cursor: isDragging ? "grabbing" : "default",
