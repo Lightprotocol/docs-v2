@@ -85,14 +85,55 @@ export const CodeCompare = ({
     }
   };
 
-  // Wiggle animation keyframes
-  const wiggleKeyframes = `
-    @keyframes wiggle {
-      0%, 100% { transform: translateX(0); }
-      25% { transform: translateX(-3px); }
-      75% { transform: translateX(3px); }
-    }
-  `;
+  // Auto-demo animation - slides the actual slider to show functionality
+  useEffect(() => {
+    if (hasInteracted) return;
+
+    let animationId;
+    let startTime;
+    const duration = 2000; // 2s per cycle
+    const startPos = initialPosition;
+    const endPos = 20; // Slide slightly to hint at functionality
+
+    const animate = (timestamp) => {
+      if (!startTime) startTime = timestamp;
+      const elapsed = timestamp - startTime;
+      const cycle = (elapsed % (duration * 2)) / duration; // 0-2 range
+
+      // Ease in-out: go to endPos then back to startPos
+      let progress;
+      if (cycle < 1) {
+        progress = cycle; // Going to endPos
+      } else {
+        progress = 2 - cycle; // Coming back to startPos
+      }
+
+      // Smooth easing
+      const eased = progress < 0.5
+        ? 2 * progress * progress
+        : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+
+      const newPos = startPos + (endPos - startPos) * eased;
+      setSliderPercent(newPos);
+
+      // Stop after 1 full cycle (4 seconds)
+      if (elapsed < duration * 2) {
+        animationId = requestAnimationFrame(animate);
+      } else {
+        setSliderPercent(initialPosition);
+      }
+    };
+
+    // Start after a short delay
+    const timeout = setTimeout(() => {
+      animationId = requestAnimationFrame(animate);
+    }, 500);
+
+    return () => {
+      clearTimeout(timeout);
+      if (animationId) cancelAnimationFrame(animationId);
+    };
+  }, [hasInteracted, initialPosition]);
 
   useEffect(() => {
     if (isDragging) {
@@ -128,33 +169,23 @@ export const CodeCompare = ({
   );
 
   return (
-    <div
-      ref={containerRef}
-      className="p-0 rounded-3xl not-prose mt-4 dark:bg-white/5 backdrop-blur-xl border border-black/[0.04] dark:border-white/10 shadow-lg overflow-hidden"
-      style={{
-        fontFamily: 'Inter, sans-serif',
-        cursor: isDragging ? "grabbing" : "default",
-      }}
-    >
-      {/* Inject keyframes for wiggle animation */}
-      <style>{wiggleKeyframes}</style>
-    </div>
-    <div
-      ref={containerRef}
-      className="p-0 rounded-3xl not-prose mt-4 dark:bg-white/5 backdrop-blur-xl border border-black/[0.04] dark:border-white/10 shadow-lg overflow-hidden"
-      style={{
-        fontFamily: 'Inter, sans-serif',
-        cursor: isDragging ? "grabbing" : "default",
-      }}
-      onTouchMove={handleTouchMove}
-      tabIndex={0}
-      onKeyDown={handleKeyDown}
-      role="slider"
-      aria-valuenow={sliderPercent}
-      aria-valuemin={0}
-      aria-valuemax={100}
-      aria-label="Code comparison slider"
-    >
+    <>
+      <div
+        ref={containerRef}
+        className="p-0 rounded-3xl not-prose mt-4 dark:bg-white/5 backdrop-blur-xl border border-black/[0.04] dark:border-white/10 overflow-hidden"
+        style={{
+          fontFamily: 'Inter, sans-serif',
+          cursor: isDragging ? "grabbing" : "default",
+        }}
+        onTouchMove={handleTouchMove}
+        tabIndex={0}
+        onKeyDown={handleKeyDown}
+        role="slider"
+        aria-valuenow={sliderPercent}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-label="Code comparison slider"
+      >
       {/* Code container - no header, just code */}
       <div className="relative" style={{ minHeight: "140px" }}>
         {/* Floating copy button */}
@@ -248,6 +279,7 @@ export const CodeCompare = ({
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 };

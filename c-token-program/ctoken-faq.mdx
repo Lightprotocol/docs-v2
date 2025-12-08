@@ -1,0 +1,118 @@
+---
+title: FAQ
+description: Frequently asked questions about c-Token.
+---
+import { CodeCompare } from '/snippets/jsx/code-compare.jsx';
+import CompressibleRentExplained from '/snippets/compressible-rent-explained.mdx';
+import { RentLifecycleVisualizer } from '/snippets/jsx/rent-lifecycle-visualizer.jsx';
+
+
+#### What is c-token?
+c-token is like SPL token stored more efficiently to reduce account creation cost.
+Users receive and 
+
+|  Creation Cost         | SPL  | c-Token      |
+|:---------------------|:------------------|:----------------------|
+| **Token Account**   | 	  ~2,000,000 lamports         | ~**17,000** lamports     |
+
+
+#### Is c-token live on mainnet & audited?
+c-token is currently deployed on devnet and undergoing security audits. 
+<br/>ETA: Q1 2026.
+
+#### Do I need to change my client code significantly?
+No. The c-token SDK follows similar patterns to SPL.
+
+<CodeCompare
+  firstCode={`// Create SPL token account
+const ix = createAssociatedTokenAccountInstruction(
+  payer,
+  ata,
+  owner,
+  mint
+);`}
+  secondCode={`// Create c-token account
+const ix = CreateCTokenAccount.new(
+  payer,
+  account,
+  owner,
+  mint
+);`}
+  firstLabel="SPL"
+  secondLabel="c-Token"
+
+/>
+
+<AccordionGroup>
+
+<Accordion title="Can c-Token accounts hold SPL tokens?">
+Yes. c-Token accounts can hold tokens from c-Mints, SPL mints, or Token 2022 mints.
+SPL tokens can be converted to c-Tokens and back.
+</Accordion>
+
+<Accordion title="Do c-token accounts require rent?">
+
+Rent is paid over time when accounts are accessed via a custom rent config instead of the full rent-exemption upfront:
+<CompressibleRentExplained />
+
+<RentLifecycleVisualizer />
+
+</Accordion>
+
+<Accordion title="What happens if my c-Token account runs out of rent?">
+The account is automatically compressed.
+Your tokens are preserved as a compressed token account (rent-free). The account decompresses automatically when you interact with it again.
+</Accordion>
+
+<Accordion title="Does c-Token support extensions?">
+Extensions are under development. Additional extensions can be requested.
+
+Coming soon:
+- MetadataPointer
+- TokenMetadata
+- InterestBearingConfig
+- GroupPointer
+- GroupMemberPointer
+- TokenGroup
+- TokenGroupMember
+- MintCloseAuthority
+- TransferFeeConfig
+- DefaultAccountState
+- PermanentDelegate
+- TransferHook
+- Pausable
+- ConfidentialTransferMint
+- ConfidentialTransferFeeConfig
+- ConfidentialMintBurn
+</Accordion>
+
+<Accordion title="What is the difference between c-Mint, c-Token, and compressed token?">
+- **c-Mint**: Compressed account representing a token (like SPL mint). Rent-free.
+- **c-Token**: Solana account that holds token balances of c-mints, SPL or Token 22 mints. Uses sponsored rent.
+- **Compressed token**: Compressed account storing token data. Rent-free, for storage and distribution.
+</Accordion>
+
+<Accordion title="How do I query c-Token and compressed token balances?">
+Standard Solana RPC works for c-Token accounts (Solana accounts). Compressed token balances require the ZK Compression RPC.
+</Accordion>
+
+<Accordion title="Can I convert between c-Tokens and SPL tokens?">
+Yes. SPL tokens can be deposited into c-Token accounts and withdrawn back to SPL token accounts via the `transferInterface` method.
+</Accordion>
+
+<Accordion title="What are compressed tokens good for?">
+- Token distribution at scale
+- Storage of inactive tokens
+</Accordion>
+
+</AccordionGroup>
+
+### Get Started
+<CardGroup cols={2}>
+  <Card title="Toolkits" href="/c-token-program#toolkits" color="#0066ff" style={{backgroundColor: '#2563eb', color: 'white'}}>
+    Dedicated guides for specific use cases.
+  </Card>
+  <Card title="Cookbook" href="/c-token-program#cookbook">
+    Recipes for c-Mints and c-Tokens.
+  </Card>
+</CardGroup>

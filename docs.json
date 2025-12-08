@@ -30,7 +30,7 @@
             "group": "c-Token (Beta)",
             "pages": [
               "c-token-program/README",
-              "c-token-program/faq",
+              "c-token-program/ctoken-faq",
               {
                 "group": "Cookbook",
                 "pages": [
