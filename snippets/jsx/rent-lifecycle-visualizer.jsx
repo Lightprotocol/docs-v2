@@ -3,7 +3,8 @@ export const RentLifecycleVisualizer = () => {
   const [lamports, setLamports] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
   const [phase, setPhase] = useState('uninitialized');
-  const [hasStarted, setHasStarted] = useState(false);
+  const [hasUserClicked, setHasUserClicked] = useState(false);
+  const [showControls, setShowControls] = useState(false);
   const containerRef = useRef(null);
   const [isHighlighted, setIsHighlighted] = useState(false);
   const [activeArrows, setActiveArrows] = useState([]);
@@ -148,25 +149,25 @@ export const RentLifecycleVisualizer = () => {
     // Otherwise just the transaction happens (no rent top-up needed)
   };
 
-  // 38-second transaction schedule with realistic spam patterns (10% slower)
+  // 38-second transaction schedule with realistic spam patterns (shifted +0.5s for delayed start)
   const txTimesRef = useRef([
-    // Phase 1: Heavy burst at start (0.5-6s) - shows active account
-    0.9, 1.2, 1.5, 1.9, 2.3, 2.8, 3.2, 3.6, 4.1, 4.6, 5.2, 5.8,
-    // Phase 2: Continued activity (6-8.5s)
-    6.4, 7.0, 7.6,
-    // Phase 3: Top-ups as rent depletes (~8.5-10.5s) - 3 top-ups
-    8.5, 9.4, 10.2,
+    // Phase 1: Heavy burst at start (1.0-6.5s) - shows active account
+    1.4, 1.7, 2.0, 2.4, 2.8, 3.3, 3.7, 4.1, 4.6, 5.1, 5.7, 6.3,
+    // Phase 2: Continued activity (6.5-9s)
+    6.9, 7.5, 8.1,
+    // Phase 3: Top-ups as rent depletes (~9-11s) - 3 top-ups
+    9.0, 9.9, 10.7,
     // Phase 4: Goes cold, reinit
-    13.5,
-    // Phase 5: Second cycle spam (14-18.5s)
-    14.1, 14.6, 15.2, 15.8, 16.4, 17.1, 17.7, 18.4,
-    // Phase 6: Top-ups again (~19-20.5s) - 2 top-ups
-    19.3, 20.4,
+    14.0,
+    // Phase 5: Second cycle spam (14.5-19s)
+    14.6, 15.1, 15.7, 16.3, 16.9, 17.6, 18.2, 18.9,
+    // Phase 6: Top-ups again (~19.5-21s) - 2 top-ups
+    19.8, 20.9,
     // Phase 7: Goes cold, reinit
-    23.1,
-    // Phase 8: Final burst (23.5-29.5s)
-    23.7, 24.2, 24.8, 25.4, 26.1, 26.7, 27.5, 28.3, 29.2,
-    // Phase 9: Let it drain and go cold before loop (29-38s)
+    23.6,
+    // Phase 8: Final burst (24-30s)
+    24.2, 24.7, 25.3, 25.9, 26.6, 27.2, 28.0, 28.8, 29.7,
+    // Phase 9: Let it drain and go cold before loop (30-38s)
   ]);
 
   const handleReset = () => {
@@ -183,27 +184,17 @@ export const RentLifecycleVisualizer = () => {
     flyingArrowIdRef.current = 0;
   };
 
-  // Start animation when component scrolls into view
-  useEffect(() => {
-    if (hasStarted) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsRunning(true);
-          setHasStarted(true);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.5 }
-    );
-
-    if (containerRef.current) {
-      observer.observe(containerRef.current);
+  // Handle click on diamond to start animation
+  const handleDiamondClick = () => {
+    if (!hasUserClicked) {
+      setHasUserClicked(true);
+      setIsRunning(true);
+      // Show controls after 500ms delay
+      setTimeout(() => {
+        setShowControls(true);
+      }, 500);
     }
-
-    return () => observer.disconnect();
-  }, [hasStarted]);
+  };
 
   useEffect(() => {
     if (!isRunning) return;
@@ -212,8 +203,8 @@ export const RentLifecycleVisualizer = () => {
       setTime((t) => {
         const newTime = t + 0.1;
 
-        // Initialize at t=0.5 (after brief pause showing uninitialized state)
-        if (t < 0.5 && newTime >= 0.5) {
+        // Initialize at t=1.0 (after brief pause showing uninitialized state)
+        if (t < 1.0 && newTime >= 1.0) {
           setLamports(INITIAL_RENT);
           setPhase('hot');
           triggerHighlight();
@@ -261,10 +252,13 @@ export const RentLifecycleVisualizer = () => {
           });
         }
 
-        // Loop at 38s (extra 4s for cold fade)
+        // Loop at 38s - reset to "Press" state
         if (newTime >= 38) {
           setPhase('uninitialized');
           setLamports(0);
+          setHasUserClicked(false);
+          setIsRunning(false);
+          setShowControls(false);
           txLineIndexRef.current = 0;
           return 0;
         }
@@ -320,6 +314,10 @@ export const RentLifecycleVisualizer = () => {
         }
         .timeline-scroll {
           animation: scrollTimeline 38s linear infinite;
+          animation-play-state: paused;
+        }
+        .timeline-scroll-running {
+          animation-play-state: running;
         }
         @keyframes bobbleMove {
           0% { offset-distance: 0%; opacity: 0; }
@@ -397,6 +395,10 @@ export const RentLifecycleVisualizer = () => {
           className="absolute inset-0 w-full h-full"
           viewBox="0 0 100 100"
           preserveAspectRatio="xMidYMid meet"
+          style={{
+            filter: !hasUserClicked ? 'blur(2px)' : 'none',
+            transition: 'filter 0.3s ease',
+          }}
         >
           {txLines.map((line) => {
             const active = isLineActive(line.id);
@@ -453,11 +455,13 @@ export const RentLifecycleVisualizer = () => {
           style={{
             maskImage: 'linear-gradient(to right, transparent, black 15%, black 35%, transparent 45%, transparent 55%, black 65%, black 85%, transparent)',
             WebkitMaskImage: 'linear-gradient(to right, transparent, black 15%, black 35%, transparent 45%, transparent 55%, black 65%, black 85%, transparent)',
+            filter: !hasUserClicked ? 'blur(2px)' : 'none',
+            transition: 'filter 0.3s ease',
           }}
         >
           {/* Continuously scrolling tick marks with hour labels below */}
           <div className="absolute inset-0 flex items-center overflow-hidden">
-            <div key={resetCount} className="flex items-center timeline-scroll" style={{ gap: '5rem' }}>
+            <div key={resetCount} className={`flex items-center timeline-scroll ${hasUserClicked ? 'timeline-scroll-running' : ''}`} style={{ gap: '5rem' }}>
               {[...Array(34).keys()].map(i => i * 3).concat([...Array(34).keys()].map(i => i * 3)).map((h, i) => (
                 <div key={i} className="flex flex-col items-center flex-shrink-0">
                   <span
@@ -479,10 +483,12 @@ export const RentLifecycleVisualizer = () => {
         {/* Diamond Account - centered */}
         <div
           className="absolute z-10"
+          onClick={handleDiamondClick}
           style={{
             left: '50%',
             top: '50%',
             transform: 'translate(-50%, -50%)',
+            cursor: !hasUserClicked ? 'pointer' : 'default',
             filter: activeLines.length > 0
               ? 'drop-shadow(0 0 25px rgba(227, 89, 48, 0.7)) drop-shadow(0 0 10px rgba(255, 150, 50, 0.8))'
               : 'none',
@@ -501,88 +507,115 @@ export const RentLifecycleVisualizer = () => {
               />
             ))}
           </svg>
+          {/* Prompt text - shown before user clicks */}
+          {!hasUserClicked && (
+            <div
+              className="text-zinc-400 dark:text-white/40 text-center"
+              style={{
+                fontSize: '1.15rem',
+                position: 'absolute',
+                top: '100%',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                marginTop: '0.5rem',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              Press to see the Rent Config over time!
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Rent Balance - centered */}
-      <div className="flex justify-center mt-4">
-        {/* Arrows container - separate from number */}
-        <div
-          className="relative flex items-center justify-end mr-2"
-          style={{ width: '1.5rem', height: '2.2rem' }}
-        >
-          {activeArrows.map((arrowId) => (
-            <span
-              key={arrowId}
-              className="arrow-up absolute"
-              style={{ color: 'rgb(34, 197, 94)', fontSize: '1.7rem', right: 0, top: '50%', transform: 'translateY(-50%)', lineHeight: 1 }}
-            >
-              ↑
-            </span>
-          ))}
-          {flyingArrows.map((id) => (
-            <span
-              key={id}
-              className="arrow-fly-up absolute"
-              style={{ color: 'rgb(34, 197, 94)', fontSize: '1.7rem', right: 0, top: '50%', lineHeight: 1 }}
-            >
-              ↑
-            </span>
-          ))}
-        </div>
-        <div className="text-center">
-          <div style={{ height: '2.2rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <span
-              className="font-mono text-zinc-700 dark:text-white/80 transition-all duration-150"
-              style={{
-                fontSize: isHighlighted ? '1.9rem' : '1.7rem',
-                fontWeight: isHighlighted ? 700 : 500,
-                transformOrigin: 'center',
-                transform: isHighlighted ? 'scale(1.05)' : 'scale(1)',
-                fontVariantNumeric: 'tabular-nums',
-                minWidth: '6.5rem',
-                textAlign: 'right',
-              }}
-            >
-              {formatLamports(lamports)}
-            </span>
-            <span
-              className="text-zinc-400 dark:text-white/40 transition-all duration-150 ml-1"
-              style={{
-                fontSize: isHighlighted ? '1.45rem' : '1.15rem',
-                fontWeight: isHighlighted ? 800 : 400,
-              }}
-            >lamports</span>
+      {/* Controls - blur-to-clear fade in after user clicks */}
+      <div
+        style={{
+          opacity: showControls ? 1 : 0,
+          filter: showControls ? 'blur(0px)' : 'blur(8px)',
+          transition: 'opacity 0.5s ease, filter 0.5s ease',
+          pointerEvents: showControls ? 'auto' : 'none',
+        }}
+      >
+        {/* Rent Balance - centered */}
+        <div className="flex justify-center mt-4">
+          {/* Arrows container - separate from number */}
+          <div
+            className="relative flex items-center justify-end mr-2"
+            style={{ width: '1.5rem', height: '2.2rem' }}
+          >
+            {activeArrows.map((arrowId) => (
+              <span
+                key={arrowId}
+                className="arrow-up absolute"
+                style={{ color: 'rgb(34, 197, 94)', fontSize: '1.7rem', right: 0, top: '50%', transform: 'translateY(-50%)', lineHeight: 1 }}
+              >
+                ↑
+              </span>
+            ))}
+            {flyingArrows.map((id) => (
+              <span
+                key={id}
+                className="arrow-fly-up absolute"
+                style={{ color: 'rgb(34, 197, 94)', fontSize: '1.7rem', right: 0, top: '50%', lineHeight: 1 }}
+              >
+                ↑
+              </span>
+            ))}
           </div>
-          <div className="text-zinc-500 dark:text-white/50 uppercase tracking-wide" style={{ fontSize: '0.9rem' }}>
-            Rent Balance
+          <div className="text-center">
+            <div style={{ height: '2.2rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span
+                className="font-mono text-zinc-700 dark:text-white/80 transition-all duration-150"
+                style={{
+                  fontSize: isHighlighted ? '1.9rem' : '1.7rem',
+                  fontWeight: isHighlighted ? 700 : 500,
+                  transformOrigin: 'center',
+                  transform: isHighlighted ? 'scale(1.05)' : 'scale(1)',
+                  fontVariantNumeric: 'tabular-nums',
+                  minWidth: '6.5rem',
+                  textAlign: 'right',
+                }}
+              >
+                {formatLamports(lamports)}
+              </span>
+              <span
+                className="text-zinc-400 dark:text-white/40 transition-all duration-150 ml-1"
+                style={{
+                  fontSize: isHighlighted ? '1.45rem' : '1.15rem',
+                  fontWeight: isHighlighted ? 800 : 400,
+                }}
+              >lamports</span>
+            </div>
+            <div className="text-zinc-500 dark:text-white/50 uppercase tracking-wide" style={{ fontSize: '0.9rem' }}>
+              Rent Balance
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Buttons row - centered, side by side */}
-      <div className="flex justify-center gap-4 mt-3">
-        <button
-          onClick={handleReset}
-          className="font-medium rounded-lg border backdrop-blur-sm transition-all btn-interactive"
-          style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }}
-        >
-          Back to Start
-        </button>
-        <button
-          onClick={handleTopup}
-          className={`rounded-lg border backdrop-blur-sm transition-all ${isButtonPressed ? 'font-bold' : 'font-medium'}`}
-          style={{
-            padding: '0.5rem 1rem',
-            fontSize: isButtonPressed ? '0.95rem' : '0.85rem',
-            transform: isButtonPressed ? 'scale(1.15)' : 'scale(1)',
-            background: '#0066ff',
-            borderColor: '#0066ff',
-            color: '#fff',
-          }}
-        >
-          Send Tx
-        </button>
+        {/* Buttons row - centered, side by side */}
+        <div className="flex justify-center gap-4 mt-3">
+          <button
+            onClick={handleReset}
+            className="font-medium rounded-lg border backdrop-blur-sm transition-all btn-interactive"
+            style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }}
+          >
+            Back to Start
+          </button>
+          <button
+            onClick={handleTopup}
+            className={`rounded-lg border backdrop-blur-sm transition-all ${isButtonPressed ? 'font-bold' : 'font-medium'}`}
+            style={{
+              padding: '0.5rem 1rem',
+              fontSize: isButtonPressed ? '0.95rem' : '0.85rem',
+              transform: isButtonPressed ? 'scale(1.15)' : 'scale(1)',
+              background: '#0066ff',
+              borderColor: '#0066ff',
+              color: '#fff',
+            }}
+          >
+            Send Tx
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -5,12 +5,15 @@ description: "Guide to integrate c-Token APIs with comparison to SPL."
 ---
 
 1. c-Token follows the same API patterns like ATA
-2. 1/200th ATA creation cost. 
-3. Your users get the same USDC, just stored more efficiently.
+2. Your users get the same USDC, just stored more efficiently.
 
-Need help with integration? Reach out on telegram.
+|  Creation Cost         | SPL  | c-Token      |
+|:---------------------|:------------------|:----------------------|
+| **Token Account**   | 	  ~2,000,000 lamports         | ~**17,000** lamports     |
 
-
+<Info>
+Get an [overview to c-Token's here](/c-token-program/README).
+</Info>
 ### What you will implement
 
 <table>
@@ -55,13 +58,12 @@ Need help with integration? Reach out on telegram.
   </tbody>
 </table>
 
+<Note>
+Find devnet examples here [https://github.com/Lightprotocol/c-token-toolkit](https://github.com/Lightprotocol/c-token-toolkit).
+</Note>
+
 ## Setup
 
-Run the examples on Github
-```bash
-git clone <https://github.com/Lightprotocol/c-token-toolkit>
-# add your Helius API key to .env
-```
 
 Connect to an RPC endpoint that serves both standard Solana methods and compression methods.
 ```typescript
@@ -349,7 +351,7 @@ const signatures = await connection.getSignaturesForAddress(ata);
 </Step>
 
 <Step>
-### Exit to SPL (Unwrap)
+### Unwrap to SPL
 
 When users need vanilla SPL tokens (CEX withdrawal, legacy integration):
 
