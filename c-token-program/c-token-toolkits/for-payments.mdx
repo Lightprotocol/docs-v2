@@ -1,11 +1,13 @@
 ---
-title: "c-Token for Payments"
-sidebarTitle: "for Payments"
+title: "c-Token Toolkit for Stablecoin Payments"
+sidebarTitle: "for Stablecoin Payments"
 description: "Guide to integrate c-Token APIs with comparison to SPL."
 ---
 
+import { CodeCompare } from '/snippets/jsx/code-compare.jsx';
+
 1. c-Token follows the same API patterns like ATA
-2. Your users get the same USDC, just stored more efficiently.
+2. Your users receives the same stablecoin, just stored more efficiently.
 
 |  Creation Cost         | SPL  | c-Token      |
 |:---------------------|:------------------|:----------------------|
@@ -80,6 +82,33 @@ import {
 const rpc = createRpc(RPC_ENDPOINT);
 ```
 
+<CodeCompare
+  firstCode={`import { getOrCreateAtaInterface } from "@lightprotocol/compressed-token/unified";
+
+const ata = await getOrCreateAtaInterface(
+  rpc,
+  payer,
+  mint,
+  recipient
+);
+// Share ata.parsed.address with sender
+
+console.log(ata.parsed.amount);`}
+  secondCode={`import { getOrCreateAssociatedTokenAccount } from "@solana/spl-token";
+
+const ata = await getOrCreateAssociatedTokenAccount(
+  rpc,
+  payer,
+  mint,
+  recipient
+);
+// Share ata.address with sender
+
+console.log(ata.amount);`}
+  firstLabel="c-Token"
+  secondLabel="SPL"
+/>
+
 <Steps>
 
 <Step>
@@ -89,7 +118,14 @@ const rpc = createRpc(RPC_ENDPOINT);
 <Tab title="Action">
 
 ```typescript
-const ata = await getOrCreateAtaInterface(rpc, payer, mint, recipient);
+import { getOrCreateAtaInterface } from "@lightprotocol/compressed-token/unified";
+
+const ata = await getOrCreateAtaInterface(
+  rpc,
+  payer,
+  mint,
+  recipient
+);
 // Share ata.parsed.address with sender
 
 console.log(ata.parsed.amount);
@@ -176,6 +212,11 @@ const tx = new Transaction().add(
 <Tab title="Action">
 
 ```typescript
+import {
+  getAssociatedTokenAddressInterface,
+  transferInterface,
+} from "@lightprotocol/compressed-token/unified";
+
 const sourceAta = getAssociatedTokenAddressInterface(mint, owner.publicKey);
 const destinationAta = getAssociatedTokenAddressInterface(mint, recipient);
 
@@ -215,6 +256,7 @@ new Transaction().add(createAtaIx, transferIx);
 
 ```typescript
 import { transfer } from "@solana/spl-token";
+
 const sourceAta = getAssociatedTokenAddressSync(mint, owner.publicKey);
 const destinationAta = getAssociatedTokenAddressSync(mint, recipient);
 
@@ -307,8 +349,18 @@ const tx = new Transaction().add(
 ### Show Balance
 
 ```typescript
+import {
+  getAssociatedTokenAddressInterface,
+  getAtaInterface,
+} from "@lightprotocol/compressed-token/unified";
+
 const ata = getAssociatedTokenAddressInterface(mint, owner);
-const account = await getAtaInterface(rpc, ata, owner, mint);
+const account = await getAtaInterface(
+  rpc,
+  ata,
+  owner,
+  mint
+);
 
 console.log(account.parsed.amount);
 ```
@@ -319,6 +371,7 @@ console.log(account.parsed.amount);
 import { getAccount } from "@solana/spl-token";
 
 const account = await getAccount(connection, ata);
+
 console.log(account.amount);
 ```
 
@@ -330,7 +383,6 @@ console.log(account.amount);
 ### Transaction History
 
 ```typescript
-// Unified: fetches both on-chain and compressed tx signatures
 const result = await rpc.getSignaturesForOwnerInterface(owner);
 
 console.log(result.signatures); // Merged + deduplicated
@@ -364,7 +416,14 @@ import { getAssociatedTokenAddressSync } from "@solana/spl-token";
 // SPL ATA must exist
 const splAta = getAssociatedTokenAddressSync(mint, owner.publicKey);
 
-await unwrap(rpc, payer, owner, mint, splAta, amount);
+await unwrap(
+  rpc,
+  payer,
+  owner,
+  mint,
+  splAta,
+  amount
+);
 ```
 
 </Tab>
