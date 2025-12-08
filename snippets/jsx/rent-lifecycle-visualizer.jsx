@@ -13,6 +13,7 @@ export const RentLifecycleVisualizer = () => {
   const [flyingArrows, setFlyingArrows] = useState([]);
   const [floatingAmounts, setFloatingAmounts] = useState([]);
   const [resetCount, setResetCount] = useState(0);
+  const [timelineStarted, setTimelineStarted] = useState(false);
 
   // Constants from rent config
   const LAMPORTS_PER_TICK = 77.6;       // 388 per epoch / 5 ticks = smooth decrement
@@ -148,25 +149,27 @@ export const RentLifecycleVisualizer = () => {
     // Otherwise just the transaction happens (no rent top-up needed)
   };
 
-  // 38-second transaction schedule with realistic spam patterns (shifted +0.5s for delayed start)
+  // 38-second transaction schedule aligned with depletion math
+  // 6208 lamports / 776/s = 8s to deplete, top-up window at ~8s from init
   const txTimesRef = useRef([
-    // Phase 1: Heavy burst at start (1.0-6.5s) - shows active account
-    1.4, 1.7, 2.0, 2.4, 2.8, 3.3, 3.7, 4.1, 4.6, 5.1, 5.7, 6.3,
-    // Phase 2: Continued activity (6.5-9s)
-    6.9, 7.5, 8.1,
-    // Phase 3: Top-ups as rent depletes (~9-11s) - 3 top-ups
-    9.0, 9.9, 10.7,
-    // Phase 4: Goes cold, reinit
-    14.0,
-    // Phase 5: Second cycle spam (14.5-19s)
-    14.6, 15.1, 15.7, 16.3, 16.9, 17.6, 18.2, 18.9,
-    // Phase 6: Top-ups again (~19.5-21s) - 2 top-ups
-    19.8, 20.9,
-    // Phase 7: Goes cold, reinit
-    23.6,
-    // Phase 8: Final burst (24-30s)
-    24.2, 24.7, 25.3, 25.9, 26.6, 27.2, 28.0, 28.8, 29.7,
-    // Phase 9: Let it drain and go cold before loop (30-38s)
+    // Cycle 1: Init at 1.0s
+    // Activity (lamports > 776, no top-up needed)
+    1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0, 7.5,
+    // Top-ups at ~8s when lamports < 776
+    8.2, 9.2, 10.2,
+    // Goes cold ~11.8s
+
+    // Cycle 2: Reinit from cold at 13.0s
+    13.0,
+    13.5, 14.0, 14.5, 15.0, 15.5, 16.0, 16.5, 17.0, 17.5, 18.0, 18.5, 19.0, 19.5,
+    // Top-ups
+    20.2, 21.2,
+    // Goes cold ~23s
+
+    // Cycle 3: Reinit from cold at 25.0s
+    25.0,
+    25.5, 26.0, 26.5, 27.0, 27.5, 28.0, 28.5, 29.0, 29.5, 30.0,
+    // Let it drain to cold before 38s loop
   ]);
 
   const handleReset = () => {
@@ -174,6 +177,7 @@ export const RentLifecycleVisualizer = () => {
     setLamports(0);
     setPhase('uninitialized');
     setIsRunning(true);
+    setTimelineStarted(false);
     setActiveLines([]);
     setActiveArrows([]);
     setFlyingArrows([]);
@@ -203,6 +207,7 @@ export const RentLifecycleVisualizer = () => {
         if (t < 1.0 && newTime >= 1.0) {
           setLamports(INITIAL_RENT);
           setPhase('hot');
+          setTimelineStarted(true);
           triggerHighlight();
           triggerTransaction(getNextLineIndex());
         }
@@ -254,6 +259,7 @@ export const RentLifecycleVisualizer = () => {
           setHasUserClicked(false);
           setIsRunning(false);
           setShowControls(false);
+          setTimelineStarted(false);
           txLineIndexRef.current = 0;
           return 0;
         }
@@ -304,8 +310,8 @@ export const RentLifecycleVisualizer = () => {
       {/* CSS for animations */}
       <style>{`
         @keyframes scrollTimeline {
-          from { transform: translateX(0); }
-          to { transform: translateX(-170rem); }
+          from { transform: translateX(15rem); }
+          to { transform: translateX(-155rem); }
         }
         .timeline-scroll {
           animation: scrollTimeline 38s linear infinite;
@@ -456,12 +462,17 @@ export const RentLifecycleVisualizer = () => {
         >
           {/* Continuously scrolling tick marks with hour labels below */}
           <div className="absolute inset-0 flex items-center overflow-hidden">
-            <div key={resetCount} className={`flex items-center timeline-scroll ${hasUserClicked ? 'timeline-scroll-running' : ''}`} style={{ gap: '5rem' }}>
+            <div key={resetCount} className={`flex items-center timeline-scroll ${timelineStarted ? 'timeline-scroll-running' : ''}`} style={{ gap: '5rem', transform: 'translateX(15rem)' }}>
               {[...Array(34).keys()].map(i => i * 3).concat([...Array(34).keys()].map(i => i * 3)).map((h, i) => (
                 <div key={i} className="flex flex-col items-center flex-shrink-0">
                   <span
                     className="font-mono text-zinc-300 dark:text-white/20 mb-2"
-                    style={{ fontSize: '1rem' }}
+                    style={{
+                      fontSize: '1rem',
+                      opacity: timelineStarted ? 1 : 0,
+                      filter: timelineStarted ? 'blur(0)' : 'blur(8px)',
+                      transition: 'opacity 0.5s ease, filter 0.5s ease',
+                    }}
                   >
                     {h}h
                   </span>
