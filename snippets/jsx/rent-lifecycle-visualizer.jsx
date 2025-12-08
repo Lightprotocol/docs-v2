@@ -16,7 +16,6 @@ export const RentLifecycleVisualizer = () => {
 
   // Constants from rent config
   const LAMPORTS_PER_TICK = 77.6;       // 388 per epoch / 5 ticks = smooth decrement
-  const LAMPORTS_PER_TICK_SLOW = 50;    // Faster drain in cold zone to reach 0 before loop
   const INITIAL_RENT = 6208;            // 24h of rent (16 epochs × 388)
   const TOPUP_LAMPORTS = 776;           // 3h worth (2 epochs)
   const TOPUP_THRESHOLD = 776;          // Top up when below 3h of rent
@@ -236,10 +235,9 @@ export const RentLifecycleVisualizer = () => {
         });
 
         // Smooth lamport decrement every tick (100ms) when hot or cold
-        // Slower in critical zone (below 1000) so users can see the 776→388 transition
         if ((phase === 'hot' || phase === 'cold') && newTime > 0.1) {
           setLamports((l) => {
-            const tickAmount = l < 1000 ? LAMPORTS_PER_TICK_SLOW : LAMPORTS_PER_TICK;
+            const tickAmount = LAMPORTS_PER_TICK;
             const newLamports = Math.max(0, l - tickAmount);
             // Go cold when lamports below cold threshold
             if (newLamports < COLD_THRESHOLD) {
