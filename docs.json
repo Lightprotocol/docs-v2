@@ -20,7 +20,8 @@
       {
             "group": "Get Started",
             "pages": [
-              "landing",
+              "home",
+              "welcome",
               "quickstart",
               "learn/ai-tools-guide"
             ]
@@ -29,6 +30,7 @@
             "group": "c-Token (Beta)",
             "pages": [
               "c-token-program/README",
+              "c-token-program/faq",
               {
                 "group": "Cookbook",
                 "pages": [
@@ -56,12 +58,12 @@
                 "group": "Toolkit",
                 "expanded": true,
                 "pages": [
-                  "c-token-program/c-token-toolkits/for-payments"
+                  "c-token-program/c-token-toolkits/for-payments",
                   "c-token-program/c-token-toolkits/for-wallets",
                   "c-token-program/c-token-toolkits/for-aggregators",
                   "c-token-program/c-token-toolkits/for-dexs",
                   "c-token-program/c-token-toolkits/for-launchpads",
-                  "c-token-program/c-token-toolkits/for-trading-apps",
+                  "c-token-program/c-token-toolkits/for-trading-apps"
                 ]
               }
             ]
@@ -525,5 +527,11 @@
       "github": "https://github.com/Lightprotocol/light-protocol",
       "discord": "https://discord.com/invite/CYvjBgzRFP"
     }
-  }
+  },
+  "redirects": [
+    {
+      "source": "/landing",
+      "destination": "/welcome"
+    }
+  ]
 }

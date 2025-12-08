@@ -8,6 +8,7 @@ export const CodeCompare = ({
   const [sliderPercent, setSliderPercent] = useState(initialPosition);
   const [isDragging, setIsDragging] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [hasInteracted, setHasInteracted] = useState(false);
   const containerRef = useRef(null);
 
   // Syntax highlighting for TypeScript - single-pass to avoid regex conflicts
@@ -51,6 +52,7 @@ export const CodeCompare = ({
   const handleMouseDown = (e) => {
     e.preventDefault();
     setIsDragging(true);
+    setHasInteracted(true);
   };
 
   const handleMouseUp = () => {
@@ -67,6 +69,7 @@ export const CodeCompare = ({
 
   const handleTouchMove = (e) => {
     if (!containerRef.current) return;
+    setHasInteracted(true);
     const rect = containerRef.current.getBoundingClientRect();
     const x = e.touches[0].clientX - rect.left;
     const percent = Math.max(0, Math.min(100, (x / rect.width) * 100));
@@ -74,12 +77,22 @@ export const CodeCompare = ({
   };
 
   const handleKeyDown = (e) => {
+    setHasInteracted(true);
     if (e.key === "ArrowLeft") {
       setSliderPercent((p) => Math.max(0, p - 5));
     } else if (e.key === "ArrowRight") {
       setSliderPercent((p) => Math.min(100, p + 5));
     }
   };
+
+  // Wiggle animation keyframes
+  const wiggleKeyframes = `
+    @keyframes wiggle {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-3px); }
+      75% { transform: translateX(3px); }
+    }
+  `;
 
   useEffect(() => {
     if (isDragging) {
@@ -115,6 +128,17 @@ export const CodeCompare = ({
   );
 
   return (
+    <div
+      ref={containerRef}
+      className="p-0 rounded-3xl not-prose mt-4 dark:bg-white/5 backdrop-blur-xl border border-black/[0.04] dark:border-white/10 shadow-lg overflow-hidden"
+      style={{
+        fontFamily: 'Inter, sans-serif',
+        cursor: isDragging ? "grabbing" : "default",
+      }}
+    >
+      {/* Inject keyframes for wiggle animation */}
+      <style>{wiggleKeyframes}</style>
+    </div>
     <div
       ref={containerRef}
       className="p-0 rounded-3xl not-prose mt-4 dark:bg-white/5 backdrop-blur-xl border border-black/[0.04] dark:border-white/10 shadow-lg overflow-hidden"

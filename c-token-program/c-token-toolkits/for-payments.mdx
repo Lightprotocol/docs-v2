@@ -91,7 +91,6 @@ const ata = await getOrCreateAtaInterface(
   mint,
   recipient
 );
-// Share ata.parsed.address with sender
 
 console.log(ata.parsed.amount);`}
   secondCode={`import { getOrCreateAssociatedTokenAccount } from "@solana/spl-token";
@@ -102,7 +101,6 @@ const ata = await getOrCreateAssociatedTokenAccount(
   mint,
   recipient
 );
-// Share ata.address with sender
 
 console.log(ata.amount);`}
   firstLabel="c-Token"

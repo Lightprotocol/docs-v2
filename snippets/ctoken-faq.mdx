@@ -1,0 +1,98 @@
+import { CodeCompare } from '/snippets/jsx/code-compare.jsx';
+
+
+#### What is c-Token?
+c-Token is like SPL token stored more efficiently to reduce account creation cost.
+Users receive and 
+
+#### Is c-Token live on mainnet & audited?
+c-Token is currently deployed on devnet and undergoing security audits. 
+<br/>ETA: Q1 2026.
+
+#### Do I need to change my client code significantly?
+No. The c-Token SDK follows similar patterns to SPL.
+
+<CodeCompare
+  firstCode={`// c-Token: Create token account
+const ix = CreateCTokenAccount.new(
+  payer,
+  account,
+  mint,
+  owner
+).instruction();`}
+  secondCode={`// SPL: Create token account
+const ix = createAssociatedTokenAccountInstruction(
+  payer,
+  ata,
+  owner,
+  mint
+);`}
+  firstLabel="c-Token"
+  secondLabel="SPL"
+
+/>
+
+---
+
+
+<AccordionGroup>
+
+<Accordion title="Can c-Token accounts hold SPL tokens?">
+Yes. c-Token accounts can hold tokens from c-Mints, SPL mints, or Token 2022 mints.
+SPL tokens can be converted to c-Tokens and back.
+</Accordion>
+
+<Accordion title="Does c-Token support extensions?">
+Extensions are under development. Additional extensions can be requested.
+
+Coming soon:
+- MetadataPointer
+- TokenMetadata
+- InterestBearingConfig
+- GroupPointer
+- GroupMemberPointer
+- TokenGroup
+- TokenGroupMember
+- MintCloseAuthority
+- TransferFeeConfig
+- DefaultAccountState
+- PermanentDelegate
+- TransferHook
+- Pausable
+- ConfidentialTransferMint
+- ConfidentialTransferFeeConfig
+- ConfidentialMintBurn
+</Accordion>
+
+
+
+
+<Accordion title="What is the difference between c-Mint, c-Token, and compressed token?">
+- **c-Mint**: Compressed account representing a token (like SPL mint). Rent-free.
+- **c-Token**: Solana account that holds token balances of c-mints, SPL or Token 22 mints. Uses sponsored rent.
+- **Compressed token**: Compressed account storing token data. Rent-free, for storage and distribution.
+</Accordion>
+
+<Accordion title="What happens if my c-Token account runs out of rent?">
+The account is automatically compressed.
+Your tokens are preserved as a compressed token account (rent-free). The account decompresses automatically when you interact with it again.
+</Accordion>
+
+<Accordion title="Can I use c-Tokens on existing DEXs?">
+DEXs and other protocols need to integrate with the c-Token program. c-Token accounts follow SPL Token account layout for compatibility, but protocol integration is required.
+</Accordion>
+
+<Accordion title="How do I query c-Token and compressed token balances?">
+Standard Solana RPC works for c-Token accounts (Solana accounts). Compressed token balances require the ZK Compression RPC.
+</Accordion>
+
+<Accordion title="Can I convert between c-Tokens and SPL tokens?">
+Yes. SPL tokens can be deposited into c-Token accounts and withdrawn back to SPL token accounts.
+</Accordion>
+
+<Accordion title="What are compressed tokens good for?">
+- Token distribution at scale
+- Storage of inactive tokens
+</Accordion>
+
+</AccordionGroup>
