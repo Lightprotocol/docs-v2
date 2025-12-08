@@ -316,6 +316,7 @@ export const RentLifecycleVisualizer = () => {
         .timeline-scroll {
           animation: scrollTimeline 38s linear infinite;
           animation-play-state: paused;
+          animation-fill-mode: backwards;
         }
         .timeline-scroll-running {
           animation-play-state: running;
@@ -462,7 +463,7 @@ export const RentLifecycleVisualizer = () => {
         >
           {/* Continuously scrolling tick marks with hour labels below */}
           <div className="absolute inset-0 flex items-center overflow-hidden">
-            <div key={resetCount} className={`flex items-center timeline-scroll ${timelineStarted ? 'timeline-scroll-running' : ''}`} style={{ gap: '5rem', transform: 'translateX(15rem)' }}>
+            <div key={resetCount} className={`flex items-center timeline-scroll ${timelineStarted ? 'timeline-scroll-running' : ''}`} style={{ gap: '5rem' }}>
               {[...Array(34).keys()].map(i => i * 3).concat([...Array(34).keys()].map(i => i * 3)).map((h, i) => (
                 <div key={i} className="flex flex-col items-center flex-shrink-0">
                   <span
