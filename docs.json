@@ -12,7 +12,7 @@
     "default": "light"
   },
   "banner": {
-    "content": "c-Token is live on Devnet. <a href=\"/compressed-token-program/README\" style=\"color:#FFFFFF; text-decoration: underline;\">Start testing and create mints or tokens</a> without rent-exemption!",
+    "content": "c-Token is live on Devnet. <a href=\"/c-token-program/README\" style=\"color:#FFFFFF; text-decoration: underline;\">Start testing and create mints or tokens</a> without rent-exemption!",
     "dismissible": false
   },
   "navigation": {
@@ -28,7 +28,7 @@
           {
             "group": "c-Token (Localnet & Devnet)",
             "pages": [
-              "compressed-token-program/README",
+              "c-token-program/README",
               {
                 "group": "Cookbook",
                 "pages": [
@@ -36,32 +36,32 @@
                     "group": "c-Mint",
                     "expanded": true,
                     "pages": [
-                      "compressed-token-program/cmint/create-cmint",
-                      "compressed-token-program/cmint/mint-ctokens"
+                      "c-token-program/cmint/create-cmint",
+                      "c-token-program/cmint/mint-ctokens"
                     ]
                   },
                   {
                     "group": "c-Token",
                     "expanded": true,
                     "pages": [
-                      "compressed-token-program/ctoken/create-ctoken",
-                      "compressed-token-program/ctoken/create-cata",
-                      "compressed-token-program/ctoken/transfer-interface",
-                      "compressed-token-program/ctoken/close-ctoken-account"
+                      "c-token-program/ctoken/create-ctoken",
+                      "c-token-program/ctoken/create-cata",
+                      "c-token-program/ctoken/transfer-interface",
+                      "c-token-program/ctoken/close-ctoken-account"
                     ]
                   }
                 ]
               },
               {
-                "group": "Integrate c-Token",
+                "group": "Toolkit",
                 "expanded": true,
                 "pages": [
-                  "compressed-token-program/integrate/for-aggregators",
-                  "compressed-token-program/integrate/for-dexs",
-                  "compressed-token-program/integrate/for-defi-markets",
-                  "compressed-token-program/integrate/for-trading-apps",
-                  "compressed-token-program/integrate/for-wallet-applications",
-                  "compressed-token-program/integrate/for-payment-companies"
+                  "c-token-program/c-token-toolkits/for-aggregators",
+                  "c-token-program/c-token-toolkits/for-dexs",
+                  "c-token-program/c-token-toolkits/for-defi-markets",
+                  "c-token-program/c-token-toolkits/for-trading-apps",
+                  "c-token-program/c-token-toolkits/for-wallets",
+                  "c-token-program/c-token-toolkits/for-payments"
                 ]
               }
             ]

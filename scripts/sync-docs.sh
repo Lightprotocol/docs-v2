@@ -1,6 +1,18 @@
 #!/bin/bash
 set -e
 
+# Environment variables for local testing
+# LIGHT_PROTOCOL_PATH: Path to light-protocol repo (default: "light-protocol")
+# DRY_RUN: If "true", show diff instead of writing files (default: "false")
+LIGHT_PROTOCOL_PATH="${LIGHT_PROTOCOL_PATH:-light-protocol}"
+DRY_RUN="${DRY_RUN:-false}"
+
+if [[ "$DRY_RUN" == "true" ]]; then
+  echo "🔍 DRY RUN MODE - no files will be modified"
+  echo "   Using LIGHT_PROTOCOL_PATH: $LIGHT_PROTOCOL_PATH"
+  echo ""
+fi
+
 # Mapping of source files to docs files
 declare -A FILE_MAP=(
   ["create_cmint.rs"]="compressed-token-program/cmint/create-cmint.mdx"
@@ -11,7 +23,7 @@ declare -A FILE_MAP=(
   ["transfer_interface.rs"]="compressed-token-program/ctoken/transfer-interface.mdx"
 )
 
-SOURCE_DIR="light-protocol/sdk-tests/sdk-ctoken-test/src"
+SOURCE_DIR="$LIGHT_PROTOCOL_PATH/sdk-tests/sdk-ctoken-test/src"
 
 for filename in "${!FILE_MAP[@]}"; do
   docs_file="${FILE_MAP[$filename]}"
@@ -40,9 +52,17 @@ for filename in "${!FILE_MAP[@]}"; do
         next
       }
       { print }
-    ' "$docs_file" > "$docs_file.tmp" && mv "$docs_file.tmp" "$docs_file"
+    ' "$docs_file" > "$docs_file.tmp"
 
-    echo "✓ Updated $docs_file"
+    if [[ "$DRY_RUN" == "true" ]]; then
+      echo "--- Changes for $docs_file ---"
+      diff "$docs_file" "$docs_file.tmp" || true
+      rm "$docs_file.tmp"
+      echo ""
+    else
+      mv "$docs_file.tmp" "$docs_file"
+      echo "✓ Updated $docs_file"
+    fi
   else
     if [[ ! -f "$source_file" ]]; then
       echo "⚠ Source file not found: $source_file"
