@@ -12,6 +12,7 @@ The c-token program introduces two equivalents to SPL mints and tokens:
 - c-tokens 
 
 We built the c-token standard to remove the well known barrier developers face on Solana to scale their application: the rent-exemption.
+
 Both c-mints and c-tokens do not require the account creator to pay rent-exemption.
 
 |  Creation Cost       | SPL               | c-Token            |
@@ -21,9 +22,9 @@ Both c-mints and c-tokens do not require the account creator to pay rent-exempti
 
 ### Use c-tokens with existing SPL tokens
 
-A key feature to highlight is that c-Token accounts can hold tokens from c-Mints, SPL mints, or Token 2022 mints.
+A key feature to highlight is that c-token accounts can hold tokens from c-Mints, SPL mints, or Token 2022 mints.
 This means you can convert existing SPL tokens to c-Tokens and back. 
-Existing SPL tokens can hereby benefit from the rent config c-token introduces.
+Existing SPL tokens can hereby benefit from the rent config c-token introduces, which we get to in a minute.
 
 This is implemented by the `c-token-sdk`.
 It follows similar patterns to SPL to maximize developer experience. 
@@ -75,18 +76,16 @@ When rent runs out, the account is automatically compressed. Your tokens are pre
 
 ### c-Token vs Compressed Tokens
 
-It's important to note c-token accounts are Solana accounts. Compressed tokens are compressed accounts.
-The c-token program uses under the hood the ZK Compression primitive we released last year together with Helius Labs.
+It's important to note c-token accounts are Solana accounts. 
+Under the hood, the c-token program uses ZK Compression.
 
-| | c-Token | Compressed Token |
+| | C-Token | Compressed Token |
 |:--|:--|:--|
 | **Storage** | Solana account | Compressed account |
 | **Rent** | Pay-as-you-go | None |
 | **RPC** | Standard Solana RPC | ZK Compression RPC |
 
 Use c-Token for active token accounts. Use compressed tokens for distribution and long-term storage.
-
-### Token Interface Methods
 
 ### Extensions with c-token
 
@@ -120,6 +119,8 @@ We have dedicated toolkits for specific use cases:
 - [DEXs](/c-token-program/c-token-toolkits/for-dexs)
 - [Launchpads](/c-token-program/c-token-toolkits/for-launchpads)
 - [Trading Apps](/c-token-program/c-token-toolkits/for-trading-apps)
+
+Get in touch on telegram for help!
 
 ## What's next?
 
