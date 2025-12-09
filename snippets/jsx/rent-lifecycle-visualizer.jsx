@@ -16,12 +16,12 @@ export const RentLifecycleVisualizer = () => {
   const [timelineStarted, setTimelineStarted] = useState(false);
 
   // Constants from rent config
-  const LAMPORTS_PER_TICK = 38.8;       // 388 per epoch / 10 ticks = 1 epoch per second
+  const LAMPORTS_PER_TICK = 58.2;       // 582 per second = 1.5 epochs/s (1.5x speed)
   const INITIAL_RENT = 6208;            // 24h of rent (16 epochs × 388)
   const TOPUP_LAMPORTS = 776;           // 3h worth (2 epochs)
   const TOPUP_THRESHOLD = 776;          // Top up when below 3h of rent
   const COLD_THRESHOLD = 388;           // Cold when below 1 epoch of rent
-  // Time scale: 1s per epoch → 16s to deplete, 44s total cycle (compressed gaps)
+  // Time scale: 1.5x speed → ~10.7s to deplete, 29s total cycle
 
   // Colors
   const GREY = { r: 161, g: 161, b: 170 };
@@ -149,22 +149,22 @@ export const RentLifecycleVisualizer = () => {
     // Otherwise just the transaction happens (no rent top-up needed)
   };
 
-  // 44-second transaction schedule (compressed cold gaps)
-  // 6208 lamports / 388/s = 16s to deplete, top-up at ~14s from init
+  // 29-second transaction schedule (1.5x speed)
+  // 6208 lamports / 582/s = 10.7s to deplete
   const txTimesRef = useRef([
     // Cycle 1: Init at 1.0s
-    // Activity (lamports > 776, no top-up needed)
-    2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,
-    // Top-ups at ~15s when lamports < 776
-    15.2, 17.2, 19.2,
-    // Goes cold ~22s
+    // Activity (lamports > 776)
+    1.3, 2, 2.7, 3.3, 4, 4.7, 5.3, 6, 6.7, 7.3, 8, 8.7, 9.3,
+    // Top-ups at ~10s when lamports < 776
+    10.1, 11.5, 12.8,
+    // Goes cold ~14.5s
 
-    // Cycle 2: Reinit from cold at 24.0s (2s gap)
-    24,
-    25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37,
+    // Cycle 2: Reinit from cold at 16s
+    16,
+    16.7, 17.3, 18, 18.7, 19.3, 20, 20.7, 21.3, 22, 22.7, 23.3, 24, 24.7,
     // Top-ups
-    38.2, 40.2,
-    // Goes cold ~43s, loop at 44s
+    25.5, 26.8,
+    // Goes cold ~28.5s, loop at 29s
   ]);
 
   const handleReset = () => {
@@ -247,8 +247,8 @@ export const RentLifecycleVisualizer = () => {
           });
         }
 
-        // Loop at 44s - reset to "Press" state
-        if (newTime >= 44) {
+        // Loop at 29s - reset to "Press" state
+        if (newTime >= 29) {
           setPhase('uninitialized');
           setLamports(0);
           setHasUserClicked(false);
@@ -311,7 +311,7 @@ export const RentLifecycleVisualizer = () => {
           to { transform: translateX(-95rem); }
         }
         .timeline-scroll {
-          animation: scrollTimeline 44s linear infinite;
+          animation: scrollTimeline 29s linear infinite;
           animation-play-state: paused;
           animation-fill-mode: backwards;
         }

@@ -11,7 +11,14 @@ The c-token program introduces two equivalents to SPL mints and tokens:
 - c-mints with token metadata
 - c-tokens 
 
-We built the to remove the well known barrier developers face on Solana to scale their application: the rent-exemption.
+We built the c-token standard to remove the well known barrier developers face on Solana to scale their application: the rent-exemption.
+
+A key feature is that c-Token accounts can hold tokens from c-Mints, SPL mints, or Token 2022 mints.
+This means you can convert existing SPL tokens to c-Tokens and back with a unified `transferInterface` method.
+Existing SPL tokens can hereby benefit from the rent config c-token introduces.
+
+
+
 Let's start by comparing it to SPL tokens
 
 
@@ -20,7 +27,6 @@ Let's start by comparing it to SPL tokens
 | **Mint Account**    | ~1,500,000 lamports        | **15,000** lamports     |
 | **Token Account**    | ~2,000,000 lamports | **17,000** lamports |
 
-c-Token accounts can hold tokens from c-Mints, SPL mints, or Token 2022 mints. You can convert SPL tokens to c-Tokens and back via `transferInterface`.
 
 ### Why we built c-token
 Rent is a well known barrier to developers to scale their application.
