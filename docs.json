@@ -19,7 +19,7 @@
           {
             "group": "Get Started",
             "pages": [
-              "/landing",
+              "/welcome",
               "/quickstart",
               "learn/ai-tools-guide"
             ]
