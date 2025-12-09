@@ -66,8 +66,11 @@ Find devnet examples here [https://github.com/Lightprotocol/c-token-toolkit](htt
 
 ## Setup
 
+```bash
+npm install @lightprotocol/compressed-token/unified \
+            @lightprotocol/stateless.js
+```
 
-Connect to an RPC endpoint that serves both standard Solana methods and compression methods.
 ```typescript
 import { createRpc } from "@lightprotocol/stateless.js";
 
@@ -81,31 +84,6 @@ import {
 
 const rpc = createRpc(RPC_ENDPOINT);
 ```
-
-<CodeCompare
-  firstCode={`import { getOrCreateAtaInterface } from "@lightprotocol/compressed-token/unified";
-
-const ata = await getOrCreateAtaInterface(
-  rpc,
-  payer,
-  mint,
-  recipient
-);
-
-console.log(ata.parsed.amount);`}
-  secondCode={`import { getOrCreateAssociatedTokenAccount } from "@solana/spl-token";
-
-const ata = await getOrCreateAssociatedTokenAccount(
-  rpc,
-  payer,
-  mint,
-  recipient
-);
-
-console.log(ata.amount);`}
-  firstLabel="c-Token"
-  secondLabel="SPL"
-/>
 
 <Steps>
 

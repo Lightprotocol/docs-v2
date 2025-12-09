@@ -60,7 +60,10 @@ Learn the core concepts to the [c-Token program here](/learn/c-token-program).
 
 ### Install dependencies
 
-<InstallDependencies />
+```bash
+npm install @lightprotocol/compressed-token/unified \
+            @lightprotocol/stateless.js
+```
 </Step>
 
 <Step>
@@ -68,7 +71,21 @@ Learn the core concepts to the [c-Token program here](/learn/c-token-program).
 ### Set up developer environment
 
 <Accordion title="Setup">
-<SetupEnvironment />
+
+```typescript
+import { createRpc } from "@lightprotocol/stateless.js";
+
+import {
+  getOrCreateAtaInterface,
+  getAtaInterface,
+  getAssociatedTokenAddressInterface,
+  transferInterface,
+  unwrap,
+} from "@lightprotocol/compressed-token/unified";
+
+const rpc = createRpc(RPC_ENDPOINT);
+```
+
 </Accordion>
 </Step>
 

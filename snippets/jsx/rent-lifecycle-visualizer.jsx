@@ -16,12 +16,12 @@ export const RentLifecycleVisualizer = () => {
   const [timelineStarted, setTimelineStarted] = useState(false);
 
   // Constants from rent config
-  const LAMPORTS_PER_TICK = 77.6;       // 388 per epoch / 5 ticks = smooth decrement
+  const LAMPORTS_PER_TICK = 38.8;       // 388 per epoch / 10 ticks = 1 epoch per second
   const INITIAL_RENT = 6208;            // 24h of rent (16 epochs × 388)
   const TOPUP_LAMPORTS = 776;           // 3h worth (2 epochs)
   const TOPUP_THRESHOLD = 776;          // Top up when below 3h of rent
   const COLD_THRESHOLD = 388;           // Cold when below 1 epoch of rent
-  // Time scale: 0.5s per epoch → 16 epochs = 8s to deplete, 30s total cycle
+  // Time scale: 1s per epoch → 16s to deplete, 44s total cycle (compressed gaps)
 
   // Colors
   const GREY = { r: 161, g: 161, b: 170 };
@@ -149,27 +149,22 @@ export const RentLifecycleVisualizer = () => {
     // Otherwise just the transaction happens (no rent top-up needed)
   };
 
-  // 38-second transaction schedule aligned with depletion math
-  // 6208 lamports / 776/s = 8s to deplete, top-up window at ~8s from init
+  // 44-second transaction schedule (compressed cold gaps)
+  // 6208 lamports / 388/s = 16s to deplete, top-up at ~14s from init
   const txTimesRef = useRef([
     // Cycle 1: Init at 1.0s
     // Activity (lamports > 776, no top-up needed)
-    1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0, 7.5,
-    // Top-ups at ~8s when lamports < 776
-    8.2, 9.2, 10.2,
-    // Goes cold ~11.8s
+    2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,
+    // Top-ups at ~15s when lamports < 776
+    15.2, 17.2, 19.2,
+    // Goes cold ~22s
 
-    // Cycle 2: Reinit from cold at 13.0s
-    13.0,
-    13.5, 14.0, 14.5, 15.0, 15.5, 16.0, 16.5, 17.0, 17.5, 18.0, 18.5, 19.0, 19.5,
+    // Cycle 2: Reinit from cold at 24.0s (2s gap)
+    24,
+    25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37,
     // Top-ups
-    20.2, 21.2,
-    // Goes cold ~23s
-
-    // Cycle 3: Reinit from cold at 25.0s
-    25.0,
-    25.5, 26.0, 26.5, 27.0, 27.5, 28.0, 28.5, 29.0, 29.5, 30.0,
-    // Let it drain to cold before 38s loop
+    38.2, 40.2,
+    // Goes cold ~43s, loop at 44s
   ]);
 
   const handleReset = () => {
@@ -252,8 +247,8 @@ export const RentLifecycleVisualizer = () => {
           });
         }
 
-        // Loop at 38s - reset to "Press" state
-        if (newTime >= 38) {
+        // Loop at 44s - reset to "Press" state
+        if (newTime >= 44) {
           setPhase('uninitialized');
           setLamports(0);
           setHasUserClicked(false);
@@ -313,10 +308,10 @@ export const RentLifecycleVisualizer = () => {
       <style>{`
         @keyframes scrollTimeline {
           from { transform: translateX(15rem); }
-          to { transform: translateX(-155rem); }
+          to { transform: translateX(-95rem); }
         }
         .timeline-scroll {
-          animation: scrollTimeline 38s linear infinite;
+          animation: scrollTimeline 44s linear infinite;
           animation-play-state: paused;
           animation-fill-mode: backwards;
         }

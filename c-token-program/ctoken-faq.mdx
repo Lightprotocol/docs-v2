@@ -18,7 +18,7 @@ Users receive and
 
 #### Is c-token live on mainnet & audited?
 c-token is currently deployed on devnet and undergoing security audits. 
-<br/>ETA: Q1 2026.
+<br/>ETA: End of Q1 2026.
 
 #### Do I need to change my client code significantly?
 No. The c-token SDK follows similar patterns to SPL.
@@ -47,9 +47,10 @@ const ix = CreateCTokenAccount.new(
 
 <AccordionGroup>
 
-<Accordion title="Can c-Token accounts hold SPL tokens?">
-Yes. c-Token accounts can hold tokens from c-Mints, SPL mints, or Token 2022 mints.
-SPL tokens can be converted to c-Tokens and back.
+<Accordion title="Can c-token accounts hold SPL tokens?">
+Yes. c-token accounts can hold tokens from c-mints, SPL mints, or Token 2022 mints.
+
+SPL tokens can be deposited into c-token accounts and withdrawn back to SPL token accounts via the `transferInterface` method.
 </Accordion>
 
 <Accordion title="Do c-token accounts require rent?">
@@ -61,12 +62,13 @@ Rent is paid over time when accounts are accessed via a custom rent config inste
 
 </Accordion>
 
-<Accordion title="What happens if my c-Token account runs out of rent?">
+<Accordion title="What happens if my c-token account runs out of rent?">
 The account is automatically compressed.
-Your tokens are preserved as a compressed token account (rent-free). The account decompresses automatically when you interact with it again.
+Your tokens are preserved as a compressed token account (rent-free). 
+The account is automatically decompressed when someone interacts with it again.
 </Accordion>
 
-<Accordion title="Does c-Token support extensions?">
+<Accordion title="Does c-token support extensions?">
 Extensions are under development. Additional extensions can be requested.
 
 Coming soon:
@@ -88,23 +90,13 @@ Coming soon:
 - ConfidentialMintBurn
 </Accordion>
 
-<Accordion title="What is the difference between c-Mint, c-Token, and compressed token?">
-- **c-Mint**: Compressed account representing a token (like SPL mint). Rent-free.
-- **c-Token**: Solana account that holds token balances of c-mints, SPL or Token 22 mints. Uses sponsored rent.
+<Accordion title="What is the difference between c-token and compressed token?">
+- **c-token**: Solana account that holds token balances of c-mints, SPL or Token 22 mints.
 - **Compressed token**: Compressed account storing token data. Rent-free, for storage and distribution.
 </Accordion>
 
-<Accordion title="How do I query c-Token and compressed token balances?">
-Standard Solana RPC works for c-Token accounts (Solana accounts). Compressed token balances require the ZK Compression RPC.
-</Accordion>
-
-<Accordion title="Can I convert between c-Tokens and SPL tokens?">
-Yes. SPL tokens can be deposited into c-Token accounts and withdrawn back to SPL token accounts via the `transferInterface` method.
-</Accordion>
-
-<Accordion title="What are compressed tokens good for?">
-- Token distribution at scale
-- Storage of inactive tokens
+<Accordion title="How do I query c-token and compressed token balances?">
+Standard Solana RPC works for c-token accounts (Solana accounts).
 </Accordion>
 
 </AccordionGroup>

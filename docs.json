@@ -16,8 +16,11 @@
     "dismissible": false
   },
   "navigation": {
-    "groups": [
+    "tabs": [
       {
+        "tab": "Documentation",
+        "groups": [
+          {
             "group": "Get Started",
             "pages": [
               "welcome",
@@ -458,6 +461,20 @@
               "api-reference/libraries/light-program-test"
             ]
           }
+        ]
+      },
+      {
+        "tab": "Blog",
+        "groups": [
+          {
+            "group": "Blog Posts",
+            "pages": [
+              "blog/README",
+              "blog/c-token"
+            ]
+          }
+        ]
+      }
     ],
     "global": {
       "anchors": [
