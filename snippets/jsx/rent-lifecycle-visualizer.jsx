@@ -607,11 +607,13 @@ export const RentLifecycleVisualizer = () => {
           </button>
           <button
             onClick={handleTopup}
-            className={`rounded-lg border backdrop-blur-sm transition-all btn-interactive ${isButtonPressed ? 'font-bold' : 'font-medium'}`}
+            className={`rounded-lg border-none backdrop-blur-sm transition-all ${isButtonPressed ? 'font-bold' : 'font-medium'}`}
             style={{
               padding: '0.5rem 1rem',
               fontSize: isButtonPressed ? '0.95rem' : '0.85rem',
               transform: isButtonPressed ? 'scale(1.15)' : 'scale(1)',
+              background: '#0066ff',
+              color: '#fff',
             }}
           >
             Send Tx
