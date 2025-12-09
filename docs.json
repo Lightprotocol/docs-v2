@@ -19,8 +19,8 @@
           {
             "group": "Get Started",
             "pages": [
-              "/welcome",
-              "/quickstart",
+              "welcome",
+              "quickstart",
               "learn/ai-tools-guide"
             ]
           },
@@ -566,10 +566,10 @@
       "x": "https://x.com/lightprotocol",
       "github": "https://github.com/Lightprotocol/light-protocol",
       "discord": "https://discord.com/invite/CYvjBgzRFP"
-    },
+    }
+  },
   "redirects": [{
     "source": "/landing",
     "destination": "/welcome"
-    }]
-  }
+  }]
 }
