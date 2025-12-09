@@ -283,8 +283,10 @@ export const RentLifecycleVisualizer = () => {
       const width = size - Math.abs(row);
       for (let col = -width; col <= width; col++) {
         const distFromCenter = Math.max(Math.abs(row), Math.abs(col));
-        const dotSize = Math.max(1, centerSize - distFromCenter * 0.6);
-        const opacity = Math.max(0.2, 1 - distFromCenter * 0.15);
+        // Exponential fade for smooth transition to white
+        const fadeProgress = distFromCenter / size; // 0 at center, 1 at edge
+        const dotSize = Math.max(0.3, centerSize * Math.pow(1 - fadeProgress, 1.5));
+        const opacity = Math.pow(1 - fadeProgress, 2.5); // Aggressive exponential fade
 
         dots.push({
           x: 50 + col * 6,
@@ -610,14 +612,11 @@ export const RentLifecycleVisualizer = () => {
           </button>
           <button
             onClick={handleTopup}
-            className={`rounded-lg border backdrop-blur-sm transition-all ${isButtonPressed ? 'font-bold' : 'font-medium'}`}
+            className={`rounded-lg border backdrop-blur-sm transition-all btn-interactive ${isButtonPressed ? 'font-bold' : 'font-medium'}`}
             style={{
               padding: '0.5rem 1rem',
               fontSize: isButtonPressed ? '0.95rem' : '0.85rem',
               transform: isButtonPressed ? 'scale(1.15)' : 'scale(1)',
-              background: '#0066ff',
-              borderColor: '#0066ff',
-              color: '#fff',
             }}
           >
             Send Tx

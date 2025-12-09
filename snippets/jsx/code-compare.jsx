@@ -236,12 +236,13 @@ export const CodeCompare = ({
           {/* Grey line */}
           <div className="absolute top-0 bottom-0 w-px bg-zinc-400 dark:bg-white/30" />
 
-          {/* Blue shine/glow to the right */}
+          {/* Blue glow fading to left starting at the line */}
           <div
-            className="absolute top-0 bottom-0 left-0"
+            className="absolute top-0 bottom-0"
             style={{
-              width: "40px",
-              background: "linear-gradient(to right, rgba(59, 130, 246, 0.1) 0%, transparent 100%)",
+              right: "50%",
+              width: "80px",
+              background: "linear-gradient(to left, rgba(59, 130, 246, 0.12) 0%, transparent 100%)",
             }}
           />
 
@@ -253,9 +254,9 @@ export const CodeCompare = ({
               width: "20px",
               height: "32px",
               borderRadius: "4px",
-              background: "linear-gradient(to bottom, rgba(255,255,255,0.95), rgba(191,219,254,0.9), rgba(255,255,255,0.95))",
-              border: "1px solid rgba(199, 210, 254, 0.8)",
-              boxShadow: "0 1px 3px rgba(0,0,0,0.1), 0 0 8px rgba(99,102,241,0.2)",
+              background: "#f8fafc",
+              border: "1px solid #d1d5db",
+              boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
               transform: isDragging ? "scale(1.08)" : "scale(1)",
             }}
           >
