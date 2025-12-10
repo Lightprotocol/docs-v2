@@ -65,7 +65,9 @@
                   "c-token-program/c-token-toolkits/for-aggregators",
                   "c-token-program/c-token-toolkits/for-dexs",
                   "c-token-program/c-token-toolkits/for-launchpads",
-                  "c-token-program/c-token-toolkits/for-trading-apps"
+                  "c-token-program/c-token-toolkits/for-trading-apps",
+                  "c-token-program/c-token-toolkits/for-streaming-mints",
+                  "c-token-program/c-token-toolkits/for-streaming-tokens"
                 ]
               }
             ]
