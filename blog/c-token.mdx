@@ -1,46 +1,43 @@
 ---
-title: "Announcing C-Token: The Solana token standard to scale Internet Capital Markets"
+title: "Announcing the Light Token Standard: Rent-free tokens on Solana"
+description: " Today we bring to you the light-token standard. A token standard with mint and token accounts equivalent to SPL, but without rent-exemption."
+
 ---
 import { CodeCompare } from '/snippets/jsx/code-compare.jsx';
 import CompressibleRentExplained from '/snippets/compressible-rent-explained.mdx';
 import { RentLifecycleVisualizer } from '/snippets/jsx/rent-lifecycle-visualizer.jsx';
 
- Today we bring to you c-token, a token standard equivalent to SPL mints and tokens but without rent-exemption:
-- c-mints with token metadata, and 
-- c-tokens.
-
-The c-token program extends Solana's two main token programs (SPL and Token 2022).
-
 At the moment around XXX token accounts are created on a daily basis.
 Many are created and rarely accessed.
 Still lock up SOL due to rent-exemption.
 There have been many discussions around how to solve rent on Solana (SIMD references).
-Compression denied due to developer experience.
 
-That's why we built c-token
+To truly scale Solana to 1 billion+ users the cost to store data must be near zero. 
+
+That's why we built light-token.
 From now on, you can create mints and tokens 
 1. at a fraction of the cost,
-2. with improved performance,
-3. similar developer experience.
+2. with improved performance, and
+3. with similar developer experience.
 
-#### Mints and Tokens at a Fraction of the Cost
+#### Mints and Tokens without Rent-Exemption
 
-|         | SPL               | c-Token            |
+| Creation Cost        | SPL               | Light            |
 |:---------------------|:------------------|:-------------------|
 | **Mint Account**    | ~1,500,000 lamports        | **15,000** lamports     |
-| **Token Account**    | ~2,000,000 lamports | **17,000** lamports |
+| **Token Account**    | ~2,000,000 lamports | ~**17,000** lamports |
 
-#### Interoperability: Use C-Tokens with Existing SPL Tokens
+#### Interoperability with Existing SPL Tokens
 
-A key feature to highlight is that c-token accounts can hold tokens from c-Mints, SPL mints, or Token 2022 mints.
-This means you can convert existing SPL tokens to c-Tokens and back. 
-Existing SPL tokens can hereby benefit from the rent config c-token introduces, to which we get in a minute.
+A key feature to highlight is that light-token accounts can hold tokens from light, SPL, or Token 2022 mints.
+This means you can convert existing SPL tokens to light-tokens and back. 
+Existing SPL tokens can hereby benefit from the rent config light-token introduces, to which we get in a minute.
 
-This is implemented by the `c-token-sdk`.
-It follows similar patterns to SPL to maximize developer experience. 
-This makes it easy to integrate c-token in your protocol, app, or payment flow.
+This is implemented by the `light-token-sdk`.
+It follows similar patterns to SPL to maximize developer experience
+and puts the barrier low to integrate light-token in your protocol, app, or payment flow.
 
-Example to create SPL vs c-token account:
+Example to create SPL vs light-token account:
 <CodeCompare
   firstCode={`// Create SPL token account
 const ix = createAssociatedTokenAccountInstruction(
@@ -49,8 +46,8 @@ const ix = createAssociatedTokenAccountInstruction(
   owner,
   mint
 );`}
-  secondCode={`// Create c-token account
-const ix = CreateCTokenAccount.new(
+  secondCode={`// Create light-token account
+const ix = CreateAssociatedTokenAccount.new(
   payer,
   account,
   owner,
@@ -60,63 +57,41 @@ const ix = CreateCTokenAccount.new(
   secondLabel="c-Token"
 />
 
-## Why we Built C-Token
+## Light-Token Program Features
 
-We built the c-token standard to accelerate internet capital markets on Solana.
+### Mint Accounts with Token Metadata
 
-1. Launchpads launch x tokens daily on Solana. 
-Few tokens are actively traded for more than 12h.
-Most are created and merely active for 45 minutes.
-
-2. More institutions are choosing Solana for their payments. 
-Make Solana competitive with traditional finance.
-
-## C-Token Program Features
-
-### C-Mints with Metadata
-
-C-mints uniquely represent a token on Solana and store its global metadata, similar to SPL mint accounts with few core differences:
-- C-mint accounts are rent-free.
-- Tokens created from c-mints are c-tokens.
-
-- meme coins
-. inactive
-- lifecycle
-- die out
-- only active markets persist
-
-
-Get in touch if your a launchpad that wants to integrate c-mints.
+Mints uniquely represent a token on Solana and store its global metadata, 
+similar to SPL mint accounts with few core differences:
+- Light-token mint accounts are compressed accounts and rent-free.
+- Tokens created from light-token mints are light-tokens.
 
 You can view the source code here.
 
-### C-Token & Rent Model
+### Token Accounts with Pay-as-you-go Rent
 
-C-tokens are like SPL tokens and hold token balances of c-mints, SPL mints, or Token 2022 mints.
+Light-tokens are like SPL tokens and hold token balances of light, SPL, or Token 2022 mints.
 
-C-token accounts don't require upfront rent-exemption. Instead, rent is paid over time when accounts are accessed:
+Light-token accounts are Solana accounts, but don't require the creator to pay rent-exemption.
+Instead, rent is paid over time when accounts are accessed:
 
 <CompressibleRentExplained />
 
 <RentLifecycleVisualizer />
 
-When rent runs out, the account is automatically compressed. Your tokens are preserved as a compressed token account (rent-free). The account decompresses automatically when you interact with it again.
+The token accounts is initalized and funded with initial rent.
+When rent runs low, transactions top-up the account's rent balance.
+Transactions only top-up the account's rent balance, when it is low. 
+When rent runs out, the account is automatically compressed. 
+Your tokens are preserved as a compressed token account and 
+are automatically decompressed when you interact with it again.
 
-### C-Token vs Compressed Tokens
+You can view the source code here.
 
-It's important to note c-token accounts are Solana accounts, not compressed token accounts. 
-C-token simply uses ZK Compression under the hood to store inactive tokens.
-You can still use compressed tokens for efficient token distribution.
+### Extensions
 
-| | C-Token | Compressed Token |
-|:--|:--|:--|
-| **Storage** | Solana account | Compressed account |
-| **Rent** | Pay-as-you-go | None |
-| **RPC** | Standard Solana RPC | ZK Compression RPC |
-
-### Extensions with c-token
-
-Extensions are under development and are currently implemented. Additional extensions can be requested.
+Extensions are under development and are currently implemented. 
+Additional extensions can be requested.
 
 Coming soon:
 - MetadataPointer
@@ -136,7 +111,7 @@ Coming soon:
 - ConfidentialTransferFeeConfig
 - ConfidentialMintBurn
 
-## Integrate c-token with Your Application
+## Integrate with Your Application
 
 We have dedicated toolkits for specific use cases:
 
@@ -151,6 +126,6 @@ Get in touch on telegram for help!
 
 ## What's next?
 
-For now, c-token is live on Devnet. Mainnet is anticipated for end of Q1 2026. 
+For now, light-token is live on Devnet. Mainnet is anticipated for end of Q1 2026. 
 
 Get started and send us your feedback!

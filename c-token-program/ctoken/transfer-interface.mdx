@@ -75,7 +75,7 @@ use borsh::BorshDeserialize;
 use light_client::rpc::Rpc;
 use light_ctoken_sdk::{
     ctoken::{
-        derive_ctoken_ata, CreateAssociatedTokenAccount, TransferCtoken,
+        derive_ctoken_ata, CreateAssociatedCTokenAccount, TransferCToken,
         TransferSplToCtoken,
     },
     token_pool::find_token_pool_pda_with_index,
@@ -129,7 +129,7 @@ async fn test_client_transfer_spl_to_ctoken_to_ctoken() {
     // Step 4: Create sender cToken ATA
     let (sender_ctoken_ata, _) = derive_ctoken_ata(&sender.pubkey(), &mint);
 
-    let create_sender_ata = CreateAssociatedTokenAccount::new(
+    let create_sender_ata = CreateAssociatedCTokenAccount::new(
         payer.pubkey(),
         sender.pubkey(),
         mint,
@@ -175,7 +175,7 @@ async fn test_client_transfer_spl_to_ctoken_to_ctoken() {
 
     let (recipient_ctoken_ata, _) = derive_ctoken_ata(&recipient.pubkey(), &mint);
 
-    let create_recipient_ata = CreateAssociatedTokenAccount::new(
+    let create_recipient_ata = CreateAssociatedCTokenAccount::new(
         payer.pubkey(),
         recipient.pubkey(),
         mint,
@@ -188,11 +188,12 @@ async fn test_client_transfer_spl_to_ctoken_to_ctoken() {
         .unwrap();
 
     // Step 7: Transfer cToken to cToken (3000 tokens)
-    let transfer_instruction = TransferCtoken {
+    let transfer_instruction = TransferCToken {
         source: sender_ctoken_ata,
         destination: recipient_ctoken_ata,
         amount: ctoken_transfer_amount,
         authority: sender.pubkey(),
+        max_top_up: None,
     }
     .instruction()
     .unwrap();
@@ -261,9 +262,9 @@ Define the number of c-Tokens / SPL tokens to transfer
 - to which SPL or c-Token account.
 
 ```rust
-use light_ctoken_sdk::ctoken::TransferInterface;
+use light_ctoken_sdk::ctoken::TransferInterfaceCpi;
 
-let mut transfer = TransferInterface::new(
+let mut transfer = TransferInterfaceCpi::new(
     data.amount,
     source_account.clone(),
     destination_account.clone(),
@@ -336,7 +337,7 @@ Find the source code [here](https://github.com/Lightprotocol/light-protocol/blob
 
 ```rust expandable
 use borsh::{BorshDeserialize, BorshSerialize};
-use light_ctoken_sdk::ctoken::TransferInterface;
+use light_ctoken_sdk::ctoken::TransferInterfaceCpi;
 use solana_program::{account_info::AccountInfo, program_error::ProgramError, pubkey::Pubkey};
 
 use crate::ID;
@@ -344,7 +345,7 @@ use crate::ID;
 /// PDA seed for authority in invoke_signed variants
 pub const TRANSFER_INTERFACE_AUTHORITY_SEED: &[u8] = b"transfer_interface_authority";
 
-/// Instruction data for TransferInterface
+/// Instruction data for TransferInterfaceCpi
 #[derive(BorshSerialize, BorshDeserialize, Debug)]
 pub struct TransferInterfaceData {
     pub amount: u64,
@@ -352,7 +353,7 @@ pub struct TransferInterfaceData {
     pub token_pool_pda_bump: Option<u8>,
 }
 
-/// Handler for TransferInterface (invoke)
+/// Handler for TransferInterfaceCpi (invoke)
 ///
 /// This unified interface automatically detects account types and routes to:
 /// - CToken -> CToken transfer
@@ -378,7 +379,7 @@ pub fn process_transfer_interface_invoke(
         return Err(ProgramError::NotEnoughAccountKeys);
     }
 
-    let mut transfer = TransferInterface::new(
+    let mut transfer = TransferInterfaceCpi::new(
         data.amount,
         accounts[1].clone(), // source_account
         accounts[2].clone(), // destination_account
@@ -402,7 +403,7 @@ pub fn process_transfer_interface_invoke(
     Ok(())
 }
 
-/// Handler for TransferInterface with PDA authority (invoke_signed)
+/// Handler for TransferInterfaceCpi with PDA authority (invoke_signed)
 ///
 /// The authority is a PDA derived from TRANSFER_INTERFACE_AUTHORITY_SEED.
 ///
@@ -434,7 +435,7 @@ pub fn process_transfer_interface_invoke_signed(
         return Err(ProgramError::InvalidSeeds);
     }
 
-    let mut transfer = TransferInterface::new(
+    let mut transfer = TransferInterfaceCpi::new(
         data.amount,
         accounts[1].clone(), // source_account
         accounts[2].clone(), // destination_account

@@ -205,9 +205,9 @@ Find [a full code example at the end](#full-code-example).
 <Tab title="invoke (External signer)">
 
 ```rust
-use light_ctoken_sdk::ctoken::CreateCTokenAccountInfos;
+use light_ctoken_sdk::ctoken::CreateCTokenAccountCpi;
 
-CreateCTokenAccountInfos {
+CreateCTokenAccountCpi {
     payer: payer.clone(),
     account: account.clone(),
     mint: mint.clone(),
@@ -222,9 +222,9 @@ CreateCTokenAccountInfos {
 <Tab title="invoke_signed (PDA is signer)">
 
 ```rust
-use light_ctoken_sdk::ctoken::CreateCTokenAccountInfos;
+use light_ctoken_sdk::ctoken::CreateCTokenAccountCpi;
 
-let account_infos = CreateCTokenAccountInfos {
+let account_cpi = CreateCTokenAccountCpi {
     payer: payer.clone(),
     account: account.clone(),
     mint: mint.clone(),
@@ -233,7 +233,7 @@ let account_infos = CreateCTokenAccountInfos {
 };
 
 let signer_seeds: &[&[u8]] = &[TOKEN_ACCOUNT_SEED, &[bump]];
-account_infos.invoke_signed(&[signer_seeds])?;
+account_cpi.invoke_signed(&[signer_seeds])?;
 ```
 
 </Tab>
@@ -250,7 +250,7 @@ Find the source code [here](https://github.com/Lightprotocol/light-protocol/blob
 
 ```rust expandable
 use borsh::{BorshDeserialize, BorshSerialize};
-use light_ctoken_sdk::ctoken::{CompressibleParamsInfos, CreateCTokenAccountInfos};
+use light_ctoken_sdk::ctoken::{CompressibleParamsCpi, CreateCTokenAccountCpi};
 use solana_program::{account_info::AccountInfo, program_error::ProgramError, pubkey::Pubkey};
 
 use crate::{ID, TOKEN_ACCOUNT_SEED};
@@ -285,14 +285,14 @@ pub fn process_create_token_account_invoke(
     }
 
     // Build the compressible params using constructor
-    let compressible_params = CompressibleParamsInfos::new(
+    let compressible_params = CompressibleParamsCpi::new(
         accounts[3].clone(),
         accounts[5].clone(),
         accounts[4].clone(),
     );
 
     // Build the account infos struct
-    CreateCTokenAccountInfos {
+    CreateCTokenAccountCpi {
         payer: accounts[0].clone(),
         account: accounts[1].clone(),
         mint: accounts[2].clone(),
@@ -330,14 +330,14 @@ pub fn process_create_token_account_invoke_signed(
     }
 
     // Build the compressible params using constructor
-    let compressible_params = CompressibleParamsInfos::new(
+    let compressible_params = CompressibleParamsCpi::new(
         accounts[3].clone(),
         accounts[5].clone(),
         accounts[4].clone(),
     );
 
     // Build the account infos struct
-    let account_infos = CreateCTokenAccountInfos {
+    let account_cpi = CreateCTokenAccountCpi {
         payer: accounts[0].clone(),
         account: accounts[1].clone(),
         mint: accounts[2].clone(),
@@ -347,7 +347,7 @@ pub fn process_create_token_account_invoke_signed(
 
     // Invoke with PDA signing
     let signer_seeds: &[&[u8]] = &[TOKEN_ACCOUNT_SEED, &[bump]];
-    account_infos.invoke_signed(&[signer_seeds])?;
+    account_cpi.invoke_signed(&[signer_seeds])?;
 
     Ok(())
 }

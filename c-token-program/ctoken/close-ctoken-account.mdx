@@ -19,9 +19,9 @@ import ClientCustomRentConfig from '/snippets/ctoken-guides/client-custom-rent-c
 <Tab title="Rust Client">
 
 1. The example creates a test c-Mint and c-token account.
-2. Build the instruction with `CloseAccount`:
+2. Build the instruction with `CloseCTokenAccount`:
 ```rust
-let close_instruction = CloseAccount::new(
+let close_instruction = CloseCTokenAccount::new(
     CTOKEN_PROGRAM_ID,
     account.pubkey(),
     payer.pubkey(), // Destination for remaining lamports
@@ -45,11 +45,11 @@ let close_instruction = CloseAccount::new(
 use borsh::BorshDeserialize;
 use light_client::indexer::{AddressWithTree, Indexer};
 use light_client::rpc::Rpc;
-use light_compressed_token_sdk::ctoken::{
-    CloseAccount, CreateCMint, CreateCMintParams, CreateCTokenAccount,
+use light_ctoken_sdk::ctoken::{
+    CloseCTokenAccount, CreateCMint, CreateCMintParams, CreateCTokenAccount,
     CTOKEN_PROGRAM_ID,
 };
-use light_ctoken_types::state::CToken;
+use light_ctoken_sdk::CToken;
 use light_program_test::{LightProgramTest, ProgramTestConfig};
 use solana_sdk::{pubkey::Pubkey, signature::Keypair, signer::Signer};
 
@@ -98,7 +98,7 @@ async fn test_close_ctoken_account() {
     assert_eq!(ctoken_state.amount, 0, "Account balance must be 0 to close");
 
     // Step 5: Build close instruction using SDK builder
-    let close_instruction = CloseAccount::new(
+    let close_instruction = CloseCTokenAccount::new(
         CTOKEN_PROGRAM_ID,
         account.pubkey(),
         payer.pubkey(), // Destination for remaining lamports
@@ -129,13 +129,13 @@ pub async fn create_compressed_mint<R: Rpc + Indexer>(
     let output_queue = rpc.get_random_state_tree_info().unwrap().queue;
 
     // Derive compression address
-    let compression_address = light_compressed_token_sdk::ctoken::derive_compressed_mint_address(
+    let compression_address = light_ctoken_sdk::ctoken::derive_cmint_compressed_address(
         &mint_signer.pubkey(),
         &address_tree.tree,
     );
 
     let mint_pda =
-        light_compressed_token_sdk::ctoken::find_spl_mint_address(&mint_signer.pubkey()).0;
+        light_ctoken_sdk::ctoken::find_cmint_address(&mint_signer.pubkey()).0;
 
     // Get validity proof for the address
     let rpc_result = rpc
@@ -202,9 +202,9 @@ Find [a full code example at the end](#full-code-example).
 <Tab title="invoke (External Signer)">
 
 ```rust
-use light_compressed_token_sdk::ctoken::CloseAccountInfos;
+use light_ctoken_sdk::ctoken::CloseCTokenAccountCpi;
 
-CloseAccountInfos {
+CloseCTokenAccountCpi {
     token_program: token_program.clone(),
     account: account.clone(),
     destination: destination.clone(),
@@ -218,9 +218,9 @@ CloseAccountInfos {
 <Tab title="invoke_signed (PDA Owner)">
 
 ```rust
-use light_compressed_token_sdk::ctoken::CloseAccountInfos;
+use light_ctoken_sdk::ctoken::CloseCTokenAccountCpi;
 
-let close_account_infos = CloseAccountInfos {
+let close_account_cpi = CloseCTokenAccountCpi {
     token_program: token_program.clone(),
     account: account.clone(),
     destination: destination.clone(),
@@ -229,7 +229,7 @@ let close_account_infos = CloseAccountInfos {
 };
 
 let signer_seeds: &[&[u8]] = &[TOKEN_ACCOUNT_SEED, &[bump]];
-close_account_infos.invoke_signed(&[signer_seeds])?;
+close_account_cpi.invoke_signed(&[signer_seeds])?;
 ```
 
 </Tab>
@@ -249,7 +249,7 @@ Find the source code [here](https://github.com/Lightprotocol/light-protocol/blob
 </Info>
 
 ```rust expandable
-use light_ctoken_sdk::ctoken::CloseAccountInfos;
+use light_ctoken_sdk::ctoken::CloseCTokenAccountCpi;
 use solana_program::{account_info::AccountInfo, program_error::ProgramError, pubkey::Pubkey};
 
 use crate::{ID, TOKEN_ACCOUNT_SEED};
@@ -273,7 +273,7 @@ pub fn process_close_account_invoke(accounts: &[AccountInfo]) -> Result<(), Prog
         None
     };
 
-    CloseAccountInfos {
+    CloseCTokenAccountCpi {
         token_program: accounts[0].clone(),
         account: accounts[1].clone(),
         destination: accounts[2].clone(),
@@ -313,7 +313,7 @@ pub fn process_close_account_invoke_signed(accounts: &[AccountInfo]) -> Result<(
     };
 
     let signer_seeds: &[&[u8]] = &[TOKEN_ACCOUNT_SEED, &[bump]];
-    CloseAccountInfos {
+    CloseCTokenAccountCpi {
         token_program: accounts[0].clone(),
         account: accounts[1].clone(),
         destination: accounts[2].clone(),
