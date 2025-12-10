@@ -7,21 +7,21 @@ import CompressibleRentExplained from '/snippets/compressible-rent-explained.mdx
 import { RentLifecycleVisualizer } from '/snippets/jsx/rent-lifecycle-visualizer.jsx';
 
 
-#### What is c-token?
-c-token is like SPL token stored more efficiently to reduce account creation cost.
-Users receive and 
+#### What is light-token?
+Light-token is like SPL token stored more efficiently to reduce account creation cost.
+Users receive and send the same tokens.
 
-|  Creation Cost         | SPL  | c-Token      |
-|:---------------------|:------------------|:----------------------|
-| **Token Account**   | 	  ~2,000,000 lamports         | ~**17,000** lamports     |
+| Creation Cost        | SPL               | Light            |
+|:---------------------|:------------------|:-------------------|
+| **Mint Account**    | ~1,500,000 lamports        | **15,000** lamports     |
+| **Token Account**    | ~2,000,000 lamports | ~**17,000** lamports |
 
-
-#### Is c-token live on mainnet & audited?
-c-token is currently deployed on devnet and undergoing security audits. 
-<br/>ETA: End of Q1 2026.
+#### Is light-token live on mainnet & audited?
+Light-token is currently deployed on devnet and undergoing security audits. 
+<br/>Mainnet ETA: End of Q1 2026.
 
 #### Do I need to change my client code significantly?
-No. The c-token SDK follows similar patterns to SPL.
+No. The `light-token-sdk` follows similar patterns to SPL.
 
 <CodeCompare
   firstCode={`// Create SPL token account
