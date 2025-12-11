@@ -12,7 +12,7 @@
     "default": "light"
   },
   "banner": {
-    "content": "Light Token is live on Devnet. <a href=\"/light-token/README\" style=\"color:#FFFFFF; text-decoration: underline;\">Start testing and create mints or tokens</a> without rent-exemption!",
+    "content": "The Light-Token Standard is live on Devnet. <a href=\"/light-token/README\" style=\"color:#FFFFFF; text-decoration: underline;\">Start testing and create mints or tokens</a>!",
     "dismissible": false
   },
   "navigation": {
