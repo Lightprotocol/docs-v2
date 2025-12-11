@@ -12,7 +12,7 @@
     "default": "light"
   },
   "banner": {
-    "content": "c-Token is live on Devnet. <a href=\"/c-token-program/README\" style=\"color:#FFFFFF; text-decoration: underline;\">Start testing and create mints or tokens</a> without rent-exemption!",
+    "content": "Light Token is live on Devnet. <a href=\"/light-token/README\" style=\"color:#FFFFFF; text-decoration: underline;\">Start testing and create mints or tokens</a> without rent-exemption!",
     "dismissible": false
   },
   "navigation": {
@@ -29,44 +29,32 @@
             ]
           },
           {
-            "group": "c-Token (Beta)",
+            "group": "Light-Token Standard (Beta)",
             "pages": [
-              "c-token-program/README",
-              "c-token-program/ctoken-faq",
+              "light-token/README",
+              "light-token/faq",
               {
                 "group": "Cookbook",
                 "pages": [
-                  {
-                    "group": "c-Mint",
-                    "expanded": true,
-                    "pages": [
-                      "c-token-program/cmint/create-cmint",
-                      "c-token-program/cmint/mint-ctokens"
-                    ]
-                  },
-                  {
-                    "group": "c-Token",
-                    "expanded": true,
-                    "pages": [
-                      "c-token-program/ctoken/create-ctoken",
-                      "c-token-program/ctoken/create-cata",
-                      "c-token-program/ctoken/transfer-interface",
-                      "c-token-program/ctoken/close-ctoken-account"
-                    ]
-                  }
+                  "light-token/cookbook/create-mint",
+                  "light-token/cookbook/create-ata",
+                  "light-token/cookbook/create-token-account",
+                  "light-token/cookbook/mint-tokens",
+                  "light-token/cookbook/transfer-interface",
+                  "light-token/cookbook/close-token-account"
                 ]
               },
               {
                 "group": "Toolkits",
                 "expanded": true,
                 "pages": [
-                  "c-token-program/c-token-toolkits/for-payments",
-                  "c-token-program/c-token-toolkits/for-wallets",
-                  "c-token-program/c-token-toolkits/for-dexs",
-                  "c-token-program/c-token-toolkits/for-launchpads",
-                  "c-token-program/c-token-toolkits/for-trading-apps",
-                  "c-token-program/c-token-toolkits/for-streaming-mints",
-                  "c-token-program/c-token-toolkits/for-streaming-tokens"
+                  "light-token/toolkits/for-payments",
+                  "light-token/toolkits/for-wallets",
+                  "light-token/toolkits/for-dexs",
+                  "light-token/toolkits/for-launchpads",
+                  "light-token/toolkits/for-trading-apps",
+                  "light-token/toolkits/for-streaming-mints",
+                  "light-token/toolkits/for-streaming-tokens"
                 ]
               }
             ]

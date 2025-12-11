@@ -16,7 +16,7 @@ import ClientCustomRentConfig from '/snippets/ctoken-guides/client-custom-rent-c
       <td style={{width: '33%'}}>**light-token -> light-token Account**</td>
       <td>
         <ul>
-          <li>Transfers light-tokens between light-token accounts</li>
+          <li>Transfers tokens between light-token accounts</li>
         </ul>
       </td>
     </tr>
@@ -26,7 +26,7 @@ import ClientCustomRentConfig from '/snippets/ctoken-guides/client-custom-rent-c
         <ul>
           <li>Transfers SPL tokens to light-token accounts</li>
           <li>SPL tokens are locked in interface PDA</li>
-          <li>light-tokens are minted to light-token account</li>
+          <li>Tokens are minted to light-token account</li>
         </ul>
       </td>
     </tr>
@@ -35,7 +35,7 @@ import ClientCustomRentConfig from '/snippets/ctoken-guides/client-custom-rent-c
       <td>
         <ul>
           <li>Releases SPL tokens from interface PDA to SPL account</li>
-          <li>Burns light-tokens in source light-token account</li>
+          <li>Burns tokens in source light-token account</li>
         </ul>
       </td>
     </tr>
@@ -43,8 +43,8 @@ import ClientCustomRentConfig from '/snippets/ctoken-guides/client-custom-rent-c
 </table>
 
 <Tip>
-* For example, **SPL -> light-token** can be used for transfers from Alice's SPL token account to her own light-token account.
-* You can use this to **convert existing SPL tokens to light-tokens** with **sponsored rent-exemption**.
+* For example, **SPL -> light-token account** can be used for transfers from Alice's SPL token account to her own light-token account.
+* You can use this to use the **sponsored rent-exemption for existing SPL tokens**.
 </Tip>
 
 # Get Started
@@ -53,7 +53,13 @@ import ClientCustomRentConfig from '/snippets/ctoken-guides/client-custom-rent-c
 
 <Tab title="TypeScript Client">
 
-The example transfers light-tokens between light-token accounts.
+ADD mint for light-token accounts EXAMPLE
+
+
+The example transfers SPL tokens to light-token accounts and light-tokens between light-token accounts:
+1. Create SPL mint with token pool and mint SPL tokens
+2. Send SPL tokens to light-token account via `compress()`
+3. Transfer light-tokens to another light-token account via `transferInterface()`
 
 <Steps>
 <Step>
@@ -66,91 +72,133 @@ The example transfers light-tokens between light-token accounts.
 
 <Step>
 
-### Transfer light-tokens
+### Transfer Interface
 
-<Tabs>
-<Tab title="Action">
+```typescript transfer-spl-to-ctoken-to-ctoken.ts expandable
+// 1. Setup funded payer and connect to local validator
+// 2. Create SPL mint with token pool and mint SPL tokens
+// 3. Compress SPL → light-token
+// 4. Transfer light-token → light-token
 
-```typescript
+import { Keypair } from "@solana/web3.js";
 import { createRpc } from "@lightprotocol/stateless.js";
+import { createMint, compress } from "@lightprotocol/compressed-token";
 import {
+  getOrCreateAtaInterface,
   getAssociatedTokenAddressInterface,
   transferInterface,
 } from "@lightprotocol/compressed-token/unified";
-
-const rpc = createRpc(RPC_ENDPOINT);
-
-const sourceAta = getAssociatedTokenAddressInterface(mint, owner.publicKey);
-const destinationAta = getAssociatedTokenAddressInterface(mint, recipient);
-
-await transferInterface(
-  rpc,
-  payer,
-  sourceAta,
-  mint,
-  destinationAta,
-  owner,
-  amount
-);
-```
-
-To ensure the recipient's ATA exists, prepend an idempotent creation instruction:
-
-```typescript
 import {
-  getAssociatedTokenAddressInterface,
-  createAssociatedTokenAccountInterfaceIdempotentInstruction,
-} from "@lightprotocol/compressed-token/unified";
-import { CTOKEN_PROGRAM_ID } from "@lightprotocol/stateless.js";
+  getOrCreateAssociatedTokenAccount,
+  mintTo as splMintTo,
+  TOKEN_PROGRAM_ID,
+} from "@solana/spl-token";
 
-const destinationAta = getAssociatedTokenAddressInterface(mint, recipient);
-const createAtaIx = createAssociatedTokenAccountInterfaceIdempotentInstruction(
-  payer.publicKey,
-  destinationAta,
-  recipient,
-  mint,
-  CTOKEN_PROGRAM_ID
-);
+async function transferSplToCtokenToCtoken() {
+  // Step 1: Setup funded payer and connect to local validator
+  const rpc = createRpc(); // defaults to localhost:8899
+  const payer = Keypair.generate();
+  const airdropSignature = await rpc.requestAirdrop(payer.publicKey, 1e9);
+  await rpc.confirmTransaction(airdropSignature);
 
-new Transaction().add(createAtaIx, transferIx);
-```
+  const sender = Keypair.generate();
+  await rpc.confirmTransaction(
+    await rpc.requestAirdrop(sender.publicKey, 1e9)
+  );
 
-</Tab>
-<Tab title="Instruction">
+  // Step 2: Create SPL mint with token pool and mint SPL tokens
+  const { mint } = await createMint(rpc, payer, payer.publicKey, 9);
+  console.log("Mint with token pool created:", mint.toBase58());
 
-```typescript
-import { createRpc } from "@lightprotocol/stateless.js";
-import {
-  createLoadAtaInstructions,
-  createTransferInterfaceInstruction,
-  getAssociatedTokenAddressInterface,
-} from "@lightprotocol/compressed-token/unified";
-import { Transaction } from "@solana/web3.js";
+  const initialAmount = 10000n;
+  const splToCtokenAmount = 7000n;
+  const ctokenTransferAmount = 3000n;
 
-const rpc = createRpc(RPC_ENDPOINT);
-
-const sourceAta = getAssociatedTokenAddressInterface(mint, owner.publicKey);
-const destinationAta = getAssociatedTokenAddressInterface(mint, recipient);
-
-const tx = new Transaction().add(
-  ...(await createLoadAtaInstructions(
+  // Create SPL token account and mint tokens
+  const splTokenAccount = await getOrCreateAssociatedTokenAccount(
     rpc,
-    sourceAta,
-    owner.publicKey,
+    payer,
     mint,
-    payer.publicKey
-  )),
-  createTransferInterfaceInstruction(
-    sourceAta,
-    destinationAta,
-    owner.publicKey,
-    amount
-  )
-);
-```
+    sender.publicKey,
+    false,
+    TOKEN_PROGRAM_ID
+  );
 
-</Tab>
-</Tabs>
+  await splMintTo(
+    rpc,
+    payer,
+    mint,
+    splTokenAccount.address,
+    payer,
+    initialAmount,
+    [],
+    undefined,
+    TOKEN_PROGRAM_ID
+  );
+  console.log("SPL tokens minted:", initialAmount.toString());
+
+  // Step 3: Compress SPL → light-token (7000 tokens)
+  // Create sender light-token ATA
+  await getOrCreateAtaInterface(rpc, payer, mint, sender.publicKey);
+  const senderCtokenAta = getAssociatedTokenAddressInterface(
+    mint,
+    sender.publicKey
+  );
+
+  // Compress: locks SPL tokens in pool, mints light-tokens to ATA
+  await compress(
+    rpc,
+    payer,
+    mint,
+    splToCtokenAmount,
+    sender,
+    splTokenAccount.address,
+    sender.publicKey
+  );
+  console.log("Compressed SPL → light-token:", splToCtokenAmount.toString());
+
+  // Step 4: Transfer light-token → light-token accounts
+  const recipient = Keypair.generate();
+
+  // Create recipient light-token ATA
+  await getOrCreateAtaInterface(rpc, payer, mint, recipient.publicKey);
+  const recipientCtokenAta = getAssociatedTokenAddressInterface(
+    mint,
+    recipient.publicKey
+  );
+
+  // Transfer light-tokens
+  await transferInterface(
+    rpc,
+    payer,
+    senderCtokenAta,
+    mint,
+    recipientCtokenAta,
+    sender,
+    ctokenTransferAmount
+  );
+
+  // Step 5: Verify balances
+  const senderAtaInfo = await rpc.getAccountInfo(senderCtokenAta);
+  const recipientAtaInfo = await rpc.getAccountInfo(recipientCtokenAta);
+
+  console.log("\nFinal balances:");
+  console.log(
+    "Sender light-token balance:",
+    (splToCtokenAmount - ctokenTransferAmount).toString()
+  );
+  console.log(
+    "Recipient light-token balance:",
+    ctokenTransferAmount.toString()
+  );
+  console.log(
+    "SPL account remaining:",
+    (initialAmount - splToCtokenAmount).toString()
+  );
+}
+
+transferSplToCtokenToCtoken().catch(console.error);
+```
 
 </Step>
 </Steps>
@@ -578,6 +626,6 @@ pub fn process_transfer_interface_invoke_signed(
     title="Learn how to close light-token accounts"
     icon="chevron-right"
     color="#0066ff"
-    href="/c-token-program/ctoken/close-ctoken-account"
+    href="/light-token/cookbook/close-token-account"
     horizontal
   />

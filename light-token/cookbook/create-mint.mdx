@@ -1,6 +1,7 @@
 ---
-title: Create light-mint
-description: Program and client guide to create a light-mint with token metadata via CPI to the light-token Program. Includes step-by-step implementation and full code examples.
+title: Create Mint Account wih Token Metadata
+sidebarTitle: Create Mint Account
+description: Program and client guides to create a mint with token metadata. Includes step-by-step implementation and full code examples.
 ---
 
 import CMintSystemAccountsList from '/snippets/accounts-list/cmint-system-accounts-list.mdx';
@@ -9,10 +10,10 @@ import CTokenTsClientPrerequisites from '/snippets/ctoken-guides/ctoken-ts-clien
 import ClientCustomRentConfig from '/snippets/ctoken-guides/client-custom-rent-config.mdx';
 
 1. Mint accounts uniquely represent a token on Solana and store its global metadata.
-2. Light-mints are compressed accounts and rent-free.
+2. Mints for light-token accounts are compressed accounts and rent-free.
 
 <Info>
-Learn the [core concepts to the light-token Program here](/c-token-program/README.mdx).
+Learn the [core concepts to the light-token standard here](/light-token/README).
 </Info>
 
 # Get Started
@@ -20,8 +21,6 @@ Learn the [core concepts to the light-token Program here](/c-token-program/READM
 <Tabs>
 
 <Tab title="TypeScript Client">
-
-The example creates a light-mint with the specified decimals and mint authority.
 
 <Steps>
 <Step>
@@ -34,7 +33,7 @@ The example creates a light-mint with the specified decimals and mint authority.
 
 <Step>
 
-### Create light-mint
+### Create Mint Account
 
 ```typescript
 import { createRpc } from "@lightprotocol/stateless.js";
@@ -648,10 +647,10 @@ pub fn process_create_cmint_with_pda_authority(
 # Next Steps
 
 <Card
-  title="Learn how to mint light-tokens"
+  title="Learn how to mint tokens to light-token accounts."
   icon="chevron-right"
   color="#0066ff"
-  href="/c-token-program/cmint/mint-ctokens"
+  href="/light-token/cookbook/mint-tokens"
   horizontal
 />
 

@@ -1,7 +1,7 @@
 ---
-title: Close Light-Token Accounts
-sidebarTitle: Close Token Accounts
-description: Program guide to close light-token accounts via CPI to the light-token Program with step-by-step implementation and full code examples.
+title: Close Light-Token Account
+sidebarTitle: Close Token Account
+description: Program guide to close light-token accounts via CPI. Includes step-by-step implementation and full code examples.
 ---
 
 import CloseAccountInfosAccountsList from '/snippets/accounts-list/close-account-infos-accounts-list.mdx';
@@ -9,7 +9,7 @@ import CTokenClientPrerequisites from '/snippets/ctoken-guides/ctoken-client-pre
 import ClientCustomRentConfig from '/snippets/ctoken-guides/client-custom-rent-config.mdx';
 
 1. Closing a light-token account transfers remaining lamports to a destination account and the rent sponsor can reclaim sponsored rent.
-2. light-token accounts can be closed
+2. Light-token accounts can be closed
     * by the account owner at any time.
     * by the <Tooltip tip="The `compression_authority` is a PDA of the Light Registry program. It claims rent for the rent sponsor from compressible accounts that are compressed and closed.">`compression_authority`</Tooltip>
      when the account becomes <Tooltip tip="An account is compressible when it has rent for less than 1 epoch (360 lamports for a 260-byte light-token account).">compressible</Tooltip>. The account is <Tooltip tip="You can think of compressed light-token accounts as storage of inactive accounts that can be reactivated."> compressed and closed</Tooltip> - it can be reinstated with the same state (decompressed).
@@ -19,7 +19,7 @@ import ClientCustomRentConfig from '/snippets/ctoken-guides/client-custom-rent-c
 <Tabs>
 <Tab title="Rust Client">
 
-1. The example creates a test light-mint and light-token account.
+1. The example creates a light-token account and mint.
 2. Build the instruction with `CloseCTokenAccount`:
 ```rust
 let close_instruction = CloseCTokenAccount::new(
@@ -333,9 +333,9 @@ pub fn process_close_account_invoke_signed(accounts: &[AccountInfo]) -> Result<(
 # Next Steps
 
   <Card
-    title="Go back to the light-token overview"
+    title="Go back to the overview for the light-token standard."
     icon="chevron-right"
     color="#0066ff"
-    href="/c-token-program/README"
+    href="/light-token/README"
     horizontal
   />

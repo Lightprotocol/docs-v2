@@ -1,6 +1,7 @@
 ---
-title: Create Light-Token Accounts
-description: Program guide to create light-token accounts with step-by-step implementation and full code examples.
+title: Create Light-Token Account
+sidebarTitle: Create Token Account
+description: Client and program guide to create light-token accounts. Includes step-by-step implementation and full code examples.
 ---
 
 import CTokenCreateAccountsList from '/snippets/ctoken-create-accounts-list.mdx';
@@ -16,12 +17,12 @@ import ClientCustomRentConfig from '/snippets/ctoken-guides/client-custom-rent-c
 import CompressibleRentExplained from '/snippets/compressible-rent-explained.mdx';
 import CompressibleDefaultRentConfig from '/snippets/compressible-default-rent-config.mdx';
 
-1. Light-token accounts are Solana accounts that hold token balances of light-mints, SPL mints, or Token 2022 mints.
+1. Light-token accounts are Solana accounts that hold token balances of light, SPL, or Token 2022 mints.
 2. Light-token accounts implement a default rent config:
     1. At account creation, you pay ~17,208 lamports <Tooltip tip="24 h = 16 epochs, where 1 rent-epoch ≈ 1.5h ≈ 13,500 slots at 400ms per slot">for 24h of rent</Tooltip> <br/>and <Tooltip tip="Covers transaction cost to compress accounts (10,000) and protocol incentive (1,000). Transaction cost might vary.">compression incentive</Tooltip> (the rent-exemption is sponsored by the protocol)
     2. Transfers keep the account funded <Tooltip tip="2 epochs = 3h">with rent for 3h</Tooltip> via top-ups. The transaction payer tops up 776 lamports when the account's rent is below 3h.
 
-<Accordion title="Compressible Rent Explained">
+<Accordion title="Rent Config for Light-Token Accounts Explained">
 <CompressibleRentExplained />
 </Accordion>
 
@@ -32,7 +33,7 @@ import CompressibleDefaultRentConfig from '/snippets/compressible-default-rent-c
 <Tab title="Rust Client">
 
 
-1. The example creates a test light-mint. You can use existing light-mints, SPL or Token 2022 mints as well.
+1. The example creates a test mint for light-tokens. You can use existing light, SPL or Token 2022 mints as well.
 2. Build the instruction with `CreateCTokenAccount`. It automatically includes the default rent config.
 ```rust
 use light_ctoken_sdk::ctoken::{CreateCTokenAccount};
@@ -357,9 +358,9 @@ pub fn process_create_token_account_invoke_signed(
 </Tabs>
 # Next Steps
   <Card
-    title="Learn how to mint light-tokens"
+    title="Learn how to mint tokens to light-token accounts"
     icon="chevron-right"
     color="#0066ff"
-    href="/c-token-program/cmint/mint-ctokens"
+    href="/light-token/cookbook/mint-tokens"
     horizontal
   />

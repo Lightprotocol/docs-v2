@@ -1,6 +1,6 @@
 ---
 title: Mint to Light-Token Accounts
-description: Program guide to mint light-tokens to a light-mint via CPI to the Compressed Token Program with step-by-step implementation and full code examples.
+description: Client and program guide to mint tokens to a light-token account. Includes step-by-step implementation and full code examples.
 ---
 
 import CMintSystemAccountsList from '/snippets/accounts-list/cmint-system-accounts-list.mdx';
@@ -20,8 +20,6 @@ import ClientCustomRentConfig from '/snippets/ctoken-guides/client-custom-rent-c
 
 <Tab title="TypeScript Client">
 
-The example mints light-tokens to a recipient address.
-
 <Steps>
 <Step>
 
@@ -33,7 +31,7 @@ The example mints light-tokens to a recipient address.
 
 <Step>
 
-### Mint light-tokens
+### Mint to Light-Token Accounts
 
 ```typescript
 import { createRpc } from "@lightprotocol/stateless.js";
@@ -574,7 +572,7 @@ pub fn process_mint_to_ctoken_invoke_signed(
   title="Learn to use the transfer interface for light-token <> SPL token transfers"
   icon="chevron-right"
   color="#0066ff"
-  href="/c-token-program/ctoken/transfer-interface"
+  href="/light-token/cookbook/transfer-interface"
   horizontal
 >
 </Card>
