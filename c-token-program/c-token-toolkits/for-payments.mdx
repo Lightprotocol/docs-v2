@@ -85,9 +85,6 @@ import {
 const rpc = createRpc(RPC_ENDPOINT);
 ```
 
-<Steps>
-
-<Step>
 ### Receive Payments
 
 <Tabs>
@@ -179,9 +176,6 @@ const tx = new Transaction().add(
 </Tab>
 </Tabs>
 
-</Step>
-
-<Step>
 ### Send Payments
 
 <Tabs>
@@ -319,9 +313,6 @@ const tx = new Transaction().add(
 </Tab>
 </Tabs>
 
-</Step>
-
-<Step>
 ### Show Balance
 
 ```typescript
@@ -353,9 +344,6 @@ console.log(account.amount);
 
 </Accordion>
 
-</Step>
-
-<Step>
 ### Transaction History
 
 ```typescript
@@ -376,9 +364,6 @@ const signatures = await connection.getSignaturesForAddress(ata);
 
 </Accordion>
 
-</Step>
-
-<Step>
 ### Unwrap to SPL
 
 When users need vanilla SPL tokens (CEX withdrawal, legacy integration):
@@ -441,7 +426,3 @@ const tx = new Transaction().add(
 
 </Tab>
 </Tabs>
-
-</Step>
-
-</Steps>

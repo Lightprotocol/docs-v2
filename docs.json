@@ -62,7 +62,6 @@
                 "pages": [
                   "c-token-program/c-token-toolkits/for-payments",
                   "c-token-program/c-token-toolkits/for-wallets",
-                  "c-token-program/c-token-toolkits/for-aggregators",
                   "c-token-program/c-token-toolkits/for-dexs",
                   "c-token-program/c-token-toolkits/for-launchpads",
                   "c-token-program/c-token-toolkits/for-trading-apps",
