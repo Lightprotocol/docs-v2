@@ -7,7 +7,15 @@ import { CodeCompare } from '/snippets/jsx/code-compare.jsx';
 import CompressibleRentExplained from '/snippets/compressible-rent-explained.mdx';
 import { RentLifecycleVisualizer } from '/snippets/jsx/rent-lifecycle-visualizer.jsx';
 
-At the moment around XXX token accounts are created on a daily basis.
+Today we bring to you the light-token standard. A token standard with mint and token accounts equivalent to SPL, but without rent-exemption.
+Users receive and send the same tokens.
+From now on, you can create mints and tokens 
+1. at a fraction of the cost,
+2. with improved performance, and
+3. with similar developer experience.
+
+
+At the moment around XXX token accounts over 20k mint accounts are created on a daily basis.
 Many are created and rarely accessed.
 Still lock up SOL due to rent-exemption.
 There have been many discussions around how to solve rent on Solana (SIMD references).
@@ -15,12 +23,6 @@ There have been many discussions around how to solve rent on Solana (SIMD refere
 To truly scale Solana to 1 billion+ users the cost to store data must be near zero. 
 
 That's why we built light-token, which is like SPL token just stored more efficiently to reduce account creation cost. 
-Users receive and send the same tokens.
-From now on, you can create mints and tokens 
-1. at a fraction of the cost,
-2. with improved performance, and
-3. with similar developer experience.
-
 #### Mints and Tokens without Rent-Exemption
 
 | Creation Cost        | SPL               | Light            |
