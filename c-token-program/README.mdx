@@ -1,6 +1,6 @@
 ---
 title: Overview
-description: c-Token extends Solana's token standards with c-Mints and c-Tokens.
+description: The light-token standard extends Solana's SPL token standard. Users receive and send the same tokens.
 
 ---
 
@@ -17,11 +17,11 @@ import CTokenGuidesTable from '/snippets/overview-tables/ctoken-guides-table.mdx
 import CMintGuidesTable from '/snippets/overview-tables/cmint-guides-table.mdx';
 import IntegrateCTokenGuidesTable from '/snippets/overview-tables/integrate-ctoken-guides-table.mdx';
 
-1. c-Mints and c-Tokens are equivalents to SPL mints and tokens.
-2. The key difference is c-Mint and c-Token accounts do not require you to pay rent-exemption upon creation.
-3. c-Token accounts can hold token balances of c-Mints, SPL mints, or Token 2022 mints. SPL tokens can be converted to c-Tokens and back on demand.
+1. Light-mints and tokens are equivalents to SPL mints and tokens.
+2. The key difference is light-mint and token accounts do not require you to pay rent-exemption upon creation.
+3. Light-token accounts are interoperable with SPL and Token 2022 programs.
 
-|  Creation Cost         | SPL  | c-Token      |
+|  Creation Cost         | SPL  | Light      |
 |:---------------------|:------------------|:----------------------|
 | **Mint Account**    | ~1,500,000 lamports        | **15,000** lamports     |
 | **Token Account**   | 	  ~2,000,000 lamports         | ~**17,000** lamports     |
@@ -29,28 +29,19 @@ import IntegrateCTokenGuidesTable from '/snippets/overview-tables/integrate-ctok
 
 <CardGroup cols={2}>
   <Card title="" icon="coins">
-  ## c-Mint Accounts
+  # Mint Accounts
     * Uniquely represent a token and store its global metadata.
-    * c-Mints are compressed accounts and rent-free.
+    * light-mints are compressed accounts and rent-free.
   </Card>
   <Card title="" icon="wallet">
-  ## c-Token Accounts
-    * Each c-Token account can hold units of one c-Mint, SPL mint, or Token-2022 mint.
+  # Token Accounts
+    * Each light-token account can hold units of one light, SPL, or Token 2022 mint.
     * Custom rent config reduces account creation cost.
   </Card>
 </CardGroup>
 
 <Info>
 If you simply want to **distribute tokens**, please refer to [this page](/compressed-tokens).
-</Info>
-#### Rent Config for c-Tokens
-
-
-<CompressibleRentExplained />
-<RentLifecycleVisualizer />
-
-<Info>
-Learn the core concepts to the [c-Token program here](/learn/c-token-program).
 </Info>
 
 # Start building
@@ -95,16 +86,16 @@ const rpc = createRpc(RPC_ENDPOINT);
   </Step>
 </Steps>
 
-## Integrate c-Token
+## Integrate light-token
 
 <IntegrateCTokenGuidesTable />
 
 ## Cookbook
 
-### c-Mints
+### light-mints
 <CMintGuidesTable />
 
-### c-Tokens
+### light-tokens
 <CTokenGuidesTable />
 
 ## Examples
@@ -112,16 +103,16 @@ const rpc = createRpc(RPC_ENDPOINT);
 | Example | Description |
 |---------|-------------|
 | [create-cmint](https://github.com/Lightprotocol/program-examples/blob/main/c-token/tests/client-create-cmint.rs) | Create compressed mint with metadata |
-| [create-ctoken](https://github.com/Lightprotocol/program-examples/blob/main/c-token/tests/client-create-ctoken.rs) | Create c-Token account |
-| [create-cata](https://github.com/Lightprotocol/program-examples/blob/main/c-token/tests/client-create-cata.rs) | Create associated c-Token account |
-| [mint-to-ctoken](https://github.com/Lightprotocol/program-examples/blob/main/c-token/tests/client-mint-to-ctoken.rs) | Mint tokens to c-Token account |
-| [transfer-interface](https://github.com/Lightprotocol/program-examples/blob/main/c-token/tests/client-transfer-interface.rs) | Transfer between SPL and c-Token |
-| [close-ctoken](https://github.com/Lightprotocol/program-examples/blob/main/c-token/tests/client-close-ctoken.rs) | Close c-Token account |
+| [create-ctoken](https://github.com/Lightprotocol/program-examples/blob/main/c-token/tests/client-create-ctoken.rs) | Create light-token account |
+| [create-cata](https://github.com/Lightprotocol/program-examples/blob/main/c-token/tests/client-create-cata.rs) | Create associated light-token account |
+| [mint-to-ctoken](https://github.com/Lightprotocol/program-examples/blob/main/c-token/tests/client-mint-to-ctoken.rs) | Mint tokens to light-token account |
+| [transfer-interface](https://github.com/Lightprotocol/program-examples/blob/main/c-token/tests/client-transfer-interface.rs) | Transfer between SPL and light-token |
+| [close-ctoken](https://github.com/Lightprotocol/program-examples/blob/main/c-token/tests/client-close-ctoken.rs) | Close light-token account |
 
 # Next Steps
 
 <Card
-  title="Create c-Token accounts"
+  title="Create light-token accounts"
   icon="chevron-right"
   color="#0066ff"
   href="/c-token-program/ctoken/create-ctoken"

@@ -1,27 +1,69 @@
 ---
-title: Mint c-Tokens
-description: Program guide to mint c-Tokens to a c-Mint via CPI to the Compressed Token Program with step-by-step implementation and full code examples.
+title: Mint to Light-Token Accounts
+description: Program guide to mint light-tokens to a light-mint via CPI to the Compressed Token Program with step-by-step implementation and full code examples.
 ---
 
 import CMintSystemAccountsList from '/snippets/accounts-list/cmint-system-accounts-list.mdx';
 import CMintToCTokenAccountsList from '/snippets/accounts-list/cmint-to-ctoken-accounts-list.mdx';
 import CTokenClientPrerequisites from '/snippets/ctoken-guides/ctoken-client-prerequisites.mdx';
+import CTokenTsClientPrerequisites from '/snippets/ctoken-guides/ctoken-ts-client-prerequisites.mdx';
 import ClientCustomRentConfig from '/snippets/ctoken-guides/client-custom-rent-config.mdx';
 
 
-1. c-Tokens increase the supply of a c-Mint.
-2. The destination c-Token accounts must exist to receive the minted c-Tokens.
-3. Only the mint authority can mint new c-Tokens.
+1. Minting to light-token accounts increases the supply of a mint.
+2. The destination token accounts must exist to receive the minted tokens.
+3. Only the mint authority can mint new tokens to light-token accounts.
 
 # Get Started
 
 <Tabs>
+
+<Tab title="TypeScript Client">
+
+The example mints light-tokens to a recipient address.
+
+<Steps>
+<Step>
+
+### Prerequisites
+
+<CTokenTsClientPrerequisites />
+
+</Step>
+
+<Step>
+
+### Mint light-tokens
+
+```typescript
+import { createRpc } from "@lightprotocol/stateless.js";
+import { mintTo } from "@lightprotocol/compressed-token";
+
+const rpc = createRpc(RPC_ENDPOINT);
+
+const transactionSignature = await mintTo(
+  rpc,
+  payer,
+  mint, // light-mint address
+  recipient, // destination address
+  mintAuthority, // mint authority keypair
+  amount // amount to mint
+);
+
+console.log("Minted light-tokens:", transactionSignature);
+```
+
+</Step>
+</Steps>
+
+</Tab>
+
 <Tab title="Rust Client">
 
-The example mints c-Tokens to existing c-Token accounts.
-1. Prerequisite: The example creates a test c-Mint and destination c-Token account.
-2. Get c-Mint account infos and prove it exists <Tooltip tip="c-Mints are compressed accounts. Compressed accounts are stored in state Merkle trees. Only the root hash is stored on chain - every transaction that accesses the c-Mint includes a validity proof to verify the compressed state.">with a validity proof</Tooltip>..
-3. Set the amount of tokens you will mint and the mint authority. Only the mint authority can mint new c-Tokens.
+The example mints light-tokens to existing light-token accounts.
+1. Prerequisite: The example creates a test light-mint and destination light-token account.
+2. Get light-mint account infos and prove it exists <Tooltip tip="light-mints are compressed accounts. Compressed accounts are stored in state Merkle trees. Only the root hash is stored on chain - every transaction that accesses the light-mint includes a validity proof to verify the compressed state.">with a validity proof</Tooltip>..
+3. Set the amount of tokens you will mint and the mint authority. Only the mint authority can mint new light-tokens.
 4. Build the instruction with `MintToCToken::new()` and send the transaction.
 ```rust
 use light_ctoken_sdk::ctoken::MintToCToken;
@@ -46,7 +88,7 @@ let instruction = MintToCToken::new(
 </Step>
 
 <Step>
-### Mint c-Tokens
+### Mint light-tokens
 
 ```rust
 use borsh::BorshDeserialize;
@@ -245,7 +287,7 @@ Find [a full code example at the end](#full-code-example).
 
 ### Configure Mint Parameters
 Include your mint, the amount of tokens to be minted and the pubkey of the mint authority. 
-The client passes a validity proof that <Tooltip tip="c-Mints are compressed accounts. Compressed accounts are stored in state Merkle trees. Only the root hash is stored on chain - every transaction that accesses the c-Mint includes a validity proof to verify the compressed state.">proves the c-Mint exists</Tooltip>.
+The client passes a validity proof that <Tooltip tip="light-mints are compressed accounts. Compressed accounts are stored in state Merkle trees. Only the root hash is stored on chain - every transaction that accesses the light-mint includes a validity proof to verify the compressed state.">proves the light-mint exists</Tooltip>.
 
 ```rust
 use light_ctoken_sdk::ctoken::MintToCTokenParams;
@@ -265,7 +307,7 @@ let params = MintToCTokenParams::new(
 
 ### System Accounts
 
-Compressed accounts like c-Mints require system accounts like the Light System Program account for interactions and proof verification. 
+Compressed accounts like light-mints require system accounts like the Light System Program account for interactions and proof verification. 
 The client includes them in the instruction.
 
 <Accordion title="System Accounts List">
@@ -289,9 +331,9 @@ let system_accounts = SystemAccountInfos {
 
 <Step>
 
-### Build Account Infos and CPI the c-Token Program
+### Build Account Infos and CPI the light-token Program
 
-1. Pass the required accounts, including the destination c-Token accounts.
+1. Pass the required accounts, including the destination light-token accounts.
 2. Include `params` and `system_accounts` from the previous steps
 3. Use `invoke` or `invoke_signed`, when a CPI requires a PDA signer.
 <Tabs>
@@ -529,7 +571,7 @@ pub fn process_mint_to_ctoken_invoke_signed(
 # Next Steps
 
 <Card
-  title="Learn to use the transfer interface for c-Token <> SPL token transfers"
+  title="Learn to use the transfer interface for light-token <> SPL token transfers"
   icon="chevron-right"
   color="#0066ff"
   href="/c-token-program/ctoken/transfer-interface"

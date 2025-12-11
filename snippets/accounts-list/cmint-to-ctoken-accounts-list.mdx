@@ -15,7 +15,7 @@
     <tr>
       <td style={{textAlign: 'left'}}><strong>Authority</strong></td>
       <td>signer</td>
-      <td>The mint authority. Must match the cMint's mint authority.</td>
+      <td>The mint authority. Must match the light-mint's mint authority.</td>
     </tr>
     <tr>
       <td style={{textAlign: 'left'}}><strong>Payer</strong></td>
@@ -25,22 +25,22 @@
     <tr>
       <td style={{textAlign: 'left'}}><strong>State Tree</strong></td>
       <td>mutable</td>
-      <td>Account of the state Merkle tree storing the cMint.</td>
+      <td>Account of the state Merkle tree storing the light-mint.</td>
     </tr>
     <tr>
       <td style={{textAlign: 'left'}}><strong>Input Queue</strong></td>
       <td>mutable</td>
-      <td>Account of the input queue associated with the state tree the cMint is stored in. The existing hash of the cMint is <Tooltip tip="A Forester node asynchronously nullifies the leaf in the state tree.">inserted to this queue</Tooltip> to mark it as spent.</td>
+      <td>Account of the input queue associated with the state tree the light-mint is stored in. The existing hash of the light-mint is <Tooltip tip="A Forester node asynchronously nullifies the leaf in the state tree.">inserted to this queue</Tooltip> to mark it as spent.</td>
     </tr>
     <tr>
       <td style={{textAlign: 'left'}}><strong>Output Queue</strong></td>
       <td>mutable</td>
-      <td>Account of the output queue associated with the state tree the cMint will be stored in. The updated hash of the cMint is <Tooltip tip="A Forester node asynchronously appends the leaf to the state tree.">inserted to this queue</Tooltip>.</td>
+      <td>Account of the output queue associated with the state tree the light-mint will be stored in. The updated hash of the light-mint is <Tooltip tip="A Forester node asynchronously appends the leaf to the state tree.">inserted to this queue</Tooltip>.</td>
     </tr>
     <tr>
-      <td style={{textAlign: 'left'}}><strong>c-Token Accounts</strong></td>
+      <td style={{textAlign: 'left'}}><strong>light-token Accounts</strong></td>
       <td>mutable</td>
-      <td>Destination c-Token Solana accounts to receive minted tokens.</td>
+      <td>Destination light-token Solana accounts to receive minted tokens.</td>
     </tr>
     <tr>
       <td style={{textAlign: 'left'}}><strong>System Accounts</strong></td>

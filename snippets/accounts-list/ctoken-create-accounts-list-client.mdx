@@ -28,8 +28,8 @@
       <td style={{textAlign: 'left'}}><strong>Token Account</strong></td>
       <td>signer*, mutable</td>
       <td>
-        - The c-Token account being created.<br/>
-        - *Must be signer for `invoke()`. 
+        - The light-token account being created.<br/>
+        - *Must be signer for `invoke()`.
         - *For `invoke_signed()`, program signs via PDA seeds.
       </td>
     </tr>
@@ -37,7 +37,7 @@
       <td>2</td>
       <td style={{textAlign: 'left'}}><strong>Mint</strong></td>
       <td>-</td>
-      <td>The SPL or cMint token mint. Defines which token this account holds.</td>
+      <td>The SPL or light-mint token mint. Defines which token this account holds.</td>
     </tr>
     <tr>
       <td>3</td>
@@ -55,20 +55,20 @@
     </tr>
     <tr>
       <td>5</td>
-      <td style={{textAlign: 'left'}}><strong><Tooltip tip="CToken program PDA that manages rent for compressible accounts.">Rent Sponsor</Tooltip></strong></td>
+      <td style={{textAlign: 'left'}}><strong><Tooltip tip="light-token program PDA that manages rent for compressible accounts.">Rent Sponsor</Tooltip></strong></td>
       <td>mutable</td>
       <td>
-        - CToken program PDA that fronts rent exemption at creation.<br/>
+        - light-token program PDA that fronts rent exemption at creation.<br/>
         - Claims rent when account compresses.
       </td>
     </tr>
     <tr>
       <td>6</td>
-      <td style={{textAlign: 'left'}}><strong><Tooltip tip="cTokenpN6n8uj2gwJJszLDaeMpJt6aVqGbPWLJbvTFg2" cta="Program ID" href="https://solscan.io/account/cTokenpN6n8uj2gwJJszLDaeMpJt6aVqGbPWLJbvTFg2">c-Token Program</Tooltip></strong></td>
+      <td style={{textAlign: 'left'}}><strong><Tooltip tip="cTokenpN6n8uj2gwJJszLDaeMpJt6aVqGbPWLJbvTFg2" cta="Program ID" href="https://solscan.io/account/cTokenpN6n8uj2gwJJszLDaeMpJt6aVqGbPWLJbvTFg2">light-token Program</Tooltip></strong></td>
       <td>-</td>
       <td>
-      - Program to create and interact with cMints, c-Tokens and compressed tokens.
-      - Your program calls this to create the c-Token account.
+      - Program to create and interact with light-mints, light-tokens and compressed tokens.
+      - Your program calls this to create the light-token account.
       </td>
     </tr>
   </tbody>

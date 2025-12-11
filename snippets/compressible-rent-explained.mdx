@@ -1,8 +1,8 @@
-1. The rent-exemption for c-Token account creation is sponsored by Light Protocol.
+1. The rent-exemption for light-token account creation is sponsored by Light Protocol.
 2. Transaction payer's pay rent <Tooltip tip="1 rent-epoch ≈ 1.5h ≈ 13,500 slots at 400ms per slot">per rent-epoch (388 lamports for 1.5h)</Tooltip> <br/> 
 to keep accounts "active".
 3. "Inactive" accounts, where rent is below one epoch, are compressed <br/>and the rent-exemption can be claimed by the rent sponsor.
-4. Transfers to inactive accounts <Tooltip tip="Compressed state is stored in leaves of Merkle trees (≃ disk). c-Token accounts are Solana accounts that store state on chain (≃ RAM). Load means to load state from 'disk' to 'RAM', i.e. decompress accounts.">"load" it with the same state </Tooltip> (decompress).
+4. Transfers to inactive accounts <Tooltip tip="Compressed state is stored in leaves of Merkle trees (≃ disk). light-token accounts are Solana accounts that store state on chain (≃ RAM). Load means to load state from 'disk' to 'RAM', i.e. decompress accounts.">"load" it with the same state </Tooltip> (decompress).
 
 This way rent is automatically paid when accounts are used:
 

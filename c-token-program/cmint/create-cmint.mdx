@@ -1,27 +1,66 @@
 ---
-title: Create c-Mint
-description: Program and client guide to create a c-Mint with token metadata via CPI to the c-Token Program. Includes step-by-step implementation and full code examples.
+title: Create light-mint
+description: Program and client guide to create a light-mint with token metadata via CPI to the light-token Program. Includes step-by-step implementation and full code examples.
 ---
 
 import CMintSystemAccountsList from '/snippets/accounts-list/cmint-system-accounts-list.mdx';
 import CTokenClientPrerequisites from '/snippets/ctoken-guides/ctoken-client-prerequisites.mdx';
+import CTokenTsClientPrerequisites from '/snippets/ctoken-guides/ctoken-ts-client-prerequisites.mdx';
 import ClientCustomRentConfig from '/snippets/ctoken-guides/client-custom-rent-config.mdx';
 
-1. c-Mints uniquely represent a token on Solana and store its global metadata.
-2. c-Mints are compressed accounts and rent-free.
-3. Tokens created from c-Mints are c-Tokens.
+1. Mint accounts uniquely represent a token on Solana and store its global metadata.
+2. Light-mints are compressed accounts and rent-free.
 
 <Info>
-Learn the [core concepts to the c-Token Program here](/c-token-program/README.mdx).
+Learn the [core concepts to the light-token Program here](/c-token-program/README.mdx).
 </Info>
 
 # Get Started
 
 <Tabs>
 
+<Tab title="TypeScript Client">
+
+The example creates a light-mint with the specified decimals and mint authority.
+
+<Steps>
+<Step>
+
+### Prerequisites
+
+<CTokenTsClientPrerequisites />
+
+</Step>
+
+<Step>
+
+### Create light-mint
+
+```typescript
+import { createRpc } from "@lightprotocol/stateless.js";
+import { createMint } from "@lightprotocol/compressed-token";
+
+const rpc = createRpc(RPC_ENDPOINT);
+
+const { mint, transactionSignature } = await createMint(
+  rpc,
+  payer,
+  payer.publicKey, // mint authority
+  9 // decimals
+);
+
+console.log("light-mint created:", mint.toBase58());
+console.log("Transaction:", transactionSignature);
+```
+
+</Step>
+</Steps>
+
+</Tab>
+
 <Tab title="Rust Client">
 
-The example creates a c-Mint with token metadata.
+The example creates a light-mint with token metadata.
 1. Derive the mint address from the mint signer and address tree
 2. Fetch a <Tooltip tip="Validity proofs are 128 byte zero-knowledge proofs (ZKP). Your RPC generates the validity proof for you.">validity proof</Tooltip> from your RPC that proves the address does not exist yet. 
 
@@ -50,7 +89,7 @@ let instruction = create_cmint.instruction()?;
 </Step>
 
 <Step>
-### Create c-Mint with Token Metadata
+### Create light-mint with Token Metadata
 
 ```rust
 use light_client::indexer::{AddressWithTree, Indexer};
@@ -188,7 +227,7 @@ let token_metadata = ExtensionInstructionData::TokenMetadata(
 ```
 
 <Note>
-**Fields must be set at c-Mint creation.**
+**Fields must be set at light-mint creation.**
 * Standard fields (`name`, `symbol`, `uri`) can be updated by `update_authority`.
 * For `additional_metadata`, only existing keys can be modified or removed. New keys cannot be added after creation.
 </Note>
@@ -196,7 +235,7 @@ let token_metadata = ExtensionInstructionData::TokenMetadata(
 </Step>
 
 <Step>
-### Configure c-Mint
+### Configure light-mint
 
 Set `decimals`, `mint_authority`, `freeze_authority`, and pass the `token_metadata` from the previous step.
 
@@ -215,7 +254,7 @@ let params = CreateCMintParams {
 };
 ```
 <Info>
-* The client passes a validity proof that proves the c-Mint address does not exist in the address tree where it will be stored.
+* The client passes a validity proof that proves the light-mint address does not exist in the address tree where it will be stored.
 * You can safely ignore `compression_address` and `address_merkle_tree_root_index`. The client passes these for proof verification.
 </Info>
 
@@ -248,7 +287,7 @@ let system_accounts = SystemAccountInfos {
 </Step>
 
 <Step>
-### Build Account Infos and CPI the c-Token Program
+### Build Account Infos and CPI the light-token Program
 
 1. Pass the required accounts
 2. Include `params` and `system_accounts` from the previous steps
@@ -609,7 +648,7 @@ pub fn process_create_cmint_with_pda_authority(
 # Next Steps
 
 <Card
-  title="Learn how to mint c-Tokens"
+  title="Learn how to mint light-tokens"
   icon="chevron-right"
   color="#0066ff"
   href="/c-token-program/cmint/mint-ctokens"

@@ -1,40 +1,41 @@
 ---
 title: Transfer Interface
-description: Guide for transfers between c-Token and SPL token accounts via CPI. The interface detects account types and invokes the right programs.
+description: Guide for transfers between light-token and SPL token accounts via CPI. The interface detects account types and invokes the right programs.
 ---
 
 import TransferInterfaceAccountsListCtoken1 from '/snippets/accounts-list/transfer-interface-accounts-list-ctoken-1.mdx';
 import TransferInterfaceAccountsListSpl2 from '/snippets/accounts-list/transfer-interface-accounts-list-spl-2.mdx';
 import TransferInterfaceIntro from '/snippets/ctoken-guides/transfer-interface-intro.mdx';
 import CTokenClientPrerequisites from '/snippets/ctoken-guides/ctoken-client-prerequisites.mdx';
+import CTokenTsClientPrerequisites from '/snippets/ctoken-guides/ctoken-ts-client-prerequisites.mdx';
 import ClientCustomRentConfig from '/snippets/ctoken-guides/client-custom-rent-config.mdx';
 
 <table>
   <tbody>
     <tr>
-      <td style={{width: '33%'}}>**c-Token -> c-Token Account**</td>
+      <td style={{width: '33%'}}>**light-token -> light-token Account**</td>
       <td>
         <ul>
-          <li>Transfers c-Tokens between c-Token accounts</li>
+          <li>Transfers light-tokens between light-token accounts</li>
         </ul>
       </td>
     </tr>
     <tr>
-      <td>**SPL token -> c-Token Account**</td>
+      <td>**SPL token -> light-token Account**</td>
       <td>
         <ul>
-          <li>Transfers SPL tokens to c-Token accounts</li>
+          <li>Transfers SPL tokens to light-token accounts</li>
           <li>SPL tokens are locked in interface PDA</li>
-          <li>c-Tokens are minted to c-Token account</li>
+          <li>light-tokens are minted to light-token account</li>
         </ul>
       </td>
     </tr>
     <tr>
-      <td>**c-Token -> SPL Account**</td>
+      <td>**light-token -> SPL Account**</td>
       <td>
         <ul>
           <li>Releases SPL tokens from interface PDA to SPL account</li>
-          <li>Burns c-Tokens in source c-Token account</li>
+          <li>Burns light-tokens in source light-token account</li>
         </ul>
       </td>
     </tr>
@@ -42,20 +43,126 @@ import ClientCustomRentConfig from '/snippets/ctoken-guides/client-custom-rent-c
 </table>
 
 <Tip>
-* For example, **SPL -> c-Token** can be used for transfers from Alice's SPL token account to her own c-Token account.
-* You can use this to **convert existing SPL tokens to c-Tokens** with **sponsored rent-exemption**.
+* For example, **SPL -> light-token** can be used for transfers from Alice's SPL token account to her own light-token account.
+* You can use this to **convert existing SPL tokens to light-tokens** with **sponsored rent-exemption**.
 </Tip>
 
 # Get Started
 
 <Tabs>
 
+<Tab title="TypeScript Client">
+
+The example transfers light-tokens between light-token accounts.
+
+<Steps>
+<Step>
+
+### Prerequisites
+
+<CTokenTsClientPrerequisites />
+
+</Step>
+
+<Step>
+
+### Transfer light-tokens
+
+<Tabs>
+<Tab title="Action">
+
+```typescript
+import { createRpc } from "@lightprotocol/stateless.js";
+import {
+  getAssociatedTokenAddressInterface,
+  transferInterface,
+} from "@lightprotocol/compressed-token/unified";
+
+const rpc = createRpc(RPC_ENDPOINT);
+
+const sourceAta = getAssociatedTokenAddressInterface(mint, owner.publicKey);
+const destinationAta = getAssociatedTokenAddressInterface(mint, recipient);
+
+await transferInterface(
+  rpc,
+  payer,
+  sourceAta,
+  mint,
+  destinationAta,
+  owner,
+  amount
+);
+```
+
+To ensure the recipient's ATA exists, prepend an idempotent creation instruction:
+
+```typescript
+import {
+  getAssociatedTokenAddressInterface,
+  createAssociatedTokenAccountInterfaceIdempotentInstruction,
+} from "@lightprotocol/compressed-token/unified";
+import { CTOKEN_PROGRAM_ID } from "@lightprotocol/stateless.js";
+
+const destinationAta = getAssociatedTokenAddressInterface(mint, recipient);
+const createAtaIx = createAssociatedTokenAccountInterfaceIdempotentInstruction(
+  payer.publicKey,
+  destinationAta,
+  recipient,
+  mint,
+  CTOKEN_PROGRAM_ID
+);
+
+new Transaction().add(createAtaIx, transferIx);
+```
+
+</Tab>
+<Tab title="Instruction">
+
+```typescript
+import { createRpc } from "@lightprotocol/stateless.js";
+import {
+  createLoadAtaInstructions,
+  createTransferInterfaceInstruction,
+  getAssociatedTokenAddressInterface,
+} from "@lightprotocol/compressed-token/unified";
+import { Transaction } from "@solana/web3.js";
+
+const rpc = createRpc(RPC_ENDPOINT);
+
+const sourceAta = getAssociatedTokenAddressInterface(mint, owner.publicKey);
+const destinationAta = getAssociatedTokenAddressInterface(mint, recipient);
+
+const tx = new Transaction().add(
+  ...(await createLoadAtaInstructions(
+    rpc,
+    sourceAta,
+    owner.publicKey,
+    mint,
+    payer.publicKey
+  )),
+  createTransferInterfaceInstruction(
+    sourceAta,
+    destinationAta,
+    owner.publicKey,
+    amount
+  )
+);
+```
+
+</Tab>
+</Tabs>
+
+</Step>
+</Steps>
+
+</Tab>
+
 <Tab title="Rust Client">
 
-The example transfers SPL token -> c-Token and c-Token -> c-Token:
+The example transfers SPL token -> light-token and light-token -> light-token:
 1. Create SPL mint, SPL token accounts, and mint SPL tokens
-2. Send SPL tokens to c-Token account to mint c-Tokens.
-3. Transfer c-Tokens to another c-Token account.
+2. Send SPL tokens to light-token account to mint light-tokens.
+3. Transfer light-tokens to another light-token account.
 
 <Steps>
 <Step>
@@ -255,11 +362,11 @@ Find [a full code example at the end](#full-code-example).
 <Steps>
 <Step>
 
-### c-Token Transfer Interface
+### light-token Transfer Interface
 
-Define the number of c-Tokens / SPL tokens to transfer
-- from which SPL or c-Token account, and
-- to which SPL or c-Token account.
+Define the number of light-tokens / SPL tokens to transfer
+- from which SPL or light-token account, and
+- to which SPL or light-token account.
 
 ```rust
 use light_ctoken_sdk::ctoken::TransferInterfaceCpi;
@@ -273,7 +380,7 @@ let mut transfer = TransferInterfaceCpi::new(
     compressed_token_program_authority.clone(),
 );
 ```
-<Accordion title="c-Token Interface Accounts">
+<Accordion title="light-token Interface Accounts">
 <TransferInterfaceAccountsListCtoken1 />
 </Accordion>
 
@@ -283,7 +390,7 @@ let mut transfer = TransferInterfaceCpi::new(
 
 ### SPL Transfer Interface (Optional)
 
-The SPL transfer interface is only needed for SPL ↔ c-Token transfers.
+The SPL transfer interface is only needed for SPL ↔ light-token transfers.
 ```rust
 transfer = transfer.with_spl_interface(
     Some(mint.clone()),
@@ -293,9 +400,9 @@ transfer = transfer.with_spl_interface(
 )?;
 ```
 
-SPL ↔ c-Token transfers require a `spl_interface_pda`:
-    * **SPL → c-Token**: SPL tokens are locked by the c-Token Program in the PDA, c-Tokens are minted to c-Token accounts
-    * **c-Token → SPL**: c-Tokens are burned, SPL tokens transferred to SPL token accounts
+SPL ↔ light-token transfers require a `spl_interface_pda`:
+    * **SPL → light-token**: SPL tokens are locked by the light-token Program in the PDA, light-tokens are minted to light-token accounts
+    * **light-token → SPL**: light-tokens are burned, SPL tokens transferred to SPL token accounts
 <Info>
 The interface PDA is derived from the `mint` pubkey and pool seed.
 </Info>
@@ -307,9 +414,9 @@ The interface PDA is derived from the `mint` pubkey and pool seed.
 
 <Step>
 
-### CPI the c-Token Program
+### CPI the light-token Program
 
-CPI the c-Token program to execute the transfer. 
+CPI the light-token program to execute the transfer. 
 Use `invoke()`, or `invoke_signed()` when a CPI requires a PDA signer.
 
 <Tabs>
@@ -468,7 +575,7 @@ pub fn process_transfer_interface_invoke_signed(
 # Next Steps
 
   <Card
-    title="Learn how to close c-Token accounts"
+    title="Learn how to close light-token accounts"
     icon="chevron-right"
     color="#0066ff"
     href="/c-token-program/ctoken/close-ctoken-account"

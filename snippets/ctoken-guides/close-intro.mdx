@@ -1,5 +1,5 @@
-1. Closing a c-Token account transfers remaining lamports to a destination account and the rent sponsor can reclaim sponsored rent.
-2. c-Token accounts can be closed
+1. Closing a light-token account transfers remaining lamports to a destination account and the rent sponsor can reclaim sponsored rent.
+2. light-token accounts can be closed
     * by the account owner at any time.
     * by the <Tooltip tip="The `compression_authority` is a PDA of the Light Registry program. It claims rent for the rent sponsor from compressible accounts that are compressed and closed.">`compression_authority`</Tooltip>
-     when the account becomes <Tooltip tip="An account is compressible when it has rent for less than 1 epoch (360 lamports for a 260-byte c-Token account).">compressible</Tooltip>. The account is <Tooltip tip="You can think of compressed c-Token accounts as storage of inactive accounts that can be reactivated."> compressed and closed</Tooltip> - it can be reinstated with the same state (decompressed).
+     when the account becomes <Tooltip tip="An account is compressible when it has rent for less than 1 epoch (360 lamports for a 260-byte light-token account).">compressible</Tooltip>. The account is <Tooltip tip="You can think of compressed light-token accounts as storage of inactive accounts that can be reactivated."> compressed and closed</Tooltip> - it can be reinstated with the same state (decompressed).

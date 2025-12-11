@@ -15,16 +15,16 @@
       <td style={{textAlign: 'left'}}><strong>Owner</strong></td>
       <td>-</td>
       <td>
-        - The wallet that will own this c-ATA.<br/>
-        - Used to derive the c-ATA address deterministically.
+        - The wallet that will own this light-ATA.<br/>
+        - Used to derive the light-ATA address deterministically.
       </td>
     </tr>
     <tr>
       <td style={{textAlign: 'left'}}><strong>Mint</strong></td>
       <td>-</td>
       <td>
-        - The SPL or cMint token mint.<br/>
-        - Used to derive the c-ATA address deterministically.
+        - The SPL or light-mint token mint.<br/>
+        - Used to derive the light-ATA address deterministically.
       </td>
     </tr>
     <tr>
@@ -36,10 +36,10 @@
       </td>
     </tr>
     <tr>
-      <td style={{textAlign: 'left'}}><strong>c-ATA Account</strong></td>
+      <td style={{textAlign: 'left'}}><strong>light-ATA Account</strong></td>
       <td>mutable</td>
       <td>
-        - The c-ATA being created.<br/>
+        - The light-ATA being created.<br/>
         - Address is derived from `[owner, ctoken_program_id, mint]`.
       </td>
     </tr>
@@ -51,7 +51,7 @@
     <tr>
       <td style={{textAlign: 'left'}}><strong>Bump</strong></td>
       <td>u8</td>
-      <td>The PDA bump seed for the c-ATA address derivation.</td>
+      <td>The PDA bump seed for the light-ATA address derivation.</td>
     </tr>
     <tr>
       <td style={{textAlign: 'left'}}><strong>Idempotent</strong></td>

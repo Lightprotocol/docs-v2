@@ -14,12 +14,12 @@
     <tr>
       <td style={{textAlign: 'left'}}><strong>Token Program</strong></td>
       <td>-</td>
-      <td>The c-Token program for CPI.</td>
+      <td>The light-token program for CPI.</td>
     </tr>
     <tr>
       <td style={{textAlign: 'left'}}><strong>Account</strong></td>
       <td>mutable</td>
-      <td>The c-Token account to close.</td>
+      <td>The light-token account to close.</td>
     </tr>
     <tr>
       <td style={{textAlign: 'left'}}><strong>Destination</strong></td>
@@ -30,7 +30,7 @@
       <td style={{textAlign: 'left'}}><strong>Owner</strong></td>
       <td>signer*</td>
       <td>
-        - Owner of the c-Token account.<br/>
+        - Owner of the light-token account.<br/>
         - *Must be signer for `invoke()`. For `invoke_signed()`, program signs via PDA seeds.
       </td>
     </tr>
@@ -38,7 +38,7 @@
       <td style={{textAlign: 'left'}}><strong>Rent Sponsor</strong></td>
       <td>mutable, optional</td>
       <td>
-      * c-Token program PDA that fronts rent exemption at creation.
+      * light-token program PDA that fronts rent exemption at creation.
       * Claims rent when account compresses and/or is closed.
       </td>
     </tr>

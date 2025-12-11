@@ -1,6 +1,7 @@
 ---
-title: Create Associated c-Token Accounts
-description: Client and program guide to create associated c-Token accounts with step-by-step implementation and full code examples.
+title: Create Associated Token Accounts
+sidebarTitle: Create Associated Token Accounts
+description: Client and program guide to create associated light-token accounts with step-by-step implementation and full code examples.
 ---
 
 import CTokenCreateATAAccountsList from '/snippets/accounts-list/ctoken-create-ata-accounts-list.mdx';
@@ -9,11 +10,12 @@ import CTokenConfigureRent from '/snippets/ctoken-configure-rent.mdx';
 import CAtaIntro from '/snippets/ctoken-guides/cata-intro.mdx';
 import CompressibleRentExplained from '/snippets/compressible-rent-explained.mdx';
 import CTokenClientPrerequisites from '/snippets/ctoken-guides/ctoken-client-prerequisites.mdx';
+import CTokenTsClientPrerequisites from '/snippets/ctoken-guides/ctoken-ts-client-prerequisites.mdx';
 import ClientCustomRentConfig from '/snippets/ctoken-guides/client-custom-rent-config.mdx';
 
-1. Associated c-Token accounts (c-ATA) are Solana accounts that hold token balances of cMints, SPL mints, or Token 2022 mints.
-2. The address for c-ATAs is deterministically derived with the owner's address, c-Token program ID, and mint address.
-3. c-ATAs are compressible with a default rent config.
+1. Associated light-token accounts (light-ATA) are Solana accounts that hold token balances of light-mints, SPL mints, or Token 2022 mints.
+2. The address for light-ATAs is deterministically derived with the owner's address, light-token program ID, and mint address.
+3. light-ATAs are compressible with a default rent config.
     1. At account creation, you pay ~17,208 lamports <Tooltip tip="24 h = 16 epochs, where 1 rent-epoch ≈ 1.5h ≈ 13,500 slots at 400ms per slot">for 24h of rent</Tooltip> <br/>and <Tooltip tip="Covers transaction cost to compress accounts (10,000) and protocol incentive (1,000). Transaction cost might vary.">compression incentive</Tooltip> (the rent-exemption is sponsored by the protocol)
     2. Transfers keep the account funded <Tooltip tip="2 epochs = 3h">with rent for 3h</Tooltip> via top-ups. The transaction payer tops up 776 lamports when the account's rent is below 3h.
 
@@ -25,9 +27,90 @@ import ClientCustomRentConfig from '/snippets/ctoken-guides/client-custom-rent-c
 
 <Tabs>
 
+<Tab title="TypeScript Client">
+
+The example creates an associated light-token account (light-ATA) for a given mint and owner.
+
+<Steps>
+<Step>
+
+### Prerequisites
+
+<CTokenTsClientPrerequisites />
+
+</Step>
+
+<Step>
+
+### Create light-ATA
+
+<Tabs>
+<Tab title="Action">
+
+```typescript
+import { createRpc } from "@lightprotocol/stateless.js";
+import { getOrCreateAtaInterface } from "@lightprotocol/compressed-token/unified";
+
+const rpc = createRpc(RPC_ENDPOINT);
+
+const ata = await getOrCreateAtaInterface(
+  rpc,
+  payer,
+  mint,
+  owner
+);
+
+console.log("light-ATA address:", ata.parsed.address.toBase58());
+console.log("Balance:", ata.parsed.amount);
+```
+
+</Tab>
+<Tab title="Instruction">
+
+```typescript
+import { createRpc, CTOKEN_PROGRAM_ID } from "@lightprotocol/stateless.js";
+import {
+  createAssociatedTokenAccountInterfaceIdempotentInstruction,
+  createLoadAtaInstructions,
+  getAssociatedTokenAddressInterface,
+} from "@lightprotocol/compressed-token/unified";
+import { Transaction } from "@solana/web3.js";
+
+const rpc = createRpc(RPC_ENDPOINT);
+
+// Derive the light-ATA address
+const ata = getAssociatedTokenAddressInterface(mint, owner);
+
+// Build transaction with idempotent creation + load instructions
+const tx = new Transaction().add(
+  createAssociatedTokenAccountInterfaceIdempotentInstruction(
+    payer.publicKey,
+    ata,
+    owner,
+    mint,
+    CTOKEN_PROGRAM_ID
+  ),
+  ...(await createLoadAtaInstructions(
+    rpc,
+    ata,
+    owner,
+    mint,
+    payer.publicKey
+  ))
+);
+```
+
+</Tab>
+</Tabs>
+
+</Step>
+</Steps>
+
+</Tab>
+
 <Tab title="Rust Client">
 
-1. The example creates a test c-Mint. You can use existing c-Mints, SPL or Token 2022 mints as well.
+1. The example creates a test light-mint. You can use existing light-mints, SPL or Token 2022 mints as well.
 2. Derive the address from mint and owner pubkey.
 3. Build the instruction with `CreateAssociatedCTokenAccount`. It automatically includes the default rent config:
 ```rust
@@ -41,7 +124,7 @@ let instruction = CreateAssociatedCTokenAccount::new(
 .instruction()?;
 ```
 
-4. Send transaction & verify c-ATA creation with `get_account`.
+4. Send transaction & verify light-ATA creation with `get_account`.
 
 <Steps>
 <Step>
@@ -54,7 +137,7 @@ let instruction = CreateAssociatedCTokenAccount::new(
 
 <Step>
 
-### Create c-ATA
+### Create light-ATA
 
 ```rust
 use borsh::BorshDeserialize;
@@ -190,12 +273,12 @@ Find [a full code example at the end](#full-code-example).
 
 <Step>
 
-### Build Account Infos and CPI the c-Token Program
+### Build Account Infos and CPI the light-token Program
 
 1. Pass the required accounts that include the rent config.
 2. Use `invoke` or `invoke_signed`, when a CPI requires a PDA signer.
 <Note>
-The c-ATA address is derived from `[owner, ctoken_program_id, mint]`. Unlike c-Token accounts, owner and mint are passed as accounts, not in instruction data.
+The light-ATA address is derived from `[owner, ctoken_program_id, mint]`. Unlike light-token accounts, owner and mint are passed as accounts, not in instruction data.
 </Note>
 
 <Tabs>
@@ -357,7 +440,7 @@ pub fn process_create_ata2_invoke_signed(
 # Next Steps
 
   <Card
-    title="Learn how to mint c-Tokens"
+    title="Learn how to mint light-tokens"
     icon="chevron-right"
     color="#0066ff"
     href="/c-token-program/cmint/mint-ctokens"
