@@ -8,13 +8,20 @@ import { RentLifecycleVisualizer } from '/snippets/jsx/rent-lifecycle-visualizer
 
 
 #### What is light-token?
-Light-token is like SPL token stored more efficiently to reduce account creation cost.
+Light-token is like SPL token stored more efficiently to reduce account creation cost while being more CU efficient than SPL on hot paths.
 Users receive and send the same tokens.
 
 | Creation Cost        | SPL               | Light            |
 |:---------------------|:------------------|:-------------------|
 | **Mint Account**    | ~1,500,000 lamports        | **15,000** lamports     |
 | **Token Account**    | ~2,000,000 lamports | ~**17,000** lamports |
+
+| CU Performance | light-token CU | SPL-token CU |                  p-token CU |
+| ----------------------------- | -------------: | -----------: | --------------------------: |
+| **ATA Creation**                  |          4,348 |       14,194 | 14,194 |
+| **Transfer** (base path)          |            312 |        4,645 |                          79 |
+| **Transfer** (rent-free hot path) |          1,885 |        4,645 |                          79 |
+
 
 #### Can I start using the Light-Token Standard?
 Light-token is currently deployed on devnet and undergoing security audits. 
