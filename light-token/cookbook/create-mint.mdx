@@ -6,7 +6,6 @@ description: Program and client guides to create a mint with token metadata. Inc
 
 import CMintSystemAccountsList from '/snippets/accounts-list/light-mint-system-accounts-list.mdx';
 import CTokenClientPrerequisites from '/snippets/light-token-guides/light-token-client-prerequisites.mdx';
-import CTokenTsClientPrerequisites from '/snippets/light-token-guides/light-token-ts-client-prerequisites.mdx';
 import ClientCustomRentConfig from '/snippets/light-token-guides/client-custom-rent-config.mdx';
 
 1. Mint accounts uniquely represent a token on Solana and store its global metadata.
@@ -19,43 +18,6 @@ Learn the [core concepts to the light-token standard here](/light-token/README).
 # Get Started
 
 <Tabs>
-
-<Tab title="TypeScript Client">
-
-<Steps>
-<Step>
-
-### Prerequisites
-
-<CTokenTsClientPrerequisites />
-
-</Step>
-
-<Step>
-
-### Create Mint Account
-
-```typescript
-import { createRpc } from "@lightprotocol/stateless.js";
-import { createMint } from "@lightprotocol/compressed-token";
-
-const rpc = createRpc(RPC_ENDPOINT);
-
-const { mint, transactionSignature } = await createMint(
-  rpc,
-  payer,
-  payer.publicKey, // mint authority
-  9 // decimals
-);
-
-console.log("light-mint created:", mint.toBase58());
-console.log("Transaction:", transactionSignature);
-```
-
-</Step>
-</Steps>
-
-</Tab>
 
 <Tab title="Rust Client">
 

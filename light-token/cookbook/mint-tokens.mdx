@@ -6,7 +6,6 @@ description: Client and program guide to mint tokens to a light-token account. I
 import CMintSystemAccountsList from '/snippets/accounts-list/light-mint-system-accounts-list.mdx';
 import CMintToCTokenAccountsList from '/snippets/accounts-list/light-mint-to-light-token-accounts-list.mdx';
 import CTokenClientPrerequisites from '/snippets/light-token-guides/light-token-client-prerequisites.mdx';
-import CTokenTsClientPrerequisites from '/snippets/light-token-guides/light-token-ts-client-prerequisites.mdx';
 import ClientCustomRentConfig from '/snippets/light-token-guides/client-custom-rent-config.mdx';
 
 
@@ -17,44 +16,6 @@ import ClientCustomRentConfig from '/snippets/light-token-guides/client-custom-r
 # Get Started
 
 <Tabs>
-
-<Tab title="TypeScript Client">
-
-<Steps>
-<Step>
-
-### Prerequisites
-
-<CTokenTsClientPrerequisites />
-
-</Step>
-
-<Step>
-
-### Mint to Light-Token Accounts
-
-```typescript
-import { createRpc } from "@lightprotocol/stateless.js";
-import { mintTo } from "@lightprotocol/compressed-token";
-
-const rpc = createRpc(RPC_ENDPOINT);
-
-const transactionSignature = await mintTo(
-  rpc,
-  payer,
-  mint, // light-mint address
-  recipient, // destination address
-  mintAuthority, // mint authority keypair
-  amount // amount to mint
-);
-
-console.log("Minted light-tokens:", transactionSignature);
-```
-
-</Step>
-</Steps>
-
-</Tab>
 
 <Tab title="Rust Client">
 

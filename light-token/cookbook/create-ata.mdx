@@ -10,7 +10,6 @@ import CTokenConfigureRent from '/snippets/light-token-configure-rent.mdx';
 import CAtaIntro from '/snippets/light-token-guides/cata-intro.mdx';
 import CompressibleRentExplained from '/snippets/compressible-rent-explained.mdx';
 import CTokenClientPrerequisites from '/snippets/light-token-guides/light-token-client-prerequisites.mdx';
-import CTokenTsClientPrerequisites from '/snippets/light-token-guides/light-token-ts-client-prerequisites.mdx';
 import ClientCustomRentConfig from '/snippets/light-token-guides/client-custom-rent-config.mdx';
 
 1. Associated light-token accounts are Solana accounts that hold token balances of light, SPL, or Token 2022 mints.
@@ -26,87 +25,6 @@ import ClientCustomRentConfig from '/snippets/light-token-guides/client-custom-r
 # Get Started
 
 <Tabs>
-
-<Tab title="TypeScript Client">
-
-The example creates an associated light-token account (light-ATA) for a given mint and owner.
-
-<Steps>
-<Step>
-
-### Prerequisites
-
-<CTokenTsClientPrerequisites />
-
-</Step>
-
-<Step>
-
-### Create Associated Token Account
-
-<Tabs>
-<Tab title="Action">
-
-```typescript
-import { createRpc } from "@lightprotocol/stateless.js";
-import { getOrCreateAtaInterface } from "@lightprotocol/compressed-token/unified";
-
-const rpc = createRpc(RPC_ENDPOINT);
-
-const ata = await getOrCreateAtaInterface(
-  rpc,
-  payer,
-  mint,
-  owner
-);
-
-console.log("light-ATA address:", ata.parsed.address.toBase58());
-console.log("Balance:", ata.parsed.amount);
-```
-
-</Tab>
-<Tab title="Instruction">
-
-```typescript
-import { createRpc, CTOKEN_PROGRAM_ID } from "@lightprotocol/stateless.js";
-import {
-  createAssociatedTokenAccountInterfaceIdempotentInstruction,
-  createLoadAtaInstructions,
-  getAssociatedTokenAddressInterface,
-} from "@lightprotocol/compressed-token/unified";
-import { Transaction } from "@solana/web3.js";
-
-const rpc = createRpc(RPC_ENDPOINT);
-
-// Derive the light-ATA address
-const ata = getAssociatedTokenAddressInterface(mint, owner);
-
-// Build transaction with idempotent creation + load instructions
-const tx = new Transaction().add(
-  createAssociatedTokenAccountInterfaceIdempotentInstruction(
-    payer.publicKey,
-    ata,
-    owner,
-    mint,
-    CTOKEN_PROGRAM_ID
-  ),
-  ...(await createLoadAtaInstructions(
-    rpc,
-    ata,
-    owner,
-    mint,
-    payer.publicKey
-  ))
-);
-```
-
-</Tab>
-</Tabs>
-
-</Step>
-</Steps>
-
-</Tab>
 
 <Tab title="Rust Client">
 
