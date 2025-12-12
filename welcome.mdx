@@ -8,10 +8,11 @@ description: ZK Compression is a Solana account primitive that lets you create t
   ![](/images/banner-image.png)
 </Frame>
 
-|                 | Solana Account   | Compressed Account     | Cost Reduction |
-|:-------------------------|:------------------|:-----------------------|:----------------|
-| 100-byte PDA Account    | 0.0016 SOL       | **~ 0.00001 SOL**     | **160x**       |
-| 100 Token Accounts      | ~ 0.2 SOL        | **~ 0.00004 SOL**     | **5000x**      |
+|  **Creation Cost**       | Solana              | ZK Compression   |
+|:---------------------|:--------------------|:-----------------|
+| **Token Account**    | ~2,000,000 lamports | ~**5,000** lamports |
+| **100-byte PDA**     | ~1,600,000 lamports | ~**15,000** lamports |
+
 
 
 <CardGroup cols={3}>
@@ -28,22 +29,32 @@ description: ZK Compression is a Solana account primitive that lets you create t
 
 ## Features
 
-<CardGroup cols={2}>
   <Card
-    title="Compressed Tokens"
-    href="/compressed-tokens/overview"
+    title="Light-Token Standard (Beta)"
+    href="/light-token/README"
     icon="coins"
     iconType="solid"
   >
-    Create SPL-compatible tokens 5000x cheaper.
+    For Mints with Metadata and Tokens.
   </Card>
+
+<CardGroup cols={2}>
+
   <Card
     title="Compressed PDAs"
     href="/compressed-pdas/create-a-program-with-compressed-pdas"
     icon="user"
     iconType="solid"
   >
-    Store your app state in accounts with 98% less cost.
+    For app state.
+  </Card>
+  <Card
+    title="Compressed Tokens"
+    href="/compressed-tokens"
+    icon="wallet"
+    iconType="solid"
+  >
+    For Token Distribution.
   </Card>
 </CardGroup>
 
