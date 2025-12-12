@@ -1,0 +1,71 @@
+import { CompressibleRentCalculator } from '/snippets/jsx/compressible-rent-calculator.jsx';
+
+<Info>
+We recommend to use default values, but you can customize the rent config based on the expected account activity.
+</Info>
+
+1. Set the hours to determine the amount of prepaid rent
+2. Set the lamports per write a transaction payer will pay for top ups
+
+```rust
+use light_compressed_token_sdk::ctoken::{
+    CompressibleParams, 
+    CreateCTokenAccount,
+    ctoken_v1_config_pda,      // helper to derive config PDA
+    ctoken_v1_rent_sponsor_pda // helper to derive rent sponsor PDA
+};
+use light_ctoken_types::state::TokenDataVersion;
+
+let compressible_params = CompressibleParams {
+    compressible_config: ctoken_v1_config_pda(),
+    rent_sponsor: ctoken_v1_rent_sponsor_pda(),
+    pre_pay_num_epochs: 35,           // ~52h
+    lamports_per_write: Some(788),
+    compress_to_account_pubkey: None,
+    token_account_version: TokenDataVersion::ShaFlat,
+};
+
+let instruction = CreateCTokenAccount::new(
+    payer.pubkey(),
+    account.pubkey(),
+    mint,
+    owner,
+    compressible_params,
+).instruction()?;
+```
+
+<table>
+  <colgroup>
+    <col style={{width: '25%', textAlign: 'left'}} />
+    <col style={{width: '55%'}} />
+  </colgroup>
+  <thead>
+    <tr>
+      <th style={{textAlign: 'left'}}></th>
+      <th style={{textAlign: 'left'}}></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style={{textAlign: 'left'}}><strong><Tooltip tip="Owned by LightRegistry program. Stores rent_sponsor, compression_delay, address_space, and rent_config.">Compressible Config</Tooltip></strong></td>
+      <td>
+        Protocol PDA that stores account rent config.
+      </td>
+    </tr>
+    <tr>
+      <td style={{textAlign: 'left'}}><strong><Tooltip tip="CToken program PDA that manages rent for compressible accounts.">Rent Sponsor</Tooltip></strong></td>
+      <td>
+        - CToken program PDA that fronts rent exemption at creation.<br/>
+        - Claims rent when account compresses.
+      </td>
+    </tr>
+    <tr>
+      <td style={{textAlign: 'left'}}><strong><Tooltip tip="11111111111111111111111111111111" cta="Program ID" href="https://solscan.io/account/11111111111111111111111111111111">System Program</Tooltip></strong></td>
+      <td>Solana System Program to create the on-chain account.</td>
+    </tr>
+  </tbody>
+</table>
+
+
+<CompressibleRentCalculator />
+

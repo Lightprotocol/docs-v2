@@ -1,0 +1,33 @@
+name: Sync Handler Code
+
+on:
+  repository_dispatch:
+    types: [sync-handlers]
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout docs repo
+        uses: actions/checkout@v4
+
+      - name: Checkout light-protocol
+        uses: actions/checkout@v4
+        with:
+          repository: Lightprotocol/light-protocol
+          path: light-protocol
+          ref: ${{ github.event.client_payload.commit }}
+
+      - name: Sync handlers to docs
+        run: |
+          chmod +x ./scripts/sync-docs.sh
+          ./scripts/sync-docs.sh
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          branch: sync-handlers-${{ github.event.client_payload.commit }}
+          title: "Sync handler code from light-protocol release"
+          body: |
+            Auto-generated from light-protocol commit: ${{ github.event.client_payload.commit }}
+          commit-message: "sync: update Full Code Examples from light-protocol"

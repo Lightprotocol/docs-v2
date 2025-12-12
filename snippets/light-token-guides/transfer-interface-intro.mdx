@@ -1,0 +1,36 @@
+<table>
+  <tbody>
+    <tr>
+      <td style={{width: '33%'}}>**light-token → light-token Account**</td>
+      <td>
+        <ul>
+          <li>Transfers light-tokens between light-token accounts</li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td>**SPL token → light-token Account**</td>
+      <td>
+        <ul>
+          <li>Transfers SPL tokens to light-token accounts</li>
+          <li>SPL tokens are locked in interface PDA</li>
+          <li>light-tokens are minted to light-token account</li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td>**light-token → SPL Account**</td>
+      <td>
+        <ul>
+          <li>Releases SPL tokens from interface PDA to SPL account</li>
+          <li>Burns light-tokens in source light-token account</li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<Tip>
+* For example, **SPL → light-token** can be used for transfers from Alice's SPL token account to her own light-token account.
+* You can use this to **convert existing SPL tokens to light-tokens** with **sponsored rent-exemption**. Learn more in the [core concepts to the light-token program](/light-token/README).
+</Tip>

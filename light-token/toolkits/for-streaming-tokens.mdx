@@ -1,0 +1,34 @@
+---
+title: "Toolkit to Index Light-Token Accounts"
+sidebarTitle: "for Indexing Tokens"
+description: "Light-token accounts follow the same layout as SPL-token accounts, so you can reuse your existing parsers."
+---
+
+When a market becomes inactive, its token accounts and related PDAs will be compressed - their state is committed and effectively frozen until a client decompresses it.
+While compressed, pure on-chain lookups will return uninitialized.
+
+Your indexer should keep tracking, quoting, and routing markets even if the on-chain account shows `is_initialized: false`, `is_compressed: true`. To trade a cold market, the first client must prepend an idempotent decompress "warm up" instruction.
+
+```rust
+import { createLoadAtaInstructions } from "@lightprotocol/compressed-token/unified";
+
+const warmupIxs = await createLoadAtaInstructions(
+  rpc,
+  tokenAccount,
+  owner,
+  mint,
+  payer
+);
+
+new Transaction().add(...warmupIxs, tradeIx);
+```
+
+# Stream Light-Mint Accounts
+
+<Card
+  title="Toolkit to stream light-mints"
+  icon="chevron-right"
+  color="#0066ff"
+  href="/light-token/toolkits/for-streaming-mints"
+  horizontal
+/>

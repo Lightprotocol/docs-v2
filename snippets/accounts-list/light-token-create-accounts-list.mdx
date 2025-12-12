@@ -1,0 +1,41 @@
+<table>
+  <colgroup>
+    <col style={{width: '25%', textAlign: 'left'}} />
+    <col style={{width: '55%'}} />
+  </colgroup>
+  <thead>
+    <tr>
+      <th style={{textAlign: 'left'}}></th>
+      <th style={{textAlign: 'left'}}></th>
+      <th style={{textAlign: 'left'}}></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style={{textAlign: 'left'}}><strong>Payer</strong></td>
+      <td>signer, mutable</td>
+      <td>
+        - Pays initial rent per epoch, transaction fee and compression incentive.<br/>
+        - Does NOT pay rent exemption (fronted by `rent_sponsor`).
+      </td>
+    </tr>
+    <tr>
+      <td style={{textAlign: 'left'}}><strong>light-token Account</strong></td>
+      <td>signer*, mutable</td>
+      <td>
+        - The light-token account being created.<br/>
+        - *Must be signer for `invoke()`. For `invoke_signed()`, program signs via PDA seeds.
+      </td>
+    </tr>
+    <tr>
+      <td style={{textAlign: 'left'}}><strong>Mint</strong></td>
+      <td>-</td>
+      <td>The SPL or light-mint token mint.</td>
+    </tr>
+    <tr>
+      <td style={{textAlign: 'left'}}><strong>Owner</strong></td>
+      <td>Pubkey</td>
+      <td>The owner of the token account. Controls transfers and other operations.</td>
+    </tr>
+  </tbody>
+</table>

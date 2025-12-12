@@ -1,0 +1,61 @@
+<table>
+  <colgroup>
+    <col style={{width: '25%', textAlign: 'left'}} />
+    <col style={{width: '15%'}} />
+    <col style={{width: '60%'}} />
+  </colgroup>
+  <thead>
+    <tr>
+      <th style={{textAlign: 'left'}}>Account</th>
+      <th style={{textAlign: 'left'}}>Type</th>
+      <th style={{textAlign: 'left'}}>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style={{textAlign: 'left'}}><strong>Authority</strong></td>
+      <td>signer</td>
+      <td>The mint authority. Must match the light-mint's mint authority.</td>
+    </tr>
+    <tr>
+      <td style={{textAlign: 'left'}}><strong>Payer</strong></td>
+      <td>signer, mutable</td>
+      <td>Pays transaction fees.</td>
+    </tr>
+    <tr>
+      <td style={{textAlign: 'left'}}><strong>State Tree</strong></td>
+      <td>mutable</td>
+      <td>Account of the state Merkle tree storing the light-mint.</td>
+    </tr>
+    <tr>
+      <td style={{textAlign: 'left'}}><strong>Input Queue</strong></td>
+      <td>mutable</td>
+      <td>Account of the input queue associated with the state tree the light-mint is stored in. The existing hash of the light-mint is <Tooltip tip="A Forester node asynchronously nullifies the leaf in the state tree.">inserted to this queue</Tooltip> to mark it as spent.</td>
+    </tr>
+    <tr>
+      <td style={{textAlign: 'left'}}><strong>Output Queue</strong></td>
+      <td>mutable</td>
+      <td>Account of the output queue associated with the state tree the light-mint will be stored in. The updated hash of the light-mint is <Tooltip tip="A Forester node asynchronously appends the leaf to the state tree.">inserted to this queue</Tooltip>.</td>
+    </tr>
+    <tr>
+      <td style={{textAlign: 'left'}}><strong>light-token Accounts</strong></td>
+      <td>mutable</td>
+      <td>Destination light-token Solana accounts to receive minted tokens.</td>
+    </tr>
+    <tr>
+      <td style={{textAlign: 'left'}}><strong>System Accounts</strong></td>
+      <td>-</td>
+      <td>See System Accounts List above.</td>
+    </tr>
+    <tr>
+      <td style={{textAlign: 'left'}}><strong>CPI Context</strong></td>
+      <td>optional<br/> (none for most)</td>
+      <td>Enables batched compressed account operations across multiple programs with a single validity proof. Set to `None` for most operations.</td>
+    </tr>
+    <tr>
+      <td style={{textAlign: 'left'}}><strong>CPI Context Account</strong></td>
+      <td>optional, mutable</td>
+      <td>On-chain account that temporarily stores instruction data from multiple CPIs for combined execution. Set to `None` for most operations.</td>
+    </tr>
+  </tbody>
+</table>

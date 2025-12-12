@@ -1,19 +1,19 @@
-export const TokenAccountCompressedVsSpl = () => {
+export const CTokenVsSplCalculator = () => {
   const [numAccounts, setNumAccounts] = useState(100000);
   const [showCustomAccounts, setShowCustomAccounts] = useState(false);
 
   const ACCOUNT_STORAGE_OVERHEAD = 128;
   const LAMPORTS_PER_BYTE = 6960;
   const DATA_LEN = 165; // SPL token account size
-  const COMPRESSED_COST_PER_ACCOUNT = 10300;
+  const CTOKEN_DEFAULT_CREATION_COST = 17208; // Default rent config: 6,208 prepaid rent (24h) + 11,000 compression incentive
   const LAMPORTS_PER_SOL = 1_000_000_000;
 
   const ACCOUNTS_MAX = 1000000;
 
-  const solanaCost = numAccounts * (ACCOUNT_STORAGE_OVERHEAD + DATA_LEN) * LAMPORTS_PER_BYTE;
-  const compressedCost = numAccounts * COMPRESSED_COST_PER_ACCOUNT;
-  const savings = solanaCost - compressedCost;
-  const savingsPercent = ((savings / solanaCost) * 100).toFixed(1);
+  const splCost = numAccounts * (ACCOUNT_STORAGE_OVERHEAD + DATA_LEN) * LAMPORTS_PER_BYTE;
+  const ctokenCost = numAccounts * CTOKEN_DEFAULT_CREATION_COST;
+  const savings = splCost - ctokenCost;
+  const savingsPercent = ((savings / splCost) * 100).toFixed(1);
 
   const handleAccountsChange = (value) => {
     const num = Math.max(1, Math.min(1000000, Number.parseInt(value) || 1));
@@ -48,7 +48,7 @@ export const TokenAccountCompressedVsSpl = () => {
   };
 
   return (
-    <div className="p-5 rounded-3xl not-prose mt-4 dark:bg-white/5 backdrop-blur-xl border border-black/[0.04] dark:border-white/10 shadow-lg">
+    <div className="p-5 rounded-3xl not-prose mt-4 dark:bg-white/5 backdrop-blur-xl border border-black/[0.04] dark:border-white/10 shadow-lg" style={{ fontFamily: 'Inter, sans-serif' }}>
       <div className="space-y-5">
         {/* Number of Accounts */}
         <div className="space-y-2 px-3">
@@ -112,15 +112,15 @@ export const TokenAccountCompressedVsSpl = () => {
           <div className="p-4 bg-black/[0.015] dark:bg-white/5 backdrop-blur-md rounded-2xl text-center border border-black/[0.04] dark:border-white/10 shadow-sm">
             <div className="text-xs text-zinc-500 dark:text-white/50 mb-1 uppercase tracking-wide">SPL Token</div>
             <div className="text-xl font-mono font-semibold text-zinc-900 dark:text-white">
-              {formatSOL(solanaCost)}
+              {formatSOL(splCost)}
             </div>
             <div className="text-xs text-zinc-400 dark:text-white/40">SOL</div>
           </div>
 
           <div className="p-4 bg-black/[0.015] dark:bg-white/5 backdrop-blur-md rounded-2xl text-center border border-black/[0.04] dark:border-white/10 shadow-sm">
-            <div className="text-xs text-zinc-500 dark:text-white/50 mb-1 uppercase tracking-wide">Compressed</div>
+            <div className="text-xs text-zinc-500 dark:text-white/50 mb-1 uppercase tracking-wide">Light-Token</div>
             <div className="text-xl font-mono font-semibold text-zinc-900 dark:text-white">
-              {formatSOL(compressedCost)}
+              {formatSOL(ctokenCost)}
             </div>
             <div className="text-xs text-zinc-400 dark:text-white/40">SOL</div>
           </div>

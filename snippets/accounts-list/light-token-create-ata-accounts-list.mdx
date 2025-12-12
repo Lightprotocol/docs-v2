@@ -1,0 +1,65 @@
+<table>
+  <colgroup>
+    <col style={{width: '25%', textAlign: 'left'}} />
+    <col style={{width: '55%'}} />
+  </colgroup>
+  <thead>
+    <tr>
+      <th style={{textAlign: 'left'}}></th>
+      <th style={{textAlign: 'left'}}></th>
+      <th style={{textAlign: 'left'}}></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style={{textAlign: 'left'}}><strong>Owner</strong></td>
+      <td>-</td>
+      <td>
+        - The wallet that will own this light-ATA.<br/>
+        - Used to derive the light-ATA address deterministically.
+      </td>
+    </tr>
+    <tr>
+      <td style={{textAlign: 'left'}}><strong>Mint</strong></td>
+      <td>-</td>
+      <td>
+        - The SPL or light-mint token mint.<br/>
+        - Used to derive the light-ATA address deterministically.
+      </td>
+    </tr>
+    <tr>
+      <td style={{textAlign: 'left'}}><strong>Payer</strong></td>
+      <td>signer, mutable</td>
+      <td>
+        - Pays initial rent per epoch, transaction fee and compression incentive.<br/>
+        - Does NOT pay rent exemption (fronted by `rent_sponsor`).
+      </td>
+    </tr>
+    <tr>
+      <td style={{textAlign: 'left'}}><strong>light-ATA Account</strong></td>
+      <td>mutable</td>
+      <td>
+        - The light-ATA being created.<br/>
+        - Address is derived from `[owner, ctoken_program_id, mint]`.
+      </td>
+    </tr>
+    <tr>
+      <td style={{textAlign: 'left'}}><strong><Tooltip tip="11111111111111111111111111111111" cta="Program ID" href="https://solscan.io/account/11111111111111111111111111111111">System Program</Tooltip></strong></td>
+      <td>-</td>
+      <td>Solana System Program. Required for CPI to create the on-chain account.</td>
+    </tr>
+    <tr>
+      <td style={{textAlign: 'left'}}><strong>Bump</strong></td>
+      <td>u8</td>
+      <td>The PDA bump seed for the light-ATA address derivation.</td>
+    </tr>
+    <tr>
+      <td style={{textAlign: 'left'}}><strong>Idempotent</strong></td>
+      <td>bool</td>
+      <td>
+        - When `true`, silently succeeds if account already exists.<br/>
+        - When `false`, fails if account already exists.
+      </td>
+    </tr>
+  </tbody>
+</table>

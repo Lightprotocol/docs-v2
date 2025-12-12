@@ -1,0 +1,252 @@
+---
+title: "Toolkit for Streaming Light-Mint Accounts"
+sidebarTitle: "for Streaming Mints"
+description: "Guide to stream light-mints and metadata using Laserstream."
+---
+
+| Event | Description |
+|:------|:------------|
+| **New mints** | Raw mint data |
+| **Mint updates** | Supply changes, authority changes |
+| **TokenMetadata** | Name, symbol, URI, additional_metadata |
+
+<Note>
+Find devnet examples at [c-token-toolkit/streaming-mints](https://github.com/Lightprotocol/c-token-toolkit).
+</Note>
+
+## Setup
+
+```toml Cargo.toml
+[dependencies]
+helius-laserstream = "0.1"
+tokio = { version = "1", features = ["full"] }
+futures = "0.3"
+light-event = "0.2"
+light-compressed-account = "0.7"
+light-ctoken-interface = "0.1"
+borsh = "0.10"
+bs58 = "0.5"
+```
+
+```rust
+use futures::StreamExt;
+use helius_laserstream::{subscribe, LaserstreamConfig};
+use light_event::parse::event_from_light_transaction;
+use light_ctoken_interface::state::mint::CompressedMint;
+use light_ctoken_interface::state::extensions::ExtensionStruct;
+use borsh::BorshDeserialize;
+
+const LIGHT_SYSTEM_PROGRAM: &str = "SySTEM1eSU2p4BGQfQpimFEWWSC1XDFeun3Nqzz3rT7";
+const CTOKEN_PROGRAM_ID: &str = "cTokenmWW8bLPjZEBAUgYy3zKxQZW6VKi7bqNFEVv3m";
+const COMPRESSED_MINT_DISCRIMINATOR: [u8; 8] = [0, 0, 0, 0, 0, 0, 0, 1];
+```
+
+<Steps>
+
+<Step>
+### Connect to Laserstream
+
+<Tabs>
+<Tab title="Mainnet">
+
+```rust
+let config = LaserstreamConfig::new(
+    "https://laserstream-mainnet-ewr.helius-rpc.com".to_string(),
+    std::env::var("HELIUS_API_KEY")?,
+);
+```
+
+</Tab>
+<Tab title="Devnet">
+
+```rust
+let config = LaserstreamConfig::new(
+    "https://laserstream-devnet-ewr.helius-rpc.com".to_string(),
+    std::env::var("HELIUS_API_KEY")?,
+);
+```
+
+</Tab>
+</Tabs>
+
+```rust
+let request = helius_laserstream::grpc::SubscribeRequest {
+    transactions: [(
+        "light".to_string(),
+        helius_laserstream::grpc::SubscribeRequestFilterTransactions {
+            vote: Some(false),
+            failed: Some(false),
+            account_include: vec![LIGHT_SYSTEM_PROGRAM.to_string()],
+            ..Default::default()
+        },
+    )]
+    .into(),
+    ..Default::default()
+};
+
+let (stream, _handle) = subscribe(config, request);
+tokio::pin!(stream);
+
+while let Some(update) = stream.next().await {
+    // Process transactions...
+}
+```
+
+</Step>
+
+<Step>
+### Parse Events
+
+```rust
+fn process_transaction(msg: &Message, meta: Option<&TransactionStatusMeta>) {
+    let account_keys = extract_account_keys(msg, meta);
+
+    let (program_ids, instruction_data, accounts_per_ix) =
+        extract_instructions(msg, meta, &account_keys);
+
+    match event_from_light_transaction(&program_ids, &instruction_data, accounts_per_ix) {
+        Ok(Some(batches)) => {
+            for batch in batches {
+                println!(
+                    "Event: {} inputs, {} outputs",
+                    batch.event.input_compressed_account_hashes.len(),
+                    batch.event.output_compressed_accounts.len()
+                );
+            }
+        }
+        Ok(None) => {} // No compressed account events
+        Err(e) => eprintln!("Parse error: {:?}", e),
+    }
+}
+```
+
+</Step>
+
+<Step>
+### Extract Mints
+
+```rust
+for output in event.output_compressed_accounts.iter() {
+    let owner = output.compressed_account.owner;
+
+    // Check if owned by cToken program
+    if owner != ctoken_program_id {
+        continue;
+    }
+
+    // Check discriminator
+    let data = match &output.compressed_account.data {
+        Some(d) if d.discriminator == COMPRESSED_MINT_DISCRIMINATOR => &d.data,
+        _ => continue,
+    };
+
+    // Deserialize
+    let mint = CompressedMint::try_from_slice(data)?;
+
+    // Check if new (address not in inputs)
+    let is_new = output
+        .compressed_account
+        .address
+        .map(|addr| {
+            !event.input_compressed_account_hashes.iter().any(|h| *h == addr)
+        })
+        .unwrap_or(true);
+
+    if is_new {
+        println!("New mint: {}", bs58::encode(mint.metadata.mint).into_string());
+    }
+}
+```
+
+</Step>
+
+<Step>
+### Extract Token Metadata from Mint Extensions
+
+```rust
+fn extract_metadata(mint: &CompressedMint) -> Option<(String, String, String)> {
+    let extensions = mint.extensions.as_ref()?;
+
+    for ext in extensions {
+        if let ExtensionStruct::TokenMetadata(m) = ext {
+            let name = String::from_utf8_lossy(&m.name).to_string();
+            let symbol = String::from_utf8_lossy(&m.symbol).to_string();
+            let uri = String::from_utf8_lossy(&m.uri).to_string();
+            return Some((name, symbol, uri));
+        }
+    }
+    None
+}
+```
+
+```rust
+if let Some((name, symbol, uri)) = extract_metadata(&mint) {
+    println!("  Name: {}", name);
+    println!("  Symbol: {}", symbol);
+    println!("  URI: {}", uri);
+}
+```
+
+</Step>
+
+</Steps>
+
+## Data Layouts
+
+### Mint
+
+```rust
+#[repr(C)]
+pub struct CompressedMint {
+    pub base: BaseMint,
+    pub metadata: CompressedMintMetadata,
+    pub extensions: Option<Vec<ExtensionStruct>>,
+}
+
+/// SPL compatible basemint structure (82 bytes)
+#[repr(C)]
+pub struct BaseMint {
+    pub mint_authority: Option<Pubkey>,
+    pub supply: u64,
+    pub decimals: u8,
+    pub is_initialized: bool,
+    pub freeze_authority: Option<Pubkey>,
+}
+
+/// metadata used by the cToken program (34 bytes)
+#[repr(C)]
+pub struct CompressedMintMetadata {
+    pub version: u8,
+    pub spl_mint_initialized: bool,
+    pub mint: Pubkey,  // PDA with compressed mint seed
+}
+```
+
+### TokenMetadata
+
+```rust
+#[repr(C)]
+pub struct TokenMetadata {
+    pub update_authority: Pubkey,  // [0u8; 32] = immutable
+    pub mint: Pubkey,
+    pub name: Vec<u8>,
+    pub symbol: Vec<u8>,
+    pub uri: Vec<u8>,
+    pub additional_metadata: Vec<AdditionalMetadata>,
+}
+
+pub struct AdditionalMetadata {
+    pub key: Vec<u8>,
+    pub value: Vec<u8>,
+}
+```
+
+# Index Tokens
+
+<Card
+  title="Toolkit to stream light-token accounts"
+  icon="chevron-right"
+  color="#0066ff"
+  href="/light-token/toolkits/for-streaming-tokens"
+  horizontal
+/>
