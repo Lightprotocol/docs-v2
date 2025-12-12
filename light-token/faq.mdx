@@ -24,6 +24,8 @@ No. The `light-token-sdk` follows similar patterns to SPL.
 
 <CodeCompare
   firstCode={`// Create SPL token account
+import { createAssociatedTokenAccountInstruction } from "@solana/spl-token";
+
 const ix = createAssociatedTokenAccountInstruction(
   payer,
   ata,
@@ -31,9 +33,11 @@ const ix = createAssociatedTokenAccountInstruction(
   mint
 );`}
   secondCode={`// Create light-token account
-const ix = CreateCTokenAccount.new(
+import { createAssociatedTokenAccountInstruction } from "@lightprotocol/compressed-token/unified";
+
+const ix = createAssociatedTokenAccountInstruction(
   payer,
-  account,
+  ata,
   owner,
   mint
 );`}
