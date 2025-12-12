@@ -13,13 +13,13 @@ import CTokenClientPrerequisites from '/snippets/light-token-guides/light-token-
 import CTokenTsClientPrerequisites from '/snippets/light-token-guides/light-token-ts-client-prerequisites.mdx';
 import ClientCustomRentConfig from '/snippets/light-token-guides/client-custom-rent-config.mdx';
 
-1. Associated light-token accounts (light-ATA) are Solana accounts that hold token balances of light-mints, SPL mints, or Token 2022 mints.
-2. The address for light-ATAs is deterministically derived with the owner's address, light-token program ID, and mint address.
-3. light-ATAs are compressible with a default rent config.
+1. Associated light-token accounts are Solana accounts that hold token balances of light, SPL, or Token 2022 mints.
+2. The address for light-ATAs is deterministically derived with the owner's address, compressed token program ID, and mint address.
+2. Associated light-token accounts implement a default rent config:
     1. At account creation, you pay ~17,208 lamports <Tooltip tip="24 h = 16 epochs, where 1 rent-epoch ≈ 1.5h ≈ 13,500 slots at 400ms per slot">for 24h of rent</Tooltip> <br/>and <Tooltip tip="Covers transaction cost to compress accounts (10,000) and protocol incentive (1,000). Transaction cost might vary.">compression incentive</Tooltip> (the rent-exemption is sponsored by the protocol)
     2. Transfers keep the account funded <Tooltip tip="2 epochs = 3h">with rent for 3h</Tooltip> via top-ups. The transaction payer tops up 776 lamports when the account's rent is below 3h.
 
-<Accordion title="Compressible Rent Explained">
+<Accordion title="Light Rent Config Explained">
 <CompressibleRentExplained />
 </Accordion>
 
@@ -142,33 +142,45 @@ let instruction = CreateAssociatedCTokenAccount::new(
 ```rust
 use borsh::BorshDeserialize;
 use light_client::indexer::{AddressWithTree, Indexer};
-use light_client::rpc::Rpc;
+use light_client::rpc::{LightClient, LightClientConfig, Rpc};
 use light_ctoken_sdk::ctoken::{
     derive_ctoken_ata, CreateAssociatedCTokenAccount, CreateCMint,
     CreateCMintParams,
 };
 use light_ctoken_interface::state::CToken;
-use light_program_test::{LightProgramTest, ProgramTestConfig};
+use serde_json;
 use solana_sdk::{pubkey::Pubkey, signature::Keypair, signer::Signer};
-
+use std::convert::TryFrom;
+use std::env;
+use std::fs;
 
 #[tokio::test(flavor = "multi_thread")]
-async fn test_create_cata_client() {
-    // Step 1: Setup test environment
-    let mut rpc = LightProgramTest::new(ProgramTestConfig::new_v2(false, None))
+async fn test_create_associated_token_account() {
+    dotenvy::dotenv().ok();
+
+    let keypair_path = env::var("KEYPAIR_PATH")
+        .unwrap_or_else(|_| format!("{}/.config/solana/id.json", env::var("HOME").unwrap()));
+    let payer = load_keypair(&keypair_path).expect("Failed to load keypair");
+
+    let api_key = env::var("api_key")
+        .expect("api_key environment variable must be set");
+
+    let config = LightClientConfig::devnet(
+        Some("https://devnet.helius-rpc.com".to_string()),
+        Some(api_key),
+    );
+    let mut rpc = LightClient::new_with_retry(config, None)
         .await
-        .unwrap();
+        .expect("Failed to initialize LightClient");
 
-    let payer = rpc.get_payer().insecure_clone();
-
-    // Step 2: Create compressed mint (prerequisite)
+    // Step 1: Create compressed mint (prerequisite)
     let (mint, _compression_address) = create_compressed_mint(&mut rpc, &payer, 9).await;
 
-    // Step 3: Define owner and derive ATA address
+    // Step 2: Define owner and derive ATA address
     let owner = payer.pubkey();
     let (ata_address, _bump) = derive_ctoken_ata(&owner, &mint);
 
-    // Step 4: Build instruction using SDK builder
+    // Step 3: Build instruction using SDK builder
     let instruction = CreateAssociatedCTokenAccount::new(
         payer.pubkey(),
         owner,
@@ -177,12 +189,12 @@ async fn test_create_cata_client() {
     .instruction()
     .unwrap();
 
-    // Step 5: Send transaction (only payer signs, no account keypair needed)
+    // Step 4: Send transaction (only payer signs, no account keypair needed)
     rpc.create_and_send_transaction(&[instruction], &payer.pubkey(), &[&payer])
         .await
         .unwrap();
 
-    // Step 6: Verify cATA creation
+    // Step 5: Verify light-ATA creation
     let account_data = rpc.get_account(ata_address).await.unwrap().unwrap();
     let ctoken_state = CToken::deserialize(&mut &account_data.data[..]).unwrap();
 
@@ -190,6 +202,7 @@ async fn test_create_cata_client() {
     assert_eq!(ctoken_state.owner, owner.to_bytes(), "Owner should match");
     assert_eq!(ctoken_state.amount, 0, "Initial amount should be 0");
 }
+
 pub async fn create_compressed_mint<R: Rpc + Indexer>(
     rpc: &mut R,
     payer: &Keypair,
@@ -197,7 +210,31 @@ pub async fn create_compressed_mint<R: Rpc + Indexer>(
 ) -> (Pubkey, [u8; 32]) {
     let mint_signer = Keypair::new();
     let address_tree = rpc.get_address_tree_v2();
-    let output_queue = rpc.get_random_state_tree_info().unwrap().queue;
+
+    let _ = rpc.get_latest_active_state_trees().await;
+    let output_pubkey = match rpc
+        .get_random_state_tree_info()
+        .ok()
+        .or_else(|| rpc.get_random_state_tree_info_v1().ok())
+    {
+        Some(info) => info
+            .get_output_pubkey()
+            .expect("Invalid state tree type for output"),
+        None => {
+            let queues = rpc
+                .indexer_mut()
+                .expect("IndexerNotInitialized")
+                .get_queue_info(None)
+                .await
+                .expect("Failed to fetch queue info")
+                .value
+                .queues;
+            queues
+                .get(0)
+                .map(|q| q.queue)
+                .expect("NoStateTreesAvailable")
+        }
+    };
 
     // Derive compression address
     let compression_address = light_ctoken_sdk::ctoken::derive_cmint_compressed_address(
@@ -240,7 +277,7 @@ pub async fn create_compressed_mint<R: Rpc + Indexer>(
         mint_signer.pubkey(),
         payer.pubkey(),
         address_tree.tree,
-        output_queue,
+        output_pubkey,
     );
     let instruction = create_cmint.instruction().unwrap();
 
@@ -250,6 +287,17 @@ pub async fn create_compressed_mint<R: Rpc + Indexer>(
         .unwrap();
 
     (mint_pda, compression_address)
+}
+
+fn load_keypair(path: &str) -> Result<Keypair, Box<dyn std::error::Error>> {
+    let path = if path.starts_with("~") {
+        path.replace("~", &env::var("HOME").unwrap_or_default())
+    } else {
+        path.to_string()
+    };
+    let file = fs::read_to_string(&path)?;
+    let bytes: Vec<u8> = serde_json::from_str(&file)?;
+    Ok(Keypair::try_from(&bytes[..])?)
 }
 ```
 
@@ -329,7 +377,7 @@ CreateAssociatedCTokenAccountCpi {
 # Full Code Example
 
 <Info>
-Find the source code [here](https://github.com/Lightprotocol/light-protocol/blob/main/sdk-tests/sdk-ctoken-test/src/create_token_account.rs).
+Find the source code [here](https://github.com/Lightprotocol/program-examples/blob/main/light-token/src/create_ata.rs).
 </Info>
 
 ```rust expandable

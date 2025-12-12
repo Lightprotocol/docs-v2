@@ -92,27 +92,48 @@ let instruction = create_cmint.instruction()?;
 
 ```rust
 use light_client::indexer::{AddressWithTree, Indexer};
-use light_client::rpc::Rpc;
+use light_client::rpc::{LightClient, LightClientConfig, Rpc};
 use light_ctoken_sdk::ctoken::{CreateCMint, CreateCMintParams};
 use light_ctoken_interface::instructions::extensions::token_metadata::TokenMetadataInstructionData;
 use light_ctoken_interface::instructions::extensions::ExtensionInstructionData;
 use light_ctoken_interface::state::AdditionalMetadata;
-use light_program_test::{LightProgramTest, ProgramTestConfig};
-use solana_sdk::{pubkey::Pubkey, signature::Keypair, signer::Signer};
-
+use serde_json;
+use solana_sdk::{bs58, pubkey::Pubkey, signature::Keypair, signer::Signer};
+use std::convert::TryFrom;
+use std::env;
+use std::fs;
 
 #[tokio::test(flavor = "multi_thread")]
-async fn test_create_rent_free_mint_with_metadata() {
-    let mut rpc = LightProgramTest::new(ProgramTestConfig::new_v2(false, None))
+async fn test_create_compressed_mint_with_metadata() {
+    dotenvy::dotenv().ok();
+
+    let keypair_path = env::var("KEYPAIR_PATH")
+        .unwrap_or_else(|_| format!("{}/.config/solana/id.json", env::var("HOME").unwrap()));
+    let payer = load_keypair(&keypair_path).expect("Failed to load keypair");
+
+    let api_key = env::var("api_key") // Set api_key in your .env
+        .expect("api_key environment variable must be set");
+
+    let config = LightClientConfig::devnet(
+        Some("https://devnet.helius-rpc.com".to_string()),
+        Some(api_key),
+    );
+    let mut rpc = LightClient::new_with_retry(config, None)
         .await
-        .unwrap();
+        .expect("Failed to initialize LightClient");
 
-    let payer = rpc.get_payer().insecure_clone();
+    // Create compressed mint with metadata
+    let (mint_pda, compression_address) = create_compressed_mint(&mut rpc, &payer, 9).await;
 
-    // Create c-int with metadata
-    let (_mint, _compression_address) = create_compressed_mint(&mut rpc, &payer, 9).await;
-
+    println!("\n=== Created Compressed Mint ===");
+    println!("Mint PDA: {}", mint_pda);
+    println!("Compression Address: {}", bs58::encode(compression_address).into_string());
+    println!("Decimals: 9");
+    println!("Name: Example Token");
+    println!("Symbol: EXT");
+    println!("URI: https://example.com/metadata.json");
 }
+
 pub async fn create_compressed_mint<R: Rpc + Indexer>(
     rpc: &mut R,
     payer: &Keypair,
@@ -120,16 +141,40 @@ pub async fn create_compressed_mint<R: Rpc + Indexer>(
 ) -> (Pubkey, [u8; 32]) {
     let mint_signer = Keypair::new();
     let address_tree = rpc.get_address_tree_v2();
-    let output_queue = rpc.get_random_state_tree_info().unwrap().queue;
 
-    // Derive address
+    // Fetch active state trees for devnet
+    let _ = rpc.get_latest_active_state_trees().await;
+    let output_pubkey = match rpc
+        .get_random_state_tree_info()
+        .ok()
+        .or_else(|| rpc.get_random_state_tree_info_v1().ok())
+    {
+        Some(info) => info
+            .get_output_pubkey()
+            .expect("Invalid state tree type for output"),
+        None => {
+            let queues = rpc
+                .indexer_mut()
+                .expect("IndexerNotInitialized")
+                .get_queue_info(None)
+                .await
+                .expect("Failed to fetch queue info")
+                .value
+                .queues;
+            queues
+                .get(0)
+                .map(|q| q.queue)
+                .expect("NoStateTreesAvailable: no active state trees returned")
+        }
+    };
+
+    // Derive compression address
     let compression_address = light_ctoken_sdk::ctoken::derive_cmint_compressed_address(
         &mint_signer.pubkey(),
         &address_tree.tree,
     );
 
-    let mint_pda =
-        light_ctoken_sdk::ctoken::find_cmint_address(&mint_signer.pubkey()).0;
+    let mint_pda = light_ctoken_sdk::ctoken::find_cmint_address(&mint_signer.pubkey()).0;
 
     // Get validity proof for the address
     let rpc_result = rpc
@@ -157,8 +202,8 @@ pub async fn create_compressed_mint<R: Rpc + Indexer>(
         extensions: Some(vec![ExtensionInstructionData::TokenMetadata(
             TokenMetadataInstructionData {
                 update_authority: Some(payer.pubkey().to_bytes().into()),
-                name: b"Rent Free Token".to_vec(),
-                symbol: b"RFT".to_vec(),
+                name: b"Example Token".to_vec(),
+                symbol: b"EXT".to_vec(),
                 uri: b"https://example.com/metadata.json".to_vec(),
                 additional_metadata: Some(vec![AdditionalMetadata {
                     key: b"type".to_vec(),
@@ -174,7 +219,7 @@ pub async fn create_compressed_mint<R: Rpc + Indexer>(
         mint_signer.pubkey(),
         payer.pubkey(),
         address_tree.tree,
-        output_queue,
+        output_pubkey,
     );
     let instruction = create_cmint.instruction().unwrap();
 
@@ -184,6 +229,17 @@ pub async fn create_compressed_mint<R: Rpc + Indexer>(
         .unwrap();
 
     (mint_pda, compression_address)
+}
+
+fn load_keypair(path: &str) -> Result<Keypair, Box<dyn std::error::Error>> {
+    let path = if path.starts_with("~") {
+        path.replace("~", &env::var("HOME").unwrap_or_default())
+    } else {
+        path.to_string()
+    };
+    let file = fs::read_to_string(&path)?;
+    let bytes: Vec<u8> = serde_json::from_str(&file)?;
+    Ok(Keypair::try_from(&bytes[..])?)
 }
 ```
 </Step>
@@ -291,19 +347,19 @@ let system_accounts = SystemAccountInfos {
 1. Pass the required accounts
 2. Include `params` and `system_accounts` from the previous steps
 3. Use `invoke` or `invoke_signed`:
-    * When `mint_signer` is an external keypair, use `invoke`.
-    * When `mint_signer` is a PDA, use `invoke_signed` with its seeds.
-    * When both `mint_signer` and `authority` are PDAs, use `invoke_signed` with both seeds.
+    * When `mint_seed` is an external keypair, use `invoke`.
+    * When `mint_seed` is a PDA, use `invoke_signed` with its seeds.
+    * When both `mint_seed` and `authority` are PDAs, use `invoke_signed` with both seeds.
 
 <Tabs>
 <Tab title="invoke (External signer)">
 
 
 ```rust
-use light_ctoken_sdk::ctoken::CreateCMintAccountInfos;
+use light_ctoken_sdk::ctoken::CreateCMintCpi;
 
-CreateCMintAccountInfos {
-    mint_signer: mint_signer.clone(),
+CreateCMintCpi {
+    mint_seed: mint_seed.clone(),
     authority: authority.clone(),
     payer: payer.clone(),
     address_tree: address_tree.clone(),
@@ -315,15 +371,15 @@ CreateCMintAccountInfos {
 }
 .invoke()?;
 ```
-</Tab> 
+</Tab>
 
-<Tab title="invoke_signed (PDA mint_signer)">
+<Tab title="invoke_signed (PDA mint_seed)">
 
 ```rust
-use light_ctoken_sdk::ctoken::CreateCMintAccountInfos;
+use light_ctoken_sdk::ctoken::CreateCMintCpi;
 
-let account_infos = CreateCMintAccountInfos {
-    mint_signer: mint_signer.clone(),
+let account_infos = CreateCMintCpi {
+    mint_seed: mint_seed.clone(),
     authority: authority.clone(),
     payer: payer.clone(),
     address_tree: address_tree.clone(),
@@ -337,15 +393,15 @@ let account_infos = CreateCMintAccountInfos {
 let signer_seeds: &[&[u8]] = &[MINT_SIGNER_SEED, &[bump]];
 account_infos.invoke_signed(&[signer_seeds])?;
 ```
-</Tab> 
+</Tab>
 
 <Tab title="invoke_signed (Two PDA signers)">
 
 ```rust
-use light_ctoken_sdk::ctoken::CreateCMintAccountInfos;
+use light_ctoken_sdk::ctoken::CreateCMintCpi;
 
-let account_infos = CreateCMintAccountInfos {
-    mint_signer: mint_signer.clone(),
+let account_infos = CreateCMintCpi {
+    mint_seed: mint_seed.clone(),
     authority: authority.clone(),
     payer: payer.clone(),
     address_tree: address_tree.clone(),
@@ -356,12 +412,12 @@ let account_infos = CreateCMintAccountInfos {
     params,
 };
 
-let mint_signer_seeds: &[&[u8]] = &[MINT_SIGNER_SEED, &[mint_signer_bump]];
+let mint_seed_seeds: &[&[u8]] = &[MINT_SIGNER_SEED, &[mint_seed_bump]];
 let authority_seeds: &[&[u8]] = &[MINT_AUTHORITY_SEED, &[authority_bump]];
-account_infos.invoke_signed(&[mint_signer_seeds, authority_seeds])?;
+account_infos.invoke_signed(&[mint_seed_seeds, authority_seeds])?;
 ```
 
-</Tab> 
+</Tab>
 
 </Tabs> 
 
@@ -372,14 +428,14 @@ account_infos.invoke_signed(&[mint_signer_seeds, authority_seeds])?;
 # Full Code Example
 
 <Info>
-Find the source code [here](https://github.com/Lightprotocol/light-protocol/blob/main/sdk-tests/sdk-ctoken-test/src/create_cmint.rs).
+Find the source code [here](https://github.com/Lightprotocol/program-examples/blob/main/light-token/src/create_mint.rs).
 </Info>
 
 ```rust expandable
 use borsh::{BorshDeserialize, BorshSerialize};
 use light_ctoken_sdk::{
     ctoken::{
-        CreateCMintAccountInfos, CreateCMintParams, ExtensionInstructionData, SystemAccountInfos,
+        CreateCMintCpi, CreateCMintParams, ExtensionInstructionData, SystemAccountInfos,
     },
     CompressedProof,
 };
@@ -405,15 +461,15 @@ pub struct CreateCmintData {
 
 /// Handler for creating a compressed mint (invoke)
 ///
-/// Uses the CreateCMintAccountInfos builder pattern. This demonstrates how to:
+/// Uses the CreateCMintCpi builder pattern. This demonstrates how to:
 /// 1. Build the CreateCMintParams struct from instruction data
-/// 2. Build the CreateCMintAccountInfos with accounts
+/// 2. Build the CreateCMintCpi with accounts
 /// 3. Call invoke() which handles instruction building and CPI
 ///
 /// Account order:
 /// - accounts[0]: compressed_token_program (for CPI)
 /// - accounts[1]: light_system_program
-/// - accounts[2]: mint_signer (signer)
+/// - accounts[2]: mint_seed (signer)
 /// - accounts[3]: payer (signer, also authority)
 /// - accounts[4]: payer again (fee_payer in SDK)
 /// - accounts[5]: cpi_authority_pda
@@ -456,8 +512,8 @@ pub fn process_create_cmint(
 
     // Build the account infos struct
     // In this case, payer == authority (accounts[3])
-    CreateCMintAccountInfos {
-        mint_signer: accounts[2].clone(),
+    CreateCMintCpi {
+        mint_seed: accounts[2].clone(),
         authority: accounts[3].clone(),
         payer: accounts[3].clone(),
         address_tree: accounts[11].clone(),
@@ -472,15 +528,15 @@ pub fn process_create_cmint(
     Ok(())
 }
 
-/// Handler for creating a compressed mint with PDA mint signer (invoke_signed)
+/// Handler for creating a compressed mint with PDA mint seed (invoke_signed)
 ///
-/// Uses the CreateCMintAccountInfos builder pattern with invoke_signed.
-/// The mint_signer is a PDA derived from this program.
+/// Uses the CreateCMintCpi builder pattern with invoke_signed.
+/// The mint_seed is a PDA derived from this program.
 ///
 /// Account order:
 /// - accounts[0]: compressed_token_program (for CPI)
 /// - accounts[1]: light_system_program
-/// - accounts[2]: mint_signer (PDA, not signer - program signs)
+/// - accounts[2]: mint_seed (PDA, not signer - program signs)
 /// - accounts[3]: payer (signer, also authority)
 /// - accounts[4]: payer again (fee_payer in SDK)
 /// - accounts[5]: cpi_authority_pda
@@ -499,10 +555,10 @@ pub fn process_create_cmint_invoke_signed(
         return Err(ProgramError::NotEnoughAccountKeys);
     }
 
-    // Derive the PDA for the mint signer
+    // Derive the PDA for the mint seed
     let (pda, bump) = Pubkey::find_program_address(&[MINT_SIGNER_SEED], &ID);
 
-    // Verify the mint_signer account is the PDA we expect
+    // Verify the mint_seed account is the PDA we expect
     if &pda != accounts[2].key {
         return Err(ProgramError::InvalidSeeds);
     }
@@ -531,8 +587,8 @@ pub fn process_create_cmint_invoke_signed(
 
     // Build the account infos struct
     // In this case, payer == authority (accounts[3])
-    let account_infos = CreateCMintAccountInfos {
-        mint_signer: accounts[2].clone(),
+    let account_infos = CreateCMintCpi {
+        mint_seed: accounts[2].clone(),
         authority: accounts[3].clone(),
         payer: accounts[3].clone(),
         address_tree: accounts[11].clone(),
@@ -550,15 +606,15 @@ pub fn process_create_cmint_invoke_signed(
     Ok(())
 }
 
-/// Handler for creating a compressed mint with PDA mint signer AND PDA authority (invoke_signed)
+/// Handler for creating a compressed mint with PDA mint seed AND PDA authority (invoke_signed)
 ///
-/// Uses the SDK's CreateCMintAccountInfos with separate authority and payer accounts.
-/// Both mint_signer and authority are PDAs signed by this program.
+/// Uses the SDK's CreateCMintCpi with separate authority and payer accounts.
+/// Both mint_seed and authority are PDAs signed by this program.
 ///
 /// Account order:
 /// - accounts[0]: compressed_token_program (for CPI)
 /// - accounts[1]: light_system_program
-/// - accounts[2]: mint_signer (PDA from MINT_SIGNER_SEED, not signer - program signs)
+/// - accounts[2]: mint_seed (PDA from MINT_SIGNER_SEED, not signer - program signs)
 /// - accounts[3]: authority (PDA from MINT_AUTHORITY_SEED, not signer - program signs)
 /// - accounts[4]: fee_payer (signer)
 /// - accounts[5]: cpi_authority_pda
@@ -573,21 +629,21 @@ pub fn process_create_cmint_with_pda_authority(
     accounts: &[AccountInfo],
     data: CreateCmintData,
 ) -> Result<(), ProgramError> {
-    use crate::mint_to_ctoken::MINT_AUTHORITY_SEED;
+    use crate::mint_to::MINT_AUTHORITY_SEED;
 
     if accounts.len() < 12 {
         return Err(ProgramError::NotEnoughAccountKeys);
     }
 
-    // Derive the PDA for the mint signer
-    let (mint_signer_pda, mint_signer_bump) =
+    // Derive the PDA for the mint seed
+    let (mint_seed_pda, mint_seed_bump) =
         Pubkey::find_program_address(&[MINT_SIGNER_SEED], &ID);
 
     // Derive the PDA for the authority
     let (authority_pda, authority_bump) = Pubkey::find_program_address(&[MINT_AUTHORITY_SEED], &ID);
 
-    // Verify the mint_signer account is the PDA we expect
-    if &mint_signer_pda != accounts[2].key {
+    // Verify the mint_seed account is the PDA we expect
+    if &mint_seed_pda != accounts[2].key {
         return Err(ProgramError::InvalidSeeds);
     }
 
@@ -619,8 +675,8 @@ pub fn process_create_cmint_with_pda_authority(
     };
 
     // Build the account infos struct using SDK
-    let account_infos = CreateCMintAccountInfos {
-        mint_signer: accounts[2].clone(),
+    let account_infos = CreateCMintCpi {
+        mint_seed: accounts[2].clone(),
         authority: accounts[3].clone(),
         payer: accounts[4].clone(),
         address_tree: accounts[11].clone(),
@@ -632,9 +688,9 @@ pub fn process_create_cmint_with_pda_authority(
     };
 
     // Invoke with both PDAs signing
-    let mint_signer_seeds: &[&[u8]] = &[MINT_SIGNER_SEED, &[mint_signer_bump]];
+    let mint_seed_seeds: &[&[u8]] = &[MINT_SIGNER_SEED, &[mint_seed_bump]];
     let authority_seeds: &[&[u8]] = &[MINT_AUTHORITY_SEED, &[authority_bump]];
-    account_infos.invoke_signed(&[mint_signer_seeds, authority_seeds])?;
+    account_infos.invoke_signed(&[mint_seed_seeds, authority_seeds])?;
 
     Ok(())
 }
