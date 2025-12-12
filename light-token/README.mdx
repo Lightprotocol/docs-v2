@@ -1,6 +1,6 @@
 ---
 title: Overview
-description: The light-token standard introduces mint and token accounts without rent-exemption but full SPL functionality.
+description: The light-token standard is a high performance token standard without rent-exemption at full SPL functionality.
 
 ---
 
@@ -21,10 +21,19 @@ import IntegrateCTokenGuidesTable from '/snippets/overview-tables/integrate-ligh
 2. The key difference is light-mint and token accounts do not require you to pay rent-exemption upon creation.
 3. Light-token accounts are interoperable with SPL and Token 2022 mints.
 
-|  Creation Cost         | SPL  | Light      |
+### Creation Cost
+|           | SPL  | Light      |
 |:---------------------|:------------------|:----------------------|
 | **Mint Account**    | ~1,500,000 lamports        | **15,000** lamports     |
 | **Token Account**   | 	  ~2,000,000 lamports         | ~**17,000** lamports     |
+
+### Performance 
+|                      | Light-token CU | SPL-token CU |                  p-token CU |
+| ----------------------------- | -------------: | -----------: | --------------------------: |
+| ATA Creation                  |          4,348 |       14,194 | 14,194 / 3,692 (with p-ATA) |
+| Transfer (base path)          |            312 |        4,645 |                          79 |
+| Transfer (rent-free hot path) |          1,885 |        4,645 |                          79 |
+
 
 
 <CardGroup cols={2}>
