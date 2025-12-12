@@ -519,10 +519,8 @@
       "discord": "https://discord.com/invite/CYvjBgzRFP"
     }
   },
-  "redirects": [
-    {
-      "source": "/landing",
-      "destination": "/welcome"
-    }
-  ]
+  "redirects": [{
+    "source": "/landing",
+    "destination": "/welcome"
+  }]
 }
