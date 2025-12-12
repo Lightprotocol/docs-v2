@@ -4,15 +4,13 @@ sidebarTitle: Create Token Account
 description: Client and program guide to create light-token accounts. Includes step-by-step implementation and full code examples.
 ---
 
-import CTokenCreateAccountsList from '/snippets/ctoken-create-accounts-list.mdx';
-import CTokenProtocolPDAs from '/snippets/ctoken-protocol-pdas.mdx';
+import CTokenCreateAccountsList from '/snippets/accounts-list/light-token-create-accounts-list.mdx';
 import CompressibleVsSolanaRent from '/snippets/compressible-vs-solana-rent.mdx';
-import { CompressibleRentCalculator } from '/snippets/compressible-rent-calculator.jsx';
-import CTokenConfigureRent from '/snippets/ctoken-configure-rent.mdx';
-import CTokenAccountProperties from '/snippets/ctoken-account-properties.mdx';
-import CTokenIntro from '/snippets/ctoken-guides/ctoken-intro.mdx';
-import CTokenClientPrerequisites from '/snippets/ctoken-guides/ctoken-client-prerequisites.mdx';
-import ClientCustomRentConfig from '/snippets/ctoken-guides/client-custom-rent-config.mdx';
+import { CompressibleRentCalculator } from '/snippets/jsx/compressible-rent-calculator.jsx';
+import CTokenConfigureRent from '/snippets/light-token-configure-rent.mdx';
+import CTokenIntro from '/snippets/light-token-guides/light-token-intro.mdx';
+import CTokenClientPrerequisites from '/snippets/light-token-guides/light-token-client-prerequisites.mdx';
+import ClientCustomRentConfig from '/snippets/light-token-guides/client-custom-rent-config.mdx';
 
 import CompressibleRentExplained from '/snippets/compressible-rent-explained.mdx';
 import CompressibleDefaultRentConfig from '/snippets/compressible-default-rent-config.mdx';
@@ -85,7 +83,7 @@ async fn test_create_ctoken_account() {
     // Create compressed mint first (prerequisite)
     let (mint, _compression_address) = create_compressed_mint(&mut rpc, &payer, 9).await;
 
-    // Step 1: Generate new keypair for the c-Token account
+    // Step 1: Generate new keypair for the light-token account
     let account = Keypair::new();
     let owner = payer.pubkey();
 
@@ -123,13 +121,13 @@ pub async fn create_compressed_mint<R: Rpc + Indexer>(
     let output_queue = rpc.get_random_state_tree_info().unwrap().queue;
 
     // Derive compression address
-    let compression_address = light_ctoken_sdk::ctoken::derive_compressed_mint_address(
+    let compression_address = light_ctoken_sdk::ctoken::derive_cmint_compressed_address(
         &mint_signer.pubkey(),
         &address_tree.tree,
     );
 
     let mint_pda =
-        light_ctoken_sdk::ctoken::find_spl_mint_address(&mint_signer.pubkey()).0;
+        light_ctoken_sdk::ctoken::find_cmint_address(&mint_signer.pubkey()).0;
 
     // Get validity proof for the address
     let rpc_result = rpc

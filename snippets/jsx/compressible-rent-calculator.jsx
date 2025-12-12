@@ -196,7 +196,7 @@ export const CompressibleRentCalculator = () => {
           </button>
           {showFormula && (
             <div className="text-xs font-mono text-zinc-500 dark:text-white/40 mt-3">
-              <div className="text-zinc-600 dark:text-white/60 mb-2">Total cost for {DATA_LEN}-byte c-Token account:</div>
+              <div className="text-zinc-600 dark:text-white/60 mb-2">Total cost for {DATA_LEN}-byte light-token account:</div>
               total_creation_cost = prepaid_rent + compression_incentive<br/><br/>
               rent_per_epoch = base_rent + (data_len × lamports_per_byte_per_epoch)<br/>
               rent_per_epoch = {BASE_RENT} + ({DATA_LEN} × {LAMPORTS_PER_BYTE_PER_EPOCH}) = {rentPerEpoch} lamports<br/>

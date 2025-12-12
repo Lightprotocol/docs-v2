@@ -407,7 +407,7 @@
                   "learn/core-concepts/considerations"
                 ]
               },
-              "learn/c-token-program"
+              "learn/light-token-standard"
             ]
           },
           {
@@ -449,18 +449,6 @@
               "api-reference/libraries/light-client",
               "api-reference/libraries/light-sdk",
               "api-reference/libraries/light-program-test"
-            ]
-          }
-        ]
-      },
-      {
-        "tab": "Blog",
-        "groups": [
-          {
-            "group": "Blog Posts",
-            "pages": [
-              "blog/README",
-              "blog/c-token"
             ]
           }
         ]

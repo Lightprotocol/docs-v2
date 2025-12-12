@@ -13,9 +13,9 @@ import { TokenAccountCompressedVsSpl } from '/snippets/jsx/token-account-compres
 | :------------- | :--------------------- | :---------------------- |
 | **Token Account** | 	~2,000,000 lamports          | **5,000** lamports     |
 
-1. Compressed token accounts store token balance, owner, and other information of tokens like SPL and c-Tokens. 
+1. Compressed token accounts store token balance, owner, and other information of tokens like SPL and light-tokens.
 2. Compressed token accounts are rent-free.
-3. Any c-Token or SPL token can be compressed/decompressed at will.
+3. Any light-token or SPL token can be compressed/decompressed at will.
 <Info>
 Wallets like Phantom and Backpack support compressed tokens. The UI does not distinguish between SPL and compressed tokens.
 </Info>
@@ -38,10 +38,10 @@ Wallets like Phantom and Backpack support compressed tokens. The UI does not dis
   ### Storage of Inactive Token Accounts
     * Most (associated) token accounts are not frequently written to.
     * **Store token accounts rent-free** when inactive
-    * [c-Tokens](/light-token/README) are automatically compressed/decompressed, when active/inactive and include **sponsored rent-exemption**.
+    * [Light-tokens](/light-token/README) are automatically compressed/decompressed, when active/inactive and include **sponsored rent-exemption**.
 
 <Card
-  title="Learn about c-Token"
+  title="Learn about Light-Token"
   icon="chevron-right"
   color="#0066ff"
   href="/light-token/README"

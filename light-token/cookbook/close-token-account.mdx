@@ -5,8 +5,8 @@ description: Program guide to close light-token accounts via CPI. Includes step-
 ---
 
 import CloseAccountInfosAccountsList from '/snippets/accounts-list/close-account-infos-accounts-list.mdx';
-import CTokenClientPrerequisites from '/snippets/ctoken-guides/ctoken-client-prerequisites.mdx';
-import ClientCustomRentConfig from '/snippets/ctoken-guides/client-custom-rent-config.mdx';
+import CTokenClientPrerequisites from '/snippets/light-token-guides/light-token-client-prerequisites.mdx';
+import ClientCustomRentConfig from '/snippets/light-token-guides/client-custom-rent-config.mdx';
 
 1. Closing a light-token account transfers remaining lamports to a destination account and the rent sponsor can reclaim sponsored rent.
 2. Light-token accounts can be closed
@@ -50,7 +50,7 @@ use light_ctoken_sdk::ctoken::{
     CloseCTokenAccount, CreateCMint, CreateCMintParams, CreateCTokenAccount,
     CTOKEN_PROGRAM_ID,
 };
-use light_ctoken_sdk::CToken;
+use light_ctoken_interface::state::CToken;
 use light_program_test::{LightProgramTest, ProgramTestConfig};
 use solana_sdk::{pubkey::Pubkey, signature::Keypair, signer::Signer};
 

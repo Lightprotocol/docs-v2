@@ -4,10 +4,10 @@ sidebarTitle: Create Mint Account
 description: Program and client guides to create a mint with token metadata. Includes step-by-step implementation and full code examples.
 ---
 
-import CMintSystemAccountsList from '/snippets/accounts-list/cmint-system-accounts-list.mdx';
-import CTokenClientPrerequisites from '/snippets/ctoken-guides/ctoken-client-prerequisites.mdx';
-import CTokenTsClientPrerequisites from '/snippets/ctoken-guides/ctoken-ts-client-prerequisites.mdx';
-import ClientCustomRentConfig from '/snippets/ctoken-guides/client-custom-rent-config.mdx';
+import CMintSystemAccountsList from '/snippets/accounts-list/light-mint-system-accounts-list.mdx';
+import CTokenClientPrerequisites from '/snippets/light-token-guides/light-token-client-prerequisites.mdx';
+import CTokenTsClientPrerequisites from '/snippets/light-token-guides/light-token-ts-client-prerequisites.mdx';
+import ClientCustomRentConfig from '/snippets/light-token-guides/client-custom-rent-config.mdx';
 
 1. Mint accounts uniquely represent a token on Solana and store its global metadata.
 2. Mints for light-token accounts are compressed accounts and rent-free.
@@ -123,13 +123,13 @@ pub async fn create_compressed_mint<R: Rpc + Indexer>(
     let output_queue = rpc.get_random_state_tree_info().unwrap().queue;
 
     // Derive address
-    let compression_address = light_ctoken_sdk::ctoken::derive_compressed_mint_address(
+    let compression_address = light_ctoken_sdk::ctoken::derive_cmint_compressed_address(
         &mint_signer.pubkey(),
         &address_tree.tree,
     );
 
     let mint_pda =
-        light_ctoken_sdk::ctoken::find_spl_mint_address(&mint_signer.pubkey()).0;
+        light_ctoken_sdk::ctoken::find_cmint_address(&mint_signer.pubkey()).0;
 
     // Get validity proof for the address
     let rpc_result = rpc

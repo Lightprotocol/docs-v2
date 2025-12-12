@@ -3,11 +3,11 @@ title: Mint to Light-Token Accounts
 description: Client and program guide to mint tokens to a light-token account. Includes step-by-step implementation and full code examples.
 ---
 
-import CMintSystemAccountsList from '/snippets/accounts-list/cmint-system-accounts-list.mdx';
-import CMintToCTokenAccountsList from '/snippets/accounts-list/cmint-to-ctoken-accounts-list.mdx';
-import CTokenClientPrerequisites from '/snippets/ctoken-guides/ctoken-client-prerequisites.mdx';
-import CTokenTsClientPrerequisites from '/snippets/ctoken-guides/ctoken-ts-client-prerequisites.mdx';
-import ClientCustomRentConfig from '/snippets/ctoken-guides/client-custom-rent-config.mdx';
+import CMintSystemAccountsList from '/snippets/accounts-list/light-mint-system-accounts-list.mdx';
+import CMintToCTokenAccountsList from '/snippets/accounts-list/light-mint-to-light-token-accounts-list.mdx';
+import CTokenClientPrerequisites from '/snippets/light-token-guides/light-token-client-prerequisites.mdx';
+import CTokenTsClientPrerequisites from '/snippets/light-token-guides/light-token-ts-client-prerequisites.mdx';
+import ClientCustomRentConfig from '/snippets/light-token-guides/client-custom-rent-config.mdx';
 
 
 1. Minting to light-token accounts increases the supply of a mint.
@@ -218,13 +218,13 @@ pub async fn create_compressed_mint<R: Rpc + Indexer>(
     let output_queue = rpc.get_random_state_tree_info().unwrap().queue;
 
     // Derive compression address
-    let compression_address = light_ctoken_sdk::ctoken::derive_compressed_mint_address(
+    let compression_address = light_ctoken_sdk::ctoken::derive_cmint_compressed_address(
         &mint_signer.pubkey(),
         &address_tree.tree,
     );
 
     let mint_pda =
-        light_ctoken_sdk::ctoken::find_spl_mint_address(&mint_signer.pubkey()).0;
+        light_ctoken_sdk::ctoken::find_cmint_address(&mint_signer.pubkey()).0;
 
     // Get validity proof for the address to proof it does not exist in the address tree
     let rpc_result = rpc

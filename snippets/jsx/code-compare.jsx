@@ -1,7 +1,7 @@
 export const CodeCompare = ({
   firstCode = "",
   secondCode = "",
-  firstLabel = "c-Token",
+  firstLabel = "Light-Token",
   secondLabel = "SPL",
   initialPosition = 50,
 }) => {
@@ -210,7 +210,7 @@ export const CodeCompare = ({
           dangerouslySetInnerHTML={{ __html: highlightCode(secondCode) }}
         />
 
-        {/* First code (foreground - c-Token) with clip-path - MUST be opaque to cover background */}
+        {/* First code (foreground - Light-Token) with clip-path - MUST be opaque to cover background */}
         <pre
           className="relative m-0 p-4 overflow-hidden text-zinc-700 dark:text-white/80 bg-white dark:bg-zinc-900"
           style={{
