@@ -58,30 +58,40 @@ const ix = createAssociatedTokenAccountInterfaceInstruction(
   <thead>
     <tr>
       <th style={{width: '15%'}}></th>
-      <th>light-token</th>
-      <th>SPL Token</th>
+      <th>SPL</th>
+      <th>Light</th>
     </tr>
   </thead>
   <tbody>
     <tr>
       <td>**Get/Create ATA**</td>
-      <td>getOrCreateAtaInterface()</td>
       <td>getOrCreateAssociatedTokenAccount()</td>
+      <td>getOrCreateAtaInterface()</td>
     </tr>
     <tr>
       <td>**Derive ATA**</td>
-      <td>getAssociatedTokenAddressInterface()</td>
       <td>getAssociatedTokenAddress()</td>
+      <td>getAssociatedTokenAddressInterface()</td>
     </tr>
     <tr>
       <td>**Transfer**</td>
-      <td>transferInterface()</td>
       <td>transferChecked()</td>
+      <td>transferInterface()</td>
     </tr>
     <tr>
       <td>**Get Balance**</td>
-      <td>getAtaInterface()</td>
       <td>getAccount()</td>
+      <td>getAtaInterface()</td>
+    </tr>
+    <tr>
+      <td>**Tx History**</td>
+      <td>getSignaturesForAddress()</td>
+      <td>rpc.getSignaturesForOwnerInterface()</td>
+    </tr>
+    <tr>
+      <td>**Exit to SPL**</td>
+      <td>N/A</td>
+      <td>unwrap()</td>
     </tr>
   </tbody>
 </table>
