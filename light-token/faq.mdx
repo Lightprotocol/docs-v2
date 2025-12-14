@@ -40,9 +40,9 @@ const ix = createAssociatedTokenAccountInstruction(
   mint
 );`}
   secondCode={`// Create light-token account
-import { createAssociatedTokenAccountInstruction } from "@lightprotocol/compressed-token/unified";
+import { createAssociatedTokenAccountInterfaceInstruction } from "@lightprotocol/compressed-token/unified";
 
-const ix = createAssociatedTokenAccountInstruction(
+const ix = createAssociatedTokenAccountInterfaceInstruction(
   payer,
   ata,
   owner,
