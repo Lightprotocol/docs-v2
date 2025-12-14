@@ -27,7 +27,8 @@ Users receive and send the same tokens.
 Light-token is currently deployed on devnet and undergoing security audits. 
 
 #### Do I need to change my client code significantly?
-No. The `light-token-sdk` follows similar patterns to SPL.
+No. The `light-token-sdk` methods follow similar patterns to SPL.
+Reveal the interface method in the code example and find a few examples below.
 
 <CodeCompare
   firstCode={`// Create SPL token account
@@ -53,6 +54,37 @@ const ix = createAssociatedTokenAccountInterfaceInstruction(
 
 />
 
+<table>
+  <thead>
+    <tr>
+      <th style={{width: '15%'}}></th>
+      <th>light-token</th>
+      <th>SPL Token</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>**Get/Create ATA**</td>
+      <td>getOrCreateAtaInterface()</td>
+      <td>getOrCreateAssociatedTokenAccount()</td>
+    </tr>
+    <tr>
+      <td>**Derive ATA**</td>
+      <td>getAssociatedTokenAddressInterface()</td>
+      <td>getAssociatedTokenAddress()</td>
+    </tr>
+    <tr>
+      <td>**Transfer**</td>
+      <td>transferInterface()</td>
+      <td>transferChecked()</td>
+    </tr>
+    <tr>
+      <td>**Get Balance**</td>
+      <td>getAtaInterface()</td>
+      <td>getAccount()</td>
+    </tr>
+  </tbody>
+</table>
 ---
 
 #### Can light-token accounts hold SPL tokens?
