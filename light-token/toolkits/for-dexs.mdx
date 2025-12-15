@@ -1,3 +1,461 @@
 ---
-title: "for DEXs"
+title: "Toolkit for DEXs"
+sidebarTitle: "for DEXs"
+description: "Guide to integrate light-token support into your DEX protocol."
 ---
+
+import { CodeCompare } from '/snippets/jsx/code-compare.jsx';
+
+1. Enable users to deposit and withdraw light-tokens directly.
+2. Reduce user costs by ~200x for token account creation.
+3. Support atomic swaps with light-token input/output.
+
+|  Creation Cost         | SPL  | light-token      |
+|:---------------------|:------------------|:----------------------|
+| **Token Account**   | 	  ~2,000,000 lamports         | ~**17,000** lamports     |
+
+### What you will implement
+
+<table>
+  <thead>
+    <tr>
+      <th style={{width: '15%'}}></th>
+      <th>SPL</th>
+      <th>Light</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>**Accept Deposit**</td>
+      <td>transfer() to pool</td>
+      <td>unwrap()</td>
+    </tr>
+    <tr>
+      <td>**Return Withdrawal**</td>
+      <td>transfer() from pool</td>
+      <td>wrap()</td>
+    </tr>
+    <tr>
+      <td>**Swap Input**</td>
+      <td>transferChecked()</td>
+      <td>unwrap()</td>
+    </tr>
+    <tr>
+      <td>**Swap Output**</td>
+      <td>transfer()</td>
+      <td>wrap()</td>
+    </tr>
+    <tr>
+      <td>**Query Balance**</td>
+      <td>getAccount()</td>
+      <td>getAtaInterface()</td>
+    </tr>
+  </tbody>
+</table>
+
+## Setup
+
+### TypeScript SDK
+
+```bash
+npm install @lightprotocol/compressed-token \
+            @lightprotocol/stateless.js
+```
+
+```typescript
+import { createRpc } from "@lightprotocol/stateless.js";
+import {
+  wrap,
+  unwrap,
+  getAssociatedTokenAddressInterface,
+  getAtaInterface,
+  createAtaInterfaceIdempotent,
+  getSplInterfaceInfos,
+} from "@lightprotocol/compressed-token";
+
+const rpc = createRpc(RPC_ENDPOINT);
+```
+
+### Rust SDK (On-chain Programs)
+
+```toml
+[dependencies]
+light-ctoken-sdk = "0.2"
+```
+
+```rust
+use light_ctoken_sdk::ctoken::{
+    TransferSplToCtokenCpi,  // SPL → c-token (wrap)
+    TransferCTokenToSplCpi,  // c-token → SPL (unwrap)
+};
+```
+
+## Accept Deposits
+
+Accept light-token deposits by unwrapping them from c-token ATAs to SPL tokens for your pool.
+
+<Tabs>
+<Tab title="Action">
+
+```typescript
+import { unwrap } from "@lightprotocol/compressed-token";
+import { getAssociatedTokenAddressSync } from "@solana/spl-token";
+
+// Pool's SPL ATA (destination)
+const poolAta = getAssociatedTokenAddressSync(mint, poolAuthority);
+
+// Unwrap user's light-tokens to pool's SPL ATA
+const signature = await unwrap(
+  rpc,
+  payer,
+  poolAta,          // destination: pool's SPL ATA
+  depositor,        // owner of c-token ATA (signer)
+  mint,
+  amount
+);
+```
+
+<Accordion title="Compare to SPL">
+
+```typescript
+import { transfer } from "@solana/spl-token";
+
+// SPL: User transfers from their ATA to pool
+await transfer(
+  connection,
+  payer,
+  userAta,
+  poolAta,
+  depositor,
+  amount
+);
+```
+
+</Accordion>
+
+</Tab>
+<Tab title="Instruction">
+
+```typescript
+import {
+  createUnwrapInstruction,
+  getAssociatedTokenAddressInterface,
+  getSplInterfaceInfos,
+} from "@lightprotocol/compressed-token";
+import {
+  buildAndSignTx,
+  sendAndConfirmTx,
+} from "@lightprotocol/stateless.js";
+import { getAssociatedTokenAddressSync } from "@solana/spl-token";
+import { ComputeBudgetProgram } from "@solana/web3.js";
+
+// Derive addresses
+const ctokenAta = getAssociatedTokenAddressInterface(mint, depositor.publicKey);
+const poolAta = getAssociatedTokenAddressSync(mint, poolAuthority);
+
+// Get SPL interface info
+const splInterfaceInfos = await getSplInterfaceInfos(rpc, mint);
+const splInterfaceInfo = splInterfaceInfos.find(info => info.isInitialized);
+
+// Create unwrap instruction
+const unwrapIx = createUnwrapInstruction(
+  ctokenAta,              // source: user's c-token ATA
+  poolAta,                // destination: pool's SPL ATA
+  depositor.publicKey,    // owner
+  mint,
+  amount,
+  splInterfaceInfo,
+  payer.publicKey
+);
+
+// Build and send
+const { blockhash } = await rpc.getLatestBlockhash();
+const tx = buildAndSignTx(
+  [ComputeBudgetProgram.setComputeUnitLimit({ units: 200_000 }), unwrapIx],
+  payer,
+  blockhash,
+  [depositor]
+);
+await sendAndConfirmTx(rpc, tx);
+```
+
+</Tab>
+<Tab title="Program">
+
+```rust
+use light_ctoken_sdk::ctoken::TransferCTokenToSplCpi;
+
+// In your program instruction handler
+pub fn accept_deposit(ctx: Context<AcceptDeposit>, amount: u64, spl_interface_pda_bump: u8) -> Result<()> {
+    // Transfer user's c-tokens to pool's SPL ATA
+    TransferCTokenToSplCpi {
+        source_ctoken_account: ctx.accounts.user_ctoken_ata.to_account_info(),
+        destination_spl_token_account: ctx.accounts.pool_ata.to_account_info(),
+        amount,
+        authority: ctx.accounts.depositor.to_account_info(),
+        mint: ctx.accounts.mint.to_account_info(),
+        payer: ctx.accounts.payer.to_account_info(),
+        spl_interface_pda: ctx.accounts.spl_interface_pda.to_account_info(),
+        spl_interface_pda_bump,
+        spl_token_program: ctx.accounts.token_program.to_account_info(),
+        compressed_token_program_authority: ctx.accounts.cpi_authority.to_account_info(),
+    }
+    .invoke()?;
+
+    // Continue with your pool deposit logic...
+    Ok(())
+}
+```
+
+</Tab>
+</Tabs>
+
+## Return Withdrawals
+
+Return light-tokens to users by wrapping SPL tokens from your pool into c-token ATAs.
+
+<Tabs>
+<Tab title="Action">
+
+```typescript
+import { wrap, createAtaInterfaceIdempotent, getAssociatedTokenAddressInterface } from "@lightprotocol/compressed-token";
+import { getAssociatedTokenAddressSync } from "@solana/spl-token";
+
+// Ensure user's c-token ATA exists
+const ctokenAta = getAssociatedTokenAddressInterface(mint, withdrawer);
+await createAtaInterfaceIdempotent(rpc, payer, mint, withdrawer);
+
+// Pool's SPL ATA (source)
+const poolAta = getAssociatedTokenAddressSync(mint, poolAuthority);
+
+// Wrap pool's SPL tokens to user's c-token ATA
+const signature = await wrap(
+  rpc,
+  payer,
+  poolAta,          // source: pool's SPL ATA
+  ctokenAta,        // destination: user's c-token ATA
+  poolAuthority,    // owner of pool's SPL tokens (signer)
+  mint,
+  amount
+);
+```
+
+<Accordion title="Compare to SPL">
+
+```typescript
+import { transfer } from "@solana/spl-token";
+
+// SPL: Pool transfers to user's ATA
+await transfer(
+  connection,
+  payer,
+  poolAta,
+  userAta,
+  poolAuthority,
+  amount
+);
+```
+
+</Accordion>
+
+</Tab>
+<Tab title="Instruction">
+
+```typescript
+import {
+  createWrapInstruction,
+  getAssociatedTokenAddressInterface,
+  getSplInterfaceInfos,
+} from "@lightprotocol/compressed-token";
+import {
+  buildAndSignTx,
+  sendAndConfirmTx,
+} from "@lightprotocol/stateless.js";
+import { getAssociatedTokenAddressSync } from "@solana/spl-token";
+import { ComputeBudgetProgram } from "@solana/web3.js";
+
+// Derive addresses
+const poolAta = getAssociatedTokenAddressSync(mint, poolAuthority);
+const ctokenAta = getAssociatedTokenAddressInterface(mint, withdrawer);
+
+// Get SPL interface info
+const splInterfaceInfos = await getSplInterfaceInfos(rpc, mint);
+const splInterfaceInfo = splInterfaceInfos.find(info => info.isInitialized);
+
+// Create wrap instruction
+const wrapIx = createWrapInstruction(
+  poolAta,                // source: pool's SPL ATA
+  ctokenAta,              // destination: user's c-token ATA
+  poolAuthority,          // owner
+  mint,
+  amount,
+  splInterfaceInfo,
+  payer.publicKey
+);
+
+// Build and send
+const { blockhash } = await rpc.getLatestBlockhash();
+const tx = buildAndSignTx(
+  [ComputeBudgetProgram.setComputeUnitLimit({ units: 200_000 }), wrapIx],
+  payer,
+  blockhash,
+  [poolAuthority]
+);
+await sendAndConfirmTx(rpc, tx);
+```
+
+</Tab>
+<Tab title="Program">
+
+```rust
+use light_ctoken_sdk::ctoken::TransferSplToCtokenCpi;
+
+// In your program instruction handler
+pub fn process_withdrawal(ctx: Context<ProcessWithdrawal>, amount: u64, spl_interface_pda_bump: u8) -> Result<()> {
+    // Your pool withdrawal logic first...
+
+    // Transfer SPL tokens from pool to user's c-token ATA
+    TransferSplToCtokenCpi {
+        amount,
+        spl_interface_pda_bump,
+        source_spl_token_account: ctx.accounts.pool_ata.to_account_info(),
+        destination_ctoken_account: ctx.accounts.user_ctoken_ata.to_account_info(),
+        authority: ctx.accounts.pool_authority.to_account_info(),
+        mint: ctx.accounts.mint.to_account_info(),
+        payer: ctx.accounts.payer.to_account_info(),
+        spl_interface_pda: ctx.accounts.spl_interface_pda.to_account_info(),
+        spl_token_program: ctx.accounts.token_program.to_account_info(),
+        compressed_token_program_authority: ctx.accounts.cpi_authority.to_account_info(),
+    }
+    .invoke_signed(&[pool_signer_seeds])?;
+
+    Ok(())
+}
+```
+
+</Tab>
+</Tabs>
+
+## Atomic Swap
+
+Compose unwrap + swap + wrap instructions in a single atomic transaction.
+
+```typescript
+import { ComputeBudgetProgram } from "@solana/web3.js";
+import {
+  createUnwrapInstruction,
+  createWrapInstruction,
+  getAssociatedTokenAddressInterface,
+  getSplInterfaceInfos,
+  loadAta,
+} from "@lightprotocol/compressed-token";
+import {
+  buildAndSignTx,
+  sendAndConfirmTx,
+} from "@lightprotocol/stateless.js";
+import { getAssociatedTokenAddressSync } from "@solana/spl-token";
+
+// Get addresses
+const userInputCtoken = getAssociatedTokenAddressInterface(inputMint, user.publicKey);
+const userInputSpl = getAssociatedTokenAddressSync(inputMint, user.publicKey);
+const userOutputSpl = getAssociatedTokenAddressSync(outputMint, user.publicKey);
+const userOutputCtoken = getAssociatedTokenAddressInterface(outputMint, user.publicKey);
+
+// Load c-token ATA (brings cold tokens to hot balance)
+await loadAta(rpc, userInputCtoken, user, inputMint, payer);
+
+// Get SPL interface infos
+const inputSplInfos = await getSplInterfaceInfos(rpc, inputMint);
+const inputSplInfo = inputSplInfos.find(i => i.isInitialized);
+const outputSplInfos = await getSplInterfaceInfos(rpc, outputMint);
+const outputSplInfo = outputSplInfos.find(i => i.isInitialized);
+
+// 1. Unwrap input light-tokens to SPL for swap
+const unwrapIx = createUnwrapInstruction(
+  userInputCtoken,
+  userInputSpl,
+  user.publicKey,
+  inputMint,
+  inputAmount,
+  inputSplInfo,
+  payer.publicKey
+);
+
+// 2. Your DEX swap instruction (e.g., Raydium, Orca)
+const swapIx = createSwapInstruction({
+  // ... your swap params
+});
+
+// 3. Wrap output SPL tokens back to light-tokens
+const wrapIx = createWrapInstruction(
+  userOutputSpl,
+  userOutputCtoken,
+  user.publicKey,
+  outputMint,
+  outputAmount,
+  outputSplInfo,
+  payer.publicKey
+);
+
+// Build atomic transaction
+const { blockhash } = await rpc.getLatestBlockhash();
+const tx = buildAndSignTx(
+  [
+    ComputeBudgetProgram.setComputeUnitLimit({ units: 500_000 }),
+    unwrapIx,
+    swapIx,
+    wrapIx,
+  ],
+  payer,
+  blockhash,
+  [user]
+);
+
+const signature = await sendAndConfirmTx(rpc, tx);
+```
+
+## Query User Balances
+
+Check a user's light-token holdings before processing deposits or swaps.
+
+```typescript
+import {
+  getAssociatedTokenAddressInterface,
+  getAtaInterface,
+} from "@lightprotocol/compressed-token";
+
+const ctokenAta = getAssociatedTokenAddressInterface(mint, userPubkey);
+const account = await getAtaInterface(rpc, ctokenAta, userPubkey, mint);
+
+console.log(`User has ${account.parsed.amount} light-tokens`);
+```
+
+<Accordion title="Compare to SPL">
+
+```typescript
+import { getAccount, getAssociatedTokenAddressSync } from "@solana/spl-token";
+
+const ata = getAssociatedTokenAddressSync(mint, userPubkey);
+const account = await getAccount(connection, ata);
+console.log(`User has ${account.amount} SPL tokens`);
+```
+
+</Accordion>
+
+## Integration Flow
+
+```
+                    DEX with light-token Support
+┌─────────────────────────────────────────────────────────────┐
+│                                                             │
+│  DEPOSIT:                                                   │
+│  User c-token ATA ──unwrap()──► Pool SPL ATA                │
+│                                                             │
+│  SWAP:                                                      │
+│  unwrap() ──► [swap instruction] ──► wrap()                 │
+│                                                             │
+│  WITHDRAWAL:                                                │
+│  Pool SPL ATA ──wrap()──► User c-token ATA                  │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
