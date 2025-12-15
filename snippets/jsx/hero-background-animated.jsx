@@ -3,42 +3,68 @@ export const HeroBackground = () => {
   const cols = 23;
   const rows = 10;
 
-  // Tiles with individual animation configs
-  // Avoiding row 4 (middle empty zone)
-  // Organic timing: durations 3-5s, staggered delays for smooth flow
-  const tiles = [
-    // Top area (rows 0-3)
-    { col: 1, row: 0, w: 2, h: 1, delay: 0, duration: 4, maxOpacity: 0.06 },
-    { col: 8, row: 0, w: 1, h: 2, delay: 1.3, duration: 4.5, maxOpacity: 0.05 },
-    { col: 15, row: 0, w: 1, h: 1, delay: 2.8, duration: 3.5, maxOpacity: 0.04 },
-    { col: 20, row: 1, w: 2, h: 2, delay: 0.7, duration: 5, maxOpacity: 0.05 },
-    { col: 3, row: 2, w: 2, h: 2, delay: 2.1, duration: 4, maxOpacity: 0.06 },
-    { col: 11, row: 1, w: 1, h: 1, delay: 3.9, duration: 3.5, maxOpacity: 0.04 },
-    { col: 16, row: 2, w: 1, h: 2, delay: 0.5, duration: 4.5, maxOpacity: 0.05 },
-    { col: 6, row: 1, w: 1, h: 1, delay: 4.6, duration: 4, maxOpacity: 0.03 },
-    { col: 12, row: 3, w: 2, h: 1, delay: 1.8, duration: 3.5, maxOpacity: 0.05 },
-    { col: 0, row: 2, w: 1, h: 1, delay: 4.2, duration: 4.5, maxOpacity: 0.04 },
-    { col: 19, row: 0, w: 1, h: 1, delay: 3.1, duration: 4, maxOpacity: 0.03 },
-    { col: 22, row: 3, w: 1, h: 1, delay: 1.0, duration: 3.5, maxOpacity: 0.04 },
+  // Tiles grouped by quadrant for sequential animation
+  // Quadrants: TL (0s), TR (1.5s), BL (3s), BR (4.5s)
+  // Within each quadrant, tiles appear sequentially with 1.5s stagger
+  const staggerInterval = 1.5;
+  const quadrantOffsets = { tl: 0, tr: 1.5, bl: 3, br: 4.5 };
 
-    // Bottom area (rows 5-9)
-    { col: 5, row: 5, w: 3, h: 1, delay: 2.0, duration: 4.5, maxOpacity: 0.04 },
-    { col: 0, row: 6, w: 2, h: 2, delay: 0.3, duration: 4, maxOpacity: 0.05 },
-    { col: 9, row: 6, w: 2, h: 1, delay: 3.4, duration: 3.5, maxOpacity: 0.04 },
-    { col: 18, row: 5, w: 2, h: 2, delay: 1.5, duration: 5, maxOpacity: 0.05 },
-    { col: 4, row: 7, w: 2, h: 2, delay: 4.5, duration: 4, maxOpacity: 0.04 },
-    { col: 14, row: 7, w: 2, h: 2, delay: 0.9, duration: 4.5, maxOpacity: 0.04 },
-    { col: 21, row: 8, w: 2, h: 1, delay: 3.0, duration: 3.5, maxOpacity: 0.05 },
-    { col: 4, row: 8, w: 1, h: 1, delay: 5.2, duration: 4, maxOpacity: 0.03 },
-    { col: 11, row: 5, w: 1, h: 1, delay: 0.2, duration: 3.5, maxOpacity: 0.04 },
-    { col: 2, row: 9, w: 1, h: 1, delay: 2.5, duration: 4.5, maxOpacity: 0.03 },
-    { col: 16, row: 6, w: 1, h: 1, delay: 3.7, duration: 4, maxOpacity: 0.04 },
-    { col: 8, row: 8, w: 1, h: 1, delay: 1.2, duration: 3.5, maxOpacity: 0.03 },
-    { col: 13, row: 9, w: 2, h: 1, delay: 4.3, duration: 4, maxOpacity: 0.04 },
-    { col: 20, row: 6, w: 1, h: 1, delay: 2.7, duration: 4.5, maxOpacity: 0.03 },
-    { col: 7, row: 5, w: 1, h: 1, delay: 1.0, duration: 3.5, maxOpacity: 0.04 },
-    { col: 22, row: 5, w: 1, h: 2, delay: 4.8, duration: 4, maxOpacity: 0.03 },
+  const getQuadrant = (col, row) => {
+    const isTop = row <= 3;
+    const isLeft = col <= 11;
+    if (isTop && isLeft) return 'tl';
+    if (isTop && !isLeft) return 'tr';
+    if (!isTop && isLeft) return 'bl';
+    return 'br';
+  };
+
+  const baseTiles = [
+    // Top-left quadrant
+    { col: 1, row: 0, w: 2, h: 1, duration: 4, maxOpacity: 0.06 },
+    { col: 8, row: 0, w: 1, h: 2, duration: 4.5, maxOpacity: 0.05 },
+    { col: 3, row: 2, w: 2, h: 2, duration: 4, maxOpacity: 0.06 },
+    { col: 11, row: 1, w: 1, h: 1, duration: 3.5, maxOpacity: 0.04 },
+    { col: 6, row: 1, w: 1, h: 1, duration: 4, maxOpacity: 0.03 },
+    { col: 0, row: 2, w: 1, h: 1, duration: 4.5, maxOpacity: 0.04 },
+
+    // Top-right quadrant
+    { col: 15, row: 0, w: 1, h: 1, duration: 3.5, maxOpacity: 0.04 },
+    { col: 20, row: 1, w: 2, h: 2, duration: 5, maxOpacity: 0.05 },
+    { col: 16, row: 2, w: 1, h: 2, duration: 4.5, maxOpacity: 0.05 },
+    { col: 12, row: 3, w: 2, h: 1, duration: 3.5, maxOpacity: 0.05 },
+    { col: 19, row: 0, w: 1, h: 1, duration: 4, maxOpacity: 0.03 },
+    { col: 22, row: 3, w: 1, h: 1, duration: 3.5, maxOpacity: 0.04 },
+
+    // Bottom-left quadrant
+    { col: 5, row: 5, w: 3, h: 1, duration: 4.5, maxOpacity: 0.04 },
+    { col: 0, row: 6, w: 2, h: 2, duration: 4, maxOpacity: 0.05 },
+    { col: 9, row: 6, w: 2, h: 1, duration: 3.5, maxOpacity: 0.04 },
+    { col: 4, row: 7, w: 2, h: 2, duration: 4, maxOpacity: 0.04 },
+    { col: 4, row: 8, w: 1, h: 1, duration: 4, maxOpacity: 0.03 },
+    { col: 11, row: 5, w: 1, h: 1, duration: 3.5, maxOpacity: 0.04 },
+    { col: 2, row: 9, w: 1, h: 1, duration: 4.5, maxOpacity: 0.03 },
+    { col: 8, row: 8, w: 1, h: 1, duration: 3.5, maxOpacity: 0.03 },
+    { col: 7, row: 5, w: 1, h: 1, duration: 3.5, maxOpacity: 0.04 },
+
+    // Bottom-right quadrant
+    { col: 18, row: 5, w: 2, h: 2, duration: 5, maxOpacity: 0.05 },
+    { col: 14, row: 7, w: 2, h: 2, duration: 4.5, maxOpacity: 0.04 },
+    { col: 21, row: 8, w: 2, h: 1, duration: 3.5, maxOpacity: 0.05 },
+    { col: 16, row: 6, w: 1, h: 1, duration: 4, maxOpacity: 0.04 },
+    { col: 13, row: 9, w: 2, h: 1, duration: 4, maxOpacity: 0.04 },
+    { col: 20, row: 6, w: 1, h: 1, duration: 4.5, maxOpacity: 0.03 },
+    { col: 22, row: 5, w: 1, h: 2, duration: 4, maxOpacity: 0.03 },
   ];
+
+  // Calculate delays: quadrant offset + index within quadrant * stagger
+  const quadrantCounts = { tl: 0, tr: 0, bl: 0, br: 0 };
+  const tiles = baseTiles.map((tile) => {
+    const quadrant = getQuadrant(tile.col, tile.row);
+    const indexInQuadrant = quadrantCounts[quadrant];
+    quadrantCounts[quadrant]++;
+    const delay = quadrantOffsets[quadrant] + indexInQuadrant * staggerInterval;
+    return { ...tile, delay };
+  });
 
   return (
     <svg
@@ -57,11 +83,16 @@ export const HeroBackground = () => {
       <defs>
         <style>
           {`
-            @keyframes tileAppear {
-              0% { opacity: 0; }
-              25% { opacity: 1; }
-              75% { opacity: 1; }
-              100% { opacity: 0; }
+            @keyframes tilePulse {
+              0% { opacity: 0; transform: scale(0.95); }
+              25% { opacity: 1; transform: scale(1); }
+              50% { opacity: 1; transform: scale(1.05); }
+              75% { opacity: 1; transform: scale(1); }
+              100% { opacity: 0; transform: scale(0.95); }
+            }
+            .tile {
+              transform-box: fill-box;
+              transform-origin: center;
             }
             @keyframes bloomBreathe {
               0%, 100% { opacity: 1; }
@@ -176,6 +207,7 @@ export const HeroBackground = () => {
       {tiles.map((tile, i) => (
         <rect
           key={`tile-${i}`}
+          className="tile"
           x={tile.col * cellSize}
           y={tile.row * cellSize}
           width={tile.w * cellSize}
@@ -183,9 +215,8 @@ export const HeroBackground = () => {
           fill="#0066FF"
           style={{
             opacity: 0,
-            animation: `tileAppear ${tile.duration}s ease-in-out infinite`,
+            animation: `tilePulse ${tile.duration}s ease-in-out infinite`,
             animationDelay: `${tile.delay}s`,
-            '--max-opacity': tile.maxOpacity,
           }}
           fillOpacity={tile.maxOpacity}
         />
