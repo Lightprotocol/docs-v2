@@ -3,16 +3,30 @@ export const HeroBackground = () => {
   const cols = 23; // 2048 / 91 ≈ 22.5
   const rows = 10; // 826 / 91 ≈ 9
 
-  // Tinted tiles configuration
+  // Tinted tiles configuration - distributed across grid
   const tiles = [
-    { col: 4, row: 1, w: 2, h: 2, opacity: 0.05 },
-    { col: 9, row: 2, w: 2, h: 2, opacity: 0.05 },
-    { col: 12, row: 3, w: 1, h: 2, opacity: 0.05 },
-    { col: 15, row: 2, w: 2, h: 2, opacity: 0.05 },
-    { col: 18, row: 4, w: 1, h: 2, opacity: 0.04 },
-    { col: 6, row: 4, w: 4, h: 3, opacity: 0.03 },
-    { col: 10, row: 4, w: 3, h: 3, opacity: 0.03 },
-    { col: 14, row: 4, w: 4, h: 3, opacity: 0.03 },
+    // Top row scattered
+    { col: 1, row: 0, w: 2, h: 1, opacity: 0.04 },
+    { col: 8, row: 0, w: 1, h: 2, opacity: 0.05 },
+    { col: 20, row: 1, w: 2, h: 2, opacity: 0.04 },
+    // Upper-middle area
+    { col: 3, row: 2, w: 2, h: 2, opacity: 0.05 },
+    { col: 16, row: 2, w: 1, h: 2, opacity: 0.05 },
+    // Center area (sparse, horizontal)
+    { col: 5, row: 5, w: 3, h: 1, opacity: 0.03 },
+    { col: 12, row: 3, w: 2, h: 1, opacity: 0.04 },
+    // Lower area
+    { col: 0, row: 6, w: 2, h: 2, opacity: 0.04 },
+    { col: 9, row: 6, w: 2, h: 1, opacity: 0.03 },
+    { col: 18, row: 5, w: 2, h: 2, opacity: 0.04 },
+    // Bottom scattered right
+    { col: 4, row: 8, w: 1, h: 1, opacity: 0.03 },
+    { col: 14, row: 7, w: 2, h: 2, opacity: 0.03 },
+    { col: 21, row: 8, w: 2, h: 1, opacity: 0.04 },
+    // Bottom scattered left
+    { col: 4, row: 8, w: 1, h: 1, opacity: 0.03 },
+    { col: 4, row: 7, w: 2, h: 2, opacity: 0.03 },
+    { col: 21, row: 8, w: 2, h: 1, opacity: 0.04 },
   ];
 
   return (
@@ -30,17 +44,37 @@ export const HeroBackground = () => {
       xmlns="http://www.w3.org/2000/svg"
     >
       <defs>
+        {/* Noise filter for subtle texture */}
+        <filter id="noise" x="0%" y="0%" width="100%" height="100%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" result="noise" />
+          <feColorMatrix type="saturate" values="0" />
+          <feBlend in="SourceGraphic" in2="noise" mode="multiply" />
+        </filter>
+
         {/* Radial gradient for top-left bloom */}
         <radialGradient id="bloom-top-left" cx="-1.95%" cy="4.84%" r="57.6%">
-          <stop offset="0%" stopColor="#0066FF" stopOpacity="0.14" />
-          <stop offset="45%" stopColor="#0066FF" stopOpacity="0.06" />
+          <stop offset="0%" stopColor="#0066FF" stopOpacity="0.18" />
+          <stop offset="45%" stopColor="#0066FF" stopOpacity="0.08" />
+          <stop offset="100%" stopColor="#0066FF" stopOpacity="0" />
+        </radialGradient>
+
+        {/* Radial gradient for top-right bloom */}
+        <radialGradient id="bloom-top-right" cx="105%" cy="10%" r="50%">
+          <stop offset="0%" stopColor="#0066FF" stopOpacity="0.12" />
+          <stop offset="50%" stopColor="#0066FF" stopOpacity="0.04" />
           <stop offset="100%" stopColor="#0066FF" stopOpacity="0" />
         </radialGradient>
 
         {/* Radial gradient for bottom-center bloom */}
         <radialGradient id="bloom-bottom-center" cx="50%" cy="112.6%" r="61%">
-          <stop offset="0%" stopColor="#0066FF" stopOpacity="0.11" />
-          <stop offset="55%" stopColor="#0066FF" stopOpacity="0.04" />
+          <stop offset="0%" stopColor="#0066FF" stopOpacity="0.14" />
+          <stop offset="55%" stopColor="#0066FF" stopOpacity="0.06" />
+          <stop offset="100%" stopColor="#0066FF" stopOpacity="0" />
+        </radialGradient>
+
+        {/* Center glow */}
+        <radialGradient id="center-glow" cx="50%" cy="40%" r="45%">
+          <stop offset="0%" stopColor="#0066FF" stopOpacity="0.06" />
           <stop offset="100%" stopColor="#0066FF" stopOpacity="0" />
         </radialGradient>
 
@@ -49,13 +83,28 @@ export const HeroBackground = () => {
           <stop offset="55%" stopColor="#FFFFFF" stopOpacity="0" />
           <stop offset="100%" stopColor="#FFFFFF" stopOpacity="0.55" />
         </radialGradient>
+
+        {/* Bottom fade to white */}
+        <linearGradient id="bottom-fade" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="70%" stopColor="#FFFFFF" stopOpacity="0" />
+          <stop offset="100%" stopColor="#FFFFFF" stopOpacity="1" />
+        </linearGradient>
       </defs>
 
       {/* Base fill */}
       <rect width="100%" height="100%" fill="#F7FAFA" />
 
+      {/* Subtle noise texture overlay */}
+      <rect width="100%" height="100%" fill="#F7FAFA" filter="url(#noise)" opacity="0.03" />
+
       {/* Soft bloom top-left */}
       <rect width="100%" height="100%" fill="url(#bloom-top-left)" />
+
+      {/* Soft bloom top-right */}
+      <rect width="100%" height="100%" fill="url(#bloom-top-right)" />
+
+      {/* Center glow */}
+      <rect width="100%" height="100%" fill="url(#center-glow)" />
 
       {/* Soft bloom bottom-center */}
       <rect width="100%" height="100%" fill="url(#bloom-bottom-center)" />
@@ -109,6 +158,9 @@ export const HeroBackground = () => {
 
       {/* Vignette overlay */}
       <rect width="100%" height="100%" fill="url(#vignette)" />
+
+      {/* Bottom fade to white for smooth transition */}
+      <rect width="100%" height="100%" fill="url(#bottom-fade)" />
     </svg>
   );
 };
