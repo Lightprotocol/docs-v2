@@ -18,39 +18,70 @@
   "navigation": {
     "tabs": [
       {
-        "tab": "Documentation",
+        "tab": "Home",
         "groups": [
-                    {
-            "group": "Light-Token Standard (Beta)",
+          {
+            "group": "Overview",
+            "pages": ["home"]
+          }
+        ]
+      },
+      {
+        "tab": "Light-Token Program",
+        "groups": [
+          {
+            "group": "Get Started",
             "pages": [
               "light-token/README",
+              "light-token/quickstart",
               "light-token/faq",
-              {
-                "group": "Cookbook",
-                "pages": [
-                  "light-token/cookbook/create-mint",
-                  "light-token/cookbook/create-ata",
-                  "light-token/cookbook/create-token-account",
-                  "light-token/cookbook/mint-tokens",
-                  "light-token/cookbook/transfer-interface",
-                  "light-token/cookbook/close-token-account"
-                ]
-              },
-              {
-                "group": "Toolkits",
-                "expanded": true,
-                "pages": [
-                  "light-token/toolkits/README",
-                  "light-token/toolkits/for-payments",
-                  "light-token/toolkits/for-wallets",
-                  "light-token/toolkits/for-streaming-mints",
-                  "light-token/toolkits/for-streaming-tokens"
-                ]
-              }
+              "learn/ai-tools-guide"
             ]
           },
           {
-            "group": "Get Started with ZK Compression",
+            "group": "Toolkits",
+            "pages": [
+              "light-token/toolkits/README",
+              "light-token/toolkits/for-payments",
+              "light-token/toolkits/for-wallets",
+              "light-token/toolkits/for-streaming-mints",
+              "light-token/toolkits/for-streaming-tokens"
+            ]
+          },
+          {
+            "group": "Cookbook",
+            "pages": [
+              "light-token/cookbook/create-mint",
+              "light-token/cookbook/create-ata",
+              "light-token/cookbook/create-token-account",
+              "light-token/cookbook/mint-tokens",
+              "light-token/cookbook/transfer-interface",
+              "light-token/cookbook/close-token-account"
+            ]
+          },
+          {
+            "group": "Learn",
+            "pages": [
+              "learn/light-token-standard"
+            ]
+          },
+          {
+            "group": "SDK Reference",
+            "pages": [
+              "api-reference/libraries/stateless-js",
+              "api-reference/libraries/compressed-token",
+              "api-reference/libraries/light-client",
+              "api-reference/libraries/light-sdk",
+              "api-reference/libraries/light-program-test"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "ZK Compression",
+        "groups": [
+          {
+            "group": "Get Started",
             "pages": [
               "welcome",
               "quickstart",
@@ -403,8 +434,7 @@
                   "learn/core-concepts/transaction-lifecycle",
                   "learn/core-concepts/considerations"
                 ]
-              },
-              "learn/light-token-standard"
+              }
             ]
           },
           {
@@ -440,7 +470,6 @@
           {
             "group": "SDK Reference",
             "pages": [
-              "changelog",
               "api-reference/libraries/stateless-js",
               "api-reference/libraries/compressed-token",
               "api-reference/libraries/light-client",
