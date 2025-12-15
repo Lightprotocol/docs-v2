@@ -1,5 +1,519 @@
 ---
-title: "light-token Toolkit for Launchpads"
+title: "Toolkit for Launchpads"
 sidebarTitle: "for Launchpads"
 description: "Guide to add light-token APIs to your Launchpad Application."
 ---
+
+import { CodeCompare } from '/snippets/jsx/code-compare.jsx';
+
+1. light-token follows similar API patterns like SPL and simply adds an interface suffix.
+2. Token accounts cost ~200x less to create than SPL accounts.
+3. Mints are rent-free with built-in token metadata.
+
+|  Creation Cost         | SPL  | light-token      |
+|:---------------------|:------------------|:----------------------|
+| **Mint Account**    | ~1,500,000 lamports        | **15,000** lamports     |
+| **Token Account**   | 	  ~2,000,000 lamports         | ~**17,000** lamports     |
+
+### What you will implement
+
+<table>
+  <thead>
+    <tr>
+      <th style={{width: '15%'}}></th>
+      <th>SPL</th>
+      <th>Light</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>**Create Mint**</td>
+      <td>createMint()</td>
+      <td>createMintInterface()</td>
+    </tr>
+    <tr>
+      <td>**Get/Create ATA**</td>
+      <td>getOrCreateAssociatedTokenAccount()</td>
+      <td>getOrCreateAtaInterface()</td>
+    </tr>
+    <tr>
+      <td>**Derive ATA**</td>
+      <td>getAssociatedTokenAddress()</td>
+      <td>getAssociatedTokenAddressInterface()</td>
+    </tr>
+    <tr>
+      <td>**Mint Tokens**</td>
+      <td>mintTo()</td>
+      <td>mintToInterface()</td>
+    </tr>
+    <tr>
+      <td>**Transfer**</td>
+      <td>transfer()</td>
+      <td>transferInterface()</td>
+    </tr>
+    <tr>
+      <td>**Get Balance**</td>
+      <td>getAccount()</td>
+      <td>getAtaInterface()</td>
+    </tr>
+  </tbody>
+</table>
+
+<Note>
+Find devnet examples [here](https://github.com/Lightprotocol/light-token-toolkits).
+</Note>
+
+## Setup
+
+```bash
+npm install @lightprotocol/compressed-token \
+            @lightprotocol/stateless.js
+```
+
+```typescript
+import { createRpc } from "@lightprotocol/stateless.js";
+
+import {
+  createMintInterface,
+  createTokenMetadata,
+  getOrCreateAtaInterface,
+  getAtaInterface,
+  getAssociatedTokenAddressInterface,
+  mintToInterface,
+  transferInterface,
+} from "@lightprotocol/compressed-token";
+
+const rpc = createRpc(RPC_ENDPOINT);
+```
+
+### Create Token with Metadata
+
+<Tabs>
+<Tab title="Action">
+
+```typescript
+import { Keypair } from '@solana/web3.js';
+import { createRpc } from '@lightprotocol/stateless.js';
+import { createMintInterface, createTokenMetadata } from '@lightprotocol/compressed-token';
+
+const mintSigner = Keypair.generate();
+
+const { mint, transactionSignature } = await createMintInterface(
+    rpc,
+    payer,
+    payer,      // mintAuthority
+    null,       // freezeAuthority
+    9,          // decimals
+    mintSigner,
+    undefined,
+    undefined,
+    createTokenMetadata(
+        'My Launchpad Token',
+        'MLT',
+        'https://example.com/metadata.json'
+    ),
+);
+
+console.log('Mint created:', mint.toBase58());
+```
+
+<Accordion title="Compare to SPL">
+
+```typescript
+import { createMint } from "@solana/spl-token";
+import { Metaplex } from "@metaplex-foundation/js";
+
+// SPL requires separate mint creation + Metaplex metadata
+const mint = await createMint(
+    connection,
+    payer,
+    payer.publicKey,
+    null,
+    9
+);
+
+// Then add metadata via Metaplex (additional transaction)
+const metaplex = Metaplex.make(connection);
+await metaplex.nfts().create({
+    name: 'My Launchpad Token',
+    symbol: 'MLT',
+    uri: 'https://example.com/metadata.json',
+    sellerFeeBasisPoints: 0,
+    useNewMint: mint,
+});
+```
+
+</Accordion>
+
+</Tab>
+<Tab title="Instruction">
+
+```typescript
+import { Keypair, ComputeBudgetProgram } from '@solana/web3.js';
+import {
+    buildAndSignTx,
+    sendAndConfirmTx,
+    selectAddressTreeInfoV2,
+    selectStateTreeInfo,
+} from '@lightprotocol/stateless.js';
+import {
+    createMintInstruction,
+    createTokenMetadata,
+    findMintAddress,
+} from '@lightprotocol/compressed-token';
+
+const mintSigner = Keypair.generate();
+const decimals = 9;
+
+// Get tree infos
+const addressTreeInfo = selectAddressTreeInfoV2(await rpc.getAddressTreeInfos());
+const stateTreeInfo = selectStateTreeInfo(await rpc.getStateTreeInfos());
+
+// Get validity proof for address creation
+const [mintPda] = findMintAddress(mintSigner.publicKey);
+const validityProof = await rpc.getValidityProofV0(
+    [],
+    [{ address: mintPda, tree: addressTreeInfo.tree }],
+);
+
+// Create instruction
+const ix = createMintInstruction(
+    mintSigner.publicKey,
+    decimals,
+    payer.publicKey,    // mintAuthority
+    null,               // freezeAuthority
+    payer.publicKey,
+    validityProof,
+    addressTreeInfo,
+    stateTreeInfo,
+    createTokenMetadata('My Launchpad Token', 'MLT', 'https://example.com/metadata.json'),
+);
+
+// Build and send transaction
+const { blockhash } = await rpc.getLatestBlockhash();
+const tx = buildAndSignTx(
+    [ComputeBudgetProgram.setComputeUnitLimit({ units: 300_000 }), ix],
+    payer,
+    blockhash,
+    [mintSigner],
+);
+const signature = await sendAndConfirmTx(rpc, tx);
+```
+
+</Tab>
+</Tabs>
+
+### Create User Account
+
+<Tabs>
+<Tab title="Action">
+
+```typescript
+import { getOrCreateAtaInterface } from "@lightprotocol/compressed-token";
+
+const ata = await getOrCreateAtaInterface(
+    rpc,
+    payer,
+    mint,
+    buyer.publicKey
+);
+
+console.log('User ATA:', ata.parsed.address.toBase58());
+```
+
+<Accordion title="Compare to SPL">
+
+```typescript
+import { getOrCreateAssociatedTokenAccount } from "@solana/spl-token";
+
+const ata = await getOrCreateAssociatedTokenAccount(
+    connection,
+    payer,
+    mint,
+    buyer.publicKey
+);
+
+console.log('User ATA:', ata.address.toBase58());
+```
+
+</Accordion>
+
+</Tab>
+<Tab title="Instruction">
+
+```typescript
+import { Transaction } from "@solana/web3.js";
+import {
+    createAssociatedTokenAccountInterfaceIdempotentInstruction,
+    createLoadAtaInstructions,
+    getAssociatedTokenAddressInterface,
+} from "@lightprotocol/compressed-token/unified";
+import { CTOKEN_PROGRAM_ID } from "@lightprotocol/stateless.js";
+
+const ata = getAssociatedTokenAddressInterface(mint, buyer.publicKey);
+
+const tx = new Transaction().add(
+    createAssociatedTokenAccountInterfaceIdempotentInstruction(
+        payer.publicKey,
+        ata,
+        buyer.publicKey,
+        mint,
+        CTOKEN_PROGRAM_ID
+    ),
+    ...(await createLoadAtaInstructions(
+        rpc,
+        ata,
+        buyer.publicKey,
+        mint,
+        payer.publicKey
+    ))
+);
+```
+
+</Tab>
+</Tabs>
+
+### Buy (Mint Tokens to Buyer)
+
+When a user buys from the bonding curve, mint tokens to their account.
+
+<Tabs>
+<Tab title="Action">
+
+```typescript
+import { mintToInterface, getAssociatedTokenAddressInterface } from "@lightprotocol/compressed-token";
+
+const buyerAta = getAssociatedTokenAddressInterface(mint, buyer.publicKey);
+const amount = 1_000_000_000; // 1 token with 9 decimals
+
+const signature = await mintToInterface(
+    rpc,
+    payer,
+    mint,
+    buyerAta,
+    mintAuthority,  // bonding curve PDA or keypair
+    amount,
+);
+
+console.log('Minted tokens to buyer:', signature);
+```
+
+<Accordion title="Compare to SPL">
+
+```typescript
+import { mintTo, getAssociatedTokenAddressSync } from "@solana/spl-token";
+
+const buyerAta = getAssociatedTokenAddressSync(mint, buyer.publicKey);
+const amount = 1_000_000_000;
+
+const signature = await mintTo(
+    connection,
+    payer,
+    mint,
+    buyerAta,
+    mintAuthority,
+    amount
+);
+
+console.log('Minted tokens to buyer:', signature);
+```
+
+</Accordion>
+
+</Tab>
+<Tab title="Instruction">
+
+```typescript
+import { ComputeBudgetProgram } from '@solana/web3.js';
+import {
+    buildAndSignTx,
+    sendAndConfirmTx,
+    bn,
+    DerivationMode,
+} from '@lightprotocol/stateless.js';
+import {
+    createMintToInterfaceInstruction,
+    getMintInterface,
+    getAssociatedTokenAddressInterface,
+} from '@lightprotocol/compressed-token';
+
+const buyerAta = getAssociatedTokenAddressInterface(mint, buyer.publicKey);
+const amount = 1_000_000_000;
+
+// Get mint interface (includes merkle context for c-tokens)
+const mintInterface = await getMintInterface(rpc, mint);
+
+// Get validity proof for the mint
+let validityProof;
+if (mintInterface.merkleContext) {
+    validityProof = await rpc.getValidityProofV2(
+        [{
+            hash: bn(mintInterface.merkleContext.hash),
+            leafIndex: mintInterface.merkleContext.leafIndex,
+            treeInfo: mintInterface.merkleContext.treeInfo,
+            proveByIndex: mintInterface.merkleContext.proveByIndex,
+        }],
+        [],
+        DerivationMode.compressible,
+    );
+}
+
+// Create instruction
+const ix = createMintToInterfaceInstruction(
+    mintInterface,
+    buyerAta,
+    mintAuthority.publicKey,  // bonding curve authority
+    payer.publicKey,
+    amount,
+    validityProof,
+);
+
+// Build and send transaction
+const { blockhash } = await rpc.getLatestBlockhash();
+const tx = buildAndSignTx(
+    [ComputeBudgetProgram.setComputeUnitLimit({ units: 500_000 }), ix],
+    payer,
+    blockhash,
+    [mintAuthority],  // include mint authority as signer
+);
+const signature = await sendAndConfirmTx(rpc, tx);
+```
+
+</Tab>
+</Tabs>
+
+### Sell (Transfer Back to Curve)
+
+When a user sells, transfer tokens back to the bonding curve account.
+
+<Tabs>
+<Tab title="Action">
+
+```typescript
+import {
+    transferInterface,
+    getAssociatedTokenAddressInterface,
+} from "@lightprotocol/compressed-token";
+
+const sellerAta = getAssociatedTokenAddressInterface(mint, seller.publicKey);
+const curveAta = getAssociatedTokenAddressInterface(mint, bondingCurvePda);
+const amount = 500_000_000; // 0.5 tokens
+
+const signature = await transferInterface(
+    rpc,
+    payer,
+    sellerAta,
+    mint,
+    curveAta,
+    seller,     // owner (must be Signer)
+    amount,
+);
+
+console.log('Sold tokens:', signature);
+```
+
+<Accordion title="Compare to SPL">
+
+```typescript
+import { transfer, getAssociatedTokenAddressSync } from "@solana/spl-token";
+
+const sellerAta = getAssociatedTokenAddressSync(mint, seller.publicKey);
+const curveAta = getAssociatedTokenAddressSync(mint, bondingCurvePda);
+const amount = 500_000_000;
+
+const signature = await transfer(
+    connection,
+    payer,
+    sellerAta,
+    curveAta,
+    seller,
+    amount
+);
+
+console.log('Sold tokens:', signature);
+```
+
+</Accordion>
+
+</Tab>
+<Tab title="Instruction">
+
+```typescript
+import { Transaction } from "@solana/web3.js";
+import {
+    createLoadAtaInstructions,
+    createTransferInterfaceInstruction,
+    getAssociatedTokenAddressInterface,
+} from "@lightprotocol/compressed-token/unified";
+
+const sellerAta = getAssociatedTokenAddressInterface(mint, seller.publicKey);
+const curveAta = getAssociatedTokenAddressInterface(mint, bondingCurvePda);
+const amount = 500_000_000;
+
+const tx = new Transaction().add(
+    ...(await createLoadAtaInstructions(
+        rpc,
+        sellerAta,
+        seller.publicKey,
+        mint,
+        payer.publicKey
+    )),
+    createTransferInterfaceInstruction(
+        sellerAta,
+        curveAta,
+        seller.publicKey,
+        amount
+    )
+);
+```
+
+</Tab>
+</Tabs>
+
+### Show Balance
+
+```typescript
+import {
+    getAssociatedTokenAddressInterface,
+    getAtaInterface,
+} from "@lightprotocol/compressed-token";
+
+const ata = getAssociatedTokenAddressInterface(mint, owner);
+const account = await getAtaInterface(
+    rpc,
+    ata,
+    owner,
+    mint
+);
+
+console.log('Balance:', account.parsed.amount.toString());
+```
+
+<Accordion title="Compare to SPL">
+
+```typescript
+import { getAccount, getAssociatedTokenAddressSync } from "@solana/spl-token";
+
+const ata = getAssociatedTokenAddressSync(mint, owner);
+const account = await getAccount(connection, ata);
+
+console.log('Balance:', account.amount.toString());
+```
+
+</Accordion>
+
+## On-Chain Program Integration
+
+If your bonding curve logic is on-chain and needs to CPI into the light-token program, see the Program Guide tabs in:
+
+<CardGroup cols={2}>
+  <Card title="Create Mint (CPI)" href="/light-token/cookbook/create-mint#program-guide">
+    invoke / invoke_signed examples
+  </Card>
+  <Card title="Mint Tokens (CPI)" href="/light-token/cookbook/mint-tokens#program-guide">
+    MintToCTokenCpi builder
+  </Card>
+  <Card title="Transfer (CPI)" href="/light-token/cookbook/transfer-interface#program-guide">
+    TransferInterfaceCpi builder
+  </Card>
+</CardGroup>

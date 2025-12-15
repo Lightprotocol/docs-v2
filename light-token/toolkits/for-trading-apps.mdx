@@ -1,5 +1,452 @@
 ---
-title: "light-token for Trading Apps"
+title: "Toolkit for Trading Apps"
 sidebarTitle: "for Trading Apps"
 description: "Guide to add light-token APIs to your Trading Application."
 ---
+
+import { CodeCompare } from '/snippets/jsx/code-compare.jsx';
+
+1. light-token follows similar API patterns like SPL and simply adds an interface suffix.
+2. Token accounts cost ~200x less to create than SPL accounts.
+3. Use wrap/unwrap to convert between light-tokens and SPL for DEX compatibility.
+
+|  Creation Cost         | SPL  | light-token      |
+|:---------------------|:------------------|:----------------------|
+| **Token Account**   | 	  ~2,000,000 lamports         | ~**17,000** lamports     |
+
+### What you will implement
+
+<table>
+  <thead>
+    <tr>
+      <th style={{width: '15%'}}></th>
+      <th>SPL</th>
+      <th>Light</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>**Get/Create ATA**</td>
+      <td>getOrCreateAssociatedTokenAccount()</td>
+      <td>getOrCreateAtaInterface()</td>
+    </tr>
+    <tr>
+      <td>**Derive ATA**</td>
+      <td>getAssociatedTokenAddress()</td>
+      <td>getAssociatedTokenAddressInterface()</td>
+    </tr>
+    <tr>
+      <td>**Transfer**</td>
+      <td>transfer()</td>
+      <td>transferInterface()</td>
+    </tr>
+    <tr>
+      <td>**Get Balance**</td>
+      <td>getAccount()</td>
+      <td>getAtaInterface()</td>
+    </tr>
+    <tr>
+      <td>**Tx History**</td>
+      <td>getSignaturesForAddress()</td>
+      <td>rpc.getSignaturesForOwnerInterface()</td>
+    </tr>
+    <tr>
+      <td>**Wrap (for DEX)**</td>
+      <td>N/A</td>
+      <td>wrap()</td>
+    </tr>
+    <tr>
+      <td>**Unwrap (from DEX)**</td>
+      <td>N/A</td>
+      <td>unwrap()</td>
+    </tr>
+  </tbody>
+</table>
+
+<Note>
+Find devnet examples [here](https://github.com/Lightprotocol/light-token-toolkits).
+</Note>
+
+## Setup
+
+```bash
+npm install @lightprotocol/compressed-token/unified \
+            @lightprotocol/stateless.js
+```
+
+```typescript
+import { createRpc } from "@lightprotocol/stateless.js";
+
+import {
+  getOrCreateAtaInterface,
+  getAtaInterface,
+  getAssociatedTokenAddressInterface,
+  transferInterface,
+  wrap,
+  unwrap,
+} from "@lightprotocol/compressed-token/unified";
+
+const rpc = createRpc(RPC_ENDPOINT);
+```
+
+### Portfolio View
+
+Fetch balances for multiple tokens in a user's portfolio.
+
+```typescript
+import {
+  getAssociatedTokenAddressInterface,
+  getAtaInterface,
+} from "@lightprotocol/compressed-token/unified";
+
+const mints = [USDC_MINT, SOL_MINT, BONK_MINT]; // Token mints to track
+
+const portfolio = await Promise.all(
+  mints.map(async (mint) => {
+    const ata = getAssociatedTokenAddressInterface(mint, owner);
+    try {
+      const account = await getAtaInterface(rpc, ata, owner, mint);
+      return { mint, balance: account.parsed.amount };
+    } catch {
+      return { mint, balance: 0n };
+    }
+  })
+);
+
+console.log(portfolio);
+```
+
+<Accordion title="Compare to SPL">
+
+```typescript
+import { getAccount, getAssociatedTokenAddressSync } from "@solana/spl-token";
+
+const mints = [USDC_MINT, SOL_MINT, BONK_MINT];
+
+const portfolio = await Promise.all(
+  mints.map(async (mint) => {
+    const ata = getAssociatedTokenAddressSync(mint, owner);
+    try {
+      const account = await getAccount(connection, ata);
+      return { mint, balance: account.amount };
+    } catch {
+      return { mint, balance: 0n };
+    }
+  })
+);
+
+console.log(portfolio);
+```
+
+</Accordion>
+
+### Transfer Tokens
+
+<Tabs>
+<Tab title="Action">
+
+```typescript
+import {
+  getAssociatedTokenAddressInterface,
+  transferInterface,
+} from "@lightprotocol/compressed-token/unified";
+
+const sourceAta = getAssociatedTokenAddressInterface(mint, owner.publicKey);
+const destinationAta = getAssociatedTokenAddressInterface(mint, recipient);
+
+await transferInterface(
+  rpc,
+  payer,
+  sourceAta,
+  mint,
+  destinationAta,
+  owner,
+  amount
+);
+```
+
+<Accordion title="Compare to SPL">
+
+```typescript
+import { transfer, getAssociatedTokenAddressSync } from "@solana/spl-token";
+
+const sourceAta = getAssociatedTokenAddressSync(mint, owner.publicKey);
+const destinationAta = getAssociatedTokenAddressSync(mint, recipient);
+
+await transfer(
+  connection,
+  payer,
+  sourceAta,
+  destinationAta,
+  owner,
+  amount
+);
+```
+
+</Accordion>
+
+</Tab>
+<Tab title="Instruction">
+
+```typescript
+import { Transaction } from "@solana/web3.js";
+import {
+  createLoadAtaInstructions,
+  createTransferInterfaceInstruction,
+  getAssociatedTokenAddressInterface,
+} from "@lightprotocol/compressed-token/unified";
+
+const sourceAta = getAssociatedTokenAddressInterface(mint, owner.publicKey);
+const destinationAta = getAssociatedTokenAddressInterface(mint, recipient);
+
+const tx = new Transaction().add(
+  ...(await createLoadAtaInstructions(
+    rpc,
+    sourceAta,
+    owner.publicKey,
+    mint,
+    payer.publicKey
+  )),
+  createTransferInterfaceInstruction(
+    sourceAta,
+    destinationAta,
+    owner.publicKey,
+    amount
+  )
+);
+```
+
+<Accordion title="Compare to SPL">
+
+```typescript
+import { Transaction } from "@solana/web3.js";
+import {
+  getAssociatedTokenAddressSync,
+  createTransferInstruction,
+} from "@solana/spl-token";
+
+const sourceAta = getAssociatedTokenAddressSync(mint, owner.publicKey);
+const destinationAta = getAssociatedTokenAddressSync(mint, recipient);
+
+const tx = new Transaction().add(
+  createTransferInstruction(sourceAta, destinationAta, owner.publicKey, amount)
+);
+```
+
+</Accordion>
+
+</Tab>
+</Tabs>
+
+### Transaction History
+
+```typescript
+const result = await rpc.getSignaturesForOwnerInterface(owner);
+
+console.log(result.signatures); // Merged + deduplicated
+console.log(result.solana);     // On-chain txs only
+console.log(result.compressed); // Compressed txs only
+```
+
+Use `getSignaturesForAddressInterface(address)` for address-specific rather than owner-wide history.
+
+<Accordion title="Compare to SPL">
+
+```typescript
+const signatures = await connection.getSignaturesForAddress(ata);
+```
+
+</Accordion>
+
+### Wrap for DEX Swaps
+
+Before swapping on a DEX, convert light-tokens to SPL tokens.
+
+<Tabs>
+<Tab title="Action">
+
+```typescript
+import { getAssociatedTokenAddressSync } from "@solana/spl-token";
+import {
+  wrap,
+  getAssociatedTokenAddressInterface,
+  createAtaInterfaceIdempotent,
+} from "@lightprotocol/compressed-token/unified";
+
+// 1. Create c-token ATA (source)
+const ctokenAta = getAssociatedTokenAddressInterface(mint, owner.publicKey);
+await createAtaInterfaceIdempotent(rpc, payer, mint, owner.publicKey);
+
+// 2. SPL ATA must exist (destination for DEX)
+const splAta = getAssociatedTokenAddressSync(mint, owner.publicKey);
+
+// 3. Wrap light-tokens to SPL for DEX swap
+await wrap(
+  rpc,
+  payer,
+  ctokenAta,  // source: c-token ATA
+  splAta,     // destination: SPL ATA (for DEX)
+  owner,
+  mint,
+  amount
+);
+
+// Now use splAta with your DEX of choice
+```
+
+</Tab>
+<Tab title="Instruction">
+
+```typescript
+import { Transaction, ComputeBudgetProgram } from "@solana/web3.js";
+import { getAssociatedTokenAddressSync } from "@solana/spl-token";
+import {
+  buildAndSignTx,
+  sendAndConfirmTx,
+  dedupeSigner,
+} from "@lightprotocol/stateless.js";
+import {
+  createWrapInstruction,
+  getAssociatedTokenAddressInterface,
+  getSplInterfaceInfos,
+} from "@lightprotocol/compressed-token";
+
+const ctokenAta = getAssociatedTokenAddressInterface(mint, owner.publicKey);
+const splAta = getAssociatedTokenAddressSync(mint, owner.publicKey);
+
+// Get SPL interface info for the mint
+const splInterfaceInfos = await getSplInterfaceInfos(rpc, mint);
+const splInterfaceInfo = splInterfaceInfos.find(info => info.isInitialized);
+
+// Create wrap instruction
+const ix = createWrapInstruction(
+  ctokenAta,        // source: c-token ATA
+  splAta,           // destination: SPL ATA
+  owner.publicKey,  // owner
+  mint,
+  amount,
+  splInterfaceInfo,
+  payer.publicKey
+);
+
+// Build and send transaction
+const { blockhash } = await rpc.getLatestBlockhash();
+const additionalSigners = dedupeSigner(payer, [owner]);
+
+const tx = buildAndSignTx(
+  [ComputeBudgetProgram.setComputeUnitLimit({ units: 200_000 }), ix],
+  payer,
+  blockhash,
+  additionalSigners
+);
+
+const signature = await sendAndConfirmTx(rpc, tx);
+```
+
+</Tab>
+</Tabs>
+
+### Unwrap After Swaps
+
+After receiving tokens from a DEX swap, convert SPL tokens back to light-tokens.
+
+<Tabs>
+<Tab title="Action">
+
+```typescript
+import { getAssociatedTokenAddressSync } from "@solana/spl-token";
+import { unwrap } from "@lightprotocol/compressed-token/unified";
+
+// SPL ATA holds tokens received from DEX
+const splAta = getAssociatedTokenAddressSync(mint, owner.publicKey);
+
+// Unwrap SPL tokens back to light-tokens
+await unwrap(
+  rpc,
+  payer,
+  splAta,   // destination: SPL ATA (has tokens from DEX)
+  owner,
+  mint,
+  amount    // omit for full balance
+);
+```
+
+</Tab>
+<Tab title="Instruction">
+
+```typescript
+import { ComputeBudgetProgram } from "@solana/web3.js";
+import { getAssociatedTokenAddressSync } from "@solana/spl-token";
+import {
+  buildAndSignTx,
+  sendAndConfirmTx,
+  dedupeSigner,
+} from "@lightprotocol/stateless.js";
+import {
+  loadAta,
+  createUnwrapInstruction,
+  getAssociatedTokenAddressInterface,
+  getSplInterfaceInfos,
+} from "@lightprotocol/compressed-token";
+
+const ctokenAta = getAssociatedTokenAddressInterface(mint, owner.publicKey);
+const splAta = getAssociatedTokenAddressSync(mint, owner.publicKey);
+
+// Load compressed tokens to c-token ATA (hot balance)
+await loadAta(rpc, ctokenAta, owner, mint, payer);
+
+// Get SPL interface info for the mint
+const splInterfaceInfos = await getSplInterfaceInfos(rpc, mint);
+const splInterfaceInfo = splInterfaceInfos.find(info => info.isInitialized);
+
+// Create unwrap instruction
+const ix = createUnwrapInstruction(
+  ctokenAta,        // source: c-token ATA
+  splAta,           // destination: SPL ATA
+  owner.publicKey,  // owner
+  mint,
+  amount,
+  splInterfaceInfo,
+  payer.publicKey
+);
+
+// Build and send transaction
+const { blockhash } = await rpc.getLatestBlockhash();
+const additionalSigners = dedupeSigner(payer, [owner]);
+
+const tx = buildAndSignTx(
+  [ComputeBudgetProgram.setComputeUnitLimit({ units: 200_000 }), ix],
+  payer,
+  blockhash,
+  additionalSigners
+);
+
+const signature = await sendAndConfirmTx(rpc, tx);
+```
+
+</Tab>
+</Tabs>
+
+## DEX Integration Flow
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Trading App Flow                         │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  1. User holds light-tokens (low storage cost)              │
+│                     │                                       │
+│                     ▼                                       │
+│  2. wrap() → Convert to SPL before swap                     │
+│                     │                                       │
+│                     ▼                                       │
+│  3. Execute swap on DEX (Jupiter, Raydium, etc.)            │
+│                     │                                       │
+│                     ▼                                       │
+│  4. unwrap() → Convert received SPL back to light-tokens    │
+│                     │                                       │
+│                     ▼                                       │
+│  5. User holds light-tokens (low storage cost)              │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
