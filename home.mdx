@@ -1,21 +1,246 @@
 ---
-title: Home
-description: 
+title: "Light Protocol"
+mode: "custom"
 ---
 
+import { HeroBackground } from '/snippets/jsx/hero-background.jsx';
+
+{/* Hero - full width with SVG background */}
+<div style={{
+  position: 'relative',
+  textAlign: 'center',
+  padding: '197px 32px 146px',
+  width: '100%',
+  overflow: 'hidden',
+  borderBottom: '1px solid #e5e7eb'
+}}>
+  <HeroBackground />
+  <h1 style={{position: 'relative', fontSize: '3rem', fontWeight: 500, marginBottom: '16px', color: '#111827'}}>Build and Scale <br/>with Light Protocol</h1>
+  <p style={{position: 'relative', fontSize: '1.25rem', maxWidth: '600px', margin: '0 auto'}}>
+
+  </p>
+</div>
+
+{/* Content container - centered with max-width */}
+<div style={{maxWidth: '48rem', padding: '48px 1.25rem 40px', margin: '0 auto'}} className="prose prose-gray dark:prose-invert">
+
+## Features
+
 <CardGroup cols={2}>
-  <Card
-    title="Light-Token Program"
-    icon="coins"
-    href="/light-token/README"
-  >
-    High performance token standard without rent-exemption at full SPL functionality.
+  <Card title="" icon="coins" href="/light-token/README">
+  ### Light-Token Program (Beta)
+    High performance token standard for Mints with Metadata and Tokens.
   </Card>
-  <Card
-    title="ZK Compression"
-    icon="compress"
-    href="/welcome"
-  >
-    Build with compressed tokens and compressed PDAs on Solana.
+  <Card title="" icon="compress" href="/welcome">
+  ### ZK Compression
+    For token distribution and app state.
   </Card>
 </CardGroup>
+
+## Quickstart
+
+<Steps>
+<Step>
+### Installations
+<Tabs>
+  <Tab title="npm">
+
+  Install packages in your working directory:
+    ```bash
+    npm install \
+        @lightprotocol/stateless.js \
+        @lightprotocol/compressed-token
+    ```
+Install the CLI globally:
+    ```bash
+    npm install -g @lightprotocol/zk-compression-cli
+    ```
+  </Tab>
+  <Tab title="yarn">
+    Install packages in your working directory:
+
+    ```bash
+    yarn add \
+        @lightprotocol/stateless.js \
+        @lightprotocol/compressed-token
+    ```
+Install the CLI globally:
+
+    ```bash
+    yarn global add @lightprotocol/zk-compression-cli
+    ```
+  </Tab>
+  <Tab title="pnpm">
+    Install packages in your working directory:
+    ```bash
+    pnpm add \
+        @lightprotocol/stateless.js \
+        @lightprotocol/compressed-token
+    ```
+Install the CLI globally:
+
+    ```bash
+    pnpm add -g @lightprotocol/zk-compression-cli
+    ```
+  </Tab>
+</Tabs>
+</Step>
+<Step>
+### Get started
+</Step>
+</Steps>
+
+
+
+## Toolkits
+
+
+<Card
+  title="Stablecoin Payments"
+  icon="credit-card"
+  color="#0066ff"
+  href="/light-token/toolkits/for-payments"
+  horizontal
+>
+  Integrate light-token APIs with familiar SPL patterns.
+</Card>
+
+<Card
+  title="Wallets"
+  icon="wallet"
+  color="#0066ff"
+  href="/light-token/toolkits/for-wallets"
+  horizontal
+>
+  Allow users to display and swap light-tokens.
+</Card>
+
+<Card
+  title="Streaming Mints"
+  icon="bolt"
+  color="#0066ff"
+  href="/light-token/toolkits/for-streaming-mints"
+  horizontal
+>
+  Stream mint events from the network in real-time.
+</Card>
+
+<Card
+  title="Streaming Tokens"
+  icon="stream"
+  color="#0066ff"
+  href="/light-token/toolkits/for-streaming-tokens"
+  horizontal
+>
+  Stream token events from the network in real-time.
+</Card>
+
+
+## Cookbooks
+
+<CardGroup cols={3}>
+  <Card
+    title="Light-Token"
+    icon="coins"
+    href="/light-token/cookbook/create-mint"
+  >
+    Program and client guides for light-token mints, token accounts, and transfers.
+  </Card>
+  <Card
+    title="Compressed Tokens"
+    icon="compress"
+    href="/compressed-tokens/README"
+  >
+    Client guides for compressed tokens.
+  </Card>
+  <Card
+    title="Compressed PDAs"
+    icon="database"
+    href="/compressed-pdas/create-a-program-with-compressed-pdas"
+  >
+    Program and client guides for PDA accounts.
+  </Card>
+</CardGroup>
+
+## Using AI in the Docs
+
+<Tip>
+Look up documentation, code examples and guides using the Docs' AI assistant.
+</Tip>
+
+<Frame>
+  <iframe src="https://drive.google.com/file/d/1JMG8QffBJX53_RwDxarSnnKYoNJqmH4F/preview" width="100%" height="100%" allow="autoplay" className="rounded-xl aspect-video"></iframe>
+</Frame>
+
+## Using AI in Development
+
+| Tools                | Description                                                                  |
+|:---------------------|:------------------------------------------------------------------------------|
+| MCP                 | Connect AI tools to the Light Protocol repository via Model Context Protocol  |
+| DeepWiki   | Use Deepwiki for advanced AI assistance with your development.       |
+
+<Tabs>
+<Tab title="Claude Code">
+
+```bash
+claude mcp add -s user -t http deepwiki https://mcp.deepwiki.com/mcp
+claude mcp add -s user -t http zkcompression https://www.zkcompression.com/mcp
+```
+</Tab>
+<Tab title="Codex">
+
+```bash
+codex mcp add zkcompression -- npx -y mcp-remote@latest https://www.zkcompression.com/mcp
+codex mcp add deepwiki -- npx -y mcp-remote@latest https://mcp.deepwiki.com/mcp
+```
+
+</Tab>
+<Tab title="Most Clients (Windsurf, Cursor, ...)">
+```json
+{
+  "mcpServers": {
+    "deepwiki": {
+      "serverUrl": "https://mcp.deepwiki.com/sse"
+    },
+    "zkcompression": {
+      "command": "npx",
+      "args": ["-y", "mcp-remote@latest", "https://www.zkcompression.com/mcp"]
+    }
+  }
+}
+```
+</Tab>
+</Tabs>
+
+<Card
+  title="AI Tools Guide"
+  icon="chevron-right"
+  color="#0066ff"
+  href="/learn/ai-tools-guide"
+  horizontal
+>
+</Card>
+
+<div style={{marginTop: '48px'}}>
+
+
+
+## SDK Reference
+
+<div style={{display: 'flex', flexWrap: 'wrap', gap: '12px', justifyContent: 'center'}}>
+  {/* TODO: Add SDK tiles */}
+</div>
+
+</div>
+
+<div style={{marginTop: '48px'}}>
+
+## Resources
+
+<CardGroup cols={3}>
+  {/* TODO: Add resource cards */}
+</CardGroup>
+
+</div>
+
+</div>
