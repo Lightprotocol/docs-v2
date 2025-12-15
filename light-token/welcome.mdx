@@ -13,9 +13,8 @@ import { CompressibleRentCalculator } from '/snippets/jsx/compressible-rent-calc
 import { RentLifecycleVisualizer } from '/snippets/jsx/rent-lifecycle-visualizer.jsx';
 import CompressibleRentExplained from '/snippets/compressible-rent-explained.mdx';
 import CompressibleDefaultRentConfig from '/snippets/compressible-default-rent-config.mdx';
-import CTokenGuidesTable from '/snippets/overview-tables/light-token-guides-table.mdx';
-import CMintGuidesTable from '/snippets/overview-tables/light-mint-guides-table.mdx';
 import IntegrateCTokenGuidesTable from '/snippets/overview-tables/integrate-light-token-guides-table.mdx';
+import CookbookGuidesTable from '/snippets/overview-tables/cookbook-guides-table.mdx';
 
 1. Light-mints and token accounts are equivalent to SPL mints and tokens.
 2. The key difference is light-mint and token accounts do not require you to pay rent-exemption upon creation.
@@ -110,11 +109,7 @@ const rpc = createRpc(RPC_ENDPOINT);
 
 ## Cookbook
 
-### Mint Accounts
-<CMintGuidesTable />
-
-### Token Accounts
-<CTokenGuidesTable />
+<CookbookGuidesTable />
 
 # Next Steps
 

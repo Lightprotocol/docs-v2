@@ -1,0 +1,359 @@
+---
+title: Wrap & Unwrap
+sidebarTitle: Wrap & Unwrap
+description: Convert between SPL/T22 tokens and c-token hot balance
+---
+
+import CTokenTsClientPrerequisites from '/snippets/light-token-guides/light-token-ts-client-prerequisites.mdx';
+
+- **Wrap**: Move tokens from SPL/T22 account → c-token ATA (hot balance)
+- **Unwrap**: Move tokens from c-token ATA (hot balance) → SPL/T22 account
+
+<Info>
+Find the source code: [wrap.test.ts](https://github.com/Lightprotocol/light-protocol/blob/main/js/compressed-token/tests/e2e/wrap.test.ts) | [unwrap.test.ts](https://github.com/Lightprotocol/light-protocol/blob/main/js/compressed-token/tests/e2e/unwrap.test.ts)
+</Info>
+
+## Prerequisites
+
+<CTokenTsClientPrerequisites />
+
+## Usage
+
+<Tabs>
+<Tab title="Wrap">
+
+<Note>
+The destination c-token ATA must exist before wrapping. Use `createAtaInterface` to create it.
+</Note>
+
+<CodeGroup>
+```typescript Action
+import { Keypair } from '@solana/web3.js';
+import { createRpc } from '@lightprotocol/stateless.js';
+import {
+    createMint,
+    mintTo,
+    decompress,
+    wrap,
+    getAssociatedTokenAddressInterface,
+    createAtaInterfaceIdempotent,
+} from '@lightprotocol/compressed-token';
+import {
+    createAssociatedTokenAccount,
+    TOKEN_PROGRAM_ID,
+    getAssociatedTokenAddressSync,
+} from '@solana/spl-token';
+
+async function main() {
+    const rpc = createRpc();
+    const payer = Keypair.generate();
+    await rpc.requestAirdrop(payer.publicKey, 1e9);
+
+    const owner = Keypair.generate();
+    await rpc.requestAirdrop(owner.publicKey, 1e9);
+
+    const mintAuthority = Keypair.generate();
+    const mintKeypair = Keypair.generate();
+
+    // 1. Create SPL mint with token pool
+    const { mint } = await createMint(
+        rpc,
+        payer,
+        mintAuthority.publicKey,
+        9,
+        mintKeypair,
+    );
+
+    // 2. Create SPL ATA and fund it
+    const splAta = await createAssociatedTokenAccount(
+        rpc,
+        payer,
+        mint,
+        owner.publicKey,
+    );
+
+    // Mint compressed then decompress to SPL ATA
+    await mintTo(rpc, payer, mint, owner.publicKey, mintAuthority, 1000n);
+    await decompress(rpc, payer, mint, 1000n, owner, splAta);
+
+    // 3. Create c-token ATA (destination)
+    const ctokenAta = getAssociatedTokenAddressInterface(mint, owner.publicKey);
+    await createAtaInterfaceIdempotent(rpc, payer, mint, owner.publicKey);
+
+    // 4. Wrap SPL tokens to c-token ATA
+    const signature = await wrap(
+        rpc,
+        payer,
+        splAta,       // source: SPL token account
+        ctokenAta,    // destination: c-token ATA
+        owner,        // owner of source account (signer)
+        mint,
+        500n,         // amount to wrap
+    );
+
+    console.log('Wrapped 500 tokens to c-token ATA');
+    console.log('Transaction:', signature);
+}
+
+main().catch(console.error);
+```
+
+```typescript Instruction
+import { Keypair, ComputeBudgetProgram } from '@solana/web3.js';
+import {
+    createRpc,
+    buildAndSignTx,
+    sendAndConfirmTx,
+    dedupeSigner,
+} from '@lightprotocol/stateless.js';
+import {
+    createMint,
+    mintTo,
+    decompress,
+    createWrapInstruction,
+    getAssociatedTokenAddressInterface,
+    createAtaInterfaceIdempotent,
+    getSplInterfaceInfos,
+} from '@lightprotocol/compressed-token';
+import {
+    createAssociatedTokenAccount,
+    TOKEN_PROGRAM_ID,
+} from '@solana/spl-token';
+
+async function main() {
+    const rpc = createRpc();
+    const payer = Keypair.generate();
+    await rpc.requestAirdrop(payer.publicKey, 1e9);
+
+    const owner = Keypair.generate();
+    await rpc.requestAirdrop(owner.publicKey, 1e9);
+
+    const mintAuthority = Keypair.generate();
+    const mintKeypair = Keypair.generate();
+
+    // 1. Create SPL mint with token pool
+    const { mint } = await createMint(
+        rpc,
+        payer,
+        mintAuthority.publicKey,
+        9,
+        mintKeypair,
+    );
+
+    // 2. Create SPL ATA and fund it
+    const splAta = await createAssociatedTokenAccount(
+        rpc,
+        payer,
+        mint,
+        owner.publicKey,
+    );
+
+    await mintTo(rpc, payer, mint, owner.publicKey, mintAuthority, 1000n);
+    await decompress(rpc, payer, mint, 1000n, owner, splAta);
+
+    // 3. Create c-token ATA (destination)
+    const ctokenAta = getAssociatedTokenAddressInterface(mint, owner.publicKey);
+    await createAtaInterfaceIdempotent(rpc, payer, mint, owner.publicKey);
+
+    // 4. Get SPL interface info for the mint
+    const splInterfaceInfos = await getSplInterfaceInfos(rpc, mint);
+    const splInterfaceInfo = splInterfaceInfos.find(info => info.isInitialized);
+
+    if (!splInterfaceInfo) {
+        throw new Error('No SPL interface found');
+    }
+
+    // 5. Create wrap instruction
+    const ix = createWrapInstruction(
+        splAta,           // source: SPL token account
+        ctokenAta,        // destination: c-token ATA
+        owner.publicKey,  // owner of source account
+        mint,
+        500n,             // amount to wrap
+        splInterfaceInfo, // SPL interface info
+        payer.publicKey,  // fee payer
+    );
+
+    // 6. Build, sign, and send transaction
+    const { blockhash } = await rpc.getLatestBlockhash();
+    const additionalSigners = dedupeSigner(payer, [owner]);
+
+    const tx = buildAndSignTx(
+        [ComputeBudgetProgram.setComputeUnitLimit({ units: 200_000 }), ix],
+        payer,
+        blockhash,
+        additionalSigners,
+    );
+
+    const signature = await sendAndConfirmTx(rpc, tx);
+    console.log('Wrapped 500 tokens to c-token ATA');
+    console.log('Transaction:', signature);
+}
+
+main().catch(console.error);
+```
+</CodeGroup>
+
+</Tab>
+
+<Tab title="Unwrap">
+
+<Note>
+The destination SPL/T22 account must exist before unwrapping. The action auto-loads compressed tokens to hot balance if needed.
+</Note>
+
+<CodeGroup>
+```typescript Action
+import { Keypair } from '@solana/web3.js';
+import { createRpc } from '@lightprotocol/stateless.js';
+import {
+    createMint,
+    mintTo,
+    unwrap,
+    getAssociatedTokenAddressInterface,
+} from '@lightprotocol/compressed-token';
+import { createAssociatedTokenAccount } from '@solana/spl-token';
+
+async function main() {
+    const rpc = createRpc();
+    const payer = Keypair.generate();
+    await rpc.requestAirdrop(payer.publicKey, 1e9);
+
+    const owner = Keypair.generate();
+    await rpc.requestAirdrop(owner.publicKey, 1e9);
+
+    const mintAuthority = Keypair.generate();
+    const mintKeypair = Keypair.generate();
+
+    // 1. Create SPL mint with token pool
+    const { mint } = await createMint(
+        rpc,
+        payer,
+        mintAuthority.publicKey,
+        9,
+        mintKeypair,
+    );
+
+    // 2. Mint compressed tokens to owner
+    await mintTo(rpc, payer, mint, owner.publicKey, mintAuthority, 1000n);
+
+    // 3. Create destination SPL ATA (must exist before unwrap)
+    const splAta = await createAssociatedTokenAccount(
+        rpc,
+        payer,
+        mint,
+        owner.publicKey,
+    );
+
+    // 4. Unwrap c-tokens to SPL ATA
+    // This auto-loads compressed tokens to hot balance first
+    const signature = await unwrap(
+        rpc,
+        payer,
+        splAta,     // destination: SPL token account
+        owner,      // owner of c-tokens (signer)
+        mint,
+        500n,       // amount to unwrap (omit for full balance)
+    );
+
+    console.log('Unwrapped 500 tokens to SPL ATA');
+    console.log('Transaction:', signature);
+}
+
+main().catch(console.error);
+```
+
+```typescript Instruction
+import { Keypair, ComputeBudgetProgram } from '@solana/web3.js';
+import {
+    createRpc,
+    buildAndSignTx,
+    sendAndConfirmTx,
+    dedupeSigner,
+} from '@lightprotocol/stateless.js';
+import {
+    createMint,
+    mintTo,
+    loadAta,
+    createUnwrapInstruction,
+    getAssociatedTokenAddressInterface,
+    getSplInterfaceInfos,
+} from '@lightprotocol/compressed-token';
+import { createAssociatedTokenAccount } from '@solana/spl-token';
+
+async function main() {
+    const rpc = createRpc();
+    const payer = Keypair.generate();
+    await rpc.requestAirdrop(payer.publicKey, 1e9);
+
+    const owner = Keypair.generate();
+    await rpc.requestAirdrop(owner.publicKey, 1e9);
+
+    const mintAuthority = Keypair.generate();
+    const mintKeypair = Keypair.generate();
+
+    // 1. Create SPL mint with token pool
+    const { mint } = await createMint(
+        rpc,
+        payer,
+        mintAuthority.publicKey,
+        9,
+        mintKeypair,
+    );
+
+    // 2. Mint compressed tokens to owner
+    await mintTo(rpc, payer, mint, owner.publicKey, mintAuthority, 1000n);
+
+    // 3. Load compressed tokens to c-token ATA (hot balance)
+    const ctokenAta = getAssociatedTokenAddressInterface(mint, owner.publicKey);
+    await loadAta(rpc, ctokenAta, owner, mint, payer);
+
+    // 4. Create destination SPL ATA
+    const splAta = await createAssociatedTokenAccount(
+        rpc,
+        payer,
+        mint,
+        owner.publicKey,
+    );
+
+    // 5. Get SPL interface info for the mint
+    const splInterfaceInfos = await getSplInterfaceInfos(rpc, mint);
+    const splInterfaceInfo = splInterfaceInfos.find(info => info.isInitialized);
+
+    if (!splInterfaceInfo) {
+        throw new Error('No SPL interface found');
+    }
+
+    // 6. Create unwrap instruction
+    const ix = createUnwrapInstruction(
+        ctokenAta,        // source: c-token ATA
+        splAta,           // destination: SPL token account
+        owner.publicKey,  // owner of source account
+        mint,
+        500n,             // amount to unwrap
+        splInterfaceInfo, // SPL interface info
+        payer.publicKey,  // fee payer
+    );
+
+    // 7. Build, sign, and send transaction
+    const { blockhash } = await rpc.getLatestBlockhash();
+    const additionalSigners = dedupeSigner(payer, [owner]);
+
+    const tx = buildAndSignTx(
+        [ComputeBudgetProgram.setComputeUnitLimit({ units: 200_000 }), ix],
+        payer,
+        blockhash,
+        additionalSigners,
+    );
+
+    const signature = await sendAndConfirmTx(rpc, tx);
+    console.log('Unwrapped 500 tokens to SPL ATA');
+    console.log('Transaction:', signature);
+}
+
+main().catch(console.error);
+```
+</CodeGroup>
+
+</Tab>
+</Tabs>

@@ -12,7 +12,7 @@
     "default": "light"
   },
   "banner": {
-    "content": "The Light-Token Standard is live on Devnet. <a href=\"/light-token/README\" style=\"color:#FFFFFF; text-decoration: underline;\">Start testing and create mints or tokens</a>!",
+    "content": "The Light-Token Standard is live on Devnet. <a href=\"/light-token/welcome\" style=\"color:#FFFFFF; text-decoration: underline;\">Start testing and create mints or tokens</a>!",
     "dismissible": false
   },
   "navigation": {
@@ -32,7 +32,7 @@
           {
             "group": "Get Started",
             "pages": [
-              "light-token/README",
+              "light-token/welcome",
               "light-token/quickstart",
               "light-token/faq",
               "learn/ai-tools-guide"
@@ -52,19 +52,22 @@
             "group": "Cookbook",
             "pages": [
               "light-token/cookbook/overview",
-              "light-token/cookbook/create-mint",
-              "light-token/cookbook/create-ata",
-              "light-token/cookbook/create-token-account",
-              "light-token/cookbook/mint-tokens",
-              "light-token/cookbook/close-token-account",
-              "light-token/cookbook/transfer-interface",
-              "light-token/cookbook/wrap",
-              "light-token/cookbook/unwrap",
-              "light-token/cookbook/compress",
-              "light-token/cookbook/decompress",
-              "light-token/cookbook/delegate",
-              "light-token/cookbook/load-ata",
-              "light-token/cookbook/merge-token-accounts"
+              {
+                "group": "Recipes",
+                "pages": [
+                  "light-token/cookbook/create-mint",
+                  "light-token/cookbook/create-ata",
+                  "light-token/cookbook/create-token-account",
+                  "light-token/cookbook/mint-tokens",
+                  "light-token/cookbook/close-token-account",
+                  "light-token/cookbook/transfer-interface",
+                  "light-token/cookbook/wrap-unwrap",
+                  "light-token/cookbook/compress-decompress",
+                  "light-token/cookbook/delegate",
+                  "light-token/cookbook/load-ata",
+                  "light-token/cookbook/merge-token-accounts"
+                ]
+              }
             ]
           },
           {
