@@ -4,6 +4,7 @@ mode: "custom"
 ---
 
 import { HeroCubeGrid } from '/snippets/jsx/hero-cube-grid.jsx';
+import { LiquidGlassPill } from '/snippets/jsx/liquid-glass-pill.jsx';
 
 {/* Hero - full width with SVG background */}
 <div style={{
@@ -15,8 +16,10 @@ import { HeroCubeGrid } from '/snippets/jsx/hero-cube-grid.jsx';
   borderBottom: '1px solid #e5e7eb'
 }}>
   <HeroCubeGrid />
-  <h1 style={{position: 'relative', fontSize: '3rem', fontWeight: 500, marginTop: '10px', marginBottom: '16px', color: '#111827'}}>Build and Scale with Light Protocol.</h1>
-  <p style={{position: 'relative', fontSize: '1.25rem', maxWidth: '600px', margin: '0 auto'}}>
+  <LiquidGlassPill>
+    <h1 style={{position: 'relative', fontSize: '2.5rem', fontWeight: 500, margin: 0, color: '#111827'}}>Build and Scale with Light Protocol.</h1>
+  </LiquidGlassPill>
+  <p style={{position: 'relative', fontSize: '1.25rem', maxWidth: '600px', margin: '24px auto 0'}}>
 
   </p>
 </div>
@@ -209,14 +212,14 @@ Install the CLI globally:
     icon="coins"
     href="/light-token/cookbook/create-mint"
   >
-    Program and client guides for light-token mints, token accounts, and transfers.
+    Program and client guides for token mints, accounts, and transfers.
   </Card>
   <Card
     title="Compressed Tokens"
     icon="compress"
     href="/compressed-tokens/README"
   >
-    Client guides for compressed tokens.
+    Client guides for compressed token accounts.
   </Card>
   <Card
     title="Compressed PDAs"
