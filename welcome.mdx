@@ -130,65 +130,6 @@ ZK Compression is a framework that reduces the storage cost of Solana accounts b
   </Step>
 </Steps>
 
-## Using AI in the Docs
-
-<Tip>
-Look up documentation, code examples and guides using the Docs' AI assistant.
-</Tip>
-
-<Frame>
-  <iframe src="https://drive.google.com/file/d/1JMG8QffBJX53_RwDxarSnnKYoNJqmH4F/preview" width="100%" height="100%" allow="autoplay" className="rounded-xl aspect-video"></iframe>
-</Frame>
-
-## Using AI in Development
-
-| Tools                | Description                                                                  |
-|:---------------------|:------------------------------------------------------------------------------|
-| MCP                 | Connect AI tools to the Light Protocol repository via Model Context Protocol  |
-| DeepWiki   | Use Deepwiki for advanced AI assistance with your development.       |
-
-<Tabs>
-<Tab title="Claude Code">
-
-```bash
-claude mcp add -s user -t http deepwiki https://mcp.deepwiki.com/mcp
-claude mcp add -s user -t http zkcompression https://www.zkcompression.com/mcp
-```
-</Tab>
-<Tab title="Codex">
-
-```bash
-codex mcp add zkcompression -- npx -y mcp-remote@latest https://www.zkcompression.com/mcp
-codex mcp add deepwiki -- npx -y mcp-remote@latest https://mcp.deepwiki.com/mcp
-```
-
-</Tab>
-<Tab title="Most Clients (Windsurf, Cursor, ...)">
-```json
-{
-  "mcpServers": {
-    "deepwiki": {
-      "serverUrl": "https://mcp.deepwiki.com/sse"
-    },
-    "zkcompression": {
-      "command": "npx",
-      "args": ["-y", "mcp-remote@latest", "https://www.zkcompression.com/mcp"]
-    }
-  }
-}
-```
-</Tab>
-</Tabs>
-
-<Card
-  title="AI Tools Guide"
-  icon="chevron-right"
-  color="#0066ff"
-  href="/learn/ai-tools-guide"
-  horizontal
->
-</Card>
-
 ## Resources
 <CardGroup cols={3}>
   <Card
