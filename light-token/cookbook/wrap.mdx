@@ -1,0 +1,191 @@
+---
+title: Wrap SPL/T22 to c-token
+sidebarTitle: Wrap
+description: Convert SPL or Token-2022 tokens to c-token hot balance
+---
+
+import CTokenTsClientPrerequisites from '/snippets/light-token-guides/light-token-ts-client-prerequisites.mdx';
+
+Wrap moves tokens from an SPL/T22 token account to a c-token ATA (hot balance).
+
+<Info>
+Find the source code [here](https://github.com/Lightprotocol/light-protocol/blob/main/js/compressed-token/tests/e2e/wrap.test.ts).
+</Info>
+
+<Note>
+The destination c-token ATA must exist before wrapping. Use `createAtaInterface` to create it.
+</Note>
+
+## Prerequisites
+
+<CTokenTsClientPrerequisites />
+
+## Usage
+
+<CodeGroup>
+```typescript Action
+import { Keypair } from '@solana/web3.js';
+import { createRpc } from '@lightprotocol/stateless.js';
+import {
+    createMint,
+    mintTo,
+    decompress,
+    wrap,
+    getAssociatedTokenAddressInterface,
+    createAtaInterfaceIdempotent,
+} from '@lightprotocol/compressed-token';
+import {
+    createAssociatedTokenAccount,
+    TOKEN_PROGRAM_ID,
+    getAssociatedTokenAddressSync,
+} from '@solana/spl-token';
+
+async function main() {
+    const rpc = createRpc();
+    const payer = Keypair.generate();
+    await rpc.requestAirdrop(payer.publicKey, 1e9);
+
+    const owner = Keypair.generate();
+    await rpc.requestAirdrop(owner.publicKey, 1e9);
+
+    const mintAuthority = Keypair.generate();
+    const mintKeypair = Keypair.generate();
+
+    // 1. Create SPL mint with token pool
+    const { mint } = await createMint(
+        rpc,
+        payer,
+        mintAuthority.publicKey,
+        9,
+        mintKeypair,
+    );
+
+    // 2. Create SPL ATA and fund it
+    const splAta = await createAssociatedTokenAccount(
+        rpc,
+        payer,
+        mint,
+        owner.publicKey,
+    );
+
+    // Mint compressed then decompress to SPL ATA
+    await mintTo(rpc, payer, mint, owner.publicKey, mintAuthority, 1000n);
+    await decompress(rpc, payer, mint, 1000n, owner, splAta);
+
+    // 3. Create c-token ATA (destination)
+    const ctokenAta = getAssociatedTokenAddressInterface(mint, owner.publicKey);
+    await createAtaInterfaceIdempotent(rpc, payer, mint, owner.publicKey);
+
+    // 4. Wrap SPL tokens to c-token ATA
+    const signature = await wrap(
+        rpc,
+        payer,
+        splAta,       // source: SPL token account
+        ctokenAta,    // destination: c-token ATA
+        owner,        // owner of source account (signer)
+        mint,
+        500n,         // amount to wrap
+    );
+
+    console.log('Wrapped 500 tokens to c-token ATA');
+    console.log('Transaction:', signature);
+}
+
+main().catch(console.error);
+```
+
+```typescript Instruction
+import { Keypair, ComputeBudgetProgram } from '@solana/web3.js';
+import {
+    createRpc,
+    buildAndSignTx,
+    sendAndConfirmTx,
+    dedupeSigner,
+} from '@lightprotocol/stateless.js';
+import {
+    createMint,
+    mintTo,
+    decompress,
+    createWrapInstruction,
+    getAssociatedTokenAddressInterface,
+    createAtaInterfaceIdempotent,
+    getSplInterfaceInfos,
+} from '@lightprotocol/compressed-token';
+import {
+    createAssociatedTokenAccount,
+    TOKEN_PROGRAM_ID,
+} from '@solana/spl-token';
+
+async function main() {
+    const rpc = createRpc();
+    const payer = Keypair.generate();
+    await rpc.requestAirdrop(payer.publicKey, 1e9);
+
+    const owner = Keypair.generate();
+    await rpc.requestAirdrop(owner.publicKey, 1e9);
+
+    const mintAuthority = Keypair.generate();
+    const mintKeypair = Keypair.generate();
+
+    // 1. Create SPL mint with token pool
+    const { mint } = await createMint(
+        rpc,
+        payer,
+        mintAuthority.publicKey,
+        9,
+        mintKeypair,
+    );
+
+    // 2. Create SPL ATA and fund it
+    const splAta = await createAssociatedTokenAccount(
+        rpc,
+        payer,
+        mint,
+        owner.publicKey,
+    );
+
+    await mintTo(rpc, payer, mint, owner.publicKey, mintAuthority, 1000n);
+    await decompress(rpc, payer, mint, 1000n, owner, splAta);
+
+    // 3. Create c-token ATA (destination)
+    const ctokenAta = getAssociatedTokenAddressInterface(mint, owner.publicKey);
+    await createAtaInterfaceIdempotent(rpc, payer, mint, owner.publicKey);
+
+    // 4. Get SPL interface info for the mint
+    const splInterfaceInfos = await getSplInterfaceInfos(rpc, mint);
+    const splInterfaceInfo = splInterfaceInfos.find(info => info.isInitialized);
+
+    if (!splInterfaceInfo) {
+        throw new Error('No SPL interface found');
+    }
+
+    // 5. Create wrap instruction
+    const ix = createWrapInstruction(
+        splAta,           // source: SPL token account
+        ctokenAta,        // destination: c-token ATA
+        owner.publicKey,  // owner of source account
+        mint,
+        500n,             // amount to wrap
+        splInterfaceInfo, // SPL interface info
+        payer.publicKey,  // fee payer
+    );
+
+    // 6. Build, sign, and send transaction
+    const { blockhash } = await rpc.getLatestBlockhash();
+    const additionalSigners = dedupeSigner(payer, [owner]);
+
+    const tx = buildAndSignTx(
+        [ComputeBudgetProgram.setComputeUnitLimit({ units: 200_000 }), ix],
+        payer,
+        blockhash,
+        additionalSigners,
+    );
+
+    const signature = await sendAndConfirmTx(rpc, tx);
+    console.log('Wrapped 500 tokens to c-token ATA');
+    console.log('Transaction:', signature);
+}
+
+main().catch(console.error);
+```
+</CodeGroup>

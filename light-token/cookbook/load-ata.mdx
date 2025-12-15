@@ -1,0 +1,157 @@
+---
+title: Load Cold to Hot Balance
+sidebarTitle: Load ATA
+description: Move compressed tokens (cold) to c-token ATA (hot balance)
+---
+
+import CTokenTsClientPrerequisites from '/snippets/light-token-guides/light-token-ts-client-prerequisites.mdx';
+
+Load ATA decompresses compressed tokens (cold storage) into a c-token ATA (hot balance).
+
+<Info>
+Find the source code [here](https://github.com/Lightprotocol/light-protocol/blob/main/js/compressed-token/tests/e2e/load-ata-standard.test.ts).
+</Info>
+
+<Note>
+- Returns `null` if there's nothing to load (idempotent)
+- Creates the ATA if it doesn't exist
+- With `wrap=true`, also wraps SPL/T22 balances to c-token ATA
+</Note>
+
+## Prerequisites
+
+<CTokenTsClientPrerequisites />
+
+## Usage
+
+<CodeGroup>
+```typescript Action
+import { Keypair } from '@solana/web3.js';
+import { createRpc, bn } from '@lightprotocol/stateless.js';
+import {
+    createMint,
+    mintTo,
+    loadAta,
+    getAssociatedTokenAddressInterface,
+} from '@lightprotocol/compressed-token';
+
+async function main() {
+    const rpc = createRpc();
+    const payer = Keypair.generate();
+    await rpc.requestAirdrop(payer.publicKey, 1e9);
+
+    const owner = Keypair.generate();
+    await rpc.requestAirdrop(owner.publicKey, 1e9);
+
+    const mintAuthority = Keypair.generate();
+    const mintKeypair = Keypair.generate();
+
+    // 1. Create mint and mint compressed tokens (cold)
+    const { mint } = await createMint(
+        rpc,
+        payer,
+        mintAuthority.publicKey,
+        9,
+        mintKeypair,
+    );
+
+    await mintTo(rpc, payer, mint, owner.publicKey, mintAuthority, bn(1000));
+
+    // 2. Get c-token ATA address
+    const ctokenAta = getAssociatedTokenAddressInterface(mint, owner.publicKey);
+
+    // 3. Load compressed tokens to hot balance
+    // Creates ATA if needed, returns null if nothing to load
+    const signature = await loadAta(
+        rpc,
+        ctokenAta,   // c-token ATA address
+        owner,       // owner (signer)
+        mint,
+        payer,       // optional: fee payer
+    );
+
+    if (signature) {
+        console.log('Loaded tokens to hot balance');
+        console.log('Transaction:', signature);
+    } else {
+        console.log('Nothing to load');
+    }
+}
+
+main().catch(console.error);
+```
+
+```typescript Instruction
+import { Keypair, ComputeBudgetProgram } from '@solana/web3.js';
+import {
+    createRpc,
+    bn,
+    buildAndSignTx,
+    sendAndConfirmTx,
+    dedupeSigner,
+} from '@lightprotocol/stateless.js';
+import {
+    createMint,
+    mintTo,
+    createLoadAtaInstructions,
+    getAssociatedTokenAddressInterface,
+} from '@lightprotocol/compressed-token';
+
+async function main() {
+    const rpc = createRpc();
+    const payer = Keypair.generate();
+    await rpc.requestAirdrop(payer.publicKey, 1e9);
+
+    const owner = Keypair.generate();
+    await rpc.requestAirdrop(owner.publicKey, 1e9);
+
+    const mintAuthority = Keypair.generate();
+    const mintKeypair = Keypair.generate();
+
+    // 1. Create mint and mint compressed tokens
+    const { mint } = await createMint(
+        rpc,
+        payer,
+        mintAuthority.publicKey,
+        9,
+        mintKeypair,
+    );
+
+    await mintTo(rpc, payer, mint, owner.publicKey, mintAuthority, bn(1000));
+
+    // 2. Get c-token ATA address
+    const ctokenAta = getAssociatedTokenAddressInterface(mint, owner.publicKey);
+
+    // 3. Create load instructions
+    const ixs = await createLoadAtaInstructions(
+        rpc,
+        ctokenAta,
+        owner.publicKey,
+        mint,
+        payer.publicKey,
+    );
+
+    if (ixs.length === 0) {
+        console.log('Nothing to load');
+        return;
+    }
+
+    // 4. Build, sign, and send transaction
+    const { blockhash } = await rpc.getLatestBlockhash();
+    const additionalSigners = dedupeSigner(payer, [owner]);
+
+    const tx = buildAndSignTx(
+        [ComputeBudgetProgram.setComputeUnitLimit({ units: 500_000 }), ...ixs],
+        payer,
+        blockhash,
+        additionalSigners,
+    );
+
+    const signature = await sendAndConfirmTx(rpc, tx);
+    console.log('Loaded tokens to hot balance');
+    console.log('Transaction:', signature);
+}
+
+main().catch(console.error);
+```
+</CodeGroup>

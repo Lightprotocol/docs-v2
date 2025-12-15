@@ -6,18 +6,151 @@ description: Program and client guides to create a mint with token metadata. Inc
 
 import CMintSystemAccountsList from '/snippets/accounts-list/light-mint-system-accounts-list.mdx';
 import CTokenClientPrerequisites from '/snippets/light-token-guides/light-token-client-prerequisites.mdx';
+import CTokenTsClientPrerequisites from '/snippets/light-token-guides/light-token-ts-client-prerequisites.mdx';
 import ClientCustomRentConfig from '/snippets/light-token-guides/client-custom-rent-config.mdx';
 
 1. Mint accounts uniquely represent a token on Solana and store its global metadata.
 2. Mints for light-token accounts are compressed accounts and rent-free.
 
-<Info>
-Learn the [core concepts to the light-token standard here](/light-token/README).
-</Info>
-
 # Get Started
 
 <Tabs>
+
+<Tab title="TypeScript Client">
+
+The `createMintInterface` function creates a light-mint with token metadata in a single call.
+
+<Info>
+Find the source code [here](https://github.com/Lightprotocol/light-protocol/blob/main/js/compressed-token/tests/e2e/create-mint-interface.test.ts).
+</Info>
+
+<Note>
+You can pass `TOKEN_PROGRAM_ID` or `TOKEN_2022_PROGRAM_ID` as the `programId` to create SPL or Token-2022 mints for interoperability testing.
+</Note>
+
+<Steps>
+<Step>
+### Prerequisites
+
+<CTokenTsClientPrerequisites />
+
+</Step>
+
+<Step>
+### Create Mint with Token Metadata
+
+<CodeGroup>
+```typescript Action
+import { Keypair } from '@solana/web3.js';
+import { createRpc } from '@lightprotocol/stateless.js';
+import { createMintInterface, createTokenMetadata } from '@lightprotocol/compressed-token';
+
+async function main() {
+    // 1. Setup RPC and fund payer
+    const rpc = createRpc();
+    const payer = Keypair.generate();
+    await rpc.requestAirdrop(payer.publicKey, 1e9);
+
+    // 2. Create light-mint with metadata
+    const mintSigner = Keypair.generate();
+
+    const { mint, transactionSignature } = await createMintInterface(
+        rpc,
+        payer,
+        payer,  // mintAuthority (must be Signer for c-token)
+        null,   // freezeAuthority
+        9,      // decimals
+        mintSigner,
+        undefined,
+        undefined,  // programId: defaults to CTOKEN_PROGRAM_ID. Use TOKEN_PROGRAM_ID for SPL mints.
+        createTokenMetadata('Example Token', 'EXT', 'https://example.com/metadata.json'),
+    );
+
+    console.log('Light-mint created:', mint.toBase58());
+    console.log('Transaction:', transactionSignature);
+}
+
+main().catch(console.error);
+```
+
+```typescript Instruction
+import { Keypair, ComputeBudgetProgram } from '@solana/web3.js';
+import {
+    createRpc,
+    buildAndSignTx,
+    sendAndConfirmTx,
+    selectAddressTreeInfoV2,
+    selectStateTreeInfo,
+} from '@lightprotocol/stateless.js';
+import {
+    createMintInstruction,
+    createTokenMetadata,
+    findMintAddress,
+} from '@lightprotocol/compressed-token';
+
+async function main() {
+    // 1. Setup RPC and fund payer
+    const rpc = createRpc();
+    const payer = Keypair.generate();
+    await rpc.requestAirdrop(payer.publicKey, 1e9);
+
+    // 2. Prepare mint parameters
+    const mintSigner = Keypair.generate();
+    const mintAuthority = payer.publicKey;
+    const freezeAuthority = null;
+    const decimals = 9;
+
+    // 3. Get tree infos
+    // the address Merkle tree stores the address for the mint account
+    // the state Merkle tree stores the mint account
+    // the protocol maintains merkle trees
+    const addressTreeInfo = selectAddressTreeInfoV2(await rpc.getAddressTreeInfos());
+    const stateTreeInfo = selectStateTreeInfo(await rpc.getStateTreeInfos());
+
+    // 4. Get validity proof for address creation
+    // proofs the address for the mint account does not exist yet
+    const [mintPda] = findMintAddress(mintSigner.publicKey);
+    const validityProof = await rpc.getValidityProofV0(
+        [],
+        [{ address: mintPda, tree: addressTreeInfo.tree }],
+    );
+
+    // 5. Create instruction
+    const ix = createMintInstruction(
+        mintSigner.publicKey,
+        decimals,
+        mintAuthority,
+        freezeAuthority,
+        payer.publicKey,
+        validityProof,
+        addressTreeInfo,
+        stateTreeInfo,
+        createTokenMetadata('Example Token', 'EXT', 'https://example.com/metadata.json'),
+    );
+
+    // 6. Build, sign, and send transaction
+    const { blockhash } = await rpc.getLatestBlockhash();
+    const tx = buildAndSignTx(
+        [ComputeBudgetProgram.setComputeUnitLimit({ units: 300_000 }), ix],
+        payer,
+        blockhash,
+        [mintSigner],
+    );
+    const signature = await sendAndConfirmTx(rpc, tx);
+
+    console.log('Light-mint created:', mintPda.toBase58());
+    console.log('Transaction:', signature);
+}
+
+main().catch(console.error);
+```
+</CodeGroup>
+
+
+</Step>
+</Steps>
+
+</Tab>
 
 <Tab title="Rust Client">
 

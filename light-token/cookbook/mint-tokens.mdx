@@ -6,6 +6,7 @@ description: Client and program guide to mint tokens to a light-token account. I
 import CMintSystemAccountsList from '/snippets/accounts-list/light-mint-system-accounts-list.mdx';
 import CMintToCTokenAccountsList from '/snippets/accounts-list/light-mint-to-light-token-accounts-list.mdx';
 import CTokenClientPrerequisites from '/snippets/light-token-guides/light-token-client-prerequisites.mdx';
+import CTokenTsClientPrerequisites from '/snippets/light-token-guides/light-token-ts-client-prerequisites.mdx';
 import ClientCustomRentConfig from '/snippets/light-token-guides/client-custom-rent-config.mdx';
 
 
@@ -16,6 +17,171 @@ import ClientCustomRentConfig from '/snippets/light-token-guides/client-custom-r
 # Get Started
 
 <Tabs>
+
+<Tab title="TypeScript Client">
+
+The `mintToInterface` function mints tokens to light-token accounts in a single call.
+
+<Info>
+Find the source code [here](https://github.com/Lightprotocol/light-protocol/blob/main/js/compressed-token/tests/e2e/mint-to-interface.test.ts).
+</Info>
+
+<Note>
+The function auto-detects the token program (SPL, Token-2022, or CToken) from the mint address.
+</Note>
+
+<Steps>
+<Step>
+### Prerequisites
+
+<CTokenTsClientPrerequisites />
+
+</Step>
+
+<Step>
+### Mint Tokens to Light-Token Account
+
+<CodeGroup>
+```typescript Action
+import { Keypair } from '@solana/web3.js';
+import { createRpc } from '@lightprotocol/stateless.js';
+import {
+    createMintInterface,
+    createAtaInterface,
+    mintToInterface,
+    getAssociatedCTokenAddress,
+} from '@lightprotocol/compressed-token';
+
+async function main() {
+    // 1. Setup RPC and fund payer
+    const rpc = createRpc();
+    const payer = Keypair.generate();
+    await rpc.requestAirdrop(payer.publicKey, 1e9);
+
+    // 2. Create a light-mint (payer is mint authority)
+    const mintSigner = Keypair.generate();
+    const { mint } = await createMintInterface(
+        rpc,
+        payer,
+        payer,      // mintAuthority
+        null,       // freezeAuthority
+        9,          // decimals
+        mintSigner,
+    );
+
+    // 3. Create associated token account for recipient
+    const recipient = Keypair.generate();
+    await createAtaInterface(rpc, payer, mint, recipient.publicKey);
+
+    // 4. Mint tokens to the recipient's account
+    const destination = getAssociatedCTokenAddress(recipient.publicKey, mint);
+    const amount = 1_000_000_000; // 1 token with 9 decimals
+
+    const txSignature = await mintToInterface(
+        rpc,
+        payer,
+        mint,
+        destination,
+        payer,      // mintAuthority (must be Signer)
+        amount,
+    );
+
+    console.log('Minted tokens:', amount);
+    console.log('Transaction:', txSignature);
+}
+
+main().catch(console.error);
+```
+
+```typescript Instruction
+import { Keypair, ComputeBudgetProgram } from '@solana/web3.js';
+import {
+    createRpc,
+    buildAndSignTx,
+    sendAndConfirmTx,
+    bn,
+    DerivationMode,
+} from '@lightprotocol/stateless.js';
+import {
+    createMintInterface,
+    createAtaInterface,
+    createMintToInterfaceInstruction,
+    getMintInterface,
+    getAssociatedCTokenAddress,
+} from '@lightprotocol/compressed-token';
+
+async function main() {
+    // 1. Setup RPC and fund payer
+    const rpc = createRpc();
+    const payer = Keypair.generate();
+    await rpc.requestAirdrop(payer.publicKey, 1e9);
+
+    // 2. Create a light-mint (payer is mint authority)
+    const mintSigner = Keypair.generate();
+    const { mint } = await createMintInterface(
+        rpc,
+        payer,
+        payer,
+        null,
+        9,
+        mintSigner,
+    );
+
+    // 3. Create associated token account for recipient
+    const recipient = Keypair.generate();
+    await createAtaInterface(rpc, payer, mint, recipient.publicKey);
+    const destination = getAssociatedCTokenAddress(recipient.publicKey, mint);
+
+    // 4. Get mint interface (includes merkle context for c-tokens)
+    const mintInterface = await getMintInterface(rpc, mint);
+
+    // 5. Get validity proof for the mint (required for c-token mints)
+    let validityProof;
+    if (mintInterface.merkleContext) {
+        validityProof = await rpc.getValidityProofV2(
+            [{
+                hash: bn(mintInterface.merkleContext.hash),
+                leafIndex: mintInterface.merkleContext.leafIndex,
+                treeInfo: mintInterface.merkleContext.treeInfo,
+                proveByIndex: mintInterface.merkleContext.proveByIndex,
+            }],
+            [],
+            DerivationMode.compressible,
+        );
+    }
+
+    // 6. Create instruction
+    const amount = 1_000_000_000;
+    const ix = createMintToInterfaceInstruction(
+        mintInterface,
+        destination,
+        payer.publicKey,    // authority
+        payer.publicKey,    // payer
+        amount,
+        validityProof,
+    );
+
+    // 7. Build, sign, and send transaction
+    const { blockhash } = await rpc.getLatestBlockhash();
+    const tx = buildAndSignTx(
+        [ComputeBudgetProgram.setComputeUnitLimit({ units: 500_000 }), ix],
+        payer,
+        blockhash,
+    );
+    const signature = await sendAndConfirmTx(rpc, tx);
+
+    console.log('Minted tokens:', amount);
+    console.log('Transaction:', signature);
+}
+
+main().catch(console.error);
+```
+</CodeGroup>
+
+</Step>
+</Steps>
+
+</Tab>
 
 <Tab title="Rust Client">
 

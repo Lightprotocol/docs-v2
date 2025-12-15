@@ -1,0 +1,151 @@
+---
+title: Decompress Cold to SPL
+sidebarTitle: Decompress
+description: Convert compressed accounts (cold storage) to SPL tokens
+---
+
+import CTokenTsClientPrerequisites from '/snippets/light-token-guides/light-token-ts-client-prerequisites.mdx';
+
+Decompress moves tokens from compressed accounts (cold storage) to an SPL/T22 token account.
+
+<Info>
+Find the source code [here](https://github.com/Lightprotocol/light-protocol/blob/main/js/compressed-token/tests/e2e/decompress.test.ts).
+</Info>
+
+<Note>
+The destination SPL/T22 account must exist before decompressing.
+</Note>
+
+## Prerequisites
+
+<CTokenTsClientPrerequisites />
+
+## Usage
+
+<CodeGroup>
+```typescript Action
+import { Keypair } from '@solana/web3.js';
+import { createRpc, bn } from '@lightprotocol/stateless.js';
+import {
+    createMint,
+    mintTo,
+    decompress,
+} from '@lightprotocol/compressed-token';
+import { createAssociatedTokenAccount } from '@solana/spl-token';
+
+async function main() {
+    const rpc = createRpc();
+    const payer = Keypair.generate();
+    await rpc.requestAirdrop(payer.publicKey, 1e9);
+
+    const owner = Keypair.generate();
+    await rpc.requestAirdrop(owner.publicKey, 1e9);
+
+    const mintAuthority = Keypair.generate();
+    const mintKeypair = Keypair.generate();
+
+    // 1. Create SPL mint with token pool
+    const { mint } = await createMint(
+        rpc,
+        payer,
+        mintAuthority.publicKey,
+        9,
+        mintKeypair,
+    );
+
+    // 2. Mint compressed tokens (cold storage)
+    await mintTo(rpc, payer, mint, owner.publicKey, mintAuthority, bn(1000));
+
+    // 3. Create destination SPL ATA (must exist)
+    const splAta = await createAssociatedTokenAccount(
+        rpc,
+        payer,
+        mint,
+        owner.publicKey,
+    );
+
+    // 4. Decompress to SPL ATA
+    const signature = await decompress(
+        rpc,
+        payer,
+        mint,
+        bn(500),   // amount to decompress
+        owner,     // owner of compressed tokens (signer)
+        splAta,    // destination SPL token account
+    );
+
+    console.log('Decompressed 500 tokens to SPL ATA');
+    console.log('Transaction:', signature);
+}
+
+main().catch(console.error);
+```
+
+```typescript With Token Pool
+import { Keypair } from '@solana/web3.js';
+import { createRpc, bn } from '@lightprotocol/stateless.js';
+import {
+    createMint,
+    mintTo,
+    decompress,
+    getTokenPoolInfos,
+    selectTokenPoolInfosForDecompression,
+} from '@lightprotocol/compressed-token';
+import { createAssociatedTokenAccount } from '@solana/spl-token';
+
+async function main() {
+    const rpc = createRpc();
+    const payer = Keypair.generate();
+    await rpc.requestAirdrop(payer.publicKey, 1e9);
+
+    const owner = Keypair.generate();
+    await rpc.requestAirdrop(owner.publicKey, 1e9);
+
+    const mintAuthority = Keypair.generate();
+    const mintKeypair = Keypair.generate();
+
+    // 1. Create SPL mint with token pool
+    const { mint } = await createMint(
+        rpc,
+        payer,
+        mintAuthority.publicKey,
+        9,
+        mintKeypair,
+    );
+
+    // 2. Mint compressed tokens (cold storage)
+    await mintTo(rpc, payer, mint, owner.publicKey, mintAuthority, bn(1000));
+
+    // 3. Create destination SPL ATA
+    const splAta = await createAssociatedTokenAccount(
+        rpc,
+        payer,
+        mint,
+        owner.publicKey,
+    );
+
+    // 4. Get token pool infos and select for decompression
+    const tokenPoolInfos = await getTokenPoolInfos(rpc, mint);
+    const selectedPools = selectTokenPoolInfosForDecompression(
+        tokenPoolInfos,
+        bn(500),  // amount to decompress
+    );
+
+    // 5. Decompress with explicit token pool selection
+    const signature = await decompress(
+        rpc,
+        payer,
+        mint,
+        bn(500),
+        owner,
+        splAta,
+        selectedPools,  // optional: explicitly pass token pools
+    );
+
+    console.log('Decompressed 500 tokens to SPL ATA');
+    console.log('Transaction:', signature);
+}
+
+main().catch(console.error);
+```
+</CodeGroup>

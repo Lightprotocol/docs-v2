@@ -10,6 +10,7 @@ import CTokenConfigureRent from '/snippets/light-token-configure-rent.mdx';
 import CAtaIntro from '/snippets/light-token-guides/cata-intro.mdx';
 import CompressibleRentExplained from '/snippets/compressible-rent-explained.mdx';
 import CTokenClientPrerequisites from '/snippets/light-token-guides/light-token-client-prerequisites.mdx';
+import CTokenTsClientPrerequisites from '/snippets/light-token-guides/light-token-ts-client-prerequisites.mdx';
 import ClientCustomRentConfig from '/snippets/light-token-guides/client-custom-rent-config.mdx';
 
 1. Associated light-token accounts are Solana accounts that hold token balances of light, SPL, or Token 2022 mints.
@@ -25,6 +26,133 @@ import ClientCustomRentConfig from '/snippets/light-token-guides/client-custom-r
 # Get Started
 
 <Tabs>
+
+<Tab title="TypeScript Client">
+
+The `createAtaInterface` function creates an associated light-token account in a single call.
+
+<Info>
+Find the source code [here](https://github.com/Lightprotocol/light-protocol/blob/main/js/compressed-token/tests/e2e/create-ata-interface.test.ts).
+</Info>
+
+<Note>
+Pass `TOKEN_PROGRAM_ID` or `TOKEN_2022_PROGRAM_ID` as `programId` to create SPL or Token-2022 ATAs.
+</Note>
+
+<Steps>
+<Step>
+### Prerequisites
+
+<CTokenTsClientPrerequisites />
+
+</Step>
+
+<Step>
+### Create Associated Token Account
+
+<CodeGroup>
+```typescript Action
+import { Keypair } from '@solana/web3.js';
+import { createRpc } from '@lightprotocol/stateless.js';
+import { createAtaInterface, createMintInterface } from '@lightprotocol/compressed-token';
+
+async function main() {
+    // 1. Setup RPC and fund payer
+    const rpc = createRpc();
+    const payer = Keypair.generate();
+    await rpc.requestAirdrop(payer.publicKey, 1e9);
+
+    // 2. Create a light-mint first (or use existing mint)
+    const mintSigner = Keypair.generate();
+    const { mint } = await createMintInterface(
+        rpc,
+        payer,
+        payer,      // mintAuthority
+        null,       // freezeAuthority
+        9,          // decimals
+        mintSigner,
+    );
+
+    // 3. Create associated token account for owner
+    const owner = Keypair.generate();
+    const ataAddress = await createAtaInterface(
+        rpc,
+        payer,
+        mint,
+        owner.publicKey,
+    );
+
+    console.log('Light-ATA created:', ataAddress.toBase58());
+}
+
+main().catch(console.error);
+```
+
+```typescript Instruction
+import { Keypair, ComputeBudgetProgram } from '@solana/web3.js';
+import {
+    createRpc,
+    buildAndSignTx,
+    sendAndConfirmTx,
+    CTOKEN_PROGRAM_ID,
+} from '@lightprotocol/stateless.js';
+import {
+    createMintInterface,
+    createAssociatedTokenAccountInterfaceInstruction,
+    getAssociatedTokenAddressInterface,
+} from '@lightprotocol/compressed-token';
+
+async function main() {
+    // 1. Setup RPC and fund payer
+    const rpc = createRpc();
+    const payer = Keypair.generate();
+    await rpc.requestAirdrop(payer.publicKey, 1e9);
+
+    // 2. Create a light-mint first (or use existing mint)
+    const mintSigner = Keypair.generate();
+    const { mint } = await createMintInterface(
+        rpc,
+        payer,
+        payer,
+        null,
+        9,
+        mintSigner,
+    );
+
+    // 3. Derive ATA address
+    const owner = Keypair.generate();
+    const ataAddress = getAssociatedTokenAddressInterface(mint, owner.publicKey);
+
+    // 4. Create instruction
+    const ix = createAssociatedTokenAccountInterfaceInstruction(
+        payer.publicKey,    // payer
+        ataAddress,         // associatedToken
+        owner.publicKey,    // owner
+        mint,               // mint
+        CTOKEN_PROGRAM_ID,  // programId
+    );
+
+    // 5. Build, sign, and send transaction
+    const { blockhash } = await rpc.getLatestBlockhash();
+    const tx = buildAndSignTx(
+        [ComputeBudgetProgram.setComputeUnitLimit({ units: 50_000 }), ix],
+        payer,
+        blockhash,
+    );
+    const signature = await sendAndConfirmTx(rpc, tx);
+
+    console.log('Light-ATA created:', ataAddress.toBase58());
+    console.log('Transaction:', signature);
+}
+
+main().catch(console.error);
+```
+</CodeGroup>
+
+</Step>
+</Steps>
+
+</Tab>
 
 <Tab title="Rust Client">
 

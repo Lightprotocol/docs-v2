@@ -7,6 +7,7 @@ import TransferInterfaceAccountsListCtoken1 from '/snippets/accounts-list/transf
 import TransferInterfaceAccountsListSpl2 from '/snippets/accounts-list/transfer-interface-accounts-list-spl-2.mdx';
 import TransferInterfaceIntro from '/snippets/light-token-guides/transfer-interface-intro.mdx';
 import CTokenClientPrerequisites from '/snippets/light-token-guides/light-token-client-prerequisites.mdx';
+import CTokenTsClientPrerequisites from '/snippets/light-token-guides/light-token-ts-client-prerequisites.mdx';
 import ClientCustomRentConfig from '/snippets/light-token-guides/client-custom-rent-config.mdx';
 
 <table>
@@ -49,6 +50,163 @@ import ClientCustomRentConfig from '/snippets/light-token-guides/client-custom-r
 # Get Started
 
 <Tabs>
+
+<Tab title="TypeScript Client">
+
+The `transferInterface` function transfers tokens between light-token accounts in a single call.
+
+<Info>
+Find the source code [here](https://github.com/Lightprotocol/light-protocol/blob/main/js/compressed-token/tests/e2e/transfer-interface.test.ts).
+</Info>
+
+<Note>
+The function auto-loads compressed tokens to the sender's hot balance if needed. Destination must already exist.
+</Note>
+
+<Steps>
+<Step>
+### Prerequisites
+
+<CTokenTsClientPrerequisites />
+
+</Step>
+
+<Step>
+### Transfer Between Light-Token Accounts
+
+<CodeGroup>
+```typescript Action
+import { Keypair } from '@solana/web3.js';
+import { createRpc } from '@lightprotocol/stateless.js';
+import {
+    createMintInterface,
+    createAtaInterface,
+    mintToInterface,
+    transferInterface,
+    getAssociatedTokenAddressInterface,
+} from '@lightprotocol/compressed-token';
+
+async function main() {
+    // 1. Setup RPC and fund payer
+    const rpc = createRpc();
+    const payer = Keypair.generate();
+    await rpc.requestAirdrop(payer.publicKey, 1e9);
+
+    // 2. Create a light-mint
+    const mintSigner = Keypair.generate();
+    const { mint } = await createMintInterface(
+        rpc,
+        payer,
+        payer,
+        null,
+        9,
+        mintSigner,
+    );
+
+    // 3. Create sender's ATA and mint tokens
+    const sender = Keypair.generate();
+    await createAtaInterface(rpc, payer, mint, sender.publicKey);
+    const senderAta = getAssociatedTokenAddressInterface(mint, sender.publicKey);
+    await mintToInterface(rpc, payer, mint, senderAta, payer, 1_000_000_000);
+
+    // 4. Create recipient's ATA (destination must exist)
+    const recipient = Keypair.generate();
+    await createAtaInterface(rpc, payer, mint, recipient.publicKey);
+    const recipientAta = getAssociatedTokenAddressInterface(mint, recipient.publicKey);
+
+    // 5. Transfer tokens
+    const txSignature = await transferInterface(
+        rpc,
+        payer,
+        senderAta,
+        mint,
+        recipientAta,
+        sender,         // owner (must be Signer)
+        500_000_000,    // amount to transfer
+    );
+
+    console.log('Transferred 0.5 tokens');
+    console.log('Transaction:', txSignature);
+}
+
+main().catch(console.error);
+```
+
+```typescript Instruction
+import { Keypair, ComputeBudgetProgram } from '@solana/web3.js';
+import {
+    createRpc,
+    buildAndSignTx,
+    sendAndConfirmTx,
+} from '@lightprotocol/stateless.js';
+import {
+    createMintInterface,
+    createAtaInterface,
+    mintToInterface,
+    createCTokenTransferInstruction,
+    getAssociatedTokenAddressInterface,
+} from '@lightprotocol/compressed-token';
+
+async function main() {
+    // 1. Setup RPC and fund payer
+    const rpc = createRpc();
+    const payer = Keypair.generate();
+    await rpc.requestAirdrop(payer.publicKey, 1e9);
+
+    // 2. Create a light-mint
+    const mintSigner = Keypair.generate();
+    const { mint } = await createMintInterface(
+        rpc,
+        payer,
+        payer,
+        null,
+        9,
+        mintSigner,
+    );
+
+    // 3. Create sender's ATA and mint tokens
+    const sender = Keypair.generate();
+    await createAtaInterface(rpc, payer, mint, sender.publicKey);
+    const senderAta = getAssociatedTokenAddressInterface(mint, sender.publicKey);
+    await mintToInterface(rpc, payer, mint, senderAta, payer, 1_000_000_000);
+
+    // 4. Create recipient's ATA (destination must exist)
+    const recipient = Keypair.generate();
+    await createAtaInterface(rpc, payer, mint, recipient.publicKey);
+    const recipientAta = getAssociatedTokenAddressInterface(mint, recipient.publicKey);
+
+    // 5. Create transfer instruction
+    const amount = 500_000_000;
+    const ix = createCTokenTransferInstruction(
+        senderAta,          // source
+        recipientAta,       // destination
+        sender.publicKey,   // owner
+        amount,
+        payer.publicKey,    // payer (for rent top-up)
+    );
+
+    // 6. Build, sign, and send transaction
+    const { blockhash } = await rpc.getLatestBlockhash();
+    const tx = buildAndSignTx(
+        [ComputeBudgetProgram.setComputeUnitLimit({ units: 10_000 }), ix],
+        payer,
+        blockhash,
+        [sender],
+    );
+    const signature = await sendAndConfirmTx(rpc, tx);
+
+    console.log('Transferred 0.5 tokens');
+    console.log('Transaction:', signature);
+}
+
+main().catch(console.error);
+```
+</CodeGroup>
+
+</Step>
+</Steps>
+
+</Tab>
 
 <Tab title="Rust Client">
 
