@@ -35,7 +35,7 @@
                   "light-token/cookbook/transfer-interface",
                   "light-token/cookbook/close-token-account"
                 ]
-              },
+              }
             ]
           },
           {
