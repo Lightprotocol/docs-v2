@@ -38,12 +38,12 @@ import IntegrateCTokenGuidesTable from '/snippets/overview-tables/integrate-ligh
 
 <CardGroup cols={2}>
   <Card title="" icon="coins">
-  # Mint Accounts
+  ## Mint Accounts
     * Uniquely represent a token and store its global metadata.
     * light-mints are compressed accounts and rent-free.
   </Card>
   <Card title="" icon="wallet">
-  # Token Accounts
+  ## Token Accounts
     * Each light-token account can hold units of one light, SPL, or Token 2022 mint.
     * Custom rent config reduces account creation cost.
   </Card>
@@ -53,60 +53,7 @@ import IntegrateCTokenGuidesTable from '/snippets/overview-tables/integrate-ligh
 If you simply want to **distribute tokens**, please refer to [this page](/compressed-tokens).
 </Info>
 
-# Start building
-
-<Steps>
-  <Step>
-
-### Install dependencies
-
-```bash
-npm install @lightprotocol/compressed-token \
-            @lightprotocol/stateless.js
-```
-</Step>
-
-<Step>
-
-### Set up developer environment
-
-<Accordion title="Setup">
-
-```typescript
-import { createRpc } from "@lightprotocol/stateless.js";
-
-import {
-  getOrCreateAtaInterface,
-  getAtaInterface,
-  getAssociatedTokenAddressInterface,
-  transferInterface,
-  unwrap,
-} from "@lightprotocol/compressed-token/unified";
-
-const rpc = createRpc(RPC_ENDPOINT);
-```
-
-</Accordion>
-</Step>
-
-  <Step>
-
 ### Get Started
-
-<Card
-  title="Create light-token accounts"
-  icon="chevron-right"
-  color="#0066ff"
-  href="/light-token/cookbook/create-token-account"
-  horizontal
-/>
-
-  </Step>
-</Steps>
-
-## Integration Toolkits
-
-<IntegrateCTokenGuidesTable />
 
 ## Cookbook
 
