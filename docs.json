@@ -25,6 +25,7 @@
             "pages": [
               "light-token/README",
               "light-token/faq",
+              "learn/light-token-standard",
               {
                 "group": "Cookbook",
                 "pages": [
@@ -392,8 +393,7 @@
                   "learn/core-concepts/transaction-lifecycle",
                   "learn/core-concepts/considerations"
                 ]
-              },
-              "learn/light-token-standard"
+              }
             ]
           },
           {
