@@ -36,17 +36,6 @@
                   "light-token/cookbook/close-token-account"
                 ]
               },
-              {
-                "group": "Toolkits",
-                "expanded": true,
-                "pages": [
-                  "light-token/toolkits/README",
-                  "light-token/toolkits/for-payments",
-                  "light-token/toolkits/for-wallets",
-                  "light-token/toolkits/for-streaming-mints",
-                  "light-token/toolkits/for-streaming-tokens"
-                ]
-              }
             ]
           },
           {
