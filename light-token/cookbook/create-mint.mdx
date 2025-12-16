@@ -41,108 +41,128 @@ You can pass `TOKEN_PROGRAM_ID` or `TOKEN_2022_PROGRAM_ID` as the `programId` to
 
 <CodeGroup>
 ```typescript Action
-import { Keypair } from '@solana/web3.js';
-import { createRpc } from '@lightprotocol/stateless.js';
-import { createMintInterface, createTokenMetadata } from '@lightprotocol/compressed-token';
+import "dotenv/config";
+import { Keypair } from "@solana/web3.js";
+import { createRpc, selectStateTreeInfo, TreeType } from "@lightprotocol/stateless.js";
+import { createMintInterface, createTokenMetadata } from "@lightprotocol/compressed-token/unified";
+import * as fs from "fs";
+import * as path from "path";
 
 async function main() {
-    // 1. Setup RPC and fund payer
-    const rpc = createRpc();
-    const payer = Keypair.generate();
-    await rpc.requestAirdrop(payer.publicKey, 1e9);
+  const apiKey = process.env.HELIUS_API_KEY;
+  if (!apiKey) throw new Error("HELIUS_API_KEY not set");
 
-    // 2. Create light-mint with metadata
-    const mintSigner = Keypair.generate();
+  const rpc = createRpc(`https://devnet.helius-rpc.com?api-key=${apiKey}`);
 
-    const { mint, transactionSignature } = await createMintInterface(
-        rpc,
-        payer,
-        payer,  // mintAuthority (must be Signer for c-token)
-        null,   // freezeAuthority
-        9,      // decimals
-        mintSigner,
-        undefined,
-        undefined,  // programId: defaults to CTOKEN_PROGRAM_ID. Use TOKEN_PROGRAM_ID for SPL mints.
-        createTokenMetadata('Example Token', 'EXT', 'https://example.com/metadata.json'),
-    );
+  const keypairPath = path.join(process.env.HOME || "~", ".config/solana/id.json");
+  console.log("Keypair path:", keypairPath);
+  const payer = Keypair.fromSecretKey(
+    Uint8Array.from(JSON.parse(fs.readFileSync(keypairPath, "utf-8")))
+  );
+  console.log("Payer key:", payer.publicKey.toBase58());
 
-    console.log('Light-mint created:', mint.toBase58());
-    console.log('Transaction:', transactionSignature);
+  const mintSigner = Keypair.generate();
+  const stateTreeInfo = selectStateTreeInfo(await rpc.getStateTreeInfos(), TreeType.StateV1);
+
+  const { mint, transactionSignature } = await createMintInterface(
+    rpc,
+    payer,
+    payer,
+    null,
+    9,
+    mintSigner,
+    undefined,
+    undefined,
+    createTokenMetadata("Example Token", "EXT", "https://example.com/metadata.json"),
+    stateTreeInfo
+  );
+
+  console.log("Mint:", mint.toBase58());
+  console.log(`https://explorer.solana.com/tx/${transactionSignature}?cluster=devnet`);
 }
 
 main().catch(console.error);
 ```
 
 ```typescript Instruction
-import { Keypair, ComputeBudgetProgram } from '@solana/web3.js';
+import "dotenv/config";
+import { Keypair, ComputeBudgetProgram } from "@solana/web3.js";
 import {
-    createRpc,
-    buildAndSignTx,
-    sendAndConfirmTx,
-    selectAddressTreeInfoV2,
-    selectStateTreeInfo,
-} from '@lightprotocol/stateless.js';
+  createRpc,
+  buildAndSignTx,
+  sendAndConfirmTx,
+  getBatchAddressTreeInfo,
+  selectStateTreeInfo,
+  TreeType,
+} from "@lightprotocol/stateless.js";
 import {
-    createMintInstruction,
-    createTokenMetadata,
-    findMintAddress,
-} from '@lightprotocol/compressed-token';
+  createMintInstruction,
+  createTokenMetadata,
+  findMintAddress,
+} from "@lightprotocol/compressed-token/unified";
+import * as fs from "fs";
+import * as path from "path";
 
 async function main() {
-    // 1. Setup RPC and fund payer
-    const rpc = createRpc();
-    const payer = Keypair.generate();
-    await rpc.requestAirdrop(payer.publicKey, 1e9);
+  const apiKey = process.env.HELIUS_API_KEY;
+  if (!apiKey) throw new Error("HELIUS_API_KEY not set");
 
-    // 2. Prepare mint parameters
-    const mintSigner = Keypair.generate();
-    const mintAuthority = payer.publicKey;
-    const freezeAuthority = null;
-    const decimals = 9;
+  // 1. Setup RPC connection
+  const rpc = createRpc(`https://devnet.helius-rpc.com?api-key=${apiKey}`);
 
-    // 3. Get tree infos
-    // the address Merkle tree stores the address for the mint account
-    // the state Merkle tree stores the mint account
-    // the protocol maintains merkle trees
-    const addressTreeInfo = selectAddressTreeInfoV2(await rpc.getAddressTreeInfos());
-    const stateTreeInfo = selectStateTreeInfo(await rpc.getStateTreeInfos());
+  // 2. Load payer keypair
+  const keypairPath = path.join(process.env.HOME || "~", ".config/solana/id.json");
+  const payer = Keypair.fromSecretKey(
+    Uint8Array.from(JSON.parse(fs.readFileSync(keypairPath, "utf-8")))
+  );
 
-    // 4. Get validity proof for address creation
-    // proofs the address for the mint account does not exist yet
-    const [mintPda] = findMintAddress(mintSigner.publicKey);
-    const validityProof = await rpc.getValidityProofV0(
-        [],
-        [{ address: mintPda, tree: addressTreeInfo.tree }],
-    );
+  // 3. Prepare mint parameters
+  const mintSigner = Keypair.generate();
+  const decimals = 9;
 
-    // 5. Create instruction
-    const ix = createMintInstruction(
-        mintSigner.publicKey,
-        decimals,
-        mintAuthority,
-        freezeAuthority,
-        payer.publicKey,
-        validityProof,
-        addressTreeInfo,
-        stateTreeInfo,
-        createTokenMetadata('Example Token', 'EXT', 'https://example.com/metadata.json'),
-    );
+  // 4. Get tree infos
+  // Address Merkle tree stores the mint address
+  // State Merkle tree stores the mint account data
+  const addressTreeInfo = getBatchAddressTreeInfo();
+  const stateTreeInfo = selectStateTreeInfo(await rpc.getStateTreeInfos(), TreeType.StateV1);
 
-    // 6. Build, sign, and send transaction
-    const { blockhash } = await rpc.getLatestBlockhash();
-    const tx = buildAndSignTx(
-        [ComputeBudgetProgram.setComputeUnitLimit({ units: 300_000 }), ix],
-        payer,
-        blockhash,
-        [mintSigner],
-    );
-    const signature = await sendAndConfirmTx(rpc, tx);
+  // 5. Get validity proof for address creation
+  // Proves the mint address does not exist yet
+  const [mintPda] = findMintAddress(mintSigner.publicKey);
+  const validityProof = await rpc.getValidityProofV2(
+    [],
+    [{ address: mintPda.toBytes(), treeInfo: addressTreeInfo }]
+  );
 
-    console.log('Light-mint created:', mintPda.toBase58());
-    console.log('Transaction:', signature);
+  // 6. Create instruction
+  const ix = createMintInstruction(
+    mintSigner.publicKey,
+    decimals,
+    payer.publicKey,
+    null,
+    payer.publicKey,
+    validityProof,
+    addressTreeInfo,
+    stateTreeInfo,
+    createTokenMetadata("Example Token", "EXT", "https://example.com/metadata.json")
+  );
+
+  // 7. Build, sign, and send transaction
+  const { blockhash } = await rpc.getLatestBlockhash();
+  const tx = buildAndSignTx(
+    [ComputeBudgetProgram.setComputeUnitLimit({ units: 500_000 }), ix],
+    payer,
+    blockhash,
+    [mintSigner]
+  );
+  const signature = await sendAndConfirmTx(rpc, tx, { skipPreflight: true });
+
+  console.log("Mint:", mintPda.toBase58());
+  console.log(`https://explorer.solana.com/tx/${signature}?cluster=devnet`);
 }
 
 main().catch(console.error);
+
 ```
 </CodeGroup>
 

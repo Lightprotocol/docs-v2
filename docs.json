@@ -76,13 +76,13 @@
           {
             "group": "Learn",
             "pages": [
-              "learn/light-token-standard"
+              "learn/light-token-standard",
+              "light-token/interface-methods"
             ]
           },
           {
             "group": "SDK Reference",
             "pages": [
-              "light-token/interface-methods",
               "api-reference/libraries/stateless-js",
               "api-reference/libraries/compressed-token",
               "api-reference/libraries/light-client",

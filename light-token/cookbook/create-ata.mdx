@@ -89,63 +89,106 @@ main().catch(console.error);
 ```
 
 ```typescript Instruction
-import { Keypair, ComputeBudgetProgram } from '@solana/web3.js';
+import "dotenv/config";
+import { Keypair, ComputeBudgetProgram, PublicKey } from "@solana/web3.js";
 import {
-    createRpc,
-    buildAndSignTx,
-    sendAndConfirmTx,
-    CTOKEN_PROGRAM_ID,
-} from '@lightprotocol/stateless.js';
+  createRpc,
+  buildAndSignTx,
+  sendAndConfirmTx,
+  getBatchAddressTreeInfo,
+  selectStateTreeInfo,
+  TreeType,
+  CTOKEN_PROGRAM_ID,
+} from "@lightprotocol/stateless.js";
 import {
-    createMintInterface,
-    createAssociatedTokenAccountInterfaceInstruction,
-    getAssociatedTokenAddressInterface,
-} from '@lightprotocol/compressed-token';
+  createMintInstruction,
+  createTokenMetadata,
+  findMintAddress,
+  createAssociatedTokenAccountInterfaceInstruction,
+  getAssociatedTokenAddressInterface,
+} from "@lightprotocol/compressed-token/unified";
+import * as fs from "fs";
+import * as path from "path";
 
 async function main() {
-    // 1. Setup RPC and fund payer
-    const rpc = createRpc();
-    const payer = Keypair.generate();
-    await rpc.requestAirdrop(payer.publicKey, 1e9);
+  const apiKey = process.env.HELIUS_API_KEY;
+  if (!apiKey) throw new Error("HELIUS_API_KEY not set");
 
-    // 2. Create a light-mint first (or use existing mint)
-    const mintSigner = Keypair.generate();
-    const { mint } = await createMintInterface(
-        rpc,
-        payer,
-        payer,
-        null,
-        9,
-        mintSigner,
-    );
+  // 1. Setup RPC connection
+  const rpc = createRpc(`https://devnet.helius-rpc.com?api-key=${apiKey}`);
 
-    // 3. Derive ATA address
-    const owner = Keypair.generate();
-    const ataAddress = getAssociatedTokenAddressInterface(mint, owner.publicKey);
+  // 2. Load payer keypair
+  const keypairPath = path.join(process.env.HOME || "~", ".config/solana/id.json");
+  const payer = Keypair.fromSecretKey(
+    Uint8Array.from(JSON.parse(fs.readFileSync(keypairPath, "utf-8")))
+  );
 
-    // 4. Create instruction
-    const ix = createAssociatedTokenAccountInterfaceInstruction(
-        payer.publicKey,    // payer
-        ataAddress,         // associatedToken
-        owner.publicKey,    // owner
-        mint,               // mint
-        CTOKEN_PROGRAM_ID,  // programId
-    );
+  // 3. Create a mint first (or use existing mint)
+  const mint = await createMint(rpc, payer);
 
-    // 5. Build, sign, and send transaction
-    const { blockhash } = await rpc.getLatestBlockhash();
-    const tx = buildAndSignTx(
-        [ComputeBudgetProgram.setComputeUnitLimit({ units: 50_000 }), ix],
-        payer,
-        blockhash,
-    );
-    const signature = await sendAndConfirmTx(rpc, tx);
+  // 4. Define owner and derive ATA address
+  const owner = Keypair.generate();
+  const ataAddress = getAssociatedTokenAddressInterface(mint, owner.publicKey);
 
-    console.log('Light-ATA created:', ataAddress.toBase58());
-    console.log('Transaction:', signature);
+  // 5. Create instruction
+  const ix = createAssociatedTokenAccountInterfaceInstruction(
+    payer.publicKey,
+    ataAddress,
+    owner.publicKey,
+    mint,
+    CTOKEN_PROGRAM_ID
+  );
+
+  // 6. Build, sign, and send transaction
+  const { blockhash } = await rpc.getLatestBlockhash();
+  const tx = buildAndSignTx(
+    [ComputeBudgetProgram.setComputeUnitLimit({ units: 50_000 }), ix],
+    payer,
+    blockhash
+  );
+  const signature = await sendAndConfirmTx(rpc, tx, { skipPreflight: true });
+
+  console.log("ATA:", ataAddress.toBase58());
+  console.log(`https://explorer.solana.com/tx/${signature}?cluster=devnet`);
 }
 
 main().catch(console.error);
+
+// Helper: create a mint (see create-mint example for details)
+async function createMint(rpc: ReturnType<typeof createRpc>, payer: Keypair): Promise<PublicKey> {
+  const mintSigner = Keypair.generate();
+  const addressTreeInfo = getBatchAddressTreeInfo();
+  const stateTreeInfo = selectStateTreeInfo(await rpc.getStateTreeInfos(), TreeType.StateV1);
+
+  const [mintPda] = findMintAddress(mintSigner.publicKey);
+  const validityProof = await rpc.getValidityProofV2(
+    [],
+    [{ address: mintPda.toBytes(), treeInfo: addressTreeInfo }]
+  );
+
+  const ix = createMintInstruction(
+    mintSigner.publicKey,
+    9,
+    payer.publicKey,
+    null,
+    payer.publicKey,
+    validityProof,
+    addressTreeInfo,
+    stateTreeInfo,
+    createTokenMetadata("Test Token", "TEST", "https://example.com/metadata.json")
+  );
+
+  const { blockhash } = await rpc.getLatestBlockhash();
+  const tx = buildAndSignTx(
+    [ComputeBudgetProgram.setComputeUnitLimit({ units: 500_000 }), ix],
+    payer,
+    blockhash,
+    [mintSigner]
+  );
+  await sendAndConfirmTx(rpc, tx, { skipPreflight: true });
+
+  return mintPda;
+}
 ```
 </CodeGroup>
 
