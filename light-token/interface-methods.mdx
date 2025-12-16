@@ -1,0 +1,506 @@
+---
+title: "Reference to Interface Methods"
+sidebarTitle: "Interface Methods"
+description: "Technical reference for light-token interface methods, account types, and CPI."
+---
+
+Light-token is a high performance token program that reduces the cost of account creations by 200x, while being more CU efficient than SPL on hot paths.
+
+[View on GitHub](https://github.com/Lightprotocol/light-protocol/tree/main/js/compressed-token/src/v3)
+
+
+### Creation Cost
+|           | SPL  | Light      |
+|:---------------------|:------------------|:----------------------|
+| **Mint Account**    | ~1,500,000 lamports        | **15,000** lamports     |
+| **Token Account**   | 	  ~2,000,000 lamports         | ~**17,000** lamports     |
+
+### CU Performance 
+|                      | light-token CU | SPL-token CU |                  p-token CU |
+| ----------------------------- | -------------: | -----------: | --------------------------: |
+| **ATA Creation**                  |          4,348 |       14,194 | 14,194 |
+| **Transfer** (base path)          |            312 |        4,645 |                          79 |
+| **Transfer** (rent-free hot path) |          1,885 |        4,645 |                          79 |
+
+---
+
+## Account Types
+
+### Account Types
+
+| | Description | Account Type |
+|--------------|-------------|---------|
+| **c-token ATA (hot)** | On-chain decompressed balance, immediately usable | Solana account |
+| **Cold Account** | Compressed off-chain balance, requires validity proof to access | Merkle tree |
+| **SPL Interface PDA** | Bridge account for wrap/unwrap operations | PDA holding SPL tokens |
+
+### Mint Structure
+
+Compressed mints store data using Light Protocol's compressed accounts, consisting of three layers:
+
+**BaseMint** (82 bytes)
+```typescript
+interface BaseMint {
+    mintAuthority: PublicKey | null;    // Authority to mint new tokens
+    supply: bigint;                      // Total token supply
+    decimals: number;                    // Decimal precision (0-9)
+    isInitialized: boolean;              // SPL compatibility flag
+    freezeAuthority: PublicKey | null;   // Authority to freeze accounts
+}
+```
+
+**MintContext** (34 bytes)
+```typescript
+interface MintContext {
+    version: number;              // Protocol version
+    splMintInitialized: boolean;  // Whether SPL mint is initialized
+    splMint: PublicKey;           // PDA of associated SPL mint
+}
+```
+
+**TokenMetadata Extension** (variable)
+```typescript
+interface TokenMetadata {
+    updateAuthority?: PublicKey | null;  // Authority to update metadata
+    mint: PublicKey;                      // Associated mint
+    name: string;                         // Token name
+    symbol: string;                       // Token symbol
+    uri: string;                          // Metadata JSON URI
+    additionalMetadata?: { key: string; value: string }[];
+}
+```
+
+### Key State Variables
+
+**MintInterface** - Unified mint query result
+
+| Field | Type | Description |
+|-------|------|-------------|
+| mint | Mint | SPL-compatible mint structure |
+| programId | PublicKey | Token program (SPL, T22, or c-token) |
+| merkleContext | MerkleContext? | Compression context (c-token only) |
+| mintContext | MintContext? | Protocol context (c-token only) |
+| tokenMetadata | TokenMetadata? | Parsed metadata extension |
+| extensions | MintExtension[]? | Raw extension data |
+
+**AccountInterface** - Unified token account query result
+
+| Field | Type | Description |
+|-------|------|-------------|
+| accountInfo | AccountInfo | Raw account data |
+| parsed | Account | SPL-parsed token account |
+| isCold | boolean | Whether account is compressed |
+| loadContext | MerkleContext? | Compression proof context |
+
+**TokenAccountSourceType** - Account location types
+
+| Value | Description |
+|-------|-------------|
+| `spl` | SPL Token Program hot account |
+| `token2022` | Token-2022 hot account |
+| `spl-cold` | SPL tokens in compressed state |
+| `token2022-cold` | T22 tokens in compressed state |
+| `ctoken-hot` | C-token decompressed |
+| `ctoken-cold` | C-token compressed |
+
+---
+
+## Functions
+
+### createMintInterface
+
+Create and initialize a new mint for SPL, Token-2022, or c-token.
+
+```typescript
+const { mint, transactionSignature } = await createMintInterface(
+  rpc,
+  payer,
+  mintAuthority,    // Signer for c-token mints
+  freezeAuthority,  // or null
+  9,                // decimals
+);
+```
+
+**Parameters**
+
+| Name | Type | Description |
+|------|------|-------------|
+| rpc | Rpc | RPC connection |
+| payer | Signer | Fee payer |
+| mintAuthority | PublicKey \| Signer | Mint authority |
+| freezeAuthority | PublicKey \| Signer \| null | Optional freeze authority |
+| decimals | number | Decimal places (0-9) |
+| keypair | Keypair? | Mint keypair (generated if not provided) |
+| confirmOptions | ConfirmOptions? | Transaction confirmation options |
+| programId | PublicKey? | Token program (defaults to c-token) |
+| tokenMetadata | TokenMetadataInstructionData? | Optional metadata |
+| outputStateTreeInfo | TreeInfo? | Optional state tree |
+| addressTreeInfo | AddressTreeInfo? | Optional address tree |
+
+**Returns**
+
+| Type | Description |
+|------|-------------|
+| Promise\<\{ mint: PublicKey; transactionSignature: TransactionSignature \}\> | Created mint address and transaction signature |
+
+---
+
+### mintToInterface
+
+Mint tokens to a decompressed on-chain token account. Works with SPL, Token-2022, and c-token mints.
+
+```typescript
+const ctokenAta = getAssociatedTokenAddressInterface(mint, recipient);
+
+await mintToInterface(rpc, payer, mint, ctokenAta, mintAuthority, 1_000_000n);
+```
+
+**Parameters**
+
+| Name | Type | Description |
+|------|------|-------------|
+| rpc | Rpc | RPC connection |
+| payer | Signer | Fee payer |
+| mint | PublicKey | Mint address |
+| destination | PublicKey | Destination token account |
+| authority | Signer \| PublicKey | Mint authority |
+| amount | number \| bigint | Amount to mint |
+| multiSigners | Signer[]? | Multi-signature signers |
+| confirmOptions | ConfirmOptions? | Transaction confirmation options |
+| programId | PublicKey? | Token program (auto-detected) |
+
+**Returns**
+
+| Type | Description |
+|------|-------------|
+| Promise\<TransactionSignature\> | Transaction signature |
+
+---
+
+### mintToCompressed
+
+Mint compressed tokens directly to compressed accounts.
+
+```typescript
+await mintToCompressed(rpc, payer, mint, mintAuthority, [
+  { recipient: wallet1, amount: 1_000_000n },
+  { recipient: wallet2, amount: 500_000n },
+]);
+```
+
+**Parameters**
+
+| Name | Type | Description |
+|------|------|-------------|
+| rpc | Rpc | RPC connection |
+| payer | Signer | Fee payer |
+| mint | PublicKey | Mint address |
+| authority | Signer | Mint authority |
+| recipients | Array\<\{ recipient: PublicKey; amount: number \| bigint \}\> | Recipients and amounts |
+| outputStateTreeInfo | TreeInfo? | Optional state tree |
+| tokenAccountVersion | number? | Token account version (default: 3) |
+| confirmOptions | ConfirmOptions? | Transaction confirmation options |
+
+**Returns**
+
+| Type | Description |
+|------|-------------|
+| Promise\<TransactionSignature\> | Transaction signature |
+
+---
+
+### createAssociatedCTokenAccount
+
+Create an associated c-token account.
+
+```typescript
+const ata = await createAssociatedCTokenAccount(rpc, payer, owner, mint);
+```
+
+**Parameters**
+
+| Name | Type | Description |
+|------|------|-------------|
+| rpc | Rpc | RPC connection |
+| payer | Signer | Fee payer |
+| owner | PublicKey | Account owner |
+| mint | PublicKey | Token mint |
+| compressibleConfig | CompressibleConfig? | Optional compressible configuration |
+| configAccount | PublicKey? | Config account address |
+| rentPayerPda | PublicKey? | Rent payer PDA |
+| confirmOptions | ConfirmOptions? | Transaction confirmation options |
+
+**Returns**
+
+| Type | Description |
+|------|-------------|
+| Promise\<PublicKey\> | Created ATA address |
+
+---
+
+### wrap
+
+Wrap tokens from an SPL/T22 account to a c-token account.
+
+```typescript
+const splAta = getAssociatedTokenAddressSync(mint, owner.publicKey, false, TOKEN_PROGRAM_ID);
+const ctokenAta = getAssociatedTokenAddressInterface(mint, owner.publicKey);
+
+await wrap(rpc, payer, splAta, ctokenAta, owner, mint, 1000n);
+```
+
+**Parameters**
+
+| Name | Type | Description |
+|------|------|-------------|
+| rpc | Rpc | RPC connection |
+| payer | Signer | Fee payer |
+| source | PublicKey | Source SPL/T22 token account |
+| destination | PublicKey | Destination c-token account |
+| owner | Signer | Owner of source account (must sign) |
+| mint | PublicKey | Token mint |
+| amount | bigint | Amount to wrap |
+| splInterfaceInfo | SplInterfaceInfo? | SPL interface info |
+| confirmOptions | ConfirmOptions? | Transaction confirmation options |
+
+**Returns**
+
+| Type | Description |
+|------|-------------|
+| Promise\<TransactionSignature\> | Transaction signature |
+
+---
+
+### unwrap
+
+Unwrap c-tokens to SPL tokens. Automatically loads all compressed tokens to hot ATA before unwrapping.
+
+```typescript
+const splAta = getAssociatedTokenAddressSync(mint, owner.publicKey);
+
+await unwrap(rpc, payer, splAta, owner, mint, 1000n);
+```
+
+**Parameters**
+
+| Name | Type | Description |
+|------|------|-------------|
+| rpc | Rpc | RPC connection |
+| payer | Signer | Fee payer |
+| destination | PublicKey | Destination SPL/T22 token account |
+| owner | Signer | Owner of c-token (must sign) |
+| mint | PublicKey | Token mint |
+| amount | number \| bigint \| BN? | Amount to unwrap (defaults to all) |
+| splInterfaceInfo | SplInterfaceInfo? | SPL interface info |
+| confirmOptions | ConfirmOptions? | Transaction confirmation options |
+
+**Returns**
+
+| Type | Description |
+|------|-------------|
+| Promise\<TransactionSignature\> | Transaction signature |
+
+---
+
+### transferInterface
+
+Transfer tokens using the c-token interface. Auto-detects account types and consolidates balances.
+
+```typescript
+const source = getAssociatedTokenAddressInterface(mint, owner.publicKey);
+const destination = getAssociatedTokenAddressInterface(mint, recipient);
+
+await transferInterface(rpc, payer, source, mint, destination, owner, 1000n);
+```
+
+**Parameters**
+
+| Name | Type | Description |
+|------|------|-------------|
+| rpc | Rpc | RPC connection |
+| payer | Signer | Fee payer |
+| source | PublicKey | Source token account |
+| mint | PublicKey | Token mint |
+| destination | PublicKey | Destination token account |
+| owner | Signer | Account owner |
+| amount | number \| bigint \| BN | Amount to transfer |
+| programId | PublicKey? | Token program (defaults to c-token) |
+| confirmOptions | ConfirmOptions? | Transaction confirmation options |
+| options | InterfaceOptions? | Interface options |
+| wrap | boolean? | Include SPL/T22 balances (default: false) |
+
+**Returns**
+
+| Type | Description |
+|------|-------------|
+| Promise\<TransactionSignature\> | Transaction signature |
+
+---
+
+## Rust CPI Reference
+
+### TransferSplToCtokenCpi
+
+Transfer SPL tokens to c-token account (wrap operation).
+
+**Fields**
+
+| Name | Type | Description |
+|------|------|-------------|
+| amount | u64 | Amount to transfer |
+| spl_interface_pda_bump | u8 | Bump seed for SPL interface PDA |
+| source_spl_token_account | AccountInfo | Source SPL token account (writable) |
+| destination_ctoken_account | AccountInfo | Destination c-token account (writable) |
+| authority | AccountInfo | Authority signer |
+| mint | AccountInfo | Mint account |
+| payer | AccountInfo | Fee payer (signer) |
+| spl_interface_pda | AccountInfo | SPL interface PDA (writable) |
+| spl_token_program | AccountInfo | SPL Token Program |
+| compressed_token_program_authority | AccountInfo | CPI authority PDA |
+
+**Methods**
+
+- `.invoke()` - Execute CPI
+- `.invoke_signed(&[seeds])` - Execute CPI with PDA signer
+
+```rust
+use light_ctoken_sdk::ctoken::TransferSplToCtokenCpi;
+
+TransferSplToCtokenCpi {
+    amount,
+    spl_interface_pda_bump,
+    source_spl_token_account: ctx.accounts.pool_ata.to_account_info(),
+    destination_ctoken_account: ctx.accounts.user_ctoken_ata.to_account_info(),
+    authority: ctx.accounts.pool_authority.to_account_info(),
+    mint: ctx.accounts.mint.to_account_info(),
+    payer: ctx.accounts.payer.to_account_info(),
+    spl_interface_pda: ctx.accounts.spl_interface_pda.to_account_info(),
+    spl_token_program: ctx.accounts.token_program.to_account_info(),
+    compressed_token_program_authority: ctx.accounts.cpi_authority.to_account_info(),
+}
+.invoke_signed(&[pool_signer_seeds])?;
+```
+
+---
+
+### TransferCTokenToSplCpi
+
+Transfer c-tokens to SPL token account (unwrap operation).
+
+**Fields**
+
+| Name | Type | Description |
+|------|------|-------------|
+| source_ctoken_account | AccountInfo | Source c-token account (writable) |
+| destination_spl_token_account | AccountInfo | Destination SPL token account (writable) |
+| amount | u64 | Amount to transfer |
+| authority | AccountInfo | Authority signer |
+| mint | AccountInfo | Mint account |
+| payer | AccountInfo | Fee payer (signer) |
+| spl_interface_pda | AccountInfo | SPL interface PDA (writable) |
+| spl_interface_pda_bump | u8 | Bump seed for SPL interface PDA |
+| spl_token_program | AccountInfo | SPL Token Program |
+| compressed_token_program_authority | AccountInfo | CPI authority PDA |
+
+**Methods**
+
+- `.invoke()` - Execute CPI
+- `.invoke_signed(&[seeds])` - Execute CPI with PDA signer
+
+```rust
+use light_ctoken_sdk::ctoken::TransferCTokenToSplCpi;
+
+TransferCTokenToSplCpi {
+    source_ctoken_account: ctx.accounts.user_ctoken_ata.to_account_info(),
+    destination_spl_token_account: ctx.accounts.pool_ata.to_account_info(),
+    amount,
+    authority: ctx.accounts.depositor.to_account_info(),
+    mint: ctx.accounts.mint.to_account_info(),
+    payer: ctx.accounts.payer.to_account_info(),
+    spl_interface_pda: ctx.accounts.spl_interface_pda.to_account_info(),
+    spl_interface_pda_bump,
+    spl_token_program: ctx.accounts.token_program.to_account_info(),
+    compressed_token_program_authority: ctx.accounts.cpi_authority.to_account_info(),
+}
+.invoke()?;
+```
+
+---
+
+### CreateAssociatedCTokenAccountCpi
+
+Create an associated c-token account via CPI.
+
+**Fields**
+
+| Name | Type | Description |
+|------|------|-------------|
+| owner | AccountInfo | Account owner |
+| mint | AccountInfo | Token mint |
+| payer | AccountInfo | Fee payer (signer) |
+| associated_token_account | AccountInfo | ATA to create (writable) |
+| system_program | AccountInfo | Solana System Program |
+| bump | u8 | PDA bump seed |
+| compressible | Option\<CompressibleParamsCpi\> | Optional compressible config |
+| idempotent | bool | Use idempotent instruction |
+
+**Methods**
+
+- `.invoke()` - Execute CPI
+- `.invoke_signed(&[seeds])` - Execute CPI with PDA signer
+
+---
+
+### SystemAccountInfos
+
+System accounts required for CPI operations to Light Protocol.
+
+**Fields**
+
+| Name | Type | Description |
+|------|------|-------------|
+| light_system_program | AccountInfo | Light System Program |
+| cpi_authority_pda | AccountInfo | CPI authority (signs for your program) |
+| registered_program_pda | AccountInfo | Your program's registration |
+| account_compression_authority | AccountInfo | Compression authority |
+| account_compression_program | AccountInfo | Account Compression Program |
+| system_program | AccountInfo | Solana System Program |
+
+---
+
+## Errors
+
+### CTokenSdkError
+
+| Error | Code | Description |
+|-------|------|-------------|
+| InsufficientBalance | 17001 | Account balance too low |
+| SerializationError | 17002 | Failed to serialize data |
+| CpiError | 17003 | CPI invocation failed |
+| CannotCompressAndDecompress | 17004 | Invalid operation combination |
+| CompressionCannotBeSetTwice | 17005 | Compression already configured |
+| InconsistentCompressDecompressState | 17006 | State mismatch |
+| BothCompressAndDecompress | 17007 | Both operations specified |
+| InvalidCompressDecompressAmount | 17008 | Invalid amount for operation |
+| MethodUsed | 17009 | Method already invoked |
+| DecompressedMintConfigRequired | 17010 | Missing decompressed mint config |
+| InvalidCompressInputOwner | 17011 | Wrong owner for compress input |
+| AccountBorrowFailed | 17012 | Failed to borrow account |
+| InvalidAccountData | 17013 | Malformed account data |
+| MissingCpiAccount | 17014 | Required CPI account missing |
+| TooManyAccounts | 17015 | Exceeds account limit |
+| NonContinuousIndices | 17016 | PackedAccount indices not continuous |
+| PackedAccountIndexOutOfBounds | 17017 | Index exceeds bounds |
+| CannotMintWithDecompressedInCpiWrite | 17018 | Invalid mint operation |
+| RentAuthorityIsNone | 17019 | Rent authority not set |
+| SplInterfaceRequired | 17020 | SPL interface account required |
+| IncompleteSplInterface | 17021 | SPL interface not fully initialized |
+| UseRegularSplTransfer | 17022 | Use standard SPL transfer instead |
+| CannotDetermineAccountType | 17023 | Unable to identify account type |
+| CpiContextRequired | 17024 | CPI context data required |
+| MissingMintAccount | 17025 | Mint account not provided |
+| MissingSplTokenProgram | 17026 | SPL Token Program not provided |
+| MissingSplInterfacePda | 17027 | SPL interface PDA not provided |
+| MissingSplInterfacePdaBump | 17028 | SPL interface PDA bump not provided |
+| InvalidCpiContext | 17029 | CPI context validation failed |
+| NoInputAccounts | 17030 | No input accounts provided |

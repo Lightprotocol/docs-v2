@@ -82,6 +82,7 @@
           {
             "group": "SDK Reference",
             "pages": [
+              "light-token/interface-methods",
               "api-reference/libraries/stateless-js",
               "api-reference/libraries/compressed-token",
               "api-reference/libraries/light-client",
