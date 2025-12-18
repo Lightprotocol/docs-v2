@@ -50,6 +50,11 @@ import { CodeCompare } from '/snippets/jsx/code-compare.jsx';
       <td>rpc.getSignaturesForOwnerInterface()</td>
     </tr>
     <tr>
+      <td>**Entry from SPL**</td>
+      <td>N/A</td>
+      <td>wrap()</td>
+    </tr>
+    <tr>
       <td>**Exit to SPL**</td>
       <td>N/A</td>
       <td>unwrap()</td>
@@ -76,6 +81,7 @@ import {
   getAtaInterface,
   getAssociatedTokenAddressInterface,
   transferInterface,
+  wrap,
   unwrap,
 } from "@lightprotocol/compressed-token/unified";
 
@@ -361,6 +367,68 @@ const signatures = await connection.getSignaturesForAddress(ata);
 
 </Accordion>
 
+### Wrap from SPL
+
+When users deposit from a CEX or legacy integration:
+
+<Tabs>
+<Tab title="Action">
+
+```typescript
+import { getAssociatedTokenAddressSync } from "@solana/spl-token";
+import {
+  wrap,
+  getAssociatedTokenAddressInterface,
+} from "@lightprotocol/compressed-token/unified";
+
+// SPL ATA with tokens to wrap
+const splAta = getAssociatedTokenAddressSync(mint, owner.publicKey);
+// c-token ATA destination
+const ctokenAta = getAssociatedTokenAddressInterface(mint, owner.publicKey);
+
+await wrap(
+  rpc,
+  payer,
+  splAta,
+  ctokenAta,
+  owner,
+  mint,
+  amount
+);
+```
+
+</Tab>
+<Tab title="Instruction">
+
+```typescript
+import { getAssociatedTokenAddressSync } from "@solana/spl-token";
+import {
+  createWrapInstruction,
+  getAssociatedTokenAddressInterface,
+} from "@lightprotocol/compressed-token/unified";
+import { getSplInterfaceInfos } from "@lightprotocol/compressed-token";
+
+const splAta = getAssociatedTokenAddressSync(mint, owner.publicKey);
+const ctokenAta = getAssociatedTokenAddressInterface(mint, owner.publicKey);
+
+const splInterfaceInfos = await getSplInterfaceInfos(rpc, mint);
+const splInterfaceInfo = splInterfaceInfos.find((i) => i.isInitialized);
+
+const tx = new Transaction().add(
+  createWrapInstruction(
+    splAta,
+    ctokenAta,
+    owner.publicKey,
+    mint,
+    amount,
+    splInterfaceInfo
+  )
+);
+```
+
+</Tab>
+</Tabs>
+
 ### Unwrap to SPL
 
 When users need vanilla SPL tokens (CEX withdrawal, legacy integration):
@@ -377,9 +445,9 @@ const splAta = getAssociatedTokenAddressSync(mint, owner.publicKey);
 await unwrap(
   rpc,
   payer,
+  splAta,
   owner,
   mint,
-  splAta,
   amount
 );
 ```
