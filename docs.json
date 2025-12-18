@@ -64,11 +64,7 @@
                   "light-token/cookbook/mint-tokens",
                   "light-token/cookbook/close-token-account",
                   "light-token/cookbook/transfer-interface",
-                  "light-token/cookbook/wrap-unwrap",
-                  "light-token/cookbook/compress-decompress",
-                  "light-token/cookbook/delegate",
-                  "light-token/cookbook/load-ata",
-                  "light-token/cookbook/merge-token-accounts"
+                  "light-token/cookbook/wrap-unwrap"
                 ]
               }
             ]

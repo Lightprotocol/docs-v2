@@ -1,6 +1,6 @@
 ---
 title: Transfer Interface
-description: Guide for transfers between light-token and SPL token accounts via CPI. The interface detects account types and invokes the right programs.
+description: Program andransfers between light-token and SPL token accounts. The interface detects account types and invokes the right programs.
 ---
 
 import TransferInterfaceAccountsListCtoken1 from '/snippets/accounts-list/transfer-interface-accounts-list-light-token-1.mdx';
@@ -43,18 +43,13 @@ import { CodeCompare } from '/snippets/jsx/code-compare.jsx';
   </tbody>
 </table>
 
-<Tip>
-* For example, **SPL -> light-token account** can be used for transfers from Alice's SPL token account to her own light-token account.
-* You can use this to use the **sponsored rent-exemption for existing SPL tokens**.
-</Tip>
-
 # Get Started
 
 <Tabs>
 
 <Tab title="TypeScript Client">
 
-The `transferInterface` function transfers tokens between light-token accounts in a single call.
+The `transferInterface` function transfers tokens between token accounts (SPL, Token-2022, or Light) in a single call.
 
 
 Compare to SPL:

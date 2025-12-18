@@ -11,10 +11,14 @@ description: Convert between SPL tokens and compressed accounts (cold storage)
 Find the source code: [compress.test.ts](https://github.com/Lightprotocol/light-protocol/blob/main/js/compressed-token/tests/e2e/compress.test.ts) | [decompress.test.ts](https://github.com/Lightprotocol/light-protocol/blob/main/js/compressed-token/tests/e2e/decompress.test.ts)
 </Info>
 
-## Usage
+# Get Started
 
 <Tabs>
 <Tab title="Compress">
+
+<Steps>
+<Step>
+### Compress SPL Tokens to Cold Storage
 
 <Note>
 Supports batch compression to multiple recipients in a single transaction (up to 10 recipients with V2 trees).
@@ -142,9 +146,16 @@ main().catch(console.error);
 ```
 </CodeGroup>
 
+</Step>
+</Steps>
+
 </Tab>
 
 <Tab title="Decompress">
+
+<Steps>
+<Step>
+### Decompress to SPL Account
 
 <Note>
 The destination SPL/T22 account must exist before decompressing.
@@ -273,6 +284,9 @@ async function main() {
 main().catch(console.error);
 ```
 </CodeGroup>
+
+</Step>
+</Steps>
 
 </Tab>
 </Tabs>

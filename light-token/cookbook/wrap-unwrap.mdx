@@ -1,24 +1,24 @@
 ---
-title: Wrap & Unwrap
-sidebarTitle: Wrap & Unwrap
-description: Convert between SPL/T22 tokens and c-token hot balance
+title: Wrap & Unwrap SPL/T22 <> Light Token Accounts
+sidebarTitle: Wrap & Unwrap for on/off-ramp
+description: Convert between SPL/T22 token and light-token accounts. Used for on/off-ramp to centralized exchanges that only support SPL.
 ---
 
-- **Wrap**: Move tokens from SPL/T22 account → c-token ATA (hot balance)
-- **Unwrap**: Move tokens from c-token ATA (hot balance) → SPL/T22 account
+- **Wrap**: Move tokens from SPL/T22 account → light-token ATA (hot balance)
+- **Unwrap**: Move tokens from light-token ATA (hot balance) → SPL/T22 account
 
 <Info>
 Find the source code: [wrap.test.ts](https://github.com/Lightprotocol/light-protocol/blob/main/js/compressed-token/tests/e2e/wrap.test.ts) | [unwrap.test.ts](https://github.com/Lightprotocol/light-protocol/blob/main/js/compressed-token/tests/e2e/unwrap.test.ts)
 </Info>
 
-## Usage
+# Get Started
 
 <Tabs>
 <Tab title="Wrap">
 
-<Note>
-The destination c-token ATA must exist before wrapping. Use `createAtaInterface` to create it.
-</Note>
+<Steps>
+<Step>
+### Wrap SPL Tokens to Light-Token ATA
 
 <CodeGroup>
 ```typescript Action
@@ -176,13 +176,16 @@ main().catch(console.error);
 ```
 </CodeGroup>
 
+</Step>
+</Steps>
+
 </Tab>
 
 <Tab title="Unwrap">
 
-<Note>
-The destination SPL/T22 account must exist before unwrapping. The action auto-loads compressed tokens to hot balance if needed.
-</Note>
+<Steps>
+<Step>
+### Unwrap Light-Tokens to SPL Account
 
 <CodeGroup>
 ```typescript Action
@@ -332,6 +335,9 @@ async function main() {
 main().catch(console.error);
 ```
 </CodeGroup>
+
+</Step>
+</Steps>
 
 </Tab>
 </Tabs>

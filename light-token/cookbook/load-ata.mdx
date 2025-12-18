@@ -1,22 +1,27 @@
 ---
-title: Load Cold to Hot Balance
+title: Load Token Balances to Light-ATA
 sidebarTitle: Load ATA
-description: Move compressed tokens (cold) to c-token ATA (hot balance)
+description: Unify token balances from compressed tokens (cold), SPL, and Token-2022 to one light ATA. 
 ---
 
-Load ATA decompresses compressed tokens (cold storage) into a c-token ATA (hot balance).
+1. `loadAta` unifies tokens from multiple sources to a single ATA:
+    * Compressed tokens (cold) -> Decompresses -> light ATA
+    * SPL balance (if wrap=true) -> Wraps -> light ATA
+    * T22 balance (if wrap=true) -> Wraps -> light ATA
+
+2. Returns `null` if there's nothing to load (idempotent)
+
+3. Creates the ATA if it doesn't exist
 
 <Info>
 Find the source code [here](https://github.com/Lightprotocol/light-protocol/blob/main/js/compressed-token/tests/e2e/load-ata-standard.test.ts).
 </Info>
 
-<Note>
-- Returns `null` if there's nothing to load (idempotent)
-- Creates the ATA if it doesn't exist
-- With `wrap=true`, also wraps SPL/T22 balances to c-token ATA
-</Note>
+# Get Started
 
-## Usage
+<Steps>
+<Step>
+### Load Compressed Tokens to Hot Balance
 
 <CodeGroup>
 ```typescript Action
@@ -145,3 +150,6 @@ async function main() {
 main().catch(console.error);
 ```
 </CodeGroup>
+
+</Step>
+</Steps>
