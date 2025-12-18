@@ -12,7 +12,7 @@ sidebarTitle: Quickstart
 <WelcomePageInstall />
 </Accordion>
 
-```typescript 
+```bash 
 # Start local test-validator
 light test-validator
 ```
@@ -20,28 +20,74 @@ light test-validator
 </Step>
 <Step>
 
-## Create and Mint Light-Tokens
+## Mint Tokens to Light-ATA
 
-```typescript quickstart.ts
-// TODO: Add light-token creation code
+```typescript
+import { Keypair } from "@solana/web3.js";
+import { createRpc } from "@lightprotocol/stateless.js";
+import {
+  createMintInterface,
+  createAtaInterface,
+  mintToInterface,
+  getAssociatedTokenAddressInterface,
+} from "@lightprotocol/compressed-token";
+
+async function main() {
+  const rpc = createRpc();
+  const payer = Keypair.generate();
+  await rpc.requestAirdrop(payer.publicKey, 10e9);
+
+  const mintSigner = Keypair.generate();
+  const { mint } = await createMintInterface(
+    rpc,
+    payer,
+    payer,
+    null,
+    9,
+    mintSigner,
+  );
+
+  const recipient = Keypair.generate();
+  await createAtaInterface(rpc, payer, mint, recipient.publicKey);
+
+  const destination = getAssociatedTokenAddressInterface(mint, recipient.publicKey);
+  const amount = 1_000_000_000;
+
+  const txSignature = await mintToInterface(
+    rpc,
+    payer,
+    mint,
+    destination,
+    payer,
+    amount,
+  );
+
+  console.log("Minted tokens:", amount);
+  console.log("Transaction:", txSignature);
+}
+
+main().catch(console.error);
 ```
-
-</Step>
-<Step>
-
-## That's it!
-
-You've created and minted light-tokens.
 
 </Step>
 </Steps>
 
 # Next Steps
 
-<Card
-  title="Learn more about light-tokens"
-  icon="chevron-right"
-  color="#0066ff"
-  href="/light-token/cookbook/create-token-account"
-  horizontal
-/>
+<CardGroup cols={2}>
+  <Card
+    title="Toolkits"
+    icon="toolbox"
+    href="/light-token/toolkits"
+  >
+    Guides for dedicated use cases
+  </Card>
+  <Card
+    title="Cookbook"
+    icon="book"
+    href="/light-token/cookbook"
+  >
+    Step-by-step recipes
+  </Card>
+
+</CardGroup>

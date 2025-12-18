@@ -34,8 +34,7 @@
             "pages": [
               "light-token/welcome",
               "light-token/quickstart",
-              "light-token/faq",
-              "learn/ai-tools-guide"
+              "light-token/faq"
             ]
           },
           {
@@ -61,7 +60,7 @@
                   "light-token/cookbook/create-mint",
                   "light-token/cookbook/create-ata",
                   "light-token/cookbook/create-token-account",
-                  "light-token/cookbook/mint-tokens",
+                  "light-token/cookbook/mint-to",
                   "light-token/cookbook/close-token-account",
                   "light-token/cookbook/transfer-interface",
                   "light-token/cookbook/wrap-unwrap",
@@ -96,8 +95,7 @@
             "group": "Get Started",
             "pages": [
               "welcome",
-              "quickstart",
-              "learn/ai-tools-guide"
+              "quickstart"
             ]
           },
           {
@@ -494,6 +492,11 @@
     ],
     "global": {
       "anchors": [
+        {
+          "anchor": "AI Tools Guide",
+          "href": "https://zkcompression.com/learn/ai-tools-guide",
+          "icon": "robot"
+        },
         {
           "anchor": "Support",
           "href": "https://www.zkcompression.com/support",
