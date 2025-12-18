@@ -12,6 +12,7 @@ import CompressibleRentExplained from '/snippets/compressible-rent-explained.mdx
 import CTokenClientPrerequisites from '/snippets/light-token-guides/light-token-client-prerequisites.mdx';
 import CTokenTsClientPrerequisites from '/snippets/light-token-guides/light-token-ts-client-prerequisites.mdx';
 import ClientCustomRentConfig from '/snippets/light-token-guides/client-custom-rent-config.mdx';
+import { CodeCompare } from '/snippets/jsx/code-compare.jsx';
 
 1. Associated light-token accounts are Solana accounts that hold token balances of light, SPL, or Token 2022 mints.
 2. The address for light-ATAs is deterministically derived with the owner's address, compressed token program ID, and mint address.
@@ -31,164 +32,130 @@ import ClientCustomRentConfig from '/snippets/light-token-guides/client-custom-r
 
 The `createAtaInterface` function creates an associated light-token account in a single call.
 
+Compare to SPL:
+<CodeCompare
+  firstCode={`// SPL create ATA
+import { getOrCreateAssociatedTokenAccount } from "@solana/spl-token";
+
+const ata = await getOrCreateAssociatedTokenAccount(
+  connection,
+  payer,
+  mint,
+  owner
+);`}
+  secondCode={`// light-token create ATA
+import { createAtaInterface } from "@lightprotocol/compressed-token";
+
+const ata = await createAtaInterface(
+  rpc,
+  payer,
+  mint,
+  owner
+);`}
+  firstLabel="SPL"
+  secondLabel="light-token"
+/>
+
 <Info>
 Find the source code [here](https://github.com/Lightprotocol/light-protocol/blob/main/js/compressed-token/tests/e2e/create-ata-interface.test.ts).
 </Info>
 
-<Note>
-Pass `TOKEN_PROGRAM_ID` or `TOKEN_2022_PROGRAM_ID` as `programId` to create SPL or Token-2022 ATAs.
-</Note>
 
 <Steps>
-<Step>
-### Prerequisites
-
-<CTokenTsClientPrerequisites />
-
-</Step>
 
 <Step>
 ### Create Associated Token Account
 
 <CodeGroup>
 ```typescript Action
-import { Keypair } from '@solana/web3.js';
-import { createRpc } from '@lightprotocol/stateless.js';
-import { createAtaInterface, createMintInterface } from '@lightprotocol/compressed-token';
+import { Keypair } from "@solana/web3.js";
+import { createRpc } from "@lightprotocol/stateless.js";
+import {
+  createMintInterface,
+  createAtaInterface,
+  getAssociatedTokenAddressInterface,
+} from "@lightprotocol/compressed-token";
 
 async function main() {
-    // 1. Setup RPC and fund payer
-    const rpc = createRpc();
-    const payer = Keypair.generate();
-    await rpc.requestAirdrop(payer.publicKey, 1e9);
+  const rpc = createRpc();
+  const payer = Keypair.generate();
+  await rpc.requestAirdrop(payer.publicKey, 10e9);
 
-    // 2. Create a light-mint first (or use existing mint)
-    const mintSigner = Keypair.generate();
-    const { mint } = await createMintInterface(
-        rpc,
-        payer,
-        payer,      // mintAuthority
-        null,       // freezeAuthority
-        9,          // decimals
-        mintSigner,
-    );
+  const mintSigner = Keypair.generate();
+  const { mint } = await createMintInterface(
+    rpc,
+    payer,
+    payer,
+    null,
+    9,
+    mintSigner
+  );
 
-    // 3. Create associated token account for owner
-    const owner = Keypair.generate();
-    const ataAddress = await createAtaInterface(
-        rpc,
-        payer,
-        mint,
-        owner.publicKey,
-    );
+  const owner = Keypair.generate();
+  const txSignature = await createAtaInterface(rpc, payer, mint, owner.publicKey);
+  console.log("ATA created for:", owner.publicKey.toBase58());
+  console.log("Transaction:", txSignature);
 
-    console.log('Light-ATA created:', ataAddress.toBase58());
+  const ata = getAssociatedTokenAddressInterface(mint, owner.publicKey);
+  console.log("ATA address:", ata.toBase58());
 }
 
 main().catch(console.error);
 ```
 
 ```typescript Instruction
-import "dotenv/config";
-import { Keypair, ComputeBudgetProgram, PublicKey } from "@solana/web3.js";
+import { Keypair, ComputeBudgetProgram } from "@solana/web3.js";
 import {
   createRpc,
   buildAndSignTx,
   sendAndConfirmTx,
-  getBatchAddressTreeInfo,
-  selectStateTreeInfo,
-  TreeType,
   CTOKEN_PROGRAM_ID,
 } from "@lightprotocol/stateless.js";
 import {
-  createMintInstruction,
-  createTokenMetadata,
-  findMintAddress,
+  createMintInterface,
   createAssociatedTokenAccountInterfaceInstruction,
   getAssociatedTokenAddressInterface,
-} from "@lightprotocol/compressed-token/unified";
-import * as fs from "fs";
-import * as path from "path";
+} from "@lightprotocol/compressed-token";
 
 async function main() {
-  const apiKey = process.env.HELIUS_API_KEY;
-  if (!apiKey) throw new Error("HELIUS_API_KEY not set");
+  const rpc = createRpc();
+  const payer = Keypair.generate();
+  await rpc.requestAirdrop(payer.publicKey, 10e9);
 
-  // 1. Setup RPC connection
-  const rpc = createRpc(`https://devnet.helius-rpc.com?api-key=${apiKey}`);
-
-  // 2. Load payer keypair
-  const keypairPath = path.join(process.env.HOME || "~", ".config/solana/id.json");
-  const payer = Keypair.fromSecretKey(
-    Uint8Array.from(JSON.parse(fs.readFileSync(keypairPath, "utf-8")))
+  const mintSigner = Keypair.generate();
+  const { mint } = await createMintInterface(
+    rpc,
+    payer,
+    payer,
+    null,
+    9,
+    mintSigner
   );
 
-  // 3. Create a mint first (or use existing mint)
-  const mint = await createMint(rpc, payer);
-
-  // 4. Define owner and derive ATA address
   const owner = Keypair.generate();
-  const ataAddress = getAssociatedTokenAddressInterface(mint, owner.publicKey);
+  const associatedToken = getAssociatedTokenAddressInterface(mint, owner.publicKey);
 
-  // 5. Create instruction
   const ix = createAssociatedTokenAccountInterfaceInstruction(
     payer.publicKey,
-    ataAddress,
+    associatedToken,
     owner.publicKey,
     mint,
     CTOKEN_PROGRAM_ID
   );
 
-  // 6. Build, sign, and send transaction
   const { blockhash } = await rpc.getLatestBlockhash();
   const tx = buildAndSignTx(
-    [ComputeBudgetProgram.setComputeUnitLimit({ units: 50_000 }), ix],
+    [ComputeBudgetProgram.setComputeUnitLimit({ units: 100_000 }), ix],
     payer,
     blockhash
   );
-  const signature = await sendAndConfirmTx(rpc, tx, { skipPreflight: true });
+  const signature = await sendAndConfirmTx(rpc, tx);
 
-  console.log("ATA:", ataAddress.toBase58());
-  console.log(`https://explorer.solana.com/tx/${signature}?cluster=devnet`);
+  console.log("ATA created");
+  console.log("Transaction:", signature);
 }
 
 main().catch(console.error);
-
-// Helper: create a mint (see create-mint example for details)
-async function createMint(rpc: ReturnType<typeof createRpc>, payer: Keypair): Promise<PublicKey> {
-  const mintSigner = Keypair.generate();
-  const addressTreeInfo = getBatchAddressTreeInfo();
-  const stateTreeInfo = selectStateTreeInfo(await rpc.getStateTreeInfos(), TreeType.StateV1);
-
-  const [mintPda] = findMintAddress(mintSigner.publicKey);
-  const validityProof = await rpc.getValidityProofV2(
-    [],
-    [{ address: mintPda.toBytes(), treeInfo: addressTreeInfo }]
-  );
-
-  const ix = createMintInstruction(
-    mintSigner.publicKey,
-    9,
-    payer.publicKey,
-    null,
-    payer.publicKey,
-    validityProof,
-    addressTreeInfo,
-    stateTreeInfo,
-    createTokenMetadata("Test Token", "TEST", "https://example.com/metadata.json")
-  );
-
-  const { blockhash } = await rpc.getLatestBlockhash();
-  const tx = buildAndSignTx(
-    [ComputeBudgetProgram.setComputeUnitLimit({ units: 500_000 }), ix],
-    payer,
-    blockhash,
-    [mintSigner]
-  );
-  await sendAndConfirmTx(rpc, tx, { skipPreflight: true });
-
-  return mintPda;
-}
 ```
 </CodeGroup>
 
