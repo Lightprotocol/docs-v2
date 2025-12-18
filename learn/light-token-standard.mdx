@@ -73,7 +73,7 @@ Light-mints **uniquely represent a token on Solana and store its global metadata
   <Tab title="Diagram">
     <Frame>
       <img
-        src="/images/token-explainer.png"
+        src="/images/mint-account-layout.png"
         alt="Diagram showing light-mint compressed account structure with three components: Hash (identifier for light-mint in purple box), Account (struct containing BaseMint with SPL-compatible fields, light-mint Data for program state, and optional Extensions for Token Metadata), and BasemintData (containing Supply, Decimals, Mint Authority, and Freeze Authority fields) with Token Metadata extension"
       />
     </Frame>
@@ -187,7 +187,7 @@ A light-token account holds token balances like SPL Token accounts:
   <Tab title="Diagram">
     <Frame>
       <img
-        src="/images/ctoken-explainer.png"
+        src="/images/token-account-layout.png"
         alt="Diagram showing light-token Solana account structure with three components: Address (identifier for light-token account in purple box), Account (struct containing Data bytes, Executable flag, Lamports balance, and Owner set to Compressed Token Program), and AccountData (containing Mint, Owner, Amount, and Extensions fields)"
       />
     </Frame>
