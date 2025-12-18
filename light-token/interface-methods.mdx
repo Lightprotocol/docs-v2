@@ -6,33 +6,17 @@ description: "Technical reference for light-token interface methods, account typ
 
 Light-token is a high performance token program that reduces the cost of account creations by 200x, while being more CU efficient than SPL on hot paths.
 
+<Note>
 [View on GitHub](https://github.com/Lightprotocol/light-protocol/tree/main/js/compressed-token/src/v3)
-
-
-### Creation Cost
-|           | SPL  | Light      |
-|:---------------------|:------------------|:----------------------|
-| **Mint Account**    | ~1,500,000 lamports        | **15,000** lamports     |
-| **Token Account**   | 	  ~2,000,000 lamports         | ~**17,000** lamports     |
-
-### CU Performance 
-|                      | light-token CU | SPL-token CU |                  p-token CU |
-| ----------------------------- | -------------: | -----------: | --------------------------: |
-| **ATA Creation**                  |          4,348 |       14,194 | 14,194 |
-| **Transfer** (base path)          |            312 |        4,645 |                          79 |
-| **Transfer** (rent-free hot path) |          1,885 |        4,645 |                          79 |
-
----
-
-## Account Types
+</Note>
 
 ### Account Types
 
-| | Description | Account Type |
-|--------------|-------------|---------|
-| **c-token ATA (hot)** | On-chain decompressed balance, immediately usable | Solana account |
-| **Cold Account** | Compressed off-chain balance, requires validity proof to access | Merkle tree |
-| **SPL Interface PDA** | Bridge account for wrap/unwrap operations | PDA holding SPL tokens |
+| | Description | 
+|--------------|-------------|
+| **light-ATA (hot)** | On-chain decompressed balance, immediately usable |
+| **Cold Account** | Compressed off-chain balance, requires validity proof to access |  
+| **SPL Interface PDA** | Account to wrap/unwrap SPL/Light tokens |
 
 ### Mint Structure
 

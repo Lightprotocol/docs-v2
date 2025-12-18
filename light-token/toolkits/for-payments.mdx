@@ -63,15 +63,12 @@ import { CodeCompare } from '/snippets/jsx/code-compare.jsx';
 </table>
 
 <Note>
-Find devnet examples [here](https://github.com/Lightprotocol/light-token-toolkits).
+Find full code examples [here](https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/payments-and-wallets).
 </Note>
 
 ## Setup
 
-```bash
-npm install @lightprotocol/compressed-token/unified \
-            @lightprotocol/stateless.js
-```
+<Snippet file="setup/toolkits-setup.mdx" />
 
 ```typescript
 import { createRpc } from "@lightprotocol/stateless.js";
@@ -431,7 +428,7 @@ const tx = new Transaction().add(
 
 ### Unwrap to SPL
 
-When users need vanilla SPL tokens (CEX withdrawal, legacy integration):
+When users need SPL tokens (CEX withdrawal, legacy integration):
 
 <Tabs>
 <Tab title="Action">

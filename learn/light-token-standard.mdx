@@ -10,7 +10,9 @@ import CompressibleRentExplained from '/snippets/compressible-rent-explained.mdx
 import CompressibleDefaultRentConfig from '/snippets/compressible-default-rent-config.mdx';
 
 
-The [Compressed Token Program](https://github.com/Lightprotocol/light-protocol/tree/main/programs/compressed-token) extends existing Solana token standards with light-mints, light-tokens and compressed tokens.
+The [Light Token Program](https://github.com/Lightprotocol/light-protocol/tree/main/programs/compressed-token)
+is a high performance token program that reduces the cost of account creations by 200x,
+while being more CU efficient than SPL on hot paths.
 
 <table>
   <thead>
@@ -49,7 +51,7 @@ The [Compressed Token Program](https://github.com/Lightprotocol/light-protocol/t
         <ul>
           <li>**Compressed account** with `TokenData` field</li>
           <li>**Rent-free** and SPL-compatible</li>
-          <li>Use for **storage of inactive tokens** and **token distribution**</li>
+          <li>Use for **token distribution**</li>
           <li>Light-token accounts are automatically compressed/decompressed when active/inactive.</li>
         </ul>
       </td>
@@ -73,7 +75,7 @@ Light-mints **uniquely represent a token on Solana and store its global metadata
   <Tab title="Diagram">
     <Frame>
       <img
-        src="/images/token-explainer.png"
+        src="/images/mint-account-layout.png"
         alt="Diagram showing light-mint compressed account structure with three components: Hash (identifier for light-mint in purple box), Account (struct containing BaseMint with SPL-compatible fields, light-mint Data for program state, and optional Extensions for Token Metadata), and BasemintData (containing Supply, Decimals, Mint Authority, and Freeze Authority fields) with Token Metadata extension"
       />
     </Frame>
@@ -187,7 +189,7 @@ A light-token account holds token balances like SPL Token accounts:
   <Tab title="Diagram">
     <Frame>
       <img
-        src="/images/ctoken-explainer.png"
+        src="/images/token-account-layout.png"
         alt="Diagram showing light-token Solana account structure with three components: Address (identifier for light-token account in purple box), Account (struct containing Data bytes, Executable flag, Lamports balance, and Owner set to Compressed Token Program), and AccountData (containing Mint, Owner, Amount, and Extensions fields)"
       />
     </Frame>
@@ -304,13 +306,11 @@ Find the [source code to associated light-token accounts here](https://github.co
 
 # Compressed Token Account
 
-Compressed token accounts store token balance, owner, and other information like SPL and light-tokens. Any light-token or SPL token can be compressed/decompressed at will.
+Compressed token accounts store token balance, owner, and other information like SPL and light-tokens.
 
-We recommend to use compressed tokens for **token distribution** or **storage of inactive tokens**.
-
-<Tip>
-**Light-token accounts** with the **compressible extension are automatically compressed** with no writes in 27,000 slots (3h) and decompressed with new writes.
-</Tip>
+1. Light-token accounts are automatically compressed/decompressed when active/inactive. 
+2. Any light-token or SPL token can be compressed/decompressed at will.
+3. We recommend to use compressed tokens for token distribution.
 
 <Tabs>
   <Tab title="Diagram">
