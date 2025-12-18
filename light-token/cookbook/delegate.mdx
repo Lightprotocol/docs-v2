@@ -4,6 +4,8 @@ sidebarTitle: Delegate
 description: Delegate compressed tokens to another address
 ---
 
+---
+
 import { CodeCompare } from '/snippets/jsx/code-compare.jsx';
 
 Delegation allows a delegate to transfer compressed tokens on behalf of the owner.
@@ -15,6 +17,8 @@ Find the source code [here](https://github.com/Lightprotocol/light-protocol/blob
 <Note>
 Delegation works with compressed accounts (cold storage), not c-token ATAs.
 </Note>
+
+## Get Started
 
 Compare to SPL:
 <CodeCompare
@@ -39,8 +43,6 @@ const tx = await revoke(
   firstLabel="SPL"
   secondLabel="light-token"
 />
-
-# Get Started
 
 <Steps>
 <Step>

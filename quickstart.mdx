@@ -9,75 +9,21 @@ import SdkInstall from '/snippets/versions/sdk-install-0.22.1-alpha.1.mdx';
 <Steps>
 <Step>
 
-## Install Dependencies
-
-<Accordion title="Install dependencies">
-<SdkInstall />
-</Accordion>
-</Step>
-<Step>
-
-## Create an RPC connection
-
-Run `test-connection.ts` to verify your setup:
-
-<Check>
-Replace `<api_key>` with your actual API key before running! Get one [here](https://dashboard.helius.dev/dashboard), if you don't have one yet.
-</Check>
-
-```typescript test-connection.ts
-import { createRpc } from "@lightprotocol/stateless.js";
-
-// Helius exposes Solana and Photon RPC endpoints through a single URL
-<strong>const RPC_ENDPOINT = "https://devnet.helius-rpc.com?api-key=&#x3C;api_key>";
-</strong>const connection = createRpc(RPC_ENDPOINT, RPC_ENDPOINT, RPC_ENDPOINT);
-
-console.log("Connection created");
-console.log("RPC Endpoint:", RPC_ENDPOINT);
-```
-</Step>
-<Step>
-## Create and Mint Compressed Tokens
-
-<Accordion title="Generate your keypair, if you don't have one yet.">
-
-<Steps>
-<Step>
-Install Solana
-
-```bash
-sh -c "$(curl -sSfL https://release.anza.xyz/v3.0.0/install)"
-```
-</Step>
-<Step>
-Then run the command below to create a keypair at `.config/solana/id.json`
-
-```bash
-solana-keygen new
-```
-</Step>
-<Step>
-Fund wallet with devnet SOL
-
-```bash
-# Check current balance
-solana balance --url devnet
-
-# Airdrop 1 SOL to your default wallet
-solana airdrop 1 --url devnet
-
-# or use https://faucet.solana.com/
-```
-
-</Step>
-</Steps>
+## Prerequisites
+<Accordion title="Installations">
+<WelcomePageInstall />
 </Accordion>
 
-Run `quickstart.ts` with the following code:
+```typescript 
+# Start local test-validator
+light test-validator
+```
+</Step>
+<Step>
+## Mint Compressed Tokens
 
-```typescript quickstart.ts highlight={17, 25-30, 37-45 } expandable
-// ZK Compression Quickstart - DevNet
-// 1. Load wallet and connect to DevNet via Helius RPC
+```typescript
+// 1. Load wallet and connect to Localnet
 // 2. Create SPL mint with token pool for compression via createMint()
 // 3. Mint compressed tokens to recipient account via mintTo()
 // 4. Verify compressed token balance via getCompressedTokenAccountsByOwner
@@ -91,9 +37,11 @@ import { homedir } from "os";
 // Step 1: Load wallet from filesystem
 const payer = Keypair.fromSecretKey(new Uint8Array(JSON.parse(readFileSync(`${homedir()}/.config/solana/id.json`, "utf8"))));
 
-// Helius exposes Solana and compression RPC endpoints through a single URL
-const RPC_ENDPOINT = "https://devnet.helius-rpc.com?api-key=<API_KEY>";
-const connection = createRpc(RPC_ENDPOINT, RPC_ENDPOINT, RPC_ENDPOINT);
+// Connect to local test-validator
+const RPC_ENDPOINT = "http://localhost:8899";
+const COMPRESSION_ENDPOINT = "http://localhost:8784";
+const PROVER_ENDPOINT = "http://localhost:3001";
+const connection = createRpc(RPC_ENDPOINT, COMPRESSION_ENDPOINT, PROVER_ENDPOINT);
 
 const main = async () => {
 
@@ -108,7 +56,7 @@ const main = async () => {
     );
 
     console.log(`Mint address: ${mint.toBase58()}`);
-    console.log(`Create mint transaction: https://explorer.solana.com/tx/${transactionSignature}?cluster=devnet`);
+    console.log(`Create mint transaction: https://explorer.solana.com/tx/${transactionSignature}?cluster=custom&customUrl=http://localhost:8899`);
 
     // Step 3: Mint compressed tokens to recipient account
     console.log("\nMinting compressed token...");
@@ -123,7 +71,7 @@ const main = async () => {
     );
 
     console.log(`Compressed Token minted ${mintAmount / 1e9} token`);
-    console.log(`Transaction: https://explorer.solana.com/tx/${mintToTxId}?cluster=devnet`);
+    console.log(`Transaction: https://explorer.solana.com/tx/${mintToTxId}?cluster=custom&customUrl=http://localhost:8899`);
 
     // Step 4: Verify compressed token balance via getCompressedTokenAccountsByOwner
     const tokenAccounts = await connection.getCompressedTokenAccountsByOwner(

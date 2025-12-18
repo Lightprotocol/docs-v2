@@ -64,7 +64,8 @@
                   "light-token/cookbook/mint-tokens",
                   "light-token/cookbook/close-token-account",
                   "light-token/cookbook/transfer-interface",
-                  "light-token/cookbook/wrap-unwrap"
+                  "light-token/cookbook/wrap-unwrap",
+                  "light-token/cookbook/load-ata"
                 ]
               }
             ]

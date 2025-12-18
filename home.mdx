@@ -6,6 +6,7 @@ mode: "custom"
 import { HeroCubeGrid } from '/snippets/jsx/hero-cube-grid.jsx';
 import { LiquidGlassPill } from '/snippets/jsx/liquid-glass-pill.jsx';
 import { Footer } from '/snippets/jsx/footer.jsx';
+import WelcomePageInstall from '/snippets/setup/welcome-page-install.mdx';
 
 {/* Hero - full width with SVG background */}
 <div style={{
@@ -46,48 +47,7 @@ import { Footer } from '/snippets/jsx/footer.jsx';
 <Steps>
 <Step>
 ### Installations
-<Tabs>
-  <Tab title="npm">
-
-  Install packages in your working directory:
-    ```bash
-    npm install \
-        @lightprotocol/stateless.js \
-        @lightprotocol/compressed-token
-    ```
-Install the CLI globally:
-    ```bash
-    npm install -g @lightprotocol/zk-compression-cli
-    ```
-  </Tab>
-  <Tab title="yarn">
-    Install packages in your working directory:
-
-    ```bash
-    yarn add \
-        @lightprotocol/stateless.js \
-        @lightprotocol/compressed-token
-    ```
-Install the CLI globally:
-
-    ```bash
-    yarn global add @lightprotocol/zk-compression-cli
-    ```
-  </Tab>
-  <Tab title="pnpm">
-    Install packages in your working directory:
-    ```bash
-    pnpm add \
-        @lightprotocol/stateless.js \
-        @lightprotocol/compressed-token
-    ```
-Install the CLI globally:
-
-    ```bash
-    pnpm add -g @lightprotocol/zk-compression-cli
-    ```
-  </Tab>
-</Tabs>
+<WelcomePageInstall />
 </Step>
 <Step>
 ### Get started

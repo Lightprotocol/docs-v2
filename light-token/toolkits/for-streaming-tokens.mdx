@@ -9,19 +9,146 @@ While compressed, pure on-chain lookups will return uninitialized.
 
 Your indexer should keep tracking, quoting, and routing markets even if the on-chain account shows `is_initialized: false`, `is_compressed: true`. To trade a cold market, the first client must prepend an idempotent decompress "warm up" instruction.
 
-```rust
-import { createLoadAtaInstructions } from "@lightprotocol/compressed-token/unified";
 
-const warmupIxs = await createLoadAtaInstructions(
-  rpc,
-  tokenAccount,
-  owner,
-  mint,
-  payer
-);
+<Info>
+Find the source code [here](https://github.com/Lightprotocol/light-protocol/blob/main/js/compressed-token/tests/e2e/load-ata-standard.test.ts).
+</Info>
 
-new Transaction().add(...warmupIxs, tradeIx);
+<Steps>
+<Step>
+### Load Compressed Tokens to Hot Balance
+
+<CodeGroup>
+```typescript Action
+import { Keypair } from "@solana/web3.js";
+import { createRpc, bn } from "@lightprotocol/stateless.js";
+import {
+  createMint,
+  mintTo,
+  loadAta,
+  getAssociatedTokenAddressInterface,
+} from "@lightprotocol/compressed-token";
+
+async function main() {
+  const rpc = createRpc();
+  const payer = Keypair.generate();
+  await rpc.requestAirdrop(payer.publicKey, 10e9);
+
+  const owner = Keypair.generate();
+  await rpc.requestAirdrop(owner.publicKey, 1e9);
+
+  const mintAuthority = Keypair.generate();
+  const mintKeypair = Keypair.generate();
+  const { mint } = await createMint(
+    rpc,
+    payer,
+    mintAuthority.publicKey,
+    9,
+    mintKeypair
+  );
+
+  await mintTo(rpc, payer, mint, owner.publicKey, mintAuthority, bn(1000));
+
+  // Get c-token ATA address
+  const ctokenAta = getAssociatedTokenAddressInterface(mint, owner.publicKey);
+
+  // Load compressed tokens to hot balance
+  // Creates ATA if needed, returns null if nothing to load
+  const signature = await loadAta(
+    rpc,
+    ctokenAta,
+    owner,
+    mint,
+    payer
+  );
+
+  if (signature) {
+    console.log("Loaded tokens to hot balance");
+    console.log("Transaction:", signature);
+  } else {
+    console.log("Nothing to load");
+  }
+}
+
+main().catch(console.error);
 ```
+
+```typescript Instruction
+import { Keypair, ComputeBudgetProgram } from "@solana/web3.js";
+import {
+  createRpc,
+  bn,
+  buildAndSignTx,
+  sendAndConfirmTx,
+  dedupeSigner,
+} from "@lightprotocol/stateless.js";
+import {
+  createMint,
+  mintTo,
+  createLoadAtaInstructions,
+  getAssociatedTokenAddressInterface,
+} from "@lightprotocol/compressed-token";
+
+async function main() {
+  const rpc = createRpc();
+  const payer = Keypair.generate();
+  await rpc.requestAirdrop(payer.publicKey, 10e9);
+
+  const owner = Keypair.generate();
+  await rpc.requestAirdrop(owner.publicKey, 1e9);
+
+  const mintAuthority = Keypair.generate();
+  const mintKeypair = Keypair.generate();
+  const { mint } = await createMint(
+    rpc,
+    payer,
+    mintAuthority.publicKey,
+    9,
+    mintKeypair
+  );
+
+  await mintTo(rpc, payer, mint, owner.publicKey, mintAuthority, bn(1000));
+
+  // Get c-token ATA address
+  const ctokenAta = getAssociatedTokenAddressInterface(mint, owner.publicKey);
+
+  // Create load instructions
+  const ixs = await createLoadAtaInstructions(
+    rpc,
+    ctokenAta,
+    owner.publicKey,
+    mint,
+    payer.publicKey
+  );
+
+  if (ixs.length === 0) {
+    console.log("Nothing to load");
+    return;
+  }
+
+  // Build, sign, and send transaction
+  const { blockhash } = await rpc.getLatestBlockhash();
+  const additionalSigners = dedupeSigner(payer, [owner]);
+
+  const tx = buildAndSignTx(
+    [ComputeBudgetProgram.setComputeUnitLimit({ units: 500_000 }), ...ixs],
+    payer,
+    blockhash,
+    additionalSigners
+  );
+
+  const signature = await sendAndConfirmTx(rpc, tx);
+  console.log("Loaded tokens to hot balance");
+  console.log("Transaction:", signature);
+}
+
+main().catch(console.error);
+```
+</CodeGroup>
+
+</Step>
+</Steps>
+
 
 # Stream Light-Mint Accounts
 
