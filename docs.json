@@ -76,7 +76,9 @@
                       "compressed-tokens/advanced-guides/add-wallet-support-for-compressed-tokens",
                       "compressed-tokens/advanced-guides/use-token-2022-with-compression"
                     ]
-                  },
+                  }
+                ]
+              },
               "client-library/client-guide"
             ]
           },
