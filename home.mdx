@@ -47,6 +47,9 @@ import WelcomePageInstall from '/snippets/setup/welcome-page-install.mdx';
 <Steps>
 <Step>
 ### Installations
+
+Both primitives use the same packages and CLI.
+
 <WelcomePageInstall />
 </Step>
 <Step>
@@ -177,14 +180,14 @@ import WelcomePageInstall from '/snippets/setup/welcome-page-install.mdx';
   </Card>
   <Card
     title="Compressed Tokens"
-    icon="compress"
+    icon="coin"
     href="/compressed-tokens/README"
   >
     Client guides for compressed token accounts.
   </Card>
   <Card
     title="Compressed PDAs"
-    icon="database"
+    icon="users"
     href="/compressed-pdas/create-a-program-with-compressed-pdas"
   >
     Program and client guides for PDA accounts.
@@ -199,14 +202,14 @@ import WelcomePageInstall from '/snippets/setup/welcome-page-install.mdx';
   <Card
     title="@lightprotocol/stateless.js"
     icon="js"
-    href="/api-reference/libraries/stateless-js"
+    href="https://lightprotocol.github.io/light-protocol/stateless.js/index.html"
   >
     Core client library for ZK Compression.
   </Card>
   <Card
     title="@lightprotocol/compressed-token"
     icon="coins"
-    href="/api-reference/libraries/compressed-token"
+    href="https://lightprotocol.github.io/light-protocol/compressed-token/index.html"
   >
     SDK for compressed token operations.
   </Card>
@@ -218,30 +221,24 @@ import WelcomePageInstall from '/snippets/setup/welcome-page-install.mdx';
   <Card
     title="light-client"
     icon="rust"
-    href="/api-reference/libraries/light-client"
+    href="https://docs.rs/light-client/latest/light_client/"
   >
     Rust client for Light Protocol.
   </Card>
   <Card
     title="light-sdk"
     icon="cube"
-    href="/api-reference/libraries/light-sdk"
+    href="https://docs.rs/light-sdk/latest/light_sdk/"
   >
     Core SDK for on-chain programs.
   </Card>
   <Card
     title="light-program-test"
     icon="flask-vial"
-    href="/api-reference/libraries/light-program-test"
+    href="https://docs.rs/crate/light-program-test/latest"
   >
     Testing framework for programs.
   </Card>
-</CardGroup>
-
-## Resources
-
-<CardGroup cols={3}>
-  {/* TODO: Add resource cards */}
 </CardGroup>
 
 ## Using AI in Development
@@ -292,6 +289,32 @@ codex mcp add deepwiki -- npx -y mcp-remote@latest https://mcp.deepwiki.com/mcp
   horizontal
 >
 </Card>
+
+## Resources
+
+<CardGroup cols={3}>
+  <Card
+    title="Security Audits"
+    icon="shield-check"
+    href="https://github.com/Lightprotocol/light-protocol/tree/main/audits"
+  >
+    View security audits and formal verification.
+  </Card>
+  <Card
+    title="Light-Token Standard"
+    icon="expand"
+    href="/learn/light-token-standard"
+  >
+    Learn core concepts of the Light-Token Program.
+  </Card>
+  <Card
+    title="ZK Compression"
+    icon="compress"
+    href="/learn/core-concepts"
+  >
+    Learn core concepts of ZK Compression.
+  </Card>
+</CardGroup>
 
 </div>
 
