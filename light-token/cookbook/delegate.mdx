@@ -1,0 +1,174 @@
+---
+title: Approve & Revoke Delegation
+sidebarTitle: Delegate
+description: Delegate compressed tokens to another address
+---
+
+---
+
+import { CodeCompare } from '/snippets/jsx/code-compare.jsx';
+
+Delegation allows a delegate to transfer compressed tokens on behalf of the owner.
+
+<Info>
+Find the source code [here](https://github.com/Lightprotocol/light-protocol/blob/main/js/compressed-token/tests/e2e/delegate.test.ts).
+</Info>
+
+<Note>
+Delegation works with compressed accounts (cold storage), not c-token ATAs.
+</Note>
+
+## Get Started
+
+Compare to SPL:
+<CodeCompare
+  firstCode={`// SPL revoke
+import { revoke } from "@solana/spl-token";
+
+const tx = await revoke(
+  connection,
+  payer,
+  tokenAccount,
+  owner
+);`}
+  secondCode={`// light-token revoke
+import { revoke } from "@lightprotocol/compressed-token";
+
+const tx = await revoke(
+  rpc,
+  payer,
+  compressedAccounts,
+  owner
+);`}
+  firstLabel="SPL"
+  secondLabel="light-token"
+/>
+
+<Steps>
+<Step>
+### Approve & Revoke Delegation
+
+<CodeGroup>
+```typescript Approve
+import { Keypair } from "@solana/web3.js";
+import { createRpc, bn } from "@lightprotocol/stateless.js";
+import {
+  createMint,
+  mintTo,
+  approve,
+} from "@lightprotocol/compressed-token";
+
+async function main() {
+  const rpc = createRpc();
+  const payer = Keypair.generate();
+  await rpc.requestAirdrop(payer.publicKey, 10e9);
+
+  const owner = Keypair.generate();
+  await rpc.requestAirdrop(owner.publicKey, 1e9);
+
+  const mintAuthority = Keypair.generate();
+  const mintKeypair = Keypair.generate();
+  const { mint } = await createMint(
+    rpc,
+    payer,
+    mintAuthority.publicKey,
+    9,
+    mintKeypair
+  );
+
+  await mintTo(rpc, payer, mint, owner.publicKey, mintAuthority, bn(1000));
+
+  // Create delegate
+  const delegate = Keypair.generate();
+
+  // Approve delegation
+  const signature = await approve(
+    rpc,
+    payer,
+    mint,
+    bn(500),
+    owner,
+    delegate.publicKey
+  );
+
+  console.log("Approved delegation of 500 tokens");
+  console.log("Transaction:", signature);
+
+  // Verify delegation
+  const delegatedAccounts = await rpc.getCompressedTokenAccountsByDelegate(
+    delegate.publicKey,
+    { mint }
+  );
+  console.log("Delegated accounts:", delegatedAccounts.items.length);
+}
+
+main().catch(console.error);
+```
+
+```typescript Revoke
+import { Keypair } from "@solana/web3.js";
+import { createRpc, bn } from "@lightprotocol/stateless.js";
+import {
+  createMint,
+  mintTo,
+  approve,
+  revoke,
+} from "@lightprotocol/compressed-token";
+
+async function main() {
+  const rpc = createRpc();
+  const payer = Keypair.generate();
+  await rpc.requestAirdrop(payer.publicKey, 10e9);
+
+  const owner = Keypair.generate();
+  await rpc.requestAirdrop(owner.publicKey, 1e9);
+
+  const mintAuthority = Keypair.generate();
+  const mintKeypair = Keypair.generate();
+  const { mint } = await createMint(
+    rpc,
+    payer,
+    mintAuthority.publicKey,
+    9,
+    mintKeypair
+  );
+
+  await mintTo(rpc, payer, mint, owner.publicKey, mintAuthority, bn(1000));
+
+  // Approve delegation
+  const delegate = Keypair.generate();
+  await approve(rpc, payer, mint, bn(500), owner, delegate.publicKey);
+
+  // Get delegated accounts
+  const delegatedAccounts = await rpc.getCompressedTokenAccountsByDelegate(
+    delegate.publicKey,
+    { mint }
+  );
+
+  console.log("Before revoke:", delegatedAccounts.items.length, "accounts");
+
+  // Revoke delegation
+  const signature = await revoke(
+    rpc,
+    payer,
+    delegatedAccounts.items,
+    owner
+  );
+
+  console.log("Revoked delegation");
+  console.log("Transaction:", signature);
+
+  // Verify revocation
+  const afterRevoke = await rpc.getCompressedTokenAccountsByDelegate(
+    delegate.publicKey,
+    { mint }
+  );
+  console.log("After revoke:", afterRevoke.items.length, "accounts");
+}
+
+main().catch(console.error);
+```
+</CodeGroup>
+
+</Step>
+</Steps>

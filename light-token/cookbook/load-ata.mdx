@@ -1,18 +1,25 @@
 ---
-title: "Toolkit to Index Light-Token Accounts"
-sidebarTitle: "for Indexing Tokens"
-description: "Light-token accounts follow the same layout as SPL-token accounts, so you can reuse your existing parsers."
+title: Load Token Balances to Light-ATA
+sidebarTitle: Load ATA
+description: Unify token balances from compressed tokens (cold), SPL, and Token-2022 to one light ATA.
 ---
 
-When a market becomes inactive, its token accounts and related PDAs will be compressed - their state is committed and effectively frozen until a client decompresses it.
-While compressed, pure on-chain lookups will return uninitialized.
+---
 
-Your indexer should keep tracking, quoting, and routing markets even if the on-chain account shows `is_initialized: false`, `is_compressed: true`. To trade a cold market, the first client must prepend an idempotent decompress "warm up" instruction.
+1. `loadAta` unifies tokens from multiple sources to a single ATA:
+    * Compressed tokens (cold) -> Decompresses -> light ATA
+    * SPL balance (if wrap=true) -> Wraps -> light ATA
+    * T22 balance (if wrap=true) -> Wraps -> light ATA
 
+2. Returns `null` if there's nothing to load (idempotent)
+
+3. Creates the ATA if it doesn't exist
 
 <Info>
 Find the source code [here](https://github.com/Lightprotocol/light-protocol/blob/main/js/compressed-token/tests/e2e/load-ata-standard.test.ts).
 </Info>
+
+## Get Started
 
 <Steps>
 <Step>
@@ -148,14 +155,3 @@ main().catch(console.error);
 
 </Step>
 </Steps>
-
-
-# Stream Light-Mint Accounts
-
-<Card
-  title="Toolkit to stream light-mints"
-  icon="chevron-right"
-  color="#0066ff"
-  href="/light-token/toolkits/for-streaming-mints"
-  horizontal
-/>

@@ -1,0 +1,333 @@
+---
+title: "Light Protocol"
+mode: "custom"
+---
+
+import { HeroCubeGrid } from '/snippets/jsx/hero-cube-grid.jsx';
+import { LiquidGlassPill } from '/snippets/jsx/liquid-glass-pill.jsx';
+import { Footer } from '/snippets/jsx/footer.jsx';
+import WelcomePageInstall from '/snippets/setup/welcome-page-install.mdx';
+
+{/* Hero - full width with SVG background */}
+<div style={{
+  position: 'relative',
+  textAlign: 'center',
+  padding: '140px 32px 146px',
+  width: '100%',
+  overflow: 'hidden',
+  borderBottom: '1px solid #e5e7eb'
+}}>
+  <HeroCubeGrid />
+  <LiquidGlassPill>
+    <h1 style={{position: 'relative', fontSize: '2.5rem', fontWeight: 500, margin: 0, color: '#111827'}}>Build and Scale with Light Protocol.</h1>
+  </LiquidGlassPill>
+  <p style={{position: 'relative', fontSize: '1.25rem', maxWidth: '600px', margin: '24px auto 0'}}>
+
+  </p>
+</div>
+
+{/* Content container - centered with max-width */}
+<div style={{maxWidth: '48rem', padding: '48px 1.25rem 40px', margin: '0 auto'}} className="prose prose-gray dark:prose-invert">
+
+
+<CardGroup cols={2}>
+  <Card title="" icon="expand" href="/light-token/welcome">
+  ### Light-Token Program (Beta)
+    High performance token standard for Defi and Payments.
+  </Card>
+  <Card title="" icon="compress" href="/welcome">
+  ### ZK Compression
+    For token distribution and app state.
+  </Card>
+</CardGroup>
+## Features
+
+<CardGroup cols={3}>
+  <Card title="Rent-free Accounts">
+    Create accounts without paying upfront rent.
+  </Card>
+  <Card title="L1 Performance & Security">
+    Execution and data availability on Solana.
+  </Card>
+  <Card title="Fully Composable">
+    Compatible with existing programs and accounts.
+  </Card>
+</CardGroup>
+
+## Quickstart
+
+<Steps>
+<Step>
+### Installations
+
+Both primitives use the same packages and CLI.
+
+<WelcomePageInstall />
+</Step>
+<Step>
+### Get started
+</Step>
+</Steps>
+
+
+
+## Toolkits
+
+<Tabs>
+  <Tab title="Light-Token">
+    <Card
+      title="Stablecoin Payments"
+      icon="credit-card"
+      color="#0066ff"
+      href="/light-token/toolkits/for-payments"
+      horizontal
+    >
+      Integrate light-token APIs with familiar SPL patterns.
+    </Card>
+
+    <Card
+      title="Wallets"
+      icon="wallet"
+      color="#0066ff"
+      href="/light-token/toolkits/for-wallets"
+      horizontal
+    >
+      Allow users to display and swap light-tokens.
+    </Card>
+
+    <Card
+      title="Streaming Mints"
+      icon="bolt"
+      color="#0066ff"
+      href="/light-token/toolkits/for-streaming-mints"
+      horizontal
+    >
+      Stream mint events from the network in real-time.
+    </Card>
+
+    <Card
+      title="Streaming Tokens"
+      icon="stream"
+      color="#0066ff"
+      href="/light-token/toolkits/for-streaming-tokens"
+      horizontal
+    >
+      Stream token events from the network in real-time.
+    </Card>
+  </Tab>
+  <Tab title="Compressed Tokens">
+      <Card
+      title="Airdrop without Claim"
+      icon="parachute-box"
+      color="#0066ff"
+      href="/compressed-tokens/advanced-guides/create-an-airdrop"
+      horizontal
+    >
+      Distribute tokens directly to recipients.
+    </Card>
+
+    <Card
+      title="Airdrop with Claim"
+      icon="hand-holding"
+      color="#0066ff"
+      href="/compressed-tokens/advanced-guides/create-an-airdrop-with-claim"
+      horizontal
+    >
+      Distribute tokens and let users claim.
+    </Card>
+
+    <Card
+      title="Wallets"
+      icon="wallet"
+      color="#0066ff"
+      href="/compressed-tokens/advanced-guides/add-wallet-support-for-compressed-tokens"
+      horizontal
+    >
+      Allow users to display and swap compressed tokens.
+    </Card>
+
+    <Card
+      title="Token-2022"
+      icon="coins"
+      color="#0066ff"
+      href="/compressed-tokens/advanced-guides/use-token-2022-with-compression"
+      horizontal
+    >
+      Integrate Token-2022 extensions with compressed tokens.
+    </Card>
+
+
+    <Card
+      title="Example Web Client"
+      icon="browser"
+      color="#0066ff"
+      href="/compressed-tokens/advanced-guides/example-web-client"
+      horizontal
+    >
+      Browser-based example application.
+    </Card>
+
+    <Card
+      title="Example Node.js Client"
+      icon="node-js"
+      color="#0066ff"
+      href="/compressed-tokens/advanced-guides/example-node-js"
+      horizontal
+    >
+      Server-side Node.js implementation.
+    </Card>
+  </Tab>
+</Tabs>
+
+
+## Cookbooks
+
+<CardGroup cols={3}>
+  <Card
+    title="Light-Token"
+    icon="coins"
+    href="/light-token/cookbook/create-mint"
+  >
+    Program and client guides for token mints, accounts, and transfers.
+  </Card>
+  <Card
+    title="Compressed Tokens"
+    icon="coin"
+    href="/compressed-tokens/overview"
+  >
+    Client guides for compressed token accounts.
+  </Card>
+  <Card
+    title="Compressed PDAs"
+    icon="users"
+    href="/compressed-pdas/create-a-program-with-compressed-pdas"
+  >
+    Program and client guides for PDA accounts.
+  </Card>
+</CardGroup>
+
+## SDK Reference
+
+### TypeScript
+
+<CardGroup cols={2}>
+  <Card
+    title="@lightprotocol/stateless.js"
+    icon="js"
+    href="https://lightprotocol.github.io/light-protocol/stateless.js/index.html"
+  >
+    Core client library for ZK Compression.
+  </Card>
+  <Card
+    title="@lightprotocol/compressed-token"
+    icon="coins"
+    href="https://lightprotocol.github.io/light-protocol/compressed-token/index.html"
+  >
+    SDK for compressed token operations.
+  </Card>
+</CardGroup>
+
+### Rust
+
+<CardGroup cols={3}>
+  <Card
+    title="light-client"
+    icon="rust"
+    href="https://docs.rs/light-client/latest/light_client/"
+  >
+    Rust client for Light Protocol.
+  </Card>
+  <Card
+    title="light-sdk"
+    icon="cube"
+    href="https://docs.rs/light-sdk/latest/light_sdk/"
+  >
+    Core SDK for on-chain programs.
+  </Card>
+  <Card
+    title="light-program-test"
+    icon="flask-vial"
+    href="https://docs.rs/crate/light-program-test/latest"
+  >
+    Testing framework for programs.
+  </Card>
+</CardGroup>
+
+## Using AI in Development
+
+|                 |                                                                   |
+|:---------------------|:------------------------------------------------------------------------------|
+| MCP                 | Connect AI tools to the Light Protocol repository via Model Context Protocol  |
+| DeepWiki   | Use Deepwiki for advanced AI assistance with your development.       |
+
+<Tabs>
+<Tab title="Claude Code">
+
+```bash
+claude mcp add -s user -t http deepwiki https://mcp.deepwiki.com/mcp
+claude mcp add -s user -t http zkcompression https://www.zkcompression.com/mcp
+```
+</Tab>
+<Tab title="Codex">
+
+```bash
+codex mcp add zkcompression -- npx -y mcp-remote@latest https://www.zkcompression.com/mcp
+codex mcp add deepwiki -- npx -y mcp-remote@latest https://mcp.deepwiki.com/mcp
+```
+
+</Tab>
+<Tab title="Most Clients (Windsurf, Cursor, ...)">
+```json
+{
+  "mcpServers": {
+    "deepwiki": {
+      "serverUrl": "https://mcp.deepwiki.com/sse"
+    },
+    "zkcompression": {
+      "command": "npx",
+      "args": ["-y", "mcp-remote@latest", "https://www.zkcompression.com/mcp"]
+    }
+  }
+}
+```
+</Tab>
+</Tabs>
+
+<Card
+  title="AI Tools Guide"
+  icon="chevron-right"
+  color="#0066ff"
+  href="/learn/ai-tools-guide"
+  horizontal
+>
+</Card>
+
+## Resources
+
+<CardGroup cols={3}>
+  <Card
+    title="Security Audits"
+    icon="shield-check"
+    href="https://github.com/Lightprotocol/light-protocol/tree/main/audits"
+  >
+    View security audits and formal verification.
+  </Card>
+  <Card
+    title="Light-Token Standard"
+    icon="expand"
+    href="/learn/light-token-standard"
+  >
+    Learn core concepts of the Light-Token Program.
+  </Card>
+  <Card
+    title="ZK Compression"
+    icon="compress"
+    href="/learn/core-concepts"
+  >
+    Learn core concepts of ZK Compression.
+  </Card>
+</CardGroup>
+
+</div>
+
+<Footer />

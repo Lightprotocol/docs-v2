@@ -4,6 +4,8 @@ sidebarTitle: Introduction
 description: ZK Compression is a Solana account primitive that lets you create tokens and PDAs without rent-exemption with L1 performance and security.
 ---
 
+import WelcomePageInstall from '/snippets/setup/welcome-page-install.mdx';
+
 <Frame>
   ![](/images/banner-image.png)
 </Frame>
@@ -13,25 +15,11 @@ description: ZK Compression is a Solana account primitive that lets you create t
 | **Token Account**    | ~2,000,000 lamports | ~**5,000** lamports |
 | **100-byte PDA**     | ~1,600,000 lamports | ~**15,000** lamports |
 
-
-
-<CardGroup cols={3}>
-  <Card title="Rent-free Accounts">
-    Create accounts without paying upfront rent.
-  </Card>
-  <Card title="L1 Performance & Security">
-    Execution and data availability on Solana.
-  </Card>
-  <Card title="Fully Composable">
-    Compatible with existing programs and accounts.
-  </Card>
-</CardGroup>
-
 ## Features
 
   <Card
     title="Light-Token Standard (Beta)"
-    href="/light-token/README"
+    href="/light-token/welcome"
     icon="coins"
     iconType="solid"
   >
@@ -62,48 +50,7 @@ description: ZK Compression is a Solana account primitive that lets you create t
 
 <Steps>
 <Step title="Installations">
-<Tabs>
-  <Tab title="npm">
-
-  Install packages in your working directory:
-    ```bash
-    npm install \
-        @lightprotocol/stateless.js \
-        @lightprotocol/compressed-token
-    ```
-Install the CLI globally:
-    ```bash
-    npm i -g @lightprotocol/zk-compression-cli@alpha
-    ```
-  </Tab>
-  <Tab title="yarn">
-    Install packages in your working directory:
-
-    ```bash
-    yarn add \
-        @lightprotocol/stateless.js \
-        @lightprotocol/compressed-token
-    ```
-Install the CLI globally:
-
-    ```bash
-    yarn global add @lightprotocol/zk-compression-cli
-    ```
-  </Tab>
-  <Tab title="pnpm">
-    Install packages in your working directory:
-    ```bash
-    pnpm add \
-        @lightprotocol/stateless.js \
-        @lightprotocol/compressed-token
-    ```
-Install the CLI globally:
-
-    ```bash
-    pnpm add -g @lightprotocol/zk-compression-cli@alpha
-    ```
-  </Tab>
-</Tabs>
+<WelcomePageInstall />
 </Step>
 <Step title="Get started">
 <Card title="Mint Compressed Tokens in less than 5 minutes" href="/quickstart" icon="bolt">
@@ -129,65 +76,6 @@ ZK Compression is a framework that reduces the storage cost of Solana accounts b
     * By default, this is all done under the hood. You can fetch validity proofs from RPC providers that support ZK Compression.
   </Step>
 </Steps>
-
-## Using AI in the Docs
-
-<Tip>
-Look up documentation, code examples and guides using the Docs' AI assistant.
-</Tip>
-
-<Frame>
-  <iframe src="https://drive.google.com/file/d/1JMG8QffBJX53_RwDxarSnnKYoNJqmH4F/preview" width="100%" height="100%" allow="autoplay" className="rounded-xl aspect-video"></iframe>
-</Frame>
-
-## Using AI in Development
-
-| Tools                | Description                                                                  |
-|:---------------------|:------------------------------------------------------------------------------|
-| MCP                 | Connect AI tools to the Light Protocol repository via Model Context Protocol  |
-| DeepWiki   | Use Deepwiki for advanced AI assistance with your development.       |
-
-<Tabs>
-<Tab title="Claude Code">
-
-```bash
-claude mcp add -s user -t http deepwiki https://mcp.deepwiki.com/mcp
-claude mcp add -s user -t http zkcompression https://www.zkcompression.com/mcp
-```
-</Tab>
-<Tab title="Codex">
-
-```bash
-codex mcp add zkcompression -- npx -y mcp-remote@latest https://www.zkcompression.com/mcp
-codex mcp add deepwiki -- npx -y mcp-remote@latest https://mcp.deepwiki.com/mcp
-```
-
-</Tab>
-<Tab title="Most Clients (Windsurf, Cursor, ...)">
-```json
-{
-  "mcpServers": {
-    "deepwiki": {
-      "serverUrl": "https://mcp.deepwiki.com/sse"
-    },
-    "zkcompression": {
-      "command": "npx",
-      "args": ["-y", "mcp-remote@latest", "https://www.zkcompression.com/mcp"]
-    }
-  }
-}
-```
-</Tab>
-</Tabs>
-
-<Card
-  title="AI Tools Guide"
-  icon="chevron-right"
-  color="#0066ff"
-  href="/learn/ai-tools-guide"
-  horizontal
->
-</Card>
 
 ## Resources
 <CardGroup cols={3}>

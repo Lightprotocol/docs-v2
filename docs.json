@@ -12,45 +12,91 @@
     "default": "light"
   },
   "banner": {
-    "content": "The Light-Token Standard is live on Devnet. <a href=\"/light-token/README\" style=\"color:#FFFFFF; text-decoration: underline;\">Start testing and create mints or tokens</a>!",
+    "content": "The Light-Token Standard is live on Devnet. <a href=\"/light-token/welcome\" style=\"color:#FFFFFF; text-decoration: underline;\">Start testing and create mints or tokens</a>!",
     "dismissible": false
   },
   "navigation": {
     "tabs": [
       {
-        "tab": "Documentation",
+        "tab": "Home",
         "groups": [
-                    {
-            "group": "Light-Token Standard (Beta)",
+          {
+            "group": "Overview",
+            "pages": ["home"]
+          }
+        ]
+      },
+      {
+        "tab": "Light-Token Program",
+        "groups": [
+          {
+            "group": "Get Started",
             "pages": [
-              "light-token/README",
-              "light-token/faq",
-              "learn/light-token-standard",
+              "light-token/welcome",
+              "light-token/quickstart",
+              "light-token/faq"
+            ]
+          },
+          {
+            "group": "Toolkits",
+            "pages": [
+              "light-token/toolkits/overview",
+              "light-token/toolkits/for-payments",
+              "light-token/toolkits/for-wallets",
+              "light-token/toolkits/for-streaming-mints",
+              "light-token/toolkits/for-streaming-tokens"
+            ]
+          },
+          {
+            "group": "Cookbook",
+            "pages": [
+              "light-token/cookbook/overview",
               {
-                "group": "Cookbook",
+                "group": "Recipes",
                 "pages": [
                   "light-token/cookbook/create-mint",
                   "light-token/cookbook/create-ata",
                   "light-token/cookbook/create-token-account",
-                  "light-token/cookbook/mint-tokens",
+                  "light-token/cookbook/mint-to",
+                  "light-token/cookbook/close-token-account",
                   "light-token/cookbook/transfer-interface",
-                  "light-token/cookbook/close-token-account"
+                  "light-token/cookbook/wrap-unwrap",
+                  "light-token/cookbook/load-ata"
                 ]
               }
             ]
           },
           {
-            "group": "Get Started with ZK Compression",
+            "group": "Learn",
+            "pages": [
+              "learn/light-token-standard"            ]
+          },
+          {
+            "group": "SDK Reference",
+            "pages": [
+              "api-reference/libraries/stateless-js",
+              "api-reference/libraries/compressed-token",
+              "api-reference/libraries/light-client",
+              "api-reference/libraries/light-sdk",
+              "api-reference/libraries/light-program-test"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "ZK Compression",
+        "groups": [
+          {
+            "group": "Get Started",
             "pages": [
               "welcome",
-              "quickstart",
-              "learn/ai-tools-guide"
+              "quickstart"
             ]
           },
           {
             "group": "Compressed Tokens",
             "pages": [
-              "compressed-tokens/README",
+              "compressed-tokens/overview",
               {
                 "group": "Cookbook",
                 "pages": [
@@ -87,6 +133,23 @@
                       "compressed-tokens/advanced-guides/example-node-js"
                     ]
                   }
+                ]
+              }
+            ]
+          },
+          {
+            "group": "Compressed PDAs",
+            "pages": [
+              "compressed-pdas/create-a-program-with-compressed-pdas",
+              {
+                "group": "Program Guides",
+                "pages": [
+                  "compressed-pdas/guides",
+                  "compressed-pdas/guides/how-to-create-compressed-accounts",
+                  "compressed-pdas/guides/how-to-update-compressed-accounts",
+                  "compressed-pdas/guides/how-to-close-compressed-accounts",
+                  "compressed-pdas/guides/how-to-reinitialize-compressed-accounts",
+                  "compressed-pdas/guides/how-to-burn-compressed-accounts"
                 ]
               },
               "client-library/client-guide"
@@ -173,7 +236,6 @@
           {
             "group": "SDK Reference",
             "pages": [
-              "changelog",
               "api-reference/libraries/stateless-js",
               "api-reference/libraries/compressed-token",
               "api-reference/libraries/light-client",
@@ -186,6 +248,11 @@
     ],
     "global": {
       "anchors": [
+        {
+          "anchor": "AI Tools Guide",
+          "href": "https://zkcompression.com/learn/ai-tools-guide",
+          "icon": "robot"
+        },
         {
           "anchor": "Support",
           "href": "https://www.zkcompression.com/support",
@@ -205,8 +272,8 @@
     }
   },
   "logo": {
-    "light": "/logo/logo-black.svg",
-    "dark": "/logo/logo-white.svg"
+    "light": "/logo/wordmark.png",
+    "dark": "/logo/wordmark-darkmode.png"
   },
   "navbar": {
     "links": [

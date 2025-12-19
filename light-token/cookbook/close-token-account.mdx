@@ -4,6 +4,8 @@ sidebarTitle: Close Token Account
 description: Program guide to close light-token accounts via CPI. Includes step-by-step implementation and full code examples.
 ---
 
+---
+
 import CloseAccountInfosAccountsList from '/snippets/accounts-list/close-account-infos-accounts-list.mdx';
 import CTokenClientPrerequisites from '/snippets/light-token-guides/light-token-client-prerequisites.mdx';
 import ClientCustomRentConfig from '/snippets/light-token-guides/client-custom-rent-config.mdx';
@@ -14,7 +16,7 @@ import ClientCustomRentConfig from '/snippets/light-token-guides/client-custom-r
     * by the <Tooltip tip="The `compression_authority` is a PDA of the Light Registry program. It claims rent for the rent sponsor from compressible accounts that are compressed and closed.">`compression_authority`</Tooltip>
      when the account becomes <Tooltip tip="An account is compressible when it has rent for less than 1 epoch (360 lamports for a 260-byte light-token account).">compressible</Tooltip>. The account is <Tooltip tip="You can think of compressed light-token accounts as storage of inactive accounts that can be reactivated."> compressed and closed</Tooltip> - it can be reinstated with the same state (decompressed).
 
-# Get Started
+## Get Started
 
 <Tabs>
 <Tab title="Rust Client">
@@ -376,6 +378,6 @@ pub fn process_close_account_invoke_signed(accounts: &[AccountInfo]) -> Result<(
     title="Go back to the overview for the light-token standard."
     icon="chevron-right"
     color="#0066ff"
-    href="/light-token/README"
+    href="/light-token/welcome"
     horizontal
   />
