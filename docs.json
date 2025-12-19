@@ -69,9 +69,7 @@
           {
             "group": "Learn",
             "pages": [
-              "learn/light-token-standard",
-              "light-token/interface-methods"
-            ]
+              "learn/light-token-standard"            ]
           },
           {
             "group": "SDK Reference",
