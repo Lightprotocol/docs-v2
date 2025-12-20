@@ -47,20 +47,6 @@ while being more CU efficient than SPL on hot paths.
   </tbody>
 </table>
 
-### Creation Cost
-|           | SPL  | Light      |
-|:---------------------|:------------------|:----------------------|
-| **Mint Account**    | ~1,500,000 lamports        | **15,000** lamports     |
-| **Token Account**   | 	  ~2,000,000 lamports         | ~**17,000** lamports     |
-
-### CU Performance 
-|                      | light-token CU | SPL-token CU |                  p-token CU |
-| ----------------------------- | -------------: | -----------: | --------------------------: |
-| **ATA Creation**                  |          4,348 |       14,194 | 14,194 |
-| **Transfer** (base path)          |            312 |        4,645 |                          79 |
-| **Transfer** (rent-free hot path) |          1,885 |        4,645 |                          79 |
-
-
 # Mint Accounts
 
 <Note>
@@ -73,6 +59,9 @@ Light-mints **uniquely represent a token on Solana and store its global metadata
 2. Tokens created from light-mints are **light-tokens**.
 3. Token metadata (name, symbol, URI) is stored as an extension in the struct.
 
+| Creation Cost          | SPL  | Light      |
+|:---------------------|:------------------|:----------------------|
+| **Mint Account**    | ~1,500,000 lamports        | **15,000** lamports     |
 <Tabs>
   <Tab title="Diagram">
     <Frame>
@@ -186,6 +175,19 @@ A light-token account holds token balances like SPL Token accounts:
 * A wallet needs a light-token account for each light-mint, SPL mint, or Token 2022 mint it wants to hold, with the wallet address set as the light-token account owner.
 * Each wallet can own multiple light-token accounts for the same light-mint.
 * A light-token account can only have one owner and hold units of one light-mint.
+
+|  Creation Cost         | SPL  | Light      |
+|:---------------------|:------------------|:----------------------|
+| **Token Account**   | 	  ~2,000,000 lamports         | ~**17,000** lamports     |
+
+Additionally Light-Token is more performant then SPL on hot paths:
+
+|                      | light-token CU | SPL-token CU |
+| ----------------------------- | -------------: | -----------: |
+| **ATA Creation**                  |          4,348 |       14,194 |
+| **Transfer** (base path)          |            312 |        4,645 |
+| **Transfer** (rent-free hot path) |          1,885 |        4,645 |
+
 
 <Tabs>
   <Tab title="Diagram">
