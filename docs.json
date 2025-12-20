@@ -153,7 +153,8 @@
                   "compressed-pdas/guides/how-to-burn-compressed-accounts"
                 ]
               },
-              "client-library/client-guide"
+              "client-library/client-guide",
+              "compressed-pdas/solana-attestation-service"
             ]
           },
           {
