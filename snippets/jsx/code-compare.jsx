@@ -7,7 +7,6 @@ export const CodeCompare = ({
 }) => {
   const [sliderPercent, setSliderPercent] = useState(initialPosition);
   const [isDragging, setIsDragging] = useState(false);
-  const [copied, setCopied] = useState(false);
   const [hasInteracted, setHasInteracted] = useState(false);
   const containerRef = useRef(null);
 
@@ -40,13 +39,6 @@ export const CodeCompare = ({
       }
       return match;
     });
-  };
-
-  const handleCopy = () => {
-    const visibleCode = sliderPercent > 50 ? firstCode : secondCode;
-    navigator.clipboard.writeText(visibleCode);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
   };
 
   const handleMouseDown = (e) => {
@@ -187,42 +179,38 @@ export const CodeCompare = ({
         aria-label="Code comparison slider"
       >
       {/* Code container - no header, just code */}
-      <div className="relative" style={{ minHeight: "140px" }}>
-        {/* Floating copy button */}
-        <button
-          onClick={handleCopy}
-          className="absolute top-3 right-3 p-1.5 rounded-md bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 transition-colors"
-          style={{ zIndex: 40 }}
-          title="Copy code"
-        >
-          {copied ? <CheckIcon /> : <CopyIcon />}
-        </button>
-        {/* Second code (background - SPL) */}
-        <pre
-          className="absolute inset-0 m-0 p-4 overflow-hidden text-zinc-700 dark:text-white/80 bg-transparent"
-          style={{
-            fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
-            fontSize: "13px",
-            lineHeight: "1.6",
-            whiteSpace: "pre",
-            zIndex: 1,
-          }}
-          dangerouslySetInnerHTML={{ __html: highlightCode(secondCode) }}
-        />
+      <div className="relative" style={{ minHeight: "140px", overflowX: "auto" }}>
+        {/* Grid wrapper to stack both code blocks */}
+        <div style={{ display: "grid" }}>
+          {/* Second code (background - SPL) */}
+          <pre
+            className="m-0 p-4 text-zinc-700 dark:text-white/80 bg-transparent"
+            style={{
+              gridArea: "1/1",
+              fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
+              fontSize: "13px",
+              lineHeight: "1.6",
+              whiteSpace: "pre",
+              zIndex: 1,
+            }}
+            dangerouslySetInnerHTML={{ __html: highlightCode(secondCode) }}
+          />
 
-        {/* First code (foreground - Light-Token) with clip-path - MUST be opaque to cover background */}
-        <pre
-          className="relative m-0 p-4 overflow-hidden text-zinc-700 dark:text-white/80 bg-white dark:bg-zinc-900"
-          style={{
-            fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
-            fontSize: "13px",
-            lineHeight: "1.6",
-            whiteSpace: "pre",
-            zIndex: 2,
-            clipPath: `inset(0 ${100 - sliderPercent}% 0 0)`,
-          }}
-          dangerouslySetInnerHTML={{ __html: highlightCode(firstCode) }}
-        />
+          {/* First code (foreground - Light-Token) with clip-path - MUST be opaque to cover background */}
+          <pre
+            className="m-0 p-4 text-zinc-700 dark:text-white/80 bg-white dark:bg-zinc-900"
+            style={{
+              gridArea: "1/1",
+              fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
+              fontSize: "13px",
+              lineHeight: "1.6",
+              whiteSpace: "pre",
+              zIndex: 2,
+              clipPath: `inset(0 ${100 - sliderPercent}% 0 0)`,
+            }}
+            dangerouslySetInnerHTML={{ __html: highlightCode(firstCode) }}
+          />
+        </div>
 
         {/* Divider line */}
         <div
