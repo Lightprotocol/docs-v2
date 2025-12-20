@@ -273,8 +273,8 @@
     }
   },
   "logo": {
-    "light": "/logo/wordmark.png",
-    "dark": "/logo/wordmark-darkmode.png"
+    "light": "/logo/logo-black.svg",
+    "dark": "/logo/logo-white.svg"
   },
   "navbar": {
     "links": [
