@@ -292,7 +292,7 @@
   },
   "contextual": {
     "options": [
-      "copy",
+      "mcp",
       {
         "title": "Open DeepWiki",
         "description": "Ask Devin for help with debugging",
@@ -305,12 +305,12 @@
           }]
         }
       },
-      "mcp",
       "chatgpt",
       "claude",
       "perplexity",
       "cursor",
       "vscode",
+      "copy",
       "view"
     ]
   },
