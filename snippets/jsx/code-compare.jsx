@@ -157,11 +157,9 @@ export const CodeCompare = ({
               position: 'relative',
               width: '56px',
               height: '28px',
-              background: isLightMode ? 'rgba(0, 102, 255, 0.1)' : '#e0e0e0',
+              background: '#e0e0e0',
               borderRadius: '14px',
-              boxShadow: isLightMode
-                ? 'inset -2px -2px 4px rgba(255,255,255,0.8), inset 2px 2px 4px rgba(0, 102, 255, 0.2)'
-                : 'inset -2px -2px 4px #ffffff, inset 2px 2px 4px #b0b0b0',
+              boxShadow: 'inset -2px -2px 4px #ffffff, inset 2px 2px 4px #b0b0b0',
               cursor: 'pointer',
               transition: 'background 0.3s ease, box-shadow 0.3s ease',
             }}
@@ -172,15 +170,11 @@ export const CodeCompare = ({
                 position: 'absolute',
                 width: '24px',
                 height: '24px',
-                background: isLightMode
-                  ? 'linear-gradient(145deg, #ffffff, #e6f0ff)'
-                  : 'linear-gradient(145deg, #d9d9d9, #bfbfbf)',
+                background: 'linear-gradient(145deg, #f5f5f5, #e0e0e0)',
                 borderRadius: '12px',
                 top: '2px',
                 left: isLightMode ? '30px' : '2px',
-                boxShadow: isLightMode
-                  ? '-2px -2px 4px rgba(255,255,255,0.9), 2px 2px 4px rgba(0, 102, 255, 0.2)'
-                  : '-2px -2px 4px #ffffff, 2px 2px 4px #b0b0b0',
+                boxShadow: '-2px -2px 4px #ffffff, 2px 2px 4px #b0b0b0',
                 transition: 'all 0.3s ease-in-out',
                 display: 'flex',
                 alignItems: 'center',
