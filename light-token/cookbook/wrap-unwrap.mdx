@@ -65,11 +65,11 @@ async function main() {
   await mintTo(rpc, payer, mint, owner.publicKey, mintAuthority, bn(1000));
   await decompress(rpc, payer, mint, bn(1000), owner, splAta);
 
-  // Create c-token ATA (destination)
+  // Create ATA (destination)
   const ctokenAta = getAssociatedTokenAddressInterface(mint, owner.publicKey);
   await createAtaInterfaceIdempotent(rpc, payer, mint, owner.publicKey);
 
-  // Wrap SPL tokens to c-token ATA
+  // Wrap SPL tokens to light-ATA
   const signature = await wrap(
     rpc,
     payer,
@@ -80,7 +80,7 @@ async function main() {
     bn(500)
   );
 
-  console.log("Wrapped 500 tokens to c-token ATA");
+  console.log("Wrapped 500 tokens to light-ATA");
   console.log("Transaction:", signature);
 }
 
