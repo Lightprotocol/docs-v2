@@ -10,6 +10,7 @@ import CMintToCTokenAccountsList from '/snippets/accounts-list/light-mint-to-lig
 import CTokenClientPrerequisites from '/snippets/light-token-guides/light-token-client-prerequisites.mdx';
 import ClientCustomRentConfig from '/snippets/light-token-guides/client-custom-rent-config.mdx';
 import { CodeCompare } from '/snippets/jsx/code-compare.jsx';
+import WelcomePageInstall from '/snippets/setup/welcome-page-install.mdx';
 
 1. Mint To creates new tokens of a mint and deposits them to a specified token account.
 2. Before we can mint any tokens, we need an initialized mint account (SPL, Token-2022 or Light) for which we hold the mint authority.
@@ -60,6 +61,15 @@ Find the source code [here](https://github.com/Lightprotocol/light-protocol/blob
 <Step>
 ### Mint Tokens to Light-Token Account
 
+<Accordion title="Installations">
+<WelcomePageInstall />
+</Accordion>
+
+```bash
+# Start local test-validator in separate terminal
+light test-validator
+```
+
 <CodeGroup>
 ```typescript Action
 import { Keypair } from "@solana/web3.js";
@@ -74,117 +84,99 @@ import {
 async function main() {
   const rpc = createRpc();
   const payer = Keypair.generate();
-  await rpc.requestAirdrop(payer.publicKey, 10e9);
+  const sig = await rpc.requestAirdrop(payer.publicKey, 10e9);
+  await rpc.confirmTransaction(sig);
 
-  const mintSigner = Keypair.generate();
-  const { mint } = await createMintInterface(
-    rpc,
-    payer,
-    payer,
-    null,
-    9,
-    mintSigner,
-  );
+  const { mint } = await createMintInterface(rpc, payer, payer, null, 9);
 
   const recipient = Keypair.generate();
   await createAtaInterface(rpc, payer, mint, recipient.publicKey);
 
   const destination = getAssociatedTokenAddressInterface(mint, recipient.publicKey);
-  const amount = 1_000_000_000;
+  const tx = await mintToInterface(rpc, payer, mint, destination, payer, 1_000_000_000);
 
-  const txSignature = await mintToInterface(
-    rpc,
-    payer,
-    mint,
-    destination,
-    payer,
-    amount,
-  );
-
-  console.log("Minted tokens:", amount);
-  console.log("Transaction:", txSignature);
+  console.log("Tx:", tx);
 }
 
 main().catch(console.error);
 ```
 
 ```typescript Instruction
+import "dotenv/config";
 import { Keypair, ComputeBudgetProgram } from "@solana/web3.js";
 import {
-  createRpc,
-  buildAndSignTx,
-  sendAndConfirmTx,
-  bn,
-  DerivationMode,
+    createRpc,
+    buildAndSignTx,
+    sendAndConfirmTx,
+    bn,
+    DerivationMode,
 } from "@lightprotocol/stateless.js";
 import {
-  createMintInterface,
-  createAtaInterface,
-  createMintToInterfaceInstruction,
-  getMintInterface,
-  getAssociatedTokenAddressInterface,
+    createMintInterface,
+    createAtaInterface,
+    createMintToInterfaceInstruction,
+    getMintInterface,
+    getAssociatedTokenAddressInterface,
 } from "@lightprotocol/compressed-token";
+import { homedir } from "os";
+import { readFileSync } from "fs";
 
-async function main() {
-  const rpc = createRpc();
-  const payer = Keypair.generate();
-  await rpc.requestAirdrop(payer.publicKey, 10e9);
+const RPC_URL = `https://devnet.helius-rpc.com?api-key=${process.env.API_KEY!}`;
+const payer = Keypair.fromSecretKey(
+    new Uint8Array(
+        JSON.parse(readFileSync(`${homedir()}/.config/solana/id.json`, "utf8"))
+    )
+);
 
-  const mintSigner = Keypair.generate();
-  const { mint } = await createMintInterface(
-    rpc,
-    payer,
-    payer,
-    null,
-    9,
-    mintSigner,
-  );
+(async function () {
+    const rpc = createRpc(RPC_URL);
 
-  const recipient = Keypair.generate();
-  await createAtaInterface(rpc, payer, mint, recipient.publicKey);
-  const destination = getAssociatedTokenAddressInterface(mint, recipient.publicKey);
+    const { mint } = await createMintInterface(rpc, payer, payer, null, 9);
 
-  const mintInterface = await getMintInterface(rpc, mint);
-
-  let validityProof;
-  if (mintInterface.merkleContext) {
-    validityProof = await rpc.getValidityProofV2(
-      [
-        {
-          hash: bn(mintInterface.merkleContext.hash),
-          leafIndex: mintInterface.merkleContext.leafIndex,
-          treeInfo: mintInterface.merkleContext.treeInfo,
-          proveByIndex: mintInterface.merkleContext.proveByIndex,
-        },
-      ],
-      [],
-      DerivationMode.compressible,
+    const recipient = Keypair.generate();
+    await createAtaInterface(rpc, payer, mint, recipient.publicKey);
+    const destination = getAssociatedTokenAddressInterface(
+        mint,
+        recipient.publicKey
     );
-  }
 
-  const amount = 1_000_000_000;
-  const ix = createMintToInterfaceInstruction(
-    mintInterface,
-    destination,
-    payer.publicKey,
-    payer.publicKey,
-    amount,
-    validityProof,
-  );
+    const mintInterface = await getMintInterface(rpc, mint);
 
-  const { blockhash } = await rpc.getLatestBlockhash();
-  const tx = buildAndSignTx(
-    [ComputeBudgetProgram.setComputeUnitLimit({ units: 500_000 }), ix],
-    payer,
-    blockhash,
-  );
-  const signature = await sendAndConfirmTx(rpc, tx);
+    let validityProof;
+    if (mintInterface.merkleContext) {
+        validityProof = await rpc.getValidityProofV2(
+            [
+                {
+                    hash: bn(mintInterface.merkleContext.hash),
+                    leafIndex: mintInterface.merkleContext.leafIndex,
+                    treeInfo: mintInterface.merkleContext.treeInfo,
+                    proveByIndex: mintInterface.merkleContext.proveByIndex,
+                },
+            ],
+            [],
+            DerivationMode.compressible
+        );
+    }
 
-  console.log("Minted tokens:", amount);
-  console.log("Transaction:", signature);
-}
+    const ix = createMintToInterfaceInstruction(
+        mintInterface,
+        destination,
+        payer.publicKey,
+        payer.publicKey,
+        1_000_000_000,
+        validityProof
+    );
 
-main().catch(console.error);
+    const { blockhash } = await rpc.getLatestBlockhash();
+    const tx = buildAndSignTx(
+        [ComputeBudgetProgram.setComputeUnitLimit({ units: 500_000 }), ix],
+        payer,
+        blockhash
+    );
+    const signature = await sendAndConfirmTx(rpc, tx);
+
+    console.log("Tx:", signature);
+})();
 ```
 </CodeGroup>
 

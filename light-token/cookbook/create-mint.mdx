@@ -10,6 +10,7 @@ import CMintSystemAccountsList from '/snippets/accounts-list/light-mint-system-a
 import CTokenClientPrerequisites from '/snippets/light-token-guides/light-token-client-prerequisites.mdx';
 import CTokenTsClientPrerequisites from '/snippets/light-token-guides/light-token-ts-client-prerequisites.mdx';
 import ClientCustomRentConfig from '/snippets/light-token-guides/client-custom-rent-config.mdx';
+import WelcomePageInstall from '/snippets/setup/welcome-page-install.mdx';
 import { CodeCompare } from '/snippets/jsx/code-compare.jsx';
 
 1. Mint accounts uniquely represent a token on Solana and store its global metadata.
@@ -64,6 +65,15 @@ Find the source code [here](https://github.com/Lightprotocol/light-protocol/blob
 <Step>
 ### Create Mint with Token Metadata
 
+<Accordion title="Installations">
+<WelcomePageInstall />
+</Accordion>
+
+```bash
+# Start local test-validator in separate terminal
+light test-validator
+```
+
 <Note>
 The `mintAuthority` must be a `Signer` for light-mints but can be just a `PublicKey` for SPL/T22.
 </Note>
@@ -72,116 +82,103 @@ The `mintAuthority` must be a `Signer` for light-mints but can be just a `Public
 ```typescript Action
 import { Keypair } from "@solana/web3.js";
 import { createRpc } from "@lightprotocol/stateless.js";
-import {
-  createMintInterface,
-  createTokenMetadata,
-} from "@lightprotocol/compressed-token";
+import { createMintInterface, createTokenMetadata } from "@lightprotocol/compressed-token";
 
 async function main() {
   const rpc = createRpc();
   const payer = Keypair.generate();
-  await rpc.requestAirdrop(payer.publicKey, 10e9);
-
-  const mintSigner = Keypair.generate();
-  const mintAuthority = Keypair.generate();
+  const sig = await rpc.requestAirdrop(payer.publicKey, 10e9);
+  await rpc.confirmTransaction(sig);
 
   const { mint, transactionSignature } = await createMintInterface(
     rpc,
     payer,
-    mintAuthority,
+    payer,
     null,
     9,
-    mintSigner,
     undefined,
     undefined,
-    createTokenMetadata(
-      "Example Token",
-      "EXT",
-      "https://example.com/metadata.json"
-    ),
+    undefined,
+    createTokenMetadata("Example Token", "EXT", "https://example.com/metadata.json")
   );
 
-  console.log("Mint created:", mint.toBase58());
-  console.log("Transaction:", transactionSignature);
+  console.log("Mint:", mint.toBase58());
+  console.log("Tx:", transactionSignature);
 }
 
 main().catch(console.error);
 ```
 
 ```typescript Instruction
+import "dotenv/config";
 import { Keypair, ComputeBudgetProgram, PublicKey } from "@solana/web3.js";
 import {
-  createRpc,
-  buildAndSignTx,
-  sendAndConfirmTx,
-  getBatchAddressTreeInfo,
-  selectStateTreeInfo,
-  CTOKEN_PROGRAM_ID,
-  DerivationMode,
+    createRpc,
+    buildAndSignTx,
+    sendAndConfirmTx,
+    getBatchAddressTreeInfo,
+    selectStateTreeInfo,
+    CTOKEN_PROGRAM_ID,
+    DerivationMode,
 } from "@lightprotocol/stateless.js";
-import {
-  createMintInstruction,
-  createTokenMetadata,
-} from "@lightprotocol/compressed-token";
+import { createMintInstruction, createTokenMetadata } from "@lightprotocol/compressed-token";
+import { homedir } from "os";
+import { readFileSync } from "fs";
 
 const COMPRESSED_MINT_SEED = Buffer.from("compressed_mint");
 
 function findMintAddress(mintSigner: PublicKey): [PublicKey, number] {
-  return PublicKey.findProgramAddressSync(
-    [COMPRESSED_MINT_SEED, mintSigner.toBuffer()],
-    CTOKEN_PROGRAM_ID
-  );
+    return PublicKey.findProgramAddressSync(
+        [COMPRESSED_MINT_SEED, mintSigner.toBuffer()],
+        CTOKEN_PROGRAM_ID
+    );
 }
 
-async function main() {
-  const rpc = createRpc();
-  const payer = Keypair.generate();
-  await rpc.requestAirdrop(payer.publicKey, 10e9);
-
-  const mintSigner = Keypair.generate();
-  const decimals = 9;
-
-  const addressTreeInfo = getBatchAddressTreeInfo();
-  const stateTreeInfo = selectStateTreeInfo(await rpc.getStateTreeInfos());
-
-  const [mintPda] = findMintAddress(mintSigner.publicKey);
-
-  const validityProof = await rpc.getValidityProofV2(
-    [],
-    [{ address: mintPda.toBytes(), treeInfo: addressTreeInfo }],
-    DerivationMode.compressible
-  );
-
-  const ix = createMintInstruction(
-    mintSigner.publicKey,
-    decimals,
-    payer.publicKey,
-    null,
-    payer.publicKey,
-    validityProof,
-    addressTreeInfo,
-    stateTreeInfo,
-    createTokenMetadata(
-      "Example Token",
-      "EXT",
-      "https://example.com/metadata.json"
+const RPC_URL = `https://devnet.helius-rpc.com?api-key=${process.env.API_KEY!}`;
+const payer = Keypair.fromSecretKey(
+    new Uint8Array(
+        JSON.parse(readFileSync(`${homedir()}/.config/solana/id.json`, "utf8"))
     )
-  );
+);
 
-  const { blockhash } = await rpc.getLatestBlockhash();
-  const tx = buildAndSignTx(
-    [ComputeBudgetProgram.setComputeUnitLimit({ units: 500_000 }), ix],
-    payer,
-    blockhash,
-    [mintSigner]
-  );
-  const signature = await sendAndConfirmTx(rpc, tx, { skipPreflight: true });
+(async function () {
+    const rpc = createRpc(RPC_URL);
 
-  console.log("Mint created:", mintPda.toBase58());
-  console.log("Transaction:", signature);
-}
+    const mintSigner = Keypair.generate();
+    const addressTreeInfo = getBatchAddressTreeInfo();
+    const stateTreeInfo = selectStateTreeInfo(await rpc.getStateTreeInfos());
+    const [mintPda] = findMintAddress(mintSigner.publicKey);
 
-main().catch(console.error);
+    const validityProof = await rpc.getValidityProofV2(
+        [],
+        [{ address: mintPda.toBytes(), treeInfo: addressTreeInfo }],
+        DerivationMode.compressible
+    );
+
+    const ix = createMintInstruction(
+        mintSigner.publicKey,
+        9,
+        payer.publicKey,
+        null,
+        payer.publicKey,
+        validityProof,
+        addressTreeInfo,
+        stateTreeInfo,
+        createTokenMetadata("Example Token", "EXT", "https://example.com/metadata.json")
+    );
+
+    const { blockhash } = await rpc.getLatestBlockhash();
+    const tx = buildAndSignTx(
+        [ComputeBudgetProgram.setComputeUnitLimit({ units: 500_000 }), ix],
+        payer,
+        blockhash,
+        [mintSigner]
+    );
+    const signature = await sendAndConfirmTx(rpc, tx, { skipPreflight: true });
+
+    console.log("Mint:", mintPda.toBase58());
+    console.log("Tx:", signature);
+})();
 ```
 </CodeGroup>
 

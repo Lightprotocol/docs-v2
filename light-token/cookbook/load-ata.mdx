@@ -6,6 +6,8 @@ description: Unify token balances from compressed tokens (cold), SPL, and Token-
 
 ---
 
+import WelcomePageInstall from '/snippets/setup/welcome-page-install.mdx';
+
 1. `loadAta` unifies tokens from multiple sources to a single ATA:
     * Compressed tokens (cold) -> Decompresses -> light ATA
     * SPL balance (if wrap=true) -> Wraps -> light ATA
@@ -25,6 +27,15 @@ Find the source code [here](https://github.com/Lightprotocol/light-protocol/blob
 <Step>
 ### Load Compressed Tokens to Hot Balance
 
+<Accordion title="Installations">
+<WelcomePageInstall />
+</Accordion>
+
+```bash
+# Start local test-validator in separate terminal
+light test-validator
+```
+
 <CodeGroup>
 ```typescript Action
 import { Keypair } from "@solana/web3.js";
@@ -39,117 +50,65 @@ import {
 async function main() {
   const rpc = createRpc();
   const payer = Keypair.generate();
-  await rpc.requestAirdrop(payer.publicKey, 10e9);
+  const sig = await rpc.requestAirdrop(payer.publicKey, 10e9);
+  await rpc.confirmTransaction(sig);
 
-  const owner = Keypair.generate();
-  await rpc.requestAirdrop(owner.publicKey, 1e9);
-
-  const mintAuthority = Keypair.generate();
-  const mintKeypair = Keypair.generate();
-  const { mint } = await createMint(
-    rpc,
-    payer,
-    mintAuthority.publicKey,
-    9,
-    mintKeypair
-  );
-
-  await mintTo(rpc, payer, mint, owner.publicKey, mintAuthority, bn(1000));
-
-  // Get c-token ATA address
-  const ctokenAta = getAssociatedTokenAddressInterface(mint, owner.publicKey);
+  // Setup: Get compressed tokens (cold storage)
+  const { mint } = await createMint(rpc, payer, payer.publicKey, 9);
+  await mintTo(rpc, payer, mint, payer.publicKey, payer, bn(1000));
 
   // Load compressed tokens to hot balance
-  // Creates ATA if needed, returns null if nothing to load
-  const signature = await loadAta(
-    rpc,
-    ctokenAta,
-    owner,
-    mint,
-    payer
-  );
+  const ctokenAta = getAssociatedTokenAddressInterface(mint, payer.publicKey);
+  const tx = await loadAta(rpc, ctokenAta, payer, mint, payer);
 
-  if (signature) {
-    console.log("Loaded tokens to hot balance");
-    console.log("Transaction:", signature);
-  } else {
-    console.log("Nothing to load");
-  }
+  console.log("Tx:", tx);
 }
 
 main().catch(console.error);
 ```
 
 ```typescript Instruction
+import "dotenv/config";
 import { Keypair, ComputeBudgetProgram } from "@solana/web3.js";
-import {
-  createRpc,
-  bn,
-  buildAndSignTx,
-  sendAndConfirmTx,
-  dedupeSigner,
-} from "@lightprotocol/stateless.js";
-import {
-  createMint,
-  mintTo,
-  createLoadAtaInstructions,
-  getAssociatedTokenAddressInterface,
-} from "@lightprotocol/compressed-token";
+import { createRpc, bn, buildAndSignTx, sendAndConfirmTx } from "@lightprotocol/stateless.js";
+import { createMint, mintTo, createLoadAtaInstructions, getAssociatedTokenAddressInterface } from "@lightprotocol/compressed-token";
+import { homedir } from "os";
+import { readFileSync } from "fs";
 
-async function main() {
-  const rpc = createRpc();
-  const payer = Keypair.generate();
-  await rpc.requestAirdrop(payer.publicKey, 10e9);
+const RPC_URL = `https://devnet.helius-rpc.com?api-key=${process.env.API_KEY!}`;
+const payer = Keypair.fromSecretKey(
+    new Uint8Array(
+        JSON.parse(readFileSync(`${homedir()}/.config/solana/id.json`, "utf8"))
+    )
+);
 
-  const owner = Keypair.generate();
-  await rpc.requestAirdrop(owner.publicKey, 1e9);
+(async function () {
+    const rpc = createRpc(RPC_URL);
 
-  const mintAuthority = Keypair.generate();
-  const mintKeypair = Keypair.generate();
-  const { mint } = await createMint(
-    rpc,
-    payer,
-    mintAuthority.publicKey,
-    9,
-    mintKeypair
-  );
+    // Setup: Get compressed tokens (cold storage)
+    const { mint } = await createMint(rpc, payer, payer.publicKey, 9);
+    await mintTo(rpc, payer, mint, payer.publicKey, payer, bn(1000));
 
-  await mintTo(rpc, payer, mint, owner.publicKey, mintAuthority, bn(1000));
+    // Create load instructions to move tokens from cold to hot balance
+    const ctokenAta = getAssociatedTokenAddressInterface(mint, payer.publicKey);
 
-  // Get c-token ATA address
-  const ctokenAta = getAssociatedTokenAddressInterface(mint, owner.publicKey);
+    const ixs = await createLoadAtaInstructions(rpc, ctokenAta, payer.publicKey, mint, payer.publicKey);
 
-  // Create load instructions
-  const ixs = await createLoadAtaInstructions(
-    rpc,
-    ctokenAta,
-    owner.publicKey,
-    mint,
-    payer.publicKey
-  );
+    if (ixs.length === 0) {
+        console.log("Nothing to load");
+        return;
+    }
 
-  if (ixs.length === 0) {
-    console.log("Nothing to load");
-    return;
-  }
+    const { blockhash } = await rpc.getLatestBlockhash();
+    const tx = buildAndSignTx(
+        [ComputeBudgetProgram.setComputeUnitLimit({ units: 500_000 }), ...ixs],
+        payer,
+        blockhash
+    );
+    const signature = await sendAndConfirmTx(rpc, tx);
 
-  // Build, sign, and send transaction
-  const { blockhash } = await rpc.getLatestBlockhash();
-  const additionalSigners = dedupeSigner(payer, [owner]);
-
-  const tx = buildAndSignTx(
-    [ComputeBudgetProgram.setComputeUnitLimit({ units: 500_000 }), ...ixs],
-    payer,
-    blockhash,
-    additionalSigners
-  );
-
-  const signature = await sendAndConfirmTx(rpc, tx);
-  console.log("Loaded tokens to hot balance");
-  console.log("Transaction:", signature);
-}
-
-main().catch(console.error);
+    console.log("Tx:", signature);
+})();
 ```
 </CodeGroup>
 

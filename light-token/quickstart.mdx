@@ -15,7 +15,7 @@ import WelcomePageInstall from '/snippets/setup/welcome-page-install.mdx';
 </Accordion>
 
 ```bash 
-# Start local test-validator
+# Start local test-validator in separate terminal
 light test-validator
 ```
 
@@ -39,21 +39,18 @@ async function main() {
   const payer = Keypair.generate();
   await rpc.requestAirdrop(payer.publicKey, 10e9);
 
-  const mintSigner = Keypair.generate();
   const { mint } = await createMintInterface(
     rpc,
     payer,
     payer,
-    null,
-    9,
-    mintSigner,
+    null,  // freezeAuthority
+    9,     // decimals
   );
 
   const recipient = Keypair.generate();
   await createAtaInterface(rpc, payer, mint, recipient.publicKey);
 
   const destination = getAssociatedTokenAddressInterface(mint, recipient.publicKey);
-  const amount = 1_000_000_000;
 
   const txSignature = await mintToInterface(
     rpc,
@@ -61,10 +58,9 @@ async function main() {
     mint,
     destination,
     payer,
-    amount,
+    1_000_000_000,
   );
 
-  console.log("Minted tokens:", amount);
   console.log("Transaction:", txSignature);
 }
 
