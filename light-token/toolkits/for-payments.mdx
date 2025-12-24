@@ -120,6 +120,7 @@ console.log(ata.amount);
 
 </Tab>
 <Tab title="Instruction">
+
 ```typescript
 import {
   createAssociatedTokenAccountInterfaceIdempotentInstruction,
@@ -131,23 +132,22 @@ import { CTOKEN_PROGRAM_ID } from "@lightprotocol/stateless.js";
 const ata = getAssociatedTokenAddressInterface(mint, recipient);
 
 const tx = new Transaction().add(
-createAssociatedTokenAccountInterfaceIdempotentInstruction(
-payer.publicKey,
-ata,
-recipient,
-mint,
-CTOKEN_PROGRAM_ID
-),
-...(await createLoadAtaInstructions(
-rpc,
-ata,
-recipient,
-mint,
-payer.publicKey
-))
+  createAssociatedTokenAccountInterfaceIdempotentInstruction(
+    payer.publicKey,
+    ata,
+    recipient,
+    mint,
+    CTOKEN_PROGRAM_ID
+  ),
+  ...(await createLoadAtaInstructions(
+    rpc,
+    ata,
+    recipient,
+    mint,
+    payer.publicKey
+  ))
 );
-
-````
+```
 
 <Accordion title="Compare to SPL">
 
@@ -160,14 +160,9 @@ import {
 const ata = getAssociatedTokenAddressSync(mint, recipient);
 
 const tx = new Transaction().add(
-  createAssociatedTokenAccountInstruction(
-    payer.publicKey,
-    ata,
-    recipient,
-    mint
-  )
+  createAssociatedTokenAccountInstruction(payer.publicKey, ata, recipient, mint)
 );
-````
+```
 
 </Accordion>
 </Tab>
