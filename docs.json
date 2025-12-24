@@ -12,7 +12,7 @@
     "default": "light"
   },
   "banner": {
-    "content": "The Light-Token Standard is live on Devnet. <a href=\"/light-token/welcome\" style=\"color:#FFFFFF; text-decoration: underline;\">Start testing and create mints or tokens</a>!",
+    "content": "The new Light-Token Standard is open for Developers. <a href=\"/light-token/welcome\" style=\"color:#FFFFFF; text-decoration: underline;\">Build with high-performance, rent-free mints and token accounts</a>!",
     "dismissible": false
   },
   "navigation": {
