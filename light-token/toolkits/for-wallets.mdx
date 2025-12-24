@@ -125,6 +125,7 @@ console.log(ata.amount);
 </Tab>
 <Tab title="Instruction">
 ```typescript
+import { Transaction } from "@solana/web3.js";
 import {
   createAssociatedTokenAccountInterfaceIdempotentInstruction,
   createLoadAtaInstructions,
@@ -266,6 +267,7 @@ new Transaction().add(createAtaIx, transferIx);
 <Tab title="Instruction">
 
 ```typescript
+import { Transaction } from "@solana/web3.js";
 import {
   createLoadAtaInstructions,
   createTransferInterfaceInstruction,
@@ -400,12 +402,13 @@ await wrap(
 <Tab title="Instruction">
 
 ```typescript
+import { Transaction } from "@solana/web3.js";
 import { getAssociatedTokenAddressSync } from "@solana/spl-token";
 import {
   createWrapInstruction,
   getAssociatedTokenAddressInterface,
+  getSplInterfaceInfos,
 } from "@lightprotocol/compressed-token";
-import { getSplInterfaceInfos } from "@lightprotocol/compressed-token";
 
 const splAta = getAssociatedTokenAddressSync(mint, owner.publicKey);
 const ctokenAta = getAssociatedTokenAddressInterface(mint, owner.publicKey);
@@ -455,13 +458,14 @@ await unwrap(
 <Tab title="Instruction">
 
 ```typescript
+import { Transaction } from "@solana/web3.js";
 import { getAssociatedTokenAddressSync } from "@solana/spl-token";
 import {
   createLoadAtaInstructions,
   createUnwrapInstruction,
   getAssociatedTokenAddressInterface,
+  getSplInterfaceInfos,
 } from "@lightprotocol/compressed-token";
-import { getSplInterfaceInfos } from "@lightprotocol/compressed-token";
 
 const ctokenAta = getAssociatedTokenAddressInterface(mint, owner.publicKey);
 const splAta = getAssociatedTokenAddressSync(mint, owner.publicKey);
