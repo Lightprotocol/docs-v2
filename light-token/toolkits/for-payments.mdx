@@ -122,6 +122,7 @@ console.log(ata.amount);
 <Tab title="Instruction">
 
 ```typescript
+import { Transaction } from "@solana/web3.js";
 import {
   createAssociatedTokenAccountInterfaceIdempotentInstruction,
   createLoadAtaInstructions,
@@ -222,7 +223,11 @@ await transferInterface(
 <Accordion title="Compare to SPL">
 
 ```typescript
-import { getOrCreateAssociatedTokenAccount, transfer } from "@solana/spl-token";
+import {
+  getAssociatedTokenAddressSync,
+  getOrCreateAssociatedTokenAccount,
+  transfer,
+} from "@solana/spl-token";
 
 // Ensure recipient ATA exists
 await getOrCreateAssociatedTokenAccount(connection, payer, mint, recipient);
@@ -247,6 +252,7 @@ await transfer(
 <Tab title="Instruction">
 
 ```typescript
+import { Transaction } from "@solana/web3.js";
 import {
   createLoadAtaInstructions,
   createTransferInterfaceInstruction,
@@ -276,6 +282,7 @@ const tx = new Transaction().add(
 To ensure your recipient's ATA exists, prepend an idempotent creation instruction:
 
 ```typescript
+import { Transaction } from "@solana/web3.js";
 import {
   createAssociatedTokenAccountInterfaceIdempotentInstruction,
   createLoadAtaInstructions,
@@ -425,6 +432,7 @@ await wrap(rpc, payer, splAta, ctokenAta, owner, mint, amount);
 <Tab title="Instruction">
 
 ```typescript
+import { Transaction } from "@solana/web3.js";
 import { getAssociatedTokenAddressSync } from "@solana/spl-token";
 import {
   createWrapInstruction,
@@ -473,6 +481,7 @@ await unwrap(rpc, payer, splAta, owner, mint, amount);
 <Tab title="Instruction">
 
 ```typescript
+import { Transaction } from "@solana/web3.js";
 import { getAssociatedTokenAddressSync } from "@solana/spl-token";
 import {
   createLoadAtaInstructions,
