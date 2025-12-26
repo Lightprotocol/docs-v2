@@ -1,5 +1,7 @@
 export const LiquidGlassPill = ({ children }) => {
-  const uniqueId = 'lgp-' + Math.random().toString(36).substr(2, 9);
+  // IMPORTANT: Must be deterministic across SSR + hydration to avoid flashes caused by re-render.
+  // This component is only used as a single instance on the homepage, so a stable prefix is fine.
+  const uniqueId = 'lgp';
 
   return (
     <>
