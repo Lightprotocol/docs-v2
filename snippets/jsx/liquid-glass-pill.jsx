@@ -1,5 +1,5 @@
 export const LiquidGlassPill = ({ children }) => {
-  const uniqueId = 'lgp-' + Math.random().toString(36).substr(2, 9);
+  const uniqueId = 'lgp';
 
   return (
     <>
