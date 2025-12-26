@@ -1,3 +1,6 @@
+// CSS for .cube-tile and @keyframes cubePulse is in /style.css
+// Do NOT add inline <style> tags here - they render in <body> and cause flash
+
 export const HeroCubeGrid = () => {
   const tileSize = 80;
   const gap = 4;
@@ -34,27 +37,6 @@ export const HeroCubeGrid = () => {
       preserveAspectRatio="xMidYMid slice"
       xmlns="http://www.w3.org/2000/svg"
     >
-      <defs>
-        <style>
-          {`
-            @keyframes cubePulse {
-              0%, 100% {
-                transform: scale(0.7);
-                opacity: 0.15;
-              }
-              50% {
-                transform: scale(1);
-                opacity: 0.55;
-              }
-            }
-            .cube-tile {
-              transform-box: fill-box;
-              transform-origin: center;
-            }
-          `}
-        </style>
-      </defs>
-
       <rect width="100%" height="100%" fill="#FAFAFA" />
 
       {tiles.map((tile, i) => {
@@ -66,7 +48,6 @@ export const HeroCubeGrid = () => {
             animation: `cubePulse 3s ease-in-out infinite`,
             animationDelay: `${tile.delay}s`,
           }}>
-            {/* Gray core */}
             <rect
               x={x + gap / 2}
               y={y + gap / 2}
@@ -75,7 +56,6 @@ export const HeroCubeGrid = () => {
               fill="#cccccc"
               fillOpacity={0.3}
             />
-            {/* Blue shell/border */}
             <rect
               x={x + gap / 2}
               y={y + gap / 2}

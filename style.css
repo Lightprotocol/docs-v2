@@ -1,3 +1,9 @@
+/* ==========================================================================
+   CRITICAL CSS - Loaded in <head> before content renders
+   All styles here are applied BEFORE first paint, preventing FOUC
+   ========================================================================== */
+
+/* Font configuration */
 html {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
 }
@@ -6,9 +12,95 @@ body, h1, h2, h3, h4, h5, h6, p, span, div, a, button {
   font-family: inherit;
 }
 
-/* Prevent layout shift during font loading */
 * {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+}
+
+/* ==========================================================================
+   LiquidGlassPill Component - Critical styles
+   Must be in <head> to prevent flash on homepage hero
+   ========================================================================== */
+
+.lgp-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.lgp-glass {
+  position: absolute;
+  inset: -12px -40px;
+  z-index: 0;
+  border-radius: 9999px;
+  overflow: hidden;
+  background: transparent;
+  backdrop-filter: blur(1px) saturate(120%);
+  -webkit-backdrop-filter: blur(1px) saturate(120%);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow:
+    0 4px 20px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+.lgp-inner-rim {
+  position: absolute;
+  inset: 1px;
+  border-radius: inherit;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: transparent;
+  pointer-events: none;
+}
+
+.lgp-glass::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.20) 0%,
+    transparent 30%,
+    transparent 100%
+  );
+  pointer-events: none;
+}
+
+.lgp-glass::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    to bottom,
+    transparent 70%,
+    rgba(0, 0, 0, 0.06) 100%
+  );
+  pointer-events: none;
+}
+
+.lgp-content {
+  position: relative;
+  z-index: 1;
+}
+
+/* ==========================================================================
+   HeroCubeGrid Component - Critical animation styles
+   Must be in <head> to prevent unstyled SVG flash
+   ========================================================================== */
+
+@keyframes cubePulse {
+  0%, 100% {
+    transform: scale(0.7);
+    opacity: 0.15;
+  }
+  50% {
+    transform: scale(1);
+    opacity: 0.55;
+  }
+}
+
+.cube-tile {
+  transform-box: fill-box;
+  transform-origin: center;
 }
