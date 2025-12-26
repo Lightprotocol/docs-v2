@@ -7,6 +7,9 @@
     "light": "#0066FF",
     "dark": "#0066FF"
   },
+  "fonts": {
+    "family": "Inter"
+  },
   "favicon": "/favicon.png",
   "appearance": {
     "default": "light"
