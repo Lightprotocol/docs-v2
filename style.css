@@ -1,8 +1,3 @@
-/* Fonts are configured in `docs.json` via the `fonts` property.
-   Mintlify injects Google Fonts as <link> tags in <head>, avoiding slow @import.
-   This ensures fonts are requested immediately on page load. */
-
-/* Critical: Apply Inter font-family immediately to prevent fallback font flash */
 html {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
 }
