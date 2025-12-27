@@ -6,12 +6,12 @@ description: Program and client guides to create a mint with token metadata. Inc
 
 ---
 
-import CMintSystemAccountsList from '/snippets/accounts-list/light-mint-system-accounts-list.mdx';
-import CTokenClientPrerequisites from '/snippets/light-token-guides/light-token-client-prerequisites.mdx';
-import CTokenTsClientPrerequisites from '/snippets/light-token-guides/light-token-ts-client-prerequisites.mdx';
-import ClientCustomRentConfig from '/snippets/light-token-guides/client-custom-rent-config.mdx';
-import WelcomePageInstall from '/snippets/setup/welcome-page-install.mdx';
-import { CodeCompare } from '/snippets/jsx/code-compare.jsx';
+import CMintSystemAccountsList from "/snippets/accounts-list/light-mint-system-accounts-list.mdx";
+import CTokenClientPrerequisites from "/snippets/light-token-guides/light-token-client-prerequisites.mdx";
+import CTokenTsClientPrerequisites from "/snippets/light-token-guides/light-token-ts-client-prerequisites.mdx";
+import ClientCustomRentConfig from "/snippets/light-token-guides/client-custom-rent-config.mdx";
+import WelcomePageInstall from "/snippets/setup/welcome-page-install.mdx";
+import { CodeCompare } from "/snippets/jsx/code-compare.jsx";
 
 1. Mint accounts uniquely represent a token on Solana and store its global metadata.
 2. Mints for light-token accounts are compressed accounts and rent-free.
@@ -22,42 +22,44 @@ import { CodeCompare } from '/snippets/jsx/code-compare.jsx';
 
 <Tab title="TypeScript Client">
 
-`createMintInterface` is a unified interface that dispatches to different mint creation paths based on programId: 
-* `TOKEN_PROGRAM_ID` or `TOKEN_2022_PROGRAM_ID` → delegates to SPL or T22 `createMint`
-* Otherwise it defaults to `CTOKEN_PROGRAM_ID` → creates a light-token mint
+`createMintInterface` is a unified interface that dispatches to different mint creation paths based on programId:
+
+- `TOKEN_PROGRAM_ID` or `TOKEN_2022_PROGRAM_ID` → delegates to SPL or T22 `createMint`
+- Otherwise it defaults to `CTOKEN_PROGRAM_ID` → creates a light-token mint
 
 You can use the same interface regardless of mint type.
 
 Compare to SPL:
+
 <CodeCompare
   firstCode={`// SPL createMint
 import { createMint } from "@solana/spl-token";
 
 const mint = await createMint(
-  connection,
-  payer,
-  mintAuthority,
-  freezeAuthority,
-  decimals
+connection,
+payer,
+mintAuthority,
+freezeAuthority,
+decimals
 );`}
   secondCode={`// light-token createMint
 import { createMintInterface } from "@lightprotocol/compressed-token";
 
 const { mint } = await createMintInterface(
-  rpc,
-  payer,
-  mintAuthority,
-  freezeAuthority,
-  decimals,
-  mintKeypair
+rpc,
+payer,
+mintAuthority,
+freezeAuthority,
+decimals,
+mintKeypair
 );`}
-  firstLabel="SPL"
-  secondLabel="light-token"
+firstLabel="SPL"
+secondLabel="light-token"
 />
 
-
 <Info>
-Find the source code [here](https://github.com/Lightprotocol/light-protocol/blob/0c4e2417b2df2d564721b89e18d1aad3665120e7/js/compressed-token/src/v3/actions/create-mint-interface.ts).
+  Find the source code
+  [here](https://github.com/Lightprotocol/light-protocol/blob/0c4e2417b2df2d564721b89e18d1aad3665120e7/js/compressed-token/src/v3/actions/create-mint-interface.ts).
 </Info>
 
 <Steps>
@@ -66,7 +68,7 @@ Find the source code [here](https://github.com/Lightprotocol/light-protocol/blob
 ### Create Mint with Token Metadata
 
 <Accordion title="Installations">
-<WelcomePageInstall />
+  <WelcomePageInstall />
 </Accordion>
 
 ```bash
@@ -75,7 +77,8 @@ light test-validator
 ```
 
 <Note>
-The `mintAuthority` must be a `Signer` for light-mints but can be just a `PublicKey` for SPL/T22.
+  The `mintAuthority` must be a `Signer` for light-mints but can be just a
+  `PublicKey` for SPL/T22.
 </Note>
 
 <CodeGroup>
@@ -85,29 +88,30 @@ import { createRpc } from "@lightprotocol/stateless.js";
 import { createMintInterface, createTokenMetadata } from "@lightprotocol/compressed-token";
 
 async function main() {
-  const rpc = createRpc();
-  const payer = Keypair.generate();
-  const sig = await rpc.requestAirdrop(payer.publicKey, 10e9);
-  await rpc.confirmTransaction(sig);
+const rpc = createRpc();
+const payer = Keypair.generate();
+const sig = await rpc.requestAirdrop(payer.publicKey, 10e9);
+await rpc.confirmTransaction(sig);
 
-  const { mint, transactionSignature } = await createMintInterface(
-    rpc,
-    payer,
-    payer,
-    null,
-    9,
-    undefined,
-    undefined,
-    undefined,
-    createTokenMetadata("Example Token", "EXT", "https://example.com/metadata.json")
-  );
+const { mint, transactionSignature } = await createMintInterface(
+rpc,
+payer,
+payer,
+null,
+9,
+undefined,
+undefined,
+undefined,
+createTokenMetadata("Example Token", "EXT", "https://example.com/metadata.json")
+);
 
-  console.log("Mint:", mint.toBase58());
-  console.log("Tx:", transactionSignature);
+console.log("Mint:", mint.toBase58());
+console.log("Tx:", transactionSignature);
 }
 
 main().catch(console.error);
-```
+
+````
 
 ```typescript Instruction
 import "dotenv/config";
@@ -179,9 +183,9 @@ const payer = Keypair.fromSecretKey(
     console.log("Mint:", mintPda.toBase58());
     console.log("Tx:", signature);
 })();
-```
-</CodeGroup>
+````
 
+</CodeGroup>
 
 </Step>
 </Steps>
@@ -191,8 +195,9 @@ const payer = Keypair.fromSecretKey(
 <Tab title="Rust Client">
 
 The example creates a light-mint with token metadata.
+
 1. Derive the mint address from the mint signer and address tree
-2. Fetch a <Tooltip tip="Validity proofs are 128 byte zero-knowledge proofs (ZKP). Your RPC generates the validity proof for you.">validity proof</Tooltip> from your RPC that proves the address does not exist yet. 
+2. Fetch a <Tooltip tip="Validity proofs are 128 byte zero-knowledge proofs (ZKP). Your RPC generates the validity proof for you.">validity proof</Tooltip> from your RPC that proves the address does not exist yet.
 
 3. Configure mint and your token metadata (name, symbol, URI, additional metadata)
 4. Build the instruction with `CreateCMint::new()` and send the transaction.
@@ -373,6 +378,7 @@ fn load_keypair(path: &str) -> Result<Keypair, Box<dyn std::error::Error>> {
     Ok(Keypair::try_from(&bytes[..])?)
 }
 ```
+
 </Step>
 </Steps>
 </Tab>
@@ -413,9 +419,10 @@ let token_metadata = ExtensionInstructionData::TokenMetadata(
 ```
 
 <Note>
-**Fields must be set at light-mint creation.**
-* Standard fields (`name`, `symbol`, `uri`) can be updated by `update_authority`.
-* For `additional_metadata`, only existing keys can be modified or removed. New keys cannot be added after creation.
+  **Fields must be set at light-mint creation.** * Standard fields (`name`,
+  `symbol`, `uri`) can be updated by `update_authority`. * For
+  `additional_metadata`, only existing keys can be modified or removed. New keys
+  cannot be added after creation.
 </Note>
 
 </Step>
@@ -439,22 +446,24 @@ let params = CreateCMintParams {
     extensions: data.extensions,
 };
 ```
+
 <Info>
-* The client passes a validity proof that proves the light-mint address does not exist in the address tree where it will be stored.
-* You can safely ignore `compression_address` and `address_merkle_tree_root_index`. The client passes these for proof verification.
+  * The client passes a validity proof that proves the light-mint address does
+  not exist in the address tree where it will be stored. * You can safely ignore
+  `compression_address` and `address_merkle_tree_root_index`. The client passes
+  these for proof verification.
 </Info>
 
 </Step>
 
-
 <Step>
 ### System Accounts
 
-Include system accounts such as the Light System Program required to interact with compressed state. 
+Include system accounts such as the Light System Program required to interact with compressed state.
 The client includes them in the instruction.
 
 <Accordion title="System Accounts List">
-<CMintSystemAccountsList />
+  <CMintSystemAccountsList />
 </Accordion>
 
 ```rust
@@ -473,18 +482,17 @@ let system_accounts = SystemAccountInfos {
 </Step>
 
 <Step>
-### Build Account Infos and CPI the light-token Program
+### Build Account Infos and CPI the light token program
 
 1. Pass the required accounts
 2. Include `params` and `system_accounts` from the previous steps
 3. Use `invoke` or `invoke_signed`:
-    * When `mint_seed` is an external keypair, use `invoke`.
-    * When `mint_seed` is a PDA, use `invoke_signed` with its seeds.
-    * When both `mint_seed` and `authority` are PDAs, use `invoke_signed` with both seeds.
+   - When `mint_seed` is an external keypair, use `invoke`.
+   - When `mint_seed` is a PDA, use `invoke_signed` with its seeds.
+   - When both `mint_seed` and `authority` are PDAs, use `invoke_signed` with both seeds.
 
 <Tabs>
 <Tab title="invoke (External signer)">
-
 
 ```rust
 use light_ctoken_sdk::ctoken::CreateCMintCpi;
@@ -502,6 +510,7 @@ CreateCMintCpi {
 }
 .invoke()?;
 ```
+
 </Tab>
 
 <Tab title="invoke_signed (PDA mint_seed)">
@@ -524,6 +533,7 @@ let account_infos = CreateCMintCpi {
 let signer_seeds: &[&[u8]] = &[MINT_SIGNER_SEED, &[bump]];
 account_infos.invoke_signed(&[signer_seeds])?;
 ```
+
 </Tab>
 
 <Tab title="invoke_signed (Two PDA signers)">
@@ -550,7 +560,7 @@ account_infos.invoke_signed(&[mint_seed_seeds, authority_seeds])?;
 
 </Tab>
 
-</Tabs> 
+</Tabs>
 
 </Step>
 
@@ -559,7 +569,8 @@ account_infos.invoke_signed(&[mint_seed_seeds, authority_seeds])?;
 # Full Code Example
 
 <Info>
-Find the source code [here](https://github.com/Lightprotocol/light-protocol/blob/main/sdk-tests/sdk-ctoken-test/src/create_cmint.rs).
+  Find the source code
+  [here](https://github.com/Lightprotocol/light-protocol/blob/main/sdk-tests/sdk-ctoken-test/src/create_cmint.rs).
 </Info>
 
 ```rust expandable
@@ -840,4 +851,3 @@ pub fn process_create_cmint_with_pda_authority(
   href="/light-token/cookbook/mint-to"
   horizontal
 />
-

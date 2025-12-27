@@ -5,21 +5,21 @@ description: Program and client guide for transfers between light-token and SPL 
 
 ---
 
-import TransferInterfaceAccountsListCtoken1 from '/snippets/accounts-list/transfer-interface-accounts-list-light-token-1.mdx';
-import TransferInterfaceAccountsListSpl2 from '/snippets/accounts-list/transfer-interface-accounts-list-spl-2.mdx';
-import TransferInterfaceIntro from '/snippets/light-token-guides/transfer-interface-intro.mdx';
-import CTokenClientPrerequisites from '/snippets/light-token-guides/light-token-client-prerequisites.mdx';
-import CTokenTsClientPrerequisites from '/snippets/light-token-guides/light-token-ts-client-prerequisites.mdx';
-import ClientCustomRentConfig from '/snippets/light-token-guides/client-custom-rent-config.mdx';
-import { CodeCompare } from '/snippets/jsx/code-compare.jsx';
-import WelcomePageInstall from '/snippets/setup/welcome-page-install.mdx';
+import TransferInterfaceAccountsListCtoken1 from "/snippets/accounts-list/transfer-interface-accounts-list-light-token-1.mdx";
+import TransferInterfaceAccountsListSpl2 from "/snippets/accounts-list/transfer-interface-accounts-list-spl-2.mdx";
+import TransferInterfaceIntro from "/snippets/light-token-guides/transfer-interface-intro.mdx";
+import CTokenClientPrerequisites from "/snippets/light-token-guides/light-token-client-prerequisites.mdx";
+import CTokenTsClientPrerequisites from "/snippets/light-token-guides/light-token-ts-client-prerequisites.mdx";
+import ClientCustomRentConfig from "/snippets/light-token-guides/client-custom-rent-config.mdx";
+import { CodeCompare } from "/snippets/jsx/code-compare.jsx";
+import WelcomePageInstall from "/snippets/setup/welcome-page-install.mdx";
 
 ## Get Started
 
 <table>
   <tbody>
     <tr>
-      <td style={{width: '33%'}}>**light-token -> light-token Account**</td>
+      <td style={{ width: "33%" }}>**light-token -> light-token Account**</td>
       <td>
         <ul>
           <li>Transfers tokens between light-token accounts</li>
@@ -54,38 +54,39 @@ import WelcomePageInstall from '/snippets/setup/welcome-page-install.mdx';
 
 The `transferInterface` function transfers tokens between token accounts (SPL, Token-2022, or Light) in a single call.
 
-
 Compare to SPL:
+
 <CodeCompare
   firstCode={`// SPL transfer
 import { transfer } from "@solana/spl-token";
 
 const tx = await transfer(
-  connection,
-  payer,
-  sourceAta,
-  destinationAta,
-  owner,
-  amount
+connection,
+payer,
+sourceAta,
+destinationAta,
+owner,
+amount
 );`}
   secondCode={`// light-token transfer
 import { transferInterface } from "@lightprotocol/compressed-token";
 
 const tx = await transferInterface(
-  rpc,
-  payer,
-  sourceAta,
-  mint,
-  destinationAta,
-  owner,
-  amount
+rpc,
+payer,
+sourceAta,
+mint,
+destinationAta,
+owner,
+amount
 );`}
-  firstLabel="SPL"
-  secondLabel="light-token"
+firstLabel="SPL"
+secondLabel="light-token"
 />
 
 <Info>
-Find the source code [here](https://github.com/Lightprotocol/light-protocol/blob/0c4e2417b2df2d564721b89e18d1aad3665120e7/js/compressed-token/src/v3/actions/transfer-interface.ts).
+  Find the source code
+  [here](https://github.com/Lightprotocol/light-protocol/blob/0c4e2417b2df2d564721b89e18d1aad3665120e7/js/compressed-token/src/v3/actions/transfer-interface.ts).
 </Info>
 
 <Steps>
@@ -94,7 +95,7 @@ Find the source code [here](https://github.com/Lightprotocol/light-protocol/blob
 ### Transfer Interface
 
 <Accordion title="Installations">
-<WelcomePageInstall />
+  <WelcomePageInstall />
 </Accordion>
 
 ```bash
@@ -115,29 +116,30 @@ import {
 } from "@lightprotocol/compressed-token";
 
 async function main() {
-  const rpc = createRpc();
-  const payer = Keypair.generate();
-  const sig = await rpc.requestAirdrop(payer.publicKey, 10e9);
-  await rpc.confirmTransaction(sig);
+const rpc = createRpc();
+const payer = Keypair.generate();
+const sig = await rpc.requestAirdrop(payer.publicKey, 10e9);
+await rpc.confirmTransaction(sig);
 
-  const { mint } = await createMintInterface(rpc, payer, payer, null, 9);
+const { mint } = await createMintInterface(rpc, payer, payer, null, 9);
 
-  const sender = Keypair.generate();
-  await createAtaInterface(rpc, payer, mint, sender.publicKey);
-  const senderAta = getAssociatedTokenAddressInterface(mint, sender.publicKey);
-  await mintToInterface(rpc, payer, mint, senderAta, payer, 1_000_000_000);
+const sender = Keypair.generate();
+await createAtaInterface(rpc, payer, mint, sender.publicKey);
+const senderAta = getAssociatedTokenAddressInterface(mint, sender.publicKey);
+await mintToInterface(rpc, payer, mint, senderAta, payer, 1_000_000_000);
 
-  const recipient = Keypair.generate();
-  await createAtaInterface(rpc, payer, mint, recipient.publicKey);
-  const recipientAta = getAssociatedTokenAddressInterface(mint, recipient.publicKey);
+const recipient = Keypair.generate();
+await createAtaInterface(rpc, payer, mint, recipient.publicKey);
+const recipientAta = getAssociatedTokenAddressInterface(mint, recipient.publicKey);
 
-  const tx = await transferInterface(rpc, payer, senderAta, mint, recipientAta, sender, 500_000_000);
+const tx = await transferInterface(rpc, payer, senderAta, mint, recipientAta, sender, 500_000_000);
 
-  console.log("Tx:", tx);
+console.log("Tx:", tx);
 }
 
 main().catch(console.error);
-```
+
+````
 
 ```typescript Instruction
 import "dotenv/config";
@@ -187,7 +189,8 @@ const payer = Keypair.fromSecretKey(
 
     console.log("Tx:", signature);
 })();
-```
+````
+
 </CodeGroup>
 
 </Step>
@@ -198,6 +201,7 @@ const payer = Keypair.fromSecretKey(
 <Tab title="Rust Client">
 
 The example transfers SPL token -> light-token and light-token -> light-token:
+
 1. Create SPL mint, SPL token accounts, and mint SPL tokens
 2. Send SPL tokens to light-token account to mint light-tokens.
 3. Transfer light-tokens to another light-token account.
@@ -450,6 +454,7 @@ Find [a full code example at the end](#full-code-example).
 ### Light-Token Transfer Interface
 
 Define the number of light-tokens / SPL tokens to transfer
+
 - from which SPL or light-token account, and
 - to which SPL or light-token account.
 
@@ -465,8 +470,9 @@ let mut transfer = TransferInterfaceCpi::new(
     compressed_token_program_authority.clone(),
 );
 ```
+
 <Accordion title="light-token Interface Accounts">
-<TransferInterfaceAccountsListCtoken1 />
+  <TransferInterfaceAccountsListCtoken1 />
 </Accordion>
 
 </Step>
@@ -476,6 +482,7 @@ let mut transfer = TransferInterfaceCpi::new(
 ### SPL Transfer Interface (Optional)
 
 The SPL transfer interface is only needed for SPL ↔ light-token transfers.
+
 ```rust
 transfer = transfer.with_spl_interface(
     Some(mint.clone()),
@@ -486,13 +493,12 @@ transfer = transfer.with_spl_interface(
 ```
 
 SPL ↔ light-token transfers require a `spl_interface_pda`:
-    * **SPL → light-token**: SPL tokens are locked by the light-token Program in the PDA, light-tokens are minted to light-token accounts
-    * **light-token → SPL**: light-tokens are burned, SPL tokens transferred to SPL token accounts
-<Info>
-The interface PDA is derived from the `mint` pubkey and pool seed.
-</Info>
+_ **SPL → light-token**: SPL tokens are locked by the light token program in the PDA, light-tokens are minted to light-token accounts
+_ **light-token → SPL**: light-tokens are burned, SPL tokens transferred to SPL token accounts
+
+<Info>The interface PDA is derived from the `mint` pubkey and pool seed.</Info>
 <Accordion title="SPL Interface Accounts">
-<TransferInterfaceAccountsListSpl2 />
+  <TransferInterfaceAccountsListSpl2 />
 </Accordion>
 
 </Step>
@@ -501,21 +507,15 @@ The interface PDA is derived from the `mint` pubkey and pool seed.
 
 ### CPI
 
-CPI the Light Token program to execute the transfer. 
+CPI the Light Token program to execute the transfer.
 Use `invoke()`, or `invoke_signed()` when a CPI requires a PDA signer.
 
 <Tabs>
-<Tab title="invoke (External signer)">
-```rust
-transfer.invoke()?;
-```
-</Tab>
-<Tab title="invoke_signed (PDA is signer)">
-```rust
-let authority_seeds: &[&[u8]] = &[TRANSFER_INTERFACE_AUTHORITY_SEED, &[authority_bump]];
-transfer.invoke_signed(&[authority_seeds])?;
-```
-</Tab>
+  <Tab title="invoke (External signer)">```rust transfer.invoke()?; ```</Tab>
+  <Tab title="invoke_signed (PDA is signer)">
+    ```rust let authority_seeds: &[&[u8]] = &[TRANSFER_INTERFACE_AUTHORITY_SEED,
+    &[authority_bump]]; transfer.invoke_signed(&[authority_seeds])?; ```
+  </Tab>
 </Tabs>
 
 </Step>
@@ -524,7 +524,8 @@ transfer.invoke_signed(&[authority_seeds])?;
 # Full Code Example
 
 <Info>
-Find the source code [here](https://github.com/Lightprotocol/light-protocol/blob/main/sdk-tests/sdk-ctoken-test/src/transfer_interface.rs).
+  Find the source code
+  [here](https://github.com/Lightprotocol/light-protocol/blob/main/sdk-tests/sdk-ctoken-test/src/transfer_interface.rs).
 </Info>
 
 ```rust expandable
@@ -653,16 +654,18 @@ pub fn process_transfer_interface_invoke_signed(
     Ok(())
 }
 ```
+
 </Tab>
 
 </Tabs>
 
 # Next Steps
 
-  <Card
-    title="Learn how to close light-token accounts"
-    icon="chevron-right"
-    color="#0066ff"
-    href="/light-token/cookbook/close-token-account"
-    horizontal
-  />
+{" "}
+<Card
+  title="Learn how to close light-token accounts"
+  icon="chevron-right"
+  color="#0066ff"
+  href="/light-token/cookbook/close-token-account"
+  horizontal
+/>

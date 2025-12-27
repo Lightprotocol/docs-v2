@@ -6,14 +6,14 @@ description: Program guide to close light-token accounts via CPI. Includes step-
 
 ---
 
-import CloseAccountInfosAccountsList from '/snippets/accounts-list/close-account-infos-accounts-list.mdx';
-import CTokenClientPrerequisites from '/snippets/light-token-guides/light-token-client-prerequisites.mdx';
-import ClientCustomRentConfig from '/snippets/light-token-guides/client-custom-rent-config.mdx';
+import CloseAccountInfosAccountsList from "/snippets/accounts-list/close-account-infos-accounts-list.mdx";
+import CTokenClientPrerequisites from "/snippets/light-token-guides/light-token-client-prerequisites.mdx";
+import ClientCustomRentConfig from "/snippets/light-token-guides/client-custom-rent-config.mdx";
 
 1. Closing a light-token account transfers remaining lamports to a destination account and the rent sponsor can reclaim sponsored rent.
 2. Light-token accounts can be closed
-    * by the account owner at any time.
-    * by the <Tooltip tip="The `compression_authority` is a PDA of the Light Registry program. It claims rent for the rent sponsor from compressible accounts that are compressed and closed.">`compression_authority`</Tooltip>
+   - by the account owner at any time.
+   - by the <Tooltip tip="The `compression_authority` is a PDA of the Light Registry program. It claims rent for the rent sponsor from compressible accounts that are compressed and closed.">`compression_authority`</Tooltip>
      when the account becomes <Tooltip tip="An account is compressible when it has rent for less than 1 epoch (360 lamports for a 260-byte light-token account).">compressible</Tooltip>. The account is <Tooltip tip="You can think of compressed light-token accounts as storage of inactive accounts that can be reactivated."> compressed and closed</Tooltip> - it can be reinstated with the same state (decompressed).
 
 ## Get Started
@@ -23,6 +23,7 @@ import ClientCustomRentConfig from '/snippets/light-token-guides/client-custom-r
 
 1. The example creates a light-token account and mint.
 2. Build the instruction with `CloseCTokenAccount`:
+
 ```rust
 let close_instruction = CloseCTokenAccount::new(
     CTOKEN_PROGRAM_ID,
@@ -224,6 +225,7 @@ fn load_keypair(path: &str) -> Result<Keypair, Box<dyn std::error::Error>> {
     Ok(Keypair::try_from(&bytes[..])?)
 }
 ```
+
 </Step>
 </Steps>
 </Tab>
@@ -236,7 +238,7 @@ Find [a full code example at the end](#full-code-example).
 <Steps>
 <Step>
 
-### Build Account Infos and CPI the light-token Program
+### Build Account Infos and CPI the light token program
 
 1. Define the light-token account to close and where remaining lamports should go
 2. Use `invoke` or `invoke_signed`, when a CPI requires a PDA signer.
@@ -279,7 +281,7 @@ close_account_cpi.invoke_signed(&[signer_seeds])?;
 </Tabs>
 
 <Accordion title="Account List">
-<CloseAccountInfosAccountsList />
+  <CloseAccountInfosAccountsList />
 </Accordion>
 
 </Step>
@@ -288,7 +290,8 @@ close_account_cpi.invoke_signed(&[signer_seeds])?;
 # Full Code Example
 
 <Info>
-Find the source code [here](https://github.com/Lightprotocol/light-protocol/blob/main/sdk-tests/sdk-ctoken-test/src/close.rs).
+  Find the source code
+  [here](https://github.com/Lightprotocol/light-protocol/blob/main/sdk-tests/sdk-ctoken-test/src/close.rs).
 </Info>
 
 ```rust expandable
@@ -368,16 +371,18 @@ pub fn process_close_account_invoke_signed(accounts: &[AccountInfo]) -> Result<(
     Ok(())
 }
 ```
+
 </Tab>
 
 </Tabs>
 
 # Next Steps
 
-  <Card
-    title="Go back to the overview for the light-token standard."
-    icon="chevron-right"
-    color="#0066ff"
-    href="/light-token/welcome"
-    horizontal
-  />
+{" "}
+<Card
+  title="Go back to the overview for the light-token standard."
+  icon="chevron-right"
+  color="#0066ff"
+  href="/light-token/welcome"
+  horizontal
+/>

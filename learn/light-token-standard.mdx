@@ -4,12 +4,11 @@ sidebarTitle: Core Concepts to Light-Token
 description: Core Concepts of light-mints, light-tokens, and compressed token accounts.
 ---
 
-import CompressibleVsSolanaRent from '/snippets/compressible-vs-solana-rent.mdx';
-import { CompressibleRentCalculator } from '/snippets/jsx/compressible-rent-calculator.jsx';
-import { RentLifecycleVisualizer } from '/snippets/jsx/rent-lifecycle-visualizer.jsx';
-import CompressibleRentExplained from '/snippets/compressible-rent-explained.mdx';
-import CompressibleDefaultRentConfig from '/snippets/compressible-default-rent-config.mdx';
-
+import CompressibleVsSolanaRent from "/snippets/compressible-vs-solana-rent.mdx";
+import { CompressibleRentCalculator } from "/snippets/jsx/compressible-rent-calculator.jsx";
+import { RentLifecycleVisualizer } from "/snippets/jsx/rent-lifecycle-visualizer.jsx";
+import CompressibleRentExplained from "/snippets/compressible-rent-explained.mdx";
+import CompressibleDefaultRentConfig from "/snippets/compressible-default-rent-config.mdx";
 
 The [Light Token Program](https://github.com/Lightprotocol/light-protocol/tree/main/programs/compressed-token)
 is a high performance token program that reduces the cost of account creations by 200x,
@@ -18,16 +17,18 @@ while being more CU efficient than SPL on hot paths.
 <table>
   <thead>
     <tr>
-      <th style={{width: '15%', textAlign: 'left'}}></th>
-      <th style={{width: '22%', textAlign: 'left'}}>Account Type</th>
-      <th style={{width: '63%', textAlign: 'left'}}>Key Features</th>
+      <th style={{ width: "15%", textAlign: "left" }}></th>
+      <th style={{ width: "22%", textAlign: "left" }}>Account Type</th>
+      <th style={{ width: "63%", textAlign: "left" }}>Key Features</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td style={{textAlign: 'left'}}>**[Mint Accounts](#light-mint-accounts)**</td>
-      <td style={{textAlign: 'left'}}>Compressed account</td>
-      <td style={{textAlign: 'left'}}>
+      <td style={{ textAlign: "left" }}>
+        **[Mint Accounts](#light-mint-accounts)**
+      </td>
+      <td style={{ textAlign: "left" }}>Compressed account</td>
+      <td style={{ textAlign: "left" }}>
         <ul>
           <li>**Rent-free mint accounts** (similar to SPL mints)</li>
           <li>Custom [Token Metadata](#token-metadata) **extension**</li>
@@ -35,11 +36,15 @@ while being more CU efficient than SPL on hot paths.
       </td>
     </tr>
     <tr>
-      <td style={{textAlign: 'left'}}>**[Token Accounts](#light-token-account)**</td>
-      <td style={{textAlign: 'left'}}>Solana account</td>
-      <td style={{textAlign: 'left'}}>
+      <td style={{ textAlign: "left" }}>
+        **[Token Accounts](#light-token-account)**
+      </td>
+      <td style={{ textAlign: "left" }}>Solana account</td>
+      <td style={{ textAlign: "left" }}>
         <ul>
-          <li>**Stores token balances** of mints (SPL, Token-2022, or Light)</li>
+          <li>
+            **Stores token balances** of mints (SPL, Token-2022, or Light)
+          </li>
           <li>**Sponsored rent** exemption via custom rent-config</li>
         </ul>
       </td>
@@ -50,18 +55,20 @@ while being more CU efficient than SPL on hot paths.
 # Mint Accounts
 
 <Note>
-* **Light-mints are compressed accounts** and **cannot be decompressed**.
-* SPL mints can not be compressed to light-mints.
+  * **Light-mints are compressed accounts** and **cannot be decompressed**. *
+  SPL mints can not be compressed to light-mints.
 </Note>
 
 Light-mints **uniquely represent a token on Solana and store its global metadata**, similar to SPL mint accounts with few core differences:
+
 1. Light-mint accounts are **rent-free**.
 2. Tokens created from light-mints are **light-tokens**.
 3. Token metadata (name, symbol, URI) is stored as an extension in the struct.
 
-| Creation Cost          | SPL  | Light      |
-|:---------------------|:------------------|:----------------------|
-| **Mint Account**    | ~1,500,000 lamports        | **15,000** lamports     |
+| Creation Cost    | SPL                 | Light               |
+| :--------------- | :------------------ | :------------------ |
+| **Mint Account** | ~1,500,000 lamports | **15,000** lamports |
+
 <Tabs>
   <Tab title="Diagram">
     <Frame>
@@ -86,7 +93,8 @@ Light-mints **uniquely represent a token on Solana and store its global metadata
 </Tabs>
 
 <Info>
-Find the [source code of light-mints here](https://github.com/Lightprotocol/light-protocol/blob/0c4e2417b2df2d564721b89e18d1aad3665120e7/program-libs/ctoken-interface/src/state/mint/compressed_mint.rs#L18).
+  Find the [source code of light-mints
+  here](https://github.com/Lightprotocol/light-protocol/blob/0c4e2417b2df2d564721b89e18d1aad3665120e7/program-libs/ctoken-interface/src/state/mint/compressed_mint.rs#L18).
 </Info>
 
 The `metadata` field is used by the Compressed Token Program to store the internal state of a light-mint.
@@ -168,26 +176,26 @@ Here is how light-mints and SPL mints compare:
 # Token Account
 
 <Note>
-**Light-token accounts are Solana accounts**, not compressed accounts.
+  **Light-token accounts are Solana accounts**, not compressed accounts.
 </Note>
 
 A light-token account holds token balances like SPL Token accounts:
-* A wallet needs a light-token account for each light-mint, SPL mint, or Token 2022 mint it wants to hold, with the wallet address set as the light-token account owner.
-* Each wallet can own multiple light-token accounts for the same light-mint.
-* A light-token account can only have one owner and hold units of one light-mint.
 
-|  Creation Cost         | SPL  | Light      |
-|:---------------------|:------------------|:----------------------|
-| **Token Account**   | 	  ~2,000,000 lamports         | ~**17,000** lamports     |
+- A wallet needs a light-token account for each light-mint, SPL mint, or Token 2022 mint it wants to hold, with the wallet address set as the light-token account owner.
+- Each wallet can own multiple light-token accounts for the same light-mint.
+- A light-token account can only have one owner and hold units of one light-mint.
+
+| Creation Cost     | SPL                 | Light                |
+| :---------------- | :------------------ | :------------------- |
+| **Token Account** | ~2,000,000 lamports | ~**17,000** lamports |
 
 Additionally Light-Token is more performant then SPL on hot paths:
 
-|                      | light-token CU | SPL-token CU |
-| ----------------------------- | -------------: | -----------: |
+|                                   | light-token CU | SPL-token CU |
+| --------------------------------- | -------------: | -----------: |
 | **ATA Creation**                  |          4,348 |       14,194 |
 | **Transfer** (base path)          |            312 |        4,645 |
 | **Transfer** (rent-free hot path) |          1,885 |        4,645 |
-
 
 <Tabs>
   <Tab title="Diagram">
@@ -217,65 +225,67 @@ Additionally Light-Token is more performant then SPL on hot paths:
 </Tabs>
 
 <Info>
-Find the [source code of light-tokens here](https://github.com/Lightprotocol/light-protocol/blob/0c4e2417b2df2d564721b89e18d1aad3665120e7/program-libs/ctoken-interface/src/state/ctoken/ctoken_struct.rs#L31).
+  Find the [source code of light-tokens
+  here](https://github.com/Lightprotocol/light-protocol/blob/0c4e2417b2df2d564721b89e18d1aad3665120e7/program-libs/ctoken-interface/src/state/ctoken/ctoken_struct.rs#L31).
 </Info>
 
 Light-token accounts replicate the field layout and serialization format of [SPL Token accounts](https://solana.com/docs/tokens#token-account). The struct is serialized with Borsh to match the on-chain format of SPL tokens.
 
 Here is how light-tokens and SPL tokens compare:
+
 <table>
   <thead>
     <tr>
-      <th style={{width: '10%', textAlign: 'left'}}>Field</th>
-      <th style={{width: '45%', textAlign: 'center'}}>Light-Token</th>
-      <th style={{width: '30%', textAlign: 'center'}}>SPL Token Account</th>
+      <th style={{ width: "10%", textAlign: "left" }}>Field</th>
+      <th style={{ width: "45%", textAlign: "center" }}>Light-Token</th>
+      <th style={{ width: "30%", textAlign: "center" }}>SPL Token Account</th>
     </tr>
   </thead>
   <tbody>
     <tr>
       <td>mint</td>
-      <td style={{textAlign: 'center'}}>✓</td>
-      <td style={{textAlign: 'center'}}>✓</td>
+      <td style={{ textAlign: "center" }}>✓</td>
+      <td style={{ textAlign: "center" }}>✓</td>
     </tr>
     <tr>
       <td>owner</td>
-      <td style={{textAlign: 'center'}}>✓</td>
-      <td style={{textAlign: 'center'}}>✓</td>
+      <td style={{ textAlign: "center" }}>✓</td>
+      <td style={{ textAlign: "center" }}>✓</td>
     </tr>
     <tr>
       <td>amount</td>
-      <td style={{textAlign: 'center'}}>✓</td>
-      <td style={{textAlign: 'center'}}>✓</td>
+      <td style={{ textAlign: "center" }}>✓</td>
+      <td style={{ textAlign: "center" }}>✓</td>
     </tr>
     <tr>
       <td>delegate</td>
-      <td style={{textAlign: 'center'}}>unimplemented</td>
-      <td style={{textAlign: 'center'}}>✓</td>
+      <td style={{ textAlign: "center" }}>unimplemented</td>
+      <td style={{ textAlign: "center" }}>✓</td>
     </tr>
     <tr>
       <td>state</td>
-      <td style={{textAlign: 'center'}}>✓</td>
-      <td style={{textAlign: 'center'}}>✓</td>
+      <td style={{ textAlign: "center" }}>✓</td>
+      <td style={{ textAlign: "center" }}>✓</td>
     </tr>
     <tr>
       <td>is_native</td>
-      <td style={{textAlign: 'center'}}>✓</td>
-      <td style={{textAlign: 'center'}}>✓</td>
+      <td style={{ textAlign: "center" }}>✓</td>
+      <td style={{ textAlign: "center" }}>✓</td>
     </tr>
     <tr>
       <td>delegated_amount</td>
-      <td style={{textAlign: 'center'}}>unimplemented</td>
-      <td style={{textAlign: 'center'}}>✓</td>
+      <td style={{ textAlign: "center" }}>unimplemented</td>
+      <td style={{ textAlign: "center" }}>✓</td>
     </tr>
     <tr>
       <td>close_authority</td>
-      <td style={{textAlign: 'center'}}>✓</td>
-      <td style={{textAlign: 'center'}}>✓</td>
+      <td style={{ textAlign: "center" }}>✓</td>
+      <td style={{ textAlign: "center" }}>✓</td>
     </tr>
     <tr>
       <td>extensions</td>
-      <td style={{textAlign: 'center'}}>✓</td>
-      <td style={{textAlign: 'center'}}>via Token-2022</td>
+      <td style={{ textAlign: "center" }}>✓</td>
+      <td style={{ textAlign: "center" }}>via Token-2022</td>
     </tr>
   </tbody>
 </table>
@@ -286,14 +296,15 @@ Here is how light-tokens and SPL tokens compare:
 <RentLifecycleVisualizer />
 
 We recommend to use default values, but you can customize prepaid rent and top ups:
-<CompressibleRentCalculator />
 
+<CompressibleRentCalculator />
 
 # Associated Light-Token Account
 
 **Associated light-token** accounts (light-ATAs) follow the same pattern as [associated token accounts](https://docs.solana.com/developing/programming-model/associated-token-account) (ATA):
-* Each wallet needs its own light-token account to hold tokens from the same light-mint.
-* The address for light-ATAs is deterministically derived with the owner's address, light-token program ID, and mint address.
+
+- Each wallet needs its own light-token account to hold tokens from the same light-mint.
+- The address for light-ATAs is deterministically derived with the owner's address, light token program ID, and mint address.
 
 ```rust
 let seeds = [
@@ -305,19 +316,20 @@ let seeds = [
 ```
 
 <Info>
-Find the [source code to associated light-token accounts here](https://github.com/Lightprotocol/light-protocol/blob/main/programs/compressed-token/program/src/create_associated_token_account.rs).
+  Find the [source code to associated light-token accounts
+  here](https://github.com/Lightprotocol/light-protocol/blob/main/programs/compressed-token/program/src/create_associated_token_account.rs).
 </Info>
 
 # Compressed Token Account
 
 Under the hood, compressed token accounts store token balance, owner, and other information of inactive light-tokens.
 
-1. Light-token accounts are automatically compressed/decompressed when active/inactive. 
+1. Light-token accounts are automatically compressed/decompressed when active/inactive.
 2. Any light-token or SPL token can be compressed/decompressed at will.
 
 <Note>
-You can still use compressed tokens for token distribution. 
-Learn more about this here.
+  You can still use compressed tokens for token distribution. Learn more about
+  this here.
 </Note>
 
 <Tabs>
@@ -352,5 +364,4 @@ Learn more about this here.
   color="#0066ff"
   href="/light-token/cookbook/create-token-account"
   horizontal
->
-</Card>
+></Card>

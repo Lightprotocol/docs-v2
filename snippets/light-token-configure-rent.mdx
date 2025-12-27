@@ -10,33 +10,52 @@ let compressible_params = CompressibleParamsInfos::new(
 
 <table>
   <colgroup>
-    <col style={{width: '25%', textAlign: 'left'}} />
-    <col style={{width: '55%'}} />
+    <col style={{ width: "25%", textAlign: "left" }} />
+    <col style={{ width: "55%" }} />
   </colgroup>
   <thead>
     <tr>
-      <th style={{textAlign: 'left'}}></th>
-      <th style={{textAlign: 'left'}}></th>
+      <th style={{ textAlign: "left" }}></th>
+      <th style={{ textAlign: "left" }}></th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td style={{textAlign: 'left'}}><strong><Tooltip tip="Owned by LightRegistry program. Stores rent_sponsor, compression_delay, address_space, and rent_config.">Compressible Config</Tooltip></strong></td>
+      <td style={{ textAlign: "left" }}>
+        <strong>
+          <Tooltip tip="Owned by LightRegistry program. Stores rent_sponsor, compression_delay, address_space, and rent_config.">
+            Compressible Config
+          </Tooltip>
+        </strong>
+      </td>
+      <td>Protocol PDA that stores account rent config.</td>
+    </tr>
+    <tr>
+      <td style={{ textAlign: "left" }}>
+        <strong>
+          <Tooltip tip="light token program PDA that manages rent for compressible accounts.">
+            Rent Sponsor
+          </Tooltip>
+        </strong>
+      </td>
       <td>
-        Protocol PDA that stores account rent config.
+        - light token program PDA that fronts rent exemption at creation.
+        <br />- Claims rent when account compresses.
       </td>
     </tr>
     <tr>
-      <td style={{textAlign: 'left'}}><strong><Tooltip tip="light-token program PDA that manages rent for compressible accounts.">Rent Sponsor</Tooltip></strong></td>
-      <td>
-        - light-token program PDA that fronts rent exemption at creation.<br/>
-        - Claims rent when account compresses.
+      <td style={{ textAlign: "left" }}>
+        <strong>
+          <Tooltip
+            tip="11111111111111111111111111111111"
+            cta="Program ID"
+            href="https://solscan.io/account/11111111111111111111111111111111"
+          >
+            System Program
+          </Tooltip>
+        </strong>
       </td>
-    </tr>
-    <tr>
-      <td style={{textAlign: 'left'}}><strong><Tooltip tip="11111111111111111111111111111111" cta="Program ID" href="https://solscan.io/account/11111111111111111111111111111111">System Program</Tooltip></strong></td>
       <td>Solana System Program to create the on-chain account.</td>
     </tr>
   </tbody>
 </table>
-
