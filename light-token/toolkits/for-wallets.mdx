@@ -3,21 +3,22 @@ title: "Toolkit for Wallet Applications"
 sidebarTitle: "for Wallets"
 description: "Guide for Wallet Applications to add light-token APIs."
 ---
-import { CodeCompare } from '/snippets/jsx/code-compare.jsx';
+
+import { CodeCompare } from "/snippets/jsx/code-compare.jsx";
 
 1. light-token follows the same API patterns like ATA
 2. Your users hold and receive the same tokens, just stored more efficiently.
 
-|  Creation Cost         | SPL  | light-token      |
-|:---------------------|:------------------|:----------------------|
-| **Token Account**   | 	  ~2,000,000 lamports         | ~**17,000** lamports     |
+| Creation Cost     | SPL                 | light-token          |
+| :---------------- | :------------------ | :------------------- |
+| **Token Account** | ~2,000,000 lamports | ~**11,000** lamports |
 
 ### What you will implement
 
 <table>
   <thead>
     <tr>
-      <th style={{width: '15%'}}></th>
+      <th style={{ width: "15%" }}></th>
       <th>SPL</th>
       <th>Light</th>
     </tr>
@@ -61,9 +62,9 @@ import { CodeCompare } from '/snippets/jsx/code-compare.jsx';
   </tbody>
 </table>
 
-
 <Note>
-Find full code examples [here](https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/payments-and-wallets).
+  Find full code examples
+  [here](https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/payments-and-wallets).
 </Note>
 
 ## Setup
@@ -93,12 +94,7 @@ const rpc = createRpc(RPC_ENDPOINT);
 ```typescript
 import { getOrCreateAtaInterface } from "@lightprotocol/compressed-token";
 
-const ata = await getOrCreateAtaInterface(
-  rpc,
-  payer,
-  mint,
-  recipient
-);
+const ata = await getOrCreateAtaInterface(rpc, payer, mint, recipient);
 // Share ata.parsed.address with sender
 
 console.log(ata.parsed.amount);
@@ -136,22 +132,23 @@ import { CTOKEN_PROGRAM_ID } from "@lightprotocol/stateless.js";
 const ata = getAssociatedTokenAddressInterface(mint, recipient);
 
 const tx = new Transaction().add(
-  createAssociatedTokenAccountInterfaceIdempotentInstruction(
-    payer.publicKey,
-    ata,
-    recipient,
-    mint,
-    CTOKEN_PROGRAM_ID
-  ),
-  ...(await createLoadAtaInstructions(
-    rpc,
-    ata,
-    recipient,
-    mint,
-    payer.publicKey
-  ))
+createAssociatedTokenAccountInterfaceIdempotentInstruction(
+payer.publicKey,
+ata,
+recipient,
+mint,
+CTOKEN_PROGRAM_ID
+),
+...(await createLoadAtaInstructions(
+rpc,
+ata,
+recipient,
+mint,
+payer.publicKey
+))
 );
-```
+
+````
 
 <Accordion title="Compare to SPL">
 
@@ -171,7 +168,7 @@ const tx = new Transaction().add(
     mint
   )
 );
-```
+````
 
 </Accordion>
 </Tab>
@@ -324,12 +321,7 @@ import {
 } from "@lightprotocol/compressed-token";
 
 const ata = getAssociatedTokenAddressInterface(mint, owner);
-const account = await getAtaInterface(
-  rpc,
-  ata,
-  owner,
-  mint
-);
+const account = await getAtaInterface(rpc, ata, owner, mint);
 
 console.log(account.parsed.amount);
 ```
@@ -387,15 +379,7 @@ const splAta = getAssociatedTokenAddressSync(mint, owner.publicKey);
 // c-token ATA destination
 const ctokenAta = getAssociatedTokenAddressInterface(mint, owner.publicKey);
 
-await wrap(
-  rpc,
-  payer,
-  splAta,
-  ctokenAta,
-  owner,
-  mint,
-  amount
-);
+await wrap(rpc, payer, splAta, ctokenAta, owner, mint, amount);
 ```
 
 </Tab>
@@ -444,14 +428,7 @@ import { getAssociatedTokenAddressSync } from "@solana/spl-token";
 // SPL ATA must exist
 const splAta = getAssociatedTokenAddressSync(mint, owner.publicKey);
 
-await unwrap(
-  rpc,
-  payer,
-  splAta,
-  owner,
-  mint,
-  amount
-);
+await unwrap(rpc, payer, splAta, owner, mint, amount);
 ```
 
 </Tab>

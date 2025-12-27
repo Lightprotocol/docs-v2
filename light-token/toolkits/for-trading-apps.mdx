@@ -4,22 +4,22 @@ sidebarTitle: "for Trading Apps"
 description: "Guide to add light-token APIs to your Trading Application."
 ---
 
-import { CodeCompare } from '/snippets/jsx/code-compare.jsx';
+import { CodeCompare } from "/snippets/jsx/code-compare.jsx";
 
 1. light-token follows similar API patterns like SPL and simply adds an interface suffix.
 2. Token accounts cost ~200x less to create than SPL accounts.
 3. Use wrap/unwrap to convert between light-tokens and SPL for compatibility with DEXs without light-token support.
 
-|  Creation Cost         | SPL  | light-token      |
-|:---------------------|:------------------|:----------------------|
-| **Token Account**   | 	  ~2,000,000 lamports         | ~**17,000** lamports     |
+| Creation Cost     | SPL                 | light-token          |
+| :---------------- | :------------------ | :------------------- |
+| **Token Account** | ~2,000,000 lamports | ~**11,000** lamports |
 
 ### What you will implement
 
 <table>
   <thead>
     <tr>
-      <th style={{width: '15%'}}></th>
+      <th style={{ width: "15%" }}></th>
       <th>SPL</th>
       <th>Light</th>
     </tr>
@@ -64,7 +64,8 @@ import { CodeCompare } from '/snippets/jsx/code-compare.jsx';
 </table>
 
 <Note>
-Find devnet examples [here](https://github.com/Lightprotocol/light-token-toolkits).
+  Find devnet examples
+  [here](https://github.com/Lightprotocol/light-token-toolkits).
 </Note>
 
 ## Setup
@@ -170,14 +171,7 @@ import { transfer, getAssociatedTokenAddressSync } from "@solana/spl-token";
 const sourceAta = getAssociatedTokenAddressSync(mint, owner.publicKey);
 const destinationAta = getAssociatedTokenAddressSync(mint, recipient);
 
-await transfer(
-  connection,
-  payer,
-  sourceAta,
-  destinationAta,
-  owner,
-  amount
-);
+await transfer(connection, payer, sourceAta, destinationAta, owner, amount);
 ```
 
 </Accordion>
@@ -241,7 +235,7 @@ const tx = new Transaction().add(
 const result = await rpc.getSignaturesForOwnerInterface(owner);
 
 console.log(result.signatures); // Merged + deduplicated
-console.log(result.solana);     // On-chain txs only
+console.log(result.solana); // On-chain txs only
 console.log(result.compressed); // Compressed txs only
 ```
 
@@ -281,8 +275,8 @@ const splAta = getAssociatedTokenAddressSync(mint, owner.publicKey);
 await wrap(
   rpc,
   payer,
-  ctokenAta,  // source: c-token ATA
-  splAta,     // destination: SPL ATA (for DEX)
+  ctokenAta, // source: c-token ATA
+  splAta, // destination: SPL ATA (for DEX)
   owner,
   mint,
   amount
@@ -313,13 +307,13 @@ const splAta = getAssociatedTokenAddressSync(mint, owner.publicKey);
 
 // Get SPL interface info for the mint
 const splInterfaceInfos = await getSplInterfaceInfos(rpc, mint);
-const splInterfaceInfo = splInterfaceInfos.find(info => info.isInitialized);
+const splInterfaceInfo = splInterfaceInfos.find((info) => info.isInitialized);
 
 // Create wrap instruction
 const ix = createWrapInstruction(
-  ctokenAta,        // source: c-token ATA
-  splAta,           // destination: SPL ATA
-  owner.publicKey,  // owner
+  ctokenAta, // source: c-token ATA
+  splAta, // destination: SPL ATA
+  owner.publicKey, // owner
   mint,
   amount,
   splInterfaceInfo,
@@ -361,10 +355,10 @@ const splAta = getAssociatedTokenAddressSync(mint, owner.publicKey);
 await unwrap(
   rpc,
   payer,
-  splAta,   // destination: SPL ATA (has tokens from DEX)
+  splAta, // destination: SPL ATA (has tokens from DEX)
   owner,
   mint,
-  amount    // omit for full balance
+  amount // omit for full balance
 );
 ```
 
@@ -394,13 +388,13 @@ await loadAta(rpc, ctokenAta, owner, mint, payer);
 
 // Get SPL interface info for the mint
 const splInterfaceInfos = await getSplInterfaceInfos(rpc, mint);
-const splInterfaceInfo = splInterfaceInfos.find(info => info.isInitialized);
+const splInterfaceInfo = splInterfaceInfos.find((info) => info.isInitialized);
 
 // Create unwrap instruction
 const ix = createUnwrapInstruction(
-  ctokenAta,        // source: c-token ATA
-  splAta,           // destination: SPL ATA
-  owner.publicKey,  // owner
+  ctokenAta, // source: c-token ATA
+  splAta, // destination: SPL ATA
+  owner.publicKey, // owner
   mint,
   amount,
   splInterfaceInfo,
