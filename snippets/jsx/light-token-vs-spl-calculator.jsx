@@ -118,7 +118,7 @@ export const CTokenVsSplCalculator = () => {
           </div>
 
           <div className="p-4 bg-black/[0.015] dark:bg-white/5 backdrop-blur-md rounded-2xl text-center border border-black/[0.04] dark:border-white/10 shadow-sm">
-            <div className="text-xs text-zinc-500 dark:text-white/50 mb-1 uppercase tracking-wide">Light-Token</div>
+            <div className="text-xs text-zinc-500 dark:text-white/50 mb-1 uppercase tracking-wide">Light Token</div>
             <div className="text-xl font-mono font-semibold text-zinc-900 dark:text-white">
               {formatSOL(ctokenCost)}
             </div>

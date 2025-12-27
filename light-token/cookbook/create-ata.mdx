@@ -1,30 +1,30 @@
 ---
-title: Create Associated Light-Token Accounts
+title: Create Associated Light Token Accounts
 sidebarTitle: Create Associated Token Account
 description: Client and program guide to create associated light-token accounts. Includes step-by-step implementation and full code examples.
 ---
 
 ---
 
-import CTokenCreateATAAccountsList from '/snippets/accounts-list/light-token-create-ata-accounts-list.mdx';
-import CompressibleVsSolanaRent from '/snippets/compressible-vs-solana-rent.mdx';
-import CTokenConfigureRent from '/snippets/light-token-configure-rent.mdx';
-import CAtaIntro from '/snippets/light-token-guides/cata-intro.mdx';
-import CompressibleRentExplained from '/snippets/compressible-rent-explained.mdx';
-import CTokenClientPrerequisites from '/snippets/light-token-guides/light-token-client-prerequisites.mdx';
-import CTokenTsClientPrerequisites from '/snippets/light-token-guides/light-token-ts-client-prerequisites.mdx';
-import ClientCustomRentConfig from '/snippets/light-token-guides/client-custom-rent-config.mdx';
-import { CodeCompare } from '/snippets/jsx/code-compare.jsx';
-import WelcomePageInstall from '/snippets/setup/welcome-page-install.mdx';
+import CTokenCreateATAAccountsList from "/snippets/accounts-list/light-token-create-ata-accounts-list.mdx";
+import CompressibleVsSolanaRent from "/snippets/compressible-vs-solana-rent.mdx";
+import CTokenConfigureRent from "/snippets/light-token-configure-rent.mdx";
+import CAtaIntro from "/snippets/light-token-guides/cata-intro.mdx";
+import CompressibleRentExplained from "/snippets/compressible-rent-explained.mdx";
+import CTokenClientPrerequisites from "/snippets/light-token-guides/light-token-client-prerequisites.mdx";
+import CTokenTsClientPrerequisites from "/snippets/light-token-guides/light-token-ts-client-prerequisites.mdx";
+import ClientCustomRentConfig from "/snippets/light-token-guides/client-custom-rent-config.mdx";
+import { CodeCompare } from "/snippets/jsx/code-compare.jsx";
+import WelcomePageInstall from "/snippets/setup/welcome-page-install.mdx";
 
 1. Associated light-token accounts are Solana accounts that hold token balances of light, SPL, or Token 2022 mints.
 2. The address for light-ATAs is deterministically derived with the owner's address, compressed token program ID, and mint address.
-2. Associated light-token accounts implement a default rent config:
-    1. At account creation, you pay ~17,208 lamports <Tooltip tip="24 h = 16 epochs, where 1 rent-epoch ≈ 1.5h ≈ 13,500 slots at 400ms per slot">for 24h of rent</Tooltip> <br/>and <Tooltip tip="Covers transaction cost to compress accounts (10,000) and protocol incentive (1,000). Transaction cost might vary.">compression incentive</Tooltip> (the rent-exemption is sponsored by the protocol)
-    2. Transfers keep the account funded <Tooltip tip="2 epochs = 3h">with rent for 3h</Tooltip> via top-ups. The transaction payer tops up 776 lamports when the account's rent is below 3h.
+3. Associated light-token accounts implement a default rent config:
+   1. At account creation, you pay ~17,208 lamports <Tooltip tip="24 h = 16 epochs, where 1 rent-epoch ≈ 1.5h ≈ 13,500 slots at 400ms per slot">for 24h of rent</Tooltip> <br/>and <Tooltip tip="Covers transaction cost to compress accounts (10,000) and protocol incentive (1,000). Transaction cost might vary.">compression incentive</Tooltip> (the rent-exemption is sponsored by the protocol)
+   2. Transfers keep the account funded <Tooltip tip="2 epochs = 3h">with rent for 3h</Tooltip> via top-ups. The transaction payer tops up 776 lamports when the account's rent is below 3h.
 
 <Accordion title="Light Rent Config Explained">
-<CompressibleRentExplained />
+  <CompressibleRentExplained />
 </Accordion>
 
 ## Get Started
@@ -36,33 +36,34 @@ import WelcomePageInstall from '/snippets/setup/welcome-page-install.mdx';
 The `createAtaInterface` function creates an associated light-token account in a single call.
 
 Compare to SPL:
+
 <CodeCompare
   firstCode={`// SPL create ATA
 import { getOrCreateAssociatedTokenAccount } from "@solana/spl-token";
 
 const ata = await getOrCreateAssociatedTokenAccount(
-  connection,
-  payer,
-  mint,
-  owner
+connection,
+payer,
+mint,
+owner
 );`}
   secondCode={`// light-token create ATA
 import { createAtaInterface } from "@lightprotocol/compressed-token";
 
 const ata = await createAtaInterface(
-  rpc,
-  payer,
-  mint,
-  owner
+rpc,
+payer,
+mint,
+owner
 );`}
-  firstLabel="SPL"
-  secondLabel="light-token"
+firstLabel="SPL"
+secondLabel="light-token"
 />
 
 <Info>
-Find the source code [here](https://github.com/Lightprotocol/light-protocol/blob/0c4e2417b2df2d564721b89e18d1aad3665120e7/js/compressed-token/src/v3/actions/create-ata-interface.ts).
+  Find the source code
+  [here](https://github.com/Lightprotocol/light-protocol/blob/0c4e2417b2df2d564721b89e18d1aad3665120e7/js/compressed-token/src/v3/actions/create-ata-interface.ts).
 </Info>
-
 
 <Steps>
 
@@ -70,7 +71,7 @@ Find the source code [here](https://github.com/Lightprotocol/light-protocol/blob
 ### Create Associated Token Account
 
 <Accordion title="Installations">
-<WelcomePageInstall />
+  <WelcomePageInstall />
 </Accordion>
 
 ```bash
@@ -85,21 +86,22 @@ import { createRpc } from "@lightprotocol/stateless.js";
 import { createMintInterface, createAtaInterface } from "@lightprotocol/compressed-token";
 
 async function main() {
-  const rpc = createRpc();
-  const payer = Keypair.generate();
-  const sig = await rpc.requestAirdrop(payer.publicKey, 10e9);
-  await rpc.confirmTransaction(sig);
+const rpc = createRpc();
+const payer = Keypair.generate();
+const sig = await rpc.requestAirdrop(payer.publicKey, 10e9);
+await rpc.confirmTransaction(sig);
 
-  const { mint } = await createMintInterface(rpc, payer, payer, null, 9);
+const { mint } = await createMintInterface(rpc, payer, payer, null, 9);
 
-  const owner = Keypair.generate();
-  const ata = await createAtaInterface(rpc, payer, mint, owner.publicKey);
+const owner = Keypair.generate();
+const ata = await createAtaInterface(rpc, payer, mint, owner.publicKey);
 
-  console.log("ATA:", ata.toBase58());
+console.log("ATA:", ata.toBase58());
 }
 
 main().catch(console.error);
-```
+
+````
 
 ```typescript Instruction
 import "dotenv/config";
@@ -147,7 +149,8 @@ const payer = Keypair.fromSecretKey(
     console.log("ATA:", associatedToken.toBase58());
     console.log("Tx:", signature);
 })();
-```
+````
+
 </CodeGroup>
 
 </Step>
@@ -160,6 +163,7 @@ const payer = Keypair.fromSecretKey(
 1. The example creates a test light-mint. You can use existing light-mints, SPL or Token 2022 mints as well.
 2. Derive the address from mint and owner pubkey.
 3. Build the instruction with `CreateAssociatedCTokenAccount`. It automatically includes the default rent config:
+
 ```rust
 use light_ctoken_sdk::ctoken::CreateAssociatedCTokenAccount;
 
@@ -372,9 +376,11 @@ Find [a full code example at the end](#full-code-example).
 
 1. Pass the required accounts that include the rent config.
 2. Use `invoke` or `invoke_signed`, when a CPI requires a PDA signer.
-<Note>
-The light-ATA address is derived from `[owner, ctoken_program_id, mint]`. Unlike light-token accounts, owner and mint are passed as accounts, not in instruction data.
-</Note>
+   <Note>
+     The light-ATA address is derived from `[owner, ctoken_program_id, mint]`.
+     Unlike light-token accounts, owner and mint are passed as accounts, not in
+     instruction data.
+   </Note>
 
 <Tabs>
 <Tab title="invoke (External signer)">
@@ -424,7 +430,8 @@ CreateAssociatedCTokenAccountCpi {
 # Full Code Example
 
 <Info>
-Find the source code [here](https://github.com/Lightprotocol/light-protocol/blob/main/sdk-tests/sdk-ctoken-test/src/create_ata2.rs).
+  Find the source code
+  [here](https://github.com/Lightprotocol/light-protocol/blob/main/sdk-tests/sdk-ctoken-test/src/create_ata2.rs).
 </Info>
 
 ```rust expandable
@@ -529,15 +536,17 @@ pub fn process_create_ata2_invoke_signed(
     Ok(())
 }
 ```
+
 </Tab>
 
 </Tabs>
 # Next Steps
 
-  <Card
-    title="Learn how to mint light-tokens"
-    icon="chevron-right"
-    color="#0066ff"
-    href="/light-token/cookbook/mint-to"
-    horizontal
-  />
+{" "}
+<Card
+  title="Learn how to mint light-tokens"
+  icon="chevron-right"
+  color="#0066ff"
+  href="/light-token/cookbook/mint-to"
+  horizontal
+/>

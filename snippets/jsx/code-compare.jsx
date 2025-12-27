@@ -1,7 +1,7 @@
 export const CodeCompare = ({
   firstCode = "",
   secondCode = "",
-  firstLabel = "Light-Token",
+  firstLabel = "Light Token",
   secondLabel = "SPL",
 }) => {
   const [sliderPercent, setSliderPercent] = useState(0);

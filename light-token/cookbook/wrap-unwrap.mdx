@@ -6,13 +6,16 @@ description: Convert between SPL/T22 token and light-token accounts. Used for on
 
 ---
 
-import WelcomePageInstall from '/snippets/setup/welcome-page-install.mdx';
+import WelcomePageInstall from "/snippets/setup/welcome-page-install.mdx";
 
 - **Wrap**: Move tokens from SPL/T22 account → light-token ATA (hot balance)
 - **Unwrap**: Move tokens from light-token ATA (hot balance) → SPL/T22 account
 
 <Info>
-Find the source code: [wrap.ts](https://github.com/Lightprotocol/light-protocol/blob/0c4e2417b2df2d564721b89e18d1aad3665120e7/js/compressed-token/src/v3/actions/wrap.ts) | [unwrap.ts](https://github.com/Lightprotocol/light-protocol/blob/0c4e2417b2df2d564721b89e18d1aad3665120e7/js/compressed-token/src/v3/actions/unwrap.ts)
+  Find the source code:
+  [wrap.ts](https://github.com/Lightprotocol/light-protocol/blob/0c4e2417b2df2d564721b89e18d1aad3665120e7/js/compressed-token/src/v3/actions/wrap.ts)
+  |
+  [unwrap.ts](https://github.com/Lightprotocol/light-protocol/blob/0c4e2417b2df2d564721b89e18d1aad3665120e7/js/compressed-token/src/v3/actions/unwrap.ts)
 </Info>
 
 ## Get Started
@@ -22,10 +25,10 @@ Find the source code: [wrap.ts](https://github.com/Lightprotocol/light-protocol/
 
 <Steps>
 <Step>
-### Wrap SPL Tokens to Light-Token ATA
+### Wrap SPL Tokens to Light Token ATA
 
 <Accordion title="Installations">
-<WelcomePageInstall />
+  <WelcomePageInstall />
 </Accordion>
 
 ```bash
@@ -48,28 +51,29 @@ import {
 import { createAssociatedTokenAccount } from "@solana/spl-token";
 
 async function main() {
-  const rpc = createRpc();
-  const payer = Keypair.generate();
-  const sig = await rpc.requestAirdrop(payer.publicKey, 10e9);
-  await rpc.confirmTransaction(sig);
+const rpc = createRpc();
+const payer = Keypair.generate();
+const sig = await rpc.requestAirdrop(payer.publicKey, 10e9);
+await rpc.confirmTransaction(sig);
 
-  // Setup: Get SPL tokens (needed to wrap)
-  const { mint } = await createMint(rpc, payer, payer.publicKey, 9);
-  const splAta = await createAssociatedTokenAccount(rpc, payer, mint, payer.publicKey);
-  await mintTo(rpc, payer, mint, payer.publicKey, payer, bn(1000));
-  await decompress(rpc, payer, mint, bn(1000), payer, splAta);
+// Setup: Get SPL tokens (needed to wrap)
+const { mint } = await createMint(rpc, payer, payer.publicKey, 9);
+const splAta = await createAssociatedTokenAccount(rpc, payer, mint, payer.publicKey);
+await mintTo(rpc, payer, mint, payer.publicKey, payer, bn(1000));
+await decompress(rpc, payer, mint, bn(1000), payer, splAta);
 
-  // Wrap SPL tokens to rent-free token ATA
-  const ctokenAta = getAssociatedTokenAddressInterface(mint, payer.publicKey);
-  await createAtaInterfaceIdempotent(rpc, payer, mint, payer.publicKey);
+// Wrap SPL tokens to rent-free token ATA
+const ctokenAta = getAssociatedTokenAddressInterface(mint, payer.publicKey);
+await createAtaInterfaceIdempotent(rpc, payer, mint, payer.publicKey);
 
-  const tx = await wrap(rpc, payer, splAta, ctokenAta, payer, mint, bn(500));
+const tx = await wrap(rpc, payer, splAta, ctokenAta, payer, mint, bn(500));
 
-  console.log("Tx:", tx);
+console.log("Tx:", tx);
 }
 
 main().catch(console.error);
-```
+
+````
 
 ```typescript Instruction
 import { Keypair, ComputeBudgetProgram } from "@solana/web3.js";
@@ -159,7 +163,8 @@ async function main() {
 }
 
 main().catch(console.error);
-```
+````
+
 </CodeGroup>
 
 </Step>
@@ -171,7 +176,7 @@ main().catch(console.error);
 
 <Steps>
 <Step>
-### Unwrap Light-Tokens to SPL Account
+### Unwrap Light Tokens to SPL Account
 
 <CodeGroup>
 ```typescript Action
@@ -182,24 +187,25 @@ import { unwrap } from "@lightprotocol/compressed-token/unified";
 import { createAssociatedTokenAccount } from "@solana/spl-token";
 
 async function main() {
-  const rpc = createRpc();
-  const payer = Keypair.generate();
-  const sig = await rpc.requestAirdrop(payer.publicKey, 10e9);
-  await rpc.confirmTransaction(sig);
+const rpc = createRpc();
+const payer = Keypair.generate();
+const sig = await rpc.requestAirdrop(payer.publicKey, 10e9);
+await rpc.confirmTransaction(sig);
 
-  // Setup: Get compressed tokens (cold storage)
-  const { mint } = await createMint(rpc, payer, payer.publicKey, 9);
-  await mintTo(rpc, payer, mint, payer.publicKey, payer, bn(1000));
+// Setup: Get compressed tokens (cold storage)
+const { mint } = await createMint(rpc, payer, payer.publicKey, 9);
+await mintTo(rpc, payer, mint, payer.publicKey, payer, bn(1000));
 
-  // Unwrap rent-free tokens to SPL ATA
-  const splAta = await createAssociatedTokenAccount(rpc, payer, mint, payer.publicKey);
-  const tx = await unwrap(rpc, payer, splAta, payer, mint, bn(500));
+// Unwrap rent-free tokens to SPL ATA
+const splAta = await createAssociatedTokenAccount(rpc, payer, mint, payer.publicKey);
+const tx = await unwrap(rpc, payer, splAta, payer, mint, bn(500));
 
-  console.log("Tx:", tx);
+console.log("Tx:", tx);
 }
 
 main().catch(console.error);
-```
+
+````
 
 ```typescript Instruction
 import { Keypair, ComputeBudgetProgram } from "@solana/web3.js";
@@ -289,7 +295,8 @@ async function main() {
 }
 
 main().catch(console.error);
-```
+````
+
 </CodeGroup>
 
 </Step>

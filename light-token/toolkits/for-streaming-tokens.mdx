@@ -1,5 +1,5 @@
 ---
-title: "Toolkit to Index Light-Token Accounts"
+title: "Toolkit to Index Light Token Accounts"
 sidebarTitle: "for Indexing Tokens"
 description: "Light-token accounts follow the same layout as SPL-token accounts, so you can reuse your existing parsers."
 ---
@@ -9,9 +9,9 @@ While compressed, pure on-chain lookups will return uninitialized.
 
 Your indexer should keep tracking, quoting, and routing markets even if the on-chain account shows `is_initialized: false`, `is_compressed: true`. To trade a cold market, the first client must prepend an idempotent decompress "warm up" instruction.
 
-
 <Info>
-Find the source code [here](https://github.com/Lightprotocol/light-protocol/blob/main/js/compressed-token/tests/e2e/load-ata-standard.test.ts).
+  Find the source code
+  [here](https://github.com/Lightprotocol/light-protocol/blob/main/js/compressed-token/tests/e2e/load-ata-standard.test.ts).
 </Info>
 
 <Steps>
@@ -30,48 +30,49 @@ import {
 } from "@lightprotocol/compressed-token";
 
 async function main() {
-  const rpc = createRpc();
-  const payer = Keypair.generate();
-  await rpc.requestAirdrop(payer.publicKey, 10e9);
+const rpc = createRpc();
+const payer = Keypair.generate();
+await rpc.requestAirdrop(payer.publicKey, 10e9);
 
-  const owner = Keypair.generate();
-  await rpc.requestAirdrop(owner.publicKey, 1e9);
+const owner = Keypair.generate();
+await rpc.requestAirdrop(owner.publicKey, 1e9);
 
-  const mintAuthority = Keypair.generate();
-  const mintKeypair = Keypair.generate();
-  const { mint } = await createMint(
-    rpc,
-    payer,
-    mintAuthority.publicKey,
-    9,
-    mintKeypair
-  );
+const mintAuthority = Keypair.generate();
+const mintKeypair = Keypair.generate();
+const { mint } = await createMint(
+rpc,
+payer,
+mintAuthority.publicKey,
+9,
+mintKeypair
+);
 
-  await mintTo(rpc, payer, mint, owner.publicKey, mintAuthority, bn(1000));
+await mintTo(rpc, payer, mint, owner.publicKey, mintAuthority, bn(1000));
 
-  // Get c-token ATA address
-  const ctokenAta = getAssociatedTokenAddressInterface(mint, owner.publicKey);
+// Get c-token ATA address
+const ctokenAta = getAssociatedTokenAddressInterface(mint, owner.publicKey);
 
-  // Load compressed tokens to hot balance
-  // Creates ATA if needed, returns null if nothing to load
-  const signature = await loadAta(
-    rpc,
-    ctokenAta,
-    owner,
-    mint,
-    payer
-  );
+// Load compressed tokens to hot balance
+// Creates ATA if needed, returns null if nothing to load
+const signature = await loadAta(
+rpc,
+ctokenAta,
+owner,
+mint,
+payer
+);
 
-  if (signature) {
-    console.log("Loaded tokens to hot balance");
-    console.log("Transaction:", signature);
-  } else {
-    console.log("Nothing to load");
-  }
+if (signature) {
+console.log("Loaded tokens to hot balance");
+console.log("Transaction:", signature);
+} else {
+console.log("Nothing to load");
+}
 }
 
 main().catch(console.error);
-```
+
+````
 
 ```typescript Instruction
 import { Keypair, ComputeBudgetProgram } from "@solana/web3.js";
@@ -143,12 +144,12 @@ async function main() {
 }
 
 main().catch(console.error);
-```
+````
+
 </CodeGroup>
 
 </Step>
 </Steps>
-
 
 # Stream Light-Mint Accounts
 
