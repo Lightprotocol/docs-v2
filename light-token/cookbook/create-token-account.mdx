@@ -11,8 +11,8 @@ import CTokenConfigureRent from "/snippets/light-token-configure-rent.mdx";
 import CTokenClientPrerequisites from "/snippets/light-token-guides/light-token-client-prerequisites.mdx";
 import CompressibleRentExplained from "/snippets/compressible-rent-explained.mdx";
 
-1. Light-token accounts are Solana accounts that hold token balances of light, SPL, or Token 2022 mints.
-2. Light-token accounts implement a default rent config:
+1. Light token accounts are Solana accounts that hold token balances of light, SPL, or Token 2022 mints.
+2. Light token accounts implement a default rent config:
    1. At account creation, you pay ~17,208 lamports <Tooltip tip="24 h = 16 epochs, where 1 rent-epoch ≈ 1.5h ≈ 13,500 slots at 400ms per slot">for 24h of rent</Tooltip> <br/>and <Tooltip tip="Covers transaction cost to compress accounts (10,000) and protocol incentive (1,000). Transaction cost might vary.">compression incentive</Tooltip> (the rent-exemption is sponsored by the protocol)
    2. Transfers keep the account funded <Tooltip tip="2 epochs = 3h">with rent for 3h</Tooltip> via top-ups. The transaction payer tops up 776 lamports when the account's rent is below 3h.
 
@@ -234,7 +234,7 @@ Find [a full code example at the end](#full-code-example).
 1. Pass the required accounts
 2. Include rent config from `compressible_params`
 3. Use `invoke` or `invoke_signed`, when a CPI requires a PDA signer.
-   <Tabs>
+      <Tabs>
 <Tab title="invoke (External signer)">
 
 ```rust

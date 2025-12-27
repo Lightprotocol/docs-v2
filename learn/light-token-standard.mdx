@@ -176,7 +176,7 @@ Here is how light-mints and SPL mints compare:
 # Token Account
 
 <Note>
-  **Light-token accounts are Solana accounts**, not compressed accounts.
+  **Light token accounts are Solana accounts**, not compressed accounts.
 </Note>
 
 A light-token account holds token balances like SPL Token accounts:
@@ -229,7 +229,7 @@ Additionally Light Token is more performant then SPL on hot paths:
   here](https://github.com/Lightprotocol/light-protocol/blob/0c4e2417b2df2d564721b89e18d1aad3665120e7/program-libs/ctoken-interface/src/state/ctoken/ctoken_struct.rs#L31).
 </Info>
 
-Light-token accounts replicate the field layout and serialization format of [SPL Token accounts](https://solana.com/docs/tokens#token-account). The struct is serialized with Borsh to match the on-chain format of SPL tokens.
+Light token accounts replicate the field layout and serialization format of [SPL Token accounts](https://solana.com/docs/tokens#token-account). The struct is serialized with Borsh to match the on-chain format of SPL tokens.
 
 Here is how light-tokens and SPL tokens compare:
 
@@ -324,7 +324,7 @@ let seeds = [
 
 Under the hood, compressed token accounts store token balance, owner, and other information of inactive light-tokens.
 
-1. Light-token accounts are automatically compressed/decompressed when active/inactive.
+1. Light token accounts are automatically compressed/decompressed when active/inactive.
 2. Any light-token or SPL token can be compressed/decompressed at will.
 
 <Note>

@@ -69,16 +69,16 @@ const ix = CreateAssociatedTokenAccount.new(
 Mints uniquely represent a token on Solana and store its global metadata,
 similar to SPL mint accounts with few core differences:
 
-- Light-token mint accounts are compressed accounts and rent-free.
+- Light token mint accounts are compressed accounts and rent-free.
 - Tokens created from light-token mints are light-tokens.
 
 You can view the source code here.
 
 ### Token Accounts with Pay-as-you-go Rent
 
-Light-tokens are like SPL tokens and hold token balances of light, SPL, or Token 2022 mints.
+Light tokens are like SPL tokens and hold token balances of light, SPL, or Token 2022 mints.
 
-Light-token accounts are Solana accounts, but don't require the creator to pay rent-exemption.
+Light token accounts are Solana accounts, but don't require the creator to pay rent-exemption.
 Instead, rent is paid over time when accounts are accessed:
 
 <CompressibleRentExplained />
