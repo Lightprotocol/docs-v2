@@ -4,14 +4,15 @@ mode: "custom"
 ---
 
 import { Footer } from "/snippets/jsx/footer.jsx";
+import { HeroCubeGrid } from "/snippets/jsx/hero-cube-grid.jsx";
+import { LiquidGlassPill } from "/snippets/jsx/liquid-glass-pill.jsx";
 import WelcomePageInstall from "/snippets/setup/welcome-page-install.mdx";
 
-{/* Simple hero - no fancy JSX components */}
+{/* Hero with animation - styles in style.css (no flash) */}
 
-<div className="text-center py-36 border-b border-gray-200 bg-gray-50">
-  <h1 className="text-4xl font-medium text-gray-900">
-    Scale Anything on Solana.
-  </h1>
+<div className="relative text-center py-32 md:py-40 w-full overflow-hidden border-b border-gray-200">
+  <HeroCubeGrid />
+  <LiquidGlassPill title="Scale Anything on Solana." />
 </div>
 
 {/* Content container - using Tailwind classes to avoid flash */}
@@ -19,12 +20,15 @@ import WelcomePageInstall from "/snippets/setup/welcome-page-install.mdx";
 <div className="max-w-3xl mx-auto px-5 py-12 prose prose-gray dark:prose-invert">
 
 <CardGroup cols={2}>
-  <Card title="" icon="expand" href="/light-token/welcome">
-    ### Light-Token Program (Beta) High performance token standard for Defi and
-    Payments.
+  <Card
+    title="Light-Token Program (Beta)"
+    icon="expand"
+    href="/light-token/welcome"
+  >
+    High performance token standard for DeFi and Payments.
   </Card>
-  <Card title="" icon="compress" href="/welcome">
-    ### ZK Compression For token distribution and app state.
+  <Card title="ZK Compression" icon="compress" href="/welcome">
+    For token distribution and app state.
   </Card>
 </CardGroup>
 ## Features

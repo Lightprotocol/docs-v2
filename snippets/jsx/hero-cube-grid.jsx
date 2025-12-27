@@ -1,12 +1,11 @@
-// ALL STYLES INLINE - no external CSS needed, no flash possible
-// Animation keyframes are embedded in the SVG via style attribute
+// Styles in style.css - animation uses CSS class .cube-tile
 
 export const HeroCubeGrid = () => {
-  const tileSize = 80;
-  const gap = 4;
+  const tileSize = 72;
+  const gap = 6;
   const cellSize = tileSize + gap;
   const cols = Math.ceil(2048 / cellSize);
-  const rows = Math.ceil(826 / cellSize);
+  const rows = Math.ceil(700 / cellSize);
 
   const centerX = (cols - 1) / 2;
   const centerY = (rows - 1) / 2;
@@ -19,70 +18,60 @@ export const HeroCubeGrid = () => {
       const dy = row - centerY;
       const distance = Math.sqrt(dx * dx + dy * dy);
       const normalizedDistance = distance / maxDistance;
-      tiles.push({ col, row, delay: normalizedDistance * 2 });
+      tiles.push({ col, row, delay: normalizedDistance * 2.5 });
     }
   }
 
-  // Keyframes as a string for the SVG style element
-  const keyframesCSS = `
-    @keyframes cubePulse {
-      0%, 100% { transform: scale(0.7); opacity: 0.15; }
-      50% { transform: scale(1); opacity: 0.55; }
-    }
-  `;
-
   return (
-    <svg
-      style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        pointerEvents: 'none',
-      }}
-      viewBox="0 0 2048 826"
-      preserveAspectRatio="xMidYMid slice"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <defs>
-        <style>{keyframesCSS}</style>
-      </defs>
+    <div className="hero-cube-grid">
+      <svg
+        viewBox="0 0 2048 700"
+        preserveAspectRatio="xMidYMid slice"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <defs>
+          <linearGradient id="gridGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#f8fafc" />
+            <stop offset="100%" stopColor="#f1f5f9" />
+          </linearGradient>
+        </defs>
 
-      <rect width="100%" height="100%" fill="#FAFAFA" />
+        <rect width="100%" height="100%" fill="url(#gridGradient)" />
 
-      {tiles.map((tile, i) => {
-        const x = tile.col * cellSize;
-        const y = tile.row * cellSize;
+        {tiles.map((tile, i) => {
+          const x = tile.col * cellSize;
+          const y = tile.row * cellSize;
 
-        return (
-          <g key={i} style={{
-            transformBox: 'fill-box',
-            transformOrigin: 'center',
-            animation: `cubePulse 3s ease-in-out infinite`,
-            animationDelay: `${tile.delay}s`,
-          }}>
-            <rect
-              x={x + gap / 2}
-              y={y + gap / 2}
-              width={tileSize}
-              height={tileSize}
-              fill="#cccccc"
-              fillOpacity={0.3}
-            />
-            <rect
-              x={x + gap / 2}
-              y={y + gap / 2}
-              width={tileSize}
-              height={tileSize}
-              fill="none"
-              stroke="#0066ff"
-              strokeWidth={1.5}
-              strokeOpacity={0.4}
-            />
-          </g>
-        );
-      })}
-    </svg>
+          return (
+            <g 
+              key={i} 
+              className="cube-tile"
+              style={{ animationDelay: `${tile.delay}s` }}
+            >
+              <rect
+                x={x + gap / 2}
+                y={y + gap / 2}
+                width={tileSize}
+                height={tileSize}
+                fill="#e2e8f0"
+                fillOpacity={0.5}
+                rx={4}
+              />
+              <rect
+                x={x + gap / 2}
+                y={y + gap / 2}
+                width={tileSize}
+                height={tileSize}
+                fill="none"
+                stroke="#0066ff"
+                strokeWidth={1.5}
+                strokeOpacity={0.25}
+                rx={4}
+              />
+            </g>
+          );
+        })}
+      </svg>
+    </div>
   );
 };

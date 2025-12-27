@@ -1,47 +1,15 @@
-// ALL STYLES INLINE - no external CSS needed, no flash possible
-// Title is rendered inside component to preserve inline styles
+// Styles in style.css - uses .glass-pill classes
 
 export const LiquidGlassPill = ({ title }) => {
   return (
-    <div style={{
-      position: 'relative',
-      display: 'inline-block',
-    }}>
-      <div style={{
-        position: 'absolute',
-        inset: '-12px -40px',
-        zIndex: 0,
-        borderRadius: '9999px',
-        overflow: 'hidden',
-        background: 'transparent',
-        backdropFilter: 'blur(1px) saturate(120%)',
-        WebkitBackdropFilter: 'blur(1px) saturate(120%)',
-        border: '1px solid rgba(255, 255, 255, 0.35)',
-        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.25)',
-      }}>
-        <span style={{
-          position: 'absolute',
-          inset: '1px',
-          borderRadius: 'inherit',
-          border: '1px solid rgba(255, 255, 255, 0.18)',
-          background: 'transparent',
-          pointerEvents: 'none',
-        }} />
+    <div className="glass-pill">
+      <div className="glass-pill-bg">
+        <span className="glass-pill-inner" />
       </div>
-      <div style={{
-        position: 'relative',
-        zIndex: 1,
-      }}>
-        {/* Title with ALL inline styles - rendered inside component */}
-        <div style={{
-          fontSize: '2.5rem',
-          fontWeight: 500,
-          margin: 0,
-          color: '#111827',
-          fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif",
-        }}>
+      <div className="glass-pill-content">
+        <h1 className="text-4xl md:text-5xl font-medium text-gray-900 m-0">
           {title}
-        </div>
+        </h1>
       </div>
     </div>
   );
