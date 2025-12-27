@@ -8,22 +8,18 @@ import { LiquidGlassPill } from '/snippets/jsx/liquid-glass-pill.jsx';
 import { Footer } from '/snippets/jsx/footer.jsx';
 import WelcomePageInstall from '/snippets/setup/welcome-page-install.mdx';
 
-{/* Hero - full width with SVG background */}
+ {/* Hero - all styles inline in components */}
 <div style={{
   position: 'relative',
   textAlign: 'center',
   padding: '140px 32px 146px',
   width: '100%',
   overflow: 'hidden',
-  borderBottom: '1px solid #e5e7eb'
+  borderBottom: '1px solid #e5e7eb',
+  background: '#FAFAFA'
 }}>
   <HeroCubeGrid />
-  <LiquidGlassPill>
-    <h1 style={{position: 'relative', fontSize: '2.5rem', fontWeight: 500, margin: 0, color: '#111827'}}>Scale Anything on Solana.</h1>
-  </LiquidGlassPill>
-  <p style={{position: 'relative', fontSize: '1.25rem', maxWidth: '600px', margin: '24px auto 0'}}>
-
-  </p>
+  <LiquidGlassPill title="Scale Anything on Solana." />
 </div>
 
 {/* Content container - centered with max-width */}

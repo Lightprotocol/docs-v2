@@ -1,7 +1,7 @@
 // ALL STYLES INLINE - no external CSS needed, no flash possible
-// Inline styles are part of the HTML attributes and render immediately
+// Title is rendered inside component to preserve inline styles
 
-export const LiquidGlassPill = ({ children }) => {
+export const LiquidGlassPill = ({ title }) => {
   return (
     <div style={{
       position: 'relative',
@@ -32,7 +32,16 @@ export const LiquidGlassPill = ({ children }) => {
         position: 'relative',
         zIndex: 1,
       }}>
-        {children}
+        {/* Title with ALL inline styles - rendered inside component */}
+        <div style={{
+          fontSize: '2.5rem',
+          fontWeight: 500,
+          margin: 0,
+          color: '#111827',
+          fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif",
+        }}>
+          {title}
+        </div>
       </div>
     </div>
   );
