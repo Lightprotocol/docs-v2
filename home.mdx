@@ -3,37 +3,28 @@ title: "Home"
 mode: "custom"
 ---
 
-import { HeroCubeGrid } from '/snippets/jsx/hero-cube-grid.jsx';
-import { LiquidGlassPill } from '/snippets/jsx/liquid-glass-pill.jsx';
-import { Footer } from '/snippets/jsx/footer.jsx';
-import WelcomePageInstall from '/snippets/setup/welcome-page-install.mdx';
+import { HeroCubeGrid } from "/snippets/jsx/hero-cube-grid.jsx";
+import { LiquidGlassPill } from "/snippets/jsx/liquid-glass-pill.jsx";
+import { Footer } from "/snippets/jsx/footer.jsx";
+import WelcomePageInstall from "/snippets/setup/welcome-page-install.mdx";
 
- {/* Hero - all styles inline in components */}
-<div style={{
-  position: 'relative',
-  textAlign: 'center',
-  padding: '140px 32px 146px',
-  width: '100%',
-  overflow: 'hidden',
-  borderBottom: '1px solid #e5e7eb',
-  background: '#FAFAFA'
-}}>
+{/* Hero - all styles in components, container styles will be stripped but that's OK */}
+<div style={{position: 'relative', textAlign: 'center', padding: '140px 32px 146px', width: '100%', overflow: 'hidden', borderBottom: '1px solid #e5e7eb', background: '#FAFAFA'}}>
   <HeroCubeGrid />
   <LiquidGlassPill title="Scale Anything on Solana." />
 </div>
 
 {/* Content container - centered with max-width */}
-<div style={{maxWidth: '48rem', padding: '48px 1.25rem 40px', margin: '0 auto'}} className="prose prose-gray dark:prose-invert">
 
+<div style={{maxWidth: '48rem', padding: '48px 1.25rem 40px', margin: '0 auto'}} className="prose prose-gray dark:prose-invert">
 
 <CardGroup cols={2}>
   <Card title="" icon="expand" href="/light-token/welcome">
-  ### Light-Token Program (Beta)
-    High performance token standard for Defi and Payments.
+    ### Light-Token Program (Beta) High performance token standard for Defi and
+    Payments.
   </Card>
   <Card title="" icon="compress" href="/welcome">
-  ### ZK Compression
-    For token distribution and app state.
+    ### ZK Compression For token distribution and app state.
   </Card>
 </CardGroup>
 ## Features
@@ -72,8 +63,6 @@ Both primitives use the same packages and CLI.
 
 </Step>
 </Steps>
-
-
 
 ## Toolkits
 
@@ -118,6 +107,7 @@ Both primitives use the same packages and CLI.
     >
       Stream token events from the network in real-time.
     </Card>
+
   </Tab>
   <Tab title="Compressed Tokens">
       <Card
@@ -189,18 +179,14 @@ Both primitives use the same packages and CLI.
     >
       Common token distribution flows (airdrops, payments, rewards).
     </Card>
+
   </Tab>
 </Tabs>
-
 
 ## Cookbooks
 
 <CardGroup cols={2}>
-  <Card
-    title="Light-Token"
-    icon="coins"
-    href="/light-token/cookbook/overview"
-  >
+  <Card title="Light-Token" icon="coins" href="/light-token/cookbook/overview">
     Program and client guides for mints, token accounts, and transfers.
   </Card>
   <Card
@@ -229,10 +215,10 @@ Both primitives use the same packages and CLI.
 
 ## Using AI in Development
 
-|                 |                                                                   |
-|:---------------------|:------------------------------------------------------------------------------|
-| MCP                 | Connect AI tools to the Light Protocol repository via Model Context Protocol  |
-| DeepWiki   | Use Deepwiki for advanced AI assistance with your development.       |
+|          |                                                                              |
+| :------- | :--------------------------------------------------------------------------- |
+| MCP      | Connect AI tools to the Light Protocol repository via Model Context Protocol |
+| DeepWiki | Use Deepwiki for advanced AI assistance with your development.               |
 
 <Tabs>
 <Tab title="Claude Code">
@@ -241,6 +227,7 @@ Both primitives use the same packages and CLI.
 claude mcp add -s user -t http deepwiki https://mcp.deepwiki.com/mcp
 claude mcp add -s user -t http zkcompression https://www.zkcompression.com/mcp
 ```
+
 </Tab>
 <Tab title="Codex">
 
@@ -273,8 +260,7 @@ codex mcp add deepwiki -- npx -y mcp-remote@latest https://mcp.deepwiki.com/mcp
   color="#0066ff"
   href="/learn/ai-tools-guide"
   horizontal
->
-</Card>
+></Card>
 
 ## Resources
 
