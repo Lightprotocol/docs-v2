@@ -3,15 +3,12 @@ title: "Home"
 mode: "custom"
 ---
 
-import { HeroCubeGrid } from "/snippets/jsx/hero-cube-grid.jsx";
-import { LiquidGlassPill } from "/snippets/jsx/liquid-glass-pill.jsx";
 import { Footer } from "/snippets/jsx/footer.jsx";
 import WelcomePageInstall from "/snippets/setup/welcome-page-install.mdx";
 
-{/* Hero - all styles in components, container styles will be stripped but that's OK */}
-<div style={{position: 'relative', textAlign: 'center', padding: '140px 32px 146px', width: '100%', overflow: 'hidden', borderBottom: '1px solid #e5e7eb', background: '#FAFAFA'}}>
-  <HeroCubeGrid />
-  <LiquidGlassPill title="Scale Anything on Solana." />
+{/* Simple hero - no fancy JSX components */}
+<div className="text-center py-36 border-b border-gray-200 bg-gray-50">
+  <h1 className="text-4xl font-medium text-gray-900">Scale Anything on Solana.</h1>
 </div>
 
 {/* Content container - centered with max-width */}
