@@ -1,5 +1,5 @@
-// CSS for .cube-tile and @keyframes cubePulse is in /style.css
-// Do NOT add inline <style> tags here - they render in <body> and cause flash
+// ALL STYLES INLINE - no external CSS needed, no flash possible
+// Animation keyframes are embedded in the SVG via style attribute
 
 export const HeroCubeGrid = () => {
   const tileSize = 80;
@@ -23,6 +23,14 @@ export const HeroCubeGrid = () => {
     }
   }
 
+  // Keyframes as a string for the SVG style element
+  const keyframesCSS = `
+    @keyframes cubePulse {
+      0%, 100% { transform: scale(0.7); opacity: 0.15; }
+      50% { transform: scale(1); opacity: 0.55; }
+    }
+  `;
+
   return (
     <svg
       style={{
@@ -37,6 +45,10 @@ export const HeroCubeGrid = () => {
       preserveAspectRatio="xMidYMid slice"
       xmlns="http://www.w3.org/2000/svg"
     >
+      <defs>
+        <style>{keyframesCSS}</style>
+      </defs>
+
       <rect width="100%" height="100%" fill="#FAFAFA" />
 
       {tiles.map((tile, i) => {
@@ -44,7 +56,9 @@ export const HeroCubeGrid = () => {
         const y = tile.row * cellSize;
 
         return (
-          <g key={i} className="cube-tile" style={{
+          <g key={i} style={{
+            transformBox: 'fill-box',
+            transformOrigin: 'center',
             animation: `cubePulse 3s ease-in-out infinite`,
             animationDelay: `${tile.delay}s`,
           }}>
