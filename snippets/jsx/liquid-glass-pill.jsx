@@ -7,7 +7,7 @@ export const LiquidGlassPill = ({ title }) => {
         <span className="glass-pill-inner" />
       </div>
       <div className="glass-pill-content">
-        <h1 className="text-4xl md:text-5xl font-medium text-gray-900 m-0">
+        <h1 className="hero-title">
           {title}
         </h1>
       </div>
