@@ -419,10 +419,7 @@ let token_metadata = ExtensionInstructionData::TokenMetadata(
 ```
 
 <Note>
-  **Fields must be set at light-mint creation.** * Standard fields (`name`,
-  `symbol`, `uri`) can be updated by `update_authority`. * For
-  `additional_metadata`, only existing keys can be modified or removed. New keys
-  cannot be added after creation.
+  **Fields must be set at light-mint creation.** Standard fields (`name`, `symbol`, `uri`) can be updated by `update_authority`. For `additional_metadata`, only existing keys can be modified or removed. New keys cannot be added after creation.
 </Note>
 
 </Step>
@@ -448,10 +445,7 @@ let params = CreateCMintParams {
 ```
 
 <Info>
-  * The client passes a validity proof that proves the light-mint address does
-  not exist in the address tree where it will be stored. * You can safely ignore
-  `compression_address` and `address_merkle_tree_root_index`. The client passes
-  these for proof verification.
+  The client passes a validity proof that proves the light-mint address does not exist in the address tree where it will be stored. You can safely ignore `compression_address` and `address_merkle_tree_root_index`. The client passes these for proof verification.
 </Info>
 
 </Step>
