@@ -1,10 +1,10 @@
-const iconStyle = {
-  color: '#6b7280',
-  transition: 'color 0.2s',
-  display: 'flex'
-};
-
 export const Footer = () => {
+  const iconStyle = {
+    color: '#6b7280',
+    transition: 'color 0.2s',
+    display: 'flex'
+  };
+
   return (
     <footer style={{
       borderTop: '1px solid #e5e7eb',
@@ -14,7 +14,7 @@ export const Footer = () => {
         maxWidth: '48rem',
         margin: '0 auto',
         display: 'flex',
-        justifyContent: 'center',
+        justifyContent: 'flex-end',
         alignItems: 'center',
         fontSize: '0.875rem'
       }}>

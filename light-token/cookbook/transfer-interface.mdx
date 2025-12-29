@@ -493,8 +493,8 @@ transfer = transfer.with_spl_interface(
 ```
 
 SPL ↔ light-token transfers require a `spl_interface_pda`:
-_ **SPL → light-token**: SPL tokens are locked by the light token program in the PDA, light-tokens are minted to light-token accounts
-_ **light-token → SPL**: light-tokens are burned, SPL tokens transferred to SPL token accounts
+- **SPL → light-token**: SPL tokens are locked by the light token program in the PDA, light-tokens are minted to light-token accounts
+- **light-token → SPL**: light-tokens are burned, SPL tokens transferred to SPL token accounts
 
 <Info>The interface PDA is derived from the `mint` pubkey and pool seed.</Info>
 <Accordion title="SPL Interface Accounts">
@@ -511,10 +511,16 @@ CPI the Light Token program to execute the transfer.
 Use `invoke()`, or `invoke_signed()` when a CPI requires a PDA signer.
 
 <Tabs>
-  <Tab title="invoke (External signer)">```rust transfer.invoke()?; ```</Tab>
+  <Tab title="invoke (External signer)">
+```rust
+transfer.invoke()?;
+```
+  </Tab>
   <Tab title="invoke_signed (PDA is signer)">
-    ```rust let authority_seeds: &[&[u8]] = &[TRANSFER_INTERFACE_AUTHORITY_SEED,
-    &[authority_bump]]; transfer.invoke_signed(&[authority_seeds])?; ```
+```rust
+let authority_seeds: &[&[u8]] = &[TRANSFER_INTERFACE_AUTHORITY_SEED, &[authority_bump]];
+transfer.invoke_signed(&[authority_seeds])?;
+```
   </Tab>
 </Tabs>
 
