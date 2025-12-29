@@ -88,6 +88,10 @@ const rpc = createRpc(RPC_ENDPOINT);
 
 ### Receive Payments
 
+<Note>
+Find a full code example [here](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments-and-wallets/send-and-receive.ts).
+</Note>
+
 <Tabs>
 <Tab title="Action">
 
@@ -171,6 +175,10 @@ const tx = new Transaction().add(
 
 ### Send Payments
 
+<Note>
+Find a full code example [here](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments-and-wallets/send-and-receive.ts).
+</Note>
+
 <Tabs>
 <Tab title="Action">
 
@@ -183,8 +191,7 @@ import {
 const sourceAta = getAssociatedTokenAddressInterface(mint, owner.publicKey);
 const destinationAta = getAssociatedTokenAddressInterface(mint, recipient);
 
-await transferInterface(
-  rpc,
+await transferInterface( 
   payer,
   sourceAta,
   mint,
@@ -364,6 +371,10 @@ const tx = new Transaction().add(
 
 ### Show Balance
 
+<Note>
+Find a full code example [here](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments-and-wallets/get-balance.ts).
+</Note>
+
 ```typescript
 import {
   getAssociatedTokenAddressInterface,
@@ -390,6 +401,10 @@ console.log(account.amount);
 
 ### Transaction History
 
+<Note>
+Find a full code example [here](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments-and-wallets/get-history.ts).
+</Note>
+
 ```typescript
 const result = await rpc.getSignaturesForOwnerInterface(owner);
 
@@ -409,6 +424,10 @@ const signatures = await connection.getSignaturesForAddress(ata);
 ### Wrap from SPL
 
 When users deposit from a CEX or legacy integration:
+
+<Note>
+Find a full code example [here](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments-and-wallets/wrap.ts).
+</Note>
 
 <Tabs>
 <Tab title="Action">
@@ -464,6 +483,10 @@ const tx = new Transaction().add(
 ### Unwrap to SPL
 
 When users need SPL tokens (CEX withdrawal, legacy integration):
+
+<Note>
+Find a full code example [here](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments-and-wallets/unwrap.ts).
+</Note>
 
 <Tabs>
 <Tab title="Action">

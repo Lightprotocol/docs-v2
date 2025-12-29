@@ -88,6 +88,10 @@ const rpc = createRpc(RPC_ENDPOINT);
 
 ### Receive Payments
 
+<Note>
+Find a full code example [here](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments-and-wallets/send-and-receive.ts).
+</Note>
+
 <Tabs>
 <Tab title="Action">
 
@@ -175,6 +179,10 @@ const tx = new Transaction().add(
 </Tabs>
 
 ### Send Payments
+
+<Note>
+Find a full code example [here](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments-and-wallets/send-and-receive.ts).
+</Note>
 
 <Tabs>
 <Tab title="Action">
@@ -314,6 +322,10 @@ const tx = new Transaction().add(
 
 ### Show Balance
 
+<Note>
+Find a full code example [here](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments-and-wallets/get-balance.ts).
+</Note>
+
 ```typescript
 import {
   getAssociatedTokenAddressInterface,
@@ -340,6 +352,10 @@ console.log(account.amount);
 
 ### Transaction History
 
+<Note>
+Find a full code example [here](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments-and-wallets/get-history.ts).
+</Note>
+
 Token accounts are compressed when inactive
 
 ```typescript
@@ -361,6 +377,10 @@ const signatures = await connection.getSignaturesForAddress(ata);
 </Accordion>
 
 ### Wrap from SPL
+
+<Note>
+Find a full code example [here](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments-and-wallets/wrap.ts).
+</Note>
 
 When users deposit from a CEX or legacy integration:
 
@@ -416,6 +436,10 @@ const tx = new Transaction().add(
 </Tabs>
 
 ### Unwrap to SPL
+
+<Note>
+Find a full code example [here](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments-and-wallets/unwrap.ts).
+</Note>
 
 When users need SPL tokens (CEX withdrawal, legacy integration):
 
