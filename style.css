@@ -15,8 +15,10 @@ body, h1, h2, h3, h4, h5, h6, p, span, div, a, button {
 
 /* Hero cube grid animation */
 @keyframes cubePulse {
-  0%, 100% { transform: scale(0.85); opacity: 0.2; }
-  50% { transform: scale(1); opacity: 0.6; }
+  0% { transform: scale(0.85); opacity: 0.2; }
+  20% { transform: scale(1); opacity: 0.6; }
+  80% { transform: scale(1); opacity: 0.6; }
+  100% { transform: scale(0.85); opacity: 0.2; }
 }
 
 .hero-cube-grid {
@@ -33,7 +35,9 @@ body, h1, h2, h3, h4, h5, h6, p, span, div, a, button {
 .cube-tile {
   transform-box: fill-box;
   transform-origin: center;
-  animation: cubePulse 4s ease-in-out infinite;
+  transform: scale(0.85);
+  opacity: 0.2;
+  animation: cubePulse 5s ease-in-out infinite backwards;
 }
 
 /* Liquid glass pill - 3D glassmorphism */
