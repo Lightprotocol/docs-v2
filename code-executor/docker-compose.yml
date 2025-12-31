@@ -1,0 +1,22 @@
+version: "3.8"
+
+services:
+  code-executor:
+    build: .
+    ports:
+      - "3040:3040"
+    environment:
+      - EXECUTOR_API_KEY=${EXECUTOR_API_KEY}
+      - PORT=3040
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: "0.5"
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /app/.temp:size=50M,mode=1777
+
