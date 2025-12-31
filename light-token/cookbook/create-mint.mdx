@@ -37,25 +37,25 @@ Compare to SPL:
 import { createMint } from "@solana/spl-token";
 
 const mint = await createMint(
-connection,
-payer,
-mintAuthority,
-freezeAuthority,
-decimals
+  connection,
+  payer,
+  mintAuthority,
+  freezeAuthority,
+  decimals
 );`}
   secondCode={`// light-token createMint
 import { createMintInterface } from "@lightprotocol/compressed-token";
 
 const { mint } = await createMintInterface(
-rpc,
-payer,
-mintAuthority,
-freezeAuthority,
-decimals,
-mintKeypair
+  rpc,
+  payer,
+  mintAuthority,
+  freezeAuthority,
+  decimals,
+  mintKeypair
 );`}
-firstLabel="SPL"
-secondLabel="light-token"
+  firstLabel="SPL"
+  secondLabel="light-token"
 />
 
 <Info>
@@ -89,30 +89,29 @@ import { createRpc } from "@lightprotocol/stateless.js";
 import { createMintInterface, createTokenMetadata } from "@lightprotocol/compressed-token";
 
 async function main() {
-const rpc = createRpc();
-const payer = Keypair.generate();
-const sig = await rpc.requestAirdrop(payer.publicKey, 10e9);
-await rpc.confirmTransaction(sig);
+  const rpc = createRpc();
+  const payer = Keypair.generate();
+  const sig = await rpc.requestAirdrop(payer.publicKey, 10e9);
+  await rpc.confirmTransaction(sig);
 
-const { mint, transactionSignature } = await createMintInterface(
-rpc,
-payer,
-payer,
-null,
-9,
-undefined,
-undefined,
-undefined,
-createTokenMetadata("Example Token", "EXT", "https://example.com/metadata.json")
-);
+  const { mint, transactionSignature } = await createMintInterface(
+    rpc,
+    payer,
+    payer,
+    null,
+    9,
+    undefined,
+    undefined,
+    undefined,
+    createTokenMetadata("Example Token", "EXT", "https://example.com/metadata.json")
+  );
 
-console.log("Mint:", mint.toBase58());
-console.log("Tx:", transactionSignature);
+  console.log("Mint:", mint.toBase58());
+  console.log("Tx:", transactionSignature);
 }
 
 main().catch(console.error);
-
-````
+```
 
 ```typescript Instruction
 import "dotenv/config";
@@ -184,7 +183,7 @@ const payer = Keypair.fromSecretKey(
     console.log("Mint:", mintPda.toBase58());
     console.log("Tx:", signature);
 })();
-````
+```
 
 </CodeGroup>
 
