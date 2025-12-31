@@ -137,20 +137,20 @@ import { CTOKEN_PROGRAM_ID } from "@lightprotocol/stateless.js";
 const ata = getAssociatedTokenAddressInterface(mint, recipient);
 
 const tx = new Transaction().add(
-createAssociatedTokenAccountInterfaceIdempotentInstruction(
-payer.publicKey,
-ata,
-recipient,
-mint,
-CTOKEN_PROGRAM_ID
-),
-...(await createLoadAtaInstructions(
-rpc,
-ata,
-recipient,
-mint,
-payer.publicKey
-))
+  createAssociatedTokenAccountInterfaceIdempotentInstruction(
+    payer.publicKey,
+    ata,
+    recipient,
+    mint,
+    CTOKEN_PROGRAM_ID
+  ),
+  ...(await createLoadAtaInstructions(
+    rpc,
+    ata,
+    recipient,
+    mint,
+    payer.publicKey
+  ))
 );
 
 ````
