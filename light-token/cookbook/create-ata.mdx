@@ -16,6 +16,10 @@ import CTokenTsClientPrerequisites from "/snippets/light-token-guides/light-toke
 import ClientCustomRentConfig from "/snippets/light-token-guides/client-custom-rent-config.mdx";
 import { CodeCompare } from "/snippets/jsx/code-compare.jsx";
 import WelcomePageInstall from "/snippets/setup/welcome-page-install.mdx";
+import {
+  splCreateAtaCode,
+  lightCreateAtaCode,
+} from "/snippets/code-samples/code-compare-snippets.jsx";
 
 1. Associated light-token accounts are Solana accounts that hold token balances of light, SPL, or Token 2022 mints.
 2. The address for light-ATAs is deterministically derived with the owner's address, compressed token program ID, and mint address.
@@ -38,24 +42,8 @@ The `createAtaInterface` function creates an associated light-token account in a
 Compare to SPL:
 
 <CodeCompare
-  firstCode={`// SPL create ATA
-import { getOrCreateAssociatedTokenAccount } from "@solana/spl-token";
-
-const ata = await getOrCreateAssociatedTokenAccount(
-  connection,
-  payer,
-  mint,
-  owner
-);`}
-  secondCode={`// light-token create ATA
-import { createAtaInterface } from "@lightprotocol/compressed-token";
-
-const ata = await createAtaInterface(
-  rpc,
-  payer,
-  mint,
-  owner
-);`}
+  firstCode={splCreateAtaCode}
+  secondCode={lightCreateAtaCode}
   firstLabel="SPL"
   secondLabel="light-token"
 />
@@ -542,6 +530,7 @@ pub fn process_create_ata2_invoke_signed(
 # Next Steps
 
 {" "}
+
 <Card
   title="Learn how to mint light-tokens"
   icon="chevron-right"

@@ -11,6 +11,10 @@ import CTokenClientPrerequisites from "/snippets/light-token-guides/light-token-
 import ClientCustomRentConfig from "/snippets/light-token-guides/client-custom-rent-config.mdx";
 import { CodeCompare } from "/snippets/jsx/code-compare.jsx";
 import WelcomePageInstall from "/snippets/setup/welcome-page-install.mdx";
+import {
+  splMintToCode,
+  lightMintToCode,
+} from "/snippets/code-samples/code-compare-snippets.jsx";
 
 1. Mint To creates new tokens of a mint and deposits them to a specified token account.
 2. Before we can mint any tokens, we need an initialized mint account (SPL, Token-2022 or Light) for which we hold the mint authority.
@@ -28,30 +32,10 @@ The function auto-detects the token program (SPL, Token-2022, or Light) from the
 Compare to SPL:
 
 <CodeCompare
-  firstCode={`// SPL mintTo
-import { mintTo } from "@solana/spl-token";
-
-const tx = await mintTo(
-connection,
-payer,
-mint,
-destination,
-mintAuthority,
-amount
-);`}
-  secondCode={`// light-token mintTo
-import { mintToInterface } from "@lightprotocol/compressed-token";
-
-const tx = await mintToInterface(
-rpc,
-payer,
-mint,
-destination,
-mintAuthority,
-amount
-);`}
-firstLabel="SPL"
-secondLabel="light-token"
+  firstCode={splMintToCode}
+  secondCode={lightMintToCode}
+  firstLabel="SPL"
+  secondLabel="light-token"
 />
 
 <Info>
@@ -84,25 +68,24 @@ import {
 } from "@lightprotocol/compressed-token";
 
 async function main() {
-const rpc = createRpc();
-const payer = Keypair.generate();
-const sig = await rpc.requestAirdrop(payer.publicKey, 10e9);
-await rpc.confirmTransaction(sig);
+  const rpc = createRpc();
+  const payer = Keypair.generate();
+  const sig = await rpc.requestAirdrop(payer.publicKey, 10e9);
+  await rpc.confirmTransaction(sig);
 
-const { mint } = await createMintInterface(rpc, payer, payer, null, 9);
+  const { mint } = await createMintInterface(rpc, payer, payer, null, 9);
 
-const recipient = Keypair.generate();
-await createAtaInterface(rpc, payer, mint, recipient.publicKey);
+  const recipient = Keypair.generate();
+  await createAtaInterface(rpc, payer, mint, recipient.publicKey);
 
-const destination = getAssociatedTokenAddressInterface(mint, recipient.publicKey);
-const tx = await mintToInterface(rpc, payer, mint, destination, payer, 1_000_000_000);
+  const destination = getAssociatedTokenAddressInterface(mint, recipient.publicKey);
+  const tx = await mintToInterface(rpc, payer, mint, destination, payer, 1_000_000_000);
 
-console.log("Tx:", tx);
+  console.log("Tx:", tx);
 }
 
 main().catch(console.error);
-
-````
+```
 
 ```typescript Instruction
 import "dotenv/config";
@@ -180,7 +163,7 @@ const payer = Keypair.fromSecretKey(
 
     console.log("Tx:", signature);
 })();
-````
+```
 
 </CodeGroup>
 

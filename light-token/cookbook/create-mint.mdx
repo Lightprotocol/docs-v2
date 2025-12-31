@@ -13,6 +13,10 @@ import ClientCustomRentConfig from "/snippets/light-token-guides/client-custom-r
 import WelcomePageInstall from "/snippets/setup/welcome-page-install.mdx";
 import { CodeCompare } from "/snippets/jsx/code-compare.jsx";
 import { CodeRunnerEmbed } from "/snippets/jsx/code-runner-embed.jsx";
+import {
+  splCreateMintCode,
+  lightCreateMintCode,
+} from "/snippets/code-samples/code-compare-snippets.jsx";
 
 1. Mint accounts uniquely represent a token on Solana and store its global metadata.
 2. Mints for light-token accounts are compressed accounts and rent-free.
@@ -33,27 +37,8 @@ You can use the same interface regardless of mint type.
 Compare to SPL:
 
 <CodeCompare
-  firstCode={`// SPL createMint
-import { createMint } from "@solana/spl-token";
-
-const mint = await createMint(
-  connection,
-  payer,
-  mintAuthority,
-  freezeAuthority,
-  decimals
-);`}
-  secondCode={`// light-token createMint
-import { createMintInterface } from "@lightprotocol/compressed-token";
-
-const { mint } = await createMintInterface(
-  rpc,
-  payer,
-  mintAuthority,
-  freezeAuthority,
-  decimals,
-  mintKeypair
-);`}
+  firstCode={splCreateMintCode}
+  secondCode={lightCreateMintCode}
   firstLabel="SPL"
   secondLabel="light-token"
 />

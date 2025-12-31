@@ -13,6 +13,10 @@ import CTokenTsClientPrerequisites from "/snippets/light-token-guides/light-toke
 import ClientCustomRentConfig from "/snippets/light-token-guides/client-custom-rent-config.mdx";
 import { CodeCompare } from "/snippets/jsx/code-compare.jsx";
 import WelcomePageInstall from "/snippets/setup/welcome-page-install.mdx";
+import {
+  splTransferCode,
+  lightTransferCode,
+} from "/snippets/code-samples/code-compare-snippets.jsx";
 
 ## Get Started
 
@@ -57,29 +61,8 @@ The `transferInterface` function transfers tokens between token accounts (SPL, T
 Compare to SPL:
 
 <CodeCompare
-  firstCode={`// SPL transfer
-import { transfer } from "@solana/spl-token";
-
-const tx = await transfer(
-  connection,
-  payer,
-  sourceAta,
-  destinationAta,
-  owner,
-  amount
-);`}
-  secondCode={`// light-token transfer
-import { transferInterface } from "@lightprotocol/compressed-token";
-
-const tx = await transferInterface(
-  rpc,
-  payer,
-  sourceAta,
-  mint,
-  destinationAta,
-  owner,
-  amount
-);`}
+  firstCode={splTransferCode}
+  secondCode={lightTransferCode}
   firstLabel="SPL"
   secondLabel="light-token"
 />

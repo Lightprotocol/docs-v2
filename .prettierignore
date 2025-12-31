@@ -1,0 +1,6 @@
+# MDX files with code blocks - formatter breaks indentation
+light-token/cookbook/*.mdx
+light-token/faq.mdx
+light-token/toolkits/*.mdx
+blog/light-token.mdx
+

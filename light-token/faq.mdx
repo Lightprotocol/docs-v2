@@ -6,6 +6,10 @@ description: Frequently asked questions about light-token.
 import { CodeCompare } from "/snippets/jsx/code-compare.jsx";
 import CompressibleRentExplained from "/snippets/compressible-rent-explained.mdx";
 import { RentLifecycleVisualizer } from "/snippets/jsx/rent-lifecycle-visualizer.jsx";
+import {
+  splCreateAtaCode,
+  lightCreateAtaCode,
+} from "/snippets/code-samples/code-compare-snippets.jsx";
 
 #### What is light-token?
 
@@ -33,26 +37,10 @@ No. The `light-token-sdk` methods follow similar patterns to SPL.
 Reveal the interface method in the code example and find a few examples below.
 
 <CodeCompare
-  firstCode={`// SPL create ATA
-import { getOrCreateAssociatedTokenAccount } from "@solana/spl-token";
-
-const ata = await getOrCreateAssociatedTokenAccount(
-connection,
-payer,
-mint,
-owner
-);`}
-  secondCode={`// light-token create ATA
-import { createAtaInterface } from "@lightprotocol/compressed-token";
-
-const ata = await createAtaInterface(
-rpc,
-payer,
-mint,
-owner
-);`}
-firstLabel="SPL"
-secondLabel="light-token"
+  firstCode={splCreateAtaCode}
+  secondCode={lightCreateAtaCode}
+  firstLabel="SPL"
+  secondLabel="light-token"
 />
 
 <table>
