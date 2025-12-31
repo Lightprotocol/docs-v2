@@ -377,13 +377,13 @@ const signatures = await connection.getSignaturesForAddress(ata);
 
 </Accordion>
 
-### Wrap from SPL
+### Entry from SPL
+
+Wrap tokens from SPL/Token-2022 accounts to light-token ATA.
 
 <Note>
 Find a full code example [here](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments-and-wallets/wrap.ts).
 </Note>
-
-When users deposit from a CEX or legacy integration:
 
 <Tabs>
 <Tab title="Action">
@@ -436,13 +436,16 @@ const tx = new Transaction().add(
 </Tab>
 </Tabs>
 
-### Unwrap to SPL
+### Exit to SPL
+
+When users withdraw to an integration that does not support light-token yet,
+you'll need to unwrap light-token to SPL.
+
+Unwrap moves tokens from light-token ATA to SPL/Token-2022 account.
 
 <Note>
 Find a full code example [here](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments-and-wallets/unwrap.ts).
 </Note>
-
-When users need SPL tokens (CEX withdrawal, legacy integration):
 
 <Tabs>
 <Tab title="Action">
