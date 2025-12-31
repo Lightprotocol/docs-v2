@@ -51,29 +51,28 @@ import {
 import { createAssociatedTokenAccount } from "@solana/spl-token";
 
 async function main() {
-const rpc = createRpc();
-const payer = Keypair.generate();
-const sig = await rpc.requestAirdrop(payer.publicKey, 10e9);
-await rpc.confirmTransaction(sig);
+  const rpc = createRpc();
+  const payer = Keypair.generate();
+  const sig = await rpc.requestAirdrop(payer.publicKey, 10e9);
+  await rpc.confirmTransaction(sig);
 
-// Setup: Get SPL tokens (needed to wrap)
-const { mint } = await createMint(rpc, payer, payer.publicKey, 9);
-const splAta = await createAssociatedTokenAccount(rpc, payer, mint, payer.publicKey);
-await mintTo(rpc, payer, mint, payer.publicKey, payer, bn(1000));
-await decompress(rpc, payer, mint, bn(1000), payer, splAta);
+  // Setup: Get SPL tokens (needed to wrap)
+  const { mint } = await createMint(rpc, payer, payer.publicKey, 9);
+  const splAta = await createAssociatedTokenAccount(rpc, payer, mint, payer.publicKey);
+  await mintTo(rpc, payer, mint, payer.publicKey, payer, bn(1000));
+  await decompress(rpc, payer, mint, bn(1000), payer, splAta);
 
-// Wrap SPL tokens to rent-free token ATA
-const ctokenAta = getAssociatedTokenAddressInterface(mint, payer.publicKey);
-await createAtaInterfaceIdempotent(rpc, payer, mint, payer.publicKey);
+  // Wrap SPL tokens to rent-free token ATA
+  const ctokenAta = getAssociatedTokenAddressInterface(mint, payer.publicKey);
+  await createAtaInterfaceIdempotent(rpc, payer, mint, payer.publicKey);
 
-const tx = await wrap(rpc, payer, splAta, ctokenAta, payer, mint, bn(500));
+  const tx = await wrap(rpc, payer, splAta, ctokenAta, payer, mint, bn(500));
 
-console.log("Tx:", tx);
+  console.log("Tx:", tx);
 }
 
 main().catch(console.error);
-
-````
+```
 
 ```typescript Instruction
 import { Keypair, ComputeBudgetProgram } from "@solana/web3.js";
@@ -163,7 +162,7 @@ async function main() {
 }
 
 main().catch(console.error);
-````
+```
 
 </CodeGroup>
 
@@ -187,25 +186,24 @@ import { unwrap } from "@lightprotocol/compressed-token/unified";
 import { createAssociatedTokenAccount } from "@solana/spl-token";
 
 async function main() {
-const rpc = createRpc();
-const payer = Keypair.generate();
-const sig = await rpc.requestAirdrop(payer.publicKey, 10e9);
-await rpc.confirmTransaction(sig);
+  const rpc = createRpc();
+  const payer = Keypair.generate();
+  const sig = await rpc.requestAirdrop(payer.publicKey, 10e9);
+  await rpc.confirmTransaction(sig);
 
-// Setup: Get compressed tokens (cold storage)
-const { mint } = await createMint(rpc, payer, payer.publicKey, 9);
-await mintTo(rpc, payer, mint, payer.publicKey, payer, bn(1000));
+  // Setup: Get compressed tokens (cold storage)
+  const { mint } = await createMint(rpc, payer, payer.publicKey, 9);
+  await mintTo(rpc, payer, mint, payer.publicKey, payer, bn(1000));
 
-// Unwrap rent-free tokens to SPL ATA
-const splAta = await createAssociatedTokenAccount(rpc, payer, mint, payer.publicKey);
-const tx = await unwrap(rpc, payer, splAta, payer, mint, bn(500));
+  // Unwrap rent-free tokens to SPL ATA
+  const splAta = await createAssociatedTokenAccount(rpc, payer, mint, payer.publicKey);
+  const tx = await unwrap(rpc, payer, splAta, payer, mint, bn(500));
 
-console.log("Tx:", tx);
+  console.log("Tx:", tx);
 }
 
 main().catch(console.error);
-
-````
+```
 
 ```typescript Instruction
 import { Keypair, ComputeBudgetProgram } from "@solana/web3.js";
@@ -295,7 +293,7 @@ async function main() {
 }
 
 main().catch(console.error);
-````
+```
 
 </CodeGroup>
 

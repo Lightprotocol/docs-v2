@@ -116,30 +116,29 @@ import {
 } from "@lightprotocol/compressed-token";
 
 async function main() {
-const rpc = createRpc();
-const payer = Keypair.generate();
-const sig = await rpc.requestAirdrop(payer.publicKey, 10e9);
-await rpc.confirmTransaction(sig);
+  const rpc = createRpc();
+  const payer = Keypair.generate();
+  const sig = await rpc.requestAirdrop(payer.publicKey, 10e9);
+  await rpc.confirmTransaction(sig);
 
-const { mint } = await createMintInterface(rpc, payer, payer, null, 9);
+  const { mint } = await createMintInterface(rpc, payer, payer, null, 9);
 
-const sender = Keypair.generate();
-await createAtaInterface(rpc, payer, mint, sender.publicKey);
-const senderAta = getAssociatedTokenAddressInterface(mint, sender.publicKey);
-await mintToInterface(rpc, payer, mint, senderAta, payer, 1_000_000_000);
+  const sender = Keypair.generate();
+  await createAtaInterface(rpc, payer, mint, sender.publicKey);
+  const senderAta = getAssociatedTokenAddressInterface(mint, sender.publicKey);
+  await mintToInterface(rpc, payer, mint, senderAta, payer, 1_000_000_000);
 
-const recipient = Keypair.generate();
-await createAtaInterface(rpc, payer, mint, recipient.publicKey);
-const recipientAta = getAssociatedTokenAddressInterface(mint, recipient.publicKey);
+  const recipient = Keypair.generate();
+  await createAtaInterface(rpc, payer, mint, recipient.publicKey);
+  const recipientAta = getAssociatedTokenAddressInterface(mint, recipient.publicKey);
 
-const tx = await transferInterface(rpc, payer, senderAta, mint, recipientAta, sender, 500_000_000);
+  const tx = await transferInterface(rpc, payer, senderAta, mint, recipientAta, sender, 500_000_000);
 
-console.log("Tx:", tx);
+  console.log("Tx:", tx);
 }
 
 main().catch(console.error);
-
-````
+```
 
 ```typescript Instruction
 import "dotenv/config";
@@ -189,7 +188,7 @@ const payer = Keypair.fromSecretKey(
 
     console.log("Tx:", signature);
 })();
-````
+```
 
 </CodeGroup>
 
