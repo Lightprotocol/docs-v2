@@ -5,9 +5,9 @@ description: "Guide for fiat on-ramps to integrate light-token APIs with compari
 ---
 
 1. On-ramps need to create ATAs for every user's to hold a specific token. Light tokens reduce this cost by 200x.
-2. The light-token API matches the SPL-token API almost entirely, 
+2. Your users receive the same token, just stored more efficiently.
+3. The light-token API matches the SPL-token API almost entirely, 
 and extends their functionality to include the light token program in addition to the SPL-token and Token-2022 programs. 
-3. Your users receive the same token, just stored more efficiently.
 
 | Creation Cost     | SPL                 | light-token          |
 | :---------------- | :------------------ | :------------------- |
@@ -42,10 +42,6 @@ and extends their functionality to include the light token program in addition t
   </tbody>
 </table>
 
-<Note>
-Find full code examples [here](https://github.com/Lightprotocol/light-token-toolkits).
-</Note>
-
 ## Setup
 
 <Snippet file="setup/toolkits-setup.mdx" />
@@ -67,6 +63,10 @@ const rpc = createRpc(RPC_ENDPOINT);
 1. Derives the user's light-token ATA
 2. Creates the ATA (idempotent)
 3. Transfers tokens from hot wallet to user
+
+<Note>
+Find full code examples [here](https://github.com/Lightprotocol/light-token-toolkits).
+</Note>
 
 <Tabs>
 <Tab title="Action">
@@ -205,6 +205,8 @@ function buildOnrampTxSPL(
 
 </Tab>
 </Tabs>
+
+
 
 
 ## Exit to SPL
