@@ -4,6 +4,8 @@ sidebarTitle: "for Indexing Tokens"
 description: "Light token accounts follow the same layout as SPL-token accounts, so you can reuse your existing parsers."
 ---
 
+import ToolkitsSetup from "/snippets/setup/toolkits-setup.mdx";
+
 When a market becomes inactive, its token accounts and related PDAs will be compressed - their state is committed and effectively frozen until a client decompresses it.
 While compressed, pure on-chain lookups will return uninitialized.
 
@@ -13,6 +15,10 @@ Your indexer should keep tracking, quoting, and routing markets even if the on-c
   Find the source code
   [here](https://github.com/Lightprotocol/light-protocol/blob/main/js/compressed-token/tests/e2e/load-ata-standard.test.ts).
 </Info>
+
+## Setup
+
+<ToolkitsSetup />
 
 <Steps>
 <Step>
