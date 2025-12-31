@@ -1,0 +1,101 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Dark theme (default) - matching Solana docs exactly */
+:root {
+  --ch-0: dark;
+  --ch-1: #8b949e;
+  --ch-2: #79c0ff;
+  --ch-3: #ffa657;
+  --ch-4: #c9d1d9;
+  --ch-5: #d2a8ff;
+  --ch-6: #7ee787;
+  --ch-7: #ff7b72;
+  --ch-8: #a5d6ff;
+  --ch-9: #ffa198;
+  --ch-10: #f0f6fc;
+  --ch-11: #490202;
+  --ch-12: #04260f;
+  --ch-13: #5a1e02;
+  --ch-14: #161b22;
+  --ch-15: #8b949e;
+  --ch-16: #0d1117;
+  --ch-17: #6e76811a;
+  --ch-18: #ffffff0b;
+  --ch-19: #3794ff;
+  --ch-20: #264f78;
+  --ch-21: #1f6feb;
+  --ch-22: #010409;
+  --ch-23: #30363d;
+  --ch-24: #6e7681;
+  --ch-25: #6e768166;
+  --ch-26: #0d1117e6;
+
+  --fd-border: 215 14% 20%;
+  --fd-muted: 215 14% 11%;
+
+  --ch-background: var(--ch-16);
+  --ch-foreground: var(--ch-4);
+  --ch-border: hsl(var(--fd-border));
+  --ch-tabs-background: hsl(var(--fd-muted));
+  --ch-tab-active-foreground: var(--ch-4);
+  --ch-tab-inactive-foreground: var(--ch-15);
+  --ch-active-border: var(--ch-3);
+  --ch-selection: var(--ch-20);
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+html,
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+body {
+  background: var(--ch-background);
+  color: var(--ch-foreground);
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* Monospace font stack matching Solana */
+.font-mono,
+pre,
+code {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-feature-settings: normal;
+  font-variation-settings: normal;
+}
+
+/* Code block styling */
+pre {
+  direction: ltr;
+  text-align: left;
+}
+
+/* Shiki overrides */
+.shiki,
+.shiki code {
+  background-color: transparent !important;
+}
+
+.shiki code {
+  display: block;
+}
+
+.shiki .line {
+  display: inline-block;
+  width: 100%;
+  min-height: 1.5rem;
+  line-height: 1.5rem;
+}
+
+/* Selection color */
+::selection {
+  background-color: var(--ch-selection);
+}
