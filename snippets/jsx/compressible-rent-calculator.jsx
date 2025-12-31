@@ -16,7 +16,7 @@ export const CompressibleRentCalculator = () => {
   const LAMPORTS_MAX = 6400;
 
   const numEpochs = Math.ceil((hours * 60) / MINUTES_PER_EPOCH);
-  const rentPerEpoch = BASE_RENT + (DATA_LEN * LAMPORTS_PER_BYTE_PER_EPOCH);
+  const rentPerEpoch = BASE_RENT + DATA_LEN * LAMPORTS_PER_BYTE_PER_EPOCH;
   const totalPrepaidRent = rentPerEpoch * numEpochs;
   const totalCreationCost = totalPrepaidRent + COMPRESSION_INCENTIVE;
 
@@ -49,24 +49,32 @@ export const CompressibleRentCalculator = () => {
   };
 
   return (
-    <div className="p-5 rounded-3xl not-prose mt-4 dark:bg-white/5 backdrop-blur-xl border border-black/[0.04] dark:border-white/10 shadow-lg" style={{ fontFamily: 'Inter, sans-serif' }}>
+    <div
+      className="p-5 rounded-3xl not-prose mt-4 dark:bg-white/5 backdrop-blur-xl border border-black/[0.04] dark:border-white/10 shadow-lg"
+      style={{ fontFamily: "Inter, sans-serif" }}
+    >
       <div className="space-y-5">
         {/* Prepaid Epochs in Hours */}
         <div className="space-y-2 px-3">
           <div className="flex justify-between items-center">
-            <span className="text-sm text-zinc-700 dark:text-white/80">Prepaid Epochs in Hours</span>
+            <span className="text-sm text-zinc-700 dark:text-white/80">
+              Prepaid Epochs in Hours
+            </span>
             <div className="flex items-center gap-1.5">
               {hoursPresets.map((h) => (
                 <button
                   key={h}
-                  onClick={() => { setHours(h); setShowCustomHours(false); }}
+                  onClick={() => {
+                    setHours(h);
+                    setShowCustomHours(false);
+                  }}
                   className={`px-2.5 py-1 text-xs font-medium rounded-lg border backdrop-blur-sm transition-all ${
                     hours === h && !showCustomHours
-                      ? 'bg-blue-500/20 border-blue-500/50 text-blue-600 dark:text-blue-400'
-                      : 'bg-black/[0.015] dark:bg-white/5 border-black/[0.04] dark:border-white/20 text-zinc-600 dark:text-white/70 hover:bg-black/[0.03]'
+                      ? "bg-blue-500/20 border-blue-500/50 text-blue-600 dark:text-blue-400"
+                      : "bg-black/[0.015] dark:bg-white/5 border-black/[0.04] dark:border-white/20 text-zinc-600 dark:text-white/70 hover:bg-black/[0.03]"
                   }`}
                 >
-                  {h === 24 ? 'Default' : `${h}h`}
+                  {h === 24 ? "Default" : `${h}h`}
                 </button>
               ))}
               {showCustomHours ? (
@@ -100,7 +108,10 @@ export const CompressibleRentCalculator = () => {
                 min="3"
                 max={HOURS_MAX}
                 value={Math.min(hours, HOURS_MAX)}
-                onChange={(e) => { setHours(Number.parseInt(e.target.value)); setShowCustomHours(false); }}
+                onChange={(e) => {
+                  setHours(Number.parseInt(e.target.value));
+                  setShowCustomHours(false);
+                }}
                 className="relative w-full h-1.5 bg-black/[0.03] dark:bg-white/20 rounded-full appearance-none cursor-pointer backdrop-blur-sm z-10"
               />
             </div>
@@ -115,14 +126,17 @@ export const CompressibleRentCalculator = () => {
               {lamportsPresets.map((l) => (
                 <button
                   key={l}
-                  onClick={() => { setLamportsPerWrite(l); setShowCustomLamports(false); }}
+                  onClick={() => {
+                    setLamportsPerWrite(l);
+                    setShowCustomLamports(false);
+                  }}
                   className={`px-2.5 py-1 text-xs font-medium rounded-lg border backdrop-blur-sm transition-all ${
                     lamportsPerWrite === l && !showCustomLamports
-                      ? 'bg-blue-500/20 border-blue-500/50 text-blue-600 dark:text-blue-400'
-                      : 'bg-black/[0.015] dark:bg-white/5 border-black/[0.04] dark:border-white/20 text-zinc-600 dark:text-white/70 hover:bg-black/[0.03]'
+                      ? "bg-blue-500/20 border-blue-500/50 text-blue-600 dark:text-blue-400"
+                      : "bg-black/[0.015] dark:bg-white/5 border-black/[0.04] dark:border-white/20 text-zinc-600 dark:text-white/70 hover:bg-black/[0.03]"
                   }`}
                 >
-                  {l === 776 ? 'Default' : l.toLocaleString()}
+                  {l === 776 ? "Default" : l.toLocaleString()}
                 </button>
               ))}
               {showCustomLamports ? (
@@ -147,7 +161,8 @@ export const CompressibleRentCalculator = () => {
           </div>
           <div className="flex items-center">
             <span className="w-1/3 text-xs text-zinc-500 dark:text-white/50 whitespace-nowrap">
-              ≈ {(lamportsPerWrite / rentPerEpoch).toFixed(1)} epochs / {((lamportsPerWrite / rentPerEpoch) * MINUTES_PER_EPOCH / 60).toFixed(1)}h
+              ≈ {(lamportsPerWrite / rentPerEpoch).toFixed(1)} epochs /{" "}
+              {(((lamportsPerWrite / rentPerEpoch) * MINUTES_PER_EPOCH) / 60).toFixed(1)}h
             </span>
             <div className="w-2/3 relative">
               <SliderMarkers max={LAMPORTS_MAX} step={800} />
@@ -157,7 +172,10 @@ export const CompressibleRentCalculator = () => {
                 max={LAMPORTS_MAX}
                 step="100"
                 value={Math.min(lamportsPerWrite, LAMPORTS_MAX)}
-                onChange={(e) => { setLamportsPerWrite(Number.parseInt(e.target.value)); setShowCustomLamports(false); }}
+                onChange={(e) => {
+                  setLamportsPerWrite(Number.parseInt(e.target.value));
+                  setShowCustomLamports(false);
+                }}
                 className="relative w-full h-1.5 bg-black/[0.03] dark:bg-white/20 rounded-full appearance-none cursor-pointer backdrop-blur-sm z-10"
               />
             </div>
@@ -167,21 +185,29 @@ export const CompressibleRentCalculator = () => {
         {/* Result Cards */}
         <div className="grid grid-cols-2 gap-3">
           <div className="p-4 bg-black/[0.015] dark:bg-white/5 backdrop-blur-md rounded-2xl text-center border border-black/[0.04] dark:border-white/10 shadow-sm">
-            <div className="text-xs text-zinc-500 dark:text-white/50 mb-1 uppercase tracking-wide">Total Creation Cost</div>
+            <div className="text-xs text-zinc-500 dark:text-white/50 mb-1 uppercase tracking-wide">
+              Total Creation Cost
+            </div>
             <div className="text-xl font-mono font-semibold text-zinc-900 dark:text-white">
               {totalCreationCost.toLocaleString()}
             </div>
             <div className="text-xs text-zinc-400 dark:text-white/40">lamports</div>
-            <div className="text-xs text-zinc-500 dark:text-white/50 mt-1">≈ {(totalCreationCost / LAMPORTS_PER_SOL).toFixed(6)} SOL</div>
+            <div className="text-xs text-zinc-500 dark:text-white/50 mt-1">
+              ≈ {(totalCreationCost / LAMPORTS_PER_SOL).toFixed(6)} SOL
+            </div>
           </div>
 
           <div className="p-4 bg-black/[0.015] dark:bg-white/5 backdrop-blur-md rounded-2xl text-center border border-black/[0.04] dark:border-white/10 shadow-sm">
-            <div className="text-xs text-zinc-500 dark:text-white/50 mb-1 uppercase tracking-wide">Top-up Amount</div>
+            <div className="text-xs text-zinc-500 dark:text-white/50 mb-1 uppercase tracking-wide">
+              Top-up Amount
+            </div>
             <div className="text-xl font-mono font-semibold text-zinc-900 dark:text-white">
               {lamportsPerWrite.toLocaleString()}
             </div>
             <div className="text-xs text-zinc-400 dark:text-white/40">lamports</div>
-            <div className="text-xs text-zinc-500 dark:text-white/50 mt-1">≈ {(lamportsPerWrite / LAMPORTS_PER_SOL).toFixed(6)} SOL</div>
+            <div className="text-xs text-zinc-500 dark:text-white/50 mt-1">
+              ≈ {(lamportsPerWrite / LAMPORTS_PER_SOL).toFixed(6)} SOL
+            </div>
           </div>
         </div>
 
@@ -191,15 +217,22 @@ export const CompressibleRentCalculator = () => {
             onClick={() => setShowFormula(!showFormula)}
             className="flex items-center gap-2 text-xs text-zinc-500 dark:text-white/50 hover:text-zinc-700 dark:hover:text-white/70 transition-colors"
           >
-            <span className={`transition-transform ${showFormula ? 'rotate-90' : ''}`}>▶</span>
+            <span className={`transition-transform ${showFormula ? "rotate-90" : ""}`}>▶</span>
             Show formula
           </button>
           {showFormula && (
             <div className="text-xs font-mono text-zinc-500 dark:text-white/40 mt-3">
-              <div className="text-zinc-600 dark:text-white/60 mb-2">Total cost for {DATA_LEN}-byte light-token account:</div>
-              total_creation_cost = prepaid_rent + compression_incentive<br/><br/>
-              rent_per_epoch = base_rent + (data_len × lamports_per_byte_per_epoch)<br/>
-              rent_per_epoch = {BASE_RENT} + ({DATA_LEN} × {LAMPORTS_PER_BYTE_PER_EPOCH}) = {rentPerEpoch} lamports<br/>
+              <div className="text-zinc-600 dark:text-white/60 mb-2">
+                Total cost for {DATA_LEN}-byte light-token account:
+              </div>
+              total_creation_cost = prepaid_rent + compression_incentive
+              <br />
+              <br />
+              rent_per_epoch = base_rent + (data_len × lamports_per_byte_per_epoch)
+              <br />
+              rent_per_epoch = {BASE_RENT} + ({DATA_LEN} × {LAMPORTS_PER_BYTE_PER_EPOCH}) ={" "}
+              {rentPerEpoch} lamports
+              <br />
               compression_incentive = {COMPRESSION_INCENTIVE.toLocaleString()} lamports
             </div>
           )}

@@ -32,12 +32,12 @@ export const HeroBackground = () => {
   return (
     <svg
       style={{
-        position: 'absolute',
+        position: "absolute",
         top: 0,
         left: 0,
-        width: '100%',
-        height: '100%',
-        pointerEvents: 'none',
+        width: "100%",
+        height: "100%",
+        pointerEvents: "none",
       }}
       viewBox="0 0 2048 826"
       preserveAspectRatio="xMidYMid slice"

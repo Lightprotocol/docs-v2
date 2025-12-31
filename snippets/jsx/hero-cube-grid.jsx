@@ -43,11 +43,7 @@ export const HeroCubeGrid = () => {
           const y = tile.row * cellSize;
 
           return (
-            <g 
-              key={i} 
-              className="cube-tile"
-              style={{ animationDelay: `${tile.delay}s` }}
-            >
+            <g key={i} className="cube-tile" style={{ animationDelay: `${tile.delay}s` }}>
               <rect
                 x={x + gap / 2}
                 y={y + gap / 2}

@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint-and-format:
+    name: Lint & Format Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check formatting
+        run: npm run format:check
+
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: Spellcheck
+        run: npm run spellcheck
+
+  validate-mdx:
+    name: Validate MDX
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check for broken code fences
+        run: |
+          echo "Checking for malformed code fences (````)..."
+          if grep -rn '````' --include="*.mdx" .; then
+            echo "::error::Found malformed code fences (````). Use triple backticks (\`\`\`) instead."
+            exit 1
+          fi
+          echo "No malformed code fences found."
+
+      - name: Check imports resolve
+        run: |
+          echo "Checking for .ts imports in MDX (Mintlify only supports .jsx)..."
+          if grep -rn 'from.*\.ts"' --include="*.mdx" .; then
+            echo "::error::Found .ts imports in MDX files. Mintlify only supports .jsx imports."
+            exit 1
+          fi
+          echo "No .ts imports found in MDX files."

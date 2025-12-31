@@ -12,10 +12,10 @@ export const HeroBackground = () => {
   const getQuadrant = (col, row) => {
     const isTop = row <= 3;
     const isLeft = col <= 11;
-    if (isTop && isLeft) return 'tl';
-    if (isTop && !isLeft) return 'tr';
-    if (!isTop && isLeft) return 'bl';
-    return 'br';
+    if (isTop && isLeft) return "tl";
+    if (isTop && !isLeft) return "tr";
+    if (!isTop && isLeft) return "bl";
+    return "br";
   };
 
   const baseTiles = [
@@ -69,12 +69,12 @@ export const HeroBackground = () => {
   return (
     <svg
       style={{
-        position: 'absolute',
+        position: "absolute",
         top: 0,
         left: 0,
-        width: '100%',
-        height: '100%',
-        pointerEvents: 'none',
+        width: "100%",
+        height: "100%",
+        pointerEvents: "none",
       }}
       viewBox="0 0 2048 826"
       preserveAspectRatio="xMidYMid slice"
@@ -159,10 +159,30 @@ export const HeroBackground = () => {
       <rect width="100%" height="100%" fill="#F7FAFA" />
       <rect width="100%" height="100%" fill="#F7FAFA" filter="url(#noise)" opacity="0.03" />
 
-      <rect className="bloom-layer bloom-tl" width="100%" height="100%" fill="url(#bloom-top-left)" />
-      <rect className="bloom-layer bloom-tr" width="100%" height="100%" fill="url(#bloom-top-right)" />
-      <rect className="bloom-layer bloom-center" width="100%" height="100%" fill="url(#center-glow)" />
-      <rect className="bloom-layer bloom-bottom" width="100%" height="100%" fill="url(#bloom-bottom-center)" />
+      <rect
+        className="bloom-layer bloom-tl"
+        width="100%"
+        height="100%"
+        fill="url(#bloom-top-left)"
+      />
+      <rect
+        className="bloom-layer bloom-tr"
+        width="100%"
+        height="100%"
+        fill="url(#bloom-top-right)"
+      />
+      <rect
+        className="bloom-layer bloom-center"
+        width="100%"
+        height="100%"
+        fill="url(#center-glow)"
+      />
+      <rect
+        className="bloom-layer bloom-bottom"
+        width="100%"
+        height="100%"
+        fill="url(#bloom-bottom-center)"
+      />
 
       {Array.from({ length: cols + 1 }, (_, i) => {
         const isMajor = i % 4 === 0;
@@ -177,7 +197,7 @@ export const HeroBackground = () => {
             stroke="#B9C4CE"
             strokeWidth={1}
             style={{
-              animation: `${isMajor ? 'gridShimmerMajor' : 'gridShimmer'} 4s ease-in-out infinite`,
+              animation: `${isMajor ? "gridShimmerMajor" : "gridShimmer"} 4s ease-in-out infinite`,
               animationDelay: `${delay}s`,
             }}
           />
@@ -197,7 +217,7 @@ export const HeroBackground = () => {
             stroke="#B9C4CE"
             strokeWidth={1}
             style={{
-              animation: `${isMajor ? 'gridShimmerMajor' : 'gridShimmer'} 4s ease-in-out infinite`,
+              animation: `${isMajor ? "gridShimmerMajor" : "gridShimmer"} 4s ease-in-out infinite`,
               animationDelay: `${delay + 1}s`,
             }}
           />

@@ -13,12 +13,10 @@ export const CodeCompare = ({
   const isLightMode = sliderPercent > 50;
 
   const highlightCode = (code) => {
-    let escaped = code
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;");
+    let escaped = code.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-    const pattern = /(\/\/.*$)|(["'`])(?:(?!\2)[^\\]|\\.)*?\2|\b(const|let|var|await|async|import|from|export|return|if|else|function|class|new|throw|try|catch)\b|\.([a-zA-Z_][a-zA-Z0-9_]*)\b|\b([a-zA-Z_][a-zA-Z0-9_]*)\s*(?=\()/gm;
+    const pattern =
+      /(\/\/.*$)|(["'`])(?:(?!\2)[^\\]|\\.)*?\2|\b(const|let|var|await|async|import|from|export|return|if|else|function|class|new|throw|try|catch)\b|\.([a-zA-Z_][a-zA-Z0-9_]*)\b|\b([a-zA-Z_][a-zA-Z0-9_]*)\s*(?=\()/gm;
 
     return escaped.replace(pattern, (match, comment, stringQuote, keyword, property, func) => {
       if (comment) return `<span style="color:#6b7280;font-style:italic">${match}</span>`;
@@ -115,6 +113,7 @@ export const CodeCompare = ({
         document.removeEventListener("mouseup", handleMouseUp);
       };
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isDragging]);
 
   // Cleanup animation on unmount
@@ -129,22 +128,22 @@ export const CodeCompare = ({
       <div
         className="rounded-3xl not-prose mt-4 backdrop-blur-xl border overflow-hidden"
         style={{
-          fontFamily: 'Inter, sans-serif',
-          borderColor: '#d4d4d8',
+          fontFamily: "Inter, sans-serif",
+          borderColor: "#d4d4d8",
         }}
       >
         {/* Header with toggle */}
         <div
           className="flex items-center justify-between px-4 py-3 border-b"
           style={{
-            background: 'linear-gradient(to bottom, #f8f9fa, #f1f3f4)',
-            borderColor: '#e4e4e7',
+            background: "linear-gradient(to bottom, #f8f9fa, #f1f3f4)",
+            borderColor: "#e4e4e7",
           }}
         >
           <span
             className="text-sm font-medium"
             style={{
-              color: '#52525b',
+              color: "#52525b",
             }}
           >
             {isLightMode ? secondLabel : firstLabel}
@@ -154,44 +153,42 @@ export const CodeCompare = ({
           <div
             onClick={handleToggle}
             style={{
-              position: 'relative',
-              width: '56px',
-              height: '28px',
-              background: '#e0e0e0',
-              borderRadius: '14px',
-              boxShadow: 'inset -2px -2px 4px #ffffff, inset 2px 2px 4px #b0b0b0',
-              cursor: 'pointer',
-              transition: 'background 0.3s ease, box-shadow 0.3s ease',
+              position: "relative",
+              width: "56px",
+              height: "28px",
+              background: "#e0e0e0",
+              borderRadius: "14px",
+              boxShadow: "inset -2px -2px 4px #ffffff, inset 2px 2px 4px #b0b0b0",
+              cursor: "pointer",
+              transition: "background 0.3s ease, box-shadow 0.3s ease",
             }}
           >
             {/* Toggle button */}
             <div
               style={{
-                position: 'absolute',
-                width: '24px',
-                height: '24px',
-                background: 'linear-gradient(145deg, #f5f5f5, #e0e0e0)',
-                borderRadius: '12px',
-                top: '2px',
-                left: isLightMode ? '30px' : '2px',
-                boxShadow: '-2px -2px 4px #ffffff, 2px 2px 4px #b0b0b0',
-                transition: 'all 0.3s ease-in-out',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
+                position: "absolute",
+                width: "24px",
+                height: "24px",
+                background: "linear-gradient(145deg, #f5f5f5, #e0e0e0)",
+                borderRadius: "12px",
+                top: "2px",
+                left: isLightMode ? "30px" : "2px",
+                boxShadow: "-2px -2px 4px #ffffff, 2px 2px 4px #b0b0b0",
+                transition: "all 0.3s ease-in-out",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
               }}
             >
               {/* LED */}
               <div
                 style={{
-                  width: '6px',
-                  height: '6px',
-                  background: isLightMode ? '#0066ff' : '#999',
-                  borderRadius: '50%',
-                  boxShadow: isLightMode
-                    ? '0 0 8px 2px #0066ff'
-                    : '0 0 4px 1px rgba(0, 0, 0, 0.1)',
-                  transition: 'all 0.3s ease-in-out',
+                  width: "6px",
+                  height: "6px",
+                  background: isLightMode ? "#0066ff" : "#999",
+                  borderRadius: "50%",
+                  boxShadow: isLightMode ? "0 0 8px 2px #0066ff" : "0 0 4px 1px rgba(0, 0, 0, 0.1)",
+                  transition: "all 0.3s ease-in-out",
                 }}
               />
             </div>
@@ -260,7 +257,8 @@ export const CodeCompare = ({
                 style={{
                   right: "50%",
                   width: "80px",
-                  background: "linear-gradient(to left, rgba(0, 102, 255, 0.15) 0%, transparent 100%)",
+                  background:
+                    "linear-gradient(to left, rgba(0, 102, 255, 0.15) 0%, transparent 100%)",
                 }}
               />
 
@@ -282,7 +280,12 @@ export const CodeCompare = ({
                   {[0, 1, 2].map((i) => (
                     <div
                       key={i}
-                      style={{ width: '3px', height: '3px', borderRadius: '50%', background: '#0066ff' }}
+                      style={{
+                        width: "3px",
+                        height: "3px",
+                        borderRadius: "50%",
+                        background: "#0066ff",
+                      }}
                     />
                   ))}
                 </div>
@@ -290,7 +293,12 @@ export const CodeCompare = ({
                   {[0, 1, 2].map((i) => (
                     <div
                       key={i}
-                      style={{ width: '3px', height: '3px', borderRadius: '50%', background: '#0066ff' }}
+                      style={{
+                        width: "3px",
+                        height: "3px",
+                        borderRadius: "50%",
+                        background: "#0066ff",
+                      }}
                     />
                   ))}
                 </div>

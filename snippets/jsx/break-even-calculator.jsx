@@ -18,7 +18,7 @@ export const BreakEvenCalculator = () => {
   const solanaCost = numAccounts * solanaCostPerAccount;
   const compressedCostPerAccount = costPerWrite * (1 + numWrites);
   const compressedCost = numAccounts * compressedCostPerAccount;
-  const breakEvenWrites = Math.floor((solanaCostPerAccount / costPerWrite) - 1);
+  const breakEvenWrites = Math.floor(solanaCostPerAccount / costPerWrite - 1);
   const useCompressed = numWrites < breakEvenWrites;
 
   const handleDataLenChange = (value) => {
@@ -52,7 +52,10 @@ export const BreakEvenCalculator = () => {
   };
 
   return (
-    <div className="p-5 rounded-3xl not-prose mt-4 dark:bg-white/5 backdrop-blur-xl border border-black/[0.04] dark:border-white/10 shadow-lg" style={{ fontFamily: 'Inter, sans-serif' }}>
+    <div
+      className="p-5 rounded-3xl not-prose mt-4 dark:bg-white/5 backdrop-blur-xl border border-black/[0.04] dark:border-white/10 shadow-lg"
+      style={{ fontFamily: "Inter, sans-serif" }}
+    >
       <div className="space-y-5">
         {/* Inputs */}
         <div className="space-y-4 px-3">
@@ -87,8 +90,8 @@ export const BreakEvenCalculator = () => {
               onClick={() => setDataLen(100)}
               className={`px-3 py-1.5 text-xs font-medium rounded-lg border backdrop-blur-sm transition-all ${
                 dataLen === 100
-                  ? 'bg-blue-500/20 border-blue-500/50 text-blue-600 dark:text-blue-400'
-                  : 'bg-black/[0.015] border-black/[0.04] text-zinc-600 dark:text-white/70 hover:bg-black/[0.03]'
+                  ? "bg-blue-500/20 border-blue-500/50 text-blue-600 dark:text-blue-400"
+                  : "bg-black/[0.015] border-black/[0.04] text-zinc-600 dark:text-white/70 hover:bg-black/[0.03]"
               }`}
             >
               100 bytes
@@ -97,8 +100,8 @@ export const BreakEvenCalculator = () => {
               onClick={() => setDataLen(250)}
               className={`px-3 py-1.5 text-xs font-medium rounded-lg border backdrop-blur-sm transition-all ${
                 dataLen === 250
-                  ? 'bg-blue-500/20 border-blue-500/50 text-blue-600 dark:text-blue-400'
-                  : 'bg-black/[0.015] border-black/[0.04] text-zinc-600 dark:text-white/70 hover:bg-black/[0.03]'
+                  ? "bg-blue-500/20 border-blue-500/50 text-blue-600 dark:text-blue-400"
+                  : "bg-black/[0.015] border-black/[0.04] text-zinc-600 dark:text-white/70 hover:bg-black/[0.03]"
               }`}
             >
               250 bytes
@@ -107,8 +110,8 @@ export const BreakEvenCalculator = () => {
               onClick={() => setDataLen(500)}
               className={`px-3 py-1.5 text-xs font-medium rounded-lg border backdrop-blur-sm transition-all ${
                 dataLen === 500
-                  ? 'bg-blue-500/20 border-blue-500/50 text-blue-600 dark:text-blue-400'
-                  : 'bg-black/[0.015] border-black/[0.04] text-zinc-600 dark:text-white/70 hover:bg-black/[0.03]'
+                  ? "bg-blue-500/20 border-blue-500/50 text-blue-600 dark:text-blue-400"
+                  : "bg-black/[0.015] border-black/[0.04] text-zinc-600 dark:text-white/70 hover:bg-black/[0.03]"
               }`}
             >
               500 bytes
@@ -172,8 +175,8 @@ export const BreakEvenCalculator = () => {
                 onClick={() => setPriorityFeeRate(100)}
                 className={`px-3 py-1.5 text-xs font-medium rounded-lg border backdrop-blur-sm transition-all ${
                   priorityFeeRate === 100
-                    ? 'bg-blue-500/20 border-blue-500/50 text-blue-600 dark:text-blue-400'
-                    : 'bg-black/[0.015] border-black/[0.04] text-zinc-600 dark:text-white/70 hover:bg-black/[0.03]'
+                    ? "bg-blue-500/20 border-blue-500/50 text-blue-600 dark:text-blue-400"
+                    : "bg-black/[0.015] border-black/[0.04] text-zinc-600 dark:text-white/70 hover:bg-black/[0.03]"
                 }`}
               >
                 Low
@@ -182,8 +185,8 @@ export const BreakEvenCalculator = () => {
                 onClick={() => setPriorityFeeRate(1000)}
                 className={`px-3 py-1.5 text-xs font-medium rounded-lg border backdrop-blur-sm transition-all ${
                   priorityFeeRate === 1000
-                    ? 'bg-blue-500/20 border-blue-500/50 text-blue-600 dark:text-blue-400'
-                    : 'bg-black/[0.015] border-black/[0.04] text-zinc-600 dark:text-white/70 hover:bg-black/[0.03]'
+                    ? "bg-blue-500/20 border-blue-500/50 text-blue-600 dark:text-blue-400"
+                    : "bg-black/[0.015] border-black/[0.04] text-zinc-600 dark:text-white/70 hover:bg-black/[0.03]"
                 }`}
               >
                 Normal
@@ -192,8 +195,8 @@ export const BreakEvenCalculator = () => {
                 onClick={() => setPriorityFeeRate(5000)}
                 className={`px-3 py-1.5 text-xs font-medium rounded-lg border backdrop-blur-sm transition-all ${
                   priorityFeeRate === 5000
-                    ? 'bg-blue-500/20 border-blue-500/50 text-blue-600 dark:text-blue-400'
-                    : 'bg-black/[0.015] border-black/[0.04] text-zinc-600 dark:text-white/70 hover:bg-black/[0.03]'
+                    ? "bg-blue-500/20 border-blue-500/50 text-blue-600 dark:text-blue-400"
+                    : "bg-black/[0.015] border-black/[0.04] text-zinc-600 dark:text-white/70 hover:bg-black/[0.03]"
                 }`}
               >
                 High
@@ -202,7 +205,7 @@ export const BreakEvenCalculator = () => {
                 onClick={() => setShowPrioritySlider(!showPrioritySlider)}
                 className="px-3 py-1.5 text-xs font-medium rounded-lg border backdrop-blur-sm transition-all bg-black/[0.015] border-black/[0.04] text-zinc-600 dark:text-white/70 hover:bg-black/[0.03]"
               >
-                {showPrioritySlider ? 'Hide' : 'Custom'}
+                {showPrioritySlider ? "Hide" : "Custom"}
               </button>
             </div>
             {showPrioritySlider && (
@@ -230,7 +233,8 @@ export const BreakEvenCalculator = () => {
                   </span>
                 </div>
                 <span className="text-xs text-zinc-500 dark:text-white/50 block">
-                  {COMPRESSED_CU_PER_WRITE.toLocaleString()} CU × {priorityFeeRate.toLocaleString()} μL/CU
+                  {COMPRESSED_CU_PER_WRITE.toLocaleString()} CU × {priorityFeeRate.toLocaleString()}{" "}
+                  μL/CU
                 </span>
               </div>
             )}
@@ -241,7 +245,9 @@ export const BreakEvenCalculator = () => {
         <div className="text-sm font-medium text-zinc-700 dark:text-white/80 px-3">Results</div>
         <div className="grid grid-cols-4 gap-3">
           <div className="p-4 bg-black/[0.015] dark:bg-white/5 backdrop-blur-md rounded-2xl text-center border border-black/[0.04] dark:border-white/10 shadow-sm">
-            <div className="text-xs text-zinc-500 dark:text-white/50 mb-1 uppercase tracking-wide">Solana Cost</div>
+            <div className="text-xs text-zinc-500 dark:text-white/50 mb-1 uppercase tracking-wide">
+              Solana Cost
+            </div>
             <div className="text-xl font-mono font-semibold text-zinc-900 dark:text-white">
               {formatSOL(solanaCost)}
             </div>
@@ -249,7 +255,9 @@ export const BreakEvenCalculator = () => {
           </div>
 
           <div className="p-4 bg-black/[0.015] dark:bg-white/5 backdrop-blur-md rounded-2xl text-center border border-black/[0.04] dark:border-white/10 shadow-sm">
-            <div className="text-xs text-zinc-500 dark:text-white/50 mb-1 uppercase tracking-wide">Compressed Cost</div>
+            <div className="text-xs text-zinc-500 dark:text-white/50 mb-1 uppercase tracking-wide">
+              Compressed Cost
+            </div>
             <div className="text-xl font-mono font-semibold text-zinc-900 dark:text-white">
               {formatSOL(compressedCost)}
             </div>
@@ -257,7 +265,9 @@ export const BreakEvenCalculator = () => {
           </div>
 
           <div className="p-4 bg-black/[0.015] dark:bg-white/5 backdrop-blur-md rounded-2xl text-center border border-black/[0.04] dark:border-white/10 shadow-sm">
-            <div className="text-xs text-zinc-500 dark:text-white/50 mb-1 uppercase tracking-wide">Break-even</div>
+            <div className="text-xs text-zinc-500 dark:text-white/50 mb-1 uppercase tracking-wide">
+              Break-even
+            </div>
             <div className="text-xl font-mono font-semibold text-zinc-900 dark:text-white">
               {breakEvenWrites.toLocaleString()}
             </div>
@@ -265,18 +275,27 @@ export const BreakEvenCalculator = () => {
           </div>
 
           <div className="p-4 bg-black/[0.015] dark:bg-white/5 backdrop-blur-md rounded-2xl text-center border border-black/[0.04] dark:border-white/10 shadow-sm">
-            <div className="text-xs text-zinc-500 dark:text-white/50 mb-1 uppercase tracking-wide">Recommendation</div>
+            <div className="text-xs text-zinc-500 dark:text-white/50 mb-1 uppercase tracking-wide">
+              Recommendation
+            </div>
             <div className="text-lg font-semibold text-zinc-900 dark:text-white">
-              {useCompressed ? 'Use Compressed' : 'Use Solana'}
+              {useCompressed ? "Use Compressed" : "Use Solana"}
             </div>
           </div>
         </div>
 
         {/* Formula reference */}
         <div className="text-xs font-mono text-zinc-500 dark:text-white/40 pt-3 border-t border-black/[0.04] dark:border-white/10">
-          Solana: ({ACCOUNT_STORAGE_OVERHEAD} + {dataLen}) × {LAMPORTS_PER_BYTE.toLocaleString()} = {solanaCostPerAccount.toLocaleString()} lamports/account<br/>
-          Compressed: ({BASE_COST_PER_WRITE.toLocaleString()} + {priorityFeePerWrite.toLocaleString()}) × (1 + {numWrites}) = {compressedCostPerAccount.toLocaleString()} lamports/account<br/>
-          Cost per write: {BASE_COST_PER_WRITE.toLocaleString()} base + {priorityFeePerWrite.toLocaleString()} priority ({COMPRESSED_CU_PER_WRITE.toLocaleString()} CU) = {costPerWrite.toLocaleString()} lamports
+          Solana: ({ACCOUNT_STORAGE_OVERHEAD} + {dataLen}) × {LAMPORTS_PER_BYTE.toLocaleString()} ={" "}
+          {solanaCostPerAccount.toLocaleString()} lamports/account
+          <br />
+          Compressed: ({BASE_COST_PER_WRITE.toLocaleString()} +{" "}
+          {priorityFeePerWrite.toLocaleString()}) × (1 + {numWrites}) ={" "}
+          {compressedCostPerAccount.toLocaleString()} lamports/account
+          <br />
+          Cost per write: {BASE_COST_PER_WRITE.toLocaleString()} base +{" "}
+          {priorityFeePerWrite.toLocaleString()} priority (
+          {COMPRESSED_CU_PER_WRITE.toLocaleString()} CU) = {costPerWrite.toLocaleString()} lamports
         </div>
       </div>
     </div>

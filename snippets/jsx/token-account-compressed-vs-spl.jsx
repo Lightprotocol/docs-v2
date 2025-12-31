@@ -48,21 +48,29 @@ export const TokenAccountCompressedVsSpl = () => {
   };
 
   return (
-    <div className="p-5 rounded-3xl not-prose mt-4 dark:bg-white/5 backdrop-blur-xl border border-black/[0.04] dark:border-white/10 shadow-lg" style={{ fontFamily: 'Inter, sans-serif' }}>
+    <div
+      className="p-5 rounded-3xl not-prose mt-4 dark:bg-white/5 backdrop-blur-xl border border-black/[0.04] dark:border-white/10 shadow-lg"
+      style={{ fontFamily: "Inter, sans-serif" }}
+    >
       <div className="space-y-5">
         {/* Number of Accounts */}
         <div className="space-y-2 px-3">
           <div className="flex justify-between items-center">
-            <span className="text-sm text-zinc-700 dark:text-white/80">Number of Token Accounts</span>
+            <span className="text-sm text-zinc-700 dark:text-white/80">
+              Number of Token Accounts
+            </span>
             <div className="flex items-center gap-1.5">
               {accountsPresets.map((a) => (
                 <button
                   key={a}
-                  onClick={() => { setNumAccounts(a); setShowCustomAccounts(false); }}
+                  onClick={() => {
+                    setNumAccounts(a);
+                    setShowCustomAccounts(false);
+                  }}
                   className={`px-2.5 py-1 text-xs font-medium rounded-lg border backdrop-blur-sm transition-all ${
                     numAccounts === a && !showCustomAccounts
-                      ? 'bg-blue-500/20 border-blue-500/50 text-blue-600 dark:text-blue-400'
-                      : 'bg-black/[0.015] dark:bg-white/5 border-black/[0.04] dark:border-white/20 text-zinc-600 dark:text-white/70 hover:bg-black/[0.03]'
+                      ? "bg-blue-500/20 border-blue-500/50 text-blue-600 dark:text-blue-400"
+                      : "bg-black/[0.015] dark:bg-white/5 border-black/[0.04] dark:border-white/20 text-zinc-600 dark:text-white/70 hover:bg-black/[0.03]"
                   }`}
                 >
                   {a.toLocaleString()}
@@ -100,7 +108,10 @@ export const TokenAccountCompressedVsSpl = () => {
                 max={ACCOUNTS_MAX}
                 step="5000"
                 value={Math.min(numAccounts, ACCOUNTS_MAX)}
-                onChange={(e) => { setNumAccounts(Number.parseInt(e.target.value)); setShowCustomAccounts(false); }}
+                onChange={(e) => {
+                  setNumAccounts(Number.parseInt(e.target.value));
+                  setShowCustomAccounts(false);
+                }}
                 className="relative w-full h-1.5 bg-black/[0.03] dark:bg-white/20 rounded-full appearance-none cursor-pointer backdrop-blur-sm z-10"
               />
             </div>
@@ -110,7 +121,9 @@ export const TokenAccountCompressedVsSpl = () => {
         {/* Result Cards */}
         <div className="grid grid-cols-3 gap-3">
           <div className="p-4 bg-black/[0.015] dark:bg-white/5 backdrop-blur-md rounded-2xl text-center border border-black/[0.04] dark:border-white/10 shadow-sm">
-            <div className="text-xs text-zinc-500 dark:text-white/50 mb-1 uppercase tracking-wide">SPL Token</div>
+            <div className="text-xs text-zinc-500 dark:text-white/50 mb-1 uppercase tracking-wide">
+              SPL Token
+            </div>
             <div className="text-xl font-mono font-semibold text-zinc-900 dark:text-white">
               {formatSOL(solanaCost)}
             </div>
@@ -118,7 +131,9 @@ export const TokenAccountCompressedVsSpl = () => {
           </div>
 
           <div className="p-4 bg-black/[0.015] dark:bg-white/5 backdrop-blur-md rounded-2xl text-center border border-black/[0.04] dark:border-white/10 shadow-sm">
-            <div className="text-xs text-zinc-500 dark:text-white/50 mb-1 uppercase tracking-wide">Compressed</div>
+            <div className="text-xs text-zinc-500 dark:text-white/50 mb-1 uppercase tracking-wide">
+              Compressed
+            </div>
             <div className="text-xl font-mono font-semibold text-zinc-900 dark:text-white">
               {formatSOL(compressedCost)}
             </div>
@@ -126,7 +141,9 @@ export const TokenAccountCompressedVsSpl = () => {
           </div>
 
           <div className="p-4 bg-black/[0.015] dark:bg-white/5 backdrop-blur-md rounded-2xl text-center border border-black/[0.04] dark:border-white/10 shadow-sm">
-            <div className="text-xs text-zinc-500 dark:text-white/50 mb-1 uppercase tracking-wide">Savings</div>
+            <div className="text-xs text-zinc-500 dark:text-white/50 mb-1 uppercase tracking-wide">
+              Savings
+            </div>
             <div className="text-xl font-mono font-semibold text-zinc-900 dark:text-white">
               {savingsPercent}%
             </div>

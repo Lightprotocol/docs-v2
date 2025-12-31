@@ -2,7 +2,7 @@ export const RentLifecycleVisualizer = () => {
   const [, setTime] = useState(0);
   const [lamports, setLamports] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
-  const [phase, setPhase] = useState('uninitialized');
+  const [phase, setPhase] = useState("uninitialized");
   const [hasUserClicked, setHasUserClicked] = useState(false);
   const [showControls, setShowControls] = useState(false);
   const containerRef = useRef(null);
@@ -16,11 +16,11 @@ export const RentLifecycleVisualizer = () => {
   const [timelineStarted, setTimelineStarted] = useState(false);
 
   // Constants from rent config
-  const LAMPORTS_PER_TICK = 58.2;       // 582 per second = 1.5 epochs/s (1.5x speed)
-  const INITIAL_RENT = 6208;            // 24h of rent (16 epochs × 388)
-  const TOPUP_LAMPORTS = 776;           // 3h worth (2 epochs)
-  const TOPUP_THRESHOLD = 776;          // Top up when below 3h of rent
-  const COLD_THRESHOLD = 388;           // Cold when below 1 epoch of rent
+  const LAMPORTS_PER_TICK = 58.2; // 582 per second = 1.5 epochs/s (1.5x speed)
+  const INITIAL_RENT = 6208; // 24h of rent (16 epochs × 388)
+  const TOPUP_LAMPORTS = 776; // 3h worth (2 epochs)
+  const TOPUP_THRESHOLD = 776; // Top up when below 3h of rent
+  const COLD_THRESHOLD = 388; // Cold when below 1 epoch of rent
   // Time scale: 1.5x speed → ~10.7s to deplete, 29s total cycle
 
   // Colors
@@ -31,13 +31,13 @@ export const RentLifecycleVisualizer = () => {
   // 7 transaction lines from edges to center (positioned around the visualization)
   // Each line has start point (edge) and ends at center (50, 50)
   const txLines = [
-    { id: 0, x1: 5, y1: 20, x2: 50, y2: 50 },   // top-left
-    { id: 1, x1: 95, y1: 15, x2: 50, y2: 50 },  // top-right
-    { id: 2, x1: 0, y1: 50, x2: 50, y2: 50 },   // left
+    { id: 0, x1: 5, y1: 20, x2: 50, y2: 50 }, // top-left
+    { id: 1, x1: 95, y1: 15, x2: 50, y2: 50 }, // top-right
+    { id: 2, x1: 0, y1: 50, x2: 50, y2: 50 }, // left
     { id: 3, x1: 100, y1: 55, x2: 50, y2: 50 }, // right
-    { id: 4, x1: 10, y1: 85, x2: 50, y2: 50 },  // bottom-left
-    { id: 5, x1: 90, y1: 90, x2: 50, y2: 50 },  // bottom-right
-    { id: 6, x1: 50, y1: 0, x2: 50, y2: 50 },   // top
+    { id: 4, x1: 10, y1: 85, x2: 50, y2: 50 }, // bottom-left
+    { id: 5, x1: 90, y1: 90, x2: 50, y2: 50 }, // bottom-right
+    { id: 6, x1: 50, y1: 0, x2: 50, y2: 50 }, // top
   ];
 
   const interpolateColor = (c1, c2, t) => {
@@ -53,7 +53,7 @@ export const RentLifecycleVisualizer = () => {
 
   // Format lamports: always ~X,XXX rounded to nearest 500
   const formatLamports = (l) => {
-    if (l <= 0) return '0';
+    if (l <= 0) return "0";
     const rounded = Math.round(l / 500) * 500;
     return `~${rounded.toLocaleString()}`;
   };
@@ -108,8 +108,8 @@ export const RentLifecycleVisualizer = () => {
   };
 
   const getAccountColor = () => {
-    if (phase === 'uninitialized') return GREY;
-    if (phase === 'cold') return BLUE;
+    if (phase === "uninitialized") return GREY;
+    if (phase === "cold") return BLUE;
 
     // Color based on lamports threshold
     if (lamports > TOPUP_THRESHOLD) {
@@ -132,9 +132,9 @@ export const RentLifecycleVisualizer = () => {
     setTimeout(() => setIsButtonPressed(false), 200);
 
     // If cold/uninitialized, re-initialize with full amount
-    if (phase === 'uninitialized' || phase === 'cold' || lamports === 0) {
+    if (phase === "uninitialized" || phase === "cold" || lamports === 0) {
       setLamports(INITIAL_RENT);
-      setPhase('hot');
+      setPhase("hot");
       triggerHighlight();
       triggerFlyingArrow(INITIAL_RENT, lastLineIndexRef.current);
       return;
@@ -160,8 +160,7 @@ export const RentLifecycleVisualizer = () => {
     // Goes cold ~14.5s
 
     // Cycle 2: Reinit from cold at 16s
-    16,
-    16.7, 17.3, 18, 18.7, 19.3, 20, 20.7, 21.3, 22, 22.7, 23.3, 24, 24.7,
+    16, 16.7, 17.3, 18, 18.7, 19.3, 20, 20.7, 21.3, 22, 22.7, 23.3, 24, 24.7,
     // Top-ups
     25.5, 26.8,
     // Goes cold ~28.5s, loop at 29s
@@ -170,7 +169,7 @@ export const RentLifecycleVisualizer = () => {
   const handleReset = () => {
     setTime(0);
     setLamports(0);
-    setPhase('uninitialized');
+    setPhase("uninitialized");
     setIsRunning(true);
     setTimelineStarted(false);
     setActiveLines([]);
@@ -201,7 +200,7 @@ export const RentLifecycleVisualizer = () => {
         // Initialize at t=1.0 (after brief pause showing uninitialized state)
         if (t < 1.0 && newTime >= 1.0) {
           setLamports(INITIAL_RENT);
-          setPhase('hot');
+          setPhase("hot");
           setTimelineStarted(true);
           triggerHighlight();
           triggerTransaction(getNextLineIndex());
@@ -214,13 +213,13 @@ export const RentLifecycleVisualizer = () => {
             triggerTransaction(getNextLineIndex());
 
             // Handle based on current state
-            if (phase === 'cold') {
+            if (phase === "cold") {
               // Reinitialize from cold state
               setLamports(INITIAL_RENT);
-              setPhase('hot');
+              setPhase("hot");
               triggerHighlight();
               triggerFlyingArrow(INITIAL_RENT, lastLineIndexRef.current);
-            } else if (phase === 'hot') {
+            } else if (phase === "hot") {
               // Only top up if below threshold (3h = 776 lamports = 2 epochs)
               setLamports((currentLamports) => {
                 if (currentLamports > 0 && currentLamports < TOPUP_THRESHOLD) {
@@ -235,13 +234,13 @@ export const RentLifecycleVisualizer = () => {
         });
 
         // Smooth lamport decrement every tick (100ms) when hot or cold
-        if ((phase === 'hot' || phase === 'cold') && newTime > 0.1) {
+        if ((phase === "hot" || phase === "cold") && newTime > 0.1) {
           setLamports((l) => {
             const tickAmount = LAMPORTS_PER_TICK;
             const newLamports = Math.max(0, l - tickAmount);
             // Go cold when lamports below cold threshold
             if (newLamports < COLD_THRESHOLD) {
-              setPhase('cold');
+              setPhase("cold");
             }
             return newLamports;
           });
@@ -249,7 +248,7 @@ export const RentLifecycleVisualizer = () => {
 
         // Loop at 29s - reset to "Press" state
         if (newTime >= 29) {
-          setPhase('uninitialized');
+          setPhase("uninitialized");
           setLamports(0);
           setHasUserClicked(false);
           setIsRunning(false);
@@ -264,6 +263,7 @@ export const RentLifecycleVisualizer = () => {
     }, 100);
 
     return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isRunning, phase]);
 
   const accountColor = getAccountColor();
@@ -388,15 +388,15 @@ export const RentLifecycleVisualizer = () => {
       `}</style>
 
       {/* Main visualization area */}
-      <div className="relative flex items-center justify-center" style={{ height: '11.5rem' }}>
+      <div className="relative flex items-center justify-center" style={{ height: "11.5rem" }}>
         {/* Transaction lines SVG layer */}
         <svg
           className="absolute inset-0 w-full h-full"
           viewBox="0 0 100 100"
           preserveAspectRatio="xMidYMid meet"
           style={{
-            filter: !hasUserClicked ? 'blur(2px)' : 'none',
-            transition: 'filter 0.3s ease',
+            filter: !hasUserClicked ? "blur(2px)" : "none",
+            transition: "filter 0.3s ease",
           }}
         >
           {txLines.map((line) => {
@@ -409,9 +409,9 @@ export const RentLifecycleVisualizer = () => {
                   y1={line.y1}
                   x2={line.x2}
                   y2={line.y2}
-                  stroke={active ? 'rgba(161, 161, 170, 0.5)' : 'rgba(161, 161, 170, 0)'}
+                  stroke={active ? "rgba(161, 161, 170, 0.5)" : "rgba(161, 161, 170, 0)"}
                   strokeWidth={active ? 0.8 : 0}
-                  style={{ transition: 'stroke 0.15s, stroke-width 0.15s' }}
+                  style={{ transition: "stroke 0.15s, stroke-width 0.15s" }}
                 />
                 {/* Bobble that travels along the line when active */}
                 {active && (
@@ -435,12 +435,12 @@ export const RentLifecycleVisualizer = () => {
               y={y}
               className="amount-fly-up"
               style={{
-                fill: 'rgb(34, 197, 94)',
-                fontSize: '8px',
+                fill: "rgb(34, 197, 94)",
+                fontSize: "8px",
                 fontWeight: 700,
-                fontFamily: 'ui-monospace, monospace',
-                textAnchor: 'middle',
-                dominantBaseline: 'middle',
+                fontFamily: "ui-monospace, monospace",
+                textAnchor: "middle",
+                dominantBaseline: "middle",
               }}
             >
               +{amount.toLocaleString()}
@@ -452,31 +452,40 @@ export const RentLifecycleVisualizer = () => {
         <div
           className="absolute inset-0 flex items-center justify-center"
           style={{
-            maskImage: 'linear-gradient(to right, transparent, black 15%, black 35%, transparent 45%, transparent 55%, black 65%, black 85%, transparent)',
-            WebkitMaskImage: 'linear-gradient(to right, transparent, black 15%, black 35%, transparent 45%, transparent 55%, black 65%, black 85%, transparent)',
-            filter: !hasUserClicked ? 'blur(2px)' : 'none',
-            transition: 'filter 0.3s ease',
+            maskImage:
+              "linear-gradient(to right, transparent, black 15%, black 35%, transparent 45%, transparent 55%, black 65%, black 85%, transparent)",
+            WebkitMaskImage:
+              "linear-gradient(to right, transparent, black 15%, black 35%, transparent 45%, transparent 55%, black 65%, black 85%, transparent)",
+            filter: !hasUserClicked ? "blur(2px)" : "none",
+            transition: "filter 0.3s ease",
           }}
         >
           {/* Continuously scrolling tick marks with hour labels below */}
           <div className="absolute inset-0 flex items-center overflow-hidden">
-            <div key={resetCount} className={`flex items-center timeline-scroll ${timelineStarted ? 'timeline-scroll-running' : ''}`} style={{ gap: '5rem' }}>
-              {[...Array(34).keys()].map(i => i * 3).concat([...Array(34).keys()].map(i => i * 3)).map((h, i) => (
-                <div key={i} className="flex flex-col items-center flex-shrink-0">
-                  <span
-                    className="font-mono text-zinc-300 dark:text-white/20 mb-2"
-                    style={{
-                      fontSize: '1rem',
-                      opacity: timelineStarted ? 1 : 0,
-                      filter: timelineStarted ? 'blur(0)' : 'blur(8px)',
-                      transition: 'opacity 0.5s ease, filter 0.5s ease',
-                    }}
-                  >
-                    {h}h
-                  </span>
-                  <div className="w-px h-3 bg-zinc-200 dark:bg-white/20" />
-                </div>
-              ))}
+            <div
+              key={resetCount}
+              className={`flex items-center timeline-scroll ${timelineStarted ? "timeline-scroll-running" : ""}`}
+              style={{ gap: "5rem" }}
+            >
+              {[...Array(34).keys()]
+                .map((i) => i * 3)
+                .concat([...Array(34).keys()].map((i) => i * 3))
+                .map((h, i) => (
+                  <div key={i} className="flex flex-col items-center flex-shrink-0">
+                    <span
+                      className="font-mono text-zinc-300 dark:text-white/20 mb-2"
+                      style={{
+                        fontSize: "1rem",
+                        opacity: timelineStarted ? 1 : 0,
+                        filter: timelineStarted ? "blur(0)" : "blur(8px)",
+                        transition: "opacity 0.5s ease, filter 0.5s ease",
+                      }}
+                    >
+                      {h}h
+                    </span>
+                    <div className="w-px h-3 bg-zinc-200 dark:bg-white/20" />
+                  </div>
+                ))}
             </div>
           </div>
 
@@ -489,14 +498,15 @@ export const RentLifecycleVisualizer = () => {
           className="absolute z-10"
           onClick={handleDiamondClick}
           style={{
-            left: '50%',
-            top: '50%',
-            transform: 'translate(-50%, -50%)',
-            cursor: !hasUserClicked ? 'pointer' : 'default',
-            filter: activeLines.length > 0
-              ? 'drop-shadow(0 0 25px rgba(227, 89, 48, 0.7)) drop-shadow(0 0 10px rgba(255, 150, 50, 0.8))'
-              : 'none',
-            transition: 'filter 0.15s ease',
+            left: "50%",
+            top: "50%",
+            transform: "translate(-50%, -50%)",
+            cursor: !hasUserClicked ? "pointer" : "default",
+            filter:
+              activeLines.length > 0
+                ? "drop-shadow(0 0 25px rgba(227, 89, 48, 0.7)) drop-shadow(0 0 10px rgba(255, 150, 50, 0.8))"
+                : "none",
+            transition: "filter 0.15s ease",
           }}
         >
           <svg width="138" height="138" viewBox="0 0 100 100">
@@ -507,7 +517,7 @@ export const RentLifecycleVisualizer = () => {
                 cy={dot.y}
                 r={dot.size}
                 fill={colorToRgba(accountColor, dot.opacity * 0.7)}
-                style={{ transition: 'fill 0.3s ease' }}
+                style={{ transition: "fill 0.3s ease" }}
               />
             ))}
           </svg>
@@ -516,13 +526,13 @@ export const RentLifecycleVisualizer = () => {
             <div
               className="text-zinc-400 dark:text-white/40 text-center"
               style={{
-                fontSize: '1.15rem',
-                position: 'absolute',
-                top: '100%',
-                left: '50%',
-                transform: 'translateX(-50%)',
-                marginTop: '0.5rem',
-                whiteSpace: 'nowrap',
+                fontSize: "1.15rem",
+                position: "absolute",
+                top: "100%",
+                left: "50%",
+                transform: "translateX(-50%)",
+                marginTop: "0.5rem",
+                whiteSpace: "nowrap",
               }}
             >
               Press to see the Rent Config over time!
@@ -535,9 +545,9 @@ export const RentLifecycleVisualizer = () => {
       <div
         style={{
           opacity: showControls ? 1 : 0,
-          filter: showControls ? 'blur(0px)' : 'blur(8px)',
-          transition: 'opacity 0.5s ease, filter 0.5s ease',
-          pointerEvents: showControls ? 'auto' : 'none',
+          filter: showControls ? "blur(0px)" : "blur(8px)",
+          transition: "opacity 0.5s ease, filter 0.5s ease",
+          pointerEvents: showControls ? "auto" : "none",
         }}
       >
         {/* Rent Balance - centered */}
@@ -545,13 +555,20 @@ export const RentLifecycleVisualizer = () => {
           {/* Arrows container - separate from number */}
           <div
             className="relative flex items-center justify-end mr-2"
-            style={{ width: '1.5rem', height: '2.2rem' }}
+            style={{ width: "1.5rem", height: "2.2rem" }}
           >
             {activeArrows.map((arrowId) => (
               <span
                 key={arrowId}
                 className="arrow-up absolute"
-                style={{ color: 'rgb(34, 197, 94)', fontSize: '1.7rem', right: 0, top: '50%', transform: 'translateY(-50%)', lineHeight: 1 }}
+                style={{
+                  color: "rgb(34, 197, 94)",
+                  fontSize: "1.7rem",
+                  right: 0,
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  lineHeight: 1,
+                }}
               >
                 ↑
               </span>
@@ -560,24 +577,37 @@ export const RentLifecycleVisualizer = () => {
               <span
                 key={id}
                 className="arrow-fly-up absolute"
-                style={{ color: 'rgb(34, 197, 94)', fontSize: '1.7rem', right: 0, top: '50%', lineHeight: 1 }}
+                style={{
+                  color: "rgb(34, 197, 94)",
+                  fontSize: "1.7rem",
+                  right: 0,
+                  top: "50%",
+                  lineHeight: 1,
+                }}
               >
                 ↑
               </span>
             ))}
           </div>
           <div className="text-center">
-            <div style={{ height: '2.2rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div
+              style={{
+                height: "2.2rem",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
               <span
                 className="font-mono text-zinc-700 dark:text-white/80 transition-all duration-150"
                 style={{
-                  fontSize: isHighlighted ? '1.9rem' : '1.7rem',
+                  fontSize: isHighlighted ? "1.9rem" : "1.7rem",
                   fontWeight: isHighlighted ? 700 : 500,
-                  transformOrigin: 'center',
-                  transform: isHighlighted ? 'scale(1.05)' : 'scale(1)',
-                  fontVariantNumeric: 'tabular-nums',
-                  minWidth: '6.5rem',
-                  textAlign: 'right',
+                  transformOrigin: "center",
+                  transform: isHighlighted ? "scale(1.05)" : "scale(1)",
+                  fontVariantNumeric: "tabular-nums",
+                  minWidth: "6.5rem",
+                  textAlign: "right",
                 }}
               >
                 {formatLamports(lamports)}
@@ -585,12 +615,17 @@ export const RentLifecycleVisualizer = () => {
               <span
                 className="text-zinc-400 dark:text-white/40 transition-all duration-150 ml-1"
                 style={{
-                  fontSize: isHighlighted ? '1.45rem' : '1.15rem',
+                  fontSize: isHighlighted ? "1.45rem" : "1.15rem",
                   fontWeight: isHighlighted ? 800 : 400,
                 }}
-              >lamports</span>
+              >
+                lamports
+              </span>
             </div>
-            <div className="text-zinc-500 dark:text-white/50 uppercase tracking-wide" style={{ fontSize: '0.9rem' }}>
+            <div
+              className="text-zinc-500 dark:text-white/50 uppercase tracking-wide"
+              style={{ fontSize: "0.9rem" }}
+            >
               Rent Balance
             </div>
           </div>
@@ -601,19 +636,19 @@ export const RentLifecycleVisualizer = () => {
           <button
             onClick={handleReset}
             className="font-medium rounded-lg border backdrop-blur-sm transition-all btn-interactive"
-            style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }}
+            style={{ padding: "0.5rem 1rem", fontSize: "0.85rem" }}
           >
             Back to Start
           </button>
           <button
             onClick={handleTopup}
-            className={`rounded-lg border-none backdrop-blur-sm transition-all ${isButtonPressed ? 'font-bold' : 'font-medium'}`}
+            className={`rounded-lg border-none backdrop-blur-sm transition-all ${isButtonPressed ? "font-bold" : "font-medium"}`}
             style={{
-              padding: '0.5rem 1rem',
-              fontSize: isButtonPressed ? '0.95rem' : '0.85rem',
-              transform: isButtonPressed ? 'scale(1.15)' : 'scale(1)',
-              background: '#0066ff',
-              color: '#fff',
+              padding: "0.5rem 1rem",
+              fontSize: isButtonPressed ? "0.95rem" : "0.85rem",
+              transform: isButtonPressed ? "scale(1.15)" : "scale(1)",
+              background: "#0066ff",
+              color: "#fff",
             }}
           >
             Send Tx

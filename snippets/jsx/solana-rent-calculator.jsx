@@ -13,7 +13,10 @@ export const SolanaRentCalculator = () => {
   };
 
   return (
-    <div className="p-5 rounded-3xl not-prose mt-4 dark:bg-white/5 backdrop-blur-xl border border-black/[0.04] dark:border-white/10 shadow-lg" style={{ fontFamily: 'Inter, sans-serif' }}>
+    <div
+      className="p-5 rounded-3xl not-prose mt-4 dark:bg-white/5 backdrop-blur-xl border border-black/[0.04] dark:border-white/10 shadow-lg"
+      style={{ fontFamily: "Inter, sans-serif" }}
+    >
       <div className="space-y-5">
         {/* Slider */}
         <div className="px-3">
@@ -40,7 +43,9 @@ export const SolanaRentCalculator = () => {
               onChange={(e) => setDataLen(Number.parseInt(e.target.value))}
               className="w-full h-1.5 bg-black/[0.03] dark:bg-white/20 rounded-full appearance-none cursor-pointer backdrop-blur-sm"
             />
-            <span className="text-xs text-zinc-500 dark:text-white/50 mt-1 block">Total size: {ACCOUNT_STORAGE_OVERHEAD + dataLen} bytes (incl. 128 byte overhead)</span>
+            <span className="text-xs text-zinc-500 dark:text-white/50 mt-1 block">
+              Total size: {ACCOUNT_STORAGE_OVERHEAD + dataLen} bytes (incl. 128 byte overhead)
+            </span>
           </div>
 
           {/* Preset buttons */}
@@ -49,8 +54,8 @@ export const SolanaRentCalculator = () => {
               onClick={() => setDataLen(165)}
               className={`px-3 py-1.5 text-xs font-medium rounded-lg border backdrop-blur-sm transition-all ${
                 dataLen === 165
-                  ? 'bg-blue-500/20 border-blue-500/50 text-blue-600 dark:text-blue-400'
-                  : 'bg-black/[0.015] border-black/[0.04] text-zinc-600 dark:text-white/70 hover:bg-black/[0.03]'
+                  ? "bg-blue-500/20 border-blue-500/50 text-blue-600 dark:text-blue-400"
+                  : "bg-black/[0.015] border-black/[0.04] text-zinc-600 dark:text-white/70 hover:bg-black/[0.03]"
               }`}
             >
               Token Account (165)
@@ -59,8 +64,8 @@ export const SolanaRentCalculator = () => {
               onClick={() => setDataLen(100)}
               className={`px-3 py-1.5 text-xs font-medium rounded-lg border backdrop-blur-sm transition-all ${
                 dataLen === 100
-                  ? 'bg-blue-500/20 border-blue-500/50 text-blue-600 dark:text-blue-400'
-                  : 'bg-black/[0.015] border-black/[0.04] text-zinc-600 dark:text-white/70 hover:bg-black/[0.03]'
+                  ? "bg-blue-500/20 border-blue-500/50 text-blue-600 dark:text-blue-400"
+                  : "bg-black/[0.015] border-black/[0.04] text-zinc-600 dark:text-white/70 hover:bg-black/[0.03]"
               }`}
             >
               PDA (100)
@@ -69,8 +74,8 @@ export const SolanaRentCalculator = () => {
               onClick={() => setDataLen(82)}
               className={`px-3 py-1.5 text-xs font-medium rounded-lg border backdrop-blur-sm transition-all ${
                 dataLen === 82
-                  ? 'bg-blue-500/20 border-blue-500/50 text-blue-600 dark:text-blue-400'
-                  : 'bg-black/[0.015] border-black/[0.04] text-zinc-600 dark:text-white/70 hover:bg-black/[0.03]'
+                  ? "bg-blue-500/20 border-blue-500/50 text-blue-600 dark:text-blue-400"
+                  : "bg-black/[0.015] border-black/[0.04] text-zinc-600 dark:text-white/70 hover:bg-black/[0.03]"
               }`}
             >
               Token Mint (82)
@@ -81,7 +86,9 @@ export const SolanaRentCalculator = () => {
         {/* Result Cards */}
         <div className="grid grid-cols-2 gap-3">
           <div className="p-4 bg-black/[0.015] dark:bg-white/5 backdrop-blur-md rounded-2xl text-center border border-black/[0.04] dark:border-white/10 shadow-sm">
-            <div className="text-xs text-zinc-500 dark:text-white/50 mb-1 uppercase tracking-wide">Rent-Exempt Balance</div>
+            <div className="text-xs text-zinc-500 dark:text-white/50 mb-1 uppercase tracking-wide">
+              Rent-Exempt Balance
+            </div>
             <div className="text-xl font-mono font-semibold text-zinc-900 dark:text-white">
               {minimumBalance.toLocaleString()}
             </div>
@@ -89,7 +96,9 @@ export const SolanaRentCalculator = () => {
           </div>
 
           <div className="p-4 bg-black/[0.015] dark:bg-white/5 backdrop-blur-md rounded-2xl text-center border border-black/[0.04] dark:border-white/10 shadow-sm">
-            <div className="text-xs text-zinc-500 dark:text-white/50 mb-1 uppercase tracking-wide">SOL Amount</div>
+            <div className="text-xs text-zinc-500 dark:text-white/50 mb-1 uppercase tracking-wide">
+              SOL Amount
+            </div>
             <div className="text-xl font-mono font-semibold text-zinc-900 dark:text-white">
               {solAmount.toFixed(6)}
             </div>
@@ -99,8 +108,10 @@ export const SolanaRentCalculator = () => {
 
         {/* Formula reference */}
         <div className="text-xs font-mono text-zinc-500 dark:text-white/40 pt-3 border-t border-black/[0.04] dark:border-white/10">
-          minimum_balance = (ACCOUNT_STORAGE_OVERHEAD + data_len) × lamports_per_byte<br/>
-          minimum_balance = ({ACCOUNT_STORAGE_OVERHEAD} + {dataLen}) × {LAMPORTS_PER_BYTE.toLocaleString()} = {minimumBalance.toLocaleString()} lamports
+          minimum_balance = (ACCOUNT_STORAGE_OVERHEAD + data_len) × lamports_per_byte
+          <br />
+          minimum_balance = ({ACCOUNT_STORAGE_OVERHEAD} + {dataLen}) ×{" "}
+          {LAMPORTS_PER_BYTE.toLocaleString()} = {minimumBalance.toLocaleString()} lamports
         </div>
       </div>
     </div>

@@ -1,0 +1,22 @@
+{
+  "name": "docs-v2",
+  "version": "1.0.0",
+  "private": true,
+  "description": "ZK Compression Documentation",
+  "scripts": {
+    "lint": "eslint 'snippets/**/*.{js,jsx}'",
+    "lint:fix": "eslint 'snippets/**/*.{js,jsx}' --fix",
+    "format": "prettier --write 'snippets/**/*.{js,jsx}'",
+    "format:check": "prettier --check 'snippets/**/*.{js,jsx}'",
+    "spellcheck": "cspell '**/*.mdx' --no-progress",
+    "ci": "npm run format:check && npm run lint && npm run spellcheck"
+  },
+  "devDependencies": {
+    "cspell": "^8.6.0",
+    "eslint": "^8.57.0",
+    "eslint-plugin-react": "^7.34.1",
+    "eslint-plugin-react-hooks": "^4.6.2",
+    "prettier": "^3.2.5"
+  }
+}
+

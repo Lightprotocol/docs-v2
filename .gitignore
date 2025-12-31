@@ -3,3 +3,6 @@ mintlify-docs/
 /CLAUDE.md
 .windsurf.context/
 .claude/
+
+# Dependencies
+node_modules/
