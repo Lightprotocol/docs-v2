@@ -89,29 +89,30 @@ import { createRpc } from "@lightprotocol/stateless.js";
 import { createMintInterface, createTokenMetadata } from "@lightprotocol/compressed-token";
 
 async function main() {
-  const rpc = createRpc();
-  const payer = Keypair.generate();
-  const sig = await rpc.requestAirdrop(payer.publicKey, 10e9);
-  await rpc.confirmTransaction(sig);
+const rpc = createRpc();
+const payer = Keypair.generate();
+const sig = await rpc.requestAirdrop(payer.publicKey, 10e9);
+await rpc.confirmTransaction(sig);
 
-  const { mint, transactionSignature } = await createMintInterface(
-    rpc,
-    payer,
-    payer,
-    null,
-    9,
-    undefined,
-    undefined,
-    undefined,
-    createTokenMetadata("Example Token", "EXT", "https://example.com/metadata.json")
-  );
+const { mint, transactionSignature } = await createMintInterface(
+rpc,
+payer,
+payer,
+null,
+9,
+undefined,
+undefined,
+undefined,
+createTokenMetadata("Example Token", "EXT", "https://example.com/metadata.json")
+);
 
-  console.log("Mint:", mint.toBase58());
-  console.log("Tx:", transactionSignature);
+console.log("Mint:", mint.toBase58());
+console.log("Tx:", transactionSignature);
 }
 
 main().catch(console.error);
-```
+
+````
 
 ```typescript Instruction
 import "dotenv/config";
@@ -183,7 +184,7 @@ const payer = Keypair.fromSecretKey(
     console.log("Mint:", mintPda.toBase58());
     console.log("Tx:", signature);
 })();
-```
+````
 
 </CodeGroup>
 
@@ -419,7 +420,10 @@ let token_metadata = ExtensionInstructionData::TokenMetadata(
 ```
 
 <Note>
-  **Fields must be set at light-mint creation.** Standard fields (`name`, `symbol`, `uri`) can be updated by `update_authority`. For `additional_metadata`, only existing keys can be modified or removed. New keys cannot be added after creation.
+  **Fields must be set at light-mint creation.** Standard fields (`name`,
+  `symbol`, `uri`) can be updated by `update_authority`. For
+  `additional_metadata`, only existing keys can be modified or removed. New keys
+  cannot be added after creation.
 </Note>
 
 </Step>
@@ -445,7 +449,10 @@ let params = CreateCMintParams {
 ```
 
 <Info>
-  The client passes a validity proof that proves the light-mint address does not exist in the address tree where it will be stored. You can safely ignore `compression_address` and `address_merkle_tree_root_index`. The client passes these for proof verification.
+  The client passes a validity proof that proves the light-mint address does not
+  exist in the address tree where it will be stored. You can safely ignore
+  `compression_address` and `address_merkle_tree_root_index`. The client passes
+  these for proof verification.
 </Info>
 
 </Step>

@@ -116,29 +116,30 @@ import {
 } from "@lightprotocol/compressed-token";
 
 async function main() {
-  const rpc = createRpc();
-  const payer = Keypair.generate();
-  const sig = await rpc.requestAirdrop(payer.publicKey, 10e9);
-  await rpc.confirmTransaction(sig);
+const rpc = createRpc();
+const payer = Keypair.generate();
+const sig = await rpc.requestAirdrop(payer.publicKey, 10e9);
+await rpc.confirmTransaction(sig);
 
-  const { mint } = await createMintInterface(rpc, payer, payer, null, 9);
+const { mint } = await createMintInterface(rpc, payer, payer, null, 9);
 
-  const sender = Keypair.generate();
-  await createAtaInterface(rpc, payer, mint, sender.publicKey);
-  const senderAta = getAssociatedTokenAddressInterface(mint, sender.publicKey);
-  await mintToInterface(rpc, payer, mint, senderAta, payer, 1_000_000_000);
+const sender = Keypair.generate();
+await createAtaInterface(rpc, payer, mint, sender.publicKey);
+const senderAta = getAssociatedTokenAddressInterface(mint, sender.publicKey);
+await mintToInterface(rpc, payer, mint, senderAta, payer, 1_000_000_000);
 
-  const recipient = Keypair.generate();
-  await createAtaInterface(rpc, payer, mint, recipient.publicKey);
-  const recipientAta = getAssociatedTokenAddressInterface(mint, recipient.publicKey);
+const recipient = Keypair.generate();
+await createAtaInterface(rpc, payer, mint, recipient.publicKey);
+const recipientAta = getAssociatedTokenAddressInterface(mint, recipient.publicKey);
 
-  const tx = await transferInterface(rpc, payer, senderAta, mint, recipientAta, sender, 500_000_000);
+const tx = await transferInterface(rpc, payer, senderAta, mint, recipientAta, sender, 500_000_000);
 
-  console.log("Tx:", tx);
+console.log("Tx:", tx);
 }
 
 main().catch(console.error);
-```
+
+````
 
 ```typescript Instruction
 import "dotenv/config";
@@ -188,7 +189,7 @@ const payer = Keypair.fromSecretKey(
 
     console.log("Tx:", signature);
 })();
-```
+````
 
 </CodeGroup>
 
@@ -492,6 +493,7 @@ transfer = transfer.with_spl_interface(
 ```
 
 SPL ↔ light-token transfers require a `spl_interface_pda`:
+
 - **SPL → light-token**: SPL tokens are locked by the light token program in the PDA, light-tokens are minted to light-token accounts
 - **light-token → SPL**: light-tokens are burned, SPL tokens transferred to SPL token accounts
 
@@ -511,15 +513,19 @@ Use `invoke()`, or `invoke_signed()` when a CPI requires a PDA signer.
 
 <Tabs>
   <Tab title="invoke (External signer)">
+
 ```rust
 transfer.invoke()?;
 ```
+
   </Tab>
   <Tab title="invoke_signed (PDA is signer)">
+
 ```rust
 let authority_seeds: &[&[u8]] = &[TRANSFER_INTERFACE_AUTHORITY_SEED, &[authority_bump]];
 transfer.invoke_signed(&[authority_seeds])?;
 ```
+
   </Tab>
 </Tabs>
 

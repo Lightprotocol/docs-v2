@@ -42,22 +42,22 @@ Compare to SPL:
 import { getOrCreateAssociatedTokenAccount } from "@solana/spl-token";
 
 const ata = await getOrCreateAssociatedTokenAccount(
-connection,
-payer,
-mint,
-owner
+  connection,
+  payer,
+  mint,
+  owner
 );`}
   secondCode={`// light-token create ATA
 import { createAtaInterface } from "@lightprotocol/compressed-token";
 
 const ata = await createAtaInterface(
-rpc,
-payer,
-mint,
-owner
+  rpc,
+  payer,
+  mint,
+  owner
 );`}
-firstLabel="SPL"
-secondLabel="light-token"
+  firstLabel="SPL"
+  secondLabel="light-token"
 />
 
 <Info>
