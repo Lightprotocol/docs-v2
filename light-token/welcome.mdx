@@ -23,14 +23,14 @@ import WelcomePageInstall from "/snippets/setup/welcome-page-install.mdx";
 
 ### Creation Cost
 
-|                   | SPL                 | Light                |
-| :---------------- | :------------------ | :------------------- |
-| **Mint Account**  | ~1,500,000 lamports | **15,000** lamports  |
-| **Token Account** | ~2,000,000 lamports | ~**11,000** lamports |
+|                   | Light                | SPL                 |
+| :---------------- | :------------------- | :------------------ |
+| **Mint Account**  | **15,000** lamports  | ~1,500,000 lamports |
+| **Token Account** | ~**11,000** lamports | ~2,000,000 lamports |
 
 ### CU Performance
 
-|                                   | Light Token CU | SPL-Token CU |
+|                                   | Light-Token CU | SPL-Token CU |
 | :-------------------------------- | :------------- | :----------- |
 | **ATA Creation**                  | 4,348          | 14,194       |
 | **Transfer** (base path)          | 312            | 4,645        |
@@ -38,16 +38,17 @@ import WelcomePageInstall from "/snippets/setup/welcome-page-install.mdx";
 
 <CardGroup cols={2}>
   <Card title="Mint Accounts" icon="coins">
-    Uniquely represent a token and store its global metadata. Light-mints are compressed accounts and rent-free.
+    Uniquely represent a token and store its global metadata. Light-mints are compressed accounts
+    and rent-free.
   </Card>
   <Card title="Token Accounts" icon="wallet">
-    Each light-token account can hold units of one light, SPL, or Token 2022 mint. Custom rent config reduces account creation cost.
+    Each light-token account can hold units of one light, SPL, or Token 2022 mint. Custom rent
+    config reduces account creation cost.
   </Card>
 </CardGroup>
 
 <Info>
-  If you simply want to **distribute tokens**, please refer to [this
-  page](/compressed-tokens).
+  If you simply want to **distribute tokens**, please refer to [this page](/compressed-tokens).
 </Info>
 
 # Quickstart

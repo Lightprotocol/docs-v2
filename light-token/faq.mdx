@@ -16,12 +16,12 @@ import {
 Light token is like SPL token stored more efficiently to reduce account creation cost while being more CU efficient than SPL on hot paths.
 Users receive and send the same tokens.
 
-| Creation Cost     | SPL                 | Light                |
-| :---------------- | :------------------ | :------------------- |
-| **Mint Account**  | ~1,500,000 lamports | **15,000** lamports  |
-| **Token Account** | ~2,000,000 lamports | ~**11,000** lamports |
+| Creation Cost     | Light                | SPL                 |
+| :---------------- | :------------------- | :------------------ |
+| **Mint Account**  | **15,000** lamports  | ~1,500,000 lamports |
+| **Token Account** | ~**11,000** lamports | ~2,000,000 lamports |
 
-|                                   | Light Token CU | SPL-Token CU |
+|                                   | Light-Token CU | SPL-Token CU |
 | :-------------------------------- | :------------- | :----------- |
 | **ATA Creation**                  | 4,348          | 14,194       |
 | **Transfer** (base path)          | 312            | 4,645        |
@@ -47,30 +47,30 @@ Reveal the interface method in the code example and find a few examples below.
   <thead>
     <tr>
       <th style={{ width: "15%" }}></th>
-      <th>SPL</th>
       <th>Light</th>
+      <th>SPL</th>
     </tr>
   </thead>
   <tbody>
     <tr>
       <td>**Get/Create ATA**</td>
-      <td>getOrCreateAssociatedTokenAccount()</td>
       <td>getOrCreateAtaInterface()</td>
+      <td>getOrCreateAssociatedTokenAccount()</td>
     </tr>
     <tr>
       <td>**Derive ATA**</td>
-      <td>getAssociatedTokenAddress()</td>
       <td>getAssociatedTokenAddressInterface()</td>
+      <td>getAssociatedTokenAddress()</td>
     </tr>
     <tr>
       <td>**Transfer**</td>
-      <td>transferChecked()</td>
       <td>transferInterface()</td>
+      <td>transferChecked()</td>
     </tr>
     <tr>
       <td>**Get Balance**</td>
-      <td>getAccount()</td>
       <td>getAtaInterface()</td>
+      <td>getAccount()</td>
     </tr>
   </tbody>
 </table>

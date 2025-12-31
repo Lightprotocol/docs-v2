@@ -65,9 +65,9 @@ Light-mints **uniquely represent a token on Solana and store its global metadata
 2. Tokens created from light-mints are **light-tokens**.
 3. Token metadata (name, symbol, URI) is stored as an extension in the struct.
 
-| Creation Cost    | SPL                 | Light               |
+| Creation Cost    | Light               | SPL                 |
 | :--------------- | :------------------ | :------------------ |
-| **Mint Account** | ~1,500,000 lamports | **15,000** lamports |
+| **Mint Account** | **15,000** lamports | ~1,500,000 lamports |
 
 <Tabs>
   <Tab title="Diagram">
@@ -185,13 +185,13 @@ A light-token account holds token balances like SPL Token accounts:
 - Each wallet can own multiple light-token accounts for the same light-mint.
 - A light-token account can only have one owner and hold units of one light-mint.
 
-| Creation Cost     | SPL                 | Light                |
-| :---------------- | :------------------ | :------------------- |
-| **Token Account** | ~2,000,000 lamports | ~**11,000** lamports |
+| Creation Cost     | Light                | SPL                 |
+| :---------------- | :------------------- | :------------------ |
+| **Token Account** | ~**11,000** lamports | ~2,000,000 lamports |
 
 Additionally Light Token is more performant then SPL on hot paths:
 
-|                                   | light-token CU | SPL-token CU |
+|                                   | Light-Token CU | SPL-Token CU |
 | --------------------------------- | -------------: | -----------: |
 | **ATA Creation**                  |          4,348 |       14,194 |
 | **Transfer** (base path)          |            312 |        4,645 |
