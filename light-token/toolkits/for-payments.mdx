@@ -51,12 +51,12 @@ import ToolkitsSetup from "/snippets/setup/toolkits-setup.mdx";
       <td>rpc.getSignaturesForOwnerInterface()</td>
     </tr>
     <tr>
-      <td>**Entry from SPL**</td>
+      <td>**Wrap from SPL**</td>
       <td>N/A</td>
       <td>wrap()</td>
     </tr>
     <tr>
-      <td>**Exit to SPL**</td>
+      <td>**Unwrap to SPL**</td>
       <td>N/A</td>
       <td>unwrap()</td>
     </tr>
@@ -422,7 +422,7 @@ const signatures = await connection.getSignaturesForAddress(ata);
 
 </Accordion>
 
-### Entry from SPL
+### Wrap from SPL
 
 Wrap tokens from SPL/Token-2022 accounts to light-token ATA.
 
@@ -481,7 +481,7 @@ const tx = new Transaction().add(
 </Tab>
 </Tabs>
 
-### Exit to SPL
+### Unwrap to SPL
 
 When users withdraw to an integration that does not support light-token yet,
 you'll need to unwrap light-token to SPL.
