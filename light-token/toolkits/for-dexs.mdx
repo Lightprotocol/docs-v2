@@ -93,7 +93,7 @@ use light_ctoken_sdk::ctoken::{
 Accept light-token deposits by unwrapping them from c-token ATAs to SPL tokens for your pool.
 
 <Tabs>
-<Tab title="Action">
+<Tab title="Action helper">
 
 ```typescript
 import { unwrap } from "@lightprotocol/compressed-token";
@@ -203,7 +203,7 @@ pub fn accept_deposit(ctx: Context<AcceptDeposit>, amount: u64, spl_interface_pd
 Return light-tokens to users by wrapping SPL tokens from your pool into c-token ATAs.
 
 <Tabs>
-<Tab title="Action">
+<Tab title="Action helper">
 
 ```typescript
 import {

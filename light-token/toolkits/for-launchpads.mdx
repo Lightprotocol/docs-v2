@@ -88,7 +88,7 @@ const rpc = createRpc(RPC_ENDPOINT);
 ### Create Token with Metadata
 
 <Tabs>
-<Tab title="Action">
+<Tab title="Action helper">
 
 ```typescript
 import { Keypair } from "@solana/web3.js";
@@ -208,7 +208,7 @@ const signature = await sendAndConfirmTx(rpc, tx);
 ### Create User Account
 
 <Tabs>
-<Tab title="Action">
+<Tab title="Action helper">
 
 ```typescript
 import { getOrCreateAtaInterface } from "@lightprotocol/compressed-token";
@@ -275,7 +275,7 @@ const tx = new Transaction().add(
 When a user buys from the bonding curve, mint tokens to their account.
 
 <Tabs>
-<Tab title="Action">
+<Tab title="Action helper">
 
 ```typescript
 import {
@@ -389,7 +389,7 @@ const signature = await sendAndConfirmTx(rpc, tx);
 When a user sells, transfer tokens back to the bonding curve account.
 
 <Tabs>
-<Tab title="Action">
+<Tab title="Action helper">
 
 ```typescript
 import {

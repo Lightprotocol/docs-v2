@@ -142,7 +142,7 @@ console.log(portfolio);
 ### Transfer Tokens
 
 <Tabs>
-<Tab title="Action">
+<Tab title="Action helper">
 
 ```typescript
 import {
@@ -255,7 +255,7 @@ const signatures = await connection.getSignaturesForAddress(ata);
 Before swapping on a DEX, convert light-tokens to SPL tokens.
 
 <Tabs>
-<Tab title="Action">
+<Tab title="Action helper">
 
 ```typescript
 import { getAssociatedTokenAddressSync } from "@solana/spl-token";
@@ -343,7 +343,7 @@ const signature = await sendAndConfirmTx(rpc, tx);
 After receiving tokens from a DEX swap, convert SPL tokens back to light-tokens.
 
 <Tabs>
-<Tab title="Action">
+<Tab title="Action helper">
 
 ```typescript
 import { getAssociatedTokenAddressSync } from "@solana/spl-token";

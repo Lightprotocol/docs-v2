@@ -1,16 +1,16 @@
 ---
 title: "Toolkit for Wallet Applications"
-sidebarTitle: "for Wallets"
-description: "Guide for Wallet Applications to add light-token APIs."
+sidebarTitle: "For Wallets"
+description: "Guide for Wallet Applications to add Light-token support."
 ---
 
 import { CodeCompare } from "/snippets/jsx/code-compare.jsx";
 import ToolkitsSetup from "/snippets/setup/toolkits-setup.mdx";
 
-1. light-token follows the same API patterns like ATA
-2. Your users hold and receive the same tokens, just stored more efficiently.
+1. The Light-token API matches the SPL-token API almost entirely, and extends their functionality to include the light token program in addition to the SPL-token and Token-2022 programs.
+2. Your users hold and receive tokens of the same mints, just stored more efficiently.
 
-| Creation Cost     | SPL                 | light-token          |
+| Creation Cost     | SPL                 | Light-token          |
 | :---------------- | :------------------ | :------------------- |
 | **Token Account** | ~2,000,000 lamports | ~**11,000** lamports |
 
@@ -94,7 +94,7 @@ Find a full code example [here](https://github.com/Lightprotocol/examples-light-
 </Note>
 
 <Tabs>
-<Tab title="Action">
+<Tab title="Action helper">
 
 ```typescript
 import { getOrCreateAtaInterface } from "@lightprotocol/compressed-token";
@@ -186,7 +186,7 @@ Find a full code example [here](https://github.com/Lightprotocol/examples-light-
 </Note>
 
 <Tabs>
-<Tab title="Action">
+<Tab title="Action helper">
 
 ```typescript
 import {
@@ -386,7 +386,7 @@ Find a full code example [here](https://github.com/Lightprotocol/examples-light-
 </Note>
 
 <Tabs>
-<Tab title="Action">
+<Tab title="Action helper">
 
 ```typescript
 import { getAssociatedTokenAddressSync } from "@solana/spl-token";
@@ -438,17 +438,17 @@ const tx = new Transaction().add(
 
 ### Unwrap to SPL
 
-When users withdraw to an integration that does not support light-token yet,
-you'll need to unwrap light-token to SPL.
+You can compose with applications that do not yet support the light-token
+standard by unwrapping your tokens.
 
-Unwrap moves tokens from light-token ATA to SPL/Token-2022 account.
+Unwrap moves the token balance from a light-token account to a SPL-token account.
 
 <Note>
 Find a full code example [here](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments-and-wallets/unwrap.ts).
 </Note>
 
 <Tabs>
-<Tab title="Action">
+<Tab title="Action helper">
 
 ```typescript
 import { getAssociatedTokenAddressSync } from "@solana/spl-token";

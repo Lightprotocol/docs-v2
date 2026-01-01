@@ -20,30 +20,20 @@ import WelcomePageInstall from "/snippets/setup/welcome-page-install.mdx";
 <div className="max-w-3xl mx-auto px-5 py-12 prose prose-gray dark:prose-invert">
 
 <CardGroup cols={2}>
-  <Card
-    title="Light Token Program (Beta)"
-    icon="expand"
-    href="/light-token/welcome"
-  >
+  <Card title="Light Token Program (Beta)" icon="expand" href="/light-token/welcome">
     High performance token standard for rent-free DeFi and Payments.
   </Card>
   <Card title="ZK Compression Core" icon="compress" href="/welcome">
-    Core primitives for rent-free accounts.
+    Core primitives for rent-free tokens & accounts.
   </Card>
 </CardGroup>
 
 ## Features
 
 <CardGroup cols={3}>
-  <Card title="Rent-free Accounts">
-    Create accounts without paying upfront rent.
-  </Card>
-  <Card title="L1 Performance & Security">
-    Execution and data availability on Solana.
-  </Card>
-  <Card title="Fully Composable">
-    Compatible with existing programs and accounts.
-  </Card>
+  <Card title="Rent-free Accounts">Create Solana accounts without paying upfront rent.</Card>
+  <Card title="L1 Performance & Security">Execution and state onchain on Solana.</Card>
+  <Card title="Fully Composable">Works with existing programs and accounts.</Card>
 </CardGroup>
 
 ## Quickstart
@@ -51,8 +41,6 @@ import WelcomePageInstall from "/snippets/setup/welcome-page-install.mdx";
 <Steps>
 <Step>
 ### Installations
-
-Both primitives use the same packages and CLI.
 
 <WelcomePageInstall />
 </Step>
@@ -191,19 +179,10 @@ Both primitives use the same packages and CLI.
 ## Cookbooks
 
 <CardGroup cols={2}>
-  <Card
-    title="Light Token Program"
-    icon="coins"
-    href="/light-token/cookbook/overview"
-  >
+  <Card title="Light Token Program" icon="coins" href="/light-token/cookbook/overview">
     Program and client guides for mints, token accounts, and transfers.
   </Card>
-  <Card
-    title="Compressed Tokens"
-    icon="wallet"
-    iconType="solid"
-    href="/compressed-tokens/overview"
-  >
+  <Card title="Compressed Tokens" icon="wallet" iconType="solid" href="/compressed-tokens/overview">
     Client guides for compressed token accounts.
   </Card>
   <Card
@@ -281,19 +260,10 @@ codex mcp add deepwiki -- npx -y mcp-remote@latest https://mcp.deepwiki.com/mcp
   >
     View security audits and formal verification.
   </Card>
-  <Card
-    title="Light Token Standard"
-    icon="graduation-cap"
-    href="/learn/light-token-standard"
-  >
+  <Card title="Light Token Standard" icon="graduation-cap" href="/learn/light-token-standard">
     Learn core concepts of the Light token program.
   </Card>
-  <Card
-    title="ZK Compression"
-    icon="graduation-cap"
-    iconType="solid"
-    href="/learn/core-concepts"
-  >
+  <Card title="ZK Compression" icon="graduation-cap" iconType="solid" href="/learn/core-concepts">
     Learn core concepts of ZK Compression.
   </Card>
 </CardGroup>
@@ -322,18 +292,10 @@ codex mcp add deepwiki -- npx -y mcp-remote@latest https://mcp.deepwiki.com/mcp
 ### Rust
 
 <CardGroup cols={3}>
-  <Card
-    title="light-client"
-    icon="rust"
-    href="https://docs.rs/light-client/latest/light_client/"
-  >
+  <Card title="light-client" icon="rust" href="https://docs.rs/light-client/latest/light_client/">
     Rust client for Light Token and ZK Compression.
   </Card>
-  <Card
-    title="light-sdk"
-    icon="cube"
-    href="https://docs.rs/light-sdk/latest/light_sdk/"
-  >
+  <Card title="light-sdk" icon="cube" href="https://docs.rs/light-sdk/latest/light_sdk/">
     Core SDK for on-chain programs.
   </Card>
   <Card

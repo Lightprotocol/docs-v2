@@ -94,7 +94,7 @@ Find a full code example [here](https://github.com/Lightprotocol/examples-light-
 </Note>
 
 <Tabs>
-<Tab title="Action">
+<Tab title="Action helper">
 
 ```typescript
 import { getOrCreateAtaInterface } from "@lightprotocol/compressed-token/unified";
@@ -181,7 +181,7 @@ Find a full code example [here](https://github.com/Lightprotocol/examples-light-
 </Note>
 
 <Tabs>
-<Tab title="Action">
+<Tab title="Action helper">
 
 ```typescript
 import {
@@ -431,7 +431,7 @@ Find a full code example [here](https://github.com/Lightprotocol/examples-light-
 </Note>
 
 <Tabs>
-<Tab title="Action">
+<Tab title="Action helper">
 
 ```typescript
 import { getAssociatedTokenAddressSync } from "@solana/spl-token";
@@ -483,17 +483,17 @@ const tx = new Transaction().add(
 
 ### Unwrap to SPL
 
-When users withdraw to an integration that does not support light-token yet,
-you'll need to unwrap light-token to SPL.
+You can compose with applications that do not yet support the light-token
+standard by unwrapping your tokens.
 
-Unwrap moves tokens from light-token ATA to SPL/Token-2022 account.
+Unwrap moves the token balance from a light-token account to a SPL-token account.
 
 <Note>
 Find a full code example [here](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments-and-wallets/unwrap.ts).
 </Note>
 
 <Tabs>
-<Tab title="Action">
+<Tab title="Action helper">
 
 ```typescript
 import { getAssociatedTokenAddressSync } from "@solana/spl-token";
