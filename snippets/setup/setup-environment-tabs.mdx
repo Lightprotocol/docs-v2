@@ -43,12 +43,19 @@ Replace `<your-api-key>` with your actual API key. [Get your API key here](https
 ```typescript
 import { createRpc } from "@lightprotocol/stateless.js";
 
-// Helius exposes Solana and Photon RPC endpoints through a single URL
 const RPC_ENDPOINT = "https://devnet.helius-rpc.com?api-key=<your_api_key>";
-const connection = createRpc(RPC_ENDPOINT, RPC_ENDPOINT, RPC_ENDPOINT);
+const connection = createRpc(RPC_ENDPOINT);
 
-console.log("Connection created!");
-console.log("RPC Endpoint:", RPC_ENDPOINT);
+async function main() {
+  let slot = await connection.getSlot();
+  console.log(slot);
+
+  let health = await connection.getIndexerHealth(slot);
+  console.log(health);
+  // "Ok"
+}
+
+main();
 ```
 
 </Tab>
