@@ -24,9 +24,7 @@ while being more CU efficient than SPL on hot paths.
   </thead>
   <tbody>
     <tr>
-      <td style={{ textAlign: "left" }}>
-        **[Mint Accounts](#light-mint-accounts)**
-      </td>
+      <td style={{ textAlign: "left" }}>**[Mint Accounts](#light-mint-accounts)**</td>
       <td style={{ textAlign: "left" }}>Compressed account</td>
       <td style={{ textAlign: "left" }}>
         <ul>
@@ -36,15 +34,11 @@ while being more CU efficient than SPL on hot paths.
       </td>
     </tr>
     <tr>
-      <td style={{ textAlign: "left" }}>
-        **[Token Accounts](#light-token-account)**
-      </td>
+      <td style={{ textAlign: "left" }}>**[Token Accounts](#light-token-account)**</td>
       <td style={{ textAlign: "left" }}>Solana account</td>
       <td style={{ textAlign: "left" }}>
         <ul>
-          <li>
-            **Stores token balances** of mints (SPL, Token-2022, or Light)
-          </li>
+          <li>**Stores token balances** of mints (SPL, Token-2022, or Light)</li>
           <li>**Sponsored rent** exemption via custom rent-config</li>
         </ul>
       </td>
@@ -55,8 +49,8 @@ while being more CU efficient than SPL on hot paths.
 # Mint Accounts
 
 <Note>
-  * **Light-mints are compressed accounts** and **cannot be decompressed**. *
-  SPL mints can not be compressed to light-mints.
+  * **Light-mints are compressed accounts** and **cannot be decompressed**. * SPL mints can not be
+  compressed to light-mints.
 </Note>
 
 Light-mints **uniquely represent a token on Solana and store its global metadata**, similar to SPL mint accounts with few core differences:
@@ -65,9 +59,9 @@ Light-mints **uniquely represent a token on Solana and store its global metadata
 2. Tokens created from light-mints are **light-tokens**.
 3. Token metadata (name, symbol, URI) is stored as an extension in the struct.
 
-| Creation Cost    | Light               | SPL                 |
-| :--------------- | :------------------ | :------------------ |
-| **Mint Account** | **15,000** lamports | ~1,500,000 lamports |
+|                  |     Light-Token |  SPL-Token |
+| :--------------- | --------------: | ---------: |
+| **Mint Account** | **0.00001 SOL** | 0.0015 SOL |
 
 <Tabs>
   <Tab title="Diagram">
@@ -175,9 +169,7 @@ Here is how light-mints and SPL mints compare:
 
 # Token Account
 
-<Note>
-  **Light token accounts are Solana accounts**, not compressed accounts.
-</Note>
+<Note>**Light token accounts are Solana accounts**, not compressed accounts.</Note>
 
 A light-token account holds token balances like SPL Token accounts:
 
@@ -185,17 +177,17 @@ A light-token account holds token balances like SPL Token accounts:
 - Each wallet can own multiple light-token accounts for the same light-mint.
 - A light-token account can only have one owner and hold units of one light-mint.
 
-| Creation Cost     | Light                | SPL                 |
-| :---------------- | :------------------- | :------------------ |
-| **Token Account** | ~**11,000** lamports | ~2,000,000 lamports |
+|                   |      Light-Token |  SPL-Token |
+| :---------------- | ---------------: | ---------: |
+| **Token Account** | **~0.00001 SOL** | ~0.002 SOL |
 
-Additionally Light Token is more performant then SPL on hot paths:
+Additionally Light Token is more compute-efficient than SPL on hot paths:
 
-|                                   | Light-Token CU | SPL-Token CU |
-| --------------------------------- | -------------: | -----------: |
-| **ATA Creation**                  |          4,348 |       14,194 |
-| **Transfer** (base path)          |            312 |        4,645 |
-| **Transfer** (rent-free hot path) |          1,885 |        4,645 |
+|                          | Light-Token | SPL-Token |
+| :----------------------- | ----------: | --------: |
+| **ATA Creation**         |   **4,348** |    14,194 |
+| **Transfer**             |     **312** |     4,645 |
+| **Transfer** (rent-free) |   **1,885** |     4,645 |
 
 <Tabs>
   <Tab title="Diagram">
@@ -327,10 +319,7 @@ Under the hood, compressed token accounts store token balance, owner, and other 
 1. Light token accounts are automatically compressed/decompressed when active/inactive.
 2. Any light-token or SPL token can be compressed/decompressed at will.
 
-<Note>
-  You can still use compressed tokens for token distribution. Learn more about
-  this here.
-</Note>
+<Note>You can still use compressed tokens for token distribution. Learn more about this here.</Note>
 
 <Tabs>
   <Tab title="Diagram">

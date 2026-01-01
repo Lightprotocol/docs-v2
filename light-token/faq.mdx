@@ -16,16 +16,20 @@ import {
 Light token is like SPL token stored more efficiently to reduce account creation cost while being more CU efficient than SPL on hot paths.
 Users receive and send the same tokens.
 
-| Creation Cost     | Light                | SPL                 |
-| :---------------- | :------------------- | :------------------ |
-| **Mint Account**  | **15,000** lamports  | ~1,500,000 lamports |
-| **Token Account** | ~**11,000** lamports | ~2,000,000 lamports |
+**Creation Cost**
 
-|                                   | Light-Token CU | SPL-Token CU |
-| :-------------------------------- | :------------- | :----------- |
-| **ATA Creation**                  | 4,348          | 14,194       |
-| **Transfer** (base path)          | 312            | 4,645        |
-| **Transfer** (rent-free hot path) | 1,885          | 4,645        |
+|                   |      Light-Token |   SPL-Token |
+| :---------------- | ---------------: | ----------: |
+| **Mint Account**  | **0.00001 SOL** | 0.0015 SOL |
+| **Token Account** | **0.00001 SOL** | 0.002 SOL |
+
+**CU Performance**
+
+|                          | Light-Token | SPL-Token |
+| :----------------------- | ----------: | --------: |
+| **ATA Creation**         |   **4,348** |    14,194 |
+| **Transfer**             |     **312** |     4,645 |
+| **Transfer** (rent-free) |   **1,885** |     4,645 |
 
 #### Can I start using the Light Token Standard?
 
