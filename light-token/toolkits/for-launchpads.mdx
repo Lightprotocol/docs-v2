@@ -88,60 +88,6 @@ const rpc = createRpc(RPC_ENDPOINT);
 ### Create Token with Metadata
 
 <Tabs>
-<Tab title="Action helper">
-
-```typescript
-import { Keypair } from "@solana/web3.js";
-import { createRpc } from "@lightprotocol/stateless.js";
-import {
-  createMintInterface,
-  createTokenMetadata,
-} from "@lightprotocol/compressed-token";
-
-const mintSigner = Keypair.generate();
-
-const { mint, transactionSignature } = await createMintInterface(
-  rpc,
-  payer,
-  payer, // mintAuthority
-  null, // freezeAuthority
-  9, // decimals
-  mintSigner,
-  undefined,
-  undefined,
-  createTokenMetadata(
-    "My Launchpad Token",
-    "MLT",
-    "https://example.com/metadata.json"
-  )
-);
-
-console.log("Mint created:", mint.toBase58());
-```
-
-<Accordion title="Compare to SPL">
-
-```typescript
-import { createMint } from "@solana/spl-token";
-import { Metaplex } from "@metaplex-foundation/js";
-
-// SPL requires separate mint creation + Metaplex metadata
-const mint = await createMint(connection, payer, payer.publicKey, null, 9);
-
-// Then add metadata via Metaplex (additional transaction)
-const metaplex = Metaplex.make(connection);
-await metaplex.nfts().create({
-  name: "My Launchpad Token",
-  symbol: "MLT",
-  uri: "https://example.com/metadata.json",
-  sellerFeeBasisPoints: 0,
-  useNewMint: mint,
-});
-```
-
-</Accordion>
-
-</Tab>
 <Tab title="Instruction">
 
 ```typescript
@@ -203,39 +149,65 @@ const signature = await sendAndConfirmTx(rpc, tx);
 ```
 
 </Tab>
-</Tabs>
-
-### Create User Account
-
-<Tabs>
 <Tab title="Action helper">
 
 ```typescript
-import { getOrCreateAtaInterface } from "@lightprotocol/compressed-token";
+import { Keypair } from "@solana/web3.js";
+import { createRpc } from "@lightprotocol/stateless.js";
+import {
+  createMintInterface,
+  createTokenMetadata,
+} from "@lightprotocol/compressed-token";
 
-const ata = await getOrCreateAtaInterface(rpc, payer, mint, buyer.publicKey);
+const mintSigner = Keypair.generate();
 
-console.log("User ATA:", ata.parsed.address.toBase58());
+const { mint, transactionSignature } = await createMintInterface(
+  rpc,
+  payer,
+  payer, // mintAuthority
+  null, // freezeAuthority
+  9, // decimals
+  mintSigner,
+  undefined,
+  undefined,
+  createTokenMetadata(
+    "My Launchpad Token",
+    "MLT",
+    "https://example.com/metadata.json"
+  )
+);
+
+console.log("Mint created:", mint.toBase58());
 ```
 
 <Accordion title="Compare to SPL">
 
 ```typescript
-import { getOrCreateAssociatedTokenAccount } from "@solana/spl-token";
+import { createMint } from "@solana/spl-token";
+import { Metaplex } from "@metaplex-foundation/js";
 
-const ata = await getOrCreateAssociatedTokenAccount(
-  connection,
-  payer,
-  mint,
-  buyer.publicKey
-);
+// SPL requires separate mint creation + Metaplex metadata
+const mint = await createMint(connection, payer, payer.publicKey, null, 9);
 
-console.log("User ATA:", ata.address.toBase58());
+// Then add metadata via Metaplex (additional transaction)
+const metaplex = Metaplex.make(connection);
+await metaplex.nfts().create({
+  name: "My Launchpad Token",
+  symbol: "MLT",
+  uri: "https://example.com/metadata.json",
+  sellerFeeBasisPoints: 0,
+  useNewMint: mint,
+});
 ```
 
 </Accordion>
 
 </Tab>
+</Tabs>
+
+### Create User Account
+
+<Tabs>
 <Tab title="Instruction">
 
 ```typescript
@@ -268,6 +240,34 @@ const tx = new Transaction().add(
 ```
 
 </Tab>
+<Tab title="Action helper">
+
+```typescript
+import { getOrCreateAtaInterface } from "@lightprotocol/compressed-token";
+
+const ata = await getOrCreateAtaInterface(rpc, payer, mint, buyer.publicKey);
+
+console.log("User ATA:", ata.parsed.address.toBase58());
+```
+
+<Accordion title="Compare to SPL">
+
+```typescript
+import { getOrCreateAssociatedTokenAccount } from "@solana/spl-token";
+
+const ata = await getOrCreateAssociatedTokenAccount(
+  connection,
+  payer,
+  mint,
+  buyer.publicKey
+);
+
+console.log("User ATA:", ata.address.toBase58());
+```
+
+</Accordion>
+
+</Tab>
 </Tabs>
 
 ### Buy (Mint Tokens to Buyer)
@@ -275,52 +275,6 @@ const tx = new Transaction().add(
 When a user buys from the bonding curve, mint tokens to their account.
 
 <Tabs>
-<Tab title="Action helper">
-
-```typescript
-import {
-  mintToInterface,
-  getAssociatedTokenAddressInterface,
-} from "@lightprotocol/compressed-token";
-
-const buyerAta = getAssociatedTokenAddressInterface(mint, buyer.publicKey);
-const amount = 1_000_000_000; // 1 token with 9 decimals
-
-const signature = await mintToInterface(
-  rpc,
-  payer,
-  mint,
-  buyerAta,
-  mintAuthority, // bonding curve PDA or keypair
-  amount
-);
-
-console.log("Minted tokens to buyer:", signature);
-```
-
-<Accordion title="Compare to SPL">
-
-```typescript
-import { mintTo, getAssociatedTokenAddressSync } from "@solana/spl-token";
-
-const buyerAta = getAssociatedTokenAddressSync(mint, buyer.publicKey);
-const amount = 1_000_000_000;
-
-const signature = await mintTo(
-  connection,
-  payer,
-  mint,
-  buyerAta,
-  mintAuthority,
-  amount
-);
-
-console.log("Minted tokens to buyer:", signature);
-```
-
-</Accordion>
-
-</Tab>
 <Tab title="Instruction">
 
 ```typescript
@@ -382,6 +336,52 @@ const signature = await sendAndConfirmTx(rpc, tx);
 ```
 
 </Tab>
+<Tab title="Action helper">
+
+```typescript
+import {
+  mintToInterface,
+  getAssociatedTokenAddressInterface,
+} from "@lightprotocol/compressed-token";
+
+const buyerAta = getAssociatedTokenAddressInterface(mint, buyer.publicKey);
+const amount = 1_000_000_000; // 1 token with 9 decimals
+
+const signature = await mintToInterface(
+  rpc,
+  payer,
+  mint,
+  buyerAta,
+  mintAuthority, // bonding curve PDA or keypair
+  amount
+);
+
+console.log("Minted tokens to buyer:", signature);
+```
+
+<Accordion title="Compare to SPL">
+
+```typescript
+import { mintTo, getAssociatedTokenAddressSync } from "@solana/spl-token";
+
+const buyerAta = getAssociatedTokenAddressSync(mint, buyer.publicKey);
+const amount = 1_000_000_000;
+
+const signature = await mintTo(
+  connection,
+  payer,
+  mint,
+  buyerAta,
+  mintAuthority,
+  amount
+);
+
+console.log("Minted tokens to buyer:", signature);
+```
+
+</Accordion>
+
+</Tab>
 </Tabs>
 
 ### Sell (Transfer Back to Curve)
@@ -389,6 +389,38 @@ const signature = await sendAndConfirmTx(rpc, tx);
 When a user sells, transfer tokens back to the bonding curve account.
 
 <Tabs>
+<Tab title="Instruction">
+
+```typescript
+import { Transaction } from "@solana/web3.js";
+import {
+  createLoadAtaInstructions,
+  createTransferInterfaceInstruction,
+  getAssociatedTokenAddressInterface,
+} from "@lightprotocol/compressed-token/unified";
+
+const sellerAta = getAssociatedTokenAddressInterface(mint, seller.publicKey);
+const curveAta = getAssociatedTokenAddressInterface(mint, bondingCurvePda);
+const amount = 500_000_000;
+
+const tx = new Transaction().add(
+  ...(await createLoadAtaInstructions(
+    rpc,
+    sellerAta,
+    seller.publicKey,
+    mint,
+    payer.publicKey
+  )),
+  createTransferInterfaceInstruction(
+    sellerAta,
+    curveAta,
+    seller.publicKey,
+    amount
+  )
+);
+```
+
+</Tab>
 <Tab title="Action helper">
 
 ```typescript
@@ -436,38 +468,6 @@ console.log("Sold tokens:", signature);
 ```
 
 </Accordion>
-
-</Tab>
-<Tab title="Instruction">
-
-```typescript
-import { Transaction } from "@solana/web3.js";
-import {
-  createLoadAtaInstructions,
-  createTransferInterfaceInstruction,
-  getAssociatedTokenAddressInterface,
-} from "@lightprotocol/compressed-token/unified";
-
-const sellerAta = getAssociatedTokenAddressInterface(mint, seller.publicKey);
-const curveAta = getAssociatedTokenAddressInterface(mint, bondingCurvePda);
-const amount = 500_000_000;
-
-const tx = new Transaction().add(
-  ...(await createLoadAtaInstructions(
-    rpc,
-    sellerAta,
-    seller.publicKey,
-    mint,
-    payer.publicKey
-  )),
-  createTransferInterfaceInstruction(
-    sellerAta,
-    curveAta,
-    seller.publicKey,
-    amount
-  )
-);
-```
 
 </Tab>
 </Tabs>

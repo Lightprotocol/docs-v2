@@ -142,42 +142,6 @@ console.log(portfolio);
 ### Transfer Tokens
 
 <Tabs>
-<Tab title="Action helper">
-
-```typescript
-import {
-  getAssociatedTokenAddressInterface,
-  transferInterface,
-} from "@lightprotocol/compressed-token/unified";
-
-const sourceAta = getAssociatedTokenAddressInterface(mint, owner.publicKey);
-const destinationAta = getAssociatedTokenAddressInterface(mint, recipient);
-
-await transferInterface(
-  rpc,
-  payer,
-  sourceAta,
-  mint,
-  destinationAta,
-  owner,
-  amount
-);
-```
-
-<Accordion title="Compare to SPL">
-
-```typescript
-import { transfer, getAssociatedTokenAddressSync } from "@solana/spl-token";
-
-const sourceAta = getAssociatedTokenAddressSync(mint, owner.publicKey);
-const destinationAta = getAssociatedTokenAddressSync(mint, recipient);
-
-await transfer(connection, payer, sourceAta, destinationAta, owner, amount);
-```
-
-</Accordion>
-
-</Tab>
 <Tab title="Instruction">
 
 ```typescript
@@ -228,6 +192,42 @@ const tx = new Transaction().add(
 </Accordion>
 
 </Tab>
+<Tab title="Action helper">
+
+```typescript
+import {
+  getAssociatedTokenAddressInterface,
+  transferInterface,
+} from "@lightprotocol/compressed-token/unified";
+
+const sourceAta = getAssociatedTokenAddressInterface(mint, owner.publicKey);
+const destinationAta = getAssociatedTokenAddressInterface(mint, recipient);
+
+await transferInterface(
+  rpc,
+  payer,
+  sourceAta,
+  mint,
+  destinationAta,
+  owner,
+  amount
+);
+```
+
+<Accordion title="Compare to SPL">
+
+```typescript
+import { transfer, getAssociatedTokenAddressSync } from "@solana/spl-token";
+
+const sourceAta = getAssociatedTokenAddressSync(mint, owner.publicKey);
+const destinationAta = getAssociatedTokenAddressSync(mint, recipient);
+
+await transfer(connection, payer, sourceAta, destinationAta, owner, amount);
+```
+
+</Accordion>
+
+</Tab>
 </Tabs>
 
 ### Transaction History
@@ -255,38 +255,6 @@ const signatures = await connection.getSignaturesForAddress(ata);
 Before swapping on a DEX, convert light-tokens to SPL tokens.
 
 <Tabs>
-<Tab title="Action helper">
-
-```typescript
-import { getAssociatedTokenAddressSync } from "@solana/spl-token";
-import {
-  wrap,
-  getAssociatedTokenAddressInterface,
-  createAtaInterfaceIdempotent,
-} from "@lightprotocol/compressed-token/unified";
-
-// 1. Create c-token ATA (source)
-const ctokenAta = getAssociatedTokenAddressInterface(mint, owner.publicKey);
-await createAtaInterfaceIdempotent(rpc, payer, mint, owner.publicKey);
-
-// 2. SPL ATA must exist (destination for DEX)
-const splAta = getAssociatedTokenAddressSync(mint, owner.publicKey);
-
-// 3. Wrap light-tokens to SPL for DEX swap
-await wrap(
-  rpc,
-  payer,
-  ctokenAta, // source: c-token ATA
-  splAta, // destination: SPL ATA (for DEX)
-  owner,
-  mint,
-  amount
-);
-
-// Now use splAta with your DEX of choice
-```
-
-</Tab>
 <Tab title="Instruction">
 
 ```typescript
@@ -336,6 +304,38 @@ const signature = await sendAndConfirmTx(rpc, tx);
 ```
 
 </Tab>
+<Tab title="Action helper">
+
+```typescript
+import { getAssociatedTokenAddressSync } from "@solana/spl-token";
+import {
+  wrap,
+  getAssociatedTokenAddressInterface,
+  createAtaInterfaceIdempotent,
+} from "@lightprotocol/compressed-token/unified";
+
+// 1. Create c-token ATA (source)
+const ctokenAta = getAssociatedTokenAddressInterface(mint, owner.publicKey);
+await createAtaInterfaceIdempotent(rpc, payer, mint, owner.publicKey);
+
+// 2. SPL ATA must exist (destination for DEX)
+const splAta = getAssociatedTokenAddressSync(mint, owner.publicKey);
+
+// 3. Wrap light-tokens to SPL for DEX swap
+await wrap(
+  rpc,
+  payer,
+  ctokenAta, // source: c-token ATA
+  splAta, // destination: SPL ATA (for DEX)
+  owner,
+  mint,
+  amount
+);
+
+// Now use splAta with your DEX of choice
+```
+
+</Tab>
 </Tabs>
 
 ### Unwrap After Swaps
@@ -343,27 +343,6 @@ const signature = await sendAndConfirmTx(rpc, tx);
 After receiving tokens from a DEX swap, convert SPL tokens back to light-tokens.
 
 <Tabs>
-<Tab title="Action helper">
-
-```typescript
-import { getAssociatedTokenAddressSync } from "@solana/spl-token";
-import { unwrap } from "@lightprotocol/compressed-token/unified";
-
-// SPL ATA holds tokens received from DEX
-const splAta = getAssociatedTokenAddressSync(mint, owner.publicKey);
-
-// Unwrap SPL tokens back to light-tokens
-await unwrap(
-  rpc,
-  payer,
-  splAta, // destination: SPL ATA (has tokens from DEX)
-  owner,
-  mint,
-  amount // omit for full balance
-);
-```
-
-</Tab>
 <Tab title="Instruction">
 
 ```typescript
@@ -414,6 +393,27 @@ const tx = buildAndSignTx(
 );
 
 const signature = await sendAndConfirmTx(rpc, tx);
+```
+
+</Tab>
+<Tab title="Action helper">
+
+```typescript
+import { getAssociatedTokenAddressSync } from "@solana/spl-token";
+import { unwrap } from "@lightprotocol/compressed-token/unified";
+
+// SPL ATA holds tokens received from DEX
+const splAta = getAssociatedTokenAddressSync(mint, owner.publicKey);
+
+// Unwrap SPL tokens back to light-tokens
+await unwrap(
+  rpc,
+  payer,
+  splAta, // destination: SPL ATA (has tokens from DEX)
+  owner,
+  mint,
+  amount // omit for full balance
+);
 ```
 
 </Tab>

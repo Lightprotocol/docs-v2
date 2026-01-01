@@ -93,38 +93,6 @@ use light_ctoken_sdk::ctoken::{
 Accept light-token deposits by unwrapping them from c-token ATAs to SPL tokens for your pool.
 
 <Tabs>
-<Tab title="Action helper">
-
-```typescript
-import { unwrap } from "@lightprotocol/compressed-token";
-import { getAssociatedTokenAddressSync } from "@solana/spl-token";
-
-// Pool's SPL ATA (destination)
-const poolAta = getAssociatedTokenAddressSync(mint, poolAuthority);
-
-// Unwrap user's light-tokens to pool's SPL ATA
-const signature = await unwrap(
-  rpc,
-  payer,
-  poolAta, // destination: pool's SPL ATA
-  depositor, // owner of c-token ATA (signer)
-  mint,
-  amount
-);
-```
-
-<Accordion title="Compare to SPL">
-
-```typescript
-import { transfer } from "@solana/spl-token";
-
-// SPL: User transfers from their ATA to pool
-await transfer(connection, payer, userAta, poolAta, depositor, amount);
-```
-
-</Accordion>
-
-</Tab>
 <Tab title="Instruction">
 
 ```typescript
@@ -168,6 +136,38 @@ await sendAndConfirmTx(rpc, tx);
 ```
 
 </Tab>
+<Tab title="Action helper">
+
+```typescript
+import { unwrap } from "@lightprotocol/compressed-token";
+import { getAssociatedTokenAddressSync } from "@solana/spl-token";
+
+// Pool's SPL ATA (destination)
+const poolAta = getAssociatedTokenAddressSync(mint, poolAuthority);
+
+// Unwrap user's light-tokens to pool's SPL ATA
+const signature = await unwrap(
+  rpc,
+  payer,
+  poolAta, // destination: pool's SPL ATA
+  depositor, // owner of c-token ATA (signer)
+  mint,
+  amount
+);
+```
+
+<Accordion title="Compare to SPL">
+
+```typescript
+import { transfer } from "@solana/spl-token";
+
+// SPL: User transfers from their ATA to pool
+await transfer(connection, payer, userAta, poolAta, depositor, amount);
+```
+
+</Accordion>
+
+</Tab>
 <Tab title="Program">
 
 ```rust
@@ -203,47 +203,6 @@ pub fn accept_deposit(ctx: Context<AcceptDeposit>, amount: u64, spl_interface_pd
 Return light-tokens to users by wrapping SPL tokens from your pool into c-token ATAs.
 
 <Tabs>
-<Tab title="Action helper">
-
-```typescript
-import {
-  wrap,
-  createAtaInterfaceIdempotent,
-  getAssociatedTokenAddressInterface,
-} from "@lightprotocol/compressed-token";
-import { getAssociatedTokenAddressSync } from "@solana/spl-token";
-
-// Ensure user's c-token ATA exists
-const ctokenAta = getAssociatedTokenAddressInterface(mint, withdrawer);
-await createAtaInterfaceIdempotent(rpc, payer, mint, withdrawer);
-
-// Pool's SPL ATA (source)
-const poolAta = getAssociatedTokenAddressSync(mint, poolAuthority);
-
-// Wrap pool's SPL tokens to user's c-token ATA
-const signature = await wrap(
-  rpc,
-  payer,
-  poolAta, // source: pool's SPL ATA
-  ctokenAta, // destination: user's c-token ATA
-  poolAuthority, // owner of pool's SPL tokens (signer)
-  mint,
-  amount
-);
-```
-
-<Accordion title="Compare to SPL">
-
-```typescript
-import { transfer } from "@solana/spl-token";
-
-// SPL: Pool transfers to user's ATA
-await transfer(connection, payer, poolAta, userAta, poolAuthority, amount);
-```
-
-</Accordion>
-
-</Tab>
 <Tab title="Instruction">
 
 ```typescript
@@ -285,6 +244,47 @@ const tx = buildAndSignTx(
 );
 await sendAndConfirmTx(rpc, tx);
 ```
+
+</Tab>
+<Tab title="Action helper">
+
+```typescript
+import {
+  wrap,
+  createAtaInterfaceIdempotent,
+  getAssociatedTokenAddressInterface,
+} from "@lightprotocol/compressed-token";
+import { getAssociatedTokenAddressSync } from "@solana/spl-token";
+
+// Ensure user's c-token ATA exists
+const ctokenAta = getAssociatedTokenAddressInterface(mint, withdrawer);
+await createAtaInterfaceIdempotent(rpc, payer, mint, withdrawer);
+
+// Pool's SPL ATA (source)
+const poolAta = getAssociatedTokenAddressSync(mint, poolAuthority);
+
+// Wrap pool's SPL tokens to user's c-token ATA
+const signature = await wrap(
+  rpc,
+  payer,
+  poolAta, // source: pool's SPL ATA
+  ctokenAta, // destination: user's c-token ATA
+  poolAuthority, // owner of pool's SPL tokens (signer)
+  mint,
+  amount
+);
+```
+
+<Accordion title="Compare to SPL">
+
+```typescript
+import { transfer } from "@solana/spl-token";
+
+// SPL: Pool transfers to user's ATA
+await transfer(connection, payer, poolAta, userAta, poolAuthority, amount);
+```
+
+</Accordion>
 
 </Tab>
 <Tab title="Program">
