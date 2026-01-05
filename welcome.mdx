@@ -15,8 +15,6 @@ import WelcomePageInstall from "/snippets/setup/welcome-page-install.mdx";
 
 ## Features
 
-{" "}
-
 <Card title="Light Token Program" href="/light-token/welcome" icon="coins" iconType="solid">
   High performance token standard for rent-free DeFi and Payments.
 </Card>
@@ -61,14 +59,8 @@ ZK Compression is a framework that reduces the storage cost of Solana accounts b
 
 <Steps>
   <Step title="State Compression">
-    Normally data is stored in millions of on-chain accounts. State compression stores account data
-    on the{" "}
-    <Tooltip tip="The ledger is an immutable historical record of all Solana transactions signed by clients since the genesis block.">
-      Solana ledger
-    </Tooltip>
-    . Only a fingerprint is stored on-chain for cryptographic security - a hash of all compressed
-    accounts. This hash allows transactions to use the account data inside Solana's virtual machine
-    as if it were stored on-chain.
+   State compression stores account data on the Solana ledger instead of in millions of on-chain accounts. Only a small fingerprint of all accounts is stored on-chain for cryptographic integrity. Using Light Protocol, programs can use the account data inside Solana's virtual machine as if it were stored on-chain.
+
   </Step>
   <Step title="ZK">
     The protocol uses 128 byte zero-knowledge proofs (validity proofs) to verify the integrity of
