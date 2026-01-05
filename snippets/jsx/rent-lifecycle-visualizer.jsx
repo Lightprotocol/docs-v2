@@ -535,7 +535,7 @@ export const RentLifecycleVisualizer = () => {
                 whiteSpace: "nowrap",
               }}
             >
-              Press to see the Rent Config over time!
+              Press to see the Rent lifecycle over time!
             </div>
           )}
         </div>
