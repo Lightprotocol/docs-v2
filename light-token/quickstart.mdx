@@ -4,17 +4,18 @@ description: Mint tokens to a Light-ATA in under 3 minutes.
 sidebarTitle: Quickstart
 ---
 
-import WelcomePageInstall from '/snippets/setup/welcome-page-install.mdx';
+import WelcomePageInstall from "/snippets/setup/welcome-page-install.mdx";
 
 <Steps>
 <Step>
 
 ## Prerequisites
-<Accordion title="Installations">
-<WelcomePageInstall />
+
+<Accordion title="Installation">
+  <WelcomePageInstall />
 </Accordion>
 
-```bash 
+```bash
 # Start local test-validator in separate terminal
 light test-validator
 ```
@@ -43,8 +44,8 @@ async function main() {
     rpc,
     payer,
     payer,
-    null,  // freezeAuthority
-    9,     // decimals
+    null, // freezeAuthority
+    9 // decimals
   );
 
   const recipient = Keypair.generate();
@@ -52,14 +53,7 @@ async function main() {
 
   const destination = getAssociatedTokenAddressInterface(mint, recipient.publicKey);
 
-  const txSignature = await mintToInterface(
-    rpc,
-    payer,
-    mint,
-    destination,
-    payer,
-    1_000_000_000,
-  );
+  const txSignature = await mintToInterface(rpc, payer, mint, destination, payer, 1_000_000_000);
 
   console.log("Transaction:", txSignature);
 }

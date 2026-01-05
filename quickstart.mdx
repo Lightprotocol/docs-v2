@@ -4,20 +4,22 @@ description: Create your first compressed tokens in under 5 minutes.
 sidebarTitle: Quickstart
 ---
 
-import SdkInstall from '/snippets/versions/sdk-install-0.22.1-alpha.1.mdx';
+import SdkInstall from "/snippets/versions/sdk-install-0.22.1-alpha.1.mdx";
 
 <Steps>
 <Step>
 
 ## Prerequisites
-<Accordion title="Installations">
-<WelcomePageInstall />
+
+<Accordion title="Installation">
+  <WelcomePageInstall />
 </Accordion>
 
-```typescript 
+```typescript
 # Start local test-validator
 light test-validator
 ```
+
 </Step>
 <Step>
 ## Mint Compressed Tokens
@@ -35,7 +37,9 @@ import { readFileSync } from "fs";
 import { homedir } from "os";
 
 // Step 1: Load wallet from filesystem
-const payer = Keypair.fromSecretKey(new Uint8Array(JSON.parse(readFileSync(`${homedir()}/.config/solana/id.json`, "utf8"))));
+const payer = Keypair.fromSecretKey(
+  new Uint8Array(JSON.parse(readFileSync(`${homedir()}/.config/solana/id.json`, "utf8")))
+);
 
 // Connect to local test-validator
 const RPC_ENDPOINT = "http://localhost:8899";
@@ -44,7 +48,6 @@ const PROVER_ENDPOINT = "http://localhost:3001";
 const connection = createRpc(RPC_ENDPOINT, COMPRESSION_ENDPOINT, PROVER_ENDPOINT);
 
 const main = async () => {
-
   try {
     // Step 2: Create SPL mint with token pool for compression
     console.log("\nCreating SPL mint with token pool for compression");
@@ -56,7 +59,9 @@ const main = async () => {
     );
 
     console.log(`Mint address: ${mint.toBase58()}`);
-    console.log(`Create mint transaction: https://explorer.solana.com/tx/${transactionSignature}?cluster=custom&customUrl=http://localhost:8899`);
+    console.log(
+      `Create mint transaction: https://explorer.solana.com/tx/${transactionSignature}?cluster=custom&customUrl=http://localhost:8899`
+    );
 
     // Step 3: Mint compressed tokens to recipient account
     console.log("\nMinting compressed token...");
@@ -71,14 +76,15 @@ const main = async () => {
     );
 
     console.log(`Compressed Token minted ${mintAmount / 1e9} token`);
-    console.log(`Transaction: https://explorer.solana.com/tx/${mintToTxId}?cluster=custom&customUrl=http://localhost:8899`);
+    console.log(
+      `Transaction: https://explorer.solana.com/tx/${mintToTxId}?cluster=custom&customUrl=http://localhost:8899`
+    );
 
     // Step 4: Verify compressed token balance via getCompressedTokenAccountsByOwner
     const tokenAccounts = await connection.getCompressedTokenAccountsByOwner(
       payer.publicKey,
       { mint } // SPL mint with token pool for compression
     );
-
   } catch (error: any) {
     console.error("Error:", error.message);
   }
@@ -86,6 +92,7 @@ const main = async () => {
 
 main().catch(console.error);
 ```
+
 </Step>
 </Steps>
 
@@ -97,5 +104,4 @@ main().catch(console.error);
   color="#0066ff"
   href="/compressed-tokens"
   horizontal
->
-</Card>
+></Card>

@@ -17,12 +17,7 @@ import WelcomePageInstall from "/snippets/setup/welcome-page-install.mdx";
 
 {" "}
 
-<Card
-  title="Light Token Program"
-  href="/light-token/welcome"
-  icon="coins"
-  iconType="solid"
->
+<Card title="Light Token Program" href="/light-token/welcome" icon="coins" iconType="solid">
   High performance token standard for rent-free DeFi and Payments.
 </Card>
 
@@ -48,7 +43,7 @@ import WelcomePageInstall from "/snippets/setup/welcome-page-install.mdx";
 ## Quickstart
 
 <Steps>
-  <Step title="Installations">
+  <Step title="Installation">
     <WelcomePageInstall />
   </Step>
   <Step title="Get started">
@@ -66,10 +61,19 @@ ZK Compression is a framework that reduces the storage cost of Solana accounts b
 
 <Steps>
   <Step title="State Compression">
-    Normally data is stored in millions of on-chain accounts. State compression stores account data on the <Tooltip tip="The ledger is an immutable historical record of all Solana transactions signed by clients since the genesis block.">Solana ledger</Tooltip>. Only a fingerprint is stored on-chain for cryptographic security - a hash of all compressed accounts. This hash allows transactions to use the account data inside Solana's virtual machine as if it were stored on-chain.
+    Normally data is stored in millions of on-chain accounts. State compression stores account data
+    on the{" "}
+    <Tooltip tip="The ledger is an immutable historical record of all Solana transactions signed by clients since the genesis block.">
+      Solana ledger
+    </Tooltip>
+    . Only a fingerprint is stored on-chain for cryptographic security - a hash of all compressed
+    accounts. This hash allows transactions to use the account data inside Solana's virtual machine
+    as if it were stored on-chain.
   </Step>
   <Step title="ZK">
-    The protocol uses 128 byte zero-knowledge proofs (validity proofs) to verify the integrity of the compressed accounts. By default, this is all done under the hood. You can fetch validity proofs from RPC providers that support ZK Compression.
+    The protocol uses 128 byte zero-knowledge proofs (validity proofs) to verify the integrity of
+    the compressed accounts. By default, this is all done under the hood. You can fetch validity
+    proofs from RPC providers that support ZK Compression.
   </Step>
 </Steps>
 
@@ -100,20 +104,10 @@ ZK Compression is a framework that reduces the storage cost of Solana accounts b
 ## Learn & Community
 
 <CardGroup cols={3}>
-  <Card
-    title="Start Learning"
-    href="/learn/core-concepts"
-    icon="graduation-cap"
-    iconType="solid"
-  >
+  <Card title="Start Learning" href="/learn/core-concepts" icon="graduation-cap" iconType="solid">
     Learn about ZK Compression's core concepts.
   </Card>
-  <Card
-    title="Security"
-    href="/references/security"
-    icon="shield-halved"
-    iconType="solid"
-  >
+  <Card title="Security" href="/references/security" icon="shield-halved" iconType="solid">
     Read our external audit and formal verification reports.
   </Card>
   <Card
