@@ -13,8 +13,7 @@ import {
 
 #### What is light-token?
 
-Light token is like SPL token stored more efficiently to reduce account creation cost while being more CU efficient than SPL on hot paths.
-Users receive and send the same tokens.
+Light token is a high-performance token standard that is functionally equivalent to SPL, but stores mint and token accounts more efficiently. This reduces account creation cost while being more CU efficient than SPL on hot paths.
 
 **Creation Cost**
 
@@ -33,12 +32,14 @@ Users receive and send the same tokens.
 
 #### Can I start using the Light Token Standard?
 
-Light token is currently deployed on devnet and undergoing security audits.
+Yes! Light Token is deployed on devnet — start integrating today with our [Quickstart](/light-token/quickstart) and [Toolkits](/light-token/toolkits/overview).
+
+For production on mainnet, use [Compressed Tokens V1](/compressed-tokens/overview), which are live and supported by leading wallets such as Phantom and Backpack.
 
 #### Do I need to change my client code significantly?
 
-No. The `light-token-sdk` methods follow similar patterns to SPL.
-Reveal the interface method in the code example and find a few examples below.
+No. The `light-token-sdk` methods are a superset of the SPL-token API.
+Find examples below.
 
 <CodeCompare
   firstCode={splCreateAtaCode}
@@ -88,7 +89,7 @@ SPL tokens can be deposited into light-token accounts and withdrawn back to SPL 
 
 #### Do light-token accounts require rent?
 
-Rent is paid over time when accounts are accessed via a custom rent config instead of the full rent-exemption upfront:
+The token standard pays rent-exemption cost for you. To prevent griefing, "rent" is paid over time to keep an account in memory. This is dealt with under the hood in a way that doesn't disrupt the UX of what your users are used to with SPL-token.
 
 <CompressibleRentExplained />
 

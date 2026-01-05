@@ -4,20 +4,12 @@ sidebarTitle: "Interface Methods"
 description: "Technical reference for light-token interface methods, account types, and CPI."
 ---
 
-Light token is a high performance token program that reduces the cost of account creations by 200x, while being more CU efficient than SPL on hot paths.
+Light token is a high-performance token standard that reduces the cost of mint and token accounts by 200x.
 
 <Note>
   [View on
   GitHub](https://github.com/Lightprotocol/light-protocol/tree/main/js/compressed-token/src/v3)
 </Note>
-
-### Account Types
-
-|                       | Description                                                     |
-| --------------------- | --------------------------------------------------------------- |
-| **light-ATA (hot)**   | On-chain decompressed balance, immediately usable               |
-| **Cold Account**      | Compressed off-chain balance, requires validity proof to access |
-| **SPL Interface PDA** | Account to wrap/unwrap SPL/Light tokens                         |
 
 ### Mint Structure
 
@@ -199,7 +191,7 @@ await mintToCompressed(rpc, payer, mint, mintAuthority, [
 
 ### createAssociatedCTokenAccount
 
-Create an associated c-token account.
+Create an associated light-token account.
 
 ```typescript
 const ata = await createAssociatedCTokenAccount(rpc, payer, owner, mint);
@@ -231,12 +223,7 @@ const ata = await createAssociatedCTokenAccount(rpc, payer, owner, mint);
 Wrap tokens from an SPL/T22 account to a c-token account.
 
 ```typescript
-const splAta = getAssociatedTokenAddressSync(
-  mint,
-  owner.publicKey,
-  false,
-  TOKEN_PROGRAM_ID
-);
+const splAta = getAssociatedTokenAddressSync(mint, owner.publicKey, false, TOKEN_PROGRAM_ID);
 const ctokenAta = getAssociatedTokenAddressInterface(mint, owner.publicKey);
 
 await wrap(rpc, payer, splAta, ctokenAta, owner, mint, 1000n);

@@ -1,7 +1,7 @@
 ---
-title: The Light Token Program (Beta)
+title: The Light Token Program
 sidebarTitle: Introduction
-description: Light token is a high performance token program that reduces the cost of account creations by 200x, while being more CU efficient than SPL on hot paths.
+description: Light token is a high-performance token standard that reduces the cost of mint and token accounts by 200x.
 ---
 
 import GuidesTable from "/snippets/overview-tables/compressed-tokens-guides-table.mdx";
@@ -17,9 +17,11 @@ import IntegrateCTokenGuidesTable from "/snippets/overview-tables/integrate-ligh
 import CookbookGuidesTable from "/snippets/overview-tables/cookbook-guides-table.mdx";
 import WelcomePageInstall from "/snippets/setup/welcome-page-install.mdx";
 
-1. Light-mints and token accounts are equivalent to SPL mints and tokens.
-2. The key difference is light-mint and token accounts do not require you to pay rent-exemption upon creation.
-3. Light token accounts are interoperable with SPL and Token 2022 mints.
+<Info>
+  **Note: This page is for the new Light Token Program Beta.** For production use today, use
+  [Compressed Tokens V1](/compressed-tokens/overview), which are live on Solana Mainnet and
+  supported by leading wallets such as Phantom & Backpack.
+</Info>
 
 ### Creation Cost
 
@@ -38,18 +40,14 @@ import WelcomePageInstall from "/snippets/setup/welcome-page-install.mdx";
 
 <CardGroup cols={2}>
   <Card title="Mint Accounts" icon="coins">
-    Uniquely represent a token and store its global metadata. Light-mints are compressed accounts
-    and rent-free.
+    Light-mint accounts represent a unique mint and optionally can store token-metadata.
+    Functionally equivalent to SPL mints.
   </Card>
   <Card title="Token Accounts" icon="wallet">
-    Each light-token account can hold units of one light, SPL, or Token 2022 mint. Custom rent
-    config reduces account creation cost.
+    Light-token accounts can hold balances from any light, SPL, or Token-2022 mint, without the need
+    to pay rent-exemption.
   </Card>
 </CardGroup>
-
-<Info>
-  If you simply want to **distribute tokens**, please refer to [this page](/compressed-tokens).
-</Info>
 
 # Quickstart
 

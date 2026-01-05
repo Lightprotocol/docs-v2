@@ -9,6 +9,8 @@ import SetupEnvironment from "/snippets/setup/setup-environment-tabs.mdx";
 import InstallDependencies from "/snippets/setup/install-dependencies-codegroup.mdx";
 import { TokenAccountCompressedVsSpl } from "/snippets/jsx/token-account-compressed-vs-spl.jsx";
 
+<Check>**Compressed Tokens are supported by major wallets such as Phantom and Backpack.**</Check>
+
 | Creation          | Solana              | Compressed         |
 | :---------------- | :------------------ | :----------------- |
 | **Token Account** | ~2,000,000 lamports | **5,000** lamports |
@@ -16,10 +18,6 @@ import { TokenAccountCompressedVsSpl } from "/snippets/jsx/token-account-compres
 1. Compressed token accounts store token balance, owner, and other information of tokens like SPL and light-tokens.
 2. Compressed token accounts are rent-free.
 3. Any light-token or SPL token can be compressed/decompressed at will.
-   <Info>
-     Wallets like Phantom and Backpack support compressed tokens. The UI does
-     not distinguish between SPL and compressed tokens.
-   </Info>
 
 ## Recommended Usage of Compressed Tokens
 
