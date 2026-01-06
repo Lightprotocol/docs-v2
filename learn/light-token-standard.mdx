@@ -49,8 +49,8 @@ while being more CU efficient than SPL on hot paths.
 # Mint Accounts
 
 <Note>
-  * **Light-mints are compressed accounts** and **cannot be decompressed**. * SPL mints can not be
-  compressed to light-mints.
+  Light mints are on-chain accounts like SPL mints, but with rent-exemption paid for by the Token
+  program, instead of the user.
 </Note>
 
 Light-mints **uniquely represent a token on Solana and store its global metadata**, similar to SPL mint accounts with few core differences:
@@ -169,7 +169,10 @@ Here is how light-mints and SPL mints compare:
 
 # Token Account
 
-<Note>**Light token accounts are Solana accounts**, not compressed accounts.</Note>
+<Note>
+  Light token accounts are on-chain accounts like SPL token accounts, but with rent-exemption paid
+  for by the Token program, instead of the user.
+</Note>
 
 A light-token account holds token balances like SPL Token accounts:
 
