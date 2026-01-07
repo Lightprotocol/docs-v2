@@ -1,6 +1,7 @@
-1. The rent-exemption for light-token account creation is sponsored by Light Protocol.
+1. The rent-exemption for light account creation is sponsored by the Light Token Program.
 2. Transaction payer's pay rent <Tooltip tip="1 rent-epoch ≈ 1.5h ≈ 13,500 slots at 400ms per slot">per rent-epoch (388 lamports for 1.5h)</Tooltip> <br/>
    to keep accounts "active".
-3. "Inactive" accounts (rent below one epoch) get automatically compressed. The account's state is cryptographically preserved and will be loaded into hot account state in-flight, when the account is used again.<br/>
+3. "Inactive" accounts (rent below one epoch) get automatically compressed. 
+4. The account's state is cryptographically preserved and will be loaded into hot account state in-flight, when the account is used again.<br/>
 
 The hot state fee is paid for by the transaction payer when writing to the respective account.
