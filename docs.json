@@ -14,6 +14,11 @@
   "appearance": {
     "default": "light"
   },
+  "seo": {
+    "metatags": {
+      "keywords": "solana tokens, spl token, token 2022, light protocol, zk compression, rent free accounts on solana, scalable solana infrastructure"
+    }
+  },
   "navigation": {
     "tabs": [
       {
