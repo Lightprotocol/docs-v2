@@ -14,10 +14,6 @@
   "appearance": {
     "default": "light"
   },
-  "banner": {
-    "content": "The new Light Token Standard is now available for Developers. <a href=\"/light-token/welcome\" style=\"color:#FFFFFF; text-decoration: underline;\">Build with high-performance, rent-free mints and token accounts</a>!",
-    "dismissible": true
-  },
   "navigation": {
     "tabs": [
       {
