@@ -167,7 +167,14 @@
     "EUROCRYPT",
     "sysvar",
     "sysvars",
-    "CpiAccounts"
+    "CpiAccounts",
+    "depin",
+    "depins",
+    "DePIN",
+    "DePINs",
+    "stablecoins",
+    "fintechs",
+    "micropayments"
   ],
   "ignorePaths": [
     "node_modules",
