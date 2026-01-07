@@ -25,36 +25,22 @@ The API exposed by the indexer closely mirrors existing RPC calls, with one-to-o
 
 <Tabs>
 <Tab title="Mainnet">
-```typescript highlight={6-7}
-import {
-  Rpc,
-  createRpc,
-} from "@lightprotocol/stateless.js";
-
+```typescript
 // Helius exposes Solana and Photon RPC endpoints through a single URL
-const RPC_ENDPOINT = "https://mainnet.helius-rpc.com?api-key=<api_key>";
-const PHOTON_ENDPOINT = RPC_ENDPOINT;
-const PROVER_ENDPOINT = RPC_ENDPOINT;
-const connection: Rpc = createRpc(RPC_ENDPOINT, PHOTON_ENDPOINT, PROVER_ENDPOINT)
+import { createRpc, Rpc } from '@lightprotocol/stateless.js';
 
-console.log("connection", connection);
+const RPC_ENDPOINT = '<https://mainnet.helius-rpc.com?api-key=YOUR_KEY>';
+const connection: Rpc = createRpc(RPC_ENDPOINT, RPC_ENDPOINT);
 ```
 </Tab>
 
 <Tab title="Devnet">
-```typescript highlight={6-7}
-import {
-  Rpc,
-  createRpc,
-} from "@lightprotocol/stateless.js";
+```typescript
+import { createRpc, Rpc } from '@lightprotocol/stateless.js';
 
 // Helius exposes Solana and Photon RPC endpoints through a single URL
 const RPC_ENDPOINT = "https://devnet.helius-rpc.com?api-key=<api_key>";
-const PHOTON_ENDPOINT = RPC_ENDPOINT;
-const PROVER_ENDPOINT = RPC_ENDPOINT;
-const connection: Rpc = createRpc(RPC_ENDPOINT, PHOTON_ENDPOINT, PROVER_ENDPOINT)
-
-console.log("connection", connection);
+const connection: Rpc = createRpc(RPC_ENDPOINT, RPC_ENDPOINT);
 ```
 </Tab>
 </Tabs>
