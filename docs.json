@@ -73,7 +73,9 @@
           {
             "group": "Learn",
             "pages": [
-              "learn/light-token-standard"            ]
+              "learn/light-token-standard",
+              "learn/ai-tools-guide"
+            ]
           },
           {
             "group": "SDK Reference",
@@ -206,7 +208,8 @@
                   "learn/core-concepts/transaction-lifecycle",
                   "learn/core-concepts/considerations"
                 ]
-              }
+              },
+              "learn/ai-tools-guide"
             ]
           },
           {
@@ -236,6 +239,7 @@
               "references/whitepaper",
               "references/node-operators",
               "references/terminology",
+              "support",
               "references/security"
             ]
           },
@@ -251,21 +255,7 @@
           }
         ]
       }
-    ],
-    "global": {
-      "anchors": [
-        {
-          "anchor": "AI Tools Guide",
-          "href": "https://zkcompression.com/learn/ai-tools-guide",
-          "icon": "robot"
-        },
-        {
-          "anchor": "Support",
-          "href": "https://www.zkcompression.com/support",
-          "icon": "headset"
-        }
-      ]
-    }
+    ]
   },
   "api": {
     "playground": {
@@ -284,15 +274,17 @@
   "navbar": {
     "links": [
       {
+        "label": "Get Support",
+        "icon": "discord",
+        "href": "https://discord.gg/CYvjBgzRFP"
+      },
+      {
+        "type": "button",
         "label": "GitHub",
+        "icon": "github",
         "href": "https://github.com/Lightprotocol/light-protocol"
       }
-    ],
-    "primary": {
-      "type": "button",
-      "label": "Get Support on Discord",
-      "href": "https://discord.gg/rpddh53TeG"
-    }
+    ]
   },
   "contextual": {
     "options": [
