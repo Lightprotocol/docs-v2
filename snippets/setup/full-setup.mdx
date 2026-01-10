@@ -1,0 +1,72 @@
+<Accordion title="Installation">
+
+<Tabs>
+  <Tab title="npm">
+
+  Install packages in your working directory:
+    ```bash
+    npm install @lightprotocol/stateless.js@alpha \
+                @lightprotocol/compressed-token@alpha
+    ```
+Install the CLI globally:
+    ```bash
+    npm install -g @lightprotocol/zk-compression-cli@alpha
+    ```
+  </Tab>
+  <Tab title="yarn">
+    Install packages in your working directory:
+
+    ```bash
+    yarn add @lightprotocol/stateless.js@alpha \
+             @lightprotocol/compressed-token@alpha
+    ```
+Install the CLI globally:
+
+    ```bash
+    yarn global add @lightprotocol/zk-compression-cli@alpha
+    ```
+  </Tab>
+  <Tab title="pnpm">
+    Install packages in your working directory:
+    ```bash
+    pnpm add @lightprotocol/stateless.js@alpha \
+             @lightprotocol/compressed-token@alpha
+    ```
+Install the CLI globally:
+
+    ```bash
+    pnpm add -g @lightprotocol/zk-compression-cli@alpha
+    ```
+  </Tab>
+</Tabs>
+
+</Accordion>
+
+<Tabs>
+<Tab title="Localnet">
+
+```bash
+# start local test-validator in a separate terminal
+light test-validator
+```
+
+<Note>
+In the code examples, use `createRpc()` without arguments for localnet.
+</Note>
+
+</Tab>
+
+<Tab title="Devnet">
+
+Get an API key from [Helius](https://helius.dev) and add to `.env`:
+
+```bash title=".env"
+API_KEY=<your-helius-api-key>
+```
+
+<Note>
+In the code examples, use `createRpc(RPC_URL)` with the devnet URL.
+</Note>
+
+</Tab>
+</Tabs>

@@ -5,62 +5,22 @@ sidebarTitle: Quickstart
 keywords: ["create tokens on solana tutorial", "mint tokens on solana guide", "spl token quickstart for developers", "token sdk for solana apps"]
 ---
 
-import WelcomePageInstall from "/snippets/setup/welcome-page-install.mdx";
+import FullSetup from "/snippets/setup/full-setup.mdx";
+import MintToAction from "/snippets/code-snippets/light-token/mint-to/action.mdx";
 
 <Steps>
 <Step>
 
 ## Prerequisites
 
-<Accordion title="Installation">
-  <WelcomePageInstall />
-</Accordion>
-
-```bash
-# Start local test-validator in separate terminal
-light test-validator
-```
+<FullSetup />
 
 </Step>
 <Step>
 
 ## Mint Tokens to Light-ATA
 
-```typescript
-import { Keypair } from "@solana/web3.js";
-import { createRpc } from "@lightprotocol/stateless.js";
-import {
-  createMintInterface,
-  createAtaInterface,
-  mintToInterface,
-  getAssociatedTokenAddressInterface,
-} from "@lightprotocol/compressed-token";
-
-async function main() {
-  const rpc = createRpc();
-  const payer = Keypair.generate();
-  await rpc.requestAirdrop(payer.publicKey, 10e9);
-
-  const { mint } = await createMintInterface(
-    rpc,
-    payer,
-    payer,
-    null, // freezeAuthority
-    9 // decimals
-  );
-
-  const recipient = Keypair.generate();
-  await createAtaInterface(rpc, payer, mint, recipient.publicKey);
-
-  const destination = getAssociatedTokenAddressInterface(mint, recipient.publicKey);
-
-  const txSignature = await mintToInterface(rpc, payer, mint, destination, payer, 1_000_000_000);
-
-  console.log("Transaction:", txSignature);
-}
-
-main().catch(console.error);
-```
+<MintToAction />
 
 </Step>
 </Steps>

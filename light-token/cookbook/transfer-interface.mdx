@@ -13,11 +13,13 @@ import CTokenClientPrerequisites from "/snippets/light-token-guides/light-token-
 import CTokenTsClientPrerequisites from "/snippets/light-token-guides/light-token-ts-client-prerequisites.mdx";
 import ClientCustomRentConfig from "/snippets/light-token-guides/client-custom-rent-config.mdx";
 import { CodeCompare } from "/snippets/jsx/code-compare.jsx";
-import WelcomePageInstall from "/snippets/setup/welcome-page-install.mdx";
+import FullSetup from "/snippets/setup/full-setup.mdx";
 import {
   splTransferCode,
   lightTransferCode,
 } from "/snippets/code-samples/code-compare-snippets.jsx";
+import ActionCode from "/snippets/code-snippets/light-token/transfer-interface/action.mdx";
+import InstructionCode from "/snippets/code-snippets/light-token/transfer-interface/instruction.mdx";
 
 ## Get Started
 
@@ -78,103 +80,16 @@ Compare to SPL:
 <Step>
 ### Transfer Interface
 
-<Accordion title="Installation">
-  <WelcomePageInstall />
-</Accordion>
+<FullSetup />
 
-```bash
-# Start local test-validator in separate terminal
-light test-validator
-```
-
-<CodeGroup>
-```typescript Action
-import { Keypair } from "@solana/web3.js";
-import { createRpc } from "@lightprotocol/stateless.js";
-import {
-  createMintInterface,
-  createAtaInterface,
-  mintToInterface,
-  transferInterface,
-  getAssociatedTokenAddressInterface,
-} from "@lightprotocol/compressed-token";
-
-async function main() {
-  const rpc = createRpc();
-  const payer = Keypair.generate();
-  const sig = await rpc.requestAirdrop(payer.publicKey, 10e9);
-  await rpc.confirmTransaction(sig);
-
-  const { mint } = await createMintInterface(rpc, payer, payer, null, 9);
-
-  const sender = Keypair.generate();
-  await createAtaInterface(rpc, payer, mint, sender.publicKey);
-  const senderAta = getAssociatedTokenAddressInterface(mint, sender.publicKey);
-  await mintToInterface(rpc, payer, mint, senderAta, payer, 1_000_000_000);
-
-  const recipient = Keypair.generate();
-  await createAtaInterface(rpc, payer, mint, recipient.publicKey);
-  const recipientAta = getAssociatedTokenAddressInterface(mint, recipient.publicKey);
-
-  const tx = await transferInterface(rpc, payer, senderAta, mint, recipientAta, sender, 500_000_000);
-
-  console.log("Tx:", tx);
-}
-
-main().catch(console.error);
-```
-
-```typescript Instruction
-import "dotenv/config";
-import { Keypair, ComputeBudgetProgram } from "@solana/web3.js";
-import { createRpc, buildAndSignTx, sendAndConfirmTx } from "@lightprotocol/stateless.js";
-import {
-    createMintInterface,
-    createAtaInterface,
-    mintToInterface,
-    createTransferInterfaceInstruction,
-    getAssociatedTokenAddressInterface,
-} from "@lightprotocol/compressed-token";
-import { homedir } from "os";
-import { readFileSync } from "fs";
-
-const RPC_URL = `https://devnet.helius-rpc.com?api-key=${process.env.API_KEY!}`;
-const payer = Keypair.fromSecretKey(
-    new Uint8Array(
-        JSON.parse(readFileSync(`${homedir()}/.config/solana/id.json`, "utf8"))
-    )
-);
-
-(async function () {
-    const rpc = createRpc(RPC_URL);
-
-    const { mint } = await createMintInterface(rpc, payer, payer, null, 9);
-
-    const sender = Keypair.generate();
-    await createAtaInterface(rpc, payer, mint, sender.publicKey);
-    const senderAta = getAssociatedTokenAddressInterface(mint, sender.publicKey);
-    await mintToInterface(rpc, payer, mint, senderAta, payer, 1_000_000_000);
-
-    const recipient = Keypair.generate();
-    await createAtaInterface(rpc, payer, mint, recipient.publicKey);
-    const recipientAta = getAssociatedTokenAddressInterface(mint, recipient.publicKey);
-
-    const ix = createTransferInterfaceInstruction(senderAta, recipientAta, sender.publicKey, 500_000_000);
-
-    const { blockhash } = await rpc.getLatestBlockhash();
-    const tx = buildAndSignTx(
-        [ComputeBudgetProgram.setComputeUnitLimit({ units: 10_000 }), ix],
-        payer,
-        blockhash,
-        [sender]
-    );
-    const signature = await sendAndConfirmTx(rpc, tx);
-
-    console.log("Tx:", signature);
-})();
-```
-
-</CodeGroup>
+<Tabs>
+<Tab title="Action">
+<ActionCode />
+</Tab>
+<Tab title="Instruction">
+<InstructionCode />
+</Tab>
+</Tabs>
 
 </Step>
 </Steps>
