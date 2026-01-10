@@ -1,13 +1,18 @@
 ---
-title: Migrate from v1 to v2 
-description: Step-by-step guide to migrate Light Protocol programs from v1 to v2. V2 reduces CU consumption by up to 70%. 
-sidebarTitle: Update to V2
+title: Guide to Migrate Programs from v1 to v2 Merkle trees
+description: V2 reduces CU consumption by up to 70%. V1 remains supported for existing deployments.
+sidebarTitle: Update Guide to V2
 ---
 
+## V2 Improvements
 
-<Note>
-V1 remains supported for existing deployments.
-</Note>
+|                     | v1                                                                                                        | v2                                                                                                      |
+|---------------------|------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------|
+| Merkle tree type    | Concurrent                                                                                               | Batched                                                                                                |
+| State tree depth    | 26 (~67M leaves)                                                                                        | 32 (~4B leaves)                                                                                      |
+| Address tree depth  | 26                                                                                                       | 40                                                                                                     |
+| Address tree accounts| Separate tree + queue                                                                                    | Single batch tree                                                                                     |
+
 
 <Tabs>
 <Tab title="TypeScript">
@@ -248,14 +253,6 @@ let new_address_params = instruction_data
 </Tab>
 </Tabs>
 
-## V2 Improvements
-
-|                     | v1                                                                                                        | v2                                                                                                      |
-|---------------------|------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------|
-| Merkle tree type    | Concurrent                                                                                               | Batched                                                                                                |
-| State tree depth    | 26 (~67M leaves)                                                                                        | 32 (~4B leaves)                                                                                      |
-| Address tree depth  | 26                                                                                                       | 40                                                                                                     |
-| Address tree accounts| Separate tree + queue                                                                                    | Single batch tree                                                                                     |
 
 ## View Program Examples
 
