@@ -114,11 +114,8 @@ Compressed account addresses are derived similar to PDAs.
 <Tab title="TypeScript">
 
 ```typescript
-const seed = deriveAddressSeed(
-  [customSeed, signer.publicKey.toBytes()],
-  new web3.PublicKey(programId)
-);
-const address = deriveAddress(seed, addressTree);
+const seed = deriveAddressSeedV2([customSeed, signer.publicKey.toBytes()]);
+const address = deriveAddressV2(seed, addressTree, new web3.PublicKey(programId));
 ```
 
 <Info>
