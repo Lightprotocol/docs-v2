@@ -4,47 +4,10 @@ description: Step-by-step guide to migrate Light Protocol programs from v1 to v2
 sidebarTitle: V1 to V2 migration
 ---
 
-## V2 changes
-
-<table>
-  <thead>
-    <tr>
-      <th></th>
-      <th>v1</th>
-      <th>v2</th>
-      <th>Improvement</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>Merkle tree type</td>
-      <td>Concurrent</td>
-      <td>Batched</td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>State tree depth</td>
-      <td>26 (~67M leaves)</td>
-      <td>32 (~4B leaves)</td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>Address tree depth</td>
-      <td>26</td>
-      <td>40</td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>Address tree accounts</td>
-      <td>Separate tree + queue</td>
-      <td>Single batch tree</td>
-      <td></td>
-    </tr>
-  </tbody>
-</table>
 
 <Note>
-V2 is the recommended version for new programs. V1 remains supported for existing deployments.
+V2 reduces CU consumption by up to 70% and is the recommended version for new programs. 
+V1 remains supported for existing deployments.
 </Note>
 
 <Tabs>
@@ -286,23 +249,21 @@ let new_address_params = instruction_data
 </Tab>
 </Tabs>
 
+## V2 Improvements
 
+|                     | v1                                                                                                        | v2                                                                                                      |
+|---------------------|------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------|
+| Merkle tree type    | Concurrent                                                                                               | Batched                                                                                                |
+| State tree depth    | 26 (~67M leaves)                                                                                        | 32 (~4B leaves)                                                                                      |
+| Address tree depth  | 26                                                                                                       | 40                                                                                                     |
+| Address tree accounts| Separate tree + queue                                                                                    | Single batch tree                                                                                     |
 
-## Next steps
+## View Program Examples
 
-<CardGroup>
 <Card
-  title="Create compressed accounts"
-  icon="chevron-right"
-  color="#0066ff"
-  href="/compressed-pdas/guides/how-to-create-compressed-accounts"
-  horizontal
-/>
-<Card
-  title="View program examples"
+  title="Program examples"
   icon="chevron-right"
   color="#0066ff"
   href="/compressed-pdas/program-examples"
   horizontal
 />
-</CardGroup>
