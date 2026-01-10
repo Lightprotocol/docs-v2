@@ -1,0 +1,320 @@
+---
+title: Migrate from v1 to v2 state trees
+description: Step-by-step guide to migrate Light Protocol programs from v1 to v2 state trees
+sidebarTitle: V1 to V2 migration
+---
+
+## V2 changes
+
+<table>
+  <thead>
+    <tr>
+      <th></th>
+      <th>v1</th>
+      <th>v2</th>
+      <th>Improvement</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Merkle tree type</td>
+      <td>Concurrent</td>
+      <td>Batched</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>State tree depth</td>
+      <td>26 (~67M leaves)</td>
+      <td>32 (~4B leaves)</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>Address tree depth</td>
+      <td>26</td>
+      <td>40</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>Address tree accounts</td>
+      <td>Separate tree + queue</td>
+      <td>Single batch tree</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td><strong>CU cost -> append</strong></td>
+      <td>24,000 CU</td>
+      <td>1,224 CU</td>
+      <td><strong>~20x</strong></td>
+    </tr>
+    <tr>
+      <td><strong>CU Cost -> update</strong></td>
+      <td>50,216 CU</td>
+      <td>3,669 CU</td>
+      <td><strong>~14x</strong></td>
+    </tr>
+  </tbody>
+</table>
+
+<Note>
+V2 is the recommended version for new programs. V1 remains supported for existing deployments.
+</Note>
+
+<Tabs>
+<Tab title="TypeScript">
+
+### Update imports
+
+```typescript
+// v1
+import {
+    deriveAddress,
+    deriveAddressSeed,
+    defaultTestStateTreeAccounts,
+    PackedAccounts,
+} from "@lightprotocol/stateless.js";
+```
+
+```typescript
+// v2
+import {
+    deriveAddressV2,
+    deriveAddressSeedV2,
+    batchAddressTree,
+    PackedAccounts,
+    featureFlags,
+    VERSION,
+} from "@lightprotocol/stateless.js";
+```
+
+### Enable v2 mode
+
+Set the feature flag before making any calls:
+
+```typescript
+import { featureFlags, VERSION } from "@lightprotocol/stateless.js";
+
+(featureFlags as any).version = VERSION.V2;
+```
+
+### Update address derivation
+
+The seed and address derivation functions have different signatures in v2:
+
+```typescript
+// v1 - Program ID passed to seed derivation
+const seed = deriveAddressSeed(
+    [counterSeed, signer.publicKey.toBytes()],
+    new PublicKey(program.idl.address)
+);
+const address = deriveAddress(seed, addressTree);
+```
+
+```typescript
+// v2 - Program ID passed to address derivation
+const seed = deriveAddressSeedV2([counterSeed, signer.publicKey.toBytes()]);
+const address = deriveAddressV2(
+    seed,
+    addressTree,
+    new PublicKey(program.idl.address)
+);
+```
+
+### Update address tree references
+
+Use `batchAddressTree` instead of `defaultTestStateTreeAccounts().addressTree`:
+
+```typescript
+// v1
+const addressTree = defaultTestStateTreeAccounts().addressTree;
+const addressQueue = defaultTestStateTreeAccounts().addressQueue;
+
+// In proof request
+{
+    tree: addressTree,
+    queue: addressQueue,
+    address: bn(address.toBytes()),
+}
+```
+
+```typescript
+// v2 - queue equals tree for batch trees
+const addressTree = new PublicKey(batchAddressTree);
+
+// In proof request
+{
+    tree: addressTree,
+    queue: addressTree,
+    address: bn(address.toBytes()),
+}
+```
+
+### Update PackedAccounts
+
+Use the v2 variant when building remaining accounts:
+
+```typescript
+// v1
+const remainingAccounts = PackedAccounts.newWithSystemAccounts(systemAccountConfig);
+```
+
+```typescript
+// v2
+const remainingAccounts = PackedAccounts.newWithSystemAccountsV2(systemAccountConfig);
+```
+
+</Tab>
+<Tab title="Rust">
+
+### Update Cargo.toml
+
+Add the `v2` feature flag to your dependencies:
+
+```toml
+[dependencies]
+light-sdk = { version = "0.16", features = ["v2"] }
+light-sdk-types = { version = "0.3", features = ["v2"] }
+```
+
+### Update imports
+
+```rust
+// v1
+use light_sdk::{
+    address::v1::derive_address,
+    constants::ADDRESS_TREE_V1,
+    cpi::v1::{CpiAccounts, LightSystemProgramCpi},
+};
+```
+
+```rust
+// v2
+use light_sdk::{
+    address::v2::derive_address,
+    cpi::v2::{CpiAccounts, LightSystemProgramCpi},
+};
+use light_sdk_types::ADDRESS_TREE_V2;
+```
+
+### Update address derivation
+
+The `derive_address` function signature remains the same, but the internal derivation logic differs. No code changes needed beyond updating the import path.
+
+### Update address params
+
+Replace `into_new_address_params_packed()` with `into_new_address_params_assigned_packed()`:
+
+```rust
+// v1
+let new_address_params = instruction_data
+    .address_tree_info
+    .into_new_address_params_packed(address_seed);
+```
+
+```rust
+// v2
+let new_address_params = instruction_data
+    .address_tree_info
+    .into_new_address_params_assigned_packed(address_seed, Some(0));
+```
+
+The second parameter specifies the output queue index. Use `Some(0)` to assign the address to the first available queue.
+
+### Update tree validation
+
+If your program validates the address tree pubkey, update the constant:
+
+```rust
+// v1
+if address_tree_pubkey.to_bytes() != ADDRESS_TREE_V1 {
+    return Err(ProgramError::InvalidAccountData);
+}
+```
+
+```rust
+// v2
+if address_tree_pubkey.to_bytes() != ADDRESS_TREE_V2 {
+    return Err(ProgramError::InvalidAccountData);
+}
+```
+
+</Tab>
+<Tab title="Pinocchio">
+
+The Pinocchio SDK follows the same import changes as the Rust SDK, plus one additional API change.
+
+### Update imports
+
+```rust
+// v1
+use light_sdk_pinocchio::{
+    address::v1::derive_address,
+    constants::ADDRESS_TREE_V1,
+    cpi::v1::{CpiAccounts, LightSystemProgramCpi},
+};
+```
+
+```rust
+// v2
+use light_sdk_pinocchio::{
+    address::v2::derive_address,
+    cpi::v2::{CpiAccounts, LightSystemProgramCpi},
+};
+use light_sdk_types::ADDRESS_TREE_V2;
+```
+
+### Update CpiAccounts
+
+`CpiAccounts::try_new_with_config()` becomes `CpiAccounts::new_with_config()` (infallible):
+
+```rust
+// v1
+let cpi_accounts = CpiAccounts::try_new_with_config(signer, &accounts[1..], config)
+    .map_err(to_custom_error_u32)?;
+```
+
+```rust
+// v2
+let cpi_accounts = CpiAccounts::new_with_config(signer, &accounts[1..], config);
+```
+
+### Update address params
+
+Same as the Rust SDK:
+
+```rust
+// v1
+let new_address_params = instruction_data
+    .address_tree_info
+    .into_new_address_params_packed(address_seed);
+```
+
+```rust
+// v2
+let new_address_params = instruction_data
+    .address_tree_info
+    .into_new_address_params_assigned_packed(address_seed, Some(0));
+```
+
+</Tab>
+</Tabs>
+
+
+
+## Next steps
+
+<CardGroup>
+<Card
+  title="Create compressed accounts"
+  icon="chevron-right"
+  color="#0066ff"
+  href="/compressed-pdas/guides/how-to-create-compressed-accounts"
+  horizontal
+/>
+<Card
+  title="View program examples"
+  icon="chevron-right"
+  color="#0066ff"
+  href="/compressed-pdas/program-examples"
+  horizontal
+/>
+</CardGroup>
