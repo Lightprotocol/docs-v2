@@ -231,7 +231,8 @@
                   "resources/sdks/program-development"
                 ]
               },
-              "resources/addresses-and-urls"
+              "resources/addresses-and-urls",
+              "resources/migration-v1-to-v2"
             ]
           },
           {
