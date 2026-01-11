@@ -1,0 +1,112 @@
+---
+title: Create Token Pools for Compression to Existing Mints
+description: "Create a token pool for an existing SPL mint. Requires only fee_payer with no mint authority constraint."
+keywords: ["compressed token pools", "token pool on solana"]
+---
+
+import FullSetup from "/snippets/setup/full-setup.mdx";
+import ActionCode from '/snippets/code-snippets/compressed-token/create-token-pool/action.mdx';
+
+Create a token for compression fo an existing SPL mint. `createTokenPool()` requires only `fee_payer` and has no mint authority constraint.
+
+<Info>
+The token pool account itself requires rent, but individual compressed token accounts are rent-free.
+</Info>
+
+<CodeGroup>
+```typescript function-create-token-pool.ts
+// Creates token pool account for existing SPL mint
+const transactionSignature = await createTokenPool(
+    rpc,
+    payer,
+    mint,
+);
+```
+</CodeGroup>
+
+<Check>
+**Best Practice:** Each mint supports a maximum of 4 token pools total. During compression/decompression operations, token pools get write-locked. Use `addTokenPools()` to create additional pools that increase per-block write-lock capacity.
+</Check>
+
+## Get Started
+
+<Steps>
+<Step>
+### Create Token Pool
+
+<FullSetup />
+
+<ActionCode />
+</Step>
+</Steps>
+
+# Troubleshooting
+
+<AccordionGroup>
+<Accordion title="TokenPool not found">
+
+You're trying to access a token pool that doesn't exist.
+
+```typescript
+// Create the missing token pool
+const poolTx = await createTokenPool(rpc, payer, mint);
+console.log("Token pool created:", poolTx);
+```
+
+</Accordion>
+</AccordionGroup>
+
+# Advanced Configuration
+
+<AccordionGroup>
+<Accordion title="Batch Pool Creation">
+
+Create pools for multiple mints:
+
+```typescript
+const mints = [
+    new PublicKey("MINT_1_ADDRESS"),
+    new PublicKey("MINT_2_ADDRESS"),
+    new PublicKey("MINT_3_ADDRESS"),
+];
+
+for (const mint of mints) {
+    try {
+        const poolTx = await createTokenPool(rpc, payer, mint);
+        console.log(`Pool created for ${mint.toBase58()}:`, poolTx);
+    } catch (error) {
+        console.log(`Failed for ${mint.toBase58()}:`, error.message);
+    }
+}
+```
+
+</Accordion>
+
+<Accordion title="Create Pool with Token-2022">
+
+Create token pools for Token-2022 mints:
+
+```typescript
+import { TOKEN_2022_PROGRAM_ID } from '@solana/spl-token';
+
+const poolTx = await createTokenPool(
+    rpc,
+    payer,
+    mint, // Token-2022 mint
+    undefined,
+    TOKEN_2022_PROGRAM_ID,
+);
+```
+
+</Accordion>
+</AccordionGroup>
+
+# Next Steps
+
+<Card
+  title="How to Merge Compressed Token Accounts"
+  icon="chevron-right"
+  color="#0066ff"
+  href="/compressed-tokens/guides/merge-compressed-token-accounts"
+  horizontal
+/>

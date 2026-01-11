@@ -1,12 +1,12 @@
 ---
 title: Transfer Compressed Tokens
-description: Guide to transfer compressed SPL tokens between compressed or regular accounts with `transfer()`, troubleshooting and advanced configurations.
+description: "Transfer compressed tokens between accounts. Transfers consume input accounts and create new output accounts with updated balances."
 keywords: ["transfer compressed tokens", "token transfer on solana"]
 ---
 
-import InstallDependencies from '/snippets/setup/install-dependencies-codegroup.mdx';
-import SetupEnvironment from '/snippets/setup/setup-environment-tabs.mdx';
+import FullSetup from "/snippets/setup/full-setup.mdx";
 import MintPrereq from '/snippets/setup/compressed-tokens-mint-prereq.mdx';
+import ActionCode from '/snippets/code-snippets/compressed-token/transfer/action.mdx';
 
 The `transfer()` function moves compressed tokens between accounts. 
 * SPL token transfers that update the existing account
@@ -28,116 +28,15 @@ const transactionSignature = await transfer(
 )
 ```
 
-# Full Code Example
+## Get Started
 
 <Steps>
 <Step>
-### Prerequisites
-
-Make sure you have dependencies and developer environment set up!
-
-<Accordion title="Prerequisites & Setup">
-
-**Dependencies**
-
-<InstallDependencies />
-
-**Developer Environment**
-
-<SetupEnvironment />
-</Accordion>
-</Step>
-
-<Step>
 ### Transfer Compressed Tokens
 
-Run this script to transfer compressed tokens to a recipient!
+<FullSetup />
 
-```typescript transfer-compressed-tokens.ts highlight={49-57} expandable
-// 1. Setup funded payer and connect to local validator
-// 2. Create SPL mint and token pool for compression with initial tokens
-// 3. Call transfer() with mint, amount, owner, recipient
-// 4. Verify transferred tokens via getCompressedTokenAccountsByOwner
-
-import { Keypair, PublicKey } from '@solana/web3.js';
-import { createRpc } from '@lightprotocol/stateless.js';
-import { createMint, mintTo, transfer } from '@lightprotocol/compressed-token';
-
-async function transferCompressedTokens() {
-    // Step 1: Setup funded payer and connect to local validator
-    const rpc = createRpc(); // defaults to localhost:8899
-    const payer = Keypair.generate();
-    const airdropSignature = await rpc.requestAirdrop(payer.publicKey, 1000000000); // 1 SOL
-    await rpc.confirmTransaction(airdropSignature);
-
-    // Step 2a: Create SPL mint with token pool for compression
-    const { mint, transactionSignature: mintCreateTx } = await createMint(
-        rpc,
-        payer,
-        payer.publicKey, // mint authority
-        9
-    );
-
-    console.log("SPL mint with token pool for compression created");
-    console.log("Mint address:", mint.toBase58());
-    console.log("Create mint transaction:", mintCreateTx);
-
-    // Step 2b: Create token owner and mint initial tokens
-    const tokenOwner = Keypair.generate();
-    const initialMintAmount = 1_000_000_000; // 1 token with 9 decimals
-
-    const mintToTx = await mintTo(
-        rpc,
-        payer,
-        mint, // SPL mint with token pool for compression
-        tokenOwner.publicKey, // recipient
-        payer, // mint authority
-        initialMintAmount
-    );
-
-    console.log("\nCompressed Tokens minted:", initialMintAmount / 1_000_000_000, "tokens");
-    console.log("Mint tokens transaction:", mintToTx);
-
-    // Generate recipient address and define transfer amount
-    const recipient = Keypair.generate();
-    const transferAmount = 500_000_000; // 0.5 tokens
-
-    // Step 3: Call transfer() with mint, amount, owner, recipient
-    const transferTx = await transfer(
-        rpc,
-        payer,
-        mint, // SPL mint with token pool for compression
-        transferAmount,
-        tokenOwner, // owner keypair
-        recipient.publicKey // recipient address
-    );
-
-    console.log("\nCompressed tokens transferred!");
-    console.log("From:", tokenOwner.publicKey.toBase58());
-    console.log("To:", recipient.publicKey.toBase58());
-    console.log("Amount transferred:", transferAmount / 1_000_000_000, "tokens");
-    console.log("Transfer transaction:", transferTx);
-
-    // Step 4: Verify transferred tokens via getCompressedTokenAccountsByOwner
-    const recipientAccounts = await rpc.getCompressedTokenAccountsByOwner(
-        recipient.publicKey,
-        { mint }
-    );
-
-    // Check recipient received the tokens
-    if (recipientAccounts.items.length > 0) {
-        const receivedBalance = recipientAccounts.items[0].parsed.amount;
-    }
-
-    return {
-        transferTransaction: transferTx,
-        recipient: recipient.publicKey,
-        amount: transferAmount
-    };
-}
-
-transferCompressedTokens().catch(console.error);
-```
+<ActionCode />
 <MintPrereq />
 
 </Step>
@@ -283,9 +182,9 @@ await transferDelegated(
 # Next Steps
 
 <Card
-  title="Learn how to compress and decompress SPL tokens."
+  title="How to Compress and Decompress SPL Tokens"
   icon="chevron-right"
   color="#0066ff"
-  href="/compressed-tokens/guides/how-to-compress-and-decompress-spl-tokens"
+  href="/compressed-tokens/guides/compress-decompress"
   horizontal
 />

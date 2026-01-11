@@ -106,15 +106,15 @@
               {
                 "group": "Cookbook",
                 "pages": [
-                  "compressed-tokens/guides/how-to-create-compressed-token-accounts",
-                  "compressed-tokens/guides/how-to-mint-compressed-tokens",
-                  "compressed-tokens/guides/how-to-transfer-compressed-token",
-                  "compressed-tokens/guides/how-to-compress-and-decompress-spl-tokens",
-                  "compressed-tokens/guides/how-to-compress-complete-spl-token-accounts",
-                  "compressed-tokens/guides/how-to-create-and-register-a-mint-account-for-compression",
-                  "compressed-tokens/guides/how-to-create-compressed-token-pools-for-mint-accounts",
-                  "compressed-tokens/guides/how-to-merge-compressed-token-accounts",
-                  "compressed-tokens/guides/how-to-approve-and-revoke-delegate-authority"
+                  "compressed-tokens/guides/create-compressed-token-accounts",
+                  "compressed-tokens/guides/mint-compressed-tokens",
+                  "compressed-tokens/guides/transfer-compressed-tokens",
+                  "compressed-tokens/guides/compress-decompress",
+                  "compressed-tokens/guides/compress-spl-token-account",
+                  "compressed-tokens/guides/create-mint-with-token-pool",
+                  "compressed-tokens/guides/add-token-pools-to-mint-accounts",
+                  "compressed-tokens/guides/merge-compressed-token-accounts",
+                  "compressed-tokens/guides/delegate"
                 ]
               },
               {

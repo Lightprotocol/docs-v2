@@ -1,0 +1,40 @@
+```typescript
+import "dotenv/config";
+import { Keypair } from "@solana/web3.js";
+import { createRpc } from "@lightprotocol/stateless.js";
+import { createMint, mintTo, approve, revoke } from "@lightprotocol/compressed-token";
+import BN from "bn.js";
+import { homedir } from "os";
+import { readFileSync } from "fs";
+
+// devnet:
+const RPC_URL = `https://devnet.helius-rpc.com?api-key=${process.env.API_KEY!}`;
+// localnet:
+// const RPC_URL = undefined;
+const payer = Keypair.fromSecretKey(
+    new Uint8Array(
+        JSON.parse(readFileSync(`${homedir()}/.config/solana/id.json`, "utf8"))
+    )
+);
+
+(async function () {
+    // devnet:
+    const rpc = createRpc(RPC_URL);
+    // localnet:
+    // const rpc = createRpc();
+
+    // Setup: Create mint, mint tokens, and approve delegate
+    const { mint } = await createMint(rpc, payer, payer.publicKey, 9);
+    const owner = Keypair.generate();
+    await mintTo(rpc, payer, mint, owner.publicKey, payer, 1_000_000_000);
+    const delegate = Keypair.generate();
+    await approve(rpc, payer, mint, new BN(500_000_000), owner, delegate.publicKey);
+
+    // Get delegated accounts and revoke
+    const delegatedAccounts = await rpc.getCompressedTokenAccountsByDelegate(delegate.publicKey, { mint });
+    const tx = await revoke(rpc, payer, delegatedAccounts.items, owner);
+
+    console.log("Mint:", mint.toBase58());
+    console.log("Tx:", tx);
+})();
+```

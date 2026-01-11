@@ -1,0 +1,38 @@
+```typescript
+import "dotenv/config";
+import { Keypair } from "@solana/web3.js";
+import { createRpc } from "@lightprotocol/stateless.js";
+import { createMint, mintTo, transfer } from "@lightprotocol/compressed-token";
+import { homedir } from "os";
+import { readFileSync } from "fs";
+
+// devnet:
+const RPC_URL = `https://devnet.helius-rpc.com?api-key=${process.env.API_KEY!}`;
+// localnet:
+// const RPC_URL = undefined;
+const payer = Keypair.fromSecretKey(
+    new Uint8Array(
+        JSON.parse(readFileSync(`${homedir()}/.config/solana/id.json`, "utf8"))
+    )
+);
+
+(async function () {
+    // devnet:
+    const rpc = createRpc(RPC_URL);
+    // localnet:
+    // const rpc = createRpc();
+
+    // Setup: Create mint and mint tokens
+    const { mint } = await createMint(rpc, payer, payer.publicKey, 9);
+    const sender = Keypair.generate();
+    await mintTo(rpc, payer, mint, sender.publicKey, payer, 1_000_000_000);
+
+    // Transfer compressed tokens
+    const recipient = Keypair.generate();
+    const tx = await transfer(rpc, payer, mint, 500_000_000, sender, recipient.publicKey);
+
+    console.log("Mint:", mint.toBase58());
+    console.log("Recipient:", recipient.publicKey.toBase58());
+    console.log("Tx:", tx);
+})();
+```

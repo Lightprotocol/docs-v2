@@ -1,0 +1,72 @@
+```typescript
+import "dotenv/config";
+import {
+    Keypair,
+    ComputeBudgetProgram,
+    PublicKey,
+    Transaction,
+    sendAndConfirmTransaction,
+} from "@solana/web3.js";
+import {
+    createRpc,
+    getBatchAddressTreeInfo,
+    selectStateTreeInfo,
+    CTOKEN_PROGRAM_ID,
+} from "@lightprotocol/stateless.js";
+import { createMintInstruction } from "@lightprotocol/compressed-token";
+import { homedir } from "os";
+import { readFileSync } from "fs";
+
+const COMPRESSED_MINT_SEED = Buffer.from("compressed_mint");
+
+function findMintAddress(mintSigner: PublicKey): [PublicKey, number] {
+    return PublicKey.findProgramAddressSync(
+        [COMPRESSED_MINT_SEED, mintSigner.toBuffer()],
+        CTOKEN_PROGRAM_ID
+    );
+}
+
+// devnet:
+const RPC_URL = `https://devnet.helius-rpc.com?api-key=${process.env.API_KEY!}`;
+const rpc = createRpc(RPC_URL);
+// localnet:
+// const rpc = createRpc();
+
+const payer = Keypair.fromSecretKey(
+    new Uint8Array(
+        JSON.parse(readFileSync(`${homedir()}/.config/solana/id.json`, "utf8"))
+    )
+);
+
+(async function () {
+    const mintSigner = Keypair.generate();
+    const addressTreeInfo = getBatchAddressTreeInfo();
+    const stateTreeInfo = selectStateTreeInfo(await rpc.getStateTreeInfos());
+    const [mintPda] = findMintAddress(mintSigner.publicKey);
+
+    const validityProof = await rpc.getValidityProofV2(
+        [],
+        [{ address: mintPda.toBytes(), treeInfo: addressTreeInfo }]
+    );
+
+    const ix = createMintInstruction(
+        mintSigner.publicKey,
+        9,
+        payer.publicKey,
+        null,
+        payer.publicKey,
+        validityProof,
+        addressTreeInfo,
+        stateTreeInfo
+    );
+
+    const tx = new Transaction().add(
+        ComputeBudgetProgram.setComputeUnitLimit({ units: 1_000_000 }),
+        ix
+    );
+    const signature = await sendAndConfirmTransaction(rpc, tx, [payer, mintSigner]);
+
+    console.log("Mint:", mintPda.toBase58());
+    console.log("Tx:", signature);
+})();
+```

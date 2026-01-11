@@ -1,0 +1,51 @@
+```typescript
+import "dotenv/config";
+import { Keypair } from "@solana/web3.js";
+import { createRpc, bn } from "@lightprotocol/stateless.js";
+import { createMint, compressSplTokenAccount } from "@lightprotocol/compressed-token";
+import { createAssociatedTokenAccount, mintTo, TOKEN_PROGRAM_ID } from "@solana/spl-token";
+import { homedir } from "os";
+import { readFileSync } from "fs";
+
+// devnet:
+const RPC_URL = `https://devnet.helius-rpc.com?api-key=${process.env.API_KEY!}`;
+// localnet:
+// const RPC_URL = undefined;
+const payer = Keypair.fromSecretKey(
+    new Uint8Array(
+        JSON.parse(readFileSync(`${homedir()}/.config/solana/id.json`, "utf8"))
+    )
+);
+
+(async function () {
+    // devnet:
+    const rpc = createRpc(RPC_URL);
+    // localnet:
+    // const rpc = createRpc();
+
+    // Setup: Create mint and SPL token account with tokens
+    const { mint } = await createMint(rpc, payer, payer.publicKey, 9);
+    const owner = Keypair.generate();
+    const tokenAccount = await createAssociatedTokenAccount(
+        rpc,
+        payer,
+        mint,
+        owner.publicKey,
+        undefined,
+        TOKEN_PROGRAM_ID
+    );
+    await mintTo(rpc, payer, mint, tokenAccount, payer, bn(1_000_000_000).toNumber());
+
+    // Compress entire SPL token account balance
+    const tx = await compressSplTokenAccount(
+        rpc,
+        payer,
+        mint,
+        owner,
+        tokenAccount
+    );
+
+    console.log("Mint:", mint.toBase58());
+    console.log("Tx:", tx);
+})();
+```

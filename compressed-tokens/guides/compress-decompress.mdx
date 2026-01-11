@@ -1,0 +1,217 @@
+---
+title: Compress and Decompress SPL Tokens
+description: "Convert SPL tokens between compressed and regular format with compress() and decompress()."
+keywords: ["compress spl tokens", "decompress tokens on solana"]
+---
+
+import FullSetup from "/snippets/setup/full-setup.mdx";
+import MintPrereq from '/snippets/setup/compressed-tokens-mint-prereq.mdx';
+import CompressActionCode from '/snippets/code-snippets/compressed-token/compress/action.mdx';
+import DecompressActionCode from '/snippets/code-snippets/compressed-token/decompress/action.mdx';
+
+<CodeGroup>
+```typescript compress()
+// Compress SPL tokens to compressed tokens
+const compressionSignature = await compress(
+    rpc,
+    payer,
+    mint, // SPL mint with token pool for compression
+    amount,
+    payer, // owner of SPL tokens
+    tokenAccount.address, // source SPL token account (sourceTokenAccount parameter)
+    recipient, // recipient owner address (toAddress parameter)
+);
+```
+
+```typescript decompress()
+// Decompress compressed tokens to SPL tokens
+const transactionSignature = await decompress(
+    rpc,
+    payer,
+    mint, // SPL mint with token pool for compression
+    amount,
+    payer, // owner of compressed tokens
+    tokenAccount.address, // destination token account (toAddress parameter)
+);
+```
+</CodeGroup>
+
+<Note>
+**Function Difference and Best Practice:**
+
+* `compress(amount, sourceTokenAccount, toAddress)` compresses specific amounts from source to a specified recipient. Use for transfers and precise amounts.
+* `compressSplTokenAccount(tokenAccount, remainingAmount)` compresses the entire SPL token account balance minus optional remaining amount only to the same owner. Use to migrate complete token accounts with optional partial retention. [Here is how](/compressed-tokens/guides/compress-spl-token-account).
+</Note>
+
+## Get Started
+
+<Steps>
+<Step>
+### Compress / Decompress Tokens
+
+<FullSetup />
+
+<Info>
+Before we can compress or decompresss, we need:
+
+* An SPL mint with a token pool for compression. This token pool can be created for new SPL mints via [`createMint()`](/compressed-tokens/guides/create-mint-with-token-pool) or added to existing SPL mints via [`createTokenPool()`](/compressed-tokens/guides/add-token-pools-to-mint-accounts).
+* For `compress()` SPL tokens in an Associated Token Account, or
+* For `decompress()` compressed token accounts with sufficient balance.
+</Info>
+<Tabs>
+<Tab title="Compress">
+<CompressActionCode />
+</Tab>
+<Tab title="Decompress">
+<DecompressActionCode />
+</Tab>
+</Tabs>
+<MintPrereq />
+
+</Step>
+</Steps>
+
+# Troubleshooting
+
+<AccordionGroup>
+<Accordion title="Insufficient balance between decompress and compress">
+
+Check your balances before operations:
+
+```typescript
+// For decompression - check compressed balance
+const compressedAccounts = await rpc.getCompressedTokenAccountsByOwner(
+    owner.publicKey,
+    { mint }
+);
+const compressedBalance = compressedAccounts.items.reduce(
+    (sum, account) => sum.add(account.parsed.amount),
+    new BN(0)
+);
+
+// For compression - check SPL token balance
+const tokenBalance = await rpc.getTokenAccountBalance(tokenAccount);
+const splBalance = new BN(tokenBalance.value.amount);
+
+console.log("Can decompress up to:", compressedBalance.toString());
+console.log("Can compress up to:", splBalance.toString());
+```
+
+</Accordion>
+
+<Accordion title="Invalid owner">
+
+Ensure the signer owns the tokens being decompressed/compressed:
+
+```typescript
+// The owner parameter must be the actual owner
+const decompressTx = await decompress(
+    rpc,
+    payer, // can be different (pays fees)
+    mint,
+    amount,
+    actualOwner, // must own compressed tokens
+    destinationAta,
+);
+
+const compressTx = await compress(
+    rpc,
+    payer, // can be different (pays fees)
+    mint,
+    amount,
+    actualOwner, // must own SPL tokens
+    sourceAta,
+    recipient,
+);
+```
+
+</Accordion>
+</AccordionGroup>
+
+# Advanced Configuration
+
+<AccordionGroup>
+<Accordion title="Compress to Different Owner">
+
+Compress tokens directly to someone else:
+
+```typescript
+const recipientWallet = new PublicKey("RECIPIENT_WALLET_ADDRESS");
+
+// Compress your SPL tokens to recipient
+const compressTx = await compress(
+    rpc,
+    payer,
+    mint,
+    amount,
+    tokenOwner, // current owner signs
+    tokenAccount, // your token account
+    recipientWallet, // recipient gets compressed tokens
+);
+```
+
+</Accordion>
+
+<Accordion title="Batch Operations">
+
+Compress multiple token accounts:
+
+```typescript
+// Compress to multiple recipients at once
+const recipients = [recipient1.publicKey, recipient2.publicKey, recipient3.publicKey];
+const amounts = [1_000_000_000, 2_000_000_000, 500_000_000]; // Different amounts
+
+const batchCompressTx = await compress(
+    rpc,
+    payer,
+    mint,
+    amounts, // Array of amounts
+    owner,
+    tokenAccount,
+    recipients, // Array of recipients
+);
+
+console.log("Batch compression completed:", batchCompressTx);
+```
+
+</Accordion>
+
+<Accordion title="Decompress with Delegate Authority">
+
+Decompress tokens using delegate authority:
+
+```typescript
+import { decompressDelegated } from '@lightprotocol/compressed-token';
+import { getAssociatedTokenAddress, TOKEN_PROGRAM_ID } from '@solana/spl-token';
+
+// Get ATA for decompressed tokens
+const ataAddress = await getAssociatedTokenAddress(
+    mint,
+    recipient,
+    false,
+    TOKEN_PROGRAM_ID
+);
+
+// Delegate decompresses tokens
+await decompressDelegated(
+    rpc,
+    payer,
+    mint,
+    amount,
+    delegate, // Signer - owner of compressed tokens
+    ataAddress, // Uncompressed token account (ATA)
+);
+```
+
+</Accordion>
+</AccordionGroup>
+
+# Next Steps
+
+<Card
+  title="How to Compress Complete SPL Token Accounts"
+  icon="chevron-right"
+  color="#0066ff"
+  href="/compressed-tokens/guides/compress-spl-token-account"
+  horizontal
+/>

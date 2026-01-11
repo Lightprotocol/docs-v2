@@ -1,0 +1,155 @@
+---
+title: Mint Compressed Tokens
+description: "Mint tokens to compressed token accounts for recipients and increases a mint's token supply. Only the mint authority can perform this operation.
+"
+keywords: ["mint compressed tokens on solana", "scalable token minting"]
+---
+
+import FullSetup from "/snippets/setup/full-setup.mdx";
+import MintPrereq from '/snippets/setup/compressed-tokens-mint-prereq.mdx';
+import ActionCode from '/snippets/code-snippets/compressed-token/mint-to/action.mdx';
+import InstructionCode from '/snippets/code-snippets/compressed-token/mint-to/instruction.mdx';
+
+```typescript
+// Mint compressed tokens - mints SPL tokens to pool, creates compressed token accounts
+const transactionSignature = await mintTo(
+    rpc,
+    payer,
+    mint, // SPL mint with token pool for compression
+    recipient, // recipient address (toPubkey parameter)
+    payer, // mint authority
+    amount,
+);
+```
+
+## Get Started
+
+<Steps>
+<Step>
+### Mint Compressed Tokens
+
+<FullSetup />
+
+<Tabs>
+<Tab title="Action">
+<ActionCode />
+</Tab>
+<Tab title="Instruction">
+<InstructionCode />
+</Tab>
+</Tabs>
+<MintPrereq />
+
+</Step>
+</Steps>
+
+# Troubleshooting
+
+<AccordionGroup>
+<Accordion title="TokenPool not found">
+
+
+```typescript
+// Error message: "TokenPool not found. Please create a compressed token
+// pool for mint: [ADDRESS] via createTokenPool().
+```
+
+The mint does no have a token pool for compression. Ensure you created the mint using `createMint`.
+
+```typescript
+// Create mint with token pool for compression
+import { createMint } from '@lightprotocol/compressed-token';
+const { mint } = await createMint(rpc, payer, payer.publicKey, 9);
+```
+
+</Accordion>
+
+<Accordion title="TokenPool mint does not match the provided mint">
+
+The token pool info doesn't correspond to the mint address. Ensure you're fetching the correct pool:
+
+```typescript
+// Get the correct token pool for your mint
+const tokenPoolInfo = await getTokenPoolInfos(rpc, mint);
+```
+
+</Accordion>
+
+<Accordion title="Amount and toPubkey arrays must have the same length">
+
+When minting to multiple recipients, ensure arrays are the same size.
+
+```typescript
+// Wrong: Mismatched array lengths
+const recipients = [addr1, addr2, addr3];
+const amounts = [100, 200]; // Only 2 amounts for 3 recipients
+
+// Correct: Same length arrays
+const recipients = [addr1, addr2, addr3];
+const amounts = [100, 200, 300]; // 3 amounts for 3 recipients
+```
+
+</Accordion>
+</AccordionGroup>
+
+# Advanced Configuration
+
+<AccordionGroup>
+<Accordion title="Mint to Multiple Recipients">
+
+```typescript
+// Mint different amounts to multiple recipients
+const recipients = [
+    Keypair.generate().publicKey,
+    Keypair.generate().publicKey,
+    Keypair.generate().publicKey,
+];
+
+const amounts = [
+    1_000_000_000, // 1 token
+    2_000_000_000, // 2 tokens
+    500_000_000,   // 0.5 tokens
+];
+
+const transactionSignature = await mintTo(
+    rpc,
+    payer,
+    mint, // SPL mint with token pool for compression
+    recipients, // array of recipients (toPubkey parameter)
+    payer, // mint authority
+    amounts, // array of amounts (amount parameter)
+);
+```
+
+</Accordion>
+
+<Accordion title="With Custom Mint Authority">
+
+Mint tokens using a custom mint authority with `approveAndMintTo()`:
+
+```typescript
+import { approveAndMintTo } from '@lightprotocol/compressed-token';
+
+// Mint tokens with a separate mint authority
+const transactionSignature = await approveAndMintTo(
+    rpc,
+    payer,
+    mint, // SPL mint with token pool for compression
+    recipient.publicKey, // recipient of minted tokens (toPubkey parameter)
+    mintAuthority, // mint authority
+    mintAmount,
+);
+```
+
+</Accordion>
+</AccordionGroup>
+
+# Next Steps
+
+<Card
+  title="How to Transfer Compressed Tokens"
+  icon="chevron-right"
+  color="#0066ff"
+  href="/compressed-tokens/guides/transfer-compressed-tokens"
+  horizontal
+/>
