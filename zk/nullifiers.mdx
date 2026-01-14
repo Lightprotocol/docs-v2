@@ -1,0 +1,145 @@
+---
+title: Nullifier Guide
+description: "Nullifiers prevent double-spending of state without revealing which state was spent."
+---
+
+import ZkAppPrompt from "/snippets/ai-prompts/zk-app.mdx";
+import NullifierCircuit from '/snippets/code-snippets/zk/nullifier/circuit.mdx';
+import NullifierProgram from '/snippets/code-snippets/zk/nullifier/program.mdx';
+import NullifierRustClient from '/snippets/code-snippets/zk/nullifier/rust-client.mdx';
+import NullifierTypescriptClient from '/snippets/code-snippets/zk/nullifier/typescript-client.mdx';
+
+---
+
+* On Solana nullifiers require a data structure that ensures the nullifier is only created once.
+* A straight forward way is to derive a PDA with the nullifier as seed for the PDA account.
+* Nullifier accounts must remain active, hence lock ~0.001 SOL in rent per nullifier PDA permanently.
+* A rent-free alternative are compressed addresses. It can be be created once and is derived from a seed similar to a pda. This way you can insert nullifiers at a fraction of the cost to create a PDA.
+
+| Storage | Cost per nullifier |
+|---------|-------------------|
+| PDA | ~0.001 SOL |
+| Compressed PDA | ~0.000005 SOL |
+
+<Note>
+To create the compressed PDA and a CPI to the Light system program you fetch an additional ZK proof from your RPC. 
+If you're already generating a ZK proof for your application logic, the marginal cost of the extra proof is low.
+</Note>
+
+## Implementation Guide
+
+This is the complete flow of how nullifiers are used in zk applications.
+
+<Info>
+Each tab includes a full code example section at the bottom.
+</Info>
+
+<Tabs>
+<Tab title="Guide">
+<Steps>
+<Step>
+### Client computes the nullifier
+
+The nullifier combines a context (e.g., `verification_id`) with the user's secret:
+
+```rust
+fn compute_nullifier(
+    verification_id: &[u8; 32],
+    secret: &[u8; 32],
+) -> [u8; 32] {
+    Poseidon::hashv(&[verification_id, secret]).unwrap()
+}
+```
+
+</Step>
+
+<Step>
+### Derive address from nullifier on-chain
+
+The program derives a deterministic address from the nullifier:
+
+```rust
+let (address, address_seed) = derive_address(
+    &[
+        NULLIFIER_PREFIX,               // prefix
+        nullifier.as_slice(),           // nullifier hash
+        verification_id.as_slice(),     // context
+    ],
+    &address_tree_pubkey,
+    &crate::ID,
+);
+```
+
+</Step>
+<Step>
+### Create account at that address
+
+Create a compressed account at the derived address:
+
+```rust
+let nullifier_account = LightAccount::<NullifierAccount>::new_init(
+    &crate::ID,
+    Some(address),
+    output_state_tree_index,
+);
+```
+
+The nullifier now prevents double spending:
+1. Same secret + same context = same nullifier
+2. Same nullifier = same derived address
+3. Address already exists = transaction fails
+</Step>
+
+</Steps>
+
+## Full code example
+
+<Tabs>
+<Tab title="Program">
+<NullifierProgram />
+</Tab>
+<Tab title="Rust client">
+<NullifierRustClient />
+</Tab>
+<Tab title="TypeScript client">
+<NullifierTypescriptClient />
+</Tab>
+
+<Tab title="Get started with AI">
+<ZkAppPrompt />
+</Tab>
+</Tabs>
+
+</Tab>
+
+<Tab title="Get started with AI">
+For AI assistance with your ZK App, copy this prompt and add your design ideas:
+
+<ZkAppPrompt />
+
+## Full code example
+
+<Tabs>
+<Tab title="Program">
+<NullifierProgram />
+</Tab>
+<Tab title="Rust client">
+<NullifierRustClient />
+</Tab>
+<Tab title="TypeScript client">
+<NullifierTypescriptClient />
+</Tab>
+</Tabs>
+
+</Tab>
+</Tabs>
+
+## Next Steps
+
+<Card
+  title="Create Compressed Accounts for ZK Applications"
+  icon="chevron-right"
+  color="#0066ff"
+  href="/zk/compressed-account-zk"
+  horizontal
+/>

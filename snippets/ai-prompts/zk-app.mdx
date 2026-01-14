@@ -1,0 +1,155 @@
+```markdown expandable
+---
+argument-hint: <add_your_app_description>
+description: Design a ZK App POC with rent-free nullifiers, compressed accounts, and Groth16 circuits
+allowed-tools: [Bash, Read, Glob, Grep, Task, WebFetch]
+---
+
+Design a Solana program with tests that uses rent-free nullifiers, compressed accounts, and Groth16 circuits.
+
+
+## Initial App Design
+<ADD YOUR IDEA AND DESIGN HERE>
+
+## Goal
+
+Produce a **fully working POC** that builds and tests pass.
+
+## Available commands
+
+Via Bash tool:
+- `cargo build-sbf`, `cargo test-sbf`, `cargo fmt`, `cargo clippy`
+- `anchor build`, `anchor test`, `anchor deploy`
+- `circom`, `snarkjs`, `solana`, `light`
+
+## Documentation
+
+- Nullifiers: https://zkcompression.com/zk/nullifiers
+- Compressed Accounts with Poseidon Hashes: https://zkcompression.com/zk/compressed-account-zk
+
+## Reference repos
+
+Nullifier example. Does not need Circuit.
+nullifier/
+├── programs/nullifier/
+│   ├── src/lib.rs           # Program with create_nullifiers helper
+│   └── tests/test.rs        # Rust integration tests
+└── ts-tests/
+    └── nullifier.test.ts    # TypeScript tests
+
+Full Example
+program-examples/zk/zk-id/
+├── programs/zk-id/src/
+│   ├── lib.rs              # create_issuer, add_credential, zk_verify_credential
+│   └── verifying_key.rs    # Groth16 key from circom trusted setup
+├── circuits/
+│   └── compressed_account_merkle_proof.circom  # Merkle proof
+└── tests/
+└── zk-id.ts            # Proof generation + on-chain verification
+
+
+## Workflow
+
+### Phase 1: Design application
+
+**1.1 Define private state**
+
+What data stays private? (credentials, balances, votes, etc.)
+
+**1.2 Define public inputs**
+
+What does the circuit prove publicly? (nullifier, merkle root, commitments)
+
+**1.3 Do not include circuits**
+
+
+
+### Phase 2: Index reference implementation
+
+    grep -r "LightAccountPoseidon" program-examples/zk/
+    grep -r "Groth16Verifier" program-examples/zk/
+    grep -r "derive_address.*nullifier" program-examples/zk/
+    grep -r "read_state_merkle_tree_root" program-examples/zk/
+
+Read matching files to understand patterns.
+
+### Phase 3: Circuit development
+
+**3.1 Write circom circuit**
+
+Based on compressed_account_merkle_proof.circom:
+- Merkle proof verification
+- Nullifier computation
+- Public input constraints
+
+**3.2 Trusted setup**
+
+    circom circuit.circom --r1cs --wasm --sym
+    snarkjs groth16 setup circuit.r1cs pot_final.ptau circuit_0000.zkey
+    snarkjs zkey export verificationkey circuit_final.zkey verification_key.json
+    snarkjs zkey export solidityverifier circuit_final.zkey  # adapt for Solana
+
+**3.3 Add sensitive files to .gitignore**
+
+    *.zkey
+    *.ptau
+    *.r1cs
+    *_js/
+
+### Phase 4: Program implementation
+
+| Pattern | Function | Reference |
+|---------|----------|-----------|
+| Poseidon state | `LightAccountPoseidon::new_init()` | zk-id/lib.rs |
+| Nullifier address | `derive_address([prefix, nullifier, ctx], tree, program)` | zk-id/lib.rs |
+| Read root only | `read_state_merkle_tree_root()` | zk-id/lib.rs |
+| Groth16 verify | `Groth16Verifier::new().verify()` | zk-id/lib.rs |
+
+**Dependencies:**
+
+    [dependencies]
+    anchor-lang = "0.31.1"
+    light-sdk = { version = "0.17.1", features = ["anchor", "poseidon", "merkle-tree", "v2"] }
+    light-hasher = "5.0.0"
+    light-sdk-types = { version = "0.17.1", features = ["v2"] }
+    groth16-solana = { git = "https://github.com/Lightprotocol/groth16-solana", rev = "66c0dc87" }
+
+    [dev-dependencies]
+    light-program-test = "0.17.1"
+    light-client = "0.17.1"
+
+### Phase 5: Build and test loop
+
+**Required commands (no shortcuts):**
+
+For Anchor programs: `anchor build && anchor test`
+
+For Native programs: `cargo build-sbf && cargo test-sbf`
+
+**NO shortcuts allowed:**
+
+- Do NOT use `cargo build` (must use `cargo build-sbf`)
+- Do NOT use `cargo test` (must use `cargo test-sbf`)
+- Do NOT skip SBF compilation
+- Tests MUST run against real BPF bytecode
+
+**On failure:** Spawn debugger agent with error context.
+
+**Loop rules:**
+
+1. Each debugger gets fresh context + previous debug reports
+2. Each attempt tries something DIFFERENT
+3. **NEVER GIVE UP** - keep spawning until fixed
+
+Do NOT proceed until all tests pass.
+
+### Phase 6: Cleanup (only after tests pass)
+
+    rm -rf target/
+
+## DeepWiki fallback
+
+If no matching pattern in reference repos:
+
+    mcp__deepwiki__ask_question("Lightprotocol/light-protocol", "How to {operation}?")
+```

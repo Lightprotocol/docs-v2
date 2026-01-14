@@ -1,8 +1,19 @@
 ---
-title: Guide to Migrate from v1 to v2 Merkle trees
-sidebarTitle: V2 Migration Guide
+title: Guide to Migrate Programs from v1 to v2 Merkle trees
 description: V2 reduces CU consumption by up to 70%. V1 remains supported for existing deployments.
+sidebarTitle: V2 Migration Guide
 ---
+
+import V1ToV2MigrationPrompt from "/snippets/ai-prompts/v1-to-v2-migration.mdx";
+
+## V2 Improvements
+
+|                       | v1                    | v2                 |
+|-----------------------|-----------------------|--------------------|
+| Merkle tree type      | Concurrent            | Batched            |
+| State tree depth      | 26 (~67M leaves)      | 32 (~4B leaves)    |
+| Address tree depth    | 26                    | 40                 |
+| Address tree accounts | Separate tree + queue | Single batch tree  |
 
 <Tabs>
 <Tab title="TypeScript">
@@ -241,20 +252,13 @@ let new_address_params = instruction_data
 ```
 
 </Tab>
+<Tab title="AI Prompt">
+
+<V1ToV2MigrationPrompt />
+
+</Tab>
 </Tabs>
 
-## V1 vs V2 Merkle Tree
-
-|                     | v1                                                                                                        | v2                                                                                                      |
-|---------------------|------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------|
-| Merkle tree type    | Concurrent                                                                                               | Batched                                                                                                |
-| State tree depth    | 26 (~67M leaves)                                                                                        | 32 (~4B leaves)                                                                                      |
-| Address tree depth  | 26                                                                                                       | 40                                                                                                     |
-| Address tree accounts| Separate tree + queue                                                                                    | Single batch tree                                                                                     |
-
-<Info>
-Learn more about the [batched Merkle tree in this keynote](https://www.youtube.com/watch?v=WMzZdLB9gWE).
-</Info>
 
 ## View Program Examples
 
