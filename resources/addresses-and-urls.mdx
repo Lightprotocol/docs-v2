@@ -43,65 +43,67 @@ Find all JSON RPC Methods for ZK Compression [here](/api-reference/json-rpc-meth
 </Check>
 
 <Tabs>
-<Tab title="V1">
+<Tab title="V2 (Default)">
 
-| | Devnet | Mainnet | Public Key |
-|:-|:-:|:-:|:-|
-| State Tree | ✓ | ✓ | **smt2rJAFdyJJupwMKAqTNAJwvjhmiZ4JYGZmbVRw1Ho** |
-| Nullifier Queue | ✓ | ✓ | **nfq2hgS7NYemXsFaFUCe3EMXSDSfnZnAe27jC6aPP1X** |
-| CPI Context | ✓ | ✓ | **cpi2cdhkH5roePvcudTgUL8ppEBfTay1desGh8G8QxK** |
+| | Public Key |
+|:-|:-|
+| #1 State Tree | **bmt1LryLZUMmF7ZtqESaw7wifBXLfXHQYoE4GAmrahU** |
+| #1 Output Queue | **oq1na8gojfdUhsfCpyjNt6h4JaDWtHf1yQj4koBWfto** |
+| #1 CPI Context | **cpi15BoVPKgEPw5o8wc2T816GE7b378nMXnhH3Xbq4y** |
+
+| | Public Key |
+|:-|:-|
+| #2 State Tree | **bmt2UxoBxB9xWev4BkLvkGdapsz6sZGkzViPNph7VFi** |
+| #2 Output Queue | **oq2UkeMsJLfXt2QHzim242SUi3nvjJs8Pn7Eac9H9vg** |
+| #2 CPI Context | **cpi2yGapXUR3As5SjnHBAVvmApNiLsbeZpF3euWnW6B** |
+
+| | Public Key |
+|:-|:-|
+| #3 State Tree | **bmt3ccLd4bqSVZVeCJnH1F6C8jNygAhaDfxDwePyyGb** |
+| #3 Output Queue | **oq3AxjekBWgo64gpauB6QtuZNesuv19xrhaC1ZM1THQ** |
+| #3 CPI Context | **cpi3mbwMpSX8FAGMZVP85AwxqCaQMfEk9Em1v8QK9Rf** |
+
+| | Public Key |
+|:-|:-|
+| #4 State Tree | **bmt4d3p1a4YQgk9PeZv5s4DBUmbF5NxqYpk9HGjQsd8** |
+| #4 Output Queue | **oq4ypwvVGzCUMoiKKHWh4S1SgZJ9vCvKpcz6RT6A8dq** |
+| #4 CPI Context | **cpi4yyPDc4bCgHAnsenunGA8Y77j3XEDyjgfyCKgcoc** |
+
+| | Public Key |
+|:-|:-|
+| #5 State Tree | **bmt5yU97jC88YXTuSukYHa8Z5Bi2ZDUtmzfkDTA2mG2** |
+| #5 Output Queue | **oq5oh5ZR3yGomuQgFduNDzjtGvVWfDRGLuDVjv9a96P** |
+| #5 CPI Context | **cpi5ZTjdgYpZ1Xr7B1cMLLUE81oTtJbNNAyKary2nV6** |
+
+</Tab>
+
+<Tab title="V1 (For ZK)">
+
+| | Public Key |
+|:-|:-|
+| State Tree | **smt2rJAFdyJJupwMKAqTNAJwvjhmiZ4JYGZmbVRw1Ho** |
+| Nullifier Queue | **nfq2hgS7NYemXsFaFUCe3EMXSDSfnZnAe27jC6aPP1X** |
+| CPI Context | **cpi2cdhkH5roePvcudTgUL8ppEBfTay1desGh8G8QxK** |
 
 </Tab>
 
-<Tab title="V2">
 
-| | Devnet | Mainnet | Public Key |
-|:-|:-:|:-:|:-|
-| #1 State Tree | ✓ | - | **bmt1LryLZUMmF7ZtqESaw7wifBXLfXHQYoE4GAmrahU** |
-| #1 Output Queue | ✓ | - | **oq1na8gojfdUhsfCpyjNt6h4JaDWtHf1yQj4koBWfto** |
-| #1 CPI Context | ✓ | - | **cpi15BoVPKgEPw5o8wc2T816GE7b378nMXnhH3Xbq4y** |
-
-| | Devnet | Mainnet | Public Key |
-|:-|:-:|:-:|:-|
-| #2 State Tree | ✓ | - | **bmt2UxoBxB9xWev4BkLvkGdapsz6sZGkzViPNph7VFi** |
-| #2 Output Queue | ✓ | - | **oq2UkeMsJLfXt2QHzim242SUi3nvjJs8Pn7Eac9H9vg** |
-| #2 CPI Context | ✓ | - | **cpi2yGapXUR3As5SjnHBAVvmApNiLsbeZpF3euWnW6B** |
-
-| | Devnet | Mainnet | Public Key |
-|:-|:-:|:-:|:-|
-| #3 State Tree | ✓ | - | **bmt3ccLd4bqSVZVeCJnH1F6C8jNygAhaDfxDwePyyGb** |
-| #3 Output Queue | ✓ | - | **oq3AxjekBWgo64gpauB6QtuZNesuv19xrhaC1ZM1THQ** |
-| #3 CPI Context | ✓ | - | **cpi3mbwMpSX8FAGMZVP85AwxqCaQMfEk9Em1v8QK9Rf** |
-
-| | Devnet | Mainnet | Public Key |
-|:-|:-:|:-:|:-|
-| #4 State Tree | ✓ | - | **bmt4d3p1a4YQgk9PeZv5s4DBUmbF5NxqYpk9HGjQsd8** |
-| #4 Output Queue | ✓ | - | **oq4ypwvVGzCUMoiKKHWh4S1SgZJ9vCvKpcz6RT6A8dq** |
-| #4 CPI Context | ✓ | - | **cpi4yyPDc4bCgHAnsenunGA8Y77j3XEDyjgfyCKgcoc** |
-
-| | Devnet | Mainnet | Public Key |
-|:-|:-:|:-:|:-|
-| #5 State Tree | ✓ | - | **bmt5yU97jC88YXTuSukYHa8Z5Bi2ZDUtmzfkDTA2mG2** |
-| #5 Output Queue | ✓ | - | **oq5oh5ZR3yGomuQgFduNDzjtGvVWfDRGLuDVjv9a96P** |
-| #5 CPI Context | ✓ | - | **cpi5ZTjdgYpZ1Xr7B1cMLLUE81oTtJbNNAyKary2nV6** |
-
-</Tab>
 </Tabs>
 
 ## Address Trees & Queues
 
 <Tabs>
-<Tab title="V1">
-| Address Tree #1 | |
-|:-|:-|
-| Address Tree #1 | **amt1Ayt45jfbdw5YSo7iz6WZxUmnZsQTYXy82hVwyC2** |
-| Address Queue #1 | **aq1S9z4reTSQAdgWHGD2zDaS39sjGrAxbR31vxJ2F4F** |
-</Tab>
 
 <Tab title="V2">
 | Address Tree | |
 |:-|:-|
 | Address Tree  | **amt2kaJA14v3urZbZvnc5v2np8jqvc4Z8zDep5wbtzx** |
+</Tab>
+<Tab title="V1 (Deprecated)">
+| Address Tree #1 | |
+|:-|:-|
+| Address Tree #1 | **amt1Ayt45jfbdw5YSo7iz6WZxUmnZsQTYXy82hVwyC2** |
+| Address Queue #1 | **aq1S9z4reTSQAdgWHGD2zDaS39sjGrAxbR31vxJ2F4F** |
 </Tab>
 </Tabs>
 
@@ -186,7 +188,7 @@ Start building with Compressed Tokens or PDAs
   title="Compressed PDAs"
   icon="chevron-right"
   color="#0066ff"
-  href="/compressed-pdas/create-a-program-with-compressed-pdas"
+  href="/compressed-pdas/overview"
   horizontal
 />
 </CardGroup>
