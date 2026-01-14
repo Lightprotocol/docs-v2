@@ -1,0 +1,126 @@
+---
+title: Primitives for ZK on Solana
+sidebarTitle: Overview
+description: Overview how to build a ZK program on Solana.
+keywords: ["nullifiers on Solana", "zcash on solana", "privacy on solana", "zk on solana", "solana privacy hackathon", "private payments solana", "privacy tooling solana"]
+---
+
+import ZkExamplesTable from "/snippets/overview-tables/zk-examples-table.mdx";
+
+---
+
+Building a ZK Solana program requires: 
+1. Nullifiers to prevent double spending
+2. Proof verification
+3. A Merkle tree to store state, 
+4. An indexer to serve Merkle proofs, and
+5. Encrypted state.
+
+## Nullifiers on Solana
+
+A nullifier is a deterministically derived hash to ensure an action can only be performed once without linking it back to the action. 
+Attempting to consume state twice requires the same nullifier, hence the transaction would fail.
+For example Zcash uses nullifiers to prevent double spending. 
+
+* On Solana nullifiers require a data structure that ensures the nullifier is only created once.
+* A straight forward way is to derive a PDA with the nullifier as seed for the PDA account.
+* Nullifier accounts must remain active, hence lock ~0.001 SOL in rent per nullifier PDA permanently.
+* A rent-free alternative are compressed addresses with similar functionality and derivation. This way you can insert nullifiers at a fraction of the cost to create a PDA.
+
+
+| Storage | Cost per nullifier |
+|---------|-------------------|
+| PDA | ~0.001 SOL |
+| Compressed PDA | ~0.000005 SOL |
+
+<Info>
+This example does not require a custom circuit. [See full example with tests on Github](https://github.com/Lightprotocol/program-examples/tree/main/zk-id).
+</Info>
+
+```rust
+use anchor_lang::prelude::*;
+use nullifier_creation::{create_nullifiers, NullifierInstructionData};
+
+declare_id!("Bw8aty8LJY5Kg2b6djghjWGwt6cBc1tVQUoreUehvVq4");
+
+#[program]
+pub mod zk_nullifier {
+    use super::*;
+
+    pub fn create_nullifier<'info>(
+        ctx: Context<'_, '_, '_, 'info, CreateNullifierAccounts<'info>>,
+        data: NullifierInstructionData,
+        nullifiers: Vec<[u8; 32]>,
+    ) -> Result<()> {
+        // Verify your proof here. Use nullifiers as public inputs
+        // among your other public inputs.
+        // Example:
+        // let public_inputs = [...nullifiers, ...your_other_inputs];
+        // Groth16Verifier::new(...).verify()?;
+
+        create_nullifiers(
+            &nullifiers,
+            data,
+            ctx.accounts.signer.as_ref(),
+            ctx.remaining_accounts,
+        )
+    }
+}
+
+#[derive(Accounts)]
+pub struct CreateNullifierAccounts<'info> {
+    #[account(mut)]
+    pub signer: Signer<'info>,
+}
+```
+
+## Groth16 Proof Verification on Solana
+
+Groth16's small proof size and fast verification (~200k compute units) make it the practical choice for Solana.
+
+<Info>
+Find more information on [docs.rs](https://docs.rs/groth16-solana) and [Github](https://github.com/Lightprotocol/groth16-solana).
+</Info>
+
+```rust
+let mut public_inputs_vec = Vec::new();
+for input in PUBLIC_INPUTS.chunks(32) {
+    public_inputs_vec.push(input);
+}
+
+let proof_a: G1 =
+    <G1 as FromBytes>::read(&*[&change_endianness(&PROOF[0..64])[..], &[0u8][..]].concat())
+        .unwrap();
+let mut proof_a_neg = [0u8; 65];
+<G1 as ToBytes>::write(&proof_a.neg(), &mut proof_a_neg[..]).unwrap();
+
+let proof_a = change_endianness(&proof_a_neg[..64]).try_into().unwrap();
+let proof_b = PROOF[64..192].try_into().unwrap();
+let proof_c = PROOF[192..256].try_into().unwrap();
+
+let mut verifier = Groth16Verifier::new(
+    &proof_a,
+    &proof_b,
+    &proof_c,
+    public_inputs_vec.as_slice(),
+    &VERIFYING_KEY,
+)
+.unwrap();
+verifier.verify().unwrap();
+```
+
+## Merklelized State with Indexer Support
+
+ZK applications on Solana can use existing state Merkle trees to store state in compressed accounts.
+* This way you don't need to maintain your own Merkle tree and indexer.
+* RPCs that support ZK Compression (Helius, Triton) index state changes.
+
+<Note>
+Find the [full example here](https://github.com/Lightprotocol/program-examples/blob/99d260f9f356743b8fe3501c684f7926930d6079/zk-id/circuits/compressed_account.circom)
+</Note>
+
+## Get Started & Examples
+
+<ZkExamplesTable />
+
+For AI assistance with your ZK App, copy this prompt and add your design ideas:

@@ -175,7 +175,16 @@
     "stablecoins",
     "fintechs",
     "micropayments",
-    "clawback"
+    "clawback",
+    "hackathon",
+    "altbn",
+    "circom",
+    "snarkjs",
+    "Zcash",
+    "zcash",
+    "circomlibjs",
+    "Jotaro",
+    "Yano"
   ],
   "ignorePaths": [
     "node_modules",
