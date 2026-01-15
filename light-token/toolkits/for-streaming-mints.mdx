@@ -130,8 +130,9 @@ fn process_transaction(msg: &Message, meta: Option<&TransactionStatusMeta>) {
 for output in event.output_compressed_accounts.iter() {
     let owner = output.compressed_account.owner;
 
-    // Check if owned by cToken program
-    if owner != ctoken_program_id {
+    // Check if owned by light token program
+    let ctoken_program_id = bs58::decode(CTOKEN_PROGRAM_ID).into_vec().unwrap();
+    if owner != ctoken_program_id.as_slice() {
         continue;
     }
 
