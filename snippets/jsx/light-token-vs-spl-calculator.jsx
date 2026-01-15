@@ -1,5 +1,4 @@
-import { useState } from 'react';
-
+import { useState } from "react";
 
 export const LightTokenVsSplCalculator = () => {
   const [numAccounts, setNumAccounts] = useState(100000);
