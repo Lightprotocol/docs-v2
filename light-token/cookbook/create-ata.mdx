@@ -7,13 +7,13 @@ keywords: ["associated token account on solana", "create ata for solana tokens",
 
 ---
 
-import CTokenCreateATAAccountsList from "/snippets/accounts-list/light-token-create-ata-accounts-list.mdx";
+import TokenCreateATAAccountsList from "/snippets/accounts-list/light-token-create-ata-accounts-list.mdx";
 import CompressibleVsSolanaRent from "/snippets/compressible-vs-solana-rent.mdx";
-import CTokenConfigureRent from "/snippets/light-token-configure-rent.mdx";
-import CAtaIntro from "/snippets/light-token-guides/cata-intro.mdx";
+import TokenConfigureRent from "/snippets/light-token-configure-rent.mdx";
+import AtaIntro from "/snippets/light-token-guides/cata-intro.mdx";
 import CompressibleRentExplained from "/snippets/compressible-rent-explained.mdx";
-import CTokenClientPrerequisites from "/snippets/light-token-guides/light-token-client-prerequisites.mdx";
-import CTokenTsClientPrerequisites from "/snippets/light-token-guides/light-token-ts-client-prerequisites.mdx";
+import TokenClientPrerequisites from "/snippets/light-token-guides/light-token-client-prerequisites.mdx";
+import TokenTsClientPrerequisites from "/snippets/light-token-guides/light-token-ts-client-prerequisites.mdx";
 import ClientCustomRentConfig from "/snippets/light-token-guides/client-custom-rent-config.mdx";
 import { CodeCompare } from "/snippets/jsx/code-compare.jsx";
 import FullSetup from "/snippets/setup/full-setup.mdx";
@@ -81,12 +81,12 @@ Compare to SPL:
 
 1. The example creates a test light-mint. You can use existing light-mints, SPL or Token 2022 mints as well.
 2. Derive the address from mint and owner pubkey.
-3. Build the instruction with `CreateAssociatedCTokenAccount`. It automatically includes the default rent config:
+3. Build the instruction with `CreateAssociatedTokenAccount`. It automatically includes the default rent config:
 
 ```rust
-use light_ctoken_sdk::ctoken::CreateAssociatedCTokenAccount;
+use light_token_sdk::token::CreateAssociatedTokenAccount;
 
-let instruction = CreateAssociatedCTokenAccount::new(
+let instruction = CreateAssociatedTokenAccount::new(
     payer.pubkey(),
     owner,
     mint,
@@ -101,7 +101,7 @@ let instruction = CreateAssociatedCTokenAccount::new(
 
 ### Prerequisites
 
-<CTokenClientPrerequisites />
+<TokenClientPrerequisites />
 
 </Step>
 
@@ -113,11 +113,11 @@ let instruction = CreateAssociatedCTokenAccount::new(
 use borsh::BorshDeserialize;
 use light_client::indexer::{AddressWithTree, Indexer};
 use light_client::rpc::{LightClient, LightClientConfig, Rpc};
-use light_ctoken_sdk::ctoken::{
-    derive_ctoken_ata, CreateAssociatedCTokenAccount, CreateCMint,
+use light_token_sdk::token::{
+    derive_token_ata, CreateAssociatedTokenAccount, CreateCMint,
     CreateCMintParams,
 };
-use light_ctoken_interface::state::CToken;
+use light_token_interface::state::Token;
 use serde_json;
 use solana_sdk::{pubkey::Pubkey, signature::Keypair, signer::Signer};
 use std::convert::TryFrom;
@@ -148,10 +148,10 @@ async fn test_create_associated_token_account() {
 
     // Step 2: Define owner and derive ATA address
     let owner = payer.pubkey();
-    let (ata_address, _bump) = derive_ctoken_ata(&owner, &mint);
+    let (ata_address, _bump) = derive_token_ata(&owner, &mint);
 
     // Step 3: Build instruction using SDK builder
-    let instruction = CreateAssociatedCTokenAccount::new(
+    let instruction = CreateAssociatedTokenAccount::new(
         payer.pubkey(),
         owner,
         mint,
@@ -166,11 +166,11 @@ async fn test_create_associated_token_account() {
 
     // Step 5: Verify light-ATA creation
     let account_data = rpc.get_account(ata_address).await.unwrap().unwrap();
-    let ctoken_state = CToken::deserialize(&mut &account_data.data[..]).unwrap();
+    let token_state = Token::deserialize(&mut &account_data.data[..]).unwrap();
 
-    assert_eq!(ctoken_state.mint, mint.to_bytes(), "Mint should match");
-    assert_eq!(ctoken_state.owner, owner.to_bytes(), "Owner should match");
-    assert_eq!(ctoken_state.amount, 0, "Initial amount should be 0");
+    assert_eq!(token_state.mint, mint.to_bytes(), "Mint should match");
+    assert_eq!(token_state.owner, owner.to_bytes(), "Owner should match");
+    assert_eq!(token_state.amount, 0, "Initial amount should be 0");
 }
 
 pub async fn create_compressed_mint<R: Rpc + Indexer>(
@@ -207,13 +207,13 @@ pub async fn create_compressed_mint<R: Rpc + Indexer>(
     };
 
     // Derive compression address
-    let compression_address = light_ctoken_sdk::ctoken::derive_cmint_compressed_address(
+    let compression_address = light_token_sdk::token::derive_cmint_compressed_address(
         &mint_signer.pubkey(),
         &address_tree.tree,
     );
 
     let mint_pda =
-        light_ctoken_sdk::ctoken::find_cmint_address(&mint_signer.pubkey()).0;
+        light_token_sdk::token::find_cmint_address(&mint_signer.pubkey()).0;
 
     // Get validity proof for the address
     let rpc_result = rpc
@@ -285,7 +285,7 @@ Find [a full code example at the end](#full-code-example).
 
 ### Define Rent Config Accounts
 
-<CTokenConfigureRent />
+<TokenConfigureRent />
 
 </Step>
 
@@ -296,7 +296,7 @@ Find [a full code example at the end](#full-code-example).
 1. Pass the required accounts that include the rent config.
 2. Use `invoke` or `invoke_signed`, when a CPI requires a PDA signer.
    <Note>
-     The light-ATA address is derived from `[owner, ctoken_program_id, mint]`.
+     The light-ATA address is derived from `[owner, light_token_program_id, mint]`.
      Unlike light-token accounts, owner and mint are passed as accounts, not in
      instruction data.
    </Note>
@@ -305,9 +305,9 @@ Find [a full code example at the end](#full-code-example).
 <Tab title="invoke (External signer)">
 
 ```rust
-use light_ctoken_sdk::ctoken::CreateAssociatedCTokenAccountCpi;
+use light_token_sdk::token::CreateAssociatedTokenAccountCpi;
 
-CreateAssociatedCTokenAccountCpi {
+CreateAssociatedTokenAccountCpi {
     owner: owner.clone(),
     mint: mint.clone(),
     payer: payer.clone(),
@@ -324,10 +324,10 @@ CreateAssociatedCTokenAccountCpi {
 <Tab title="invoke_signed (PDA is signer)">
 
 ```rust
-use light_ctoken_sdk::ctoken::CreateAssociatedCTokenAccountCpi;
+use light_token_sdk::token::CreateAssociatedTokenAccountCpi;
 
 let signer_seeds: &[&[u8]] = &[ATA_SEED, &[bump]];
-CreateAssociatedCTokenAccountCpi {
+CreateAssociatedTokenAccountCpi {
     owner: owner.clone(),
     mint: mint.clone(),
     payer: payer.clone(),
@@ -342,7 +342,7 @@ CreateAssociatedCTokenAccountCpi {
 
 </Tab>
 </Tabs>
-<CTokenCreateATAAccountsList />
+<TokenCreateATAAccountsList />
 
 </Step>
 </Steps>
@@ -350,12 +350,12 @@ CreateAssociatedCTokenAccountCpi {
 
 <Info>
   Find the source code
-  [here](https://github.com/Lightprotocol/light-protocol/blob/main/sdk-tests/sdk-token-test/src/create_ata2.rs).
+  [here](https://github.com/Lightprotocol/light-protocol/blob/main/sdk-tests/sdk-light-token-test/src/create_ata.rs).
 </Info>
 
 ```rust expandable
 use borsh::{BorshDeserialize, BorshSerialize};
-use light_ctoken_sdk::ctoken::{CompressibleParamsCpi, CreateAssociatedCTokenAccountCpi};
+use light_token_sdk::token::{CompressibleParamsCpi, CreateAssociatedTokenAccountCpi};
 use solana_program::{account_info::AccountInfo, program_error::ProgramError, pubkey::Pubkey};
 
 use crate::{ATA_SEED, ID};
@@ -392,7 +392,7 @@ pub fn process_create_ata2_invoke(
         accounts[4].clone(),
     );
 
-    CreateAssociatedCTokenAccountCpi {
+    CreateAssociatedTokenAccountCpi {
         owner: accounts[0].clone(),
         mint: accounts[1].clone(),
         payer: accounts[2].clone(),
@@ -440,7 +440,7 @@ pub fn process_create_ata2_invoke_signed(
     );
 
     let signer_seeds: &[&[u8]] = &[ATA_SEED, &[bump]];
-    CreateAssociatedCTokenAccountCpi {
+    CreateAssociatedTokenAccountCpi {
         owner: accounts[0].clone(),
         mint: accounts[1].clone(),
         payer: accounts[2].clone(), // PDA

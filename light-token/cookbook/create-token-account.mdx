@@ -7,9 +7,9 @@ keywords: ["token account on solana", "rent free token account for apps", "rent 
 
 ---
 
-import CTokenCreateAccountsList from "/snippets/accounts-list/light-token-create-accounts-list.mdx";
-import CTokenConfigureRent from "/snippets/light-token-configure-rent.mdx";
-import CTokenClientPrerequisites from "/snippets/light-token-guides/light-token-client-prerequisites.mdx";
+import TokenCreateAccountsList from "/snippets/accounts-list/light-token-create-accounts-list.mdx";
+import TokenConfigureRent from "/snippets/light-token-configure-rent.mdx";
+import TokenClientPrerequisites from "/snippets/light-token-guides/light-token-client-prerequisites.mdx";
 import CompressibleRentExplained from "/snippets/compressible-rent-explained.mdx";
 
 1. Light token accounts are Solana accounts that hold token balances of light, SPL, or Token 2022 mints.
@@ -28,12 +28,12 @@ import CompressibleRentExplained from "/snippets/compressible-rent-explained.mdx
 <Tab title="Rust Client">
 
 1. The example creates a test mint for light-tokens. You can use existing light, SPL or Token 2022 mints as well.
-2. Build the instruction with `CreateCTokenAccount`. It automatically includes the default rent config.
+2. Build the instruction with `CreateTokenAccount`. It automatically includes the default rent config.
 
 ```rust
-use light_ctoken_sdk::ctoken::{CreateCTokenAccount};
+use light_token_sdk::token::{CreateTokenAccount};
 
-let instruction = CreateCTokenAccount::new(
+let instruction = CreateTokenAccount::new(
     payer.pubkey(),
     account.pubkey(),
     mint,
@@ -48,7 +48,7 @@ let instruction = CreateCTokenAccount::new(
 <Step>
 ### Prerequisites
 
-<CTokenClientPrerequisites />
+<TokenClientPrerequisites />
 
 </Step>
 
@@ -59,8 +59,8 @@ let instruction = CreateCTokenAccount::new(
 use borsh::BorshDeserialize;
 use light_client::indexer::{AddressWithTree, Indexer};
 use light_client::rpc::{LightClient, LightClientConfig, Rpc};
-use light_ctoken_sdk::ctoken::{CreateCMint, CreateCMintParams, CreateCTokenAccount};
-use light_ctoken_interface::state::CToken;
+use light_token_sdk::token::{CreateCMint, CreateCMintParams, CreateTokenAccount};
+use light_token_interface::state::Token;
 use serde_json;
 use solana_sdk::{pubkey::Pubkey, signature::Keypair, signer::Signer};
 use std::convert::TryFrom;
@@ -68,7 +68,7 @@ use std::env;
 use std::fs;
 
 #[tokio::test(flavor = "multi_thread")]
-async fn test_create_ctoken_account() {
+async fn test_create_token_account() {
     dotenvy::dotenv().ok();
 
     let keypair_path = env::var("KEYPAIR_PATH")
@@ -94,7 +94,7 @@ async fn test_create_ctoken_account() {
     let owner = payer.pubkey();
 
     // Step 3: Build instruction using SDK builder
-    let instruction = CreateCTokenAccount::new(payer.pubkey(), account.pubkey(), mint, owner)
+    let instruction = CreateTokenAccount::new(payer.pubkey(), account.pubkey(), mint, owner)
         .instruction()
         .unwrap();
 
@@ -105,11 +105,11 @@ async fn test_create_ctoken_account() {
 
     // Step 5: Verify account creation
     let account_data = rpc.get_account(account.pubkey()).await.unwrap().unwrap();
-    let ctoken_state = CToken::deserialize(&mut &account_data.data[..]).unwrap();
+    let token_state = Token::deserialize(&mut &account_data.data[..]).unwrap();
 
-    assert_eq!(ctoken_state.mint, mint.to_bytes(), "Mint should match");
-    assert_eq!(ctoken_state.owner, owner.to_bytes(), "Owner should match");
-    assert_eq!(ctoken_state.amount, 0, "Initial amount should be 0");
+    assert_eq!(token_state.mint, mint.to_bytes(), "Mint should match");
+    assert_eq!(token_state.owner, owner.to_bytes(), "Owner should match");
+    assert_eq!(token_state.amount, 0, "Initial amount should be 0");
 }
 
 pub async fn create_compressed_mint<R: Rpc + Indexer>(
@@ -147,12 +147,12 @@ pub async fn create_compressed_mint<R: Rpc + Indexer>(
     };
 
     // Derive compression address
-    let compression_address = light_ctoken_sdk::ctoken::derive_cmint_compressed_address(
+    let compression_address = light_token_sdk::token::derive_cmint_compressed_address(
         &mint_signer.pubkey(),
         &address_tree.tree,
     );
 
-    let mint_pda = light_ctoken_sdk::ctoken::find_cmint_address(&mint_signer.pubkey()).0;
+    let mint_pda = light_token_sdk::token::find_cmint_address(&mint_signer.pubkey()).0;
 
     // Get validity proof for the address
     let rpc_result = rpc
@@ -225,7 +225,7 @@ Find [a full code example at the end](#full-code-example).
 
 ### Configure Rent
 
-<CTokenConfigureRent />
+<TokenConfigureRent />
 
 </Step>
 <Step>
@@ -240,9 +240,9 @@ Find [a full code example at the end](#full-code-example).
 <Tab title="invoke (External signer)">
 
 ```rust
-use light_ctoken_sdk::ctoken::CreateCTokenAccountCpi;
+use light_token_sdk::token::CreateTokenAccountCpi;
 
-CreateCTokenAccountCpi {
+CreateTokenAccountCpi {
     payer: payer.clone(),
     account: account.clone(),
     mint: mint.clone(),
@@ -252,15 +252,15 @@ CreateCTokenAccountCpi {
 .invoke()?;
 ```
 
-<CTokenCreateAccountsList />
+<TokenCreateAccountsList />
 
 </Tab>
 <Tab title="invoke_signed (PDA is signer)">
 
 ```rust
-use light_ctoken_sdk::ctoken::CreateCTokenAccountCpi;
+use light_token_sdk::token::CreateTokenAccountCpi;
 
-let account_cpi = CreateCTokenAccountCpi {
+let account_cpi = CreateTokenAccountCpi {
     payer: payer.clone(),
     account: account.clone(),
     mint: mint.clone(),
@@ -282,12 +282,12 @@ account_cpi.invoke_signed(&[signer_seeds])?;
 
 <Info>
   Find the source code
-  [here](https://github.com/Lightprotocol/light-protocol/blob/main/sdk-tests/sdk-ctoken-test/src/create_token_account.rs).
+  [here](https://github.com/Lightprotocol/light-protocol/blob/main/sdk-tests/sdk-light-token-test/src/create_token_account.rs).
 </Info>
 
 ```rust expandable
 use borsh::{BorshDeserialize, BorshSerialize};
-use light_ctoken_sdk::ctoken::{CompressibleParamsCpi, CreateCTokenAccountCpi};
+use light_token_sdk::token::{CompressibleParamsCpi, CreateTokenAccountCpi};
 use solana_program::{account_info::AccountInfo, program_error::ProgramError, pubkey::Pubkey};
 
 use crate::{ID, TOKEN_ACCOUNT_SEED};
@@ -302,7 +302,7 @@ pub struct CreateTokenAccountData {
 
 /// Handler for creating a compressible token account (invoke)
 ///
-/// Uses the builder pattern from the ctoken module. This demonstrates how to:
+/// Uses the builder pattern from the token module. This demonstrates how to:
 /// 1. Build the account infos struct with compressible params
 /// 2. Call the invoke() method which handles instruction building and CPI
 ///
@@ -329,7 +329,7 @@ pub fn process_create_token_account_invoke(
     );
 
     // Build the account infos struct
-    CreateCTokenAccountCpi {
+    CreateTokenAccountCpi {
         payer: accounts[0].clone(),
         account: accounts[1].clone(),
         mint: accounts[2].clone(),
@@ -374,7 +374,7 @@ pub fn process_create_token_account_invoke_signed(
     );
 
     // Build the account infos struct
-    let account_cpi = CreateCTokenAccountCpi {
+    let account_cpi = CreateTokenAccountCpi {
         payer: accounts[0].clone(),
         account: accounts[1].clone(),
         mint: accounts[2].clone(),

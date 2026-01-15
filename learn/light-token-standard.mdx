@@ -93,7 +93,7 @@ Light-mints **uniquely represent a token on Solana and store its global metadata
 
 <Info>
   Find the [source code of light-mints
-  here](https://github.com/Lightprotocol/light-protocol/blob/main/program-libs/token-interface/src/state/mint/compressed_mint.rs).
+  here](https://github.com/Lightprotocol/light-protocol/blob/bda52c305fad28b1b72093911f878d37fb190656/program-libs/token-interface/src/state/mint/compressed_mint.rs#L19).
 </Info>
 
 The `metadata` field is used by the Compressed Token Program to store the internal state of a light-mint.
@@ -208,8 +208,8 @@ Additionally Light Token is more compute-efficient than SPL on hot paths:
   </Tab>
   <Tab title="Source Code">
     ```rust
-    /// Ctoken account structure (with extensions).
-    pub struct CToken {
+    /// Token account structure (with extensions).
+    pub struct Token {
         pub mint: Pubkey,
         pub owner: Pubkey,
         pub amount: u64,
@@ -226,7 +226,7 @@ Additionally Light Token is more compute-efficient than SPL on hot paths:
 
 <Info>
   Find the [source code of light-tokens
-  here](https://github.com/Lightprotocol/light-protocol/blob/main/program-libs/token-interface/src/state/token/token_struct.rs).
+  here](https://github.com/Lightprotocol/light-protocol/blob/bda52c305fad28b1b72093911f878d37fb190656/program-libs/token-interface/src/state/token/token_struct.rs#L34).
 </Info>
 
 Light token accounts replicate the field layout and serialization format of [SPL Token accounts](https://solana.com/docs/tokens#token-account). The struct is serialized with Borsh to match the on-chain format of SPL tokens.

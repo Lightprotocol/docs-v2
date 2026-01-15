@@ -56,12 +56,12 @@ async function main() {
 
   await mintTo(rpc, payer, mint, owner.publicKey, mintAuthority, bn(1000));
 
-  // Get c-token ATA address
-  const ctokenAta = getAssociatedTokenAddressInterface(mint, owner.publicKey);
+  // Get light-token ATA address
+  const tokenAta = getAssociatedTokenAddressInterface(mint, owner.publicKey);
 
   // Load compressed tokens to hot balance
   // Creates ATA if needed, returns null if nothing to load
-  const signature = await loadAta(rpc, ctokenAta, owner, mint, payer);
+  const signature = await loadAta(rpc, tokenAta, owner, mint, payer);
 
   if (signature) {
     console.log("Loaded tokens to hot balance");
@@ -110,13 +110,13 @@ async function main() {
 
   await mintTo(rpc, payer, mint, owner.publicKey, mintAuthority, bn(1000));
 
-  // Get c-token ATA address
-  const ctokenAta = getAssociatedTokenAddressInterface(mint, owner.publicKey);
+  // Get light-token ATA address
+  const tokenAta = getAssociatedTokenAddressInterface(mint, owner.publicKey);
 
   // Create load instructions
   const ixs = await createLoadAtaInstructions(
     rpc,
-    ctokenAta,
+    tokenAta,
     owner.publicKey,
     mint,
     payer.publicKey

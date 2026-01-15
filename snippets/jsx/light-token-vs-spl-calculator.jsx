@@ -1,5 +1,6 @@
 import { useState } from 'react';
 
+
 export const LightTokenVsSplCalculator = () => {
   const [numAccounts, setNumAccounts] = useState(100000);
   const [showCustomAccounts, setShowCustomAccounts] = useState(false);
@@ -7,14 +8,14 @@ export const LightTokenVsSplCalculator = () => {
   const ACCOUNT_STORAGE_OVERHEAD = 128;
   const LAMPORTS_PER_BYTE = 6960;
   const DATA_LEN = 165; // SPL token account size
-  const CTOKEN_DEFAULT_CREATION_COST = 17208; // Default rent config: 6,208 prepaid rent (24h) + 11,000 compression incentive
+  const LIGHT_TOKEN_DEFAULT_CREATION_COST = 17208; // Default rent config: 6,208 prepaid rent (24h) + 11,000 compression incentive
   const LAMPORTS_PER_SOL = 1_000_000_000;
 
   const ACCOUNTS_MAX = 1000000;
 
   const splCost = numAccounts * (ACCOUNT_STORAGE_OVERHEAD + DATA_LEN) * LAMPORTS_PER_BYTE;
-  const ctokenCost = numAccounts * CTOKEN_DEFAULT_CREATION_COST;
-  const savings = splCost - ctokenCost;
+  const tokenCost = numAccounts * LIGHT_TOKEN_DEFAULT_CREATION_COST;
+  const savings = splCost - tokenCost;
   const savingsPercent = ((savings / splCost) * 100).toFixed(1);
 
   const handleAccountsChange = (value) => {
@@ -137,7 +138,7 @@ export const LightTokenVsSplCalculator = () => {
               Light Token
             </div>
             <div className="text-xl font-mono font-semibold text-zinc-900 dark:text-white">
-              {formatSOL(ctokenCost)}
+              {formatSOL(tokenCost)}
             </div>
             <div className="text-xs text-zinc-400 dark:text-white/40">SOL</div>
           </div>

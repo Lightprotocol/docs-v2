@@ -41,7 +41,7 @@ const payer = Keypair.fromSecretKey(
     await decompress(rpc, payer, mint, bn(1000), payer, splAta);
 
     // Create wrap instruction
-    const ctokenAta = getAssociatedTokenAddressInterface(mint, payer.publicKey);
+    const lightTokenAta = getAssociatedTokenAddressInterface(mint, payer.publicKey);
     await createAtaInterfaceIdempotent(rpc, payer, mint, payer.publicKey);
 
     const splInterfaceInfos = await getSplInterfaceInfos(rpc, mint);
@@ -53,7 +53,7 @@ const payer = Keypair.fromSecretKey(
 
     const ix = createWrapInstruction(
         splAta,
-        ctokenAta,
+        lightTokenAta,
         payer.publicKey,
         mint,
         bn(500),

@@ -8,7 +8,7 @@ keywords: ["close token account on solana", "reclaim rent on solana"]
 ---
 
 import CloseAccountInfosAccountsList from "/snippets/accounts-list/close-account-infos-accounts-list.mdx";
-import CTokenClientPrerequisites from "/snippets/light-token-guides/light-token-client-prerequisites.mdx";
+import TokenClientPrerequisites from "/snippets/light-token-guides/light-token-client-prerequisites.mdx";
 import ClientCustomRentConfig from "/snippets/light-token-guides/client-custom-rent-config.mdx";
 
 1. Closing a light-token account transfers remaining lamports to a destination account and the rent sponsor can reclaim sponsored rent.
@@ -23,11 +23,11 @@ import ClientCustomRentConfig from "/snippets/light-token-guides/client-custom-r
 <Tab title="Rust Client">
 
 1. The example creates a light-token account and mint.
-2. Build the instruction with `CloseCTokenAccount`:
+2. Build the instruction with `CloseTokenAccount`:
 
 ```rust
-let close_instruction = CloseCTokenAccount::new(
-    CTOKEN_PROGRAM_ID,
+let close_instruction = CloseTokenAccount::new(
+    LIGHT_TOKEN_PROGRAM_ID,
     account.pubkey(),
     payer.pubkey(), // Destination for remaining lamports
     owner,
@@ -39,7 +39,7 @@ let close_instruction = CloseCTokenAccount::new(
 <Step>
 ### Prerequisites
 
-<CTokenClientPrerequisites />
+<TokenClientPrerequisites />
 
 </Step>
 
@@ -50,10 +50,10 @@ let close_instruction = CloseCTokenAccount::new(
 use borsh::BorshDeserialize;
 use light_client::indexer::{AddressWithTree, Indexer};
 use light_client::rpc::{LightClient, LightClientConfig, Rpc};
-use light_ctoken_sdk::ctoken::{
-    CloseCTokenAccount, CreateCMint, CreateCMintParams, CreateCTokenAccount, CTOKEN_PROGRAM_ID,
+use light_token_sdk::token::{
+    CloseTokenAccount, CreateCMint, CreateCMintParams, CreateTokenAccount, LIGHT_TOKEN_PROGRAM_ID,
 };
-use light_ctoken_interface::state::CToken;
+use light_token_interface::state::Token;
 use serde_json;
 use solana_sdk::{pubkey::Pubkey, signature::Keypair, signer::Signer};
 use std::convert::TryFrom;
@@ -61,7 +61,7 @@ use std::env;
 use std::fs;
 
 #[tokio::test(flavor = "multi_thread")]
-async fn test_close_ctoken_account() {
+async fn test_close_token_account() {
     dotenvy::dotenv().ok();
 
     let keypair_path = env::var("KEYPAIR_PATH")
@@ -82,12 +82,12 @@ async fn test_close_ctoken_account() {
     // Step 1: Create compressed mint (prerequisite)
     let (mint, _compression_address) = create_compressed_mint(&mut rpc, &payer, 9).await;
 
-    // Step 2: Create cToken account with 0 balance
+    // Step 2: Create token account with 0 balance
     let account = Keypair::new();
     let owner = payer.pubkey();
 
     let create_instruction =
-        CreateCTokenAccount::new(payer.pubkey(), account.pubkey(), mint, owner)
+        CreateTokenAccount::new(payer.pubkey(), account.pubkey(), mint, owner)
             .instruction()
             .unwrap();
 
@@ -102,13 +102,13 @@ async fn test_close_ctoken_account() {
         "Account should exist before closing"
     );
 
-    let ctoken_state =
-        CToken::deserialize(&mut &account_before_close.unwrap().data[..]).unwrap();
-    assert_eq!(ctoken_state.amount, 0, "Account balance must be 0 to close");
+    let token_state =
+        Token::deserialize(&mut &account_before_close.unwrap().data[..]).unwrap();
+    assert_eq!(token_state.amount, 0, "Account balance must be 0 to close");
 
     // Step 4: Build close instruction using SDK builder
-    let close_instruction = CloseCTokenAccount::new(
-        CTOKEN_PROGRAM_ID,
+    let close_instruction = CloseTokenAccount::new(
+        LIGHT_TOKEN_PROGRAM_ID,
         account.pubkey(),
         payer.pubkey(), // Destination for remaining lamports
         owner,
@@ -164,12 +164,12 @@ pub async fn create_compressed_mint<R: Rpc + Indexer>(
     };
 
     // Derive compression address
-    let compression_address = light_ctoken_sdk::ctoken::derive_cmint_compressed_address(
+    let compression_address = light_token_sdk::token::derive_cmint_compressed_address(
         &mint_signer.pubkey(),
         &address_tree.tree,
     );
 
-    let mint_pda = light_ctoken_sdk::ctoken::find_cmint_address(&mint_signer.pubkey()).0;
+    let mint_pda = light_token_sdk::token::find_cmint_address(&mint_signer.pubkey()).0;
 
     // Get validity proof for the address
     let rpc_result = rpc
@@ -248,9 +248,9 @@ Find [a full code example at the end](#full-code-example).
 <Tab title="invoke (External Signer)">
 
 ```rust
-use light_ctoken_sdk::ctoken::CloseCTokenAccountCpi;
+use light_token_sdk::token::CloseTokenAccountCpi;
 
-CloseCTokenAccountCpi {
+CloseTokenAccountCpi {
     token_program: token_program.clone(),
     account: account.clone(),
     destination: destination.clone(),
@@ -264,9 +264,9 @@ CloseCTokenAccountCpi {
 <Tab title="invoke_signed (PDA Owner)">
 
 ```rust
-use light_ctoken_sdk::ctoken::CloseCTokenAccountCpi;
+use light_token_sdk::token::CloseTokenAccountCpi;
 
-let close_account_cpi = CloseCTokenAccountCpi {
+let close_account_cpi = CloseTokenAccountCpi {
     token_program: token_program.clone(),
     account: account.clone(),
     destination: destination.clone(),
@@ -292,11 +292,11 @@ close_account_cpi.invoke_signed(&[signer_seeds])?;
 
 <Info>
   Find the source code
-  [here](https://github.com/Lightprotocol/light-protocol/blob/main/sdk-tests/sdk-ctoken-test/src/close.rs).
+  [here](https://github.com/Lightprotocol/light-protocol/blob/main/sdk-tests/sdk-light-token-test/src/close.rs).
 </Info>
 
 ```rust expandable
-use light_ctoken_sdk::ctoken::CloseCTokenAccountCpi;
+use light_token_sdk::token::CloseTokenAccountCpi;
 use solana_program::{account_info::AccountInfo, program_error::ProgramError, pubkey::Pubkey};
 
 use crate::{ID, TOKEN_ACCOUNT_SEED};
@@ -304,7 +304,7 @@ use crate::{ID, TOKEN_ACCOUNT_SEED};
 /// Handler for closing a compressed token account (invoke)
 ///
 /// Account order:
-/// - accounts[0]: token_program (ctoken program)
+/// - accounts[0]: token_program (light token program)
 /// - accounts[1]: account to close (writable)
 /// - accounts[2]: destination for lamports (writable)
 /// - accounts[3]: owner/authority (signer)
@@ -320,7 +320,7 @@ pub fn process_close_account_invoke(accounts: &[AccountInfo]) -> Result<(), Prog
         None
     };
 
-    CloseCTokenAccountCpi {
+    CloseTokenAccountCpi {
         token_program: accounts[0].clone(),
         account: accounts[1].clone(),
         destination: accounts[2].clone(),
@@ -335,7 +335,7 @@ pub fn process_close_account_invoke(accounts: &[AccountInfo]) -> Result<(), Prog
 /// Handler for closing a PDA-owned compressed token account (invoke_signed)
 ///
 /// Account order:
-/// - accounts[0]: token_program (ctoken program)
+/// - accounts[0]: token_program (light token program)
 /// - accounts[1]: account to close (writable)
 /// - accounts[2]: destination for lamports (writable)
 /// - accounts[3]: PDA owner/authority (not signer, program signs)
@@ -360,7 +360,7 @@ pub fn process_close_account_invoke_signed(accounts: &[AccountInfo]) -> Result<(
     };
 
     let signer_seeds: &[&[u8]] = &[TOKEN_ACCOUNT_SEED, &[bump]];
-    CloseCTokenAccountCpi {
+    CloseTokenAccountCpi {
         token_program: accounts[0].clone(),
         account: accounts[1].clone(),
         destination: accounts[2].clone(),

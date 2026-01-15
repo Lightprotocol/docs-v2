@@ -33,12 +33,12 @@ const payer = Keypair.fromSecretKey(
     const { mint } = await createMint(rpc, payer, payer.publicKey, 9);
     await mintTo(rpc, payer, mint, payer.publicKey, payer, bn(1000));
 
-    const ctokenAta = getAssociatedTokenAddressInterface(mint, payer.publicKey);
+    const lightTokenAta = getAssociatedTokenAddressInterface(mint, payer.publicKey);
 
     // load from cold to hot state
     const ixs = await createLoadAtaInstructions(
         rpc,
-        ctokenAta,
+        lightTokenAta,
         payer.publicKey,
         mint,
         payer.publicKey

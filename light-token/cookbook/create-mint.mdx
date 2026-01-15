@@ -8,8 +8,8 @@ keywords: ["create mint account on solana", "rent free mint on solana", "rent fr
 ---
 
 import CMintSystemAccountsList from "/snippets/accounts-list/light-mint-system-accounts-list.mdx";
-import CTokenClientPrerequisites from "/snippets/light-token-guides/light-token-client-prerequisites.mdx";
-import CTokenTsClientPrerequisites from "/snippets/light-token-guides/light-token-ts-client-prerequisites.mdx";
+import TokenClientPrerequisites from "/snippets/light-token-guides/light-token-client-prerequisites.mdx";
+import TokenTsClientPrerequisites from "/snippets/light-token-guides/light-token-ts-client-prerequisites.mdx";
 import ClientCustomRentConfig from "/snippets/light-token-guides/client-custom-rent-config.mdx";
 import FullSetup from "/snippets/setup/full-setup.mdx";
 import { CodeCompare } from "/snippets/jsx/code-compare.jsx";
@@ -32,7 +32,7 @@ import InstructionCode from "/snippets/code-snippets/light-token/create-mint/ins
 `createMintInterface` is a unified interface that dispatches to different mint creation paths based on programId:
 
 - `TOKEN_PROGRAM_ID` or `TOKEN_2022_PROGRAM_ID` → delegates to SPL or T22 `createMint`
-- Otherwise it defaults to `CTOKEN_PROGRAM_ID` → creates a light-token mint
+- Otherwise it defaults to `LIGHT_TOKEN_PROGRAM_ID` → creates a light-token mint
 
 You can use the same interface regardless of mint type.
 
@@ -87,7 +87,7 @@ The example creates a light-mint with token metadata.
 4. Build the instruction with `CreateCMint::new()` and send the transaction.
 
 ```rust
-use light_ctoken_sdk::ctoken::CreateCMint;
+use light_token_sdk::token::CreateCMint;
 
 let create_cmint = CreateCMint::new(
     params,
@@ -103,7 +103,7 @@ let instruction = create_cmint.instruction()?;
 <Step>
 ### Prerequisites
 
-<CTokenClientPrerequisites />
+<TokenClientPrerequisites />
 
 </Step>
 
@@ -113,10 +113,10 @@ let instruction = create_cmint.instruction()?;
 ```rust
 use light_client::indexer::{AddressWithTree, Indexer};
 use light_client::rpc::{LightClient, LightClientConfig, Rpc};
-use light_ctoken_sdk::ctoken::{CreateCMint, CreateCMintParams};
-use light_ctoken_interface::instructions::extensions::token_metadata::TokenMetadataInstructionData;
-use light_ctoken_interface::instructions::extensions::ExtensionInstructionData;
-use light_ctoken_interface::state::AdditionalMetadata;
+use light_token_sdk::token::{CreateCMint, CreateCMintParams};
+use light_token_interface::instructions::extensions::token_metadata::TokenMetadataInstructionData;
+use light_token_interface::instructions::extensions::ExtensionInstructionData;
+use light_token_interface::state::AdditionalMetadata;
 use serde_json;
 use solana_sdk::{bs58, pubkey::Pubkey, signature::Keypair, signer::Signer};
 use std::convert::TryFrom;
@@ -189,12 +189,12 @@ pub async fn create_compressed_mint<R: Rpc + Indexer>(
     };
 
     // Derive compression address
-    let compression_address = light_ctoken_sdk::ctoken::derive_cmint_compressed_address(
+    let compression_address = light_token_sdk::token::derive_cmint_compressed_address(
         &mint_signer.pubkey(),
         &address_tree.tree,
     );
 
-    let mint_pda = light_ctoken_sdk::ctoken::find_cmint_address(&mint_signer.pubkey()).0;
+    let mint_pda = light_token_sdk::token::find_cmint_address(&mint_signer.pubkey()).0;
 
     // Get validity proof for the address
     let rpc_result = rpc
@@ -278,7 +278,7 @@ Find [a full code example at the end](#full-code-example).
 ### Configure Token Metadata
 
 ```rust
-use light_ctoken_interface::{
+use light_token_interface::{
     instructions::extensions::{
         token_metadata::TokenMetadataInstructionData,
         ExtensionInstructionData,
@@ -317,7 +317,7 @@ let token_metadata = ExtensionInstructionData::TokenMetadata(
 Set `decimals`, `mint_authority`, `freeze_authority`, and pass the `token_metadata` from the previous step.
 
 ```rust
-use light_ctoken_sdk::ctoken::CreateCMintParams;
+use light_token_sdk::token::CreateCMintParams;
 
 let params = CreateCMintParams {
     decimals: data.decimals,
@@ -351,7 +351,7 @@ The client includes them in the instruction.
 </Accordion>
 
 ```rust
-use light_ctoken_sdk::ctoken::SystemAccountInfos;
+use light_token_sdk::token::SystemAccountInfos;
 
 let system_accounts = SystemAccountInfos {
     light_system_program: light_system_program.clone(),
@@ -379,7 +379,7 @@ let system_accounts = SystemAccountInfos {
 <Tab title="invoke (External signer)">
 
 ```rust
-use light_ctoken_sdk::ctoken::CreateCMintCpi;
+use light_token_sdk::token::CreateCMintCpi;
 
 CreateCMintCpi {
     mint_seed: mint_seed.clone(),
@@ -400,7 +400,7 @@ CreateCMintCpi {
 <Tab title="invoke_signed (PDA mint_seed)">
 
 ```rust
-use light_ctoken_sdk::ctoken::CreateCMintCpi;
+use light_token_sdk::token::CreateCMintCpi;
 
 let account_infos = CreateCMintCpi {
     mint_seed: mint_seed.clone(),
@@ -423,7 +423,7 @@ account_infos.invoke_signed(&[signer_seeds])?;
 <Tab title="invoke_signed (Two PDA signers)">
 
 ```rust
-use light_ctoken_sdk::ctoken::CreateCMintCpi;
+use light_token_sdk::token::CreateCMintCpi;
 
 let account_infos = CreateCMintCpi {
     mint_seed: mint_seed.clone(),
@@ -454,13 +454,13 @@ account_infos.invoke_signed(&[mint_seed_seeds, authority_seeds])?;
 
 <Info>
   Find the source code
-  [here](https://github.com/Lightprotocol/light-protocol/blob/main/sdk-tests/sdk-ctoken-test/src/create_cmint.rs).
+  [here](https://github.com/Lightprotocol/light-protocol/blob/main/sdk-tests/sdk-light-token-test/src/create_cmint.rs).
 </Info>
 
 ```rust expandable
 use borsh::{BorshDeserialize, BorshSerialize};
-use light_ctoken_sdk::{
-    ctoken::{
+use light_token_sdk::{
+    token::{
         CreateCMintCpi, CreateCMintParams, ExtensionInstructionData, SystemAccountInfos,
     },
     CompressedProof,
