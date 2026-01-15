@@ -12,11 +12,10 @@
     "ci": "npm run format:check && npm run lint && npm run spellcheck"
   },
   "devDependencies": {
-    "cspell": "^8.6.0",
+    "cspell": "^8.19.4",
     "eslint": "^8.57.0",
     "eslint-plugin-react": "^7.34.1",
     "eslint-plugin-react-hooks": "^4.6.2",
     "prettier": "^3.2.5"
   }
 }
-

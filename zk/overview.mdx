@@ -1,0 +1,128 @@
+---
+title: Primitives for ZK on Solana
+sidebarTitle: Overview
+description: Overview how to build a ZK program on Solana.
+keywords: ["nullifiers on Solana", "zcash on solana", "privacy on solana", "zk on solana", "solana privacy hackathon", "private payments solana", "privacy tooling solana"]
+---
+
+import ZkExamplesTable from "/snippets/overview-tables/zk-examples-table.mdx";
+
+---
+
+Building a ZK Solana program requires: 
+1. Nullifiers to prevent double spending
+2. Proof verification
+3. A Merkle tree to store state 
+4. An indexer to serve Merkle proofs
+5. Encrypted state
+
+## Nullifiers on Solana
+
+A nullifier is a deterministically derived hash to ensure an action can only be performed once.
+The nullifier cannot be linked to the action or user.
+For example Zcash uses nullifiers to prevent double spending. 
+
+To implement nullifiers we need a data structure that ensures every nullifier is only created once and never deleted.
+On Solana a straight forward way to implement nullifiers is to create a PDA account with the nullifier as seed.
+* PDA accounts cannot be closed and permanently lock 890,880 lamports (per nullifier rent-exemption).
+* Compressed PDAs are derived similar to Solana PDAs and cost 15,000 lamports to create (no rent-exemption).
+
+| Storage | Cost per nullifier |
+|---------|-------------------|
+| PDA | 890,880 lamports |
+| Compressed PDA | 15,000 lamports |
+
+<Info>
+[See full example with tests on on Github](https://github.com/Lightprotocol/program-examples/tree/main/zk/nullifier).
+</Info>
+
+```rust
+// add to your program
+use anchor_lang::prelude::*;
+use nullifier_creation::{create_nullifiers, NullifierInstructionData};
+
+declare_id!("Bw8aty8LJY5Kg2b6djghjWGwt6cBc1tVQUoreUehvVq4");
+
+#[program]
+pub mod zk_nullifier {
+    use super::*;
+
+    pub fn create_nullifier<'info>(
+        ctx: Context<'_, '_, '_, 'info, CreateNullifierAccounts<'info>>,
+        data: NullifierInstructionData,
+        nullifiers: Vec<[u8; 32]>,
+    ) -> Result<()> {
+        // Verify your proof here. Use nullifiers as public inputs
+        // among your other public inputs.
+        // Example:
+        // let public_inputs = [...nullifiers, ...your_other_inputs];
+        // Groth16Verifier::new(...).verify()?;
+
+        create_nullifiers(
+            &nullifiers,
+            data,
+            ctx.accounts.signer.as_ref(),
+            ctx.remaining_accounts,
+        )
+    }
+}
+
+#[derive(Accounts)]
+pub struct CreateNullifierAccounts<'info> {
+    #[account(mut)]
+    pub signer: Signer<'info>,
+}
+```
+
+## Groth16 Proof Verification on Solana
+
+Groth16's small proof size and fast verification (~200k compute units) make it the practical choice for Solana.
+
+<Info>
+Find more information on [docs.rs](https://docs.rs/groth16-solana) and [Github](https://github.com/Lightprotocol/groth16-solana).
+</Info>
+
+```rust
+let mut public_inputs_vec = Vec::new();
+for input in PUBLIC_INPUTS.chunks(32) {
+    public_inputs_vec.push(input);
+}
+
+let proof_a: G1 =
+    <G1 as FromBytes>::read(&*[&change_endianness(&PROOF[0..64])[..], &[0u8][..]].concat())
+        .unwrap();
+let mut proof_a_neg = [0u8; 65];
+<G1 as ToBytes>::write(&proof_a.neg(), &mut proof_a_neg[..]).unwrap();
+
+let proof_a = change_endianness(&proof_a_neg[..64]).try_into().unwrap();
+let proof_b = PROOF[64..192].try_into().unwrap();
+let proof_c = PROOF[192..256].try_into().unwrap();
+
+let mut verifier = Groth16Verifier::new(
+    &proof_a,
+    &proof_b,
+    &proof_c,
+    public_inputs_vec.as_slice(),
+    &VERIFYING_KEY,
+)
+.unwrap();
+verifier.verify().unwrap();
+```
+
+## Merklelized State with Indexer Support
+
+ZK applications on Solana can use existing state Merkle trees to store state in rent-free accounts.
+* This way you don't need to maintain your own Merkle tree and indexer.
+* RPCs that support ZK Compression (Helius, Triton) index state changes.
+
+| Creation      | Regular PDA Account    | Compressed PDA         |
+| :------------- | :--------------------- | :---------------------- |
+| 100-byte PDA  | 	~1,600,000 lamports          | 15,000 lamports     |
+
+<Note>
+Your circuit must include compressed accounts. Find [guides to compressed accounts in the documentation](/compressed-pdas/overview) and the [full example with zk implementation here](https://github.com/Lightprotocol/program-examples/blob/99d260f9f356743b8fe3501c684f7926930d6079/zk-id/circuits/compressed_account.circom).
+</Note>
+
+## Get Started & Examples
+
+<ZkExamplesTable />

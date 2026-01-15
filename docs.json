@@ -100,6 +100,33 @@
             ]
           },
           {
+            "group": "ZK",
+            "pages": [
+              "zk/overview",
+              "zk/examples"
+            ]
+          },
+          {
+            "group": "Compressed PDAs",
+            "pages": [
+              "compressed-pdas/overview",
+              {
+                "group": "Program Guides",
+                "pages": [
+                  "compressed-pdas/guides",
+                  "compressed-pdas/guides/how-to-create-compressed-accounts",
+                  "compressed-pdas/guides/how-to-update-compressed-accounts",
+                  "compressed-pdas/guides/how-to-close-compressed-accounts",
+                  "compressed-pdas/guides/how-to-reinitialize-compressed-accounts",
+                  "compressed-pdas/guides/how-to-burn-compressed-accounts"
+                ]
+              },
+              "compressed-pdas/program-examples",
+              "client-library/client-guide",
+              "compressed-pdas/solana-attestation-service"
+            ]
+          },
+          {
             "group": "Compressed Tokens",
             "pages": [
               "compressed-tokens/overview",
@@ -142,26 +169,6 @@
                   }
                 ]
               }
-            ]
-          },
-          {
-            "group": "Compressed PDAs",
-            "pages": [
-              "compressed-pdas/create-a-program-with-compressed-pdas",
-              {
-                "group": "Program Guides",
-                "pages": [
-                  "compressed-pdas/guides",
-                  "compressed-pdas/guides/how-to-create-compressed-accounts",
-                  "compressed-pdas/guides/how-to-update-compressed-accounts",
-                  "compressed-pdas/guides/how-to-close-compressed-accounts",
-                  "compressed-pdas/guides/how-to-reinitialize-compressed-accounts",
-                  "compressed-pdas/guides/how-to-burn-compressed-accounts"
-                ]
-              },
-              "compressed-pdas/program-examples",
-              "client-library/client-guide",
-              "compressed-pdas/solana-attestation-service"
             ]
           },
           {
