@@ -12,28 +12,28 @@ import ZkExamplesTable from "/snippets/overview-tables/zk-examples-table.mdx";
 Building a ZK Solana program requires: 
 1. Nullifiers to prevent double spending
 2. Proof verification
-3. A Merkle tree to store state, 
-4. An indexer to serve Merkle proofs, and
-5. Encrypted state.
+3. A Merkle tree to store state 
+4. An indexer to serve Merkle proofs
+5. Encrypted state
 
 ## Nullifiers on Solana
 
-A nullifier is a deterministically derived hash to ensure an action can only be performed once without linking it back to the action. 
-Attempting to consume state twice requires the same nullifier, hence the transaction would fail.
+A nullifier is a deterministically derived hash to ensure an action can only be performed once.
+The nullifier cannot be linked to the action or user.
 For example Zcash uses nullifiers to prevent double spending. 
 
-* On Solana nullifiers require a data structure that ensures the nullifier is only created once.
-* On Solana a straight forward way is to derive a PDA with the nullifier as seed for the PDA account.
-* Nullifier accounts must remain active, hence lock ~0.001 SOL in rent per nullifier PDA permanently.
-* Compressed PDAs are rent-free, provide similar functionality and derivation while not requiring a custom circuit.
+To implement nullifiers we need a data structure that ensures every nullifier is only created once and never deleted.
+On Solana a straight forward way to implement nullifiers is to create a PDA account with the nullifier as seed.
+* PDA accounts cannot be closed and permanently lock 890,880 lamports (per nullifier rent-exemption).
+* Compressed PDAs are derived similar to Solana PDAs and cost 15,000 lamports to create (no rent-exemption).
 
 | Storage | Cost per nullifier |
 |---------|-------------------|
-| PDA | ~0.001 SOL |
-| Compressed PDA | ~0.000015 SOL |
+| PDA | 890,880 lamports |
+| Compressed PDA | 15,000 lamports |
 
 <Info>
-[See full example with tests on Github](https://github.com/Lightprotocol/program-examples/tree/main/zk/nullifier).
+[See full example with tests on on Github](https://github.com/Lightprotocol/program-examples/tree/main/zk/nullifier).
 </Info>
 
 ```rust
@@ -52,6 +52,11 @@ pub mod zk_nullifier {
         data: NullifierInstructionData,
         nullifiers: Vec<[u8; 32]>,
     ) -> Result<()> {
+        // Verify your proof here. Use nullifiers as public inputs
+        // among your other public inputs.
+        // Example:
+        // let public_inputs = [...nullifiers, ...your_other_inputs];
+        // Groth16Verifier::new(...).verify()?;
 
         create_nullifiers(
             &nullifiers,
@@ -110,9 +115,9 @@ ZK applications on Solana can use existing state Merkle trees to store state in 
 * This way you don't need to maintain your own Merkle tree and indexer.
 * RPCs that support ZK Compression (Helius, Triton) index state changes.
 
-| Creation      |  Regular    | Compressed         |
+| Creation      | Regular PDA Account    | Compressed PDA         |
 | :------------- | :--------------------- | :---------------------- |
-| 100-byte PDA  | 	~0.002 SOL          | ~0.000015 SOL     |
+| 100-byte PDA  | 	~1,600,000 lamports          | 15,000 lamports     |
 
 <Note>
 Your circuit must include compressed accounts. Find [guides to compressed accounts in the documentation](/compressed-pdas/overview) and the [full example with zk implementation here](https://github.com/Lightprotocol/program-examples/blob/99d260f9f356743b8fe3501c684f7926930d6079/zk-id/circuits/compressed_account.circom).
