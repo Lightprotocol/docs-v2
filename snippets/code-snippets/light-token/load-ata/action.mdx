@@ -32,8 +32,8 @@ const payer = Keypair.fromSecretKey(
     await mintTo(rpc, payer, mint, payer.publicKey, payer, bn(1000));
 
     // Load compressed tokens to hot balance
-    const ctokenAta = getAssociatedTokenAddressInterface(mint, payer.publicKey);
-    const tx = await loadAta(rpc, ctokenAta, payer, mint, payer);
+    const lightTokenAta = getAssociatedTokenAddressInterface(mint, payer.publicKey);
+    const tx = await loadAta(rpc, lightTokenAta, payer, mint, payer);
 
     console.log("Tx:", tx);
 })();

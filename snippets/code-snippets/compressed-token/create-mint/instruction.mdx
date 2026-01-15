@@ -11,7 +11,7 @@ import {
     createRpc,
     getBatchAddressTreeInfo,
     selectStateTreeInfo,
-    CTOKEN_PROGRAM_ID,
+    LIGHT_TOKEN_PROGRAM_ID,
 } from "@lightprotocol/stateless.js";
 import { createMintInstruction } from "@lightprotocol/compressed-token";
 import { homedir } from "os";
@@ -22,7 +22,7 @@ const COMPRESSED_MINT_SEED = Buffer.from("compressed_mint");
 function findMintAddress(mintSigner: PublicKey): [PublicKey, number] {
     return PublicKey.findProgramAddressSync(
         [COMPRESSED_MINT_SEED, mintSigner.toBuffer()],
-        CTOKEN_PROGRAM_ID
+        LIGHT_TOKEN_PROGRAM_ID
     );
 }
 

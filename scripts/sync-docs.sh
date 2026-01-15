@@ -15,15 +15,14 @@ fi
 
 # Mapping of source files to docs files
 declare -A FILE_MAP=(
-  ["create_cmint.rs"]="compressed-token-program/cmint/create-cmint.mdx"
-  ["mint_to_ctoken.rs"]="compressed-token-program/cmint/mint-ctokens.mdx"
-  ["create_token_account.rs"]="compressed-token-program/ctoken/create-ctoken.mdx"
-  ["create_ata.rs"]="compressed-token-program/ctoken/create-cata.mdx"
-  ["close.rs"]="compressed-token-program/ctoken/close-ctoken-account.mdx"
-  ["transfer_interface.rs"]="compressed-token-program/ctoken/transfer-interface.mdx"
+  ["create_mint.rs"]="light-token/cookbook/create-mint.mdx"
+  ["create_token_account.rs"]="light-token/cookbook/create-token-account.mdx"
+  ["create_ata.rs"]="light-token/cookbook/create-ata.mdx"
+  ["close.rs"]="light-token/cookbook/close-token-account.mdx"
+  ["transfer_interface.rs"]="light-token/cookbook/transfer-interface.mdx"
 )
 
-SOURCE_DIR="$LIGHT_PROTOCOL_PATH/sdk-tests/sdk-ctoken-test/src"
+SOURCE_DIR="$LIGHT_PROTOCOL_PATH/sdk-tests/sdk-light-token-test/src"
 
 for filename in "${!FILE_MAP[@]}"; do
   docs_file="${FILE_MAP[$filename]}"

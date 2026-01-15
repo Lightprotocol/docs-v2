@@ -103,7 +103,7 @@ import {
   createLoadAtaInstructions,
   getAssociatedTokenAddressInterface,
 } from "@lightprotocol/compressed-token";
-import { CTOKEN_PROGRAM_ID } from "@lightprotocol/stateless.js";
+import { LIGHT_TOKEN_PROGRAM_ID } from "@lightprotocol/stateless.js";
 
 const ata = getAssociatedTokenAddressInterface(mint, recipient);
 
@@ -113,7 +113,7 @@ const tx = new Transaction().add(
     ata,
     recipient,
     mint,
-    CTOKEN_PROGRAM_ID
+    LIGHT_TOKEN_PROGRAM_ID
   ),
   ...(await createLoadAtaInstructions(
     rpc,
@@ -265,7 +265,7 @@ import {
   getAssociatedTokenAddressInterface,
   createAssociatedTokenAccountInterfaceIdempotentInstruction,
 } from "@lightprotocol/compressed-token";
-import { CTOKEN_PROGRAM_ID } from "@lightprotocol/stateless.js";
+import { LIGHT_TOKEN_PROGRAM_ID } from "@lightprotocol/stateless.js";
 
 const destinationAta = getAssociatedTokenAddressInterface(mint, recipient);
 const createAtaIx = createAssociatedTokenAccountInterfaceIdempotentInstruction(
@@ -273,7 +273,7 @@ const createAtaIx = createAssociatedTokenAccountInterfaceIdempotentInstruction(
   destinationAta,
   recipient,
   mint,
-  CTOKEN_PROGRAM_ID
+  LIGHT_TOKEN_PROGRAM_ID
 );
 
 new Transaction().add(createAtaIx, transferIx);
@@ -397,7 +397,7 @@ import {
 } from "@lightprotocol/compressed-token";
 
 const splAta = getAssociatedTokenAddressSync(mint, owner.publicKey);
-const ctokenAta = getAssociatedTokenAddressInterface(mint, owner.publicKey);
+const tokenAta = getAssociatedTokenAddressInterface(mint, owner.publicKey);
 
 const splInterfaceInfos = await getSplInterfaceInfos(rpc, mint);
 const splInterfaceInfo = splInterfaceInfos.find((i) => i.isInitialized);
@@ -405,7 +405,7 @@ const splInterfaceInfo = splInterfaceInfos.find((i) => i.isInitialized);
 const tx = new Transaction().add(
   createWrapInstruction(
     splAta,
-    ctokenAta,
+    tokenAta,
     owner.publicKey,
     mint,
     amount,
@@ -426,10 +426,10 @@ import {
 
 // SPL ATA with tokens to wrap
 const splAta = getAssociatedTokenAddressSync(mint, owner.publicKey);
-// c-token ATA destination
-const ctokenAta = getAssociatedTokenAddressInterface(mint, owner.publicKey);
+// light-token ATA destination
+const tokenAta = getAssociatedTokenAddressInterface(mint, owner.publicKey);
 
-await wrap(rpc, payer, splAta, ctokenAta, owner, mint, amount);
+await wrap(rpc, payer, splAta, tokenAta, owner, mint, amount);
 ```
 
 </Tab>
@@ -459,7 +459,7 @@ import {
   getSplInterfaceInfos,
 } from "@lightprotocol/compressed-token";
 
-const ctokenAta = getAssociatedTokenAddressInterface(mint, owner.publicKey);
+const tokenAta = getAssociatedTokenAddressInterface(mint, owner.publicKey);
 const splAta = getAssociatedTokenAddressSync(mint, owner.publicKey);
 
 const splInterfaceInfos = await getSplInterfaceInfos(rpc, mint);
@@ -468,13 +468,13 @@ const splInterfaceInfo = splInterfaceInfos.find((i) => i.isInitialized);
 const tx = new Transaction().add(
   ...(await createLoadAtaInstructions(
     rpc,
-    ctokenAta,
+    tokenAta,
     owner.publicKey,
     mint,
     payer.publicKey
   )),
   createUnwrapInstruction(
-    ctokenAta,
+    tokenAta,
     splAta,
     owner.publicKey,
     mint,

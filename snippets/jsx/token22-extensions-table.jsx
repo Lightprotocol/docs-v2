@@ -18,7 +18,7 @@ export const Token22ExtensionsTable = () => {
   ];
 
   const pinocchioInstructions = [
-    "CTokenTransfer",
+    "TokenTransfer",
     "CreateAssociatedTokenAccount",
     "CreateAssociatedTokenAccountIdempotent",
     "CreateTokenAccount",
@@ -60,63 +60,63 @@ export const Token22ExtensionsTable = () => {
       name: "MintCloseAuthority",
       description: "-",
       instructions: allInstructions.filter(
-        (i) => !["transfer", "CTokenTransfer", "Transfer2"].includes(i)
+        (i) => !["transfer", "TokenTransfer", "Transfer2"].includes(i)
       ),
     },
     {
       name: "TransferFeeConfig",
       description: "fees must be zero",
       instructions: allInstructions.filter(
-        (i) => !["transfer", "CTokenTransfer", "Transfer2"].includes(i)
+        (i) => !["transfer", "TokenTransfer", "Transfer2"].includes(i)
       ),
     },
     {
       name: "DefaultAccountState",
       description: "any state allowed",
       instructions: allInstructions.filter(
-        (i) => !["transfer", "CTokenTransfer", "Transfer2"].includes(i)
+        (i) => !["transfer", "TokenTransfer", "Transfer2"].includes(i)
       ),
     },
     {
       name: "PermanentDelegate",
       description: "-",
       instructions: allInstructions.filter(
-        (i) => !["transfer", "CTokenTransfer", "Transfer2"].includes(i)
+        (i) => !["transfer", "TokenTransfer", "Transfer2"].includes(i)
       ),
     },
     {
       name: "TransferHook",
       description: "program_id must be nil",
       instructions: allInstructions.filter(
-        (i) => !["transfer", "CTokenTransfer", "Transfer2"].includes(i)
+        (i) => !["transfer", "TokenTransfer", "Transfer2"].includes(i)
       ),
     },
     {
       name: "Pausable",
       description: "-",
       instructions: allInstructions.filter(
-        (i) => !["transfer", "CTokenTransfer", "Transfer2"].includes(i)
+        (i) => !["transfer", "TokenTransfer", "Transfer2"].includes(i)
       ),
     },
     {
       name: "ConfidentialTransferMint",
       description: "initialized but not enabled",
       instructions: allInstructions.filter(
-        (i) => !["transfer", "CTokenTransfer", "Transfer2"].includes(i)
+        (i) => !["transfer", "TokenTransfer", "Transfer2"].includes(i)
       ),
     },
     {
       name: "ConfidentialTransferFeeConfig",
       description: "fees must be zero",
       instructions: allInstructions.filter(
-        (i) => !["transfer", "CTokenTransfer", "Transfer2"].includes(i)
+        (i) => !["transfer", "TokenTransfer", "Transfer2"].includes(i)
       ),
     },
     {
       name: "ConfidentialMintBurn",
       description: "initialized but not enabled",
       instructions: allInstructions.filter(
-        (i) => !["transfer", "CTokenTransfer", "Transfer2"].includes(i)
+        (i) => !["transfer", "TokenTransfer", "Transfer2"].includes(i)
       ),
     },
   ];

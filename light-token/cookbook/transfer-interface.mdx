@@ -9,8 +9,8 @@ keywords: ["transfer tokens on solana", "token transfer on solana", "interface m
 import TransferInterfaceAccountsListCtoken1 from "/snippets/accounts-list/transfer-interface-accounts-list-light-token-1.mdx";
 import TransferInterfaceAccountsListSpl2 from "/snippets/accounts-list/transfer-interface-accounts-list-spl-2.mdx";
 import TransferInterfaceIntro from "/snippets/light-token-guides/transfer-interface-intro.mdx";
-import CTokenClientPrerequisites from "/snippets/light-token-guides/light-token-client-prerequisites.mdx";
-import CTokenTsClientPrerequisites from "/snippets/light-token-guides/light-token-ts-client-prerequisites.mdx";
+import TokenClientPrerequisites from "/snippets/light-token-guides/light-token-client-prerequisites.mdx";
+import TokenTsClientPrerequisites from "/snippets/light-token-guides/light-token-ts-client-prerequisites.mdx";
 import ClientCustomRentConfig from "/snippets/light-token-guides/client-custom-rent-config.mdx";
 import { CodeCompare } from "/snippets/jsx/code-compare.jsx";
 import FullSetup from "/snippets/setup/full-setup.mdx";
@@ -109,7 +109,7 @@ The example transfers SPL token -> light-token and light-token -> light-token:
 <Step>
 ### Prerequisites
 
-<CTokenClientPrerequisites />
+<TokenClientPrerequisites />
 
 </Step>
 
@@ -121,10 +121,10 @@ The example transfers SPL token -> light-token and light-token -> light-token:
 ```rust
 use anchor_spl::token::{spl_token, Mint};
 use light_client::rpc::{LightClient, LightClientConfig, Rpc};
-use light_ctoken_sdk::{
-    ctoken::{
-        derive_ctoken_ata as derive_token_ata, CreateAssociatedCTokenAccount as CreateAssociatedTokenAccount,
-        TransferCToken as TransferToken, TransferSplToCtoken as TransferSplToToken,
+use light_token_sdk::{
+    token::{
+        derive_token_ata, CreateAssociatedTokenAccount,
+        Transfer, TransferFromSpl,
     },
     spl_interface::{find_spl_interface_pda_with_index, CreateSplInterfacePda},
 };
@@ -278,11 +278,11 @@ async fn test_spl_to_token_to_token() {
     // 7. Transfer SPL tokens to sender's token account
     let (spl_interface_pda, spl_interface_pda_bump) = find_spl_interface_pda_with_index(&mint, 0);
 
-    let spl_to_token_ix = TransferSplToToken {
+    let spl_to_token_ix = TransferFromSpl {
         amount: spl_to_token_amount,
         spl_interface_pda_bump,
         source_spl_token_account: spl_token_account_keypair.pubkey(),
-        destination_ctoken_account: sender_token_ata,
+        destination_token_account: sender_token_ata,
         authority: payer.pubkey(),
         mint,
         payer: payer.pubkey(),
@@ -308,7 +308,7 @@ async fn test_spl_to_token_to_token() {
     .instruction()
     .unwrap();
 
-    let token_transfer_ix = TransferToken {
+    let token_transfer_ix = Transfer {
         source: sender_token_ata,
         destination: recipient_token_ata,
         amount: token_transfer_amount,
@@ -358,7 +358,7 @@ Define the number of light-tokens / SPL tokens to transfer
 - to which SPL or light-token account.
 
 ```rust
-use light_ctoken_sdk::ctoken::TransferInterfaceCpi;
+use light_token_sdk::token::TransferInterfaceCpi;
 
 let mut transfer = TransferInterfaceCpi::new(
     data.amount,
@@ -435,12 +435,12 @@ transfer.invoke_signed(&[authority_seeds])?;
 
 <Info>
   Find the source code
-  [here](https://github.com/Lightprotocol/light-protocol/blob/main/sdk-tests/sdk-ctoken-test/src/transfer_interface.rs).
+  [here](https://github.com/Lightprotocol/light-protocol/blob/main/sdk-tests/sdk-light-token-test/src/transfer_interface.rs).
 </Info>
 
 ```rust expandable
 use borsh::{BorshDeserialize, BorshSerialize};
-use light_ctoken_sdk::ctoken::TransferInterfaceCpi;
+use light_token_sdk::token::TransferInterfaceCpi;
 use solana_program::{account_info::AccountInfo, program_error::ProgramError, pubkey::Pubkey};
 
 use crate::ID;
@@ -452,25 +452,25 @@ pub const TRANSFER_INTERFACE_AUTHORITY_SEED: &[u8] = b"transfer_interface_author
 #[derive(BorshSerialize, BorshDeserialize, Debug)]
 pub struct TransferInterfaceData {
     pub amount: u64,
-    /// Required for SPL<->CToken transfers, None for CToken->CToken
+    /// Required for SPL<->Token transfers, None for Token->Token
     pub token_pool_pda_bump: Option<u8>,
 }
 
 /// Handler for TransferInterfaceCpi (invoke)
 ///
 /// This unified interface automatically detects account types and routes to:
-/// - CToken -> CToken transfer
-/// - CToken -> SPL transfer
-/// - SPL -> CToken transfer
+/// - Token -> Token transfer
+/// - Token -> SPL transfer
+/// - SPL -> Token transfer
 ///
 /// Account order:
 /// - accounts[0]: compressed_token_program (for CPI)
-/// - accounts[1]: source_account (SPL or CToken)
-/// - accounts[2]: destination_account (SPL or CToken)
+/// - accounts[1]: source_account (SPL or light-token)
+/// - accounts[2]: destination_account (SPL or light-token)
 /// - accounts[3]: authority (signer)
 /// - accounts[4]: payer (signer)
 /// - accounts[5]: compressed_token_program_authority
-///   For SPL bridge (optional, required for SPL<->CToken):
+///   For SPL bridge (optional, required for SPL<->Token):
 /// - accounts[6]: mint
 /// - accounts[7]: token_pool_pda
 /// - accounts[8]: spl_token_program
@@ -512,12 +512,12 @@ pub fn process_transfer_interface_invoke(
 ///
 /// Account order:
 /// - accounts[0]: compressed_token_program (for CPI)
-/// - accounts[1]: source_account (SPL or CToken)
-/// - accounts[2]: destination_account (SPL or CToken)
+/// - accounts[1]: source_account (SPL or light-token)
+/// - accounts[2]: destination_account (SPL or light-token)
 /// - accounts[3]: authority (PDA, not signer - program signs)
 /// - accounts[4]: payer (signer)
 /// - accounts[5]: compressed_token_program_authority
-///   For SPL bridge (optional, required for SPL<->CToken):
+///   For SPL bridge (optional, required for SPL<->Token):
 /// - accounts[6]: mint
 /// - accounts[7]: token_pool_pda
 /// - accounts[8]: spl_token_program
