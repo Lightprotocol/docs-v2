@@ -24,9 +24,6 @@ import ThawFull from "/snippets/code-snippets/light-token/freeze-thaw/rust-clien
 4. Only the freeze authority (set at mint creation) can freeze or thaw accounts.
 5. If the freeze authority is revoked (set to null) on the mint account, tokens can never be frozen.
 
-The ThawAccount instruction reverses a freeze, restoring full functionality to a previously frozen token account.
- After thawing, the account can once again send and receive tokens normally. 
-
 <Tabs>
 <Tab title="Rust Client">
 
