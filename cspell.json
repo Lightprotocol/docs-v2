@@ -184,7 +184,9 @@
     "zcash",
     "circomlibjs",
     "Jotaro",
-    "Yano"
+    "Yano",
+    "jito",
+    "Jito"
   ],
   "ignorePaths": [
     "node_modules",
