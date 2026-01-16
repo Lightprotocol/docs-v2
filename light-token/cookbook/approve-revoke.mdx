@@ -1,0 +1,98 @@
+---
+title: Approve and Revoke Delegates
+sidebarTitle: Approve / Revoke
+description: Rust client guide to approve and revoke delegates for light-token accounts. Includes step-by-step implementation and full code examples.
+keywords: ["approve delegate solana", "revoke delegate solana", "token delegation"]
+---
+
+---
+
+import TokenClientPrerequisites from "/snippets/light-token-guides/light-token-client-prerequisites.mdx";
+import { CodeCompare } from "/snippets/jsx/code-compare.jsx";
+import {
+  splApproveRustCode,
+  lightApproveRustCode,
+  splRevokeRustCode,
+  lightRevokeRustCode,
+} from "/snippets/code-samples/code-compare-snippets.jsx";
+import ApproveFull from "/snippets/code-snippets/light-token/approve-revoke/rust-client/approve-full.mdx";
+import RevokeFull from "/snippets/code-snippets/light-token/approve-revoke/rust-client/revoke-full.mdx";
+
+1. Approve grants a delegate permission to transfer up to a specified amount of tokens from your account.
+    * Each token account can have only one delegate at a time. 
+    * Any new approval overwrites the previous one.
+2. Revoke removes all delegate permissions from a light-token account.
+3. Only the token account owner can approve or revoke delegates.
+
+<Tabs>
+<Tab title="Rust Client">
+
+<Tabs>
+<Tab title="Approve">
+
+<CodeCompare
+  firstCode={splApproveRustCode}
+  secondCode={lightApproveRustCode}
+  firstLabel="SPL"
+  secondLabel="light-token"
+  language="rust"
+/>
+
+</Tab>
+<Tab title="Revoke">
+
+<CodeCompare
+  firstCode={splRevokeRustCode}
+  secondCode={lightRevokeRustCode}
+  firstLabel="SPL"
+  secondLabel="light-token"
+  language="rust"
+/>
+
+</Tab>
+</Tabs>
+
+<Steps>
+<Step>
+### Prerequisites
+
+<TokenClientPrerequisites />
+
+</Step>
+
+<Step>
+### Approve or revoke delegates
+
+<Info>
+  Find the full example including shared test utilities in the
+  [examples-light-token repo](https://github.com/Lightprotocol/examples-light-token/tree/main/rust-client/tests).
+</Info>
+
+<Tabs>
+<Tab title="Approve">
+
+<ApproveFull />
+
+</Tab>
+<Tab title="Revoke">
+
+<RevokeFull />
+
+</Tab>
+</Tabs>
+
+</Step>
+</Steps>
+</Tab>
+
+</Tabs>
+
+# Next Steps
+
+<Card
+  title="Go back to the overview for the light-token standard"
+  icon="chevron-right"
+  color="#0066ff"
+  href="/light-token/welcome"
+  horizontal
+/>

@@ -1,0 +1,11 @@
+```rust
+use light_token_sdk::token::CloseTokenAccount;
+
+let close_instruction = CloseTokenAccount::new(
+    LIGHT_TOKEN_PROGRAM_ID,
+    account.pubkey(),
+    payer.pubkey(), // Destination for remaining lamports
+    owner,
+)
+.instruction()?;
+```

@@ -1,0 +1,101 @@
+---
+title: Freeze and Thaw Light Token Accounts
+sidebarTitle: Freeze / Thaw
+description: Rust client guide to freeze and thaw light-token accounts. Includes step-by-step implementation and full code examples.
+keywords: ["freeze token account solana", "thaw token account solana", "token account management"]
+---
+
+---
+
+import TokenClientPrerequisites from "/snippets/light-token-guides/light-token-client-prerequisites.mdx";
+import { CodeCompare } from "/snippets/jsx/code-compare.jsx";
+import {
+  splFreezeRustCode,
+  lightFreezeRustCode,
+  splThawRustCode,
+  lightThawRustCode,
+} from "/snippets/code-samples/code-compare-snippets.jsx";
+import FreezeFull from "/snippets/code-snippets/light-token/freeze-thaw/rust-client/freeze-full.mdx";
+import ThawFull from "/snippets/code-snippets/light-token/freeze-thaw/rust-client/thaw-full.mdx";
+
+1. Freeze prevents all transfers or token burns from a specific light-token account.
+2. Once frozen, the account cannot send tokens, receive tokens, or be closed until it is thawed. 
+3. Thaw re-enables transfers on a frozen light-token account.
+4. Only the freeze authority (set at mint creation) can freeze or thaw accounts.
+5. If the freeze authority is revoked (set to null) on the mint account, tokens can never be frozen.
+
+The ThawAccount instruction reverses a freeze, restoring full functionality to a previously frozen token account.
+ After thawing, the account can once again send and receive tokens normally. 
+
+<Tabs>
+<Tab title="Rust Client">
+
+<Tabs>
+<Tab title="Freeze">
+
+<CodeCompare
+  firstCode={splFreezeRustCode}
+  secondCode={lightFreezeRustCode}
+  firstLabel="SPL"
+  secondLabel="light-token"
+  language="rust"
+/>
+
+</Tab>
+<Tab title="Thaw">
+
+<CodeCompare
+  firstCode={splThawRustCode}
+  secondCode={lightThawRustCode}
+  firstLabel="SPL"
+  secondLabel="light-token"
+  language="rust"
+/>
+
+</Tab>
+</Tabs>
+
+<Steps>
+<Step>
+### Prerequisites
+
+<TokenClientPrerequisites />
+
+</Step>
+
+<Step>
+### Freeze or thaw light-token accounts
+
+<Info>
+  Find the full example including shared test utilities in the
+  [examples-light-token repo](https://github.com/Lightprotocol/examples-light-token/tree/main/rust-client/tests).
+</Info>
+
+<Tabs>
+<Tab title="Freeze">
+
+<FreezeFull />
+
+</Tab>
+<Tab title="Thaw">
+
+<ThawFull />
+
+</Tab>
+</Tabs>
+
+</Step>
+</Steps>
+</Tab>
+
+</Tabs>
+
+# Next Steps
+
+<Card
+  title="Learn to approve and revoke delegates"
+  icon="chevron-right"
+  color="#0066ff"
+  href="/light-token/cookbook/approve-revoke"
+  horizontal
+/>

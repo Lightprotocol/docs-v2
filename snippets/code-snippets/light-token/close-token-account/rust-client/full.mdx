@@ -1,0 +1,34 @@
+```rust
+mod shared;
+
+use light_client::rpc::Rpc;
+use light_token_sdk::token::{CloseAccount, LIGHT_TOKEN_PROGRAM_ID};
+use shared::SetupContext;
+use solana_sdk::signer::Signer;
+
+#[tokio::test(flavor = "multi_thread")]
+async fn close_account() {
+    // Setup creates mint and empty ATA (must be empty to close).
+    let SetupContext {
+        mut rpc,
+        payer,
+        ata,
+        ..
+    } = shared::setup_empty_ata().await;
+    let close_ix = CloseAccount::new(
+        LIGHT_TOKEN_PROGRAM_ID,
+        ata,
+        payer.pubkey(),
+        payer.pubkey(),
+    )
+    .instruction()
+    .unwrap();
+
+    rpc.create_and_send_transaction(&[close_ix], &payer.pubkey(), &[&payer])
+        .await
+        .unwrap();
+
+    let account_after = rpc.get_account(ata).await.unwrap();
+    assert!(account_after.is_none());
+}
+```
