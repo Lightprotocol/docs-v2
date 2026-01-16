@@ -28,9 +28,7 @@ import InstructionCode from "/snippets/code-snippets/light-token/create-ata/inst
 import RustFullCode from "/snippets/code-snippets/light-token/create-ata/rust-client/full.mdx";
 
 1. Associated light-token accounts can hold token balances of light, SPL, or Token 2022 mints.
-2. The address is derived with the owner's address, compressed token program ID, and mint address.
-3. Light-ATAs are on-chain accounts like SPL ATA's, but the light token program sponsors the rent-exemption cost for you.
-
+2. Light-ATAs are on-chain accounts like SPL ATA's, but the light token program sponsors the rent-exemption cost for you.
 
 <Accordion title="Light Rent Config Explained">
   <CompressibleRentExplained />
@@ -45,10 +43,10 @@ The `createAtaInterface` function creates an associated light-token account in a
 Compare to SPL:
 
 <CodeCompare
-  firstCode={splCreateAtaCode}
-  secondCode={lightCreateAtaCode}
-  firstLabel="SPL"
-  secondLabel="light-token"
+  firstCode={lightCreateAtaCode}
+  secondCode={splCreateAtaCode}
+  firstLabel="light-token"
+  secondLabel="SPL"
 />
 
 <Info>
@@ -84,10 +82,10 @@ Compare to SPL:
 Compare to SPL:
 
 <CodeCompare
-  firstCode={splCreateAtaRustCode}
-  secondCode={lightCreateAtaRustCode}
-  firstLabel="SPL"
-  secondLabel="light-token"
+  firstCode={lightCreateAtaRustCode}
+  secondCode={splCreateAtaRustCode}
+  firstLabel="light-token"
+  secondLabel="SPL"
   language="rust"
 />
 
