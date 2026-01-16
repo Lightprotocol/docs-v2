@@ -130,6 +130,7 @@
             "group": "Compressed Tokens",
             "pages": [
               "compressed-tokens/overview",
+              "compressed-tokens/advanced-guides/airdrop",
               {
                 "group": "Cookbook",
                 "pages": [
@@ -160,8 +161,6 @@
                     "group": "Examples",
                     "expanded": true,
                     "pages": [
-                      "compressed-tokens/advanced-guides/create-an-airdrop",
-                      "compressed-tokens/advanced-guides/create-an-airdrop-with-claim",
                       "compressed-tokens/advanced-guides/example-web-client",
                       "compressed-tokens/advanced-guides/example-node-js",
                       "compressed-tokens/advanced-guides/example-token-distribution"

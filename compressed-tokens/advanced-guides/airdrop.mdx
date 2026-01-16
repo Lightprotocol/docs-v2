@@ -1,50 +1,37 @@
 ---
-title: Create an Airdrop without Claim
-description: Complete guide to create an airdrop – with or without code. Access to cost calculation and best practices. ZK compression is the most efficient way to distribute SPL tokens.
-keywords: ["airdrop infrastructure on solana", "scalable token distribution on solana", "token airdrop for protocols"]
+title: Airdrop Guide with ZK Compression
+sidebarTitle: Airdrop Guide
+description: Complete client and program guides to create an airdrop – with or without code. ZK compression is the most efficient way to distribute SPL tokens.
+keywords: ["solana airdrop", "merkle distributor", "merkle airdrop", "airdrop infrastructure on solana", "scalable token distribution on solana", "token airdrop for protocols"]
 ---
 
+import { TokenAccountCompressedVsSpl } from '/snippets/jsx/token-account-compressed-vs-spl.jsx';
 import InstallDependencies from '/snippets/setup/install-dependencies-codegroup.mdx';
 import SetupEnvironment from '/snippets/setup/setup-environment-tabs.mdx';
-import { TokenAccountCompressedVsSpl } from '/snippets/jsx/token-account-compressed-vs-spl.jsx';
-
-## Guides
-
-There are two ways to use ZK Compression to distribute your SPL tokens.
-<CardGroup>
-  <Card
-    title="No-Code Airdrop Tool"
-    href="https://www.helius.dev/docs/airship/getting-started"
-    icon="laptop-code"
-  >
-  Use **Airship by Helius Labs** to airdrop to up to 200,000 recipients via Webapp.
-  </Card>
-  <Card
-    title="Custom Programmatic Airdrop"
-    href="#programmatic-airdrop"
-    icon="terminal"
-  >
-  Create a programmatic airdrop with this guide for more control.
-  </Card>
-</CardGroup>
 
 
-### Cost Comparison
 
 <TokenAccountCompressedVsSpl />
 
-## Programmatic Airdrop
+---
+
+<Tabs>
+<Tab title="Client Side Distribution">
 
 Choose your implementation based on your needs:
 
 | Tab | Best For | What You'll Get | Time |
 |:-------------|:-------------|:-------------|:-------------|
-| **Implementation Steps** | First-time users, learning | Step-by-step Localnet tutorial | 20 min |
+| **Localnet Guide** | First-time users, learning | Step-by-step Localnet tutorial | 20 min |
 | **Simple Airdrop** | \<10,000 recipients | Production-ready single script | 10 min |
 | **Airdrop with Batched Instructions** | 10,000+ recipients | Batched system with retry logic | 15 min |
 
+<Info>
+Via Webapp you can use [Airship by Helius Labs](https://airship.helius.dev/) to airdrop to up to 200,000 recipients.
+</Info>
+
 <Tabs>
-  <Tab title="Implementation Steps">
+  <Tab title="Localnet Guide">
 
 <Check>
 **What you'll build:** A test airdrop sending compressed tokens to 3 recipients on your local validator.
@@ -298,11 +285,58 @@ MINT_ADDRESS=YOUR_MINT_ADDRESS
 <Step>
 ### Mint SPL Tokens
 
-Mint SPL tokens to your wallet for distribution. See the [mint script example](https://github.com/Lightprotocol/example-token-distribution/blob/main/src/simple-airdrop/mint.ts).
+Use your existing mint or mint SPL tokens to your wallet for distribution. 
 
-<Info>
-You can also use an existing mint if you already have one.
-</Info>
+```typescript expandable
+import { Rpc, createRpc } from '@lightprotocol/stateless.js';
+import { createMint } from '@lightprotocol/compressed-token';
+import {
+    getOrCreateAssociatedTokenAccount,
+    mintTo as mintToSpl,
+} from '@solana/spl-token';
+import { PAYER_KEYPAIR, RPC_ENDPOINT } from '../constants';
+
+const payer = PAYER_KEYPAIR;
+const connection: Rpc = createRpc(RPC_ENDPOINT);
+const decimals = 9;
+const mintAmount = 100;
+
+(async () => {
+    // airdrop lamports to pay tx fees
+    // await confirmTx(
+    //   connection,
+    //   await connection.requestAirdrop(payer.publicKey, 1e7)
+    // );
+
+    const { mint, transactionSignature } = await createMint(
+        connection,
+        payer,
+        payer.publicKey,
+        decimals,
+    );
+    console.log(
+        `create-mint success! txId: ${transactionSignature}, mint: ${mint.toBase58()}`,
+    );
+
+    const ata = await getOrCreateAssociatedTokenAccount(
+        connection,
+        payer,
+        mint,
+        payer.publicKey,
+    );
+    console.log(`ata: ${ata.address}`);
+
+    const mintTxId = await mintToSpl(
+        connection,
+        payer,
+        mint,
+        ata.address,
+        payer.publicKey,
+        mintAmount,
+    );
+    console.log(`mint-spl success! txId: ${mintTxId}`);
+})();
+```
 </Step>
 
 <Step>
@@ -866,9 +900,7 @@ Solana Wallets like Phantom and Backpack already support compressed tokens.
 Still, you can let users decompress to SPL via your Frontend to customize claims.
 </Info>
 
-* Full Example on Github to [create an Airdrop with Claim](https://github.com/Lightprotocol/program-examples-airdrop-implementations/simple-claim).
-
-* Add decompression of SPL Tokens with this script.
+Add decompression of SPL Tokens with this script.
 
 ```typescript  expandable
 import {
@@ -968,12 +1000,52 @@ Set priority fees dynamically for decompression. Learn more [here](https://docs.
 
 If you have a custom FE, you can let users swap compressed tokens using the Jup-API. A reference implementation is available [here](https://github.com/Lightprotocol/example-jupiter-swap-node).
 
-# Next Steps
+## Next Steps
 
 <Card
   title="Create an airdrop with claim functionality."
   icon="chevron-right"
   color="#0066ff"
-  href="https://github.com/Lightprotocol/program-examples-airdrop-implementations/tree/main/simple-claim"
+  href="#claim-reference-implementations"
   horizontal
 />
+</Tab>
+<Tab title="Claim Reference Implementations">
+
+Customize token distribution and let users claim.
+
+|  | distributor | simple-claim |
+|--|-------------|--------------|
+| Vesting | Linear Vesting | Cliff at Slot X |
+| Partial claims | Yes | No |
+| Clawback | Yes | No |
+| Frontend | REST API + CLI | None |
+
+<Info>
+The programs are not audited and should be before production use.
+</Info>
+
+<CardGroup>
+<Card
+    title="Merkle Distributor"
+    icon="parachute-box"
+    color="#0066ff"
+    href="https://github.com/Lightprotocol/distributor"
+    horizontal
+>
+    Merkle distributor based on jito airdrop and optimized with rent-free PDAs.
+</Card>
+
+<Card
+    title="Simple Airdrop with Claim"
+    icon="hand-holding"
+    color="#0066ff"
+    href="https://github.com/Lightprotocol/program-examples/tree/main/airdrop-implementations/simple-claim"
+    horizontal
+>
+    Simple SPL token airdrop with claim.
+</Card>
+</CardGroup>
+
+</Tab>
+</Tabs>
