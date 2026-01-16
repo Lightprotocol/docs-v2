@@ -5,17 +5,18 @@ export const CodeCompare = ({
   secondLabel = "SPL",
   language = "javascript",
 }) => {
-  const [sliderPercent, setSliderPercent] = useState(0);
+  const [sliderPercent, setSliderPercent] = useState(100);
   const [isDragging, setIsDragging] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
   const [copied, setCopied] = useState(false);
   const containerRef = useRef(null);
   const animationRef = useRef(null);
 
-  const isLightMode = sliderPercent > 50;
+  // When slider is on the right (100%), show first code; on left (0%), show second code
+  const showingFirst = sliderPercent > 50;
 
   const handleCopy = async () => {
-    const codeToCopy = isLightMode ? secondCode : firstCode;
+    const codeToCopy = showingFirst ? firstCode : secondCode;
     await navigator.clipboard.writeText(codeToCopy);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -87,7 +88,7 @@ export const CodeCompare = ({
   };
 
   const handleToggle = () => {
-    animateTo(isLightMode ? 0 : 100);
+    animateTo(showingFirst ? 0 : 100);
   };
 
   const handleMouseDown = (e) => {
@@ -163,7 +164,7 @@ export const CodeCompare = ({
           <span
             className="text-sm font-medium text-zinc-600 dark:text-zinc-300"
           >
-            {isLightMode ? secondLabel : firstLabel}
+            {showingFirst ? firstLabel : secondLabel}
           </span>
 
           <div className="flex items-center gap-3">
@@ -209,7 +210,7 @@ export const CodeCompare = ({
                 height: "24px",
                 borderRadius: "12px",
                 top: "2px",
-                left: isLightMode ? "30px" : "2px",
+                left: showingFirst ? "30px" : "2px",
                 boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
                 transition: "all 0.3s ease-in-out",
                 display: "flex",
@@ -222,9 +223,9 @@ export const CodeCompare = ({
                 style={{
                   width: "6px",
                   height: "6px",
-                  background: isLightMode ? "#0066ff" : "#999",
+                  background: showingFirst ? "#0066ff" : "#999",
                   borderRadius: "50%",
-                  boxShadow: isLightMode ? "0 0 8px 2px #0066ff" : "0 0 4px 1px rgba(0, 0, 0, 0.1)",
+                  boxShadow: showingFirst ? "0 0 5px 1px rgba(0, 102, 255, 0.6)" : "0 0 4px 1px rgba(0, 0, 0, 0.1)",
                   transition: "all 0.3s ease-in-out",
                 }}
               />
@@ -247,9 +248,9 @@ export const CodeCompare = ({
           aria-valuemax={100}
           aria-label="Code comparison slider"
         >
-          <div className="relative" style={{ minHeight: "140px", overflowX: "auto" }}>
+          <div className="relative" style={{ minHeight: "140px", overflow: "hidden" }}>
             <div style={{ display: "grid" }}>
-              {/* First code (background) */}
+              {/* Second code (background) - shown when slider is on left */}
               <pre
                 className="m-0 p-4 text-zinc-700 dark:text-white/80 bg-transparent"
                 style={{
@@ -260,10 +261,10 @@ export const CodeCompare = ({
                   whiteSpace: "pre",
                   zIndex: 1,
                 }}
-                dangerouslySetInnerHTML={{ __html: highlightCode(firstCode) }}
+                dangerouslySetInnerHTML={{ __html: highlightCode(secondCode) }}
               />
 
-              {/* Second code (foreground) with clip-path */}
+              {/* First code (foreground) with clip-path - revealed when slider moves right */}
               <pre
                 className="m-0 p-4 text-zinc-700 dark:text-white/80 bg-white dark:bg-zinc-900"
                 style={{
@@ -275,7 +276,7 @@ export const CodeCompare = ({
                   zIndex: 2,
                   clipPath: `inset(0 ${100 - sliderPercent}% 0 0)`,
                 }}
-                dangerouslySetInnerHTML={{ __html: highlightCode(secondCode) }}
+                dangerouslySetInnerHTML={{ __html: highlightCode(firstCode) }}
               />
             </div>
 
@@ -294,7 +295,7 @@ export const CodeCompare = ({
                 className="absolute top-0 bottom-0"
                 style={{
                   right: "50%",
-                  width: "80px",
+                  width: "60px",
                   background:
                     "linear-gradient(to left, rgba(0, 102, 255, 0.15) 0%, transparent 100%)",
                 }}
