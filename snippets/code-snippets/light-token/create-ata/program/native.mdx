@@ -1,0 +1,75 @@
+```rust
+use super::authority_seeds;
+use light_token_sdk::token::{CompressibleParamsCpi, CreateAssociatedAccountCpi};
+use solana_program::{
+    account_info::AccountInfo, entrypoint::ProgramResult, program_error::ProgramError,
+};
+
+pub fn process(accounts: &[AccountInfo], data: &[u8]) -> ProgramResult {
+    let [owner, mint, payer, associated_token_account, system_program, compressible_config, rent_sponsor, _token_program] =
+        accounts
+    else {
+        return Err(ProgramError::NotEnoughAccountKeys);
+    };
+
+    if data.is_empty() {
+        return Err(ProgramError::InvalidInstructionData);
+    }
+
+    let bump = data[0];
+    let idempotent = data.get(1).copied().unwrap_or(0) != 0;
+
+    let compressible = CompressibleParamsCpi::new_ata(
+        compressible_config.clone(),
+        rent_sponsor.clone(),
+        system_program.clone(),
+    );
+
+    CreateAssociatedAccountCpi {
+        owner: owner.clone(),
+        mint: mint.clone(),
+        payer: payer.clone(),
+        associated_token_account: associated_token_account.clone(),
+        system_program: system_program.clone(),
+        bump,
+        compressible,
+        idempotent,
+    }
+    .invoke()
+}
+
+pub fn process_signed(accounts: &[AccountInfo], data: &[u8]) -> ProgramResult {
+    let [owner, mint, payer, associated_token_account, system_program, compressible_config, rent_sponsor, _token_program] =
+        accounts
+    else {
+        return Err(ProgramError::NotEnoughAccountKeys);
+    };
+
+    if data.len() < 3 {
+        return Err(ProgramError::InvalidInstructionData);
+    }
+
+    let bump = data[0];
+    let idempotent = data[1] != 0;
+    let authority_bump = data[2];
+    let signer_seeds = authority_seeds!(authority_bump);
+
+    let compressible = CompressibleParamsCpi::new_ata(
+        compressible_config.clone(),
+        rent_sponsor.clone(),
+        system_program.clone(),
+    );
+
+    CreateAssociatedAccountCpi {
+        owner: owner.clone(),
+        mint: mint.clone(),
+        payer: payer.clone(),
+        associated_token_account: associated_token_account.clone(),
+        system_program: system_program.clone(),
+        bump,
+        compressible,
+        idempotent,
+    }
+    .invoke_signed(&[signer_seeds])
+}
+```

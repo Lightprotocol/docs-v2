@@ -1,0 +1,149 @@
+```rust
+use borsh::BorshDeserialize;
+use light_token_sdk::{
+    token::{CreateMintCpi, CreateMintParams, SystemAccountInfos},
+    CompressedProof,
+};
+use solana_program::{
+    account_info::AccountInfo, entrypoint::ProgramResult, program_error::ProgramError,
+    pubkey::Pubkey,
+};
+
+#[derive(BorshDeserialize)]
+struct CreateMintData {
+    decimals: u8,
+    address_merkle_tree_root_index: u16,
+    mint_authority: Pubkey,
+    proof_a: [u8; 32],
+    proof_b: [u8; 64],
+    proof_c: [u8; 32],
+    compression_address: [u8; 32],
+    mint: Pubkey,
+    bump: u8,
+    freeze_authority: Option<Pubkey>,
+    rent_payment: u8,
+    write_top_up: u32,
+}
+
+pub fn process(accounts: &[AccountInfo], data: &[u8]) -> ProgramResult {
+    let [mint_seed, authority, payer, address_tree, output_queue, compressible_config, mint, rent_sponsor, light_system_program, cpi_authority_pda, registered_program_pda, account_compression_authority, account_compression_program, system_program, _token_program] =
+        accounts
+    else {
+        return Err(ProgramError::NotEnoughAccountKeys);
+    };
+
+    let ix_data = CreateMintData::deserialize(&mut &data[..])
+        .map_err(|_| ProgramError::InvalidInstructionData)?;
+
+    let params = CreateMintParams {
+        decimals: ix_data.decimals,
+        address_merkle_tree_root_index: ix_data.address_merkle_tree_root_index,
+        mint_authority: ix_data.mint_authority,
+        proof: CompressedProof {
+            a: ix_data.proof_a,
+            b: ix_data.proof_b,
+            c: ix_data.proof_c,
+        },
+        compression_address: ix_data.compression_address,
+        mint: ix_data.mint,
+        bump: ix_data.bump,
+        freeze_authority: ix_data.freeze_authority,
+        extensions: None,
+        rent_payment: ix_data.rent_payment,
+        write_top_up: ix_data.write_top_up,
+    };
+
+    let system_accounts = SystemAccountInfos {
+        light_system_program: light_system_program.clone(),
+        cpi_authority_pda: cpi_authority_pda.clone(),
+        registered_program_pda: registered_program_pda.clone(),
+        account_compression_authority: account_compression_authority.clone(),
+        account_compression_program: account_compression_program.clone(),
+        system_program: system_program.clone(),
+    };
+
+    CreateMintCpi::new(
+        mint_seed.clone(),
+        authority.clone(),
+        payer.clone(),
+        address_tree.clone(),
+        output_queue.clone(),
+        compressible_config.clone(),
+        mint.clone(),
+        rent_sponsor.clone(),
+        system_accounts,
+        params,
+    )
+    .invoke()
+}
+
+#[derive(BorshDeserialize)]
+struct CreateMintSignedData {
+    decimals: u8,
+    address_merkle_tree_root_index: u16,
+    proof_a: [u8; 32],
+    proof_b: [u8; 64],
+    proof_c: [u8; 32],
+    compression_address: [u8; 32],
+    mint: Pubkey,
+    bump: u8,
+    freeze_authority: Option<Pubkey>,
+    rent_payment: u8,
+    write_top_up: u32,
+    authority_bump: u8,
+}
+
+pub fn process_signed(accounts: &[AccountInfo], data: &[u8]) -> ProgramResult {
+    let [mint_seed, authority, payer, address_tree, output_queue, compressible_config, mint, rent_sponsor, light_system_program, cpi_authority_pda, registered_program_pda, account_compression_authority, account_compression_program, system_program, _token_program] =
+        accounts
+    else {
+        return Err(ProgramError::NotEnoughAccountKeys);
+    };
+
+    let ix_data = CreateMintSignedData::deserialize(&mut &data[..])
+        .map_err(|_| ProgramError::InvalidInstructionData)?;
+
+    let signer_seeds: &[&[u8]] = &[b"authority", &[ix_data.authority_bump]];
+
+    let params = CreateMintParams {
+        decimals: ix_data.decimals,
+        address_merkle_tree_root_index: ix_data.address_merkle_tree_root_index,
+        mint_authority: *authority.key,
+        proof: CompressedProof {
+            a: ix_data.proof_a,
+            b: ix_data.proof_b,
+            c: ix_data.proof_c,
+        },
+        compression_address: ix_data.compression_address,
+        mint: ix_data.mint,
+        bump: ix_data.bump,
+        freeze_authority: ix_data.freeze_authority,
+        extensions: None,
+        rent_payment: ix_data.rent_payment,
+        write_top_up: ix_data.write_top_up,
+    };
+
+    let system_accounts = SystemAccountInfos {
+        light_system_program: light_system_program.clone(),
+        cpi_authority_pda: cpi_authority_pda.clone(),
+        registered_program_pda: registered_program_pda.clone(),
+        account_compression_authority: account_compression_authority.clone(),
+        account_compression_program: account_compression_program.clone(),
+        system_program: system_program.clone(),
+    };
+
+    CreateMintCpi::new(
+        mint_seed.clone(),
+        authority.clone(),
+        payer.clone(),
+        address_tree.clone(),
+        output_queue.clone(),
+        compressible_config.clone(),
+        mint.clone(),
+        rent_sponsor.clone(),
+        system_accounts,
+        params,
+    )
+    .invoke_signed(&[signer_seeds])
+}
+```

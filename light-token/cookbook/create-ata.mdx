@@ -22,6 +22,8 @@ import {
 import ActionCode from "/snippets/code-snippets/light-token/create-ata/action.mdx";
 import InstructionCode from "/snippets/code-snippets/light-token/create-ata/instruction.mdx";
 import RustFullCode from "/snippets/code-snippets/light-token/create-ata/rust-client/full.mdx";
+import NativeProgram from "/snippets/code-snippets/light-token/create-ata/program/native.mdx";
+import AnchorProgram from "/snippets/code-snippets/light-token/create-ata/program/anchor.mdx";
 
 1. Associated light-token accounts can hold token balances of light, SPL, or Token 2022 mints.
 2. Light-ATAs are on-chain accounts like SPL ATA's, but the light token program sponsors the rent-exemption cost for you.
@@ -139,39 +141,51 @@ Find [a full code example at the end](#full-code-example).
 <Tab title="invoke (External signer)">
 
 ```rust
-use light_token_sdk::token::CreateAssociatedTokenAccountCpi;
+use light_token_sdk::token::{CompressibleParamsCpi, CreateAssociatedAccountCpi};
 
-CreateAssociatedTokenAccountCpi {
+let compressible = CompressibleParamsCpi::new_ata(
+    compressible_config.clone(),
+    rent_sponsor.clone(),
+    system_program.clone(),
+);
+
+CreateAssociatedAccountCpi {
     owner: owner.clone(),
     mint: mint.clone(),
     payer: payer.clone(),
     associated_token_account: associated_token_account.clone(),
     system_program: system_program.clone(),
-    bump: data.bump,
-    compressible: Some(compressible_params),
-    idempotent: false,
+    bump,
+    compressible,
+    idempotent,
 }
-.invoke()?;
+.invoke()
 ```
 
 </Tab>
 <Tab title="invoke_signed (PDA is signer)">
 
 ```rust
-use light_token_sdk::token::CreateAssociatedTokenAccountCpi;
+use light_token_sdk::token::{CompressibleParamsCpi, CreateAssociatedAccountCpi};
 
-let signer_seeds: &[&[u8]] = &[ATA_SEED, &[bump]];
-CreateAssociatedTokenAccountCpi {
+let compressible = CompressibleParamsCpi::new_ata(
+    compressible_config.clone(),
+    rent_sponsor.clone(),
+    system_program.clone(),
+);
+
+let signer_seeds = authority_seeds!(authority_bump);
+CreateAssociatedAccountCpi {
     owner: owner.clone(),
     mint: mint.clone(),
     payer: payer.clone(),
     associated_token_account: associated_token_account.clone(),
     system_program: system_program.clone(),
-    bump: data.bump,
-    compressible: Some(compressible_params),
-    idempotent: false,
+    bump,
+    compressible,
+    idempotent,
 }
-.invoke_signed(&[signer_seeds])?;
+.invoke_signed(&[signer_seeds])
 ```
 
 </Tab>
@@ -183,112 +197,18 @@ CreateAssociatedTokenAccountCpi {
 # Full Code Example
 
 <Info>
-  Find the source code
-  [here](https://github.com/Lightprotocol/light-protocol/blob/main/sdk-tests/sdk-light-token-test/src/create_ata.rs).
+  Find the source code in the
+  [examples-light-token repo](https://github.com/Lightprotocol/examples-light-token/tree/main/program-examples).
 </Info>
 
-```rust expandable
-use borsh::{BorshDeserialize, BorshSerialize};
-use light_token_sdk::token::{CompressibleParamsCpi, CreateAssociatedTokenAccountCpi};
-use solana_program::{account_info::AccountInfo, program_error::ProgramError, pubkey::Pubkey};
-
-use crate::{ATA_SEED, ID};
-
-/// Instruction data for create ATA V2 (owner/mint as accounts)
-#[derive(BorshSerialize, BorshDeserialize, Debug)]
-pub struct CreateAta2Data {
-    pub bump: u8,
-    pub pre_pay_num_epochs: u8,
-    pub lamports_per_write: u32,
-}
-
-/// Handler for creating ATA using V2 variant (invoke)
-///
-/// Account order:
-/// - accounts[0]: owner (readonly)
-/// - accounts[1]: mint (readonly)
-/// - accounts[2]: payer (signer, writable)
-/// - accounts[3]: associated_token_account (writable)
-/// - accounts[4]: system_program
-/// - accounts[5]: compressible_config
-/// - accounts[6]: rent_sponsor (writable)
-pub fn process_create_ata2_invoke(
-    accounts: &[AccountInfo],
-    data: CreateAta2Data,
-) -> Result<(), ProgramError> {
-    if accounts.len() < 7 {
-        return Err(ProgramError::NotEnoughAccountKeys);
-    }
-
-    let compressible_params = CompressibleParamsCpi::new(
-        accounts[5].clone(),
-        accounts[6].clone(),
-        accounts[4].clone(),
-    );
-
-    CreateAssociatedTokenAccountCpi {
-        owner: accounts[0].clone(),
-        mint: accounts[1].clone(),
-        payer: accounts[2].clone(),
-        associated_token_account: accounts[3].clone(),
-        system_program: accounts[4].clone(),
-        bump: data.bump,
-        compressible: Some(compressible_params),
-        idempotent: false,
-    }
-    .invoke()?;
-
-    Ok(())
-}
-
-/// Handler for creating ATA using V2 variant with PDA ownership (invoke_signed)
-///
-/// Account order:
-/// - accounts[0]: owner (PDA, readonly)
-/// - accounts[1]: mint (readonly)
-/// - accounts[2]: payer (PDA, writable, not signer - program signs)
-/// - accounts[3]: associated_token_account (writable)
-/// - accounts[4]: system_program
-/// - accounts[5]: compressible_config
-/// - accounts[6]: rent_sponsor (writable)
-pub fn process_create_ata2_invoke_signed(
-    accounts: &[AccountInfo],
-    data: CreateAta2Data,
-) -> Result<(), ProgramError> {
-    if accounts.len() < 7 {
-        return Err(ProgramError::NotEnoughAccountKeys);
-    }
-
-    // Derive the PDA that will act as payer
-    let (pda, bump) = Pubkey::find_program_address(&[ATA_SEED], &ID);
-
-    // Verify the payer is the PDA
-    if &pda != accounts[2].key {
-        return Err(ProgramError::InvalidSeeds);
-    }
-
-    let compressible_params = CompressibleParamsCpi::new(
-        accounts[5].clone(),
-        accounts[6].clone(),
-        accounts[4].clone(),
-    );
-
-    let signer_seeds: &[&[u8]] = &[ATA_SEED, &[bump]];
-    CreateAssociatedTokenAccountCpi {
-        owner: accounts[0].clone(),
-        mint: accounts[1].clone(),
-        payer: accounts[2].clone(), // PDA
-        associated_token_account: accounts[3].clone(),
-        system_program: accounts[4].clone(),
-        bump: data.bump,
-        compressible: Some(compressible_params),
-        idempotent: false,
-    }
-    .invoke_signed(&[signer_seeds])?;
-
-    Ok(())
-}
-```
+<Tabs>
+  <Tab title="Native">
+    <NativeProgram />
+  </Tab>
+  <Tab title="Anchor">
+    <AnchorProgram />
+  </Tab>
+</Tabs>
 
 </Tab>
 

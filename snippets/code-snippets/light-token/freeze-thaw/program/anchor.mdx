@@ -1,0 +1,71 @@
+```rust
+#![allow(unexpected_cfgs)]
+
+use anchor_lang::prelude::*;
+use light_token_sdk::token::FreezeCpi;
+
+declare_id!("7ovuM3dD2MZtcWQesVMiSYJef3oh1XH3e8nUk1ArpWX6");
+
+#[program]
+pub mod light_token_anchor_freeze {
+    use super::*;
+
+    pub fn freeze<'info>(ctx: Context<'_, '_, '_, 'info, FreezeAccounts<'info>>) -> Result<()> {
+        FreezeCpi {
+            token_account: ctx.accounts.token_account.to_account_info(),
+            mint: ctx.accounts.mint.to_account_info(),
+            freeze_authority: ctx.accounts.freeze_authority.to_account_info(),
+        }
+        .invoke()?;
+        Ok(())
+    }
+}
+
+#[derive(Accounts)]
+pub struct FreezeAccounts<'info> {
+    /// CHECK: Validated by light-token CPI
+    #[account(mut)]
+    pub token_account: AccountInfo<'info>,
+    /// CHECK: Validated by light-token CPI
+    pub mint: AccountInfo<'info>,
+    pub freeze_authority: Signer<'info>,
+    /// CHECK: Light token program for CPI
+    pub light_token_program: AccountInfo<'info>,
+}
+
+// ---
+
+#![allow(unexpected_cfgs)]
+
+use anchor_lang::prelude::*;
+use light_token_sdk::token::ThawCpi;
+
+declare_id!("FL4MY6v5mTqncytUeuPoGroo6DHSsmBCPirckygGbcip");
+
+#[program]
+pub mod light_token_anchor_thaw {
+    use super::*;
+
+    pub fn thaw<'info>(ctx: Context<'_, '_, '_, 'info, ThawAccounts<'info>>) -> Result<()> {
+        ThawCpi {
+            token_account: ctx.accounts.token_account.to_account_info(),
+            mint: ctx.accounts.mint.to_account_info(),
+            freeze_authority: ctx.accounts.freeze_authority.to_account_info(),
+        }
+        .invoke()?;
+        Ok(())
+    }
+}
+
+#[derive(Accounts)]
+pub struct ThawAccounts<'info> {
+    /// CHECK: Validated by light-token CPI
+    #[account(mut)]
+    pub token_account: AccountInfo<'info>,
+    /// CHECK: Validated by light-token CPI
+    pub mint: AccountInfo<'info>,
+    pub freeze_authority: Signer<'info>,
+    /// CHECK: Light token program for CPI
+    pub light_token_program: AccountInfo<'info>,
+}
+```

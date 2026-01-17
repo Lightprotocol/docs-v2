@@ -1,7 +1,7 @@
 ```rust
-use light_token_sdk::token::CompressibleParamsInfos;
+use light_token_sdk::token::CompressibleParamsCpi;
 
-let compressible_params = CompressibleParamsInfos::new(
+let compressible = CompressibleParamsCpi::new_ata(
     compressible_config.clone(),
     rent_sponsor.clone(),
     system_program.clone(),
@@ -22,38 +22,29 @@ let compressible_params = CompressibleParamsInfos::new(
   <tbody>
     <tr>
       <td style={{ textAlign: "left" }}>
-        <strong>
-          <Tooltip tip="Owned by LightRegistry program. Stores rent_sponsor, compression_delay, address_space, and rent_config.">
-            Compressible Config
-          </Tooltip>
-        </strong>
+        <Tooltip tip="Owned by LightRegistry program. Stores rent_sponsor, compression_delay, address_space, and rent_config.">
+          Compressible Config
+        </Tooltip>
       </td>
       <td>Protocol PDA that stores account rent config.</td>
     </tr>
     <tr>
       <td style={{ textAlign: "left" }}>
-        <strong>
-          <Tooltip tip="light token program PDA that manages rent for compressible accounts.">
-            Rent Sponsor
-          </Tooltip>
-        </strong>
+        <Tooltip tip="Light token program PDA that pays rent exemption at creation. Claims rent when account compresses.">
+          Rent Sponsor
+        </Tooltip>
       </td>
-      <td>
-        - light token program PDA that fronts rent exemption at creation.
-        <br />- Claims rent when account compresses.
-      </td>
+      <td>Light token program PDA that pays rent exemption at creation and claims rent when account compresses.</td>
     </tr>
     <tr>
       <td style={{ textAlign: "left" }}>
-        <strong>
-          <Tooltip
-            tip="11111111111111111111111111111111"
-            cta="Program ID"
-            href="https://solscan.io/account/11111111111111111111111111111111"
-          >
-            System Program
-          </Tooltip>
-        </strong>
+        <Tooltip
+          tip="11111111111111111111111111111111"
+          cta="Program ID"
+          href="https://solscan.io/account/11111111111111111111111111111111"
+        >
+          System Program
+        </Tooltip>
       </td>
       <td>Solana System Program to create the on-chain account.</td>
     </tr>

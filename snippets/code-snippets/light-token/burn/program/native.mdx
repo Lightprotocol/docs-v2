@@ -1,0 +1,50 @@
+```rust
+use super::authority_seeds;
+use light_token_sdk::token::BurnCpi;
+use solana_program::{
+    account_info::AccountInfo, entrypoint::ProgramResult, program_error::ProgramError,
+};
+
+pub fn process(accounts: &[AccountInfo], data: &[u8]) -> ProgramResult {
+    let [source, mint, authority, _token_program] = accounts else {
+        return Err(ProgramError::NotEnoughAccountKeys);
+    };
+
+    let amount = u64::from_le_bytes(
+        data.try_into()
+            .map_err(|_| ProgramError::InvalidInstructionData)?,
+    );
+
+    BurnCpi {
+        source: source.clone(),
+        mint: mint.clone(),
+        amount,
+        authority: authority.clone(),
+        max_top_up: None,
+    }
+    .invoke()
+}
+
+pub fn process_signed(accounts: &[AccountInfo], data: &[u8]) -> ProgramResult {
+    let [source, mint, authority, _token_program] = accounts else {
+        return Err(ProgramError::NotEnoughAccountKeys);
+    };
+
+    if data.len() < 9 {
+        return Err(ProgramError::InvalidInstructionData);
+    }
+
+    let amount = u64::from_le_bytes(data[0..8].try_into().unwrap());
+    let bump = data[8];
+    let signer_seeds = authority_seeds!(bump);
+
+    BurnCpi {
+        source: source.clone(),
+        mint: mint.clone(),
+        amount,
+        authority: authority.clone(),
+        max_top_up: None,
+    }
+    .invoke_signed(&[signer_seeds])
+}
+```

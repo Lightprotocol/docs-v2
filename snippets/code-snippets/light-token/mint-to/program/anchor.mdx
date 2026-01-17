@@ -1,0 +1,43 @@
+```rust
+#![allow(unexpected_cfgs)]
+
+use anchor_lang::prelude::*;
+use light_token_sdk::token::MintToCpi;
+
+declare_id!("7SUgjNZYC1h89MuPVYkgEP5A4uYx5GFSjC7mzqMbN8U2");
+
+#[program]
+pub mod light_token_anchor_mint_to {
+    use super::*;
+
+    pub fn mint_to<'info>(
+        ctx: Context<'_, '_, '_, 'info, MintToAccounts<'info>>,
+        amount: u64,
+    ) -> Result<()> {
+        MintToCpi {
+            mint: ctx.accounts.mint.to_account_info(),
+            destination: ctx.accounts.destination.to_account_info(),
+            amount,
+            authority: ctx.accounts.authority.to_account_info(),
+            system_program: ctx.accounts.system_program.to_account_info(),
+            max_top_up: None,
+        }
+        .invoke()?;
+        Ok(())
+    }
+}
+
+#[derive(Accounts)]
+pub struct MintToAccounts<'info> {
+    /// CHECK: Validated by light-token CPI
+    #[account(mut)]
+    pub mint: AccountInfo<'info>,
+    /// CHECK: Validated by light-token CPI
+    #[account(mut)]
+    pub destination: AccountInfo<'info>,
+    pub authority: Signer<'info>,
+    pub system_program: Program<'info, System>,
+    /// CHECK: Light token program for CPI
+    pub light_token_program: AccountInfo<'info>,
+}
+```

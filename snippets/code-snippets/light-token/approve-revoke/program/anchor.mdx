@@ -1,0 +1,76 @@
+```rust
+#![allow(unexpected_cfgs)]
+
+use anchor_lang::prelude::*;
+use light_token_sdk::token::ApproveCpi;
+
+declare_id!("A9b9t3qNQmYTpbui7TXLQbTJPXbNaV5dW11vxn2M7eC5");
+
+#[program]
+pub mod light_token_anchor_approve {
+    use super::*;
+
+    pub fn approve<'info>(
+        ctx: Context<'_, '_, '_, 'info, ApproveAccounts<'info>>,
+        amount: u64,
+    ) -> Result<()> {
+        ApproveCpi {
+            token_account: ctx.accounts.token_account.to_account_info(),
+            delegate: ctx.accounts.delegate.to_account_info(),
+            owner: ctx.accounts.owner.to_account_info(),
+            system_program: ctx.accounts.system_program.to_account_info(),
+            amount,
+        }
+        .invoke()?;
+        Ok(())
+    }
+}
+
+#[derive(Accounts)]
+pub struct ApproveAccounts<'info> {
+    /// CHECK: Validated by light-token CPI
+    #[account(mut)]
+    pub token_account: AccountInfo<'info>,
+    /// CHECK: Validated by light-token CPI
+    pub delegate: AccountInfo<'info>,
+    pub owner: Signer<'info>,
+    pub system_program: Program<'info, System>,
+    /// CHECK: Light token program for CPI
+    pub light_token_program: AccountInfo<'info>,
+}
+
+// ---
+
+#![allow(unexpected_cfgs)]
+
+use anchor_lang::prelude::*;
+use light_token_sdk::token::RevokeCpi;
+
+declare_id!("Dvq3UxQUDEF3B6khoJTdcbm3UutDsvxkdkTvxoJvegfg");
+
+#[program]
+pub mod light_token_anchor_revoke {
+    use super::*;
+
+    pub fn revoke<'info>(ctx: Context<'_, '_, '_, 'info, RevokeAccounts<'info>>) -> Result<()> {
+        RevokeCpi {
+            token_account: ctx.accounts.token_account.to_account_info(),
+            owner: ctx.accounts.owner.to_account_info(),
+            system_program: ctx.accounts.system_program.to_account_info(),
+        }
+        .invoke()?;
+        Ok(())
+    }
+}
+
+#[derive(Accounts)]
+pub struct RevokeAccounts<'info> {
+    /// CHECK: Validated by light-token CPI
+    #[account(mut)]
+    pub token_account: AccountInfo<'info>,
+    pub owner: Signer<'info>,
+    pub system_program: Program<'info, System>,
+    /// CHECK: Light token program for CPI
+    pub light_token_program: AccountInfo<'info>,
+}
+```

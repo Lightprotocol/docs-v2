@@ -1,0 +1,63 @@
+```rust
+use super::authority_seeds;
+use light_token_sdk::token::TransferInterfaceCpi;
+use solana_program::{
+    account_info::AccountInfo, entrypoint::ProgramResult, program_error::ProgramError,
+};
+
+pub fn process(accounts: &[AccountInfo], data: &[u8]) -> ProgramResult {
+    let [source, destination, authority, payer, ctoken_authority, system_program, _token_program] =
+        accounts
+    else {
+        return Err(ProgramError::NotEnoughAccountKeys);
+    };
+
+    if data.len() < 9 {
+        return Err(ProgramError::InvalidInstructionData);
+    }
+
+    let amount = u64::from_le_bytes(data[0..8].try_into().unwrap());
+    let decimals = data[8];
+
+    TransferInterfaceCpi::new(
+        amount,
+        decimals,
+        source.clone(),
+        destination.clone(),
+        authority.clone(),
+        payer.clone(),
+        ctoken_authority.clone(),
+        system_program.clone(),
+    )
+    .invoke()
+}
+
+pub fn process_signed(accounts: &[AccountInfo], data: &[u8]) -> ProgramResult {
+    let [source, destination, authority, payer, ctoken_authority, system_program, _token_program] =
+        accounts
+    else {
+        return Err(ProgramError::NotEnoughAccountKeys);
+    };
+
+    if data.len() < 10 {
+        return Err(ProgramError::InvalidInstructionData);
+    }
+
+    let amount = u64::from_le_bytes(data[0..8].try_into().unwrap());
+    let decimals = data[8];
+    let bump = data[9];
+    let signer_seeds = authority_seeds!(bump);
+
+    TransferInterfaceCpi::new(
+        amount,
+        decimals,
+        source.clone(),
+        destination.clone(),
+        authority.clone(),
+        payer.clone(),
+        ctoken_authority.clone(),
+        system_program.clone(),
+    )
+    .invoke_signed(&[signer_seeds])
+}
+```

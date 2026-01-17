@@ -1,0 +1,44 @@
+```rust
+use super::authority_seeds;
+use light_token_sdk::token::CloseAccountCpi;
+use solana_program::{
+    account_info::AccountInfo, entrypoint::ProgramResult, program_error::ProgramError,
+};
+
+pub fn process(accounts: &[AccountInfo], _data: &[u8]) -> ProgramResult {
+    let [token_program, account, destination, owner, rent_sponsor] = accounts else {
+        return Err(ProgramError::NotEnoughAccountKeys);
+    };
+
+    CloseAccountCpi {
+        token_program: token_program.clone(),
+        account: account.clone(),
+        destination: destination.clone(),
+        owner: owner.clone(),
+        rent_sponsor: rent_sponsor.clone(),
+    }
+    .invoke()
+}
+
+pub fn process_signed(accounts: &[AccountInfo], data: &[u8]) -> ProgramResult {
+    let [token_program, account, destination, owner, rent_sponsor] = accounts else {
+        return Err(ProgramError::NotEnoughAccountKeys);
+    };
+
+    if data.is_empty() {
+        return Err(ProgramError::InvalidInstructionData);
+    }
+
+    let bump = data[0];
+    let signer_seeds = authority_seeds!(bump);
+
+    CloseAccountCpi {
+        token_program: token_program.clone(),
+        account: account.clone(),
+        destination: destination.clone(),
+        owner: owner.clone(),
+        rent_sponsor: rent_sponsor.clone(),
+    }
+    .invoke_signed(&[signer_seeds])
+}
+```

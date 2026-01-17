@@ -1,0 +1,91 @@
+```rust
+use super::authority_seeds;
+use light_token_sdk::token::ApproveCpi;
+use solana_program::{
+    account_info::AccountInfo, entrypoint::ProgramResult, program_error::ProgramError,
+};
+
+pub fn process(accounts: &[AccountInfo], data: &[u8]) -> ProgramResult {
+    let [token_account, delegate, owner, system_program, _token_program] = accounts else {
+        return Err(ProgramError::NotEnoughAccountKeys);
+    };
+
+    let amount = u64::from_le_bytes(
+        data.try_into()
+            .map_err(|_| ProgramError::InvalidInstructionData)?,
+    );
+
+    ApproveCpi {
+        token_account: token_account.clone(),
+        delegate: delegate.clone(),
+        owner: owner.clone(),
+        system_program: system_program.clone(),
+        amount,
+    }
+    .invoke()
+}
+
+pub fn process_signed(accounts: &[AccountInfo], data: &[u8]) -> ProgramResult {
+    let [token_account, delegate, owner, system_program, _token_program] = accounts else {
+        return Err(ProgramError::NotEnoughAccountKeys);
+    };
+
+    if data.len() < 9 {
+        return Err(ProgramError::InvalidInstructionData);
+    }
+
+    let amount = u64::from_le_bytes(data[0..8].try_into().unwrap());
+    let bump = data[8];
+    let signer_seeds = authority_seeds!(bump);
+
+    ApproveCpi {
+        token_account: token_account.clone(),
+        delegate: delegate.clone(),
+        owner: owner.clone(),
+        system_program: system_program.clone(),
+        amount,
+    }
+    .invoke_signed(&[signer_seeds])
+}
+
+// ---
+
+use super::authority_seeds;
+use light_token_sdk::token::RevokeCpi;
+use solana_program::{
+    account_info::AccountInfo, entrypoint::ProgramResult, program_error::ProgramError,
+};
+
+pub fn process(accounts: &[AccountInfo], _data: &[u8]) -> ProgramResult {
+    let [token_account, owner, system_program, _token_program] = accounts else {
+        return Err(ProgramError::NotEnoughAccountKeys);
+    };
+
+    RevokeCpi {
+        token_account: token_account.clone(),
+        owner: owner.clone(),
+        system_program: system_program.clone(),
+    }
+    .invoke()
+}
+
+pub fn process_signed(accounts: &[AccountInfo], data: &[u8]) -> ProgramResult {
+    let [token_account, owner, system_program, _token_program] = accounts else {
+        return Err(ProgramError::NotEnoughAccountKeys);
+    };
+
+    if data.is_empty() {
+        return Err(ProgramError::InvalidInstructionData);
+    }
+
+    let bump = data[0];
+    let signer_seeds = authority_seeds!(bump);
+
+    RevokeCpi {
+        token_account: token_account.clone(),
+        owner: owner.clone(),
+        system_program: system_program.clone(),
+    }
+    .invoke_signed(&[signer_seeds])
+}
+```

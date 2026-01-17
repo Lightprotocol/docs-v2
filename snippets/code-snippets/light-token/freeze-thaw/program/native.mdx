@@ -1,0 +1,81 @@
+```rust
+use super::authority_seeds;
+use light_token_sdk::token::FreezeCpi;
+use solana_program::{
+    account_info::AccountInfo, entrypoint::ProgramResult, program_error::ProgramError,
+};
+
+pub fn process(accounts: &[AccountInfo], _data: &[u8]) -> ProgramResult {
+    let [token_account, mint, freeze_authority, _token_program] = accounts else {
+        return Err(ProgramError::NotEnoughAccountKeys);
+    };
+
+    FreezeCpi {
+        token_account: token_account.clone(),
+        mint: mint.clone(),
+        freeze_authority: freeze_authority.clone(),
+    }
+    .invoke()
+}
+
+pub fn process_signed(accounts: &[AccountInfo], data: &[u8]) -> ProgramResult {
+    let [token_account, mint, freeze_authority, _token_program] = accounts else {
+        return Err(ProgramError::NotEnoughAccountKeys);
+    };
+
+    if data.is_empty() {
+        return Err(ProgramError::InvalidInstructionData);
+    }
+
+    let bump = data[0];
+    let signer_seeds = authority_seeds!(bump);
+
+    FreezeCpi {
+        token_account: token_account.clone(),
+        mint: mint.clone(),
+        freeze_authority: freeze_authority.clone(),
+    }
+    .invoke_signed(&[signer_seeds])
+}
+
+// ---
+
+use super::authority_seeds;
+use light_token_sdk::token::ThawCpi;
+use solana_program::{
+    account_info::AccountInfo, entrypoint::ProgramResult, program_error::ProgramError,
+};
+
+pub fn process(accounts: &[AccountInfo], _data: &[u8]) -> ProgramResult {
+    let [token_account, mint, freeze_authority, _token_program] = accounts else {
+        return Err(ProgramError::NotEnoughAccountKeys);
+    };
+
+    ThawCpi {
+        token_account: token_account.clone(),
+        mint: mint.clone(),
+        freeze_authority: freeze_authority.clone(),
+    }
+    .invoke()
+}
+
+pub fn process_signed(accounts: &[AccountInfo], data: &[u8]) -> ProgramResult {
+    let [token_account, mint, freeze_authority, _token_program] = accounts else {
+        return Err(ProgramError::NotEnoughAccountKeys);
+    };
+
+    if data.is_empty() {
+        return Err(ProgramError::InvalidInstructionData);
+    }
+
+    let bump = data[0];
+    let signer_seeds = authority_seeds!(bump);
+
+    ThawCpi {
+        token_account: token_account.clone(),
+        mint: mint.clone(),
+        freeze_authority: freeze_authority.clone(),
+    }
+    .invoke_signed(&[signer_seeds])
+}
+```
