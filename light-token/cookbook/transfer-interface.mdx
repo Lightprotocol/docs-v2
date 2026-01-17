@@ -129,8 +129,7 @@ The example transfers
 3. light-token -> SPL token.
 
 <Info>
-  Find the full example including shared test utilities in the
-  [examples-light-token repo](https://github.com/Lightprotocol/examples-light-token/tree/main/rust-client/tests).
+  View [Source Code](https://github.com/Lightprotocol/light-protocol/blob/main/sdk-libs/token-sdk/src/token/transfer_interface.rs) or find full examples with tests: [examples-light-token](https://github.com/Lightprotocol/examples-light-token/tree/main/rust-client).
 </Info>
 
 <RustFullCode />
@@ -142,16 +141,10 @@ The example transfers
 
 <Tab title="Program Guide">
 
-<Note>
-Find [a full code example at the end](#full-code-example).
-</Note>
 <Steps>
 <Step>
 
 ### Build Account Infos and CPI
-
-1. Pass the amount, decimals, source and destination accounts, authority, payer, ctoken authority, and system program.
-2. Use `invoke` or `invoke_signed`, when a CPI requires a PDA signer.
 
 <Tabs>
 <Tab title="invoke (External signer)">
@@ -206,8 +199,7 @@ TransferInterfaceCpi::new(
 # Full Code Example
 
 <Info>
-  Find the source code in the
-  [examples-light-token repo](https://github.com/Lightprotocol/examples-light-token/tree/main/program-examples).
+  View [Source Code](https://github.com/Lightprotocol/light-protocol/tree/main/programs/compressed-token/program/src/ctoken/transfer/) or full examples with tests: [examples-light-token](https://github.com/Lightprotocol/examples-light-token/tree/main/program-examples).
 </Info>
 
 <Tabs>
@@ -228,7 +220,7 @@ TransferInterfaceCpi::new(
 {" "}
 
 <Card
-  title="Learn how to close light-token accounts"
+  title="Close Light Token Accounts"
   icon="chevron-right"
   color="#0066ff"
   href="/light-token/cookbook/close-token-account"

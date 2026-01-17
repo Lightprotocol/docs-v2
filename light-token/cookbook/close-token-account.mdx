@@ -55,8 +55,7 @@ Compare to SPL:
 ### Close light-token Account
 
 <Info>
-  Find the full example including shared test utilities in the
-  [examples-light-token repo](https://github.com/Lightprotocol/examples-light-token/tree/main/rust-client/tests).
+  View [Source Code](https://github.com/Lightprotocol/light-protocol/blob/main/sdk-libs/token-sdk/src/token/close.rs) or find full examples with tests: [examples-light-token](https://github.com/Lightprotocol/examples-light-token/tree/main/rust-client).
 </Info>
 
 <RustFullCode />
@@ -67,16 +66,10 @@ Compare to SPL:
 
 <Tab title="Program Guide">
 
-<Note>
-Find [a full code example at the end](#full-code-example).
-</Note>
 <Steps>
 <Step>
 
 ### Build Account Infos and CPI the light token program
-
-1. Define the light-token account to close and where remaining lamports should go
-2. Use `invoke` or `invoke_signed`, when a CPI requires a PDA signer.
 
 <Tabs>
 <Tab title="invoke (External Signer)">
@@ -125,8 +118,7 @@ CloseAccountCpi {
 # Full Code Example
 
 <Info>
-  Find the source code in the
-  [examples-light-token repo](https://github.com/Lightprotocol/examples-light-token/tree/main/program-examples).
+  View [Source Code](https://github.com/Lightprotocol/light-protocol/tree/main/programs/compressed-token/program/src/ctoken/close/) or full examples with tests: [examples-light-token](https://github.com/Lightprotocol/examples-light-token/tree/main/program-examples).
 </Info>
 
 <Tabs>
@@ -147,9 +139,9 @@ CloseAccountCpi {
 {" "}
 
 <Card
-  title="Go back to the overview for the light-token standard."
+  title="Use the Unified Transfer Interface for Light-Token, SPL and Token 22 Transfers"
   icon="chevron-right"
   color="#0066ff"
-  href="/light-token/welcome"
+  href="/light-token/cookbook/transfer-interface"
   horizontal
 />

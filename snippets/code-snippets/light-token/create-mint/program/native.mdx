@@ -1,12 +1,15 @@
 ```rust
 use borsh::BorshDeserialize;
+use light_token_interface::instructions::extensions::{
+    token_metadata::TokenMetadataInstructionData, ExtensionInstructionData,
+};
 use light_token_sdk::{
     token::{CreateMintCpi, CreateMintParams, SystemAccountInfos},
     CompressedProof,
 };
 use solana_program::{
-    account_info::AccountInfo, entrypoint::ProgramResult, program_error::ProgramError,
-    pubkey::Pubkey,
+    account_info::AccountInfo, entrypoint::ProgramResult,
+    program_error::ProgramError, pubkey::Pubkey,
 };
 
 #[derive(BorshDeserialize)]
@@ -23,9 +26,12 @@ struct CreateMintData {
     freeze_authority: Option<Pubkey>,
     rent_payment: u8,
     write_top_up: u32,
+    metadata_name: Option<Vec<u8>>,
+    metadata_symbol: Option<Vec<u8>>,
+    metadata_uri: Option<Vec<u8>>,
 }
 
-pub fn process(accounts: &[AccountInfo], data: &[u8]) -> ProgramResult {
+pub fn create_mint_invoke(accounts: &[AccountInfo], data: &[u8]) -> ProgramResult {
     let [mint_seed, authority, payer, address_tree, output_queue, compressible_config, mint, rent_sponsor, light_system_program, cpi_authority_pda, registered_program_pda, account_compression_authority, account_compression_program, system_program, _token_program] =
         accounts
     else {
@@ -34,6 +40,24 @@ pub fn process(accounts: &[AccountInfo], data: &[u8]) -> ProgramResult {
 
     let ix_data = CreateMintData::deserialize(&mut &data[..])
         .map_err(|_| ProgramError::InvalidInstructionData)?;
+
+    // Build token metadata extension if metadata fields are provided
+    let extensions = match (
+        &ix_data.metadata_name,
+        &ix_data.metadata_symbol,
+        &ix_data.metadata_uri,
+    ) {
+        (Some(name), Some(symbol), Some(uri)) => Some(vec![ExtensionInstructionData::TokenMetadata(
+            TokenMetadataInstructionData {
+                update_authority: Some(ix_data.mint_authority.to_bytes().into()),
+                name: name.clone(),
+                symbol: symbol.clone(),
+                uri: uri.clone(),
+                additional_metadata: None,
+            },
+        )]),
+        _ => None,
+    };
 
     let params = CreateMintParams {
         decimals: ix_data.decimals,
@@ -48,7 +72,7 @@ pub fn process(accounts: &[AccountInfo], data: &[u8]) -> ProgramResult {
         mint: ix_data.mint,
         bump: ix_data.bump,
         freeze_authority: ix_data.freeze_authority,
-        extensions: None,
+        extensions,
         rent_payment: ix_data.rent_payment,
         write_top_up: ix_data.write_top_up,
     };
@@ -91,9 +115,12 @@ struct CreateMintSignedData {
     rent_payment: u8,
     write_top_up: u32,
     authority_bump: u8,
+    metadata_name: Option<Vec<u8>>,
+    metadata_symbol: Option<Vec<u8>>,
+    metadata_uri: Option<Vec<u8>>,
 }
 
-pub fn process_signed(accounts: &[AccountInfo], data: &[u8]) -> ProgramResult {
+pub fn create_mint_invoke_signed(accounts: &[AccountInfo], data: &[u8]) -> ProgramResult {
     let [mint_seed, authority, payer, address_tree, output_queue, compressible_config, mint, rent_sponsor, light_system_program, cpi_authority_pda, registered_program_pda, account_compression_authority, account_compression_program, system_program, _token_program] =
         accounts
     else {
@@ -104,6 +131,24 @@ pub fn process_signed(accounts: &[AccountInfo], data: &[u8]) -> ProgramResult {
         .map_err(|_| ProgramError::InvalidInstructionData)?;
 
     let signer_seeds: &[&[u8]] = &[b"authority", &[ix_data.authority_bump]];
+
+    // Build token metadata extension if metadata fields are provided
+    let extensions = match (
+        &ix_data.metadata_name,
+        &ix_data.metadata_symbol,
+        &ix_data.metadata_uri,
+    ) {
+        (Some(name), Some(symbol), Some(uri)) => Some(vec![ExtensionInstructionData::TokenMetadata(
+            TokenMetadataInstructionData {
+                update_authority: Some(authority.key.to_bytes().into()),
+                name: name.clone(),
+                symbol: symbol.clone(),
+                uri: uri.clone(),
+                additional_metadata: None,
+            },
+        )]),
+        _ => None,
+    };
 
     let params = CreateMintParams {
         decimals: ix_data.decimals,
@@ -118,7 +163,7 @@ pub fn process_signed(accounts: &[AccountInfo], data: &[u8]) -> ProgramResult {
         mint: ix_data.mint,
         bump: ix_data.bump,
         freeze_authority: ix_data.freeze_authority,
-        extensions: None,
+        extensions,
         rent_payment: ix_data.rent_payment,
         write_top_up: ix_data.write_top_up,
     };

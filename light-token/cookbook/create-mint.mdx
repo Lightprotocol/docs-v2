@@ -112,8 +112,7 @@ Compare to SPL:
 ### Create Mint with Token Metadata
 
 <Info>
-  Find the full example including shared test utilities in the
-  [examples-light-token repo](https://github.com/Lightprotocol/examples-light-token/tree/main/rust-client/tests).
+  View [Source Code](https://github.com/Lightprotocol/light-protocol/blob/main/sdk-libs/token-sdk/src/token/create_mint.rs) or find full examples with tests: [examples-light-token](https://github.com/Lightprotocol/examples-light-token/tree/main/rust-client).
 </Info>
 
 <RustFullCode />
@@ -124,9 +123,6 @@ Compare to SPL:
 
 <Tab title="Program Guide">
 
-<Note>
-Find [a full code example at the end](#full-code-example).
-</Note>
 <Steps>
 
 <Step>
@@ -223,12 +219,6 @@ let system_accounts = SystemAccountInfos {
 <Step>
 ### Build Account Infos and CPI the light token program
 
-1. Pass the required accounts
-2. Include `params` and `system_accounts` from the previous steps
-3. Use `invoke` or `invoke_signed`:
-   - When `mint_seed` is an external keypair, use `invoke`.
-   - When `mint_seed` is a PDA, use `invoke_signed` with its seeds.
-
 <Tabs>
 <Tab title="invoke (External signer)">
 
@@ -285,8 +275,7 @@ CreateMintCpi::new(
 # Full Code Example
 
 <Info>
-  Find the source code in the
-  [examples-light-token repo](https://github.com/Lightprotocol/examples-light-token/tree/main/program-examples).
+  View [Source Code](https://github.com/Lightprotocol/light-protocol/tree/main/programs/compressed-token/program/src/compressed_token/mint_action/) or full examples with tests: [examples-light-token](https://github.com/Lightprotocol/examples-light-token/tree/main/program-examples).
 </Info>
 
 <Tabs>
@@ -305,7 +294,7 @@ CreateMintCpi::new(
 # Next Steps
 
 <Card
-  title="Learn how to mint tokens to light-token accounts."
+  title="Mint to Light Token Accounts"
   icon="chevron-right"
   color="#0066ff"
   href="/light-token/cookbook/mint-to"

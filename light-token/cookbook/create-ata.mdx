@@ -101,8 +101,7 @@ Compare to SPL:
 ### Create ATA
 
 <Info>
-  Find the full example including shared test utilities in the
-  [examples-light-token repo](https://github.com/Lightprotocol/examples-light-token/tree/main/rust-client/tests).
+  View [Source Code](https://github.com/Lightprotocol/light-protocol/blob/main/sdk-libs/token-sdk/src/token/create_ata.rs) or find full examples with tests: [examples-light-token](https://github.com/Lightprotocol/examples-light-token/tree/main/rust-client).
 </Info>
 
 <RustFullCode />
@@ -113,9 +112,6 @@ Compare to SPL:
 </Tab>
 <Tab title="Program Guide">
 
-<Note>
-Find [a full code example at the end](#full-code-example).
-</Note>
 <Steps>
 <Step>
 
@@ -129,13 +125,11 @@ Find [a full code example at the end](#full-code-example).
 
 ### Build Account Infos and CPI the Compressed Token Program
 
-1. Pass the required accounts that include the rent config.
-2. Use `invoke` or `invoke_signed`, when a CPI requires a PDA signer.
-   <Note>
-     The light-ATA address is derived from `[owner, light_token_program_id, mint]`.
-     Unlike light-token accounts, owner and mint are passed as accounts, not in
-     instruction data.
-   </Note>
+<Note>
+  The light-ATA address is derived from `[owner, light_token_program_id, mint]`.
+  Unlike light-token accounts, owner and mint are passed as accounts, not in
+  instruction data.
+</Note>
 
 <Tabs>
 <Tab title="invoke (External signer)">
@@ -197,8 +191,7 @@ CreateAssociatedAccountCpi {
 # Full Code Example
 
 <Info>
-  Find the source code in the
-  [examples-light-token repo](https://github.com/Lightprotocol/examples-light-token/tree/main/program-examples).
+  View [Source Code](https://github.com/Lightprotocol/light-protocol/tree/main/programs/compressed-token/program/src/ctoken/create_ata.rs) or full examples with tests: [examples-light-token](https://github.com/Lightprotocol/examples-light-token/tree/main/program-examples).
 </Info>
 
 <Tabs>
@@ -218,7 +211,7 @@ CreateAssociatedAccountCpi {
 {" "}
 
 <Card
-  title="Learn how to mint light-tokens"
+  title="Mint to Light Token Accounts"
   icon="chevron-right"
   color="#0066ff"
   href="/light-token/cookbook/mint-to"

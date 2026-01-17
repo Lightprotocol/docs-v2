@@ -17,6 +17,8 @@ import {
   lightCreateTokenAccountRustCode,
 } from "/snippets/code-samples/code-compare-snippets.jsx";
 import RustFullCode from "/snippets/code-snippets/light-token/create-token-account/rust-client/full.mdx";
+import NativeProgram from "/snippets/code-snippets/light-token/create-token-account/program/native.mdx";
+import AnchorProgram from "/snippets/code-snippets/light-token/create-token-account/program/anchor.mdx";
 
 1. Light token accounts are Solana accounts that hold token balances of light, SPL, or Token 2022 mints.
 2. Light token accounts are on-chain accounts like SPL ATA’s, but the light token program sponsors the rent-exemption cost for you.
@@ -52,8 +54,7 @@ Compare to SPL:
 ### Create Token Account
 
 <Info>
-  Find the full example including shared test utilities in the
-  [examples-light-token repo](https://github.com/Lightprotocol/examples-light-token/tree/main/rust-client/tests).
+  View [Source Code](https://github.com/Lightprotocol/light-protocol/blob/main/sdk-libs/token-sdk/src/token/create.rs) or find full examples with tests: [examples-light-token](https://github.com/Lightprotocol/examples-light-token/tree/main/rust-client).
 </Info>
 
 <RustFullCode />
@@ -65,9 +66,6 @@ Compare to SPL:
 
 <Tab title="Program Guide">
 
-<Note>
-Find [a full code example at the end](#full-code-example).
-</Note>
 <Steps>
 <Step>
 
@@ -79,10 +77,6 @@ Find [a full code example at the end](#full-code-example).
 <Step>
 
 ### Build Account Infos and CPI
-
-1. Pass the required accounts
-2. Include rent config from `compressible_params`
-3. Use `invoke` or `invoke_signed`, when a CPI requires a PDA signer.
 
 <Tabs>
 <Tab title="invoke (External signer)">
@@ -129,121 +123,24 @@ account_cpi.invoke_signed(&[signer_seeds])?;
 # Full Code Example
 
 <Info>
-  Find the source code
-  [here](https://github.com/Lightprotocol/light-protocol/blob/main/sdk-tests/sdk-light-token-test/src/create_token_account.rs).
+  View [Source Code](https://github.com/Lightprotocol/light-protocol/tree/main/programs/compressed-token/program/src/ctoken/create.rs) or full examples with tests: [examples-light-token](https://github.com/Lightprotocol/examples-light-token/tree/main/program-examples).
 </Info>
 
-```rust expandable
-use borsh::{BorshDeserialize, BorshSerialize};
-use light_token_sdk::token::{CompressibleParamsCpi, CreateTokenAccountCpi};
-use solana_program::{account_info::AccountInfo, program_error::ProgramError, pubkey::Pubkey};
-
-use crate::{ID, TOKEN_ACCOUNT_SEED};
-
-/// Instruction data for create token account
-#[derive(BorshSerialize, BorshDeserialize, Debug)]
-pub struct CreateTokenAccountData {
-    pub owner: Pubkey,
-    pub pre_pay_num_epochs: u8,
-    pub lamports_per_write: u32,
-}
-
-/// Handler for creating a compressible token account (invoke)
-///
-/// Uses the builder pattern from the token module. This demonstrates how to:
-/// 1. Build the account infos struct with compressible params
-/// 2. Call the invoke() method which handles instruction building and CPI
-///
-/// Account order:
-/// - accounts[0]: payer (signer)
-/// - accounts[1]: account to create (signer)
-/// - accounts[2]: mint
-/// - accounts[3]: compressible_config
-/// - accounts[4]: system_program
-/// - accounts[5]: rent_sponsor
-pub fn process_create_token_account_invoke(
-    accounts: &[AccountInfo],
-    data: CreateTokenAccountData,
-) -> Result<(), ProgramError> {
-    if accounts.len() < 6 {
-        return Err(ProgramError::NotEnoughAccountKeys);
-    }
-
-    // Build the compressible params using constructor
-    let compressible_params = CompressibleParamsCpi::new(
-        accounts[3].clone(),
-        accounts[5].clone(),
-        accounts[4].clone(),
-    );
-
-    // Build the account infos struct
-    CreateTokenAccountCpi {
-        payer: accounts[0].clone(),
-        account: accounts[1].clone(),
-        mint: accounts[2].clone(),
-        owner: data.owner,
-        compressible: Some(compressible_params),
-    }
-    .invoke()?;
-
-    Ok(())
-}
-
-/// Handler for creating a compressible token account with PDA ownership (invoke_signed)
-///
-/// Account order:
-/// - accounts[0]: payer (signer)
-/// - accounts[1]: account to create (PDA, will be derived and verified)
-/// - accounts[2]: mint
-/// - accounts[3]: compressible_config
-/// - accounts[4]: system_program
-/// - accounts[5]: rent_sponsor
-pub fn process_create_token_account_invoke_signed(
-    accounts: &[AccountInfo],
-    data: CreateTokenAccountData,
-) -> Result<(), ProgramError> {
-    if accounts.len() < 6 {
-        return Err(ProgramError::NotEnoughAccountKeys);
-    }
-
-    // Derive the PDA for the token account
-    let (pda, bump) = Pubkey::find_program_address(&[TOKEN_ACCOUNT_SEED], &ID);
-
-    // Verify the account to create is the PDA
-    if &pda != accounts[1].key {
-        return Err(ProgramError::InvalidSeeds);
-    }
-
-    // Build the compressible params using constructor
-    let compressible_params = CompressibleParamsCpi::new(
-        accounts[3].clone(),
-        accounts[5].clone(),
-        accounts[4].clone(),
-    );
-
-    // Build the account infos struct
-    let account_cpi = CreateTokenAccountCpi {
-        payer: accounts[0].clone(),
-        account: accounts[1].clone(),
-        mint: accounts[2].clone(),
-        owner: data.owner,
-        compressible: Some(compressible_params),
-    };
-
-    // Invoke with PDA signing
-    let signer_seeds: &[&[u8]] = &[TOKEN_ACCOUNT_SEED, &[bump]];
-    account_cpi.invoke_signed(&[signer_seeds])?;
-
-    Ok(())
-}
-```
+<Tabs>
+  <Tab title="Anchor">
+    <AnchorProgram />
+  </Tab>
+  <Tab title="Native">
+    <NativeProgram />
+  </Tab>
+</Tabs>
 
 </Tab>
 
 </Tabs>
 # Next Steps
   <Card
-    title="Learn how to mint tokens to light-token accounts"
+    title="Mint to Light Token Accounts"
     icon="chevron-right"
     color="#0066ff"
     href="/light-token/cookbook/mint-to"

@@ -1,11 +1,14 @@
 ```rust
 use super::authority_seeds;
-use light_token_sdk::token::{CompressibleParamsCpi, CreateAssociatedAccountCpi};
+use light_token_sdk::token::{
+    CompressibleParamsCpi, CreateAssociatedAccountCpi,
+};
 use solana_program::{
-    account_info::AccountInfo, entrypoint::ProgramResult, program_error::ProgramError,
+    account_info::AccountInfo, entrypoint::ProgramResult,
+    program_error::ProgramError,
 };
 
-pub fn process(accounts: &[AccountInfo], data: &[u8]) -> ProgramResult {
+pub fn create_ata_invoke(accounts: &[AccountInfo], data: &[u8]) -> ProgramResult {
     let [owner, mint, payer, associated_token_account, system_program, compressible_config, rent_sponsor, _token_program] =
         accounts
     else {
@@ -38,7 +41,7 @@ pub fn process(accounts: &[AccountInfo], data: &[u8]) -> ProgramResult {
     .invoke()
 }
 
-pub fn process_signed(accounts: &[AccountInfo], data: &[u8]) -> ProgramResult {
+pub fn create_ata_invoke_signed(accounts: &[AccountInfo], data: &[u8]) -> ProgramResult {
     let [owner, mint, payer, associated_token_account, system_program, compressible_config, rent_sponsor, _token_program] =
         accounts
     else {

@@ -95,8 +95,7 @@ Compare to SPL:
 ### Mint to Light Token Accounts
 
 <Info>
-  Find the full example including shared test utilities in the
-  [examples-light-token repo](https://github.com/Lightprotocol/examples-light-token/tree/main/rust-client/tests).
+  View [Source Code](https://github.com/Lightprotocol/light-protocol/blob/main/sdk-libs/token-sdk/src/token/mint_to.rs) or find full examples with tests: [examples-light-token](https://github.com/Lightprotocol/examples-light-token/tree/main/rust-client).
 </Info>
 
 <RustFullCode />
@@ -107,15 +106,10 @@ Compare to SPL:
 
 <Tab title="Program Guide">
 
-<Note>Find [a full code example at the end](#full-code-example).</Note>
-
 <Steps>
 <Step>
 
 ### Build Account Infos and CPI
-
-1. Pass the mint, destination token account, amount, and authority.
-2. Use `invoke` or `invoke_signed`, when a CPI requires a PDA signer.
 
 <Tabs>
 <Tab title="invoke (External Signer)">
@@ -166,8 +160,7 @@ MintToCpi {
 # Full Code Example
 
 <Info>
-  Find the source code in the
-  [examples-light-token repo](https://github.com/Lightprotocol/examples-light-token/tree/main/program-examples).
+  View [Source Code](https://github.com/Lightprotocol/light-protocol/tree/main/programs/compressed-token/program/src/ctoken/mint_to.rs) or full examples with tests: [examples-light-token](https://github.com/Lightprotocol/examples-light-token/tree/main/program-examples).
 </Info>
 
 <Tabs>
@@ -185,7 +178,7 @@ MintToCpi {
 # Next Steps
 
 <Card
-  title="Learn to use the transfer interface for light-token <> SPL token transfers"
+  title="Use the Unified Transfer Interface for Light-Token, SPL and Token 22 Transfers"
   icon="chevron-right"
   color="#0066ff"
   href="/light-token/cookbook/transfer-interface"

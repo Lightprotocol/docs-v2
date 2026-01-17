@@ -2,11 +2,13 @@
 use super::authority_seeds;
 use light_token_sdk::token::FreezeCpi;
 use solana_program::{
-    account_info::AccountInfo, entrypoint::ProgramResult, program_error::ProgramError,
+    account_info::AccountInfo, entrypoint::ProgramResult,
+    program_error::ProgramError,
 };
 
-pub fn process(accounts: &[AccountInfo], _data: &[u8]) -> ProgramResult {
-    let [token_account, mint, freeze_authority, _token_program] = accounts else {
+pub fn freeze_invoke(accounts: &[AccountInfo], _data: &[u8]) -> ProgramResult {
+    let [token_account, mint, freeze_authority, _token_program] = accounts
+    else {
         return Err(ProgramError::NotEnoughAccountKeys);
     };
 
@@ -18,8 +20,9 @@ pub fn process(accounts: &[AccountInfo], _data: &[u8]) -> ProgramResult {
     .invoke()
 }
 
-pub fn process_signed(accounts: &[AccountInfo], data: &[u8]) -> ProgramResult {
-    let [token_account, mint, freeze_authority, _token_program] = accounts else {
+pub fn freeze_invoke_signed(accounts: &[AccountInfo], data: &[u8]) -> ProgramResult {
+    let [token_account, mint, freeze_authority, _token_program] = accounts
+    else {
         return Err(ProgramError::NotEnoughAccountKeys);
     };
 
@@ -43,11 +46,13 @@ pub fn process_signed(accounts: &[AccountInfo], data: &[u8]) -> ProgramResult {
 use super::authority_seeds;
 use light_token_sdk::token::ThawCpi;
 use solana_program::{
-    account_info::AccountInfo, entrypoint::ProgramResult, program_error::ProgramError,
+    account_info::AccountInfo, entrypoint::ProgramResult,
+    program_error::ProgramError,
 };
 
-pub fn process(accounts: &[AccountInfo], _data: &[u8]) -> ProgramResult {
-    let [token_account, mint, freeze_authority, _token_program] = accounts else {
+pub fn thaw_invoke(accounts: &[AccountInfo], _data: &[u8]) -> ProgramResult {
+    let [token_account, mint, freeze_authority, _token_program] = accounts
+    else {
         return Err(ProgramError::NotEnoughAccountKeys);
     };
 
@@ -59,8 +64,9 @@ pub fn process(accounts: &[AccountInfo], _data: &[u8]) -> ProgramResult {
     .invoke()
 }
 
-pub fn process_signed(accounts: &[AccountInfo], data: &[u8]) -> ProgramResult {
-    let [token_account, mint, freeze_authority, _token_program] = accounts else {
+pub fn thaw_invoke_signed(accounts: &[AccountInfo], data: &[u8]) -> ProgramResult {
+    let [token_account, mint, freeze_authority, _token_program] = accounts
+    else {
         return Err(ProgramError::NotEnoughAccountKeys);
     };
 
