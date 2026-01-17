@@ -57,6 +57,7 @@
               "light-token/cookbook/overview",
               {
                 "group": "Recipes",
+                "expanded": true,
                 "pages": [
                   "light-token/cookbook/create-mint",
                   "light-token/cookbook/create-ata",

@@ -21,6 +21,8 @@ import {
 import ActionCode from "/snippets/code-snippets/light-token/mint-to/action.mdx";
 import InstructionCode from "/snippets/code-snippets/light-token/mint-to/instruction.mdx";
 import RustFullCode from "/snippets/code-snippets/light-token/mint-to/rust-client/full.mdx";
+import NativeProgram from "/snippets/code-snippets/light-token/mint-to/program/native.mdx";
+import AnchorProgram from "/snippets/code-snippets/light-token/mint-to/program/anchor.mdx";
 
 1. Mint To creates new tokens of a mint and deposits them to a specified token account.
 2. Before we can mint any tokens, we need an initialized mint account (SPL, Token-2022 or Light) for which we hold the mint authority.
@@ -110,57 +112,10 @@ Compare to SPL:
 <Steps>
 <Step>
 
-### Configure Mint Parameters
-
-Include your mint, the amount of tokens to be minted and the pubkey of the mint authority.
-The client passes a validity proof that <Tooltip tip="light-mints are compressed accounts. Compressed accounts are stored in state Merkle trees. Only the root hash is stored on chain - every transaction that accesses the light-mint includes a validity proof to verify the compressed state.">proves the light-mint exists</Tooltip>.
-
-```rust
-use light_token_sdk::token::MintToParams;
-
-let params = MintToParams::new(
-    data.compressed_mint_inputs,
-    data.amount,
-    data.mint_authority,
-    data.proof,
-);
-```
-
-</Step>
-
-<Step>
-
-### System Accounts
-
-Compressed accounts like light-mints require system accounts like the Light System Program account for interactions and proof verification.
-The client includes them in the instruction.
-
-<Accordion title="System Accounts List">
-  <CMintSystemAccountsList />
-</Accordion>
-
-```rust
-use light_token_sdk::token::SystemAccountInfos;
-
-let system_accounts = SystemAccountInfos {
-    light_system_program: light_system_program.clone(),
-    cpi_authority_pda: cpi_authority_pda.clone(),
-    registered_program_pda: registered_program_pda.clone(),
-    account_compression_authority: account_compression_authority.clone(),
-    account_compression_program: account_compression_program.clone(),
-    system_program: system_program.clone(),
-};
-```
-
-</Step>
-
-<Step>
-
 ### Build Account Infos and CPI
 
-1. Pass the required accounts, including the destination light-token accounts.
-2. Include `params` and `system_accounts` from the previous steps
-3. Use `invoke` or `invoke_signed`, when a CPI requires a PDA signer.
+1. Pass the mint, destination token account, amount, and authority.
+2. Use `invoke` or `invoke_signed`, when a CPI requires a PDA signer.
 
 <Tabs>
 <Tab title="invoke (External Signer)">
@@ -169,18 +124,14 @@ let system_accounts = SystemAccountInfos {
 use light_token_sdk::token::MintToCpi;
 
 MintToCpi {
+    mint: mint.clone(),
+    destination: destination.clone(),
+    amount,
     authority: authority.clone(),
-    payer: payer.clone(),
-    state_tree: state_tree.clone(),
-    input_queue: input_queue.clone(),
-    output_queue: output_queue.clone(),
-    token_accounts,
-    system_accounts,
-    cpi_context: None,
-    cpi_context_account: None,
-    params,
+    system_program: system_program.clone(),
+    max_top_up: None,
 }
-.invoke()?;
+.invoke()
 ```
 
 </Tab>
@@ -189,21 +140,17 @@ MintToCpi {
 ```rust
 use light_token_sdk::token::MintToCpi;
 
-let account_infos = MintToCpi {
-    authority: authority.clone(),
-    payer: payer.clone(),
-    state_tree: state_tree.clone(),
-    input_queue: input_queue.clone(),
-    output_queue: output_queue.clone(),
-    token_accounts,
-    system_accounts,
-    cpi_context: None,
-    cpi_context_account: None,
-    params,
-};
+let signer_seeds = authority_seeds!(bump);
 
-let signer_seeds: &[&[u8]] = &[MINT_AUTHORITY_SEED, &[bump]];
-account_infos.invoke_signed(&[signer_seeds])?;
+MintToCpi {
+    mint: mint.clone(),
+    destination: destination.clone(),
+    amount,
+    authority: authority.clone(),
+    system_program: system_program.clone(),
+    max_top_up: None,
+}
+.invoke_signed(&[signer_seeds])
 ```
 
 </Tab>
@@ -219,179 +166,18 @@ account_infos.invoke_signed(&[signer_seeds])?;
 # Full Code Example
 
 <Info>
-  Find the source code
-  [here](https://github.com/Lightprotocol/light-protocol/blob/main/sdk-tests/sdk-light-token-test/src/ctoken_mint_to.rs).
+  Find the source code in the
+  [examples-light-token repo](https://github.com/Lightprotocol/examples-light-token/tree/main/program-examples).
 </Info>
 
-```rust expandable
-use borsh::{BorshDeserialize, BorshSerialize};
-use light_token_interface::instructions::mint_action::CompressedMintWithContext;
-use light_token_sdk::token::{MintToCpi, MintToParams, SystemAccountInfos};
-use light_sdk::instruction::ValidityProof;
-use solana_program::{account_info::AccountInfo, program_error::ProgramError, pubkey::Pubkey};
-
-use crate::ID;
-
-/// PDA seed for mint authority in invoke_signed variant
-pub const MINT_AUTHORITY_SEED: &[u8] = b"mint_authority";
-
-/// Instruction data for mint_to
-#[derive(BorshSerialize, BorshDeserialize, Debug)]
-pub struct MintToData {
-    pub compressed_mint_inputs: CompressedMintWithContext,
-    pub amount: u64,
-    pub mint_authority: Pubkey,
-    pub proof: ValidityProof,
-}
-
-/// Handler for minting tokens to compressed token accounts
-///
-/// Uses the MintToCpi builder pattern. This demonstrates how to:
-/// 1. Build MintToParams using the constructor
-/// 2. Build MintToCpi with accounts and params
-/// 3. Call invoke() which handles instruction building and CPI
-///
-/// Account order (all accounts from SDK-generated instruction):
-/// - accounts[0]: compressed_token_program (for CPI)
-/// - accounts[1]: light_system_program
-/// - accounts[2]: authority (mint_authority)
-/// - accounts[3]: fee_payer
-/// - accounts[4]: cpi_authority_pda
-/// - accounts[5]: registered_program_pda
-/// - accounts[6]: account_compression_authority
-/// - accounts[7]: account_compression_program
-/// - accounts[8]: system_program
-/// - accounts[9]: output_queue
-/// - accounts[10]: state_tree
-/// - accounts[11]: input_queue
-/// - accounts[12..]: token_accounts (variable length - destination accounts)
-pub fn process_mint_to(
-    accounts: &[AccountInfo],
-    data: MintToData,
-) -> Result<(), ProgramError> {
-    if accounts.len() < 13 {
-        return Err(ProgramError::NotEnoughAccountKeys);
-    }
-
-    // Build params using the constructor
-    let params = MintToParams::new(
-        data.compressed_mint_inputs,
-        data.amount,
-        data.mint_authority,
-        data.proof,
-    );
-
-    // Build system accounts struct
-    let system_accounts = SystemAccountInfos {
-        light_system_program: accounts[1].clone(),
-        cpi_authority_pda: accounts[4].clone(),
-        registered_program_pda: accounts[5].clone(),
-        account_compression_authority: accounts[6].clone(),
-        account_compression_program: accounts[7].clone(),
-        system_program: accounts[8].clone(),
-    };
-
-    // Collect token accounts from remaining accounts (index 12 onwards)
-    let token_accounts: Vec<AccountInfo> = accounts[12..].to_vec();
-
-    // Build the account infos struct and invoke
-    // SDK account order: output_queue (9), tree (10), input_queue (11), token_accounts (12+)
-    // In this case, payer == authority (accounts[3])
-    MintToCpi {
-        authority: accounts[2].clone(),    // authority from SDK accounts
-        payer: accounts[3].clone(),        // fee_payer from SDK accounts
-        state_tree: accounts[10].clone(),  // tree at index 10
-        input_queue: accounts[11].clone(), // input_queue at index 11
-        output_queue: accounts[9].clone(), // output_queue at index 9
-        token_accounts,
-        system_accounts,
-        cpi_context: None,
-        cpi_context_account: None,
-        params,
-    }
-    .invoke()?;
-
-    Ok(())
-}
-
-/// Handler for minting tokens with PDA mint authority (invoke_signed)
-///
-/// Uses the MintToCpi builder pattern with invoke_signed.
-/// The mint authority is a PDA derived from this program.
-///
-/// Account order (all accounts from SDK-generated instruction):
-/// - accounts[0]: compressed_token_program (for CPI)
-/// - accounts[1]: light_system_program
-/// - accounts[2]: authority (PDA mint_authority, not signer - program signs)
-/// - accounts[3]: fee_payer
-/// - accounts[4]: cpi_authority_pda
-/// - accounts[5]: registered_program_pda
-/// - accounts[6]: account_compression_authority
-/// - accounts[7]: account_compression_program
-/// - accounts[8]: system_program
-/// - accounts[9]: output_queue
-/// - accounts[10]: state_tree
-/// - accounts[11]: input_queue
-/// - accounts[12..]: token_accounts (variable length - destination accounts)
-pub fn process_mint_to_invoke_signed(
-    accounts: &[AccountInfo],
-    data: MintToData,
-) -> Result<(), ProgramError> {
-    if accounts.len() < 13 {
-        return Err(ProgramError::NotEnoughAccountKeys);
-    }
-
-    // Derive the PDA for the mint authority
-    let (pda, bump) = Pubkey::find_program_address(&[MINT_AUTHORITY_SEED], &ID);
-
-    // Verify the authority account is the PDA we expect
-    if &pda != accounts[2].key {
-        return Err(ProgramError::InvalidSeeds);
-    }
-
-    // Build params using the constructor
-    let params = MintToParams::new(
-        data.compressed_mint_inputs,
-        data.amount,
-        data.mint_authority,
-        data.proof,
-    );
-
-    // Build system accounts struct
-    let system_accounts = SystemAccountInfos {
-        light_system_program: accounts[1].clone(),
-        cpi_authority_pda: accounts[4].clone(),
-        registered_program_pda: accounts[5].clone(),
-        account_compression_authority: accounts[6].clone(),
-        account_compression_program: accounts[7].clone(),
-        system_program: accounts[8].clone(),
-    };
-
-    // Collect token accounts from remaining accounts (index 12 onwards)
-    let token_accounts: Vec<AccountInfo> = accounts[12..].to_vec();
-
-    // Build the account infos struct
-    // authority is the PDA (accounts[2])
-    let account_infos = MintToCpi {
-        authority: accounts[2].clone(),    // authority PDA
-        payer: accounts[3].clone(),        // fee_payer from SDK accounts
-        state_tree: accounts[10].clone(),  // tree at index 10
-        input_queue: accounts[11].clone(), // input_queue at index 11
-        output_queue: accounts[9].clone(), // output_queue at index 9
-        token_accounts,
-        system_accounts,
-        cpi_context: None,
-        cpi_context_account: None,
-        params,
-    };
-
-    // Invoke with PDA signing
-    let signer_seeds: &[&[u8]] = &[MINT_AUTHORITY_SEED, &[bump]];
-    account_infos.invoke_signed(&[signer_seeds])?;
-
-    Ok(())
-}
-```
+<Tabs>
+  <Tab title="Native">
+    <NativeProgram />
+  </Tab>
+  <Tab title="Anchor">
+    <AnchorProgram />
+  </Tab>
+</Tabs>
 
 </Tab>
 </Tabs>

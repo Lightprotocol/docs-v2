@@ -17,6 +17,8 @@ import {
 } from "/snippets/code-samples/code-compare-snippets.jsx";
 import FreezeFull from "/snippets/code-snippets/light-token/freeze-thaw/rust-client/freeze-full.mdx";
 import ThawFull from "/snippets/code-snippets/light-token/freeze-thaw/rust-client/thaw-full.mdx";
+import NativeProgram from "/snippets/code-snippets/light-token/freeze-thaw/program/native.mdx";
+import AnchorProgram from "/snippets/code-snippets/light-token/freeze-thaw/program/anchor.mdx";
 
 1. Freeze prevents all transfers or token burns from a specific light-token account.
 2. Once frozen, the account cannot send tokens, receive tokens, or be closed until it is thawed. 
@@ -83,6 +85,112 @@ import ThawFull from "/snippets/code-snippets/light-token/freeze-thaw/rust-clien
 
 </Step>
 </Steps>
+</Tab>
+
+<Tab title="Program Guide">
+
+<Note>Find [a full code example at the end](#full-code-example).</Note>
+
+<Steps>
+<Step>
+
+### Freeze
+
+Freeze a token account to prevent transfers.
+
+<Tabs>
+<Tab title="invoke (External Signer)">
+
+```rust
+use light_token_sdk::token::FreezeCpi;
+
+FreezeCpi {
+    token_account: token_account.clone(),
+    mint: mint.clone(),
+    freeze_authority: freeze_authority.clone(),
+}
+.invoke()
+```
+
+</Tab>
+<Tab title="invoke_signed (PDA Authority)">
+
+```rust
+use light_token_sdk::token::FreezeCpi;
+
+let signer_seeds = authority_seeds!(bump);
+
+FreezeCpi {
+    token_account: token_account.clone(),
+    mint: mint.clone(),
+    freeze_authority: freeze_authority.clone(),
+}
+.invoke_signed(&[signer_seeds])
+```
+
+</Tab>
+</Tabs>
+
+</Step>
+
+<Step>
+
+### Thaw
+
+Thaw a frozen token account to re-enable transfers.
+
+<Tabs>
+<Tab title="invoke (External Signer)">
+
+```rust
+use light_token_sdk::token::ThawCpi;
+
+ThawCpi {
+    token_account: token_account.clone(),
+    mint: mint.clone(),
+    freeze_authority: freeze_authority.clone(),
+}
+.invoke()
+```
+
+</Tab>
+<Tab title="invoke_signed (PDA Authority)">
+
+```rust
+use light_token_sdk::token::ThawCpi;
+
+let signer_seeds = authority_seeds!(bump);
+
+ThawCpi {
+    token_account: token_account.clone(),
+    mint: mint.clone(),
+    freeze_authority: freeze_authority.clone(),
+}
+.invoke_signed(&[signer_seeds])
+```
+
+</Tab>
+</Tabs>
+
+</Step>
+</Steps>
+
+# Full Code Example
+
+<Info>
+  Find the source code in the
+  [examples-light-token repo](https://github.com/Lightprotocol/examples-light-token/tree/main/program-examples).
+</Info>
+
+<Tabs>
+  <Tab title="Native">
+    <NativeProgram />
+  </Tab>
+  <Tab title="Anchor">
+    <AnchorProgram />
+  </Tab>
+</Tabs>
+
 </Tab>
 
 </Tabs>
