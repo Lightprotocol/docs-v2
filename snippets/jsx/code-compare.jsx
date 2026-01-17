@@ -297,7 +297,7 @@ export const CodeCompare = ({
                   right: "50%",
                   width: "60px",
                   background:
-                    "linear-gradient(to left, rgba(0, 102, 255, 0.15) 0%, transparent 100%)",
+                    "linear-gradient(to left, rgba(0, 102, 255, 0.08) 0%, transparent 100%)",
                 }}
               />
 
