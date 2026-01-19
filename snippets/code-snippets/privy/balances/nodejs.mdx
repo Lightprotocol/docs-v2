@@ -7,10 +7,6 @@ export async function getCompressedBalances(ownerAddress: string) {
   const rpc = createRpc(HELIUS_RPC_URL);
   const owner = new PublicKey(ownerAddress);
 
-  // Get compressed SOL balance
-  const compressedSol = await rpc.getCompressedBalanceByOwner(owner);
-  const compressedSolLamports = compressedSol.value ? BigInt(compressedSol.value.toString()) : 0n;
-
   // Get compressed token accounts (filter out null items from indexer)
   const compressedAccounts = await rpc.getCompressedTokenAccountsByOwner(owner);
   const validItems = (compressedAccounts.items || []).filter((item): item is NonNullable<typeof item> => item !== null);
@@ -27,7 +23,6 @@ export async function getCompressedBalances(ownerAddress: string) {
   }
 
   return {
-    sol: compressedSolLamports.toString(),
     tokens: Array.from(balances.entries()).map(([mint, amount]) => ({
       mint,
       amount: amount.toString(),
