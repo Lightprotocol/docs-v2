@@ -162,8 +162,6 @@
                     "group": "Examples",
                     "expanded": true,
                     "pages": [
-                      "compressed-tokens/advanced-guides/example-web-client",
-                      "compressed-tokens/advanced-guides/example-node-js",
                       "compressed-tokens/advanced-guides/example-token-distribution"
                     ]
                   }
