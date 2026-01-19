@@ -1,0 +1,12 @@
+```rust
+use light_token_sdk::token::Burn;
+
+let burn_ix = Burn {
+    source: ata,
+    cmint: mint,
+    amount: burn_amount,
+    authority: payer.pubkey(),
+    max_top_up: None,
+}
+.instruction()?;
+```

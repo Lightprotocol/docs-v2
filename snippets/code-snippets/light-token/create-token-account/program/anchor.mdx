@@ -1,0 +1,51 @@
+```rust
+#![allow(unexpected_cfgs)]
+
+use anchor_lang::prelude::*;
+use light_token_sdk::token::{CompressibleParamsCpi, CreateTokenAccountCpi};
+
+declare_id!("4fi27siKEvKXJYN5WCzWuHdAw1rLed6Tprv9ZARv3Gxu");
+
+#[program]
+pub mod light_token_anchor_create_token_account {
+    use super::*;
+
+    pub fn create_token_account<'info>(
+        ctx: Context<'_, '_, '_, 'info, CreateTokenAccountAccounts<'info>>,
+        owner: Pubkey,
+    ) -> Result<()> {
+        let compressible_params = CompressibleParamsCpi::new(
+            ctx.accounts.compressible_config.to_account_info(),
+            ctx.accounts.rent_sponsor.to_account_info(),
+            ctx.accounts.system_program.to_account_info(),
+        );
+
+        CreateTokenAccountCpi {
+            payer: ctx.accounts.payer.to_account_info(),
+            account: ctx.accounts.account.to_account_info(),
+            mint: ctx.accounts.mint.to_account_info(),
+            owner,
+            compressible: Some(compressible_params),
+        }
+        .invoke()?;
+        Ok(())
+    }
+}
+
+#[derive(Accounts)]
+pub struct CreateTokenAccountAccounts<'info> {
+    #[account(mut)]
+    pub payer: Signer<'info>,
+    /// CHECK: Validated by light-token CPI
+    #[account(mut)]
+    pub account: Signer<'info>,
+    /// CHECK: Validated by light-token CPI
+    pub mint: AccountInfo<'info>,
+    /// CHECK: Validated by light-token CPI
+    pub compressible_config: AccountInfo<'info>,
+    pub system_program: Program<'info, System>,
+    /// CHECK: Validated by light-token CPI
+    #[account(mut)]
+    pub rent_sponsor: AccountInfo<'info>,
+}
+```

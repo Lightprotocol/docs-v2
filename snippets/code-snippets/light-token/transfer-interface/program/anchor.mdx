@@ -1,0 +1,50 @@
+```rust
+#![allow(unexpected_cfgs)]
+
+use anchor_lang::prelude::*;
+use light_token_sdk::token::TransferInterfaceCpi;
+
+declare_id!("ChkDqFsvNNT5CGrV2YCkmK4DiVSATnXc98mNozPbhC6u");
+
+#[program]
+pub mod light_token_anchor_transfer_interface {
+    use super::*;
+
+    pub fn transfer<'info>(
+        ctx: Context<'_, '_, '_, 'info, TransferAccounts<'info>>,
+        amount: u64,
+        decimals: u8,
+    ) -> Result<()> {
+        TransferInterfaceCpi::new(
+            amount,
+            decimals,
+            ctx.accounts.source.to_account_info(),
+            ctx.accounts.destination.to_account_info(),
+            ctx.accounts.authority.to_account_info(),
+            ctx.accounts.payer.to_account_info(),
+            ctx.accounts.cpi_authority.to_account_info(),
+            ctx.accounts.system_program.to_account_info(),
+        )
+        .invoke()?;
+        Ok(())
+    }
+}
+
+#[derive(Accounts)]
+pub struct TransferAccounts<'info> {
+    /// CHECK: Validated by light-token CPI
+    #[account(mut)]
+    pub source: AccountInfo<'info>,
+    /// CHECK: Validated by light-token CPI
+    #[account(mut)]
+    pub destination: AccountInfo<'info>,
+    pub authority: Signer<'info>,
+    #[account(mut)]
+    pub payer: Signer<'info>,
+    /// CHECK: Validated by light-token CPI
+    pub cpi_authority: AccountInfo<'info>,
+    pub system_program: Program<'info, System>,
+    /// CHECK: Light token program for CPI
+    pub light_token_program: AccountInfo<'info>,
+}
+```

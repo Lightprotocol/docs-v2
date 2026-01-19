@@ -1,0 +1,198 @@
+---
+title: Freeze and Thaw Light Token Accounts
+sidebarTitle: Freeze / Thaw
+description: Rust client guide to freeze and thaw light-token accounts. Includes step-by-step implementation and full code examples.
+keywords: ["freeze token account solana", "thaw token account solana", "token account management"]
+---
+
+---
+
+import TokenClientPrerequisites from "/snippets/light-token-guides/light-token-client-prerequisites.mdx";
+import { CodeCompare } from "/snippets/jsx/code-compare.jsx";
+import {
+  splFreezeRustCode,
+  lightFreezeRustCode,
+  splThawRustCode,
+  lightThawRustCode,
+} from "/snippets/code-samples/code-compare-snippets.jsx";
+import FreezeFull from "/snippets/code-snippets/light-token/freeze-thaw/rust-client/freeze-full.mdx";
+import ThawFull from "/snippets/code-snippets/light-token/freeze-thaw/rust-client/thaw-full.mdx";
+import NativeProgram from "/snippets/code-snippets/light-token/freeze-thaw/program/native.mdx";
+import AnchorProgram from "/snippets/code-snippets/light-token/freeze-thaw/program/anchor.mdx";
+
+1. Freeze prevents all transfers or token burns from a specific light-token account.
+2. Once frozen, the account cannot send tokens, receive tokens, or be closed until it is thawed. 
+3. Thaw re-enables transfers on a frozen light-token account.
+4. Only the freeze authority (set at mint creation) can freeze or thaw accounts.
+5. If the freeze authority is revoked (set to null) on the mint account, tokens can never be frozen.
+
+<Tabs>
+<Tab title="Rust Client">
+
+<Tabs>
+<Tab title="Freeze">
+
+<CodeCompare
+  firstCode={lightFreezeRustCode}
+  secondCode={splFreezeRustCode}
+  firstLabel="light-token"
+  secondLabel="SPL"
+  language="rust"
+/>
+
+</Tab>
+<Tab title="Thaw">
+
+<CodeCompare
+  firstCode={lightThawRustCode}
+  secondCode={splThawRustCode}
+  firstLabel="light-token"
+  secondLabel="SPL"
+  language="rust"
+/>
+
+</Tab>
+</Tabs>
+
+<Steps>
+<Step>
+### Prerequisites
+
+<TokenClientPrerequisites />
+
+</Step>
+
+<Step>
+### Freeze or thaw light-token accounts
+
+<Info>
+  View [Source Code](https://github.com/Lightprotocol/light-protocol/tree/main/sdk-libs/token-sdk/src/token) or find full examples with tests: [examples-light-token](https://github.com/Lightprotocol/examples-light-token/tree/main/rust-client).
+</Info>
+
+<Tabs>
+<Tab title="Freeze">
+
+<FreezeFull />
+
+</Tab>
+<Tab title="Thaw">
+
+<ThawFull />
+
+</Tab>
+</Tabs>
+
+</Step>
+</Steps>
+</Tab>
+
+<Tab title="Program Guide">
+
+<Steps>
+<Step>
+
+### Freeze
+
+<Tabs>
+<Tab title="invoke (External Signer)">
+
+```rust
+use light_token_sdk::token::FreezeCpi;
+
+FreezeCpi {
+    token_account: token_account.clone(),
+    mint: mint.clone(),
+    freeze_authority: freeze_authority.clone(),
+}
+.invoke()
+```
+
+</Tab>
+<Tab title="invoke_signed (PDA Authority)">
+
+```rust
+use light_token_sdk::token::FreezeCpi;
+
+let signer_seeds = authority_seeds!(bump);
+
+FreezeCpi {
+    token_account: token_account.clone(),
+    mint: mint.clone(),
+    freeze_authority: freeze_authority.clone(),
+}
+.invoke_signed(&[signer_seeds])
+```
+
+</Tab>
+</Tabs>
+
+</Step>
+
+<Step>
+
+### Thaw
+
+<Tabs>
+<Tab title="invoke (External Signer)">
+
+```rust
+use light_token_sdk::token::ThawCpi;
+
+ThawCpi {
+    token_account: token_account.clone(),
+    mint: mint.clone(),
+    freeze_authority: freeze_authority.clone(),
+}
+.invoke()
+```
+
+</Tab>
+<Tab title="invoke_signed (PDA Authority)">
+
+```rust
+use light_token_sdk::token::ThawCpi;
+
+let signer_seeds = authority_seeds!(bump);
+
+ThawCpi {
+    token_account: token_account.clone(),
+    mint: mint.clone(),
+    freeze_authority: freeze_authority.clone(),
+}
+.invoke_signed(&[signer_seeds])
+```
+
+</Tab>
+</Tabs>
+
+</Step>
+</Steps>
+
+# Full Code Example
+
+<Info>
+  View [Source Code](https://github.com/Lightprotocol/light-protocol/tree/main/programs/compressed-token/program/src/ctoken/freeze_thaw.rs) or full examples with tests: [examples-light-token](https://github.com/Lightprotocol/examples-light-token/tree/main/program-examples).
+</Info>
+
+<Tabs>
+  <Tab title="Anchor">
+    <AnchorProgram />
+  </Tab>
+  <Tab title="Native">
+    <NativeProgram />
+  </Tab>
+</Tabs>
+
+</Tab>
+
+</Tabs>
+
+# Next Steps
+
+<Card
+  title="Approve and Revoke Delegates for Light Token Accounts"
+  icon="chevron-right"
+  color="#0066ff"
+  href="/light-token/cookbook/approve-revoke"
+  horizontal
+/>

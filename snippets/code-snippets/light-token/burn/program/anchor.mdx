@@ -1,0 +1,41 @@
+```rust
+#![allow(unexpected_cfgs)]
+
+use anchor_lang::prelude::*;
+use light_token_sdk::token::BurnCpi;
+
+declare_id!("BHTGZDjDw9Gpz8oYm7CRMg2WtKwW65YAYHXXMKv4dpr6");
+
+#[program]
+pub mod light_token_anchor_burn {
+    use super::*;
+
+    pub fn burn<'info>(
+        ctx: Context<'_, '_, '_, 'info, BurnAccounts<'info>>,
+        amount: u64,
+    ) -> Result<()> {
+        BurnCpi {
+            source: ctx.accounts.source.to_account_info(),
+            mint: ctx.accounts.mint.to_account_info(),
+            amount,
+            authority: ctx.accounts.authority.to_account_info(),
+            max_top_up: None,
+        }
+        .invoke()?;
+        Ok(())
+    }
+}
+
+#[derive(Accounts)]
+pub struct BurnAccounts<'info> {
+    /// CHECK: Validated by light-token CPI
+    #[account(mut)]
+    pub source: AccountInfo<'info>,
+    /// CHECK: Validated by light-token CPI
+    #[account(mut)]
+    pub mint: AccountInfo<'info>,
+    pub authority: Signer<'info>,
+    /// CHECK: Light token program for CPI
+    pub light_token_program: AccountInfo<'info>,
+}
+```

@@ -1,0 +1,123 @@
+```rust
+mod shared;
+
+use anchor_spl::token::spl_token;
+use light_client::rpc::Rpc;
+use light_program_test::{LightProgramTest, ProgramTestConfig};
+use light_token_sdk::{
+    spl_interface::find_spl_interface_pda_with_index,
+    token::{
+        get_associated_token_address, CreateAssociatedTokenAccount, SplInterface,
+        TransferInterface, LIGHT_TOKEN_PROGRAM_ID,
+    },
+};
+use solana_sdk::{signature::Keypair, signer::Signer};
+
+#[tokio::test(flavor = "multi_thread")]
+async fn transfer_interface() {
+    let mut rpc = LightProgramTest::new(ProgramTestConfig::new_v2(true, None))
+        .await
+        .unwrap();
+
+    let payer = rpc.get_payer().insecure_clone();
+    let recipient = Keypair::new();
+    let decimals = 2u8;
+    let amount = 10_000u64;
+
+    // Setup creates mint, mints tokens and creates SPL ATA
+    let mint = shared::setup_spl_mint(&mut rpc, &payer, decimals).await;
+    let spl_ata = shared::setup_spl_ata(&mut rpc, &payer, &mint, &payer.pubkey(), amount).await;
+    let (interface_pda, interface_bump) = find_spl_interface_pda_with_index(&mint, 0, false);
+
+    // Create Light ATA
+    let light_ata_a = get_associated_token_address(&payer.pubkey(), &mint);
+
+    let create_ata_a_ix = CreateAssociatedTokenAccount::new(payer.pubkey(), payer.pubkey(), mint)
+        .instruction()
+        .unwrap();
+
+    rpc.create_and_send_transaction(&[create_ata_a_ix], &payer.pubkey(), &[&payer])
+        .await
+        .unwrap();
+
+    // Create SPL interface PDA (holds SPL tokens when transferred to Light Token)
+    let spl_interface = SplInterface {
+        mint,
+        spl_token_program: spl_token::ID,
+        spl_interface_pda: interface_pda,
+        spl_interface_pda_bump: interface_bump,
+    };
+
+    // 1. Transfer SPL tokens to Light ATA
+    let spl_to_light_ix = TransferInterface {
+        source: spl_ata,
+        destination: light_ata_a,
+        amount,
+        decimals,
+        authority: payer.pubkey(),
+        payer: payer.pubkey(),
+        spl_interface: Some(spl_interface.clone()),
+        max_top_up: None,
+        source_owner: spl_token::ID,
+        destination_owner: LIGHT_TOKEN_PROGRAM_ID,
+    }
+    .instruction()
+    .unwrap();
+
+    rpc.create_and_send_transaction(&[spl_to_light_ix], &payer.pubkey(), &[&payer])
+        .await
+        .unwrap();
+
+    // Create Second Light ATA
+    let light_ata_b = get_associated_token_address(&recipient.pubkey(), &mint);
+
+    let create_ata_b_ix =
+        CreateAssociatedTokenAccount::new(payer.pubkey(), recipient.pubkey(), mint)
+            .instruction()
+            .unwrap();
+
+    rpc.create_and_send_transaction(&[create_ata_b_ix], &payer.pubkey(), &[&payer])
+        .await
+        .unwrap();
+
+    // 2. Transfer Light-Tokens to Light ATA
+    let light_to_light_ix = TransferInterface {
+        source: light_ata_a,
+        destination: light_ata_b,
+        amount: amount / 2,
+        decimals,
+        authority: payer.pubkey(),
+        payer: payer.pubkey(),
+        spl_interface: None,
+        max_top_up: None,
+        source_owner: LIGHT_TOKEN_PROGRAM_ID,
+        destination_owner: LIGHT_TOKEN_PROGRAM_ID,
+    }
+    .instruction()
+    .unwrap();
+
+    rpc.create_and_send_transaction(&[light_to_light_ix], &payer.pubkey(), &[&payer])
+        .await
+        .unwrap();
+
+    // 3. Transfer Light-Tokens from Light ATA to SPL
+    let light_to_spl_ix = TransferInterface {
+        source: light_ata_b,
+        destination: spl_ata,
+        amount: amount / 4,
+        decimals,
+        authority: recipient.pubkey(),
+        payer: payer.pubkey(),
+        spl_interface: Some(spl_interface),
+        max_top_up: None,
+        source_owner: LIGHT_TOKEN_PROGRAM_ID,
+        destination_owner: spl_token::ID,
+    }
+    .instruction()
+    .unwrap();
+
+    rpc.create_and_send_transaction(&[light_to_spl_ix], &payer.pubkey(), &[&payer, &recipient])
+        .await
+        .unwrap();
+}
+```

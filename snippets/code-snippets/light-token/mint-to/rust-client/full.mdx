@@ -1,0 +1,41 @@
+```rust
+mod shared;
+
+use borsh::BorshDeserialize;
+use light_client::rpc::Rpc;
+use light_token_sdk::token::MintTo;
+use shared::SetupContext;
+use solana_sdk::signer::Signer;
+
+#[tokio::test(flavor = "multi_thread")]
+async fn mint_to() {
+    // Setup creates mint and empty ATA
+    let SetupContext {
+        mut rpc,
+        payer,
+        mint,
+        ata,
+        ..
+    } = shared::setup_empty_ata().await;
+
+    let mint_amount = 1_000_000_000u64;
+
+    let mint_to_ix = MintTo {
+        mint,
+        destination: ata,
+        amount: mint_amount,
+        authority: payer.pubkey(),
+        max_top_up: None,
+    }
+    .instruction()
+    .unwrap();
+
+    rpc.create_and_send_transaction(&[mint_to_ix], &payer.pubkey(), &[&payer])
+        .await
+        .unwrap();
+
+    let ata_data = rpc.get_account(ata).await.unwrap().unwrap();
+    let token = light_token_interface::state::Token::deserialize(&mut &ata_data.data[..]).unwrap();
+    assert_eq!(token.amount, mint_amount);
+}
+```

@@ -1,0 +1,30 @@
+```rust
+mod shared;
+
+use light_client::rpc::Rpc;
+use light_token_sdk::token::Revoke;
+use shared::SetupContext;
+use solana_sdk::signer::Signer;
+
+#[tokio::test(flavor = "multi_thread")]
+async fn revoke_delegation() {
+    // Setup creates mint, ATA with tokens, and approves delegate
+    let SetupContext {
+        mut rpc,
+        payer,
+        ata,
+        ..
+    } = shared::setup().await;
+
+    let revoke_ix = Revoke {
+        token_account: ata,
+        owner: payer.pubkey(),
+    }
+    .instruction()
+    .unwrap();
+
+    rpc.create_and_send_transaction(&[revoke_ix], &payer.pubkey(), &[&payer])
+        .await
+        .unwrap();
+}
+```

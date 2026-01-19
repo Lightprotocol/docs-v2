@@ -1,0 +1,202 @@
+---
+title: Approve and Revoke Delegates
+sidebarTitle: Approve / Revoke
+description: Rust client guide to approve and revoke delegates for light-token accounts. Includes step-by-step implementation and full code examples.
+keywords: ["approve delegate solana", "revoke delegate solana", "token delegation"]
+---
+
+---
+
+import TokenClientPrerequisites from "/snippets/light-token-guides/light-token-client-prerequisites.mdx";
+import { CodeCompare } from "/snippets/jsx/code-compare.jsx";
+import {
+  splApproveRustCode,
+  lightApproveRustCode,
+  splRevokeRustCode,
+  lightRevokeRustCode,
+} from "/snippets/code-samples/code-compare-snippets.jsx";
+import ApproveFull from "/snippets/code-snippets/light-token/approve-revoke/rust-client/approve-full.mdx";
+import RevokeFull from "/snippets/code-snippets/light-token/approve-revoke/rust-client/revoke-full.mdx";
+import NativeProgram from "/snippets/code-snippets/light-token/approve-revoke/program/native.mdx";
+import AnchorProgram from "/snippets/code-snippets/light-token/approve-revoke/program/anchor.mdx";
+
+1. Approve grants a delegate permission to transfer up to a specified amount of tokens from your account.
+    * Each token account can have only one delegate at a time. 
+    * Any new approval overwrites the previous one.
+2. Revoke removes all delegate permissions from a light-token account.
+3. Only the token account owner can approve or revoke delegates.
+
+<Tabs>
+<Tab title="Rust Client">
+
+<Tabs>
+<Tab title="Approve">
+
+<CodeCompare
+  firstCode={lightApproveRustCode}
+  secondCode={splApproveRustCode}
+  firstLabel="light-token"
+  secondLabel="SPL"
+  language="rust"
+/>
+
+</Tab>
+<Tab title="Revoke">
+
+<CodeCompare
+  firstCode={lightRevokeRustCode}
+  secondCode={splRevokeRustCode}
+  firstLabel="light-token"
+  secondLabel="SPL"
+  language="rust"
+/>
+
+</Tab>
+</Tabs>
+
+<Steps>
+<Step>
+### Prerequisites
+
+<TokenClientPrerequisites />
+
+</Step>
+
+<Step>
+### Approve or revoke delegates
+
+<Info>
+  View [Source Code](https://github.com/Lightprotocol/light-protocol/tree/main/sdk-libs/token-sdk/src/token) or find full examples with tests: [examples-light-token](https://github.com/Lightprotocol/examples-light-token/tree/main/rust-client).
+</Info>
+
+<Tabs>
+<Tab title="Approve">
+
+<ApproveFull />
+
+</Tab>
+<Tab title="Revoke">
+
+<RevokeFull />
+
+</Tab>
+</Tabs>
+
+</Step>
+</Steps>
+</Tab>
+
+<Tab title="Program Guide">
+
+<Steps>
+<Step>
+
+### Approve
+
+<Tabs>
+<Tab title="invoke (External Signer)">
+
+```rust
+use light_token_sdk::token::ApproveCpi;
+
+ApproveCpi {
+    token_account: token_account.clone(),
+    delegate: delegate.clone(),
+    owner: owner.clone(),
+    system_program: system_program.clone(),
+    amount,
+}
+.invoke()
+```
+
+</Tab>
+<Tab title="invoke_signed (PDA Owner)">
+
+```rust
+use light_token_sdk::token::ApproveCpi;
+
+let signer_seeds = authority_seeds!(bump);
+
+ApproveCpi {
+    token_account: token_account.clone(),
+    delegate: delegate.clone(),
+    owner: owner.clone(),
+    system_program: system_program.clone(),
+    amount,
+}
+.invoke_signed(&[signer_seeds])
+```
+
+</Tab>
+</Tabs>
+
+</Step>
+
+<Step>
+
+### Revoke
+
+<Tabs>
+<Tab title="invoke (External Signer)">
+
+```rust
+use light_token_sdk::token::RevokeCpi;
+
+RevokeCpi {
+    token_account: token_account.clone(),
+    owner: owner.clone(),
+    system_program: system_program.clone(),
+}
+.invoke()
+```
+
+</Tab>
+<Tab title="invoke_signed (PDA Owner)">
+
+```rust
+use light_token_sdk::token::RevokeCpi;
+
+let signer_seeds = authority_seeds!(bump);
+
+RevokeCpi {
+    token_account: token_account.clone(),
+    owner: owner.clone(),
+    system_program: system_program.clone(),
+}
+.invoke_signed(&[signer_seeds])
+```
+
+</Tab>
+</Tabs>
+
+</Step>
+</Steps>
+
+# Full Code Example
+
+<Info>
+  View [Source Code](https://github.com/Lightprotocol/light-protocol/tree/main/programs/compressed-token/program/src/ctoken/approve_revoke.rs) or full examples with tests: [examples-light-token](https://github.com/Lightprotocol/examples-light-token/tree/main/program-examples).
+</Info>
+
+<Tabs>
+  <Tab title="Anchor">
+    <AnchorProgram />
+  </Tab>
+  <Tab title="Native">
+    <NativeProgram />
+  </Tab>
+</Tabs>
+
+</Tab>
+
+</Tabs>
+
+# Next Steps
+
+<Card
+  title="Use the Unified Transfer Interface for Light-Token, SPL and Token 22 Transfers"
+  icon="chevron-right"
+  color="#0066ff"
+  href="/light-token/cookbook/transfer-interface"
+  horizontal
+/>

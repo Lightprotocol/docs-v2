@@ -1,0 +1,15 @@
+```rust
+let params = CreateMintParams {
+    decimals,
+    address_merkle_tree_root_index: rpc_result.addresses[0].root_index,
+    mint_authority: payer.pubkey(),
+    proof: rpc_result.proof.0.unwrap(),
+    compression_address,
+    mint,
+    bump: find_mint_address(&mint_seed.pubkey()).1,
+    freeze_authority: None,
+    extensions: Some(vec![ExtensionInstructionData::TokenMetadata(...)]),
+    rent_payment: 16,   // ~24 hours rent
+    write_top_up: 766,  // ~3 hours per write
+};
+```

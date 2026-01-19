@@ -1,0 +1,42 @@
+```rust
+mod shared;
+
+use borsh::BorshDeserialize;
+use light_client::rpc::Rpc;
+use light_token_sdk::token::Burn;
+use shared::SetupContext;
+use solana_sdk::signer::Signer;
+
+#[tokio::test(flavor = "multi_thread")]
+async fn burn() {
+    // Setup creates mint and ATA with tokens
+    let SetupContext {
+        mut rpc,
+        payer,
+        mint,
+        ata,
+        ..
+    } = shared::setup().await;
+
+    let initial_amount = 1_000_000u64;
+    let burn_amount = 400_000u64;
+
+    let burn_ix = Burn {
+        source: ata,
+        mint,
+        amount: burn_amount,
+        authority: payer.pubkey(),
+        max_top_up: None,
+    }
+    .instruction()
+    .unwrap();
+
+    rpc.create_and_send_transaction(&[burn_ix], &payer.pubkey(), &[&payer])
+        .await
+        .unwrap();
+
+    let ata_data = rpc.get_account(ata).await.unwrap().unwrap();
+    let token = light_token_interface::state::Token::deserialize(&mut &ata_data.data[..]).unwrap();
+    assert_eq!(token.amount, initial_amount - burn_amount);
+}
+```

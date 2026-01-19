@@ -1,0 +1,102 @@
+```rust
+#![allow(unexpected_cfgs)]
+
+use anchor_lang::prelude::*;
+use light_token_sdk::token::{CreateMintCpi, CreateMintParams, SystemAccountInfos};
+use light_token_sdk::CompressedProof;
+
+declare_id!("Ev7tKaozVxbZLVGcKcVcz8A9yKZjUf5ATqoNSe5BDkjj");
+
+#[program]
+pub mod light_token_anchor_create_mint {
+    use super::*;
+
+    pub fn create_mint<'info>(
+        ctx: Context<'_, '_, '_, 'info, CreateMintAccounts<'info>>,
+        decimals: u8,
+        address_merkle_tree_root_index: u16,
+        compression_address: [u8; 32],
+        proof: CompressedProof,
+        freeze_authority: Option<Pubkey>,
+        bump: u8,
+        rent_payment: Option<u8>,
+        write_top_up: Option<u32>,
+    ) -> Result<()> {
+        let mint = light_token_sdk::token::find_mint_address(ctx.accounts.mint_seed.key).0;
+
+        let params = CreateMintParams {
+            decimals,
+            address_merkle_tree_root_index,
+            mint_authority: *ctx.accounts.authority.key,
+            proof,
+            compression_address,
+            mint,
+            bump,
+            freeze_authority,
+            extensions: None,
+            rent_payment: rent_payment.unwrap_or(16),    // Default: ~24 hours
+            write_top_up: write_top_up.unwrap_or(766),   // Default: ~3 hours per write
+        };
+
+        let system_accounts = SystemAccountInfos {
+            light_system_program: ctx.accounts.light_system_program.to_account_info(),
+            cpi_authority_pda: ctx.accounts.cpi_authority_pda.to_account_info(),
+            registered_program_pda: ctx.accounts.registered_program_pda.to_account_info(),
+            account_compression_authority: ctx.accounts.account_compression_authority.to_account_info(),
+            account_compression_program: ctx.accounts.account_compression_program.to_account_info(),
+            system_program: ctx.accounts.system_program.to_account_info(),
+        };
+
+        CreateMintCpi {
+            mint_seed: ctx.accounts.mint_seed.to_account_info(),
+            authority: ctx.accounts.authority.to_account_info(),
+            payer: ctx.accounts.payer.to_account_info(),
+            address_tree: ctx.accounts.address_tree.to_account_info(),
+            output_queue: ctx.accounts.output_queue.to_account_info(),
+            compressible_config: ctx.accounts.compressible_config.to_account_info(),
+            mint: ctx.accounts.mint.to_account_info(),
+            rent_sponsor: ctx.accounts.rent_sponsor.to_account_info(),
+            system_accounts,
+            cpi_context: None,
+            cpi_context_account: None,
+            params,
+        }
+        .invoke()?;
+        Ok(())
+    }
+}
+
+#[derive(Accounts)]
+pub struct CreateMintAccounts<'info> {
+    pub mint_seed: Signer<'info>,
+    /// CHECK: Validated by light-token CPI
+    pub authority: AccountInfo<'info>,
+    #[account(mut)]
+    pub payer: Signer<'info>,
+    /// CHECK: Validated by light-token CPI
+    #[account(mut)]
+    pub address_tree: AccountInfo<'info>,
+    /// CHECK: Validated by light-token CPI
+    #[account(mut)]
+    pub output_queue: AccountInfo<'info>,
+    /// CHECK: Validated by light-token CPI
+    pub light_system_program: AccountInfo<'info>,
+    /// CHECK: Validated by light-token CPI
+    pub cpi_authority_pda: AccountInfo<'info>,
+    /// CHECK: Validated by light-token CPI
+    pub registered_program_pda: AccountInfo<'info>,
+    /// CHECK: Validated by light-token CPI
+    pub account_compression_authority: AccountInfo<'info>,
+    /// CHECK: Validated by light-token CPI
+    pub account_compression_program: AccountInfo<'info>,
+    pub system_program: Program<'info, System>,
+    /// CHECK: Validated by light-token CPI - use light_token_sdk::token::config_pda()
+    pub compressible_config: AccountInfo<'info>,
+    /// CHECK: Validated by light-token CPI - derived from find_mint_address(mint_seed)
+    #[account(mut)]
+    pub mint: AccountInfo<'info>,
+    /// CHECK: Validated by light-token CPI - use light_token_sdk::token::rent_sponsor_pda()
+    #[account(mut)]
+    pub rent_sponsor: AccountInfo<'info>,
+}
+```

@@ -1,0 +1,64 @@
+```rust
+mod shared;
+
+use light_client::rpc::Rpc;
+use light_token_sdk::token::{get_associated_token_address, CreateAssociatedTokenAccount};
+use shared::SplMintContext;
+use solana_sdk::{signature::Keypair, signer::Signer};
+
+#[tokio::test(flavor = "multi_thread")]
+async fn create_ata() {
+    // You can use light, spl, t22 mints to create a light token ATA.
+    let SplMintContext {
+        mut rpc,
+        payer,
+        mint,
+    } = shared::setup_spl_mint_context().await;
+
+    let owner = Keypair::new();
+
+    let create_ata_ix = CreateAssociatedTokenAccount::new(
+        payer.pubkey(),
+        owner.pubkey(),
+        mint,
+    )
+    .instruction()
+    .unwrap();
+
+    rpc.create_and_send_transaction(&[create_ata_ix], &payer.pubkey(), &[&payer])
+        .await
+        .unwrap();
+
+    let expected_ata = get_associated_token_address(&owner.pubkey(), &mint);
+    let ata_account = rpc.get_account(expected_ata).await.unwrap();
+    assert!(ata_account.is_some());
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn create_ata_idempotent() {
+    let SplMintContext {
+        mut rpc,
+        payer,
+        mint,
+    } = shared::setup_spl_mint_context().await;
+
+    let create_ata_ix = CreateAssociatedTokenAccount::new(
+        payer.pubkey(),
+        payer.pubkey(),
+        mint,
+    )
+    .idempotent()
+    .instruction()
+    .unwrap();
+
+    rpc.create_and_send_transaction(&[create_ata_ix.clone()], &payer.pubkey(), &[&payer])
+        .await
+        .unwrap();
+
+    let result = rpc
+        .create_and_send_transaction(&[create_ata_ix], &payer.pubkey(), &[&payer])
+        .await;
+
+    assert!(result.is_ok());
+}
+```

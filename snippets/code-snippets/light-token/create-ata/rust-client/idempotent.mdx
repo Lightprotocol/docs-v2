@@ -1,0 +1,11 @@
+```rust
+use light_token_sdk::token::CreateAssociatedTokenAccount;
+
+let create_ata_ix = CreateAssociatedTokenAccount::new(
+    payer.pubkey(),
+    payer.pubkey(),
+    mint,
+)
+.idempotent()
+.instruction()?;
+```

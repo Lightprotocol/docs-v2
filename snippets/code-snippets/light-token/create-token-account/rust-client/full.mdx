@@ -1,0 +1,37 @@
+```rust
+mod shared;
+
+use light_client::rpc::Rpc;
+use light_token_sdk::token::CreateTokenAccount;
+use shared::SplMintContext;
+use solana_sdk::{signature::Keypair, signer::Signer};
+
+#[tokio::test(flavor = "multi_thread")]
+async fn create_token_account() {
+    // Setup creates mint
+    // You can use light, spl, t22 mints to create a light token account.
+    let SplMintContext {
+        mut rpc,
+        payer,
+        mint,
+    } = shared::setup_spl_mint_context().await;
+
+    let account = Keypair::new();
+
+    let create_account_ix = CreateTokenAccount::new(
+        payer.pubkey(),
+        account.pubkey(),
+        mint,
+        payer.pubkey(),
+    )
+    .instruction()
+    .unwrap();
+
+    rpc.create_and_send_transaction(&[create_account_ix], &payer.pubkey(), &[&payer, &account])
+        .await
+        .unwrap();
+
+    let account_data = rpc.get_account(account.pubkey()).await.unwrap();
+    assert!(account_data.is_some());
+}
+```

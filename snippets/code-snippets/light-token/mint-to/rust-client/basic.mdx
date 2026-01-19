@@ -1,0 +1,13 @@
+```rust
+use light_token_sdk::token::MintTo;
+
+let instruction = MintTo::new(
+    params,
+    payer.pubkey(),
+    state_tree,
+    output_queue,
+    input_queue,
+    vec![recipient_account.pubkey()],
+)
+.instruction()?;
+```
