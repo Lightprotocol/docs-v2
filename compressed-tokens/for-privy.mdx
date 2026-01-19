@@ -6,15 +6,10 @@ keywords: ["privy solana", "privy compressed tokens", "embedded wallet compressi
 ---
 import ToolkitsSetup from "/snippets/setup/toolkits-setup.mdx";
 import TransferNodejs from "/snippets/code-snippets/privy/transfer/nodejs.mdx";
-import TransferReact from "/snippets/code-snippets/privy/transfer/react.mdx";
 import CompressNodejs from "/snippets/code-snippets/privy/compress/nodejs.mdx";
-import CompressReact from "/snippets/code-snippets/privy/compress/react.mdx";
 import DecompressNodejs from "/snippets/code-snippets/privy/decompress/nodejs.mdx";
-import DecompressReact from "/snippets/code-snippets/privy/decompress/react.mdx";
 import BalancesNodejs from "/snippets/code-snippets/privy/balances/nodejs.mdx";
-import BalancesReact from "/snippets/code-snippets/privy/balances/react.mdx";
 import TransactionHistoryNodejs from "/snippets/code-snippets/privy/transaction-history/nodejs.mdx";
-import TransactionHistoryReact from "/snippets/code-snippets/privy/transaction-history/react.mdx";
 import ActionCode from '/snippets/code-snippets/compressed-token/create-mint/action.mdx';
 
 | Creation Cost | SPL Token Account | Compressed Token |
@@ -105,7 +100,7 @@ Before we can compress or decompresss, we need:
 ## Full Code Examples
 
 <Info>
-Find complete examples on Github: [privy/nodejs-privy-compressed](https://github.com/Lightprotocol/examples-zk-compression/tree/main/privy/nodejs-privy-compressed) and [privy/react-privy-compressed](https://github.com/Lightprotocol/examples-zk-compression/tree/main/privy/react-privy-compressed).
+Find a complete example on Github: [privy/nodejs-privy-compressed](https://github.com/Lightprotocol/examples-zk-compression/tree/main/privy).
 </Info>
 
 <Tabs>
@@ -123,9 +118,6 @@ Send compressed tokens to another recipient, similar to SPL token transfers:
 <Tab title="Node.js">
 <TransferNodejs />
 </Tab>
-<Tab title="React">
-<TransferReact />
-</Tab>
 </Tabs>
 
 </Tab>
@@ -138,9 +130,6 @@ Convert SPL to compressed tokens and send to a recipient in one instruction.
 <Tab title="Node.js">
 <CompressNodejs />
 </Tab>
-<Tab title="React">
-<CompressReact />
-</Tab>
 </Tabs>
 
 </Tab>
@@ -152,9 +141,6 @@ Convert compressed tokens back to SPL tokens.
 <Tabs>
 <Tab title="Node.js">
 <DecompressNodejs />
-</Tab>
-<Tab title="React">
-<DecompressReact />
 </Tab>
 </Tabs>
 
@@ -171,9 +157,6 @@ Fetch SPL and compressed token balances.
 <Tab title="Node.js">
 <BalancesNodejs />
 </Tab>
-<Tab title="React">
-<BalancesReact />
-</Tab>
 </Tabs>
 
 ## Get transaction history
@@ -183,8 +166,5 @@ Fetch compressed token transaction history for an owner, with optional detailed 
 <Tabs>
 <Tab title="Node.js">
 <TransactionHistoryNodejs />
-</Tab>
-<Tab title="React">
-<TransactionHistoryReact />
 </Tab>
 </Tabs>
