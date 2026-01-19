@@ -1,0 +1,81 @@
+```typescript
+import 'dotenv/config';
+import {PrivyClient} from '@privy-io/node';
+import {createRpc} from '@lightprotocol/stateless.js';
+import {Keypair, PublicKey, Transaction} from '@solana/web3.js';
+import {getAssociatedTokenAddressSync, createAssociatedTokenAccount} from '@solana/spl-token';
+import {decompress} from '@lightprotocol/compressed-token';
+
+const decompressTokens = async (
+  fromAddress: string,
+  tokenMintAddress: string,
+  amount: number,
+  decimals: number = 6
+) => {
+  const connection = createRpc(process.env.HELIUS_RPC_URL!);
+
+  const privy = new PrivyClient({
+    appId: process.env.PRIVY_APP_ID!,
+    appSecret: process.env.PRIVY_APP_SECRET!,
+  });
+
+  const fromPubkey = new PublicKey(fromAddress);
+  const mintPubkey = new PublicKey(tokenMintAddress);
+  const rawAmount = amount * Math.pow(10, decimals);
+
+  // Get destination ATA
+  const ownerAta = getAssociatedTokenAddressSync(mintPubkey, fromPubkey);
+
+  // Check ATA exists (decompress action will handle creation internally)
+  // But we need to be aware ATA creation requires a separate signer
+
+  // Create fake keypair for decompress action (only publicKey is used)
+  const dummyPayer = {
+    publicKey: fromPubkey,
+    secretKey: new Uint8Array(64),
+  } as any;
+
+  // Intercept sendAndConfirmTransaction to use Privy signing
+  const originalSendAndConfirm = (connection as any).sendAndConfirmTransaction;
+  (connection as any).sendAndConfirmTransaction = async (tx: Transaction, signers: any[]) => {
+    const signResult = await privy.wallets().solana().signTransaction(process.env.TREASURY_WALLET_ID!, {
+      transaction: tx.serialize({requireAllSignatures: false}),
+      authorization_context: {
+        authorization_private_keys: [process.env.TREASURY_AUTHORIZATION_KEY!]
+      }
+    });
+
+    const signedTx = (signResult as any).signed_transaction || signResult.signedTransaction;
+    if (!signedTx) {
+      throw new Error('Privy returned invalid response');
+    }
+
+    const signedTransaction = Buffer.from(signedTx, 'base64');
+    const signature = await connection.sendRawTransaction(signedTransaction, {
+      skipPreflight: false,
+      preflightCommitment: 'confirmed'
+    });
+    await connection.confirmTransaction(signature, 'confirmed');
+    return signature;
+  };
+
+  try {
+    // Use high-level decompress action (handles account configuration correctly)
+    const signature = await decompress(
+      connection,
+      dummyPayer,
+      mintPubkey,
+      rawAmount,
+      dummyPayer,
+      ownerAta
+    );
+
+    return signature;
+  } finally {
+    // Restore original function
+    (connection as any).sendAndConfirmTransaction = originalSendAndConfirm;
+  }
+};
+
+export default decompressTokens;
+```

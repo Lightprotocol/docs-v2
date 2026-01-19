@@ -1,0 +1,38 @@
+```typescript
+import {PublicKey} from '@solana/web3.js';
+import {createRpc} from '@lightprotocol/stateless.js';
+import {HELIUS_RPC_URL} from './config.js';
+
+export async function getCompressedBalances(ownerAddress: string) {
+  const rpc = createRpc(HELIUS_RPC_URL);
+  const owner = new PublicKey(ownerAddress);
+
+  // Get compressed SOL balance
+  const compressedSol = await rpc.getCompressedBalanceByOwner(owner);
+  const compressedSolLamports = compressedSol.value ? BigInt(compressedSol.value.toString()) : 0n;
+
+  // Get compressed token accounts (filter out null items from indexer)
+  const compressedAccounts = await rpc.getCompressedTokenAccountsByOwner(owner);
+  const validItems = (compressedAccounts.items || []).filter((item): item is NonNullable<typeof item> => item !== null);
+
+  // Aggregate balances by mint
+  const balances = new Map<string, bigint>();
+  for (const account of validItems) {
+    if (account.parsed) {
+      const mint = account.parsed.mint.toBase58();
+      const amount = BigInt(account.parsed.amount.toString());
+      const current = balances.get(mint) || 0n;
+      balances.set(mint, current + amount);
+    }
+  }
+
+  return {
+    sol: compressedSolLamports.toString(),
+    tokens: Array.from(balances.entries()).map(([mint, amount]) => ({
+      mint,
+      amount: amount.toString(),
+      accounts: validItems.filter(a => a.parsed?.mint.toBase58() === mint).length
+    }))
+  };
+}
+```

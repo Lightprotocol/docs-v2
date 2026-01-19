@@ -130,6 +130,7 @@
             "group": "Compressed Tokens",
             "pages": [
               "compressed-tokens/overview",
+              "compressed-tokens/for-privy",
               "compressed-tokens/advanced-guides/airdrop",
               {
                 "group": "Cookbook",

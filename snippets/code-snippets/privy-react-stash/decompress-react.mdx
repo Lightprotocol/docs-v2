@@ -1,0 +1,98 @@
+```typescript
+import { useState } from 'react';
+import { PublicKey, Transaction, ComputeBudgetProgram } from '@solana/web3.js';
+import { getAssociatedTokenAddressSync, createAssociatedTokenAccountInstruction, getAccount, TokenAccountNotFoundError } from '@solana/spl-token';
+import { CompressedTokenProgram, selectMinCompressedTokenAccountsForTransfer, getSplInterfaceInfos, selectSplInterfaceInfosForDecompression } from '@lightprotocol/compressed-token';
+import { bn } from '@lightprotocol/stateless.js';
+import { getRpc } from '../lib/rpc';
+
+export interface BuildDecompressParams {
+  ownerPublicKey: string;
+  mint: string;
+  amount: number;
+  decimals?: number;
+}
+
+export function useBuildDecompress() {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const buildDecompressTx = async (params: BuildDecompressParams): Promise<Transaction> => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const { ownerPublicKey, mint, amount, decimals = 6 } = params;
+      const rpc = getRpc();
+      const owner = new PublicKey(ownerPublicKey);
+      const mintPubkey = new PublicKey(mint);
+      const tokenAmount = bn(Math.floor(amount * Math.pow(10, decimals)));
+
+      // Get destination ATA
+      const destinationAta = getAssociatedTokenAddressSync(mintPubkey, owner);
+
+      // Get compressed token accounts
+      const accounts = await rpc.getCompressedTokenAccountsByOwner(owner, { mint: mintPubkey });
+      if (!accounts.items || accounts.items.length === 0) {
+        throw new Error('No compressed token accounts found');
+      }
+
+      // Select minimum accounts needed
+      const [inputAccounts] = selectMinCompressedTokenAccountsForTransfer(accounts.items, tokenAmount);
+      if (inputAccounts.length === 0) {
+        throw new Error('Insufficient compressed balance');
+      }
+
+      // Get validity proof and token pool info
+      const proof = await rpc.getValidityProof(
+        inputAccounts.map((account) => bn(account.compressedAccount.hash))
+      );
+      const splInterfaceInfos = await getSplInterfaceInfos(rpc, mintPubkey);
+      const tokenPoolInfos = selectSplInterfaceInfosForDecompression(splInterfaceInfos, tokenAmount);
+
+      // Build transaction
+      const { blockhash } = await rpc.getLatestBlockhash();
+      const transaction = new Transaction();
+      transaction.add(ComputeBudgetProgram.setComputeUnitLimit({ units: 400_000 }));
+
+      // Create ATA if it doesn't exist
+      try {
+        await getAccount(rpc, destinationAta);
+      } catch (e) {
+        if (e instanceof TokenAccountNotFoundError) {
+          transaction.add(
+            createAssociatedTokenAccountInstruction(owner, destinationAta, owner, mintPubkey)
+          );
+        } else {
+          throw e;
+        }
+      }
+
+      // Build decompress instruction
+      const decompressIx = await CompressedTokenProgram.decompress({
+        payer: owner,
+        inputCompressedTokenAccounts: inputAccounts,
+        toAddress: destinationAta,
+        amount: tokenAmount,
+        recentInputStateRootIndices: proof.rootIndices,
+        recentValidityProof: proof.compressedProof,
+        tokenPoolInfos,
+      });
+
+      transaction.add(decompressIx);
+      transaction.recentBlockhash = blockhash;
+      transaction.feePayer = owner;
+
+      setIsLoading(false);
+      return transaction;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      setError(errorMessage);
+      setIsLoading(false);
+      throw err;
+    }
+  };
+
+  return { buildDecompressTx, isLoading, error };
+}
+```

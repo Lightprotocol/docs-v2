@@ -1,0 +1,98 @@
+```typescript
+import { useState } from 'react';
+import { PublicKey } from '@solana/web3.js';
+import { getRpc } from '../lib/rpc';
+import { USDC_MINT } from '../lib/constants';
+
+export interface TokenBalance {
+  mint: string;
+  amount: string;
+  accounts: number;
+}
+
+export interface CompressedBalances {
+  sol: string;
+  tokens: TokenBalance[];
+}
+
+export function useCompressedBalances() {
+  const [balances, setBalances] = useState<CompressedBalances | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchBalances = async (ownerPublicKey: string): Promise<CompressedBalances> => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const rpc = getRpc();
+      const owner = new PublicKey(ownerPublicKey);
+
+      // Get compressed SOL balance
+      const compressedSol = await rpc.getCompressedBalanceByOwner(owner);
+      const compressedSolLamports = compressedSol.value
+        ? BigInt(compressedSol.value.toString())
+        : 0n;
+
+      // Get compressed token accounts
+      const compressedAccounts = await rpc.getCompressedTokenAccountsByOwner(owner);
+
+      // Aggregate balances by mint
+      const mintBalances = new Map<string, bigint>();
+      const mintAccounts = new Map<string, number>();
+
+      if (compressedAccounts.items) {
+        for (const account of compressedAccounts.items) {
+          if (account.parsed) {
+            const mint = account.parsed.mint.toBase58();
+            const amount = BigInt(account.parsed.amount.toString());
+            const current = mintBalances.get(mint) || 0n;
+            mintBalances.set(mint, current + amount);
+
+            const accountCount = mintAccounts.get(mint) || 0;
+            mintAccounts.set(mint, accountCount + 1);
+          }
+        }
+      }
+
+      // Build tokens array, ensuring USDC is always included
+      const tokens: TokenBalance[] = [];
+
+      // Always add USDC first (even if balance is zero)
+      const usdcBalance = mintBalances.get(USDC_MINT) || 0n;
+      tokens.push({
+        mint: USDC_MINT,
+        amount: usdcBalance.toString(),
+        accounts: mintAccounts.get(USDC_MINT) || 0,
+      });
+
+      // Add other tokens
+      for (const [mint, amount] of mintBalances.entries()) {
+        if (mint !== USDC_MINT) {
+          tokens.push({
+            mint,
+            amount: amount.toString(),
+            accounts: mintAccounts.get(mint) || 0,
+          });
+        }
+      }
+
+      const result: CompressedBalances = {
+        sol: compressedSolLamports.toString(),
+        tokens,
+      };
+
+      setBalances(result);
+      setIsLoading(false);
+      return result;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      setError(errorMessage);
+      setIsLoading(false);
+      throw err;
+    }
+  };
+
+  return { balances, fetchBalances, isLoading, error };
+}
+```

@@ -1,0 +1,170 @@
+---
+title: "Rent-Free SPL Accounts with Privy"
+sidebarTitle: "Privy Guide"
+description: "Integrate compressed tokens with Privy embedded wallets for rent-free SPL token accounts and transfers."
+keywords: ["privy solana", "privy compressed tokens", "embedded wallet compression", "rent-free tokens privy"]
+---
+import ToolkitsSetup from "/snippets/setup/toolkits-setup.mdx";
+import TransferNodejs from "/snippets/code-snippets/privy/transfer/nodejs.mdx";
+import CompressNodejs from "/snippets/code-snippets/privy/compress/nodejs.mdx";
+import DecompressNodejs from "/snippets/code-snippets/privy/decompress/nodejs.mdx";
+import BalancesNodejs from "/snippets/code-snippets/privy/balances/nodejs.mdx";
+import TransactionHistoryNodejs from "/snippets/code-snippets/privy/transaction-history/nodejs.mdx";
+import ActionCode from '/snippets/code-snippets/compressed-token/create-mint/action.mdx';
+
+| Creation Cost | SPL Token Account | Compressed Token |
+| :------------ | :---------------- | :--------------- |
+| **Per account** | ~2,000,000 lamports | ~**5,000** lamports |
+
+Privy handles user authentication and wallet management. You build transactions with tokens (SOL, SPL or compressed) and Privy signs them client-side:
+
+1. Authenticate with Privy 
+2. Build unsigned transaction 
+4. Sign transaction using Privy's wallet provider
+5. Send signed transaction to RPC
+
+## What will you implement
+<table>
+  <thead>
+    <tr>
+      <th style={{ width: "20%" }}></th>
+      <th>SPL</th>
+      <th>Compressed </th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>**Get Balance**</td>
+      <td>getAccount()</td>
+      <td>getCompressedTokenAccountsByOwner()</td>
+    </tr>
+    <tr>
+      <td>**Transfer**</td>
+      <td>transferChecked()</td>
+      <td>transfer()</td>
+    </tr>
+    <tr>
+      <td>**Compress**</td>
+      <td>N/A</td>
+      <td>compress()</td>
+    </tr>
+    <tr>
+      <td>**Decompress**</td>
+      <td>N/A</td>
+      <td>decompress()</td>
+    </tr>
+    <tr>
+      <td>**Transaction History**</td>
+      <td>getSignaturesForAddress()</td>
+      <td>getCompressionSignaturesForOwner()</td>
+    </tr>
+  </tbody>
+</table>
+
+<Steps>
+<Step>
+### Prerequisites
+
+<ToolkitsSetup />
+
+Connect to an RPC endpoint that supports ZK Compression (Helius, Triton)
+```typescript
+import { createRpc } from "@lightprotocol/stateless.js";
+
+import {
+  transfer,
+  compress,
+  decompress,
+  selectMinCompressedTokenAccountsForTransfer,
+} from "@lightprotocol/compressed-token";
+
+const rpc = createRpc(RPC_ENDPOINT);
+```
+
+<Accordion title="Setup test mint">
+
+
+<Info>
+Before we can compress or decompresss, we need:
+
+* An SPL mint with a token pool for compression. This token pool can be created for new SPL mints via [`createMint()`](/compressed-tokens/guides/create-mint-with-token-pool) or added to existing SPL mints via [`createTokenPool()`](/compressed-tokens/guides/add-token-pools-to-mint-accounts).
+* For `compress()` SPL tokens in an Associated Token Account, or
+* For `decompress()` compressed token accounts with sufficient balance.
+</Info>
+
+<ActionCode />
+
+</Accordion>
+</Step>
+<Step>
+## Full Code Examples
+
+<Info>
+Find a complete example on Github: [privy/nodejs-privy-compressed](https://github.com/Lightprotocol/examples-zk-compression/tree/main/privy).
+</Info>
+
+<Tabs>
+<Tab title="Compressed Transfer">
+
+Send compressed tokens to another recipient, similar to SPL token transfers:
+
+1. Fetch compressed token accounts with `getCompressedTokenAccountsByOwner`
+2. Select sender accounts with `selectMinCompressedTokenAccountsForTransfer`
+3. Fetch a validity proof from your RPC provider to prove the account's state correctness
+4. Build the transfer instruction and transaction
+5. Sign with Privy and send transaction
+
+<Tabs>
+<Tab title="Node.js">
+<TransferNodejs />
+</Tab>
+</Tabs>
+
+</Tab>
+
+<Tab title="Compress SPL to Recipient">
+
+Convert SPL to compressed tokens and send to a recipient in one instruction.
+
+<Tabs>
+<Tab title="Node.js">
+<CompressNodejs />
+</Tab>
+</Tabs>
+
+</Tab>
+
+<Tab title="Decompress (Offramp)">
+
+Convert compressed tokens back to SPL tokens.
+
+<Tabs>
+<Tab title="Node.js">
+<DecompressNodejs />
+</Tab>
+</Tabs>
+
+</Tab>
+</Tabs>
+
+</Step>
+</Steps>
+## Get balances
+
+Fetch SOL, SPL, and compressed token balances.
+
+<Tabs>
+<Tab title="Node.js">
+<BalancesNodejs />
+</Tab>
+</Tabs>
+
+## Get transaction history
+
+Fetch compressed token transaction history for an owner, with optional detailed compression information.
+
+<Tabs>
+<Tab title="Node.js">
+<TransactionHistoryNodejs />
+</Tab>
+</Tabs>

@@ -1,0 +1,89 @@
+```typescript
+import 'dotenv/config';
+import {PrivyClient} from '@privy-io/node';
+import {createRpc, bn, selectStateTreeInfo} from '@lightprotocol/stateless.js';
+import {PublicKey, Transaction, ComputeBudgetProgram} from '@solana/web3.js';
+import {getAssociatedTokenAddressSync, getAccount} from '@solana/spl-token';
+import {CompressedTokenProgram, getTokenPoolInfos, selectTokenPoolInfo} from '@lightprotocol/compressed-token';
+
+const compressSplTokens = async (
+  fromAddress: string,
+  toAddress: string,
+  tokenMintAddress: string,
+  amount: number,
+  decimals: number = 6
+) => {
+  const connection = createRpc(process.env.HELIUS_RPC_URL!);
+
+  const privy = new PrivyClient({
+    appId: process.env.PRIVY_APP_ID!,
+    appSecret: process.env.PRIVY_APP_SECRET!,
+  });
+
+  // Create public key objects
+  const fromPubkey = new PublicKey(fromAddress);
+  const toPubkey = new PublicKey(toAddress);
+  const mintPubkey = new PublicKey(tokenMintAddress);
+  const tokenAmount = bn(amount * Math.pow(10, decimals));
+
+  // Get source token account and verify balance
+  const ownerAta = getAssociatedTokenAddressSync(mintPubkey, fromPubkey);
+  const ataAccount = await getAccount(connection, ownerAta);
+  if (ataAccount.amount < BigInt(tokenAmount.toString())) {
+    throw new Error('Insufficient SPL balance');
+  }
+
+  // Get state tree to store compressed tokens
+  //  Get token pool info. Stores SPL tokens in interface PDA when compressed.
+  const stateTreeInfos = await connection.getStateTreeInfos();
+  const selectedTreeInfo = selectStateTreeInfo(stateTreeInfos);
+  const tokenPoolInfos = await getTokenPoolInfos(connection, mintPubkey);
+  const tokenPoolInfo = selectTokenPoolInfo(tokenPoolInfos);
+
+  // Create compress instruction
+  const instruction = await CompressedTokenProgram.compress({
+    payer: fromPubkey,
+    owner: fromPubkey,
+    source: ownerAta,
+    toAddress: toPubkey,
+    mint: mintPubkey,
+    amount: tokenAmount,
+    outputStateTreeInfo: selectedTreeInfo,
+    tokenPoolInfo,
+  });
+
+  // Create transaction
+  const transaction = new Transaction();
+  transaction.add(ComputeBudgetProgram.setComputeUnitLimit({units: 300_000}));
+  transaction.add(instruction);
+
+  // Get recent blockhash
+  const {blockhash} = await connection.getLatestBlockhash();
+  transaction.recentBlockhash = blockhash;
+  transaction.feePayer = fromPubkey;
+
+  // Sign with Privy
+  const signResult = await privy.wallets().solana().signTransaction(process.env.TREASURY_WALLET_ID!, {
+    transaction: transaction.serialize({requireAllSignatures: false}),
+    authorization_context: {
+      authorization_private_keys: [process.env.TREASURY_AUTHORIZATION_KEY!]
+    }
+  });
+  const signedTx = (signResult as any).signed_transaction || signResult.signedTransaction;
+  if (!signedTx) {
+    throw new Error('Privy returned invalid response: ' + JSON.stringify(signResult));
+  }
+  const signedTransaction = Buffer.from(signedTx, 'base64');
+
+  // Send transaction
+  const signature = await connection.sendRawTransaction(signedTransaction, {
+    skipPreflight: false,
+    preflightCommitment: 'confirmed'
+  });
+  await connection.confirmTransaction(signature, 'confirmed');
+
+  return signature;
+};
+
+export default compressSplTokens;
+```

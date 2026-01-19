@@ -1,0 +1,33 @@
+```typescript
+import { useState } from 'react';
+import { getRpc } from '../lib/rpc';
+
+export function useSendTransaction() {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const sendTransaction = async (signedTransaction: Buffer): Promise<string> => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const rpc = getRpc();
+
+      const signature = await rpc.sendRawTransaction(signedTransaction, {
+        skipPreflight: false,
+        preflightCommitment: 'confirmed',
+      });
+
+      setIsLoading(false);
+      return signature;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      setError(errorMessage);
+      setIsLoading(false);
+      throw err;
+    }
+  };
+
+  return { sendTransaction, isLoading, error };
+}
+```
