@@ -4,14 +4,7 @@ description: "Build high-performance DeFi programs with rent-free accounts"
 ---
 
 The Light-SDK pays rent-exemption for your PDAs, token accounts, and mints (98%
-cost savings). Your instructions stay the same. Inactive accounts auto-compress;
-clients can load them back when needed.
-
-| | Hot (active) | Cold (inactive) |
-|---|---|---|
-| Location | On-chain | Compressed |
-| Latency/CU | No change | +load instruction |
-| Your code | No change | No change |
+cost savings). Your instructions stay the same.
 
 ## What Changes
 
@@ -492,20 +485,24 @@ async fn test_pool_lifecycle() {
 | Full test | [program.rs](https://github.com/Lightprotocol/cp-swap-reference/blob/main/programs/cp-swap/tests/program.rs) |
 
 ---
+## How it works
 
-## Hot/Cold Cycle
+The SDK pays the rent-exemption cost. Inactive (cold) accounts auto-compress. Your program only ever interacts with hot accounts. 
+Clients can load cold accounts back when needed via `create_load_instructions`.
 
-| Stage | What happens |
-|-------|--------------|
-| Init | Pool created with rent-exemption sponsored by SDK |
-| Hot | Any write bumps the virtual rent balance |
-| Cold (eg., no writes for 24h) | Miner compresses to ledger |
-| Load | User prepends load ix to transaction, pool back on-chain |
+Under the hood, clients use `AccountInterface` - a superset of Solana's `Account` that unifies hot and cold state. See [Router Integration](./routers) for details.
 
 
-## Existing Programs
+#### Hot/cold cycle
+| | Hot (active) | Cold (inactive) |
+|---|---|---|
+| Storage | On-chain | Compressed |
+| Latency/CU | No change | +load instruction |
+| Your program code | No change | No change |
 
-[Contact us](https://discord.com/invite/7cJ8BhAXhu) for migration support.
+## Existing programs
+
+If you have an existing program that you would like to migrate to rent-free accounts, [contact us](https://discord.com/invite/7cJ8BhAXhu) for migration support.
 
 
 ## FAQ
