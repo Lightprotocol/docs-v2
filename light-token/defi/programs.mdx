@@ -274,7 +274,7 @@ pub struct InitializePool<'info> {
 </Accordion>
 
 ## Step 5: Instructions
-Replace `spl_token` with `light_token` instructions as you need.
+Replace `spl_token` with `light_token` instructions as you need. The API is a superset of SPL-token so switching is straightforward.
 
 Examples include: `MintToCpi`, `TransferCpi`, `TransferInterfaceCpi`,
 `CreateTokenAccountCpi`, and `CreateTokenAtaCpi`.
@@ -492,8 +492,6 @@ Clients can load cold accounts back when needed via `create_load_instructions`.
 
 Under the hood, clients use `AccountInterface` - a superset of Solana's `Account` that unifies hot and cold state. See [Router Integration](./routers) for details.
 
-
-#### Hot/cold cycle
 | | Hot (active) | Cold (inactive) |
 |---|---|---|
 | Storage | On-chain | Compressed |
@@ -507,24 +505,25 @@ If you have an existing program that you would like to migrate to rent-free acco
 
 ## FAQ
 
-<Accordion title="Who triggers compression?">
-Foresters automatically compress when virtual rent depletes (~4 days idle). You don't trigger it.
-</Accordion>
+<Accordion title="How do you prevent re-init attacks for cold accounts?"> When
+you create an account, under the hood, the SDK auto-provides a proof that
+verifies that the account does not yet exist in the compressed address space.
+The SVM takes care of uniqueness in the onchain space. This way both account
+spaces are covered, preventing re-init attacks. </Accordion>
+
+<Accordion title="Who triggers compression?"> Miners automatically compress when
+virtual rent is below threshold (eg 24h without write bump). </Accordion>
 
 <Accordion title="Can active pools get compressed?">
-No. Any interaction resets the timer. Active pools never compress.
-</Accordion>
-
-<Accordion title="What happens to token balances?">
-Preserved exactly. Compressed state includes full balance. Restored on load.
+No. Any write bumps the virtual rent balance. Active pools never compress.
 </Accordion>
 
 <Accordion title="Do I need to run infrastructure?">
-No. Helius runs Photon (indexer), Light Protocol runs foresters. Self-hosting optional.
+No. Helius and Triton run the Interface RPC endpoints, self-hosting optional.
 </Accordion>
 
 <Accordion title="What if indexer is down?">
-Hot pools work normally. Cold pools can't load until recovery. No data loss.
+Hot pools work normally. Cold pools can't load until recovery. No data or safety loss.
 </Accordion>
 
 ---
