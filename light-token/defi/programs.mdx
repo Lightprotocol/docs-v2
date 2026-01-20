@@ -31,6 +31,9 @@ If you don't use Anchor, [let us know](https://discord.com/invite/7cJ8BhAXhu).
 References for native solana-program integration coming soon.
 
 ---
+<Callout type="info">
+You can find a complete rent-free AMM reference implementation [here](https://github.com/Lightprotocol/cp-swap-reference).
+</Callout>
 
 ## Step 1: Dependencies
 
@@ -357,7 +360,7 @@ pub fn process_initialize_pool(ctx: Context<InitializePool>, params: InitializeP
 
 To make it easy for clients to integrate with your program, ship an SDK crate implementing `LightProgramInterface`.
 
-For a detailed example of how clients use this trait, check out the [Router Integration](./aggregators.mdx) page.
+For a detailed example of how clients use this trait, check out the [Router Integration](./routers.mdx) page.
 
 <Accordion title="Example: Trait Implementation">
 
@@ -427,7 +430,7 @@ impl LightProgramInterface for AmmSdk {
 
 | Resource | Link |
 |----------|------|
-| SDK Reference | [csdk-anchor-full-derived-test-sdk](https://github.com/lightprotocol/light-protocol/tree/main/sdk-tests/csdk-anchor-full-derived-test-sdk) |
+| Trait Implementation | [CpSwapSdk](https://github.com/Lightprotocol/cp-swap-reference/blob/main/programs/cp-swap/tests/program.rs#L409) |
 
 ---
 
@@ -486,7 +489,7 @@ async fn test_pool_lifecycle() {
 
 | Resource | Link |
 |----------|------|
-| Full test | [amm_test.rs](https://github.com/lightprotocol/light-protocol/blob/main/sdk-tests/csdk-anchor-full-derived-test/tests/amm_test.rs) |
+| Full test | [program.rs](https://github.com/Lightprotocol/cp-swap-reference/blob/main/programs/cp-swap/tests/program.rs) |
 
 ---
 

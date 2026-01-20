@@ -46,7 +46,7 @@
           {
             "group": "DeFi",
             "pages": [
-              "light-token/defi/aggregators",
+              "light-token/defi/routers",
               "light-token/defi/programs"
             ]
           },
@@ -87,11 +87,12 @@
           {
             "group": "SDK Reference",
             "pages": [
-              "api-reference/libraries/stateless-js",
-              "api-reference/libraries/compressed-token",
-              "api-reference/libraries/light-client",
               "api-reference/libraries/light-sdk",
-              "api-reference/libraries/light-program-test"
+              "api-reference/libraries/light-token",
+              "api-reference/libraries/light-program-test",
+              "api-reference/libraries/light-client",
+              "api-reference/libraries/stateless-js",
+              "api-reference/libraries/compressed-token"
             ]
           }
         ]
