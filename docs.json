@@ -90,7 +90,6 @@
               "api-reference/libraries/light-sdk",
               "api-reference/libraries/light-token",
               "api-reference/libraries/light-program-test",
-              ,
               "api-reference/libraries/light-client",
               "api-reference/libraries/stateless-js",
               "api-reference/libraries/compressed-token"
