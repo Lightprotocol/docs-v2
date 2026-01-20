@@ -26,7 +26,9 @@
         "groups": [
           {
             "group": "Overview",
-            "pages": ["home"]
+            "pages": [
+              "home"
+            ]
           }
         ]
       },
@@ -42,13 +44,18 @@
             ]
           },
           {
+            "group": "DeFi",
+            "pages": [
+              "light-token/defi/aggregators",
+              "light-token/defi/programs"
+            ]
+          },
+          {
             "group": "Toolkits",
             "pages": [
               "light-token/toolkits/overview",
               "light-token/toolkits/for-payments",
-              "light-token/toolkits/for-wallets",
-              "light-token/toolkits/for-streaming-mints",
-              "light-token/toolkits/for-streaming-tokens"
+              "light-token/toolkits/for-wallets"
             ]
           },
           {
@@ -270,7 +277,11 @@
       "display": "interactive"
     },
     "examples": {
-      "languages": ["curl", "javascript", "python"],
+      "languages": [
+        "curl",
+        "javascript",
+        "python"
+      ],
       "defaults": "all",
       "prefill": true
     }
@@ -303,10 +314,12 @@
         "icon": "/images/deepwiki-logo.svg",
         "href": {
           "base": "https://deepwiki.com/Lightprotocol/light-protocol",
-          "query": [{
-            "key": "context",
-            "value": "$page"
-          }]
+          "query": [
+            {
+              "key": "context",
+              "value": "$page"
+            }
+          ]
         }
       },
       "chatgpt",
@@ -325,8 +338,10 @@
       "discord": "https://discord.com/invite/CYvjBgzRFP"
     }
   },
-  "redirects": [{
-    "source": "/landing",
-    "destination": "/welcome"
-  }]
+  "redirects": [
+    {
+      "source": "/landing",
+      "destination": "/welcome"
+    }
+  ]
 }

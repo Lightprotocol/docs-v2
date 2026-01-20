@@ -1,0 +1,536 @@
+---
+title: "Program Integration"
+description: "Build high-performance DeFi programs with rent-free accounts"
+---
+
+The Light-SDK pays rent-exemption for your PDAs, token accounts, and mints (98%
+cost savings). Your instructions stay the same. Inactive accounts auto-compress;
+clients can load them back when needed.
+
+| | Hot (active) | Cold (inactive) |
+|---|---|---|
+| Location | On-chain | Compressed |
+| Latency/CU | No change | +load instruction |
+| Your code | No change | No change |
+
+## What Changes
+
+
+| Area | Change |
+|------|--------|
+| State struct | Add a standard `compression_info: Option<CompressionInfo>` and derive `LightAccount` |
+| Accounts | Derive `LightAccounts` and add `#[light_account]` on init accounts |
+| Program module | Add `#[light_program]` on top of `#[program]` |
+| Instructions (swap, deposit, withdraw, ...) | No changes |
+
+Audit scope is minimal as your program logic is mostly untouched. The rest is
+macro-generated.
+
+
+If you don't use Anchor, [let us know](https://discord.com/invite/7cJ8BhAXhu).
+References for native solana-program integration coming soon.
+
+---
+
+## Step 1: Dependencies
+
+```toml
+[dependencies]
+
+light-sdk = { version = "0.18.0", features = ["anchor", "v2", "cpi-context"] }
+light-sdk-macros = { version = "0.18.0" }
+light-token = { version = "0.3.0", features = ["anchor"] }
+
+light-anchor-spl = { version = "0.31" }    # TokenInterface with light_token::ID
+anchor-lang = "0.31"
+```
+
+
+## Step 2: State Struct
+
+Add `compression_info` field and derive `LightAccount`:
+
+```rust
+use light_sdk::{compressible::CompressionInfo, LightDiscriminator};
+use light_sdk_macros::LightAccount;
+
+#[derive(Default, Debug, InitSpace, LightAccount)]
+#[account]
+pub struct PoolState {
+    /// Required for auto-compression when cold.
+    pub compression_info: Option<CompressionInfo>,
+    
+    // Your existing fields
+    pub authority: Pubkey,
+    pub token_0_vault: Pubkey,
+    // ...
+}
+```
+
+## Step 3: Program
+
+Add `#[light_program]` above `#[program]`:
+
+```rust
+use light_sdk_macros::light_program;
+
+#[light_program]
+#[program]
+pub mod my_amm {
+    use super::*;
+
+    pub fn initialize_pool(ctx: Context<InitializePool>, params: InitializeParams) -> Result<()> {
+        process_initialize_pool(ctx, params)
+    }
+
+    // These don't change
+    pub fn swap(ctx: Context<Swap>, amount_in: u64, min_out: u64) -> Result<()> {
+        process_swap(ctx, amount_in, min_out)
+    }
+}
+```
+
+## Step 4: Accounts Struct
+
+Derive `LightAccounts` on your `Accounts` struct and add `#[light_account(...)]` next to `#[account(...)]`.
+
+<Tabs>
+<Tab title="PDAs">
+```rust
+#[account(
+    init, 
+    seeds = [...], 
+    bump, 
+    payer = creator, 
+    space = 8 + PoolState::INIT_SPACE
+)]
+#[light_account(init)]
+pub pool_state: Box<Account<'info, PoolState>>,
+```
+</Tab>
+  <Tab title="Token Account">
+```rust
+#[account(
+    mut, 
+    seeds = [b"vault", pool_state.key().as_ref(), mint.key().as_ref()], 
+    bump,
+    payer = creator,
+    space = 8 + TokenAccount::INIT_SPACE
+)]
+#[light_account(
+    init, 
+    token, 
+    authority = [AUTH_SEED.as_bytes()], 
+    mint = token_mint, 
+    owner = authority,
+)]
+pub token_vault: UncheckedAccount<'info>,
+```
+
+<Accordion title="Manual">
+ 
+
+```rust
+#[account(
+    mut, 
+    seeds = [b"vault", pool_state.key().as_ref(), mint.key().as_ref()], 
+    bump,
+    payer = creator,
+    space = 8 + TokenAccount::INIT_SPACE
+)]
+#[light_account(
+    token, 
+    authority = [AUTH_SEED.as_bytes()], 
+    mint = token_mint, 
+    owner = authority,
+)]
+pub token_vault: UncheckedAccount<'info>,
+```
+Use without `init` to create manually in the instruction handler via
+`CreateTokenAccountCpi`.
+
+</Accordion>
+</Tab>
+<Tab title="Associated Token Account (ATA)">
+
+```rust
+#[light_account(
+    init, 
+    associated_token, 
+    owner = creator, mint = lp_mint,
+    compressible = Some(compressible_params)
+)]
+pub creator_lp_token: UncheckedAccount<'info>,
+```
+</Tab>
+
+<Tab title="Mint">
+```rust
+#[account(mut)]
+#[light_account(
+    init,
+    mint,
+    mint_signer = lp_mint_signer,
+    authority = authority,
+    decimals = 9,
+    mint_seeds = &[LP_MINT_SIGNER_SEED, pool_state.key().as_ref(), &[params.mint_signer_bump]],
+    authority_seeds = &[AUTH_SEED.as_bytes(), &[params.authority_bump]]
+)]
+pub lp_mint: UncheckedAccount<'info>,
+```
+
+<Accordion title="Mint with Metadata">
+
+```rust
+#[light_account(
+    init,
+    mint,
+    mint_signer = mint_signer,
+    authority = fee_payer,
+    decimals = 9,
+    mint_seeds = &[MINT_SIGNER_SEED, authority.key().as_ref(), &[params.mint_signer_bump]],
+    name = params.name.clone(),
+    symbol = params.symbol.clone(),
+    uri = params.uri.clone(),
+    // Optional
+    update_authority = authority,
+    additional_metadata = params.additional_metadata.clone()
+)]
+pub mint: UncheckedAccount<'info>,
+```
+</Accordion>
+</Tab>
+</Tabs>
+
+<Accordion title="Full Accounts Struct">
+We also need to add `light_token_interface_config`, `rent_sponsor`, and `light_token_cpi_authority`.
+
+```rust
+use light_sdk::interface::CreateAccountsProof;
+use light_sdk_macros::LightAccounts;
+use light_token::instruction::{COMPRESSIBLE_CONFIG_V1, RENT_SPONSOR as LIGHT_TOKEN_RENT_SPONSOR};
+
+#[derive(AnchorSerialize, AnchorDeserialize, Clone)]
+pub struct InitializeParams {
+    pub create_accounts_proof: CreateAccountsProof,
+    pub lp_mint_signer_bump: u8,
+    pub creator_lp_token_bump: u8,
+    pub authority_bump: u8,
+}
+
+#[derive(Accounts, LightAccounts)]
+#[instruction(params: InitializeParams)]
+pub struct InitializePool<'info> {
+    #[account(mut)]
+    pub creator: Signer<'info>,
+
+    #[account(mut, seeds = [AUTH_SEED.as_bytes()], bump)]
+    pub authority: UncheckedAccount<'info>,
+
+    #[account(
+        init,
+        seeds = [POOL_SEED.as_bytes(), token_0_mint.key().as_ref(), token_1_mint.key().as_ref()],
+        bump,
+        payer = creator,
+        space = 8 + PoolState::INIT_SPACE
+    )]
+    #[light_account(init)]
+    pub pool_state: Box<Account<'info, PoolState>>,
+
+    pub token_0_mint: Box<InterfaceAccount<'info, Mint>>,
+    pub token_1_mint: Box<InterfaceAccount<'info, Mint>>,
+
+    #[account(seeds = [POOL_LP_MINT_SIGNER_SEED, pool_state.key().as_ref()], bump)]
+    pub lp_mint_signer: UncheckedAccount<'info>,
+
+    #[account(mut)]
+    #[light_account(init, mint,
+        mint_signer = lp_mint_signer,
+        authority = authority,
+        decimals = 9,
+        mint_seeds = &[POOL_LP_MINT_SIGNER_SEED, self.pool_state.to_account_info().key.as_ref(), &[params.lp_mint_signer_bump]],
+        authority_seeds = &[AUTH_SEED.as_bytes(), &[params.authority_bump]]
+    )]
+    pub lp_mint: UncheckedAccount<'info>,
+
+    #[account(mut, seeds = [POOL_VAULT_SEED.as_bytes(), pool_state.key().as_ref(), token_0_mint.key().as_ref()], bump)]
+    #[light_account(token, authority = [AUTH_SEED.as_bytes()])]
+    pub token_0_vault: UncheckedAccount<'info>,
+
+    #[account(mut, seeds = [POOL_VAULT_SEED.as_bytes(), pool_state.key().as_ref(), token_1_mint.key().as_ref()], bump)]
+    #[light_account(token, authority = [AUTH_SEED.as_bytes()])]
+    pub token_1_vault: UncheckedAccount<'info>,
+
+    #[account(mut)]
+    pub creator_lp_token: UncheckedAccount<'info>,
+
+
+    pub light_interface_config: AccountInfo<'info>,
+    #[account(address = COMPRESSIBLE_CONFIG_V1)]
+    pub light_token_interface_config: AccountInfo<'info>,
+    #[account(mut, address = LIGHT_TOKEN_RENT_SPONSOR)]
+    pub rent_sponsor: AccountInfo<'info>,
+    pub light_token_program: AccountInfo<'info>,
+    pub light_token_cpi_authority: AccountInfo<'info>,
+    pub system_program: Program<'info, System>,
+}
+```
+</Accordion>
+
+## Step 5: Instructions
+Replace `spl_token` with `light_token` instructions as you need.
+
+Examples include: `MintToCpi`, `TransferCpi`, `TransferInterfaceCpi`,
+`CreateTokenAccountCpi`, and `CreateTokenAtaCpi`.
+
+<Accordion title="Example: Initialize">
+
+```rust
+use light_token::instruction::{CreateTokenAccountCpi, CreateTokenAtaCpi, MintToCpi};
+
+pub fn process_initialize_pool(ctx: Context<InitializePool>, params: InitializeParams) -> Result<()> {
+    let pool_key = ctx.accounts.pool_state.key();
+    
+    // Create rent-free token vault
+    CreateTokenAccountCpi {
+        payer: ctx.accounts.creator.to_account_info(),
+        account: ctx.accounts.token_0_vault.to_account_info(),
+        mint: ctx.accounts.token_0_mint.to_account_info(),
+        owner: ctx.accounts.authority.key(),
+    }
+    .rent_free(
+        ctx.accounts.light_token_interface_config.to_account_info(),
+        ctx.accounts.rent_sponsor.to_account_info(),
+        ctx.accounts.system_program.to_account_info(),
+        &crate::ID,
+    )
+    .invoke_signed(&[
+        POOL_VAULT_SEED.as_bytes(),
+        pool_key.as_ref(),
+        ctx.accounts.token_0_mint.key().as_ref(),
+        &[ctx.bumps.token_0_vault],
+    ])?;
+
+    // Create rent-free ATA for LP tokens
+    CreateTokenAtaCpi {
+        payer: ctx.accounts.creator.to_account_info(),
+        owner: ctx.accounts.creator.to_account_info(),
+        mint: ctx.accounts.lp_mint.to_account_info(),
+        ata: ctx.accounts.creator_lp_token.to_account_info(),
+        bump: params.creator_lp_token_bump,
+    }
+    .idempotent()
+    .rent_free(
+        ctx.accounts.light_token_interface_config.to_account_info(),
+        ctx.accounts.rent_sponsor.to_account_info(),
+        ctx.accounts.system_program.to_account_info(),
+    )
+    .invoke()?;
+
+    // Mint LP tokens (standard CPI, no changes)
+    MintToCpi {
+        mint: ctx.accounts.lp_mint.to_account_info(),
+        destination: ctx.accounts.creator_lp_token.to_account_info(),
+        amount: 1000,
+        authority: ctx.accounts.authority.to_account_info(),
+        system_program: ctx.accounts.system_program.to_account_info(),
+        max_top_up: None,
+    }
+    .invoke_signed(&[&[AUTH_SEED.as_bytes(), &[ctx.bumps.authority]]])?;
+
+    // Populate pool state (unchanged)
+    let pool = &mut ctx.accounts.pool_state;
+    pool.token_0_vault = ctx.accounts.token_0_vault.key();
+    pool.lp_mint = ctx.accounts.lp_mint.key();
+    // ...
+
+    Ok(())
+}
+```
+
+</Accordion>
+
+
+---
+
+## Client SDK
+
+To make it easy for clients to integrate with your program, ship an SDK crate implementing `LightProgramInterface`.
+
+For a detailed example of how clients use this trait, check out the [Router Integration](./aggregators.mdx) page.
+
+<Accordion title="Example: Trait Implementation">
+
+```rust
+pub struct AmmSdk {
+    pool_state_pubkey: Option<Pubkey>,
+    token_0_vault: Option<Pubkey>,
+    token_1_vault: Option<Pubkey>,
+    // ... other fields
+    program_owned_specs: HashMap<Pubkey, PdaSpec<LightAccountVariant>>,
+}
+
+pub enum AmmInstruction {
+    Swap,
+    Deposit,
+    Withdraw,
+}
+
+impl LightProgramInterface for AmmSdk {
+    type Variant = LightAccountVariant;
+    type Instruction = AmmInstruction;
+    type Error = AmmSdkError;
+
+    fn program_id(&self) -> Pubkey {
+        PROGRAM_ID
+    }
+
+    fn from_keyed_accounts(accounts: &[AccountInterface]) -> Result<Self, Self::Error> {
+        let mut sdk = Self::new();
+        for account in accounts {
+            sdk.parse_account(account)?;
+        }
+        Ok(sdk)
+    }
+
+    fn get_accounts_to_update(&self, ix: &Self::Instruction) -> Vec<AccountToFetch> {
+        match ix {
+            AmmInstruction::Swap => vec![
+                AccountToFetch::pda(self.pool_state_pubkey.unwrap(), PROGRAM_ID),
+                AccountToFetch::token(self.token_0_vault.unwrap()),
+                AccountToFetch::token(self.token_1_vault.unwrap()),
+            ],
+            // ...
+        }
+    }
+
+    fn update(&mut self, accounts: &[AccountInterface]) -> Result<(), Self::Error> {
+        for account in accounts {
+            self.parse_account(account)?;
+        }
+        Ok(())
+    }
+
+    fn get_specs_for_instruction(&self, ix: &Self::Instruction) -> Vec<AccountSpec<Self::Variant>> {
+        // Return specs for accounts needed by this instruction
+        // Specs include the variant (seeds) needed for loading cold accounts back onchain.
+        self.program_owned_specs
+            .values()
+            .cloned()
+            .map(AccountSpec::Pda)
+            .collect()
+    }
+}
+```
+
+</Accordion>
+
+| Resource | Link |
+|----------|------|
+| SDK Reference | [csdk-anchor-full-derived-test-sdk](https://github.com/lightprotocol/light-protocol/tree/main/sdk-tests/csdk-anchor-full-derived-test-sdk) |
+
+---
+
+## Testing
+
+<Accordion title="Example: Integration Test">
+
+```rust
+use light_program_test::{LightProgramTest, ProgramTestConfig, Rpc};
+use light_sdk::interface::rent::SLOTS_PER_EPOCH;
+use light_client::interface::{create_load_instructions, LightProgramInterface, AccountSpec};
+
+#[tokio::test]
+async fn test_pool_lifecycle() {
+    let config = ProgramTestConfig::new_v2(true, Some(vec![("my_amm", MY_AMM_ID)]));
+    let mut rpc = LightProgramTest::new(config).await.unwrap();
+
+    // 1. Init pool (rent-free)
+    // ... build and send init instruction ...
+    assert!(rpc.get_account_interface(&pool_address, &program_id).await.unwrap().is_some());
+
+    // 2. Swap (hot path - works normally)
+    // ... build and send swap instruction ...
+
+    // 3. Trigger compression (advance time)
+    rpc.warp_slot_forward(SLOTS_PER_EPOCH * 30).await.unwrap();
+
+    let pool_interface = rpc
+        .get_account_interface(&pool_address, &program_id)
+        .await
+        .unwrap();
+    assert!(pool_interface.is_cold()); // get_account would return None
+
+    // 5. get load instructions
+    let mut sdk = AmmSdk::from_keyed_accounts(&[pool_interface]).unwrap();
+    let accounts_to_fetch = sdk.get_accounts_to_update(&AmmInstruction::Deposit);
+    let keyed_accounts = rpc.get_multiple_account_interfaces(&accounts_to_fetch).await.unwrap();
+    sdk.update(&keyed_accounts).unwrap();
+    
+    let specs = sdk.get_specs_for_instruction(&AmmInstruction::Deposit);
+    let load_ixs = create_load_instructions(
+        &specs,
+        payer.pubkey(),
+        config_pda,
+        payer.pubkey(),
+        &rpc,
+    ).await.unwrap();
+
+    // 6. send transaction
+    rpc.create_and_send_transaction(&load_ixs, &payer.pubkey(), &[&payer]).await.unwrap();
+    assert!(rpc.get_account_interface(&pool_address, &program_id).await.unwrap().is_hot());
+}
+```
+
+</Accordion>
+
+| Resource | Link |
+|----------|------|
+| Full test | [amm_test.rs](https://github.com/lightprotocol/light-protocol/blob/main/sdk-tests/csdk-anchor-full-derived-test/tests/amm_test.rs) |
+
+---
+
+## Hot/Cold Cycle
+
+| Stage | What happens |
+|-------|--------------|
+| Init | Pool created with rent-exemption sponsored by SDK |
+| Hot | Any write bumps the virtual rent balance |
+| Cold (eg., no writes for 24h) | Miner compresses to ledger |
+| Load | User prepends load ix to transaction, pool back on-chain |
+
+
+## Existing Programs
+
+[Contact us](https://discord.com/invite/7cJ8BhAXhu) for migration support.
+
+
+## FAQ
+
+<Accordion title="Who triggers compression?">
+Foresters automatically compress when virtual rent depletes (~4 days idle). You don't trigger it.
+</Accordion>
+
+<Accordion title="Can active pools get compressed?">
+No. Any interaction resets the timer. Active pools never compress.
+</Accordion>
+
+<Accordion title="What happens to token balances?">
+Preserved exactly. Compressed state includes full balance. Restored on load.
+</Accordion>
+
+<Accordion title="Do I need to run infrastructure?">
+No. Helius runs Photon (indexer), Light Protocol runs foresters. Self-hosting optional.
+</Accordion>
+
+<Accordion title="What if indexer is down?">
+Hot pools work normally. Cold pools can't load until recovery. No data loss.
+</Accordion>
+
+---
+
+<Callout type="info">
+API is in Beta and subject to change.
+
+Questions or need hands-on support? [DM](https://t.me/swen_light) | [email](mailto:support@lightprotocol.com) | [Discord](https://discord.com/invite/7cJ8BhAXhu)
+</Callout>
