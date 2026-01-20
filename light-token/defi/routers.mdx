@@ -81,9 +81,9 @@ if specs.iter().any(|s| s.is_cold()) {
 
 ```toml
 [dependencies]
-light-client = { git = "https://github.com/Lightprotocol/light-protocol" }
+light-client = {version = "0.18.0", features = ["v2"]}
 
-# Program-specific SDK that implements LightProgramInterface (provided by AMM team)
+# Example Program SDK that implements LightProgramInterface (provided by AMM team)
 example-amm-sdk = "0.1"
 ```
 
