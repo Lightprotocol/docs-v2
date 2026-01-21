@@ -167,17 +167,15 @@ rpc.send_transaction(&ixs, &payer).await?;
 Latency, tx size, and CU depend on the number and type of cold accounts.
 
 ### When does a market go cold?
+A market is "cold" after it has been compressed by a miner. Accounts become
+eligible for compression when inactive (e.g., after 24h without lamport bumps
+from fee payers), causing the virtual rent balance to fall below threshold.
 
-1. Market is idle (eg 24h of no lamports bumps by fee_payers)
-2. Becomes eligible for compression (virtual rent balance under threshold)
-3. Miner node compresses the market
-
-**To ensure that your swaps execute regardless of whether the market is hot or
-cold, always prepend `create_load_instructions` to the swap transaction. This
-will no-op if the market is hot.**
+**To ensure swaps execute regardless of whether the market is hot or cold,
+always prepend `create_load_instructions` to the swap transaction. This no-ops
+if the market is hot.**
 
 ---
-
 ## Error Handling
 
 ```rust
