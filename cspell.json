@@ -186,7 +186,9 @@
     "Jotaro",
     "Yano",
     "jito",
-    "Jito"
+    "Jito",
+    "Offramp",
+    "offramp"
   ],
   "ignorePaths": [
     "node_modules",

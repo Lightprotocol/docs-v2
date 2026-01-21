@@ -4,7 +4,7 @@ description: "Build high-performance DeFi programs with rent-free accounts"
 ---
 
 The Light-SDK pays rent-exemption for your PDAs, token accounts, and mints (98%
-cost savings). Your instructions stay the same.
+cost savings). Your program logic stays the same.
 
 ## What Changes
 
@@ -18,7 +18,6 @@ cost savings). Your instructions stay the same.
 
 Audit scope is minimal as your program logic is mostly untouched. The rest is
 macro-generated.
-
 
 If you don't use Anchor, [let us know](https://discord.com/invite/7cJ8BhAXhu).
 References for native solana-program integration coming soon.
@@ -53,13 +52,11 @@ use light_sdk_macros::LightAccount;
 #[derive(Default, Debug, InitSpace, LightAccount)]
 #[account]
 pub struct PoolState {
-    /// Required for auto-compression when cold.
+    /// Add this:
     pub compression_info: Option<CompressionInfo>,
     
-    // Your existing fields
-    pub authority: Pubkey,
-    pub token_0_vault: Pubkey,
-    // ...
+    /// Your existing fields
+    /// ...
 }
 ```
 
@@ -500,7 +497,9 @@ Under the hood, clients use `AccountInterface` - a superset of Solana's `Account
 
 ## Existing programs
 
-If you have an existing program that you would like to migrate to rent-free accounts, [contact us](https://discord.com/invite/7cJ8BhAXhu) for migration support.
+If you have an existing program that you would like to migrate to rent-free
+accounts, [join our tech Discord](https://discord.com/invite/7cJ8BhAXhu) for
+migration support.
 
 
 ## FAQ
@@ -531,5 +530,5 @@ Hot pools work normally. Cold pools can't load until recovery. No data or safety
 <Callout type="info">
 API is in Beta and subject to change.
 
-Questions or need hands-on support? [DM](https://t.me/swen_light) | [email](mailto:support@lightprotocol.com) | [Discord](https://discord.com/invite/7cJ8BhAXhu)
+Questions or need hands-on support? [Telegram](https://t.me/swen_light) | [email](mailto:support@lightprotocol.com) | [Discord](https://discord.com/invite/7cJ8BhAXhu)
 </Callout>

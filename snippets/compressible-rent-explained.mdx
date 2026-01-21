@@ -1,7 +1,6 @@
-1. The rent-exemption for light account creation is sponsored by the Light Token Program.
-2. Transaction payer's pay rent <Tooltip tip="1 rent-epoch ≈ 1.5h ≈ 13,500 slots at 400ms per slot">per rent-epoch (388 lamports for 1.5h)</Tooltip> <br/>
-   to keep accounts "active".
-3. "Inactive" accounts (rent below one epoch) get automatically compressed. 
-4. The account's state is cryptographically preserved and will be loaded into hot account state in-flight, when the account is used again.<br/>
-
-The hot state fee is paid for by the transaction payer when writing to the respective account.
+1. The Light Token Program pays the rent-exemption cost for the account.
+2. Transaction fee payers bump a virtual rent balance when writing to the account, which keeps the account "hot".
+3. "Cold" accounts virtual rent balance below threshold (eg 24h without write bump) get auto-compressed. 
+4. The cold account's state is cryptographically preserved on the Solana ledger.
+   Users can load a cold account into hot state in-flight when using the account
+   again.

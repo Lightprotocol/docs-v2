@@ -26,7 +26,7 @@ import CompressibleRentExplained from "/snippets/compressible-rent-explained.mdx
         <ul>
           <li>Represents a unique mint and optionally can store token-metadata.</li>
           <li>Functionally equivalent to SPL mints.</li>
-          <li>Sponsored rent exemption via custom rent-config</li>
+          <li>Pays the rent-exemption cost</li>
         </ul>
       </td>
     </tr>
@@ -36,7 +36,7 @@ import CompressibleRentExplained from "/snippets/compressible-rent-explained.mdx
       <td style={{ textAlign: "left" }}>
         <ul>
           <li>Stores token balances of mints (SPL, Token-2022, or Light)</li>
-          <li>Sponsored rent exemption via custom rent-config</li>
+          <li>Pays the rent-exemption cost</li>
         </ul>
       </td>
     </tr>
@@ -96,7 +96,7 @@ Light-mints **uniquely represent a token on Solana and store its global metadata
   here](https://github.com/Lightprotocol/light-protocol/blob/bda52c305fad28b1b72093911f878d37fb190656/program-libs/token-interface/src/state/mint/compressed_mint.rs#L19).
 </Info>
 
-The `metadata` field is used by the Compressed Token Program to store the internal state of a light-mint.
+The `metadata` field is used by the Light Token Program to store the internal state of a light-mint.
 
 The `BaseMint` field replicates the field layout and serialization format of [SPL Mint accounts](https://solana.com/docs/tokens#mint-account). The struct is serialized with Borsh to match the on-chain format of SPL tokens and mints.
 
@@ -202,7 +202,7 @@ Additionally Light Token is more compute-efficient than SPL on hot paths:
     <Frame>
       <img
         src="/images/token-account-layout.png"
-        alt="Diagram showing light-token Solana account structure with three components: Address (identifier for light-token account in purple box), Account (struct containing Data bytes, Executable flag, Lamports balance, and Owner set to Compressed Token Program), and AccountData (containing Mint, Owner, Amount, and Extensions fields)"
+        alt="Diagram showing light-token Solana account structure with three components: Address (identifier for light-token account in purple box), Account (struct containing Data bytes, Executable flag, Lamports balance, and Owner set to Light Token Program), and AccountData (containing Mint, Owner, Amount, and Extensions fields)"
       />
     </Frame>
   </Tab>
@@ -301,7 +301,7 @@ Here is how light-tokens and SPL tokens compare:
 ```rust
 let seeds = [
     owner.as_ref(),          // Wallet address (32 bytes)
-    program_id.as_ref(),     // Compressed Token Program ID (32 bytes)
+    program_id.as_ref(),     // Light Token Program ID (32 bytes)
     mint.as_ref(),           // light-mint address (32 bytes)
     bump.as_ref(),           // Bump seed (1 byte)
 ];

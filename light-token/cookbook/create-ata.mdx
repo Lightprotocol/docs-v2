@@ -18,14 +18,14 @@ import ClientCustomRentConfig from "/snippets/light-token-guides/client-custom-r
 import { CodeCompare } from "/snippets/jsx/code-compare.jsx";
 import FullSetup from "/snippets/setup/full-setup.mdx";
 import {
-  splCreateAtaCode,
-  lightCreateAtaCode,
+    splCreateAtaCode,
+    lightCreateAtaCode,
 } from "/snippets/code-samples/code-compare-snippets.jsx";
 import ActionCode from "/snippets/code-snippets/light-token/create-ata/action.mdx";
 import InstructionCode from "/snippets/code-snippets/light-token/create-ata/instruction.mdx";
 
 1. Associated light-token accounts are Solana accounts that hold token balances of light, SPL, or Token 2022 mints.
-2. The address for light-ATAs is deterministically derived with the owner's address, compressed token program ID, and mint address.
+2. The address for light-ATAs is deterministically derived with the owner's address, Light Token Program ID, and mint address.
 3. Associated light-token accounts implement a default rent config:
    1. At account creation, you pay ~17,208 lamports <Tooltip tip="24 h = 16 epochs, where 1 rent-epoch ≈ 1.5h ≈ 13,500 slots at 400ms per slot">for 24h of rent</Tooltip> <br/>and <Tooltip tip="Covers transaction cost to compress accounts (10,000) and protocol incentive (1,000). Transaction cost might vary.">compression incentive</Tooltip> (the rent-exemption is sponsored by the protocol)
    2. Transfers keep the account funded <Tooltip tip="2 epochs = 3h">with rent for 3h</Tooltip> via top-ups. The transaction payer tops up 776 lamports when the account's rent is below 3h.
@@ -291,7 +291,7 @@ Find [a full code example at the end](#full-code-example).
 
 <Step>
 
-### Build Account Infos and CPI the Compressed Token Program
+### Build Account Infos and CPI the Light Token Program
 
 1. Pass the required accounts that include the rent config.
 2. Use `invoke` or `invoke_signed`, when a CPI requires a PDA signer.
