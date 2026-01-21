@@ -11,12 +11,12 @@ cost savings). Your program logic stays the same.
 
 | Area | Change |
 |------|--------|
-| State struct | Add a standard `compression_info: Option<CompressionInfo>` and derive `LightAccount` |
+| State struct | Derive `LightAccount` and add a `compression_info: Option<CompressionInfo>` field |
 | Accounts | Derive `LightAccounts` and add `#[light_account]` on init accounts |
 | Program module | Add `#[light_program]` on top of `#[program]` |
 | Instructions (swap, deposit, withdraw, ...) | No changes |
 
-Audit scope is minimal as your program logic is mostly untouched. The rest is
+Audit overhead is minimal as your program logic is mostly untouched. The rest is
 macro-generated.
 
 If you don't use Anchor, [let us know](https://discord.com/invite/7cJ8BhAXhu).
@@ -36,7 +36,7 @@ light-sdk = { version = "0.18.0", features = ["anchor", "v2", "cpi-context"] }
 light-sdk-macros = { version = "0.18.0" }
 light-token = { version = "0.3.0", features = ["anchor"] }
 
-light-anchor-spl = { version = "0.31" }    # TokenInterface with light_token::ID
+light-anchor-spl = { version = "0.31" }    # TokenInterface uses light_token::ID
 anchor-lang = "0.31"
 ```
 
@@ -348,7 +348,8 @@ pub fn process_initialize_pool(ctx: Context<InitializePool>, params: InitializeP
 
 ## Client SDK
 
-To make it easy for clients to integrate with your program, ship an SDK crate implementing `LightProgramInterface`.
+To make it easy for clients to integrate with your program, ship an SDK crate
+implementing the `LightProgramInterface` trait.
 
 For a detailed example of how clients use this trait, check out the [Router Integration](./routers.mdx) page.
 
@@ -420,7 +421,7 @@ impl LightProgramInterface for AmmSdk {
 
 | Resource | Link |
 |----------|------|
-| Trait Implementation | [CpSwapSdk](https://github.com/Lightprotocol/cp-swap-reference/blob/main/programs/cp-swap/tests/program.rs#L409) |
+| Trait Implementation Example | [CpSwapSdk](https://github.com/Lightprotocol/cp-swap-reference/blob/main/programs/cp-swap/tests/program.rs#L409) |
 
 ---
 
@@ -479,7 +480,7 @@ async fn test_pool_lifecycle() {
 
 | Resource | Link |
 |----------|------|
-| Full test | [program.rs](https://github.com/Lightprotocol/cp-swap-reference/blob/main/programs/cp-swap/tests/program.rs) |
+| Test example | [program.rs](https://github.com/Lightprotocol/cp-swap-reference/blob/main/programs/cp-swap/tests/program.rs) |
 
 ---
 ## How it works
