@@ -505,11 +505,11 @@ migration support.
 
 ## FAQ
 
-<Accordion title="How does it prevent re-init attacks?"> When
-you create an account, under the hood, the SDK auto-provides a proof that
-verifies that the account does not yet exist in the compressed address space.
-The SVM takes care of uniqueness in the onchain space. This way both account
-spaces are covered, preventing re-init attacks. </Accordion>
+<Accordion title="How does it prevent re-init attacks?"> When you create an
+account, the SDK, in addition to paying the rent exemption cost, auto-provides a
+proof that verifies that the account does not yet exist in the cold
+address space. The SVM already does the same for the onchain address space. This
+way both hot and cold address spaces are covered, preventing re-init attacks. </Accordion>
 
 <Accordion title="Who triggers compression?"> Miners automatically compress when
 virtual rent is below threshold (eg 24h without write bump). </Accordion>
