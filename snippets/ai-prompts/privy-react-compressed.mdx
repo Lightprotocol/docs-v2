@@ -1,19 +1,19 @@
 ~~~~text
 ---
 argument-hint: <project_path>
-description: Add compressed token support to Privy Node.js app
+description: Add compressed token support to Privy React app
 allowed-tools: [Bash, Read, Glob, Grep, Task, mcp__deepwiki, mcp__zkcompression]
 ---
 
-## Task: Add compressed token support to Privy Node.js app
+## Task: Add compressed token support to Privy React app
 
 References:
 - Privy Docs: https://docs.privy.io/recipes/solana/send-spl-tokens
-- Privy Node Examples:
-  - SPL: https://github.com/privy-io/examples/tree/main/privy-node-starter
-  - Compressed: https://github.com/Lightprotocol/examples-zk-compression/tree/main/privy/nodejs-privy-compressed
+- Privy React Examples:
+  - SPL: https://github.com/privy-io/examples/tree/main/privy-react-starter
+  - Compressed: https://github.com/Lightprotocol/examples-zk-compression/tree/main/privy/react-privy-compressed
 - SPL vs Compressed comparison: https://github.com/Lightprotocol/examples-zk-compression/blob/main/privy/COMPARISON.md
-- Compressed Token Guide for Privy Node.js: https://zkcompression.com/compressed-tokens/for-privy 
+- Compressed Token Guide for Privy React: https://zkcompression.com/compressed-tokens/for-privy
 
 MCP:
 * deepwiki https://mcp.deepwiki.com/mcp
@@ -63,11 +63,11 @@ npm install @lightprotocol/stateless.js @lightprotocol/compressed-token
 
 See Code Reference below all signed with Privy SDK.
 
-1. **Setup**: Connect to ZK Compression RPC (Helius, Triton) https://github.com/Lightprotocol/examples-zk-compression/blob/main/privy/nodejs-privy-compressed/src/index.ts
-2. **Get Balance**: Fetch SPL and compressed token balances https://github.com/Lightprotocol/examples-zk-compression/blob/main/privy/nodejs-privy-compressed/src/compressed/balances.ts
-3. **Transfer**: Send compressed tokens to another recipient, signed with Privy SDK https://github.com/Lightprotocol/examples-zk-compression/blob/main/privy/nodejs-privy-compressed/src/compressed/transfer.ts
-4. **Compress**: Convert SPL to compressed tokens and send to a recipient in one instruction https://github.com/Lightprotocol/examples-zk-compression/blob/main/privy/nodejs-privy-compressed/src/compressed/compress.ts
-5. **Decompress**: Convert compressed tokens back to SPL tokens for offramps https://github.com/Lightprotocol/examples-zk-compression/blob/main/privy/nodejs-privy-compressed/src/compressed/decompress.ts
+1. **Setup**: Connect to ZK Compression RPC (Helius, Triton) https://github.com/Lightprotocol/examples-zk-compression/blob/main/privy/react-privy-compressed/src/config/rpc.ts
+2. **Get Balance**: Fetch SPL and compressed token balances https://github.com/Lightprotocol/examples-zk-compression/blob/main/privy/react-privy-compressed/src/hooks/useCompressedBalances.ts
+3. **Transfer**: Send compressed tokens to another recipient, signed with Privy SDK https://github.com/Lightprotocol/examples-zk-compression/blob/main/privy/react-privy-compressed/src/hooks/useTransfer.ts
+4. **Compress**: Convert SPL to compressed tokens and send to a recipient in one instruction https://github.com/Lightprotocol/examples-zk-compression/blob/main/privy/react-privy-compressed/src/hooks/useCompress.ts
+5. **Decompress**: Convert compressed tokens back to SPL tokens for offramps https://github.com/Lightprotocol/examples-zk-compression/blob/main/privy/react-privy-compressed/src/hooks/useDecompress.ts
 6. **Tx History**: Fetch compressed token transaction history for an owner
 
 ### Phase 4: Test
