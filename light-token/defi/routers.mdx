@@ -3,13 +3,16 @@ title: "Router Integration"
 description: "Add support for rent-free AMMs on Solana."
 ---
 
-1. Use `get_account_interface` instead of `get_account`
-2. Store `AccountInterface` in your cache
-3. Prepend `create_load_instructions` when accounts are cold
+1. Use `get_account_interface` instead of `get_account` to store `AccountInterface`.
+2. Use the AMM's LightProgramInterface trait to dynamically prepend load
+   instructions if the market is cold.
+
 
 ## Step 1: Use `get_account_interface`
 
-`get_account_interface` is a new RPC endpoint that returns a superset of `get_account`. `AccountInterface` stores additional info `Option<ColdContext>` that you will need later.
+`get_account_interface` is a new RPC endpoint that returns a superset of
+`get_account`. `AccountInterface` stores additional info `Option<ColdContext>`
+that you will need later.
 
 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
 <div>
@@ -37,7 +40,7 @@ pub struct AccountInterface {
 </div>
 
 
-## Step 2: Store Account Interfaces in your cache.
+## Step 2: Implement LightProgramInterface
 All rent-free programs implement the `LightProgramInterface` trait.
 
 This trait helps you:
