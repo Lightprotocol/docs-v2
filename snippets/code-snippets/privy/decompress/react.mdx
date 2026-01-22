@@ -3,27 +3,40 @@ import { useState } from 'react';
 import { PublicKey, Transaction, ComputeBudgetProgram } from '@solana/web3.js';
 import { getAssociatedTokenAddressSync, createAssociatedTokenAccountInstruction, getAccount, TokenAccountNotFoundError } from '@solana/spl-token';
 import { CompressedTokenProgram, selectMinCompressedTokenAccountsForTransfer, getSplInterfaceInfos, selectSplInterfaceInfosForDecompression } from '@lightprotocol/compressed-token';
-import { bn } from '@lightprotocol/stateless.js';
-import { getRpc } from '../lib/rpc';
+import { bn, createRpc } from '@lightprotocol/stateless.js';
+import type { ConnectedStandardSolanaWallet } from '@privy-io/js-sdk-core';
+import type { SignTransactionResult } from '@privy-io/react-auth/solana';
 
-export interface BuildDecompressParams {
+export interface DecompressParams {
   ownerPublicKey: string;
   mint: string;
   amount: number;
   decimals?: number;
 }
 
-export function useBuildDecompress() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+export interface DecompressArgs {
+  params: DecompressParams;
+  wallet: ConnectedStandardSolanaWallet;
+  signTransaction: (args: {
+    transaction: Buffer;
+    wallet: ConnectedStandardSolanaWallet;
+    chain: string;
+  }) => Promise<SignTransactionResult>;
+}
 
-  const buildDecompressTx = async (params: BuildDecompressParams): Promise<Transaction> => {
+export function useDecompress() {
+  const [isLoading, setIsLoading] = useState(false);
+
+  const decompress = async (args: DecompressArgs): Promise<string> => {
     setIsLoading(true);
-    setError(null);
 
     try {
+      const { params, wallet, signTransaction } = args;
       const { ownerPublicKey, mint, amount, decimals = 6 } = params;
-      const rpc = getRpc();
+
+      // Create RPC connection
+      const rpc = createRpc(import.meta.env.VITE_HELIUS_RPC_URL);
+
       const owner = new PublicKey(ownerPublicKey);
       const mintPubkey = new PublicKey(mint);
       const tokenAmount = bn(Math.floor(amount * Math.pow(10, decimals)));
@@ -55,7 +68,7 @@ export function useBuildDecompress() {
       const transaction = new Transaction();
       transaction.add(ComputeBudgetProgram.setComputeUnitLimit({ units: 400_000 }));
 
-      // Create ATA if it doesn't exist
+      // Create ATA if needed
       try {
         await getAccount(rpc, destinationAta);
       } catch (e) {
@@ -83,16 +96,29 @@ export function useBuildDecompress() {
       transaction.recentBlockhash = blockhash;
       transaction.feePayer = owner;
 
+      // Serialize unsigned transaction
+      const unsignedTxBuffer = transaction.serialize({ requireAllSignatures: false });
+
+      // Sign with Privy
+      const signedTx = await signTransaction({
+        transaction: unsignedTxBuffer,
+        wallet,
+        chain: 'solana:devnet',
+      });
+
+      // Send transaction
+      const signedTxBuffer = Buffer.from(signedTx.signedTransaction);
+      const signature = await rpc.sendRawTransaction(signedTxBuffer, {
+        skipPreflight: false,
+        preflightCommitment: 'confirmed',
+      });
+
+      return signature;
+    } finally {
       setIsLoading(false);
-      return transaction;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : String(err);
-      setError(errorMessage);
-      setIsLoading(false);
-      throw err;
     }
   };
 
-  return { buildDecompressTx, isLoading, error };
+  return { decompress, isLoading };
 }
 ```

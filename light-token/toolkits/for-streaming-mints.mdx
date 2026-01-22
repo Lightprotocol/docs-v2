@@ -22,9 +22,9 @@ Find devnet examples [here](https://github.com/Lightprotocol/examples-light-toke
 helius-laserstream = "0.1"
 tokio = { version = "1", features = ["full"] }
 futures = "0.3"
-light-event = "0.2"
-light-compressed-account = "0.7"
-light-token-interface = "0.1"
+light-event = "0.3"
+light-compressed-account = "0.8"
+light-token-interface = "0.2"
 borsh = "0.10"
 bs58 = "0.5"
 ```
@@ -33,7 +33,7 @@ bs58 = "0.5"
 use futures::StreamExt;
 use helius_laserstream::{subscribe, LaserstreamConfig};
 use light_event::parse::event_from_light_transaction;
-use light_token_interface::state::mint::CompressedMint;
+use light_token_interface::state::mint::Mint;
 use light_token_interface::state::extensions::ExtensionStruct;
 use borsh::BorshDeserialize;
 
@@ -143,7 +143,7 @@ for output in event.output_compressed_accounts.iter() {
     };
 
     // Deserialize
-    let mint = CompressedMint::try_from_slice(data)?;
+    let mint = Mint::try_from_slice(data)?;
 
     // Check if new (address not in inputs)
     let is_new = output
@@ -166,7 +166,7 @@ for output in event.output_compressed_accounts.iter() {
 ### Extract Token Metadata from Mint Extensions
 
 ```rust
-fn extract_metadata(mint: &CompressedMint) -> Option<(String, String, String)> {
+fn extract_metadata(mint: &Mint) -> Option<(String, String, String)> {
     let extensions = mint.extensions.as_ref()?;
 
     for ext in extensions {
@@ -199,9 +199,15 @@ if let Some((name, symbol, uri)) = extract_metadata(&mint) {
 
 ```rust
 #[repr(C)]
-pub struct CompressedMint {
+pub struct Mint {
     pub base: BaseMint,
-    pub metadata: CompressedMintMetadata,
+    pub metadata: MintMetadata,
+    /// Reserved bytes (16 bytes) for T22 layout compatibility.
+    pub reserved: [u8; 16],
+    /// Account type discriminator at byte offset 165 (1 = Mint, 2 = Account)
+    pub account_type: u8,
+    /// Compression info embedded directly in the mint
+    pub compression: CompressionInfo,
     pub extensions: Option<Vec<ExtensionStruct>>,
 }
 
@@ -215,12 +221,20 @@ pub struct BaseMint {
     pub freeze_authority: Option<Pubkey>,
 }
 
-/// metadata used by the light token program (34 bytes)
+/// Light Protocol-specific metadata for compressed mints.
+/// Total size: 67 bytes
 #[repr(C)]
-pub struct CompressedMintMetadata {
+pub struct MintMetadata {
+    /// Version for upgradability
     pub version: u8,
-    pub spl_mint_initialized: bool,
-    pub mint: Pubkey,  // PDA with compressed mint seed
+    /// Whether the compressed mint has been decompressed to a Mint Solana account.
+    pub mint_decompressed: bool,
+    /// PDA derived from mint_signer
+    pub mint: Pubkey,
+    /// Signer pubkey used to derive the mint PDA
+    pub mint_signer: [u8; 32],
+    /// Bump seed from mint PDA derivation
+    pub bump: u8,
 }
 ```
 

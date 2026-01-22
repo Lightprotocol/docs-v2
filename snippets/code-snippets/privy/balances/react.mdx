@@ -1,98 +1,174 @@
 ```typescript
-import { useState } from 'react';
-import { PublicKey } from '@solana/web3.js';
-import { getRpc } from '../lib/rpc';
-import { USDC_MINT } from '../lib/constants';
+import { useState, useCallback } from 'react';
+import { PublicKey, LAMPORTS_PER_SOL } from '@solana/web3.js';
+import { getAccount, getAssociatedTokenAddressSync } from '@solana/spl-token';
+import { createRpc } from '@lightprotocol/stateless.js';
+
+const USDC_MINT = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
+const TEST_MINT = '7cT3PeXyDLkyEcvr9YzsjGLuZneKsea4c8hPbJQEjMCZ';
 
 export interface TokenBalance {
   mint: string;
   amount: string;
-  accounts: number;
-}
-
-export interface CompressedBalances {
-  sol: string;
-  tokens: TokenBalance[];
+  decimals: number;
+  isCompressed: boolean;
+  isNative: boolean;
 }
 
 export function useCompressedBalances() {
-  const [balances, setBalances] = useState<CompressedBalances | null>(null);
+  const [balances, setBalances] = useState<TokenBalance[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
-  const fetchBalances = async (ownerPublicKey: string): Promise<CompressedBalances> => {
+  const fetchBalances = useCallback(async (ownerAddress: string) => {
+    if (!ownerAddress) return;
+
     setIsLoading(true);
-    setError(null);
-
     try {
-      const rpc = getRpc();
-      const owner = new PublicKey(ownerPublicKey);
+      const rpc = createRpc(import.meta.env.VITE_HELIUS_RPC_URL);
+      const owner = new PublicKey(ownerAddress);
+      const allBalances: TokenBalance[] = [];
 
       // Get compressed SOL balance
-      const compressedSol = await rpc.getCompressedBalanceByOwner(owner);
-      const compressedSolLamports = compressedSol.value
-        ? BigInt(compressedSol.value.toString())
-        : 0n;
-
-      // Get compressed token accounts
-      const compressedAccounts = await rpc.getCompressedTokenAccountsByOwner(owner);
-
-      // Aggregate balances by mint
-      const mintBalances = new Map<string, bigint>();
-      const mintAccounts = new Map<string, number>();
-
-      if (compressedAccounts.items) {
-        for (const account of compressedAccounts.items) {
-          if (account.parsed) {
-            const mint = account.parsed.mint.toBase58();
-            const amount = BigInt(account.parsed.amount.toString());
-            const current = mintBalances.get(mint) || 0n;
-            mintBalances.set(mint, current + amount);
-
-            const accountCount = mintAccounts.get(mint) || 0;
-            mintAccounts.set(mint, accountCount + 1);
-          }
-        }
-      }
-
-      // Build tokens array, ensuring USDC is always included
-      const tokens: TokenBalance[] = [];
-
-      // Always add USDC first (even if balance is zero)
-      const usdcBalance = mintBalances.get(USDC_MINT) || 0n;
-      tokens.push({
-        mint: USDC_MINT,
-        amount: usdcBalance.toString(),
-        accounts: mintAccounts.get(USDC_MINT) || 0,
-      });
-
-      // Add other tokens
-      for (const [mint, amount] of mintBalances.entries()) {
-        if (mint !== USDC_MINT) {
-          tokens.push({
-            mint,
-            amount: amount.toString(),
-            accounts: mintAccounts.get(mint) || 0,
+      try {
+        const compressedSol = await rpc.getCompressedBalanceByOwner(owner);
+        if (compressedSol && BigInt(compressedSol.toString()) > 0n) {
+          allBalances.push({
+            mint: 'So11111111111111111111111111111111111111112',
+            amount: compressedSol.toString(),
+            decimals: 9,
+            isCompressed: true,
+            isNative: true,
           });
         }
+      } catch {
+        // No compressed SOL
       }
 
-      const result: CompressedBalances = {
-        sol: compressedSolLamports.toString(),
-        tokens,
-      };
+      // Get regular SOL balance
+      try {
+        const solBalance = await rpc.getBalance(owner);
+        allBalances.push({
+          mint: 'So11111111111111111111111111111111111111112',
+          amount: solBalance.toString(),
+          decimals: 9,
+          isCompressed: false,
+          isNative: true,
+        });
+      } catch {
+        // Failed to get SOL balance
+      }
 
-      setBalances(result);
+      // Get regular SPL token accounts
+      try {
+        const tokenAccounts = await rpc.getTokenAccountsByOwner(owner, {
+          programId: new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'),
+        });
+
+        for (const { account, pubkey } of tokenAccounts.value) {
+          const data = account.data;
+          if (data instanceof Buffer || (typeof data === 'object' && 'length' in data)) {
+            // Parse token account data
+            const dataBuffer = Buffer.from(data as Uint8Array);
+            if (dataBuffer.length >= 72) {
+              const mint = new PublicKey(dataBuffer.subarray(0, 32));
+              const amount = dataBuffer.readBigUInt64LE(64);
+
+              // Get mint info for decimals
+              try {
+                const mintInfo = await rpc.getAccountInfo(mint);
+                const decimals = mintInfo?.data ? (mintInfo.data as Buffer)[44] || 6 : 6;
+
+                allBalances.push({
+                  mint: mint.toBase58(),
+                  amount: amount.toString(),
+                  decimals,
+                  isCompressed: false,
+                  isNative: false,
+                });
+              } catch {
+                allBalances.push({
+                  mint: mint.toBase58(),
+                  amount: amount.toString(),
+                  decimals: 6,
+                  isCompressed: false,
+                  isNative: false,
+                });
+              }
+            }
+          }
+        }
+      } catch {
+        // Failed to get token accounts
+      }
+
+      // Get compressed token accounts
+      try {
+        const compressedAccounts = await rpc.getCompressedTokenAccountsByOwner(owner);
+
+        if (compressedAccounts?.items) {
+          const mintAmounts = new Map<string, bigint>();
+          const mintDecimals = new Map<string, number>();
+
+          for (const item of compressedAccounts.items) {
+            if (item?.parsed?.mint && item?.parsed?.amount) {
+              const mint = item.parsed.mint.toBase58();
+              const amount = BigInt(item.parsed.amount.toString());
+              const current = mintAmounts.get(mint) || 0n;
+              mintAmounts.set(mint, current + amount);
+
+              // Store decimals (assume 6 for now, could fetch from mint)
+              if (!mintDecimals.has(mint)) {
+                mintDecimals.set(mint, 6);
+              }
+            }
+          }
+
+          for (const [mint, amount] of mintAmounts) {
+            allBalances.push({
+              mint,
+              amount: amount.toString(),
+              decimals: mintDecimals.get(mint) || 6,
+              isCompressed: true,
+              isNative: false,
+            });
+          }
+        }
+      } catch {
+        // Failed to get compressed accounts
+      }
+
+      // Add fallback tokens with 0 balance if not present
+      const hasMint = (mint: string) => allBalances.some(b => b.mint === mint);
+
+      if (!hasMint(USDC_MINT)) {
+        allBalances.push({
+          mint: USDC_MINT,
+          amount: '0',
+          decimals: 6,
+          isCompressed: false,
+          isNative: false,
+        });
+      }
+
+      if (!hasMint(TEST_MINT)) {
+        allBalances.push({
+          mint: TEST_MINT,
+          amount: '0',
+          decimals: 6,
+          isCompressed: false,
+          isNative: false,
+        });
+      }
+
+      setBalances(allBalances);
+    } catch (error) {
+      console.error('Failed to fetch balances:', error);
+      setBalances([]);
+    } finally {
       setIsLoading(false);
-      return result;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : String(err);
-      setError(errorMessage);
-      setIsLoading(false);
-      throw err;
     }
-  };
+  }, []);
 
-  return { balances, fetchBalances, isLoading, error };
+  return { balances, isLoading, fetchBalances };
 }
 ```

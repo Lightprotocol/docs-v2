@@ -4,7 +4,7 @@ sidebarTitle: "Privy Guide"
 description: "Integrate compressed tokens with Privy embedded wallets for rent-free SPL token accounts and transfers."
 keywords: ["privy solana", "privy compressed tokens", "embedded wallet compression", "rent-free tokens privy"]
 ---
-import ToolkitsSetup from "/snippets/setup/toolkits-setup.mdx";
+import Toolkits2Setup from "/snippets/setup/toolkits2-setup.mdx";
 import TransferNodejs from "/snippets/code-snippets/privy/transfer/nodejs.mdx";
 import TransferReact from "/snippets/code-snippets/privy/transfer/react.mdx";
 import CompressNodejs from "/snippets/code-snippets/privy/compress/nodejs.mdx";
@@ -16,6 +16,7 @@ import BalancesReact from "/snippets/code-snippets/privy/balances/react.mdx";
 import TransactionHistoryNodejs from "/snippets/code-snippets/privy/transaction-history/nodejs.mdx";
 import TransactionHistoryReact from "/snippets/code-snippets/privy/transaction-history/react.mdx";
 import ActionCode from '/snippets/code-snippets/compressed-token/create-mint/action.mdx';
+import AiPrompt from "/snippets/ai-prompts/privy-nodejs-compressed.mdx";
 
 | Creation Cost | SPL Token Account | Compressed Token |
 | :------------ | :---------------- | :--------------- |
@@ -39,38 +40,40 @@ Privy handles user authentication and wallet management. You build transactions 
   </thead>
   <tbody>
     <tr>
-      <td>**Get Balance**</td>
-      <td>getAccount()</td>
-      <td>getCompressedTokenAccountsByOwner()</td>
-    </tr>
-    <tr>
-      <td>**Transfer**</td>
+      <td>[**Transfer**](#full-code-examples)</td>
       <td>transferChecked()</td>
       <td>transfer()</td>
     </tr>
     <tr>
-      <td>**Compress**</td>
+      <td>[**Compress**](#full-code-examples)</td>
       <td>N/A</td>
       <td>compress()</td>
     </tr>
     <tr>
-      <td>**Decompress**</td>
+      <td>[**Decompress**](#full-code-examples)</td>
       <td>N/A</td>
       <td>decompress()</td>
     </tr>
     <tr>
-      <td>**Transaction History**</td>
+      <td>[**Get Balance**](#get-balances)</td>
+      <td>getAccount()</td>
+      <td>getCompressedTokenAccountsByOwner()</td>
+    </tr>
+    <tr>
+      <td>[**Transaction History**](#get-transaction-history)</td>
       <td>getSignaturesForAddress()</td>
       <td>getCompressionSignaturesForOwner()</td>
     </tr>
   </tbody>
 </table>
 
+<Tabs>
+<Tab title="Guide">
 <Steps>
 <Step>
 ### Prerequisites
 
-<ToolkitsSetup />
+<Toolkits2Setup />
 
 Connect to an RPC endpoint that supports ZK Compression (Helius, Triton)
 ```typescript
@@ -90,9 +93,9 @@ const rpc = createRpc(RPC_ENDPOINT);
 
 
 <Info>
-Before we can compress or decompresss, we need:
+Before we call compress or decompresss, we need:
 
-* An SPL mint with a token pool for compression. This token pool can be created for new SPL mints via [`createMint()`](/compressed-tokens/guides/create-mint-with-token-pool) or added to existing SPL mints via [`createTokenPool()`](/compressed-tokens/guides/add-token-pools-to-mint-accounts).
+* An SPL mint with a interface PDA for compression. This PDA can be created for new SPL mints via [`createMint()`](/compressed-tokens/guides/create-mint-with-token-pool) or added to existing SPL mints via [`createTokenPool()`](/compressed-tokens/guides/add-token-pools-to-mint-accounts).
 * For `compress()` SPL tokens in an Associated Token Account, or
 * For `decompress()` compressed token accounts with sufficient balance.
 </Info>
@@ -105,7 +108,7 @@ Before we can compress or decompresss, we need:
 ## Full Code Examples
 
 <Info>
-Find complete examples on Github: [privy/nodejs-privy-compressed](https://github.com/Lightprotocol/examples-zk-compression/tree/main/privy/nodejs-privy-compressed) and [privy/react-privy-compressed](https://github.com/Lightprotocol/examples-zk-compression/tree/main/privy/react-privy-compressed).
+Find complete examples on Github: [nodejs](https://github.com/Lightprotocol/examples-zk-compression/tree/main/privy/nodejs-privy-compressed) and [react](https://github.com/Lightprotocol/examples-zk-compression/tree/main/privy/react-privy-compressed).
 </Info>
 
 <Tabs>
@@ -186,5 +189,11 @@ Fetch compressed token transaction history for an owner, with optional detailed 
 </Tab>
 <Tab title="React">
 <TransactionHistoryReact />
+</Tab>
+</Tabs>
+</Tab>
+
+<Tab title="AI Prompt">
+<AiPrompt />
 </Tab>
 </Tabs>

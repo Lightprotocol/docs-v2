@@ -2,10 +2,11 @@
 import { useState } from 'react';
 import { PublicKey, Transaction, ComputeBudgetProgram } from '@solana/web3.js';
 import { CompressedTokenProgram, selectMinCompressedTokenAccountsForTransfer } from '@lightprotocol/compressed-token';
-import { bn } from '@lightprotocol/stateless.js';
-import { getRpc } from '../lib/rpc';
+import { bn, createRpc } from '@lightprotocol/stateless.js';
+import type { ConnectedStandardSolanaWallet } from '@privy-io/js-sdk-core';
+import type { SignTransactionResult } from '@privy-io/react-auth/solana';
 
-export interface BuildTransferParams {
+export interface TransferParams {
   ownerPublicKey: string;
   mint: string;
   toAddress: string;
@@ -13,17 +14,29 @@ export interface BuildTransferParams {
   decimals?: number;
 }
 
-export function useBuildTransfer() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+export interface TransferArgs {
+  params: TransferParams;
+  wallet: ConnectedStandardSolanaWallet;
+  signTransaction: (args: {
+    transaction: Buffer;
+    wallet: ConnectedStandardSolanaWallet;
+    chain: string;
+  }) => Promise<SignTransactionResult>;
+}
 
-  const buildTransferTx = async (params: BuildTransferParams): Promise<Transaction> => {
+export function useTransfer() {
+  const [isLoading, setIsLoading] = useState(false);
+
+  const transfer = async (args: TransferArgs): Promise<string> => {
     setIsLoading(true);
-    setError(null);
 
     try {
+      const { params, wallet, signTransaction } = args;
       const { ownerPublicKey, mint, toAddress, amount, decimals = 6 } = params;
-      const rpc = getRpc();
+
+      // Create RPC connection
+      const rpc = createRpc(import.meta.env.VITE_HELIUS_RPC_URL);
+
       const owner = new PublicKey(ownerPublicKey);
       const mintPubkey = new PublicKey(mint);
       const recipient = new PublicKey(toAddress);
@@ -64,16 +77,29 @@ export function useBuildTransfer() {
       transaction.recentBlockhash = blockhash;
       transaction.feePayer = owner;
 
+      // Serialize unsigned transaction
+      const unsignedTxBuffer = transaction.serialize({ requireAllSignatures: false });
+
+      // Sign with Privy
+      const signedTx = await signTransaction({
+        transaction: unsignedTxBuffer,
+        wallet,
+        chain: 'solana:devnet',
+      });
+
+      // Send transaction
+      const signedTxBuffer = Buffer.from(signedTx.signedTransaction);
+      const signature = await rpc.sendRawTransaction(signedTxBuffer, {
+        skipPreflight: false,
+        preflightCommitment: 'confirmed',
+      });
+
+      return signature;
+    } finally {
       setIsLoading(false);
-      return transaction;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : String(err);
-      setError(errorMessage);
-      setIsLoading(false);
-      throw err;
     }
   };
 
-  return { buildTransferTx, isLoading, error };
+  return { transfer, isLoading };
 }
 ```
