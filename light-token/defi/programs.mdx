@@ -505,22 +505,22 @@ migration support.
 
 ## FAQ
 
-<Accordion title="How does it prevent re-init attacks?"> When you create an
-account, the SDK, in addition to paying the rent exemption cost, auto-provides a
-proof that verifies that the account does not yet exist in the cold
-address space. The SVM already does the same for the onchain address space. This
-way both hot and cold address spaces are covered, preventing re-init attacks. </Accordion>
+<Accordion title="How does it prevent re-init attacks?"> When creating an
+account for the first time, the SDK provides a proof that the account doesn't
+exist in the cold address space. The SVM already verifies this for the onchain
+space. Both address spaces are checked before creation, preventing re-init
+attacks, even if the account is currently cold. </Accordion>
 
 <Accordion title="Who triggers compression?"> Miners automatically compress when
 virtual rent is below threshold (eg 24h without write bump). </Accordion>
 
 <Accordion title="Can active pools get compressed?">
-No. Any write bumps the virtual rent balance. Active pools never compress.
+No. Any write bumps the virtual rent balance. Active accounts never compress.
 </Accordion>
 
-<Accordion title="Do I need to run infrastructure?">
-No. Helius and Triton run the Interface RPC endpoints, self-hosting the Photon indexer is optional. But Helius Labs maintains the Photon indexer implementation.
-</Accordion>
+<Accordion title="Do I need to run infrastructure?"> No. Helius and Triton run
+the Interface RPC endpoints, self-hosting the Photon indexer is optional. Helius
+Labs maintains the open-source Photon indexer implementation. </Accordion>
 
 <Accordion title="What if the indexer is down?"> 
 Hot markets work all the same as long as Solana is up. Cold accounts cannot be loaded into hot state until your indexer or RPC provider recovers.
