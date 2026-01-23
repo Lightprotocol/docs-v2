@@ -348,8 +348,8 @@ pub fn process_initialize_pool(ctx: Context<InitializePool>, params: InitializeP
 
 ## Client SDK
 
-To make it easy for clients to integrate with your program, ship an SDK crate
-implementing the `LightProgramInterface` trait.
+To make it easy for clients to integrate with your program, implement the
+`LightProgramInterface` trait in your program's SDK crate.
 
 For a detailed example of how clients use this trait, check out the [Router Integration](./routers.mdx) page.
 
