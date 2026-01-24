@@ -188,7 +188,12 @@
     "jito",
     "Jito",
     "Offramp",
-    "offramp"
+    "offramp",
+    "offramps",
+    "zkcompression",
+    "ZKCompression",
+    "Tasktool",
+    "clippy"
   ],
   "ignorePaths": [
     "node_modules",

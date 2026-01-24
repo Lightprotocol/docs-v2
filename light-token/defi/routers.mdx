@@ -171,12 +171,15 @@ Latency, tx size, and CU depend on the number and type of cold accounts.
 
 ### When does a market go cold?
 A market is "cold" after it has been compressed by a miner. Accounts become
-eligible for compression when inactive (e.g., after 24h without lamport bumps
-from fee payers), causing the virtual rent balance to fall below threshold.
+eligible for compression only after extended inactivity (e.g., multiple epochs
+without any writes), causing the virtual rent balance to fall below threshold.
+
+**In practice, cold markets should be rare.** The common path (hot) has no extra
+overhead and does not increase CU or txn size.
 
 **To ensure swaps execute regardless of whether the market is hot or cold,
-always prepend `create_load_instructions` to the swap transaction. This no-ops
-if the market is hot.**
+always call `create_load_instructions` when building the swap instructions. It
+simply no-ops if the market is hot.**
 
 ---
 ## Error Handling
