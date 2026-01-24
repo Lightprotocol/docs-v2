@@ -512,10 +512,12 @@ space. Both address spaces are checked before creation, preventing re-init
 attacks, even if the account is currently cold. </Accordion>
 
 <Accordion title="Who triggers compression?"> Miners automatically compress when
-virtual rent is below threshold (eg 24h without write bump). </Accordion>
+virtual rent is below threshold (e.g., multiple epochs without any writes). In
+practice, cold markets should be rare. The common path (hot) has no extra
+overhead and does not increase CU or txn size. </Accordion>
 
 <Accordion title="Can active pools get compressed?">
-No. Any write bumps the virtual rent balance. Active accounts never compress.
+No. Any write bumps the virtual rent balance. Active accounts do not get compressed.
 </Accordion>
 
 <Accordion title="Do I need to run infrastructure?"> No. Helius and Triton run
