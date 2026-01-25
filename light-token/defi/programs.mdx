@@ -485,10 +485,14 @@ async fn test_pool_lifecycle() {
 ---
 ## How it works
 
-The SDK pays the rent-exemption cost. Inactive (cold) accounts auto-compress. Your program only ever interacts with hot accounts. 
-Clients can load cold accounts back when needed via `create_load_instructions`.
+The SDK pays the rent-exemption cost. After extended inactivity (e.g., multiple
+epochs without any writes), cold accounts auto-compress. Your program only ever
+interacts with hot accounts. Clients can load cold accounts back into the
+onchain Solana account space when needed via `create_load_instructions`.
 
-Under the hood, clients use `AccountInterface` - a superset of Solana's `Account` that unifies hot and cold state. See [Router Integration](./routers) for details.
+Under the hood, clients use `AccountInterface` - a superset of Solana's
+`Account` that unifies hot and cold state. See [Router Integration](./routers)
+for details.
 
 | | Hot (active) | Cold (inactive) |
 |---|---|---|
