@@ -8,3 +8,5 @@ mintlify-docs/
 node_modules/
 
 stash
+docs-audit.md
+docs-audit.txt

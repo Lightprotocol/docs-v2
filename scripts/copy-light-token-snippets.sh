@@ -3,7 +3,7 @@
 # Script to copy TypeScript code from examples-light-token to docs/snippets/code-snippets/light-token
 # Wraps each file in typescript markdown code blocks
 
-EXAMPLES="/home/tilo/Workspace/examples-light-token/cookbook"
+EXAMPLES="/home/tilo/Workspace/examples-light-token/typescript-client"
 SNIPPETS_DIR="/home/tilo/Workspace/docs/snippets/code-snippets/light-token"
 
 # Recipes to process (matching directory names)

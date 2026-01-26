@@ -1,0 +1,150 @@
+---
+title: Transfer Checked
+sidebarTitle: Transfer Checked
+description: Rust client guide to transfer light-tokens with decimal validation. Includes step-by-step implementation and full code examples.
+keywords: ["transfer tokens solana", "checked transfer", "decimal validation"]
+---
+
+---
+
+import TokenClientPrerequisites from "/snippets/light-token-guides/light-token-client-prerequisites.mdx";
+import RustActionCode from "/snippets/code-snippets/light-token/transfer-checked/rust-client/action.mdx";
+import RustInstructionCode from "/snippets/code-snippets/light-token/transfer-checked/rust-client/instruction.mdx";
+import NativeProgramCode from "/snippets/code-snippets/light-token/transfer-checked/native-program/full-example.mdx";
+import AnchorProgramCode from "/snippets/code-snippets/light-token/transfer-checked/anchor-program/full-example.mdx";
+
+1. TransferChecked validates that the decimals parameter matches the mint's decimals.
+2. Use for Light→Light transfers when you need decimal verification.
+3. For transfers involving SPL or Token-2022 accounts, use [Transfer Interface](/light-token/cookbook/transfer-interface) instead.
+
+<Tabs>
+<Tab title="Rust Client">
+
+<Steps>
+<Step>
+### Prerequisites
+
+<TokenClientPrerequisites />
+
+</Step>
+
+<Step>
+### Transfer with Decimal Check
+
+<Info>
+  Find the full example including shared test utilities in the
+  [examples-light-token repo](https://github.com/Lightprotocol/examples-light-token/tree/main/rust-client/tests).
+</Info>
+
+<Tabs>
+<Tab title="Action">
+<RustActionCode />
+</Tab>
+<Tab title="Instruction">
+<RustInstructionCode />
+</Tab>
+</Tabs>
+
+</Step>
+</Steps>
+</Tab>
+
+<Tab title="Program (SDK Anchor / Native)">
+
+<Note>
+Find [a full code example at the end](#full-code-example).
+</Note>
+<Steps>
+<Step>
+
+### Transfer Checked with CPI
+
+<Tabs>
+  <Tab title="invoke (External signer)">
+
+```rust
+use light_token::instruction::TransferCheckedCpi;
+
+TransferCheckedCpi {
+    source: source.clone(),
+    mint: mint.clone(),
+    destination: destination.clone(),
+    amount,
+    decimals,
+    authority: authority.clone(),
+    system_program: system_program.clone(),
+    max_top_up: None,
+    fee_payer: None,
+}
+.invoke()?;
+```
+
+  </Tab>
+  <Tab title="invoke_signed (PDA signer)">
+
+```rust
+use light_token::instruction::TransferCheckedCpi;
+
+let signer_seeds = authority_seeds!(bump);
+
+TransferCheckedCpi {
+    source: source.clone(),
+    mint: mint.clone(),
+    destination: destination.clone(),
+    amount,
+    decimals,
+    authority: authority.clone(),
+    system_program: system_program.clone(),
+    max_top_up: None,
+    fee_payer: None,
+}
+.invoke_signed(&[signer_seeds])?;
+```
+
+  </Tab>
+</Tabs>
+
+</Step>
+</Steps>
+
+# Full Code Example
+
+<Tabs>
+<Tab title="Anchor">
+
+<Info>
+  View the full example:
+  [examples-light-token](https://github.com/Lightprotocol/examples-light-token/tree/main/program-examples/anchor/sdk-basics/transfer-checked).
+</Info>
+
+<AnchorProgramCode />
+
+</Tab>
+
+<Tab title="Native">
+
+<Info>
+  View the full example with shared test utilities:
+  [examples-light-token-native](https://github.com/Lightprotocol/examples-light-token-native/tree/main/program-examples/native).
+</Info>
+
+<NativeProgramCode />
+
+</Tab>
+</Tabs>
+
+</Tab>
+
+</Tabs>
+
+# Next Steps
+
+{" "}
+
+<Card
+  title="Learn how to close light-token accounts"
+  icon="chevron-right"
+  color="#0066ff"
+  href="/light-token/cookbook/close-token-account"
+  horizontal
+/>

@@ -1,0 +1,118 @@
+<CodeGroup>
+```rust instruction.rs
+use super::authority_seeds;
+use light_token::instruction::FreezeCpi;
+use solana_program::{
+    account_info::AccountInfo, entrypoint::ProgramResult,
+    program_error::ProgramError,
+};
+
+pub fn freeze_invoke(accounts: &[AccountInfo], _data: &[u8]) -> ProgramResult {
+    let [token_account, mint, freeze_authority, _token_program] = accounts
+    else {
+        return Err(ProgramError::NotEnoughAccountKeys);
+    };
+
+    // Freeze token account. freeze_authority must match mint creation
+    FreezeCpi {
+        token_account: token_account.clone(),
+        mint: mint.clone(),
+        freeze_authority: freeze_authority.clone(),
+    }
+    .invoke()
+}
+
+pub fn freeze_invoke_signed(
+    accounts: &[AccountInfo],
+    data: &[u8],
+) -> ProgramResult {
+    let [token_account, mint, freeze_authority, _token_program] = accounts
+    else {
+        return Err(ProgramError::NotEnoughAccountKeys);
+    };
+
+    if data.is_empty() {
+        return Err(ProgramError::InvalidInstructionData);
+    }
+
+    let bump = data[0];
+    let signer_seeds = authority_seeds!(bump);
+
+    FreezeCpi {
+        token_account: token_account.clone(),
+        mint: mint.clone(),
+        freeze_authority: freeze_authority.clone(),
+    }
+    .invoke_signed(&[signer_seeds])
+}
+```
+
+```rust test.rs
+mod shared;
+
+use borsh::BorshDeserialize;
+use light_client::rpc::Rpc;
+use light_token_interface::state::Token;
+use shared::{
+    build_freeze_cpi_ix, build_freeze_signed_cpi_ix, create_test_rpc,
+    get_authority_pda, setup, setup_mint_with_tokens, SetupContext,
+};
+use solana_sdk::signer::Signer;
+
+#[tokio::test(flavor = "multi_thread")]
+async fn freeze_cpi() {
+    // Setup: create mint and ATA with freeze authority
+    let SetupContext {
+        mut rpc,
+        payer,
+        mint,
+        ata,
+        ..
+    } = setup().await;
+
+    let ix = build_freeze_cpi_ix(ata, mint, payer.pubkey());
+
+    rpc.create_and_send_transaction(&[ix], &payer.pubkey(), &[&payer])
+        .await
+        .unwrap();
+
+    // Verify account is frozen
+    let account_data = rpc.get_account(ata).await.unwrap().unwrap();
+    let token_state = Token::deserialize(&mut &account_data.data[..]).unwrap();
+    assert!(token_state.is_frozen(), "Account should be frozen");
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn freeze_signed_cpi() {
+    let mut rpc = create_test_rpc().await;
+    let payer = rpc.get_payer().insecure_clone();
+
+    let (pda_authority, bump) = get_authority_pda();
+    let initial_amount = 1_000_000u64;
+
+    // Create mint with PDA as freeze authority and mint tokens to payer
+    let (mint, atas) = setup_mint_with_tokens(
+        &mut rpc,
+        &payer,
+        payer.pubkey(),
+        Some(pda_authority),
+        9,
+        vec![(initial_amount, payer.pubkey())],
+    )
+    .await;
+
+    let ata = atas[0];
+
+    let ix = build_freeze_signed_cpi_ix(ata, mint, pda_authority, bump);
+
+    rpc.create_and_send_transaction(&[ix], &payer.pubkey(), &[&payer])
+        .await
+        .unwrap();
+
+    // Verify account is frozen
+    let account_data = rpc.get_account(ata).await.unwrap().unwrap();
+    let token_state = Token::deserialize(&mut &account_data.data[..]).unwrap();
+    assert!(token_state.is_frozen(), "Account should be frozen");
+}
+```
+</CodeGroup>

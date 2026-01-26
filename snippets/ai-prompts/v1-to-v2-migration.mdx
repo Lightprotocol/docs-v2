@@ -1,3 +1,4 @@
+~~~~text
 ---
 argument-hint: <path_to_program>
 description: Migrate Light Protocol program from v1 to v2 Merkle trees
@@ -13,9 +14,9 @@ Produce a **fully working migration** that builds and tests pass.
 ## Available commands
 
 Via Bash tool:
-- `cargo build-sbf`, `cargo test-sbf`, `cargo fmt`, `cargo clippy`
-- `anchor build`, `anchor test`
-- `grep`, `sed`
+- **cargo build-sbf**, **cargo test-sbf**, **cargo fmt**, **cargo clippy**
+- **anchor build**, **anchor test**
+- **grep**, **sed**
 
 ## Documentation
 
@@ -78,14 +79,14 @@ Add v2 feature to Cargo.toml:
 
 **Required commands (no shortcuts):**
 
-For Anchor programs: `anchor build && anchor test`
+For Anchor programs: **anchor build && anchor test**
 
-For Native programs: `cargo build-sbf && cargo test-sbf`
+For Native programs: **cargo build-sbf && cargo test-sbf**
 
 **NO shortcuts allowed:**
 
-- Do NOT use `cargo build` (must use `cargo build-sbf`)
-- Do NOT use `cargo test` (must use `cargo test-sbf`)
+- Do NOT use **cargo build** (must use **cargo build-sbf**)
+- Do NOT use **cargo test** (must use **cargo test-sbf**)
 - Tests MUST run against real BPF bytecode
 
 **On failure:** Spawn debugger agent with error context.
@@ -103,3 +104,4 @@ Do NOT proceed until all tests pass.
 If no matching pattern in reference repos:
 
     mcp__deepwiki__ask_question("Lightprotocol/light-protocol", "How to migrate {pattern} from v1 to v2?")
+~~~~

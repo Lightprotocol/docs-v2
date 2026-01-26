@@ -1,0 +1,185 @@
+<CodeGroup>
+```rust lib.rs
+#![allow(unexpected_cfgs, deprecated)]
+
+use anchor_lang::prelude::*;
+use light_compressible::CreateAccountsProof;
+use light_sdk::derive_light_cpi_signer;
+use light_sdk_macros::{light_program, LightAccounts};
+use light_sdk_types::CpiSigner;
+
+declare_id!("JD5N2ZwvCpdcJguF2zRHgpPdrBXf3R9kmhFC7aLALB6j");
+
+pub const LIGHT_CPI_SIGNER: CpiSigner =
+    derive_light_cpi_signer!("JD5N2ZwvCpdcJguF2zRHgpPdrBXf3R9kmhFC7aLALB6j");
+
+pub const MINT_SIGNER_SEED: &[u8] = b"mint_signer";
+
+#[derive(AnchorSerialize, AnchorDeserialize, Clone)]
+pub struct CreateMintParams {
+    pub create_accounts_proof: CreateAccountsProof,
+    pub mint_signer_bump: u8,
+}
+
+#[light_program]
+#[program]
+pub mod light_token_anchor_create_mint_macro {
+    use super::*;
+
+    #[allow(unused_variables)]
+    pub fn create_mint<'info>(
+        ctx: Context<'_, '_, '_, 'info, CreateMint<'info>>,
+        params: CreateMintParams,
+    ) -> Result<()> {
+        Ok(())
+    }
+}
+
+#[derive(Accounts, LightAccounts)]
+#[instruction(params: CreateMintParams)]
+pub struct CreateMint<'info> {
+    #[account(mut)]
+    pub fee_payer: Signer<'info>,
+
+    /// CHECK: Used for mint_signer PDA derivation only
+    pub authority: AccountInfo<'info>,
+
+    /// CHECK: Validated by light-token CPI
+    #[account(
+        seeds = [MINT_SIGNER_SEED, authority.key().as_ref()],
+        bump,
+    )]
+    pub mint_signer: UncheckedAccount<'info>,
+
+    /// CHECK: Validated by light-token CPI
+    #[account(mut)]
+    #[light_account(init,
+        mint::signer = mint_signer,
+        mint::authority = fee_payer,
+        mint::decimals = 9,
+        mint::seeds = &[MINT_SIGNER_SEED, self.authority.to_account_info().key.as_ref()],
+        mint::bump = params.mint_signer_bump
+    )]
+    pub mint: UncheckedAccount<'info>,
+
+    /// CHECK: Validated by light-token CPI
+    pub compression_config: AccountInfo<'info>,
+
+    /// CHECK: Validated by light-token CPI
+    pub light_token_compressible_config: AccountInfo<'info>,
+
+    /// CHECK: Validated by light-token CPI
+    #[account(mut)]
+    pub rent_sponsor: AccountInfo<'info>,
+
+    /// CHECK: Validated by light-token CPI
+    pub light_token_program: AccountInfo<'info>,
+
+    /// CHECK: Validated by light-token CPI
+    pub light_token_cpi_authority: AccountInfo<'info>,
+
+    pub system_program: Program<'info, System>,
+}
+```
+
+```rust test.rs
+use anchor_lang::{InstructionData, ToAccountMetas};
+use light_client::interface::{
+    get_create_accounts_proof, CreateAccountsProofInput, InitializeRentFreeConfig,
+};
+use light_program_test::{
+    program_test::{setup_mock_program_data, LightProgramTest},
+    ProgramTestConfig, Rpc,
+};
+use light_sdk_types::LIGHT_TOKEN_PROGRAM_ID;
+use light_token::instruction::{find_mint_address, COMPRESSIBLE_CONFIG_V1, RENT_SPONSOR};
+use light_token_anchor_create_mint_macro::{CreateMintParams, MINT_SIGNER_SEED, ID};
+use solana_sdk::{instruction::Instruction, pubkey::Pubkey, signature::Keypair, signer::Signer};
+
+#[tokio::test]
+async fn test_create_mint() {
+    let config = ProgramTestConfig::new_v2(
+        true,
+        Some(vec![("light_token_anchor_create_mint_macro", ID)]),
+    )
+    .with_light_protocol_events();
+
+    let mut rpc = LightProgramTest::new(config).await.unwrap();
+    let payer = rpc.get_payer().insecure_clone();
+
+    let program_data_pda = setup_mock_program_data(&mut rpc, &payer, &ID);
+
+    let (init_config_ix, config_pda) = InitializeRentFreeConfig::new(
+        &ID,
+        &payer.pubkey(),
+        &program_data_pda,
+        RENT_SPONSOR,
+        payer.pubkey(),
+    )
+    .build();
+
+    rpc.create_and_send_transaction(&[init_config_ix], &payer.pubkey(), &[&payer])
+        .await
+        .unwrap();
+
+    let authority = Keypair::new();
+
+    let (mint_signer_pda, mint_signer_bump) =
+        Pubkey::find_program_address(&[MINT_SIGNER_SEED, authority.pubkey().as_ref()], &ID);
+
+    let (mint_pda, _) = find_mint_address(&mint_signer_pda);
+
+    let proof_result = get_create_accounts_proof(
+        &rpc,
+        &ID,
+        vec![CreateAccountsProofInput::mint(mint_signer_pda)],
+    )
+    .await
+    .unwrap();
+
+    let accounts = light_token_anchor_create_mint_macro::accounts::CreateMint {
+        fee_payer: payer.pubkey(),
+        authority: authority.pubkey(),
+        mint_signer: mint_signer_pda,
+        mint: mint_pda,
+        compression_config: config_pda,
+        light_token_compressible_config: COMPRESSIBLE_CONFIG_V1,
+        rent_sponsor: RENT_SPONSOR,
+        light_token_program: LIGHT_TOKEN_PROGRAM_ID.into(),
+        light_token_cpi_authority: light_token_types::CPI_AUTHORITY_PDA.into(),
+        system_program: solana_sdk::system_program::ID,
+    };
+
+    let instruction_data = light_token_anchor_create_mint_macro::instruction::CreateMint {
+        params: CreateMintParams {
+            create_accounts_proof: proof_result.create_accounts_proof,
+            mint_signer_bump,
+        },
+    };
+
+    let ix = Instruction {
+        program_id: ID,
+        accounts: [accounts.to_account_metas(None), proof_result.remaining_accounts].concat(),
+        data: instruction_data.data(),
+    };
+
+    let sig = rpc
+        .create_and_send_transaction(&[ix], &payer.pubkey(), &[&payer])
+        .await
+        .unwrap();
+
+    println!("Tx: {}", sig);
+
+    let mint_account = rpc.get_account(mint_pda).await.unwrap().unwrap();
+
+    use light_token_interface::state::Mint;
+    let mint: Mint = borsh::BorshDeserialize::deserialize(&mut &mint_account.data[..]).unwrap();
+
+    assert_eq!(mint.base.decimals, 9);
+    assert_eq!(
+        mint.base.mint_authority,
+        Some(payer.pubkey().to_bytes().into())
+    );
+}
+```
+</CodeGroup>

@@ -1,7 +1,8 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "theme": "aspen",
-  "name": "Lightprotocol",
+  "exclude": ["node_modules/**"],
+  "name": "Light Protocol",
   "colors": {
     "primary": "#0066FF",
     "light": "#0066FF",
@@ -16,7 +17,7 @@
   },
   "seo": {
     "metatags": {
-      "keywords": "solana tokens, spl token, token 2022, light protocol, zk compression, rent free accounts on solana, scalable solana infrastructure"
+      "keywords": "solana tokens, rent, spl token, token 2022, light protocol, zk compression, rent-free accounts on solana, scalable solana infrastructure"
     }
   },
   "navigation": {
@@ -26,7 +27,9 @@
         "groups": [
           {
             "group": "Overview",
-            "pages": ["home"]
+            "pages": [
+              "home"
+            ]
           }
         ]
       },
@@ -42,13 +45,18 @@
             ]
           },
           {
+            "group": "DeFi",
+            "pages": [
+              "light-token/defi/routers",
+              "light-token/defi/programs"
+            ]
+          },
+          {
             "group": "Toolkits",
             "pages": [
               "light-token/toolkits/overview",
               "light-token/toolkits/for-payments",
-              "light-token/toolkits/for-wallets",
-              "light-token/toolkits/for-streaming-mints",
-              "light-token/toolkits/for-streaming-tokens"
+              "light-token/toolkits/for-wallets"
             ]
           },
           {
@@ -64,8 +72,12 @@
                   "light-token/cookbook/mint-to",
                   "light-token/cookbook/close-token-account",
                   "light-token/cookbook/transfer-interface",
+                  "light-token/cookbook/transfer-checked",
                   "light-token/cookbook/wrap-unwrap",
-                  "light-token/cookbook/load-ata"
+                  "light-token/cookbook/load-ata",
+                  "light-token/cookbook/burn",
+                  "light-token/cookbook/freeze-thaw",
+                  "light-token/cookbook/approve-revoke"
                 ]
               }
             ]
@@ -80,11 +92,12 @@
           {
             "group": "SDK Reference",
             "pages": [
-              "api-reference/libraries/stateless-js",
-              "api-reference/libraries/compressed-token",
-              "api-reference/libraries/light-client",
               "api-reference/libraries/light-sdk",
-              "api-reference/libraries/light-program-test"
+              "api-reference/libraries/light-token",
+              "api-reference/libraries/light-program-test",
+              "api-reference/libraries/light-client",
+              "api-reference/libraries/stateless-js",
+              "api-reference/libraries/compressed-token"
             ]
           }
         ]
@@ -130,6 +143,7 @@
             "group": "Compressed Tokens",
             "pages": [
               "compressed-tokens/overview",
+              "compressed-tokens/for-privy",
               "compressed-tokens/advanced-guides/airdrop",
               {
                 "group": "Cookbook",
@@ -161,8 +175,6 @@
                     "group": "Examples",
                     "expanded": true,
                     "pages": [
-                      "compressed-tokens/advanced-guides/example-web-client",
-                      "compressed-tokens/advanced-guides/example-node-js",
                       "compressed-tokens/advanced-guides/example-token-distribution"
                     ]
                   }
@@ -234,7 +246,8 @@
                 "group": "SDKs",
                 "pages": [
                   "resources/sdks/client-development",
-                  "resources/sdks/program-development"
+                  "resources/sdks/program-development",
+                  "resources/sdks/instruction-decoder"
                 ]
               },
               "resources/addresses-and-urls"
@@ -246,6 +259,7 @@
               "references/whitepaper",
               "references/node-operators",
               "references/terminology",
+              "references/light-token-terminology",
               "references/migration-v1-to-v2",
               "support",
               "references/security"
@@ -270,7 +284,11 @@
       "display": "interactive"
     },
     "examples": {
-      "languages": ["curl", "javascript", "python"],
+      "languages": [
+        "curl",
+        "javascript",
+        "python"
+      ],
       "defaults": "all",
       "prefill": true
     }
@@ -303,10 +321,12 @@
         "icon": "/images/deepwiki-logo.svg",
         "href": {
           "base": "https://deepwiki.com/Lightprotocol/light-protocol",
-          "query": [{
-            "key": "context",
-            "value": "$page"
-          }]
+          "query": [
+            {
+              "key": "context",
+              "value": "$page"
+            }
+          ]
         }
       },
       "chatgpt",
@@ -325,8 +345,10 @@
       "discord": "https://discord.com/invite/CYvjBgzRFP"
     }
   },
-  "redirects": [{
-    "source": "/landing",
-    "destination": "/welcome"
-  }]
+  "redirects": [
+    {
+      "source": "/landing",
+      "destination": "/welcome"
+    }
+  ]
 }

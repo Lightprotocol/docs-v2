@@ -1,0 +1,39 @@
+```rust
+use borsh::BorshDeserialize;
+use light_client::rpc::Rpc;
+use light_token::instruction::Approve;
+use rust_client::{setup, SetupContext};
+use solana_sdk::{signature::Keypair, signer::Signer};
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // Setup creates mint and ATA with tokens
+    let SetupContext {
+        mut rpc,
+        payer,
+        ata,
+        ..
+    } = setup().await;
+
+    let delegate = Keypair::new();
+    let delegate_amount = 500_000u64;
+
+    let approve_ix = Approve {
+        token_account: ata,
+        delegate: delegate.pubkey(),
+        owner: payer.pubkey(),
+        amount: delegate_amount,
+    }
+    .instruction()?;
+
+    let sig = rpc
+        .create_and_send_transaction(&[approve_ix], &payer.pubkey(), &[&payer])
+        .await?;
+
+    let data = rpc.get_account(ata).await?.ok_or("Account not found")?;
+    let token = light_token_interface::state::Token::deserialize(&mut &data.data[..])?;
+    println!("Delegate: {:?} Tx: {sig}", token.delegate);
+
+    Ok(())
+}
+```

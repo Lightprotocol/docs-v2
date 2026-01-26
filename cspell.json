@@ -186,7 +186,13 @@
     "Jotaro",
     "Yano",
     "jito",
-    "Jito"
+    "Jito",
+    "Offramp",
+    "offramp",
+    "offramps",
+    "zkcompression",
+    "Tasktool",
+    "clippy"
   ],
   "ignorePaths": [
     "node_modules",

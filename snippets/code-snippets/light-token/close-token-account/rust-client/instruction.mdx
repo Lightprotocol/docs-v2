@@ -1,0 +1,28 @@
+```rust
+use light_client::rpc::Rpc;
+use light_token::instruction::{CloseAccount, LIGHT_TOKEN_PROGRAM_ID};
+use rust_client::{setup_empty_ata, SetupContext};
+use solana_sdk::signer::Signer;
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // Setup creates mint and empty ATA (must be empty to close).
+    let SetupContext {
+        mut rpc,
+        payer,
+        ata,
+        ..
+    } = setup_empty_ata().await;
+    let close_ix = CloseAccount::new(LIGHT_TOKEN_PROGRAM_ID, ata, payer.pubkey(), payer.pubkey())
+        .instruction()?;
+
+    let sig = rpc
+        .create_and_send_transaction(&[close_ix], &payer.pubkey(), &[&payer])
+        .await?;
+
+    let account = rpc.get_account(ata).await?;
+    println!("Closed: {} Tx: {sig}", account.is_none());
+
+    Ok(())
+}
+```

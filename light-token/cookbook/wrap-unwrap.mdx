@@ -12,6 +12,9 @@ import WrapActionCode from "/snippets/code-snippets/light-token/wrap/action.mdx"
 import WrapInstructionCode from "/snippets/code-snippets/light-token/wrap/instruction.mdx";
 import UnwrapActionCode from "/snippets/code-snippets/light-token/unwrap/action.mdx";
 import UnwrapInstructionCode from "/snippets/code-snippets/light-token/unwrap/instruction.mdx";
+import WrapRustActionCode from "/snippets/code-snippets/light-token/wrap/rust-client/action.mdx";
+import UnwrapRustActionCode from "/snippets/code-snippets/light-token/unwrap/rust-client/action.mdx";
+import TokenClientPrerequisites from "/snippets/light-token-guides/light-token-client-prerequisites.mdx";
 
 - **Wrap**: Move tokens from SPL/T22 account → light-token ATA (hot balance)
 - **Unwrap**: Move tokens from light-token ATA (hot balance) → SPL/T22 account
@@ -23,7 +26,8 @@ import UnwrapInstructionCode from "/snippets/code-snippets/light-token/unwrap/in
   [unwrap.ts](https://github.com/Lightprotocol/light-protocol/blob/0c4e2417b2df2d564721b89e18d1aad3665120e7/js/compressed-token/src/v3/actions/unwrap.ts)
 </Info>
 
-## Get Started
+<Tabs>
+<Tab title="TypeScript Client">
 
 <Tabs>
 <Tab title="Wrap">
@@ -65,6 +69,69 @@ import UnwrapInstructionCode from "/snippets/code-snippets/light-token/unwrap/in
 
 </Step>
 </Steps>
+
+</Tab>
+</Tabs>
+
+</Tab>
+<Tab title="Rust Client">
+
+<Tabs>
+<Tab title="Wrap">
+
+<Steps>
+<Step>
+### Prerequisites
+
+<TokenClientPrerequisites />
+
+</Step>
+
+<Step>
+### Wrap SPL tokens to light-token ATA
+
+<Info>
+  Find the full example including shared test utilities in the
+  [examples-light-token repo](https://github.com/Lightprotocol/examples-light-token/tree/main/rust-client/tests).
+</Info>
+
+<Tabs>
+<Tab title="Action">
+<WrapRustActionCode />
+</Tab>
+</Tabs>
+</Step>
+</Steps>
+
+</Tab>
+<Tab title="Unwrap">
+
+<Steps>
+<Step>
+### Prerequisites
+
+<TokenClientPrerequisites />
+
+</Step>
+
+<Step>
+### Unwrap light-tokens to SPL account
+
+<Info>
+  Find the full example including shared test utilities in the
+  [examples-light-token repo](https://github.com/Lightprotocol/examples-light-token/tree/main/rust-client/tests).
+</Info>
+
+<Tabs>
+<Tab title="Action">
+<UnwrapRustActionCode />
+</Tab>
+</Tabs>
+</Step>
+</Steps>
+
+</Tab>
+</Tabs>
 
 </Tab>
 </Tabs>

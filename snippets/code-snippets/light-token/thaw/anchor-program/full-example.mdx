@@ -1,0 +1,91 @@
+<CodeGroup>
+```rust lib.rs
+#![allow(unexpected_cfgs, deprecated)]
+
+use anchor_lang::prelude::*;
+use light_token::instruction::ThawCpi;
+
+declare_id!("7j94EF5hSkDLf7R26bjrd8Qc6s3oLAQpcKiF3re8JYw9");
+
+#[program]
+pub mod light_token_anchor_thaw {
+    use super::*;
+
+    pub fn thaw(ctx: Context<ThawAccounts>) -> Result<()> {
+        ThawCpi {
+            token_account: ctx.accounts.token_account.to_account_info(),
+            mint: ctx.accounts.mint.to_account_info(),
+            freeze_authority: ctx.accounts.freeze_authority.to_account_info(),
+        }
+        .invoke()?;
+        Ok(())
+    }
+}
+
+#[derive(Accounts)]
+pub struct ThawAccounts<'info> {
+    /// CHECK: Light token program for CPI
+    pub light_token_program: AccountInfo<'info>,
+    /// CHECK: Validated by light-token CPI
+    #[account(mut)]
+    pub token_account: AccountInfo<'info>,
+    /// CHECK: Validated by light-token CPI
+    pub mint: AccountInfo<'info>,
+    pub freeze_authority: Signer<'info>,
+}
+```
+
+```rust test.rs
+use anchor_lang::InstructionData;
+use light_program_test::Rpc;
+use light_token::instruction::{Freeze, LIGHT_TOKEN_PROGRAM_ID};
+use light_token_anchor_thaw::{instruction::Thaw, ID};
+use solana_sdk::{
+    instruction::{AccountMeta, Instruction},
+    signer::Signer,
+};
+use test_utils::{mint_tokens, setup_test_env_with_freeze};
+
+#[tokio::test]
+async fn test_thaw() {
+    let mut env = setup_test_env_with_freeze("light_token_anchor_thaw", ID).await;
+
+    // Mint tokens first
+    mint_tokens(&mut env.rpc, &env.payer, env.mint_pda, env.ata, 1_000_000).await;
+
+    // Freeze account first using SDK
+    let freeze_ix = Freeze {
+        token_account: env.ata,
+        mint: env.mint_pda,
+        freeze_authority: env.freeze_authority,
+    }
+    .instruction()
+    .unwrap();
+
+    env.rpc
+        .create_and_send_transaction(&[freeze_ix], &env.payer.pubkey(), &[&env.payer])
+        .await
+        .unwrap();
+
+    // Call the anchor program to thaw account
+    let ix = Instruction {
+        program_id: ID,
+        accounts: vec![
+            AccountMeta::new_readonly(LIGHT_TOKEN_PROGRAM_ID, false),
+            AccountMeta::new(env.ata, false),
+            AccountMeta::new_readonly(env.mint_pda, false),
+            AccountMeta::new_readonly(env.freeze_authority, true),
+        ],
+        data: Thaw {}.data(),
+    };
+
+    let sig = env
+        .rpc
+        .create_and_send_transaction(&[ix], &env.payer.pubkey(), &[&env.payer])
+        .await
+        .unwrap();
+
+    println!("Tx: {}", sig);
+}
+```
+</CodeGroup>

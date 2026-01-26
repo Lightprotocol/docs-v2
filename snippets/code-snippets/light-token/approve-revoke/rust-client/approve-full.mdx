@@ -1,0 +1,35 @@
+```rust
+mod shared;
+
+use light_client::rpc::Rpc;
+use light_token_sdk::token::Approve;
+use shared::SetupContext;
+use solana_sdk::{signature::Keypair, signer::Signer};
+
+#[tokio::test(flavor = "multi_thread")]
+async fn approve_delegate() {
+    // Setup creates mint and ATA with tokens
+    let SetupContext {
+        mut rpc,
+        payer,
+        ata,
+        ..
+    } = shared::setup().await;
+
+    let delegate = Keypair::new();
+    let delegate_amount = 500_000u64;
+
+    let approve_ix = Approve {
+        token_account: ata,
+        delegate: delegate.pubkey(),
+        owner: payer.pubkey(),
+        amount: delegate_amount,
+    }
+    .instruction()
+    .unwrap();
+
+    rpc.create_and_send_transaction(&[approve_ix], &payer.pubkey(), &[&payer])
+        .await
+        .unwrap();
+}
+```

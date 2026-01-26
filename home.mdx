@@ -58,6 +58,17 @@ import WelcomePageInstall from "/snippets/setup/welcome-page-install.mdx";
 </Step>
 </Steps>
 
+## DeFi Integration
+
+<CardGroup cols={2}>
+  <Card title="Program Integration" icon="code" href="/light-token/defi/programs">
+    Build rent-free AMMs and DeFi programs with minimal code changes.
+  </Card>
+  <Card title="Router Integration" icon="route" href="/light-token/defi/routers">
+    Add support for rent-free AMMs to your aggregator or router.
+  </Card>
+</CardGroup>
+
 ## Toolkits
 
 <Tabs>
@@ -82,7 +93,7 @@ import WelcomePageInstall from "/snippets/setup/welcome-page-install.mdx";
       Allow users to display and swap light-tokens.
     </Card>
 
-    <Card
+    {/* <Card
       title="Streaming Mints"
       icon="bolt"
       color="#0066ff"
@@ -90,9 +101,9 @@ import WelcomePageInstall from "/snippets/setup/welcome-page-install.mdx";
       horizontal
     >
       Stream mint events from the network in real-time.
-    </Card>
+    </Card> */}
 
-    <Card
+    {/* <Card
       title="Streaming Tokens"
       icon="stream"
       color="#0066ff"
@@ -100,7 +111,7 @@ import WelcomePageInstall from "/snippets/setup/welcome-page-install.mdx";
       horizontal
     >
       Stream token events from the network in real-time.
-    </Card>
+    </Card> */}
 
   </Tab>
   <Tab title="Compressed Tokens">
@@ -113,7 +124,15 @@ import WelcomePageInstall from "/snippets/setup/welcome-page-install.mdx";
     >
       ZK Compression is the most efficient way to distribute SPL tokens.
     </Card>
-
+    <Card
+      title="Privy Guide"
+      icon="wallet"
+      color="#0066ff"
+      href="/compressed-tokens/for-privy"
+      horizontal
+    >
+      Add rent-free SPL token accounts and transfers to your Privy embedded wallet.
+    </Card>
     <Card
       title="Wallets"
       icon="wallet"
@@ -134,26 +153,6 @@ import WelcomePageInstall from "/snippets/setup/welcome-page-install.mdx";
       Integrate Token-2022 extensions with compressed tokens.
     </Card>
 
-
-    <Card
-      title="Example Web Client"
-      icon="browser"
-      color="#0066ff"
-      href="https://github.com/Lightprotocol/example-web-client"
-      horizontal
-    >
-      Browser-based example application.
-    </Card>
-
-    <Card
-      title="Example Node.js Client"
-      icon="node-js"
-      color="#0066ff"
-      href="https://github.com/Lightprotocol/example-nodejs-client"
-      horizontal
-    >
-      Server-side Node.js implementation.
-    </Card>
     <Card
       title="Example Token Distribution Flows"
       icon="angles-right"

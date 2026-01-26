@@ -1,0 +1,106 @@
+```typescript
+import { useState } from 'react';
+import { PublicKey, Transaction, ComputeBudgetProgram } from '@solana/web3.js';
+import { getAssociatedTokenAddressSync, getAccount } from '@solana/spl-token';
+import { bn, createRpc, selectStateTreeInfo } from '@lightprotocol/stateless.js';
+import { CompressedTokenProgram, getTokenPoolInfos, selectTokenPoolInfo } from '@lightprotocol/compressed-token';
+import type { ConnectedStandardSolanaWallet } from '@privy-io/js-sdk-core';
+import type { SignTransactionResult } from '@privy-io/react-auth/solana';
+
+export interface CompressParams {
+  ownerPublicKey: string;
+  toAddress: string;
+  mint: string;
+  amount: number;
+  decimals?: number;
+}
+
+export interface CompressArgs {
+  params: CompressParams;
+  wallet: ConnectedStandardSolanaWallet;
+  signTransaction: (args: {
+    transaction: Buffer;
+    wallet: ConnectedStandardSolanaWallet;
+    chain: string;
+  }) => Promise<SignTransactionResult>;
+}
+
+export function useCompress() {
+  const [isLoading, setIsLoading] = useState(false);
+
+  const compress = async (args: CompressArgs): Promise<string> => {
+    setIsLoading(true);
+
+    try {
+      const { params, wallet, signTransaction } = args;
+      const { ownerPublicKey, toAddress, mint, amount, decimals = 6 } = params;
+
+      // Create RPC connection
+      const rpc = createRpc(import.meta.env.VITE_HELIUS_RPC_URL);
+
+      // Create public key objects
+      const ownerPubkey = new PublicKey(ownerPublicKey);
+      const toPubkey = new PublicKey(toAddress);
+      const mintPubkey = new PublicKey(mint);
+      const tokenAmount = bn(amount * Math.pow(10, decimals));
+
+      // Get source token account and verify balance
+      const ownerAta = getAssociatedTokenAddressSync(mintPubkey, ownerPubkey);
+      const ataAccount = await getAccount(rpc, ownerAta);
+      if (ataAccount.amount < BigInt(tokenAmount.toString())) {
+        throw new Error('Insufficient SPL balance');
+      }
+
+      // Get state tree to store compressed tokens
+      // Get token pool info. Stores SPL tokens in interface PDA when compressed.
+      const stateTreeInfos = await rpc.getStateTreeInfos();
+      const selectedTreeInfo = selectStateTreeInfo(stateTreeInfos);
+      const tokenPoolInfos = await getTokenPoolInfos(rpc, mintPubkey);
+      const tokenPoolInfo = selectTokenPoolInfo(tokenPoolInfos);
+
+      // Create compress instruction
+      const instruction = await CompressedTokenProgram.compress({
+        payer: ownerPubkey,
+        owner: ownerPubkey,
+        source: ownerAta,
+        toAddress: toPubkey,
+        mint: mintPubkey,
+        amount: tokenAmount,
+        outputStateTreeInfo: selectedTreeInfo,
+        tokenPoolInfo,
+      });
+
+      // Build transaction
+      const { blockhash } = await rpc.getLatestBlockhash();
+      const transaction = new Transaction();
+      transaction.add(ComputeBudgetProgram.setComputeUnitLimit({ units: 300_000 }));
+      transaction.add(instruction);
+      transaction.recentBlockhash = blockhash;
+      transaction.feePayer = ownerPubkey;
+
+      // Serialize unsigned transaction
+      const unsignedTxBuffer = transaction.serialize({ requireAllSignatures: false });
+
+      // Sign with Privy
+      const signedTx = await signTransaction({
+        transaction: unsignedTxBuffer,
+        wallet,
+        chain: 'solana:devnet',
+      });
+
+      // Send transaction
+      const signedTxBuffer = Buffer.from(signedTx.signedTransaction);
+      const signature = await rpc.sendRawTransaction(signedTxBuffer, {
+        skipPreflight: false,
+        preflightCommitment: 'confirmed',
+      });
+
+      return signature;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return { compress, isLoading };
+}
+```

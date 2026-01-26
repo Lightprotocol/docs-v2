@@ -1,0 +1,36 @@
+```rust
+use borsh::BorshDeserialize;
+use light_client::rpc::Rpc;
+use light_token::instruction::Thaw;
+use rust_client::{setup_frozen, SetupContext};
+use solana_sdk::signer::Signer;
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // Setup creates mint, ATA with tokens, and freezes account
+    let SetupContext {
+        mut rpc,
+        payer,
+        mint,
+        ata,
+        ..
+    } = setup_frozen().await;
+
+    let thaw_ix = Thaw {
+        token_account: ata,
+        mint,
+        freeze_authority: payer.pubkey(),
+    }
+    .instruction()?;
+
+    let sig = rpc
+        .create_and_send_transaction(&[thaw_ix], &payer.pubkey(), &[&payer])
+        .await?;
+
+    let data = rpc.get_account(ata).await?.ok_or("Account not found")?;
+    let token = light_token_interface::state::Token::deserialize(&mut &data.data[..])?;
+    println!("State: {:?} Tx: {sig}", token.state);
+
+    Ok(())
+}
+```

@@ -1,0 +1,31 @@
+```rust
+use light_client::rpc::Rpc;
+use light_token::instruction::{get_associated_token_address, CreateAssociatedTokenAccount};
+use rust_client::{setup_spl_mint_context, SplMintContext};
+use solana_sdk::{signature::Keypair, signer::Signer};
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // You can use light, spl, t22 mints to create a light token ATA.
+    let SplMintContext {
+        mut rpc,
+        payer,
+        mint,
+    } = setup_spl_mint_context().await;
+
+    let owner = Keypair::new();
+
+    let create_ata_ix =
+        CreateAssociatedTokenAccount::new(payer.pubkey(), owner.pubkey(), mint).instruction()?;
+
+    let sig = rpc
+        .create_and_send_transaction(&[create_ata_ix], &payer.pubkey(), &[&payer])
+        .await?;
+
+    let ata = get_associated_token_address(&owner.pubkey(), &mint);
+    let data = rpc.get_account(ata).await?;
+    println!("ATA: {ata} exists: {} Tx: {sig}", data.is_some());
+
+    Ok(())
+}
+```
