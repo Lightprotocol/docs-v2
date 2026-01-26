@@ -246,8 +246,7 @@
                 "group": "SDKs",
                 "pages": [
                   "resources/sdks/client-development",
-                  "resources/sdks/program-development",
-                  "resources/sdks/instruction-decoder"
+                  "resources/sdks/program-development"
                 ]
               },
               "resources/addresses-and-urls"
