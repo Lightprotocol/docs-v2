@@ -1,0 +1,50 @@
+```rust
+use borsh::BorshDeserialize;
+use light_client::rpc::Rpc;
+use light_token_client::actions::{CreateAta, TransferInterface};
+use rust_client::{setup, SetupContext};
+use solana_sdk::{signature::Keypair, signer::Signer};
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let SetupContext {
+        mut rpc,
+        payer,
+        mint,
+        ata,
+        decimals,
+        ..
+    } = setup().await;
+
+    // Create recipient ATA
+    let recipient = Keypair::new();
+    let recipient_ata = CreateAta {
+        mint,
+        owner: recipient.pubkey(),
+        idempotent: true,
+    }
+    .execute(&mut rpc, &payer)
+    .await?;
+
+    // Transfers tokens between token accounts (SPL, Token-2022, or Light) in a single call.
+    let sig = TransferInterface {
+        source: ata,
+        mint,
+        destination: recipient_ata,
+        amount: 1000,
+        decimals,
+        ..Default::default()
+    }
+    .execute(&mut rpc, &payer, &payer)
+    .await?;
+
+    let data = rpc
+        .get_account(recipient_ata)
+        .await?
+        .ok_or("Account not found")?;
+    let token = light_token_interface::state::Token::deserialize(&mut &data.data[..])?;
+    println!("Balance: {} Tx: {sig}", token.amount);
+
+    Ok(())
+}
+```

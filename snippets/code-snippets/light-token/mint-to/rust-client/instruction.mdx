@@ -1,0 +1,41 @@
+```rust
+use borsh::BorshDeserialize;
+use light_client::rpc::Rpc;
+use light_token::instruction::MintTo;
+use rust_client::{setup_empty_ata, SetupContext};
+use solana_sdk::signer::Signer;
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // Setup creates mint and empty ATA
+    let SetupContext {
+        mut rpc,
+        payer,
+        mint,
+        ata,
+        ..
+    } = setup_empty_ata().await;
+
+    let mint_amount = 1_000_000_000u64;
+
+    let mint_to_ix = MintTo {
+        mint,
+        destination: ata,
+        amount: mint_amount,
+        authority: payer.pubkey(),
+        max_top_up: None,
+        fee_payer: None,
+    }
+    .instruction()?;
+
+    let sig = rpc
+        .create_and_send_transaction(&[mint_to_ix], &payer.pubkey(), &[&payer])
+        .await?;
+
+    let data = rpc.get_account(ata).await?.ok_or("Account not found")?;
+    let token = light_token_interface::state::Token::deserialize(&mut &data.data[..])?;
+    println!("Balance: {} Tx: {sig}", token.amount);
+
+    Ok(())
+}
+```

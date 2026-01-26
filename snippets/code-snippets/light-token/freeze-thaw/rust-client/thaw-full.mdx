@@ -1,0 +1,32 @@
+```rust
+mod shared;
+
+use light_client::rpc::Rpc;
+use light_token_sdk::token::Thaw;
+use shared::SetupContext;
+use solana_sdk::signer::Signer;
+
+#[tokio::test(flavor = "multi_thread")]
+async fn thaw() {
+    // Setup creates mint, ATA with tokens, and freezes account
+    let SetupContext {
+        mut rpc,
+        payer,
+        mint,
+        ata,
+        ..
+    } = shared::setup_frozen().await;
+
+    let thaw_ix = Thaw {
+        token_account: ata,
+        mint,
+        freeze_authority: payer.pubkey(),
+    }
+    .instruction()
+    .unwrap();
+
+    rpc.create_and_send_transaction(&[thaw_ix], &payer.pubkey(), &[&payer])
+        .await
+        .unwrap();
+}
+```

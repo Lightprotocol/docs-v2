@@ -1,0 +1,168 @@
+<CodeGroup>
+```rust instruction.rs
+use super::authority_seeds;
+use light_token::instruction::BurnCpi;
+use solana_program::{
+    account_info::AccountInfo, entrypoint::ProgramResult,
+    program_error::ProgramError,
+};
+
+pub fn burn_invoke(accounts: &[AccountInfo], data: &[u8]) -> ProgramResult {
+    let [source, mint, authority, system_program, _token_program] = accounts else {
+        return Err(ProgramError::NotEnoughAccountKeys);
+    };
+
+    let amount = u64::from_le_bytes(
+        data.try_into()
+            .map_err(|_| ProgramError::InvalidInstructionData)?,
+    );
+
+    // Burn tokens from source account, reducing total supply
+    BurnCpi {
+        source: source.clone(),
+        mint: mint.clone(),
+        amount,
+        authority: authority.clone(),
+        system_program: system_program.clone(),
+        fee_payer: None,
+        max_top_up: None,
+    }
+    .invoke()
+}
+
+pub fn burn_invoke_signed(
+    accounts: &[AccountInfo],
+    data: &[u8],
+) -> ProgramResult {
+    let [source, mint, authority, system_program, _token_program] = accounts else {
+        return Err(ProgramError::NotEnoughAccountKeys);
+    };
+
+    if data.len() < 9 {
+        return Err(ProgramError::InvalidInstructionData);
+    }
+
+    let amount = u64::from_le_bytes(data[0..8].try_into().unwrap());
+    let bump = data[8];
+    let signer_seeds = authority_seeds!(bump);
+
+    BurnCpi {
+        source: source.clone(),
+        mint: mint.clone(),
+        amount,
+        authority: authority.clone(),
+        system_program: system_program.clone(),
+        fee_payer: None,
+        max_top_up: None,
+    }
+    .invoke_signed(&[signer_seeds])
+}
+```
+
+```rust test.rs
+mod shared;
+
+use borsh::BorshDeserialize;
+use light_client::rpc::Rpc;
+use light_token_interface::state::Token;
+use shared::{
+    build_burn_cpi_ix, build_burn_signed_cpi_ix, create_test_rpc,
+    get_authority_pda, setup, setup_pda_owned_ata, SetupContext,
+};
+use solana_sdk::signer::Signer;
+
+#[tokio::test(flavor = "multi_thread")]
+async fn burn_cpi() {
+    // Setup: create mint and ATA with tokens
+    let SetupContext {
+        mut rpc,
+        payer,
+        mint,
+        ata,
+        ..
+    } = setup().await;
+
+    let initial_amount = 1_000_000u64;
+    let burn_amount = 300_000u64;
+
+    // Get balance before burn
+    let account_data = rpc.get_account(ata).await.unwrap().unwrap();
+    let token_state = Token::deserialize(&mut &account_data.data[..]).unwrap();
+    let balance_before = token_state.amount;
+    assert_eq!(
+        balance_before, initial_amount,
+        "Initial balance should match"
+    );
+
+    let ix = build_burn_cpi_ix(ata, mint, payer.pubkey(), burn_amount);
+
+    rpc.create_and_send_transaction(&[ix], &payer.pubkey(), &[&payer])
+        .await
+        .unwrap();
+
+    // Verify balance decreased
+    let account_data = rpc.get_account(ata).await.unwrap().unwrap();
+    let token_state = Token::deserialize(&mut &account_data.data[..]).unwrap();
+    let balance_after = token_state.amount;
+    assert_eq!(
+        balance_after,
+        initial_amount - burn_amount,
+        "Balance should decrease by burn amount"
+    );
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn burn_signed_cpi() {
+    let mut rpc = create_test_rpc().await;
+    let payer = rpc.get_payer().insecure_clone();
+
+    let (pda_owner, bump) = get_authority_pda();
+    let initial_amount = 1_000_000u64;
+    let burn_amount = 300_000u64;
+
+    let (mint, ata) =
+        setup_pda_owned_ata(&mut rpc, &payer, pda_owner, initial_amount).await;
+
+    let ix = build_burn_signed_cpi_ix(ata, mint, pda_owner, burn_amount, bump);
+
+    rpc.create_and_send_transaction(&[ix], &payer.pubkey(), &[&payer])
+        .await
+        .unwrap();
+
+    // Verify balance decreased
+    let account_data = rpc.get_account(ata).await.unwrap().unwrap();
+    let token_state = Token::deserialize(&mut &account_data.data[..]).unwrap();
+    let balance_after = token_state.amount;
+    assert_eq!(
+        balance_after,
+        initial_amount - burn_amount,
+        "Balance should decrease by burn amount"
+    );
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn burn_fails_with_insufficient_balance() {
+    // Setup: create mint and ATA with tokens
+    let SetupContext {
+        mut rpc,
+        payer,
+        mint,
+        ata,
+        ..
+    } = setup().await;
+
+    let initial_amount = 1_000_000u64;
+    let burn_amount = initial_amount + 1; // More than balance
+
+    let ix = build_burn_cpi_ix(ata, mint, payer.pubkey(), burn_amount);
+
+    let result = rpc
+        .create_and_send_transaction(&[ix], &payer.pubkey(), &[&payer])
+        .await;
+    assert!(
+        result.is_err(),
+        "Burn with insufficient balance should fail"
+    );
+}
+```
+</CodeGroup>

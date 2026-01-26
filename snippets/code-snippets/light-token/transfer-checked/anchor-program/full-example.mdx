@@ -1,0 +1,107 @@
+<CodeGroup>
+```rust lib.rs
+#![allow(unexpected_cfgs, deprecated)]
+
+use anchor_lang::prelude::*;
+use light_token::instruction::TransferCheckedCpi;
+
+declare_id!("HXmfewpozFdxhM8BayL9v5541gwoGMXTrUoip5KySs2f");
+
+#[program]
+pub mod light_token_anchor_transfer_checked {
+    use super::*;
+
+    pub fn transfer_checked(
+        ctx: Context<TransferCheckedAccounts>,
+        amount: u64,
+        decimals: u8,
+    ) -> Result<()> {
+        TransferCheckedCpi {
+            source: ctx.accounts.source.to_account_info(),
+            mint: ctx.accounts.mint.to_account_info(),
+            destination: ctx.accounts.destination.to_account_info(),
+            amount,
+            decimals,
+            authority: ctx.accounts.authority.to_account_info(),
+            system_program: ctx.accounts.system_program.to_account_info(),
+            max_top_up: None,
+            fee_payer: None,
+        }
+        .invoke()?;
+        Ok(())
+    }
+}
+
+#[derive(Accounts)]
+pub struct TransferCheckedAccounts<'info> {
+    /// CHECK: Light token program for CPI
+    pub light_token_program: AccountInfo<'info>,
+    /// CHECK: Validated by light-token CPI
+    #[account(mut)]
+    pub source: AccountInfo<'info>,
+    /// CHECK: Validated by light-token CPI
+    pub mint: AccountInfo<'info>,
+    /// CHECK: Validated by light-token CPI
+    #[account(mut)]
+    pub destination: AccountInfo<'info>,
+    pub authority: Signer<'info>,
+    pub system_program: Program<'info, System>,
+}
+```
+
+```rust test.rs
+use anchor_lang::InstructionData;
+use light_program_test::Rpc;
+use light_token::instruction::LIGHT_TOKEN_PROGRAM_ID;
+use light_token_anchor_transfer_checked::{instruction::TransferChecked, ID};
+use solana_sdk::{
+    instruction::{AccountMeta, Instruction},
+    signature::Keypair,
+    signer::Signer,
+    system_program,
+};
+use test_utils::{create_ata_for_owner, mint_tokens, setup_test_env};
+
+#[tokio::test]
+async fn test_transfer_checked() {
+    let mut env = setup_test_env("light_token_anchor_transfer_checked", ID).await;
+    mint_tokens(&mut env.rpc, &env.payer, env.mint_pda, env.ata, 1_000_000).await;
+
+    // Create destination ATA for recipient
+    let recipient = Keypair::new();
+    let dest_ata =
+        create_ata_for_owner(&mut env.rpc, &env.payer, &recipient.pubkey(), &env.mint_pda).await;
+
+    // TransferChecked validates decimals match the mint's decimals.
+    // Only use for Light->Light transfers.
+    // Use TransferInterface for all other transfers (Light, SPL or Token-2022).
+    let transfer_amount = 100_000u64;
+    let decimals = 9u8;
+
+    let ix = Instruction {
+        program_id: ID,
+        accounts: vec![
+            AccountMeta::new_readonly(LIGHT_TOKEN_PROGRAM_ID, false),
+            AccountMeta::new(env.ata, false),
+            AccountMeta::new_readonly(env.mint_pda, false),
+            AccountMeta::new(dest_ata, false),
+            AccountMeta::new_readonly(env.payer.pubkey(), true),
+            AccountMeta::new_readonly(system_program::ID, false),
+        ],
+        data: TransferChecked {
+            amount: transfer_amount,
+            decimals,
+        }
+        .data(),
+    };
+
+    let sig = env
+        .rpc
+        .create_and_send_transaction(&[ix], &env.payer.pubkey(), &[&env.payer])
+        .await
+        .unwrap();
+
+    println!("Tx: {}", sig);
+}
+```
+</CodeGroup>

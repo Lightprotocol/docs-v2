@@ -1,0 +1,116 @@
+<CodeGroup>
+```rust instruction.rs
+use super::authority_seeds;
+use light_token::instruction::CloseAccountCpi;
+use solana_program::{
+    account_info::AccountInfo, entrypoint::ProgramResult,
+    program_error::ProgramError,
+};
+
+pub fn close_invoke(accounts: &[AccountInfo], _data: &[u8]) -> ProgramResult {
+    let [account, destination, owner, rent_sponsor, token_program] = accounts
+    else {
+        return Err(ProgramError::NotEnoughAccountKeys);
+    };
+
+    // Close token account. Must be empty (balance = 0)
+    CloseAccountCpi {
+        token_program: token_program.clone(),
+        account: account.clone(),
+        destination: destination.clone(),
+        owner: owner.clone(),
+        rent_sponsor: rent_sponsor.clone(),
+    }
+    .invoke()
+}
+
+pub fn close_invoke_signed(
+    accounts: &[AccountInfo],
+    data: &[u8],
+) -> ProgramResult {
+    let [account, destination, owner, rent_sponsor, token_program] = accounts
+    else {
+        return Err(ProgramError::NotEnoughAccountKeys);
+    };
+
+    if data.is_empty() {
+        return Err(ProgramError::InvalidInstructionData);
+    }
+
+    let bump = data[0];
+    let signer_seeds = authority_seeds!(bump);
+
+    CloseAccountCpi {
+        token_program: token_program.clone(),
+        account: account.clone(),
+        destination: destination.clone(),
+        owner: owner.clone(),
+        rent_sponsor: rent_sponsor.clone(),
+    }
+    .invoke_signed(&[signer_seeds])
+}
+```
+
+```rust test.rs
+mod shared;
+
+use light_client::rpc::Rpc;
+use light_token::instruction::rent_sponsor_pda;
+use shared::{
+    build_close_cpi_ix, build_close_signed_cpi_ix, create_test_rpc,
+    get_authority_pda, setup_empty_ata, setup_pda_owned_ata, SetupContext,
+};
+use solana_sdk::signer::Signer;
+
+#[tokio::test(flavor = "multi_thread")]
+async fn close_cpi() {
+    // Setup: create mint and empty ATA (must be empty to close)
+    let SetupContext {
+        mut rpc,
+        payer,
+        ata,
+        ..
+    } = setup_empty_ata().await;
+
+    let ix = build_close_cpi_ix(
+        ata,
+        payer.pubkey(),
+        payer.pubkey(),
+        rent_sponsor_pda(),
+    );
+
+    rpc.create_and_send_transaction(&[ix], &payer.pubkey(), &[&payer])
+        .await
+        .unwrap();
+
+    let account = rpc.get_account(ata).await.unwrap();
+    assert!(account.is_none());
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn close_signed_cpi() {
+    let mut rpc = create_test_rpc().await;
+    let payer = rpc.get_payer().insecure_clone();
+
+    let (pda_owner, bump) = get_authority_pda();
+
+    let (_mint, ata) =
+        setup_pda_owned_ata(&mut rpc, &payer, pda_owner, 0).await;
+
+    let ix = build_close_signed_cpi_ix(
+        ata,
+        payer.pubkey(),
+        pda_owner,
+        rent_sponsor_pda(),
+        bump,
+    );
+
+    rpc.create_and_send_transaction(&[ix], &payer.pubkey(), &[&payer])
+        .await
+        .unwrap();
+
+    let account = rpc.get_account(ata).await.unwrap();
+    assert!(account.is_none());
+}
+```
+</CodeGroup>

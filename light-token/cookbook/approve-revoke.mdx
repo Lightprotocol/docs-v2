@@ -1,0 +1,280 @@
+---
+title: Approve and Revoke Delegates
+sidebarTitle: Approve / Revoke
+description: Rust client guide to approve and revoke delegates for light-token accounts. Includes step-by-step implementation and full code examples.
+keywords: ["approve delegate solana", "revoke delegate solana", "token delegation"]
+---
+
+---
+
+import TokenClientPrerequisites from "/snippets/light-token-guides/light-token-client-prerequisites.mdx";
+import { CodeCompare } from "/snippets/jsx/code-compare.jsx";
+import {
+  splApproveRustCode,
+  lightApproveRustCode,
+  splRevokeRustCode,
+  lightRevokeRustCode,
+} from "/snippets/code-samples/code-compare-snippets.jsx";
+import ApproveActionCode from "/snippets/code-snippets/light-token/approve-revoke/rust-client/approve-action.mdx";
+import ApproveInstructionCode from "/snippets/code-snippets/light-token/approve-revoke/rust-client/approve-instruction.mdx";
+import RevokeActionCode from "/snippets/code-snippets/light-token/approve-revoke/rust-client/revoke-action.mdx";
+import RevokeInstructionCode from "/snippets/code-snippets/light-token/approve-revoke/rust-client/revoke-instruction.mdx";
+import ApproveAnchorProgramCode from "/snippets/code-snippets/light-token/approve/anchor-program/full-example.mdx";
+import ApproveNativeProgramCode from "/snippets/code-snippets/light-token/approve/native-program/full-example.mdx";
+import RevokeAnchorProgramCode from "/snippets/code-snippets/light-token/revoke/anchor-program/full-example.mdx";
+import RevokeNativeProgramCode from "/snippets/code-snippets/light-token/revoke/native-program/full-example.mdx";
+
+1. Approve grants a delegate permission to transfer up to a specified amount of tokens from your account.
+    * Each token account can have only one delegate at a time. 
+    * Any new approval overwrites the previous one.
+2. Revoke removes all delegate permissions from a light-token account.
+3. Only the token account owner can approve or revoke delegates.
+
+<Tabs>
+<Tab title="Rust Client">
+
+<Tabs>
+<Tab title="Approve">
+
+<CodeCompare
+  firstCode={lightApproveRustCode}
+  secondCode={splApproveRustCode}
+  firstLabel="light-token"
+  secondLabel="SPL"
+  language="rust"
+/>
+
+</Tab>
+<Tab title="Revoke">
+
+<CodeCompare
+  firstCode={lightRevokeRustCode}
+  secondCode={splRevokeRustCode}
+  firstLabel="light-token"
+  secondLabel="SPL"
+  language="rust"
+/>
+
+</Tab>
+</Tabs>
+
+<Steps>
+<Step>
+### Prerequisites
+
+<TokenClientPrerequisites />
+
+</Step>
+
+<Step>
+### Approve or revoke delegates
+
+<Info>
+  Find the full example including shared test utilities in the
+  [examples-light-token repo](https://github.com/Lightprotocol/examples-light-token/tree/main/rust-client/tests).
+</Info>
+
+<Tabs>
+<Tab title="Approve">
+<Tabs>
+<Tab title="Action">
+<ApproveActionCode />
+</Tab>
+<Tab title="Instruction">
+<ApproveInstructionCode />
+</Tab>
+</Tabs>
+</Tab>
+<Tab title="Revoke">
+<Tabs>
+<Tab title="Action">
+<RevokeActionCode />
+</Tab>
+<Tab title="Instruction">
+<RevokeInstructionCode />
+</Tab>
+</Tabs>
+</Tab>
+</Tabs>
+
+</Step>
+</Steps>
+</Tab>
+
+<Tab title="Program (SDK Anchor / Native)">
+
+<Note>
+Find [a full code example at the end](#full-code-example).
+</Note>
+
+<Tabs>
+<Tab title="Approve">
+<Steps>
+<Step>
+
+### Build Account Infos and CPI the Light Token Program
+
+1. Define the light-token account, delegate, and amount to approve
+2. Use `invoke` or `invoke_signed`, when a CPI requires a PDA signer.
+
+<Tabs>
+<Tab title="invoke (External signer)">
+
+```rust
+use light_token::instruction::ApproveCpi;
+
+ApproveCpi {
+    token_account: token_account.clone(),
+    delegate: delegate.clone(),
+    owner: owner.clone(),
+    system_program: system_program.clone(),
+    amount,
+}
+.invoke()?;
+```
+
+</Tab>
+<Tab title="invoke_signed (PDA owner)">
+
+```rust
+use light_token::instruction::ApproveCpi;
+
+let approve_cpi = ApproveCpi {
+    token_account: token_account.clone(),
+    delegate: delegate.clone(),
+    owner: owner.clone(),
+    system_program: system_program.clone(),
+    amount,
+};
+
+let signer_seeds: &[&[u8]] = &[TOKEN_ACCOUNT_SEED, &[bump]];
+approve_cpi.invoke_signed(&[signer_seeds])?;
+```
+
+</Tab>
+</Tabs>
+
+</Step>
+</Steps>
+</Tab>
+
+<Tab title="Revoke">
+<Steps>
+<Step>
+
+### Build Account Infos and CPI the Light Token Program
+
+1. Define the light-token account to revoke delegation from
+2. Use `invoke` or `invoke_signed`, when a CPI requires a PDA signer.
+
+<Tabs>
+<Tab title="invoke (External signer)">
+
+```rust
+use light_token::instruction::RevokeCpi;
+
+RevokeCpi {
+    token_account: token_account.clone(),
+    owner: owner.clone(),
+    system_program: system_program.clone(),
+}
+.invoke()?;
+```
+
+</Tab>
+<Tab title="invoke_signed (PDA owner)">
+
+```rust
+use light_token::instruction::RevokeCpi;
+
+let revoke_cpi = RevokeCpi {
+    token_account: token_account.clone(),
+    owner: owner.clone(),
+    system_program: system_program.clone(),
+};
+
+let signer_seeds: &[&[u8]] = &[TOKEN_ACCOUNT_SEED, &[bump]];
+revoke_cpi.invoke_signed(&[signer_seeds])?;
+```
+
+</Tab>
+</Tabs>
+
+</Step>
+</Steps>
+</Tab>
+</Tabs>
+
+# Full Code Example
+
+<Tabs>
+<Tab title="Approve">
+
+<Tabs>
+<Tab title="Anchor">
+
+<Info>
+  View the full example with shared test utilities:
+  [examples-light-token](https://github.com/Lightprotocol/examples-light-token/tree/main/program-examples/anchor/programs/approve).
+</Info>
+
+<ApproveAnchorProgramCode />
+
+</Tab>
+
+<Tab title="Native">
+
+<Info>
+  View the full example with shared test utilities:
+  [examples-light-token-native](https://github.com/Lightprotocol/examples-light-token-native/tree/main/program-examples/native).
+</Info>
+
+<ApproveNativeProgramCode />
+
+</Tab>
+</Tabs>
+
+</Tab>
+
+<Tab title="Revoke">
+
+<Tabs>
+<Tab title="Anchor">
+
+<Info>
+  View the full example with shared test utilities:
+  [examples-light-token](https://github.com/Lightprotocol/examples-light-token/tree/main/program-examples/anchor/programs/revoke).
+</Info>
+
+<RevokeAnchorProgramCode />
+
+</Tab>
+
+<Tab title="Native">
+
+<Info>
+  View the full example with shared test utilities:
+  [examples-light-token-native](https://github.com/Lightprotocol/examples-light-token-native/tree/main/program-examples/native).
+</Info>
+
+<RevokeNativeProgramCode />
+
+</Tab>
+</Tabs>
+
+</Tab>
+</Tabs>
+
+</Tab>
+
+</Tabs>
+
+# Next Steps
+
+<Card
+  title="Go back to the overview for the light-token standard"
+  icon="chevron-right"
+  color="#0066ff"
+  href="/light-token/welcome"
+  horizontal
+/>

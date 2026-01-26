@@ -22,9 +22,9 @@ Find devnet examples [here](https://github.com/Lightprotocol/examples-light-toke
 helius-laserstream = "0.1"
 tokio = { version = "1", features = ["full"] }
 futures = "0.3"
-light-event = "0.3"
-light-compressed-account = "0.8"
-light-token-interface = "0.2"
+light-event = "0.2"
+light-compressed-account = "0.7"
+light-token-interface = "0.1"
 borsh = "0.10"
 bs58 = "0.5"
 ```
@@ -33,7 +33,7 @@ bs58 = "0.5"
 use futures::StreamExt;
 use helius_laserstream::{subscribe, LaserstreamConfig};
 use light_event::parse::event_from_light_transaction;
-use light_token_interface::state::mint::Mint;
+use light_token_interface::state::Mint;
 use light_token_interface::state::extensions::ExtensionStruct;
 use borsh::BorshDeserialize;
 
@@ -202,16 +202,13 @@ if let Some((name, symbol, uri)) = extract_metadata(&mint) {
 pub struct Mint {
     pub base: BaseMint,
     pub metadata: MintMetadata,
-    /// Reserved bytes (16 bytes) for T22 layout compatibility.
     pub reserved: [u8; 16],
-    /// Account type discriminator at byte offset 165 (1 = Mint, 2 = Account)
     pub account_type: u8,
-    /// Compression info embedded directly in the mint
     pub compression: CompressionInfo,
     pub extensions: Option<Vec<ExtensionStruct>>,
 }
 
-/// SPL compatible basemint structure (82 bytes)
+/// SPL-compatible base mint structure
 #[repr(C)]
 pub struct BaseMint {
     pub mint_authority: Option<Pubkey>,
@@ -221,19 +218,13 @@ pub struct BaseMint {
     pub freeze_authority: Option<Pubkey>,
 }
 
-/// Light Protocol-specific metadata for compressed mints.
-/// Total size: 67 bytes
+/// Light Protocol metadata for compressed mints (67 bytes)
 #[repr(C)]
 pub struct MintMetadata {
-    /// Version for upgradability
     pub version: u8,
-    /// Whether the compressed mint has been decompressed to a Mint Solana account.
     pub mint_decompressed: bool,
-    /// PDA derived from mint_signer
     pub mint: Pubkey,
-    /// Signer pubkey used to derive the mint PDA
     pub mint_signer: [u8; 32],
-    /// Bump seed from mint PDA derivation
     pub bump: u8,
 }
 ```

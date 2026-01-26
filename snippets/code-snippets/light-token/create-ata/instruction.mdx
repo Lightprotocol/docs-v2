@@ -15,10 +15,10 @@ import { homedir } from "os";
 import { readFileSync } from "fs";
 
 // devnet:
-const RPC_URL = `https://devnet.helius-rpc.com?api-key=${process.env.API_KEY!}`;
-const rpc = createRpc(RPC_URL);
+// const RPC_URL = `https://devnet.helius-rpc.com?api-key=${process.env.API_KEY!}`;
+// const rpc = createRpc(RPC_URL);
 // localnet:
-// const rpc = createRpc();
+const rpc = createRpc();
 
 const payer = Keypair.fromSecretKey(
     new Uint8Array(

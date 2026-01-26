@@ -1,0 +1,40 @@
+```rust
+use anchor_spl::token::spl_token::state::Account as SplAccount;
+use light_client::rpc::Rpc;
+use light_token_client::actions::Unwrap;
+use rust_client::{setup_for_unwrap, UnwrapContext};
+use solana_sdk::program_pack::Pack;
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // Setup creates Light ATA with tokens and empty SPL ATA
+    let UnwrapContext {
+        mut rpc,
+        payer,
+        mint,
+        destination_ata: destination,
+        light_ata,
+        decimals,
+    } = setup_for_unwrap().await;
+
+    // Unwrap tokens from Light Token ATA to SPL ATA
+    let sig = Unwrap {
+        source: light_ata,
+        destination_spl_ata: destination,
+        mint,
+        amount: 500_000,
+        decimals,
+    }
+    .execute(&mut rpc, &payer, &payer)
+    .await?;
+
+    let data = rpc
+        .get_account(destination)
+        .await?
+        .ok_or("Account not found")?;
+    let token = SplAccount::unpack(&data.data)?;
+    println!("Balance: {} Tx: {sig}", token.amount);
+
+    Ok(())
+}
+```
