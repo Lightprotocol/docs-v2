@@ -25,11 +25,38 @@ body, h1, h2, h3, h4, h5, h6, p, span, div, a, button {
   position: absolute;
   inset: 0;
   pointer-events: none;
+  --grid-bg-start: #f8fafc;
+  --grid-bg-end: #f1f5f9;
+  --tile-fill: #e2e8f0;
+  --tile-stroke: #0066ff;
+}
+
+html.dark .hero-cube-grid {
+  --grid-bg-start: #0f172a;
+  --grid-bg-end: #1e293b;
+  --tile-fill: #334155;
+  --tile-stroke: #3b82f6;
 }
 
 .hero-cube-grid svg {
   width: 100%;
   height: 100%;
+}
+
+.hero-cube-grid .grid-bg-start {
+  stop-color: var(--grid-bg-start);
+}
+
+.hero-cube-grid .grid-bg-end {
+  stop-color: var(--grid-bg-end);
+}
+
+.hero-cube-grid .tile-fill {
+  fill: var(--tile-fill);
+}
+
+.hero-cube-grid .tile-stroke {
+  stroke: var(--tile-stroke);
 }
 
 .cube-tile {
@@ -61,6 +88,12 @@ body, h1, h2, h3, h4, h5, h6, p, span, div, a, button {
   -webkit-backdrop-filter: blur(1px) saturate(120%);
   border: 1px solid rgba(255, 255, 255, 0.35);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+/* Dark mode: glass pill */
+html.dark .glass-pill-bg {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 /* Tablet and up - larger pill padding */
@@ -106,6 +139,24 @@ body, h1, h2, h3, h4, h5, h6, p, span, div, a, button {
   pointer-events: none;
 }
 
+/* Dark mode: glass pill highlights */
+html.dark .glass-pill-bg::before {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.08) 0%,
+    transparent 30%,
+    transparent 100%
+  );
+}
+
+html.dark .glass-pill-bg::after {
+  background: linear-gradient(
+    to bottom,
+    transparent 70%,
+    rgba(0, 0, 0, 0.2) 100%
+  );
+}
+
 .glass-pill-inner {
   position: absolute;
   inset: 1px;
@@ -113,6 +164,11 @@ body, h1, h2, h3, h4, h5, h6, p, span, div, a, button {
   border: 1px solid rgba(255, 255, 255, 0.18);
   background: transparent;
   pointer-events: none;
+}
+
+/* Dark mode: glass pill inner */
+html.dark .glass-pill-inner {
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .glass-pill-content {
@@ -127,6 +183,11 @@ body, h1, h2, h3, h4, h5, h6, p, span, div, a, button {
   color: #111827;
   margin: 0;
   white-space: nowrap;
+}
+
+/* Dark mode: hero title */
+html.dark .hero-title {
+  color: #f9fafb;
 }
 
 @media (min-width: 400px) {

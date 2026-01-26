@@ -3,8 +3,11 @@ title: "Program Integration"
 description: "Build high-performance DeFi programs with rent-free accounts"
 ---
 
-The Light-SDK pays rent-exemption for your PDAs, token accounts, and mints (98%
-cost savings). Your program logic stays the same.
+The Light-SDK sponsors rent-exemption for your PDAs, token accounts, and mints. Your program logic stays the same.
+
+|                        | Before | After |
+|------------------------|--------|-------|
+| Rent (avg. DeFi pool)      | ~$2    | ~$0.02 |
 
 ## What Changes
 
@@ -46,7 +49,7 @@ anchor-lang = "0.31"
 Add `compression_info` field and derive `LightAccount`:
 
 ```rust
-use light_sdk::{compressible::CompressionInfo, LightDiscriminator};
+use light_sdk::compressible::CompressionInfo;
 use light_sdk_macros::LightAccount;
 
 #[derive(Default, Debug, InitSpace, LightAccount)]
@@ -101,7 +104,7 @@ Derive `LightAccounts` on your `Accounts` struct and add `#[light_account(...)]`
 pub pool_state: Box<Account<'info, PoolState>>,
 ```
 </Tab>
-  <Tab title="Token Account">
+<Tab title="Token Account">
 ```rust
 #[account(
     mut, 
@@ -151,7 +154,6 @@ Use without `init` to create manually in the instruction handler via
     init, 
     associated_token, 
     owner = creator, mint = lp_mint,
-    compressible = Some(compressible_params)
 )]
 pub creator_lp_token: UncheckedAccount<'info>,
 ```
@@ -455,7 +457,7 @@ async fn test_pool_lifecycle() {
         .unwrap();
     assert!(pool_interface.is_cold()); // get_account would return None
 
-    // 5. get load instructions
+    // 4. get load instructions
     let mut sdk = AmmSdk::from_keyed_accounts(&[pool_interface]).unwrap();
     let accounts_to_fetch = sdk.get_accounts_to_update(&AmmInstruction::Deposit);
     let keyed_accounts = rpc.get_multiple_account_interfaces(&accounts_to_fetch).await.unwrap();
@@ -470,7 +472,7 @@ async fn test_pool_lifecycle() {
         &rpc,
     ).await.unwrap();
 
-    // 6. send transaction
+    // 5. send transaction
     rpc.create_and_send_transaction(&load_ixs, &payer.pubkey(), &[&payer]).await.unwrap();
     assert!(rpc.get_account_interface(&pool_address, &program_id).await.unwrap().is_hot());
 }
@@ -485,9 +487,8 @@ async fn test_pool_lifecycle() {
 ---
 ## How it works
 
-The SDK pays the rent-exemption cost. After extended inactivity (e.g., multiple
-epochs without any writes), cold accounts auto-compress. Your program only ever
-interacts with hot accounts. Clients can load cold accounts back into the
+The SDK pays the rent-exemption cost. After extended inactivity, cold accounts auto-compress. Your program only ever
+interacts with hot accounts. Clients can safely load cold accounts back into the
 onchain Solana account space when needed via `create_load_instructions`.
 
 Under the hood, clients use `AccountInterface` - a superset of Solana's
@@ -502,9 +503,8 @@ for details.
 
 ## Existing programs
 
-If you have an existing program that you would like to migrate to rent-free
-accounts, [join our tech Discord](https://discord.com/invite/7cJ8BhAXhu) for
-migration support.
+If you want to migrate your program to rent-free accounts and would like hands-on support, [join our tech Discord](https://discord.com/invite/7cJ8BhAXhu),
+or [email us](mailto:support@lightprotocol.com).
 
 
 ## FAQ
@@ -515,31 +515,24 @@ exist in the cold address space. The SVM already verifies this for the onchain
 space. Both address spaces are checked before creation, preventing re-init
 attacks, even if the account is currently cold. </Accordion>
 
-<Accordion title="Who triggers compression?"> Miners automatically compress when
-virtual rent is below threshold (e.g., multiple epochs without any writes). In
-practice, cold markets should be rare. The common path (hot) has no extra
-overhead and does not increase CU or txn size. </Accordion>
-
-<Accordion title="Can active pools get compressed?">
-No. Any write bumps the virtual rent balance. Active accounts do not get compressed.
-</Accordion>
-
-<Accordion title="Do I need to run infrastructure?"> No. Helius and Triton run
-the Interface RPC endpoints, self-hosting the Photon indexer is optional. Helius
-Labs maintains the open-source Photon indexer implementation. </Accordion>
-
-<Accordion title="What if the indexer is down?"> 
-Hot markets work all the same as long as Solana is up. Cold accounts cannot be loaded into hot state until your indexer or RPC provider recovers.
-Note that compression is cryptographically verifiable, so integrity and safety are not dependent on the indexer or any other external service beyond the onchain protocol.
+<Accordion title="Who triggers compression?"> 
+Miners compress accounts that have been inactive for an extended period of time (virtual rent balance crosses below threshold).
+In practice, having to load cold accounts should be rare. The common path (hot) has no extra overhead and does not increase CU or txn size.
 </Accordion>
 
 <Accordion title="How is the SDK able to sponsor rent exemption?">
 When accounts compress after extended inactivity, the on-chain rent-exemption is released back
-to the rent sponsor. This creates a revolving fund: active "hot" accounts hold a
-rent exempt balance temporarily, inactive "cold" accounts release it back. The
+to the rent sponsor. This creates a revolving lifecycle: active "hot" accounts hold a
+rent-exempt lamports balance, inactive "cold" accounts release it back. The
 rent sponsor must be derived from the program owner. For all mint, ATA, and
-token accounts, the Light Token Program is the rent sponsor. For your
-program-owned PDAs, the SDK derives a rent sponsor address automatically.
+token accounts, the Light Token Program is the rent sponsor. For your own program-owned PDAs, the SDK derives a rent sponsor address automatically.
+</Accordion>
+
+<Accordion title="Do rent-free accounts increase CU?">
+**Hot path (e.g. swap, deposit, withdraw):** No. Active accounts do not add CU overhead to your instructions.
+
+**First time init + loading cold accounts:** Yes, adds up to 15k-400k CU,
+depending on number and type of accounts being initialized or loaded.
 </Accordion>
 
 ---

@@ -4,14 +4,13 @@ description: "Add support for rent-free AMMs on Solana."
 ---
 
 1. Use `get_account_interface` instead of `get_account` to store `AccountInterface`.
-2. Use the AMM's LightProgramInterface trait to dynamically prepend load
-   instructions if the market is cold.
+2. Use the AMM's `LightProgramInterface` trait to load inactive markets when needed.
 
 
 ## Step 1: Use `get_account_interface`
 
 `get_account_interface` is a new RPC endpoint that returns a superset of
-`get_account`. `AccountInterface` stores additional info `Option<ColdContext>`
+`get_account`. `AccountInterface` stores additional info in `Option<ColdContext>`
 that you will need later.
 
 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
@@ -40,16 +39,17 @@ pub struct AccountInterface {
 </div>
 
 
-## Step 2: Implement LightProgramInterface
-All rent-free programs implement the `LightProgramInterface` trait.
+## Step 2: Use the LightProgramInterface trait
+All rent-free programs expose a `LightProgramInterface` trait in their SDK.
 
-This trait helps you:
+Using this trait allows you to:
 
 1. Maintain a cache of `&[AccountInterface]`
-2. Load cold accounts into the onchain account space when building Swap transactions.
+2. Load inactive "cold" accounts back into the onchain account space when
+   building Swap transactions in a standardized way.
 
 ```rust
-// Program implements this.
+// AMM SDK implements this.
 pub trait LightProgramInterface {
     fn from_keyed_accounts(accounts: &[AccountInterface]) -> Result<Self, Self::Error>;
     fn get_accounts_to_update(&self, ix: &Self::Instruction) -> Vec<AccountToFetch>;
@@ -61,9 +61,10 @@ pub trait LightProgramInterface {
 ## Step 3: Load cold accounts when building Swap instructions
 When building Swap instructions, prepend a `create_load_instructions` call.
 
-This only adds latency if accounts are cold.
+This only adds latency if markets are cold.
 
 ```rust
+// add dynamic load instructions if cold
 let specs = sdk.get_specs_for_instruction(&ExampleAmmSdk::LightInstruction::Swap);
 if specs.iter().any(|s| s.is_cold()) {
     let load_ixs = create_load_instructions(
@@ -75,6 +76,8 @@ if specs.iter().any(|s| s.is_cold()) {
     ).await?;
     instructions.extend(load_ixs);
 }
+
+// add swap instruction...
 ```
 
 
@@ -170,16 +173,11 @@ rpc.send_transaction(&ixs, &payer).await?;
 Latency, tx size, and CU depend on the number and type of cold accounts.
 
 ### When does a market go cold?
-A market is "cold" after it has been compressed by a miner. Accounts become
-eligible for compression only after extended inactivity (e.g., multiple epochs
-without any writes), causing the virtual rent balance to fall below threshold.
+Accounts become "cold" after extended inactivity, causing their virtual rent balance to fall below a threshold. Once cold, they auto-compress onto the Solana ledger.
 
-**In practice, cold markets should be rare.** The common path (hot) has no extra
-overhead and does not increase CU or txn size.
+They remain cold until the first client loads them back into the hot state in-flight via `create_load_instructions`.
 
-**To ensure swaps execute regardless of whether the market is hot or cold,
-always call `create_load_instructions` when building the swap instructions. It
-simply no-ops if the market is hot.**
+**In practice, touching cold markets is rare.** The common path ("hot") has no extra latency, tx size, or CU overhead.
 
 ---
 ## Error Handling
@@ -195,31 +193,34 @@ match rpc.get_account_interface(&pool_address, &program_id).await {
     Err(LightClientError::AccountNotFound) => {
         // Account does not exist
     }
-    Err(e) => {
-        // Other error
-    }
 }
 ```
 
 ## FAQ
 
 <Accordion title="Do I need to change my swap instructions?">
-No. In all cases swap instructions stay the same.
-If the market is hot (active), the transaction is identical to today (UX, CU, latency, txn size,...). 
-If the market is cold (inactive) you additionally prepend `create_load_instructions`.
+No. In all cases, swap instructions stay the same.
+If the market is active (hot), the transaction is identical to today (UX, CU, latency, txn size,...). 
+If the market is inactive (cold), you additionally prepend `create_load_instructions`.
 </Accordion>
 
 <Accordion title="Can I quote cold markets?"> Yes. `get_account_interface` is a
-superset of `get_account` and returns full account state via the same `Account`
+superset of `get_account` and returns the full account state via the same `Account`
 type, regardless of whether the account is hot or cold. Quoting works all the same. </Accordion>
 
-<Accordion title="Do rent-free markets increase latency?"> On hot path: No. On
-cold path: Yes, +0-200ms for fetching validity proof. Depending on the number of
-cold accounts, and the type of accounts, load instructions may exceed Solana's
-current txn size limit. In this case we recommend creating Jito bundles to
- reduce latency. Future updates will continue to reduce txn size and CU usage
- for loading cold accounts. </Accordion>
+<Accordion title="Do rent-free markets increase latency?"> 
+  **Active markets (hot path)**: No additional latency.
 
+  **Inactive markets (cold)**: Yes, loading accounts back into Solana's active state adds
+  1-200ms depending on whether a validity proof is needed. If loading multiple
+  cold accounts exceeds Solana's 1232 byte limit, use Jito bundles to maintain
+  atomicity and reduce latency. Future updates will continue to reduce
+  transaction size and CU usage for loading cold accounts. 
+</Accordion>
+
+<Accordion title="How long do accounts stay hot after loading?">
+Accounts stay hot until they become inactive again. After extended inactivity (configurable by the program owner, e.g., 24h of no writes), their virtual rent balance falls below a threshold and miners compress them back to cold state. Each write extends the "hot" period.
+</Accordion>
 
 <Accordion title="Does loading cold accounts exceed Solana's txn size limit?">
 
@@ -270,14 +271,14 @@ let resp = client
 </Accordion>
 
 <Accordion title="Do RPC providers support these interface endpoints?">
-The relevant RPC methods are supported by providers such as Helius and Triton and can also be self-hosted via the open source Photon indexer. Helius Labs maintains the Photon indexer implementation.
+Yes. The relevant RPC methods are supported by providers such as Helius and Triton and can also be self-hosted via the <a href="https://github.com/helius-labs/photon" target="_blank">open-source Photon indexer</a>, which is maintained by Helius Labs.
 </Accordion>
 
 <Accordion title="What if the indexer is down?"> 
 Hot markets work all the same as long as Solana is up. Cold accounts cannot be loaded into hot state until your indexer or RPC provider recovers.
 Note that compression is cryptographically verifiable, so integrity and safety are not dependent on the indexer or any other external service beyond the onchain protocol.
 </Accordion>
----
+
 <Callout type="info">
 API is in Beta and subject to change.
 

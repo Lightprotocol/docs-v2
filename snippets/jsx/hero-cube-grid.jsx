@@ -31,8 +31,8 @@ export const HeroCubeGrid = () => {
       >
         <defs>
           <linearGradient id="gridGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#f8fafc" />
-            <stop offset="100%" stopColor="#f1f5f9" />
+            <stop offset="0%" className="grid-bg-start" />
+            <stop offset="100%" className="grid-bg-end" />
           </linearGradient>
         </defs>
 
@@ -49,7 +49,7 @@ export const HeroCubeGrid = () => {
                 y={y + gap / 2}
                 width={tileSize}
                 height={tileSize}
-                fill="#e2e8f0"
+                className="tile-fill"
                 fillOpacity={0.5}
                 rx={4}
               />
@@ -59,7 +59,7 @@ export const HeroCubeGrid = () => {
                 width={tileSize}
                 height={tileSize}
                 fill="none"
-                stroke="#0066ff"
+                className="tile-stroke"
                 strokeWidth={1.5}
                 strokeOpacity={0.25}
                 rx={4}
