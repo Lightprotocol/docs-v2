@@ -11,14 +11,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         mut rpc,
         payer,
         mint,
-        ata,
+        associated_token_account,
         decimals,
         ..
     } = setup().await;
 
-    // Create recipient ATA
+    // Create recipient associated token account
     let recipient = Keypair::new();
-    let recipient_ata = CreateAta {
+    let recipient_associated_token_account = CreateAta {
         mint,
         owner: recipient.pubkey(),
         idempotent: true,
@@ -28,9 +28,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Transfers tokens between token accounts (SPL, Token-2022, or Light) in a single call.
     let sig = TransferInterface {
-        source: ata,
+        source: associated_token_account,
         mint,
-        destination: recipient_ata,
+        destination: recipient_associated_token_account,
         amount: 1000,
         decimals,
         ..Default::default()
@@ -39,7 +39,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     .await?;
 
     let data = rpc
-        .get_account(recipient_ata)
+        .get_account(recipient_associated_token_account)
         .await?
         .ok_or("Account not found")?;
     let token = light_token_interface::state::Token::deserialize(&mut &data.data[..])?;

@@ -7,25 +7,25 @@ use solana_sdk::signer::Signer;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // Setup creates mint, ATA with tokens, and approves delegate
+    // Setup creates mint, associated token account with tokens, and approves delegate
     let SetupContext {
         mut rpc,
         payer,
-        ata,
+        associated_token_account,
         ..
     } = setup().await;
 
-    let revoke_ix = Revoke {
-        token_account: ata,
+    let revoke_instruction = Revoke {
+        token_account: associated_token_account,
         owner: payer.pubkey(),
     }
     .instruction()?;
 
     let sig = rpc
-        .create_and_send_transaction(&[revoke_ix], &payer.pubkey(), &[&payer])
+        .create_and_send_transaction(&[revoke_instruction], &payer.pubkey(), &[&payer])
         .await?;
 
-    let data = rpc.get_account(ata).await?.ok_or("Account not found")?;
+    let data = rpc.get_account(associated_token_account).await?.ok_or("Account not found")?;
     let token = light_token_interface::state::Token::deserialize(&mut &data.data[..])?;
     println!("Delegate: {:?} Tx: {sig}", token.delegate);
 

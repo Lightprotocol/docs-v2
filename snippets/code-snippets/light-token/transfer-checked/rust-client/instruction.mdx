@@ -9,35 +9,35 @@ use solana_sdk::{signature::Keypair, signer::Signer};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // Setup creates mint and ATA with tokens
+    // Setup creates mint and associated token account with tokens
     let SetupContext {
         mut rpc,
         payer,
         mint,
-        ata,
+        associated_token_account,
         decimals,
         ..
     } = setup().await;
 
     let transfer_amount = 400_000u64;
 
-    // Create recipient ATA
+    // Create recipient associated token account
     let recipient = Keypair::new();
-    let recipient_ata = get_associated_token_address(&recipient.pubkey(), &mint);
+    let recipient_associated_token_account = get_associated_token_address(&recipient.pubkey(), &mint);
 
-    let create_ata_ix = CreateAssociatedTokenAccount::new(payer.pubkey(), recipient.pubkey(), mint)
+    let create_ata_instruction = CreateAssociatedTokenAccount::new(payer.pubkey(), recipient.pubkey(), mint)
         .instruction()?;
 
-    rpc.create_and_send_transaction(&[create_ata_ix], &payer.pubkey(), &[&payer])
+    rpc.create_and_send_transaction(&[create_ata_instruction], &payer.pubkey(), &[&payer])
         .await?;
 
     // TransferChecked validates decimals match the mint's decimals
     // Only use for Light->Light transfers.
     // Use TransferInterface for all other transfers (Light, SPL or Token-2022).
-    let transfer_ix = TransferChecked {
-        source: ata,
+    let transfer_instruction = TransferChecked {
+        source: associated_token_account,
         mint,
-        destination: recipient_ata,
+        destination: recipient_associated_token_account,
         amount: transfer_amount,
         decimals,
         authority: payer.pubkey(),
@@ -47,11 +47,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     .instruction()?;
 
     let sig = rpc
-        .create_and_send_transaction(&[transfer_ix], &payer.pubkey(), &[&payer])
+        .create_and_send_transaction(&[transfer_instruction], &payer.pubkey(), &[&payer])
         .await?;
 
     let data = rpc
-        .get_account(recipient_ata)
+        .get_account(recipient_associated_token_account)
         .await?
         .ok_or("Account not found")?;
     let token = light_token_interface::state::Token::deserialize(&mut &data.data[..])?;

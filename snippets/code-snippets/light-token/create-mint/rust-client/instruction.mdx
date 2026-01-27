@@ -6,6 +6,7 @@ use light_client::{
 use light_program_test::{LightProgramTest, ProgramTestConfig};
 use light_token::instruction::{
     derive_mint_compressed_address, find_mint_address, CreateMint, CreateMintParams,
+    DEFAULT_RENT_PAYMENT, DEFAULT_WRITE_TOP_UP,
 };
 use light_token_interface::{
     instructions::extensions::{
@@ -70,12 +71,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 }]),
             },
         )]),
-        rent_payment: 16,  // ~24 hours rent
-        write_top_up: 766, // ~3 hours rent per write
+        rent_payment: DEFAULT_RENT_PAYMENT, // 24h of rent
+        write_top_up: DEFAULT_WRITE_TOP_UP, // 3h of rent
     };
 
     // Build and send instruction (mint_seed must sign)
-    let create_mint_ix = CreateMint::new(
+    let create_mint_instruction = CreateMint::new(
         params,
         mint_seed.pubkey(),
         payer.pubkey(),
@@ -85,7 +86,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     .instruction()?;
 
     let sig = rpc
-        .create_and_send_transaction(&[create_mint_ix], &payer.pubkey(), &[&payer, &mint_seed])
+        .create_and_send_transaction(&[create_mint_instruction], &payer.pubkey(), &[&payer, &mint_seed])
         .await?;
 
     let data = rpc.get_account(mint).await?;
