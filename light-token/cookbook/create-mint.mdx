@@ -25,7 +25,6 @@ import RustActionCode from "/snippets/code-snippets/light-token/create-mint/rust
 import RustInstructionCode from "/snippets/code-snippets/light-token/create-mint/rust-client/instruction.mdx";
 import NativeProgramCode from "/snippets/code-snippets/light-token/create-mint/native-program/full-example.mdx";
 import AnchorProgramCode from "/snippets/code-snippets/light-token/create-mint/anchor-program/full-example.mdx";
-import AnchorMacroCode from "/snippets/code-snippets/light-token/create-mint/anchor-macro/full-example.mdx";
 import CompressibleRentExplained from "/snippets/compressible-rent-explained.mdx";
 
 1. Mint accounts uniquely represent a token on Solana and store its global metadata.
@@ -131,7 +130,7 @@ Compare to SPL:
 </Steps>
 </Tab>
 
-<Tab title="Program (SDK Anchor / Native)">
+<Tab title="Program">
 
 <Note>
 Find [a full code example at the end](#full-code-example).
@@ -323,7 +322,7 @@ CreateMintCpi::new(
 
 </Tab>
 
-<Tab title="Native">
+<Tab title="Native Rust">
 
 <Info>
   View the full example with shared test utilities:
@@ -334,17 +333,6 @@ CreateMintCpi::new(
 
 </Tab>
 </Tabs>
-
-</Tab>
-
-<Tab title="Program (Anchor Macros)">
-
-<Info>
-  View the full example:
-  [examples-light-token](https://github.com/Lightprotocol/examples-light-token/tree/main/program-examples/anchor/macro-basics/create-mint-macro).
-</Info>
-
-<AnchorMacroCode />
 
 </Tab>
 

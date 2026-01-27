@@ -24,7 +24,6 @@ import InstructionCode from "/snippets/code-snippets/light-token/create-ata/inst
 import RustActionCode from "/snippets/code-snippets/light-token/create-ata/rust-client/action.mdx";
 import RustInstructionCode from "/snippets/code-snippets/light-token/create-ata/rust-client/instruction.mdx";
 import AnchorProgramCode from "/snippets/code-snippets/light-token/create-ata/anchor-program/full-example.mdx";
-import AnchorMacroCode from "/snippets/code-snippets/light-token/create-ata/anchor-macro/full-example.mdx";
 import NativeProgramCode from "/snippets/code-snippets/light-token/create-ata/native-program/full-example.mdx";
 
 1. Associated light-token accounts can hold token balances of light, SPL, or Token 2022 mints.
@@ -120,7 +119,7 @@ Compare to SPL:
 </Steps>
 
 </Tab>
-<Tab title="Program (SDK Anchor / Native)">
+<Tab title="Program">
 
 <Note>
 Find [a full code example at the end](#full-code-example).
@@ -206,7 +205,7 @@ CreateAssociatedAccountCpi {
 
 </Tab>
 
-<Tab title="Native">
+<Tab title="Native Rust">
 
 <Info>
   View the full example with shared test utilities:
@@ -217,17 +216,6 @@ CreateAssociatedAccountCpi {
 
 </Tab>
 </Tabs>
-
-</Tab>
-
-<Tab title="Program (Anchor Macros)">
-
-<Info>
-  View the full example:
-  [examples-light-token](https://github.com/Lightprotocol/examples-light-token/tree/main/program-examples/anchor/macro-basics/create-ata-macro).
-</Info>
-
-<AnchorMacroCode />
 
 </Tab>
 
