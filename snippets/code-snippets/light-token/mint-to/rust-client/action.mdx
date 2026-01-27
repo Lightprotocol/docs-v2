@@ -19,8 +19,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     .execute(&mut rpc, &payer, &mint_seed)
     .await?;
 
-    // Create ATA
-    let ata = CreateAta {
+    // Create associated token account
+    let associated_token_account = CreateAta {
         mint: mint_result.mint,
         owner: payer.pubkey(),
         idempotent: true,
@@ -31,14 +31,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Mint tokens
     let sig = MintTo {
         mint: mint_result.mint,
-        destination: ata,
+        destination: associated_token_account,
         amount: 1_000_000,
         max_top_up: None,
     }
     .execute(&mut rpc, &payer, &mint_seed)
     .await?;
 
-    let data = rpc.get_account(ata).await?.ok_or("Account not found")?;
+    let data = rpc.get_account(associated_token_account).await?.ok_or("Account not found")?;
     let token = light_token_interface::state::Token::deserialize(&mut &data.data[..])?;
     println!("Balance: {} Tx: {sig}", token.amount);
 

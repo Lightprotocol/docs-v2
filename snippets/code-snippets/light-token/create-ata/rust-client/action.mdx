@@ -17,8 +17,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     .execute(&mut rpc, &payer, &mint_seed)
     .await?;
 
-    // Create ATA
-    let ata = CreateAta {
+    // Create associated token account
+    let associated_token_account = CreateAta {
         mint: mint_result.mint,
         owner: payer.pubkey(),
         idempotent: true,
@@ -26,7 +26,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     .execute(&mut rpc, &payer)
     .await?;
 
-    println!("ATA: {ata}");
+    println!("ATA: {associated_token_account}");
 
     Ok(())
 }

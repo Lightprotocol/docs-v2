@@ -6,7 +6,7 @@ use solana_sdk::{signature::Keypair, signer::Signer};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // You can use light, spl, t22 mints to create a light token ATA.
+    // You can use Light, SPL, or Token-2022 mints to create a Light associated token account.
     let SplMintContext {
         mut rpc,
         payer,
@@ -15,16 +15,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let owner = Keypair::new();
 
-    let create_ata_ix =
+    let create_ata_instruction =
         CreateAssociatedTokenAccount::new(payer.pubkey(), owner.pubkey(), mint).instruction()?;
 
     let sig = rpc
-        .create_and_send_transaction(&[create_ata_ix], &payer.pubkey(), &[&payer])
+        .create_and_send_transaction(&[create_ata_instruction], &payer.pubkey(), &[&payer])
         .await?;
 
-    let ata = get_associated_token_address(&owner.pubkey(), &mint);
-    let data = rpc.get_account(ata).await?;
-    println!("ATA: {ata} exists: {} Tx: {sig}", data.is_some());
+    let associated_token_account = get_associated_token_address(&owner.pubkey(), &mint);
+    let data = rpc.get_account(associated_token_account).await?;
+    println!("ATA: {associated_token_account} exists: {} Tx: {sig}", data.is_some());
 
     Ok(())
 }

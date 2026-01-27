@@ -7,20 +7,20 @@ use solana_sdk::program_pack::Pack;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // Setup creates Light ATA with tokens and empty SPL ATA
+    // Setup creates Light associated token account with tokens and empty SPL associated token account
     let UnwrapContext {
         mut rpc,
         payer,
         mint,
-        destination_ata: destination,
-        light_ata,
+        destination_associated_token_account,
+        light_associated_token_account,
         decimals,
     } = setup_for_unwrap().await;
 
-    // Unwrap tokens from Light Token ATA to SPL ATA
+    // Unwrap tokens from Light Token associated token account to SPL associated token account
     let sig = Unwrap {
-        source: light_ata,
-        destination_spl_ata: destination,
+        source: light_associated_token_account,
+        destination_spl_ata: destination_associated_token_account,
         mint,
         amount: 500_000,
         decimals,
@@ -29,7 +29,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     .await?;
 
     let data = rpc
-        .get_account(destination)
+        .get_account(destination_associated_token_account)
         .await?
         .ok_or("Account not found")?;
     let token = SplAccount::unpack(&data.data)?;
