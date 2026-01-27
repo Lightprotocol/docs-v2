@@ -63,7 +63,16 @@
             "pages": [
               "light-token/cookbook/overview",
               {
+                "group": "Examples",
+                "expanded": true,
+                "pages": [
+                  "light-token/examples/client",
+                  "light-token/examples/program"
+                ]
+              },
+              {
                 "group": "Recipes",
+                "expanded": true,
                 "pages": [
                   "light-token/cookbook/create-mint",
                   "light-token/cookbook/create-ata",
