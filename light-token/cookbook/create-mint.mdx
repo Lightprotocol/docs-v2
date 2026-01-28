@@ -140,6 +140,16 @@ Compare to SPL:
 
 <Tab title="CPI">
 
+Compare to SPL:
+
+<CodeCompare
+  firstCode={lightCreateMintRustCode}
+  secondCode={splCreateMintRustCode}
+  firstLabel="light-token"
+  secondLabel="SPL"
+  language="rust"
+/>
+
 <Note>
 Find [a full code example at the end](#full-code-example).
 </Note>
@@ -335,10 +345,6 @@ CreateMintCpi::new(
 </Tab>
 <Tab title="Anchor Macros">
 
-<Note>
-Find [a full code example at the end](#full-code-example).
-</Note>
-
 Compare to SPL:
 
 <Tabs>
@@ -362,19 +368,27 @@ Compare to SPL:
 </Tab>
 </Tabs>
 
+<Note>
+Find [a full code example at the end](#full-code-example).
+</Note>
 
-Dependencies
+<Steps>
+
+<Step>
+### Dependencies
 
 ```toml
 [dependencies]
-
 light-sdk = { version = "0.18.0", features = ["anchor", "v2", "cpi-context"] }
-light-sdk-macros = { version = "0.18.0" }
-light-token = { version = "0.3.0", features = ["anchor"] }
-
-light-anchor-spl = { version = "0.31" }    # TokenInterface uses light_token::ID
+light-sdk-macros = "0.18.0"
+light-compressible = "0.1.0"
 anchor-lang = "0.31"
 ```
+
+</Step>
+
+<Step>
+### Program
 
 Add `#[light_program]` above `#[program]`:
 
@@ -383,108 +397,75 @@ use light_sdk_macros::light_program;
 
 #[light_program]
 #[program]
-pub mod my_amm {
+pub mod my_program {
     use super::*;
 
-    pub fn initialize_pool(ctx: Context<InitializePool>, params: InitializeParams) -> Result<()> {
-        process_initialize_pool(ctx, params)
-    }
-
-    // These don't change
-    pub fn swap(ctx: Context<Swap>, amount_in: u64, min_out: u64) -> Result<()> {
-        process_swap(ctx, amount_in, min_out)
+    pub fn create_mint<'info>(
+        ctx: Context<'_, '_, '_, 'info, CreateMint<'info>>,
+        params: CreateMintParams,
+    ) -> Result<()> {
+        Ok(())
     }
 }
 ```
+
+</Step>
+
+<Step>
+### Accounts struct
 
 Derive `LightAccounts` on your `Accounts` struct and add `#[light_account(...)]` next to `#[account(...)]`.
 
+<Tabs>
+<Tab title="Mint">
+
 ```rust
+/// CHECK: Validated by light-token CPI
 #[account(mut)]
-#[light_account(
-    init,
-    mint,
-    mint_signer = lp_mint_signer,
-    authority = authority,
-    decimals = 9,
-    mint_seeds = &[LP_MINT_SIGNER_SEED, pool_state.key().as_ref(), &[params.mint_signer_bump]],
-    authority_seeds = &[AUTH_SEED.as_bytes(), &[params.authority_bump]]
+#[light_account(init,
+    mint::signer = mint_signer,
+    mint::authority = fee_payer,
+    mint::decimals = 9,
+    mint::seeds = &[MINT_SIGNER_SEED, self.authority.to_account_info().key.as_ref()],
+    mint::bump = params.mint_signer_bump
 )]
-pub lp_mint: UncheckedAccount<'info>,
+pub mint: UncheckedAccount<'info>,
 ```
 
-We also need to add `light_token_interface_config`, `rent_sponsor`, and `light_token_cpi_authority`.
+</Tab>
+<Tab title="Mint with metadata">
 
 ```rust
-use light_sdk::interface::CreateAccountsProof;
-use light_sdk_macros::LightAccounts;
-use light_token::instruction::{COMPRESSIBLE_CONFIG_V1, RENT_SPONSOR as LIGHT_TOKEN_RENT_SPONSOR};
-
-#[derive(AnchorSerialize, AnchorDeserialize, Clone)]
-pub struct InitializeParams {
-    pub create_accounts_proof: CreateAccountsProof,
-    pub lp_mint_signer_bump: u8,
-    pub creator_lp_token_bump: u8,
-    pub authority_bump: u8,
-}
-
-#[derive(Accounts, LightAccounts)]
-#[instruction(params: InitializeParams)]
-pub struct InitializePool<'info> {
-    #[account(mut)]
-    pub creator: Signer<'info>,
-
-    #[account(mut, seeds = [AUTH_SEED.as_bytes()], bump)]
-    pub authority: UncheckedAccount<'info>,
-
-    #[account(
-        init,
-        seeds = [POOL_SEED.as_bytes(), token_0_mint.key().as_ref(), token_1_mint.key().as_ref()],
-        bump,
-        payer = creator,
-        space = 8 + PoolState::INIT_SPACE
-    )]
-    #[light_account(init)]
-    pub pool_state: Box<Account<'info, PoolState>>,
-
-    pub token_0_mint: Box<InterfaceAccount<'info, Mint>>,
-    pub token_1_mint: Box<InterfaceAccount<'info, Mint>>,
-
-    #[account(seeds = [POOL_LP_MINT_SIGNER_SEED, pool_state.key().as_ref()], bump)]
-    pub lp_mint_signer: UncheckedAccount<'info>,
-
-    #[account(mut)]
-    #[light_account(init, mint,
-        mint_signer = lp_mint_signer,
-        authority = authority,
-        decimals = 9,
-        mint_seeds = &[POOL_LP_MINT_SIGNER_SEED, self.pool_state.to_account_info().key.as_ref(), &[params.lp_mint_signer_bump]],
-        authority_seeds = &[AUTH_SEED.as_bytes(), &[params.authority_bump]]
-    )]
-    pub lp_mint: UncheckedAccount<'info>,
-
-    #[account(mut, seeds = [POOL_VAULT_SEED.as_bytes(), pool_state.key().as_ref(), token_0_mint.key().as_ref()], bump)]
-    #[light_account(token, authority = [AUTH_SEED.as_bytes()])]
-    pub token_0_vault: UncheckedAccount<'info>,
-
-    #[account(mut, seeds = [POOL_VAULT_SEED.as_bytes(), pool_state.key().as_ref(), token_1_mint.key().as_ref()], bump)]
-    #[light_account(token, authority = [AUTH_SEED.as_bytes()])]
-    pub token_1_vault: UncheckedAccount<'info>,
-
-    #[account(mut)]
-    pub creator_lp_token: UncheckedAccount<'info>,
-
-
-    pub light_interface_config: AccountInfo<'info>,
-    #[account(address = COMPRESSIBLE_CONFIG_V1)]
-    pub light_token_interface_config: AccountInfo<'info>,
-    #[account(mut, address = LIGHT_TOKEN_RENT_SPONSOR)]
-    pub rent_sponsor: AccountInfo<'info>,
-    pub light_token_program: AccountInfo<'info>,
-    pub light_token_cpi_authority: AccountInfo<'info>,
-    pub system_program: Program<'info, System>,
-}
+/// CHECK: Validated by light-token CPI
+#[account(mut)]
+#[light_account(init,
+    mint::signer = mint_signer,
+    mint::authority = fee_payer,
+    mint::decimals = 9,
+    mint::seeds = &[MINT_SIGNER_SEED, self.authority.to_account_info().key.as_ref()],
+    mint::bump = params.mint_signer_bump,
+    mint::name = params.name.clone(),
+    mint::symbol = params.symbol.clone(),
+    mint::uri = params.uri.clone(),
+    mint::update_authority = authority,
+    mint::additional_metadata = params.additional_metadata.clone()
+)]
+pub mint: UncheckedAccount<'info>,
 ```
+
+</Tab>
+</Tabs>
+
+</Step>
+
+</Steps>
+
+# Full code example
+
+<Info>
+  View the full example with test:
+  [examples-light-token-anchor](https://github.com/Lightprotocol/examples-light-token-anchor/tree/main/program-examples/anchor/basic-macros/create-mint).
+</Info>
 
 <AnchorMacroCode />
 

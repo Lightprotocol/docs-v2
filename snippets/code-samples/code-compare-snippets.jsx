@@ -3,7 +3,6 @@
 
 // === CREATE MINT ===
 export const splCreateMintCode = [
-  "// SPL createMint",
   'import { createMint } from "@solana/spl-token";',
   "",
   "const mint = await createMint(",
@@ -16,7 +15,6 @@ export const splCreateMintCode = [
 ].join("\n");
 
 export const lightCreateMintCode = [
-  "// light-token createMint",
   'import { createMintInterface } from "@lightprotocol/compressed-token";',
   "",
   "const { mint } = await createMintInterface(",
@@ -31,7 +29,6 @@ export const lightCreateMintCode = [
 
 // === MINT TO ===
 export const splMintToCode = [
-  "// SPL mintTo",
   'import { mintTo } from "@solana/spl-token";',
   "",
   "const tx = await mintTo(",
@@ -45,7 +42,6 @@ export const splMintToCode = [
 ].join("\n");
 
 export const lightMintToCode = [
-  "// light-token mintTo",
   'import { mintToInterface } from "@lightprotocol/compressed-token";',
   "",
   "const tx = await mintToInterface(",
@@ -60,7 +56,6 @@ export const lightMintToCode = [
 
 // === CREATE ATA ===
 export const splCreateAtaCode = [
-  "// SPL create ATA",
   'import { getOrCreateAssociatedTokenAccount } from "@solana/spl-token";',
   "",
   "const ata = await getOrCreateAssociatedTokenAccount(",
@@ -72,7 +67,6 @@ export const splCreateAtaCode = [
 ].join("\n");
 
 export const lightCreateAtaCode = [
-  "// light-token create ATA",
   'import { createAtaInterface } from "@lightprotocol/compressed-token";',
   "",
   "const ata = await createAtaInterface(",
@@ -85,7 +79,6 @@ export const lightCreateAtaCode = [
 
 // === TRANSFER ===
 export const splTransferCode = [
-  "// SPL transfer",
   'import { transfer } from "@solana/spl-token";',
   "",
   "const tx = await transfer(",
@@ -99,7 +92,6 @@ export const splTransferCode = [
 ].join("\n");
 
 export const lightTransferCode = [
-  "// light-token transfer",
   'import { transferInterface } from "@lightprotocol/compressed-token";',
   "",
   "const tx = await transferInterface(",
@@ -115,7 +107,6 @@ export const lightTransferCode = [
 
 // === TRANSFER (RUST) ===
 export const splTransferRustCode = [
-  "// SPL transfer",
   "use spl_token::instruction::transfer;",
   "",
   "let ix = transfer(",
@@ -129,7 +120,6 @@ export const splTransferRustCode = [
 ].join("\n");
 
 export const lightTransferRustCode = [
-  "// light-token transfer",
   "use light_token_sdk::token::TransferInterface;",
   "",
   "let ix = TransferInterface {",
@@ -149,7 +139,6 @@ export const lightTransferRustCode = [
 
 // === CREATE ATA (RUST) ===
 export const splCreateAtaRustCode = [
-  "// SPL create ATA",
   "use spl_associated_token_account::instruction::create_associated_token_account;",
   "",
   "let ix = create_associated_token_account(",
@@ -161,7 +150,6 @@ export const splCreateAtaRustCode = [
 ].join("\n");
 
 export const lightCreateAtaRustCode = [
-  "// light-token create ATA",
   "use light_token_sdk::token::CreateAssociatedTokenAccount;",
   "",
   "let ix = CreateAssociatedTokenAccount::new(",
@@ -174,7 +162,6 @@ export const lightCreateAtaRustCode = [
 
 // === CREATE MINT (RUST) ===
 export const splCreateMintRustCode = [
-  "// SPL create mint",
   "use spl_token::instruction::initialize_mint;",
   "",
   "let ix = initialize_mint(",
@@ -187,11 +174,9 @@ export const splCreateMintRustCode = [
 ].join("\n");
 
 export const lightCreateMintRustCode = [
-  "// light-token create mint",
   "use light_token_sdk::token::CreateMint;",
   "",
   "let ix = CreateMint::new(",
-  "    // includes decimals, mint_authority, freeze_authority, extensions, rent config",
   "    params,",
   "    mint_seed.pubkey(),",
   "    payer.pubkey(),",
@@ -203,7 +188,6 @@ export const lightCreateMintRustCode = [
 
 // === MINT TO (RUST) ===
 export const splMintToRustCode = [
-  "// SPL mint to",
   "use spl_token::instruction::mint_to;",
   "",
   "let ix = mint_to(",
@@ -217,7 +201,6 @@ export const splMintToRustCode = [
 ].join("\n");
 
 export const lightMintToRustCode = [
-  "// light-token mint to",
   "use light_token_sdk::token::MintTo;",
   "",
   "let ix = MintTo {",
@@ -232,7 +215,6 @@ export const lightMintToRustCode = [
 
 // === CREATE TOKEN ACCOUNT (RUST) ===
 export const splCreateTokenAccountRustCode = [
-  "// SPL create token account",
   "use spl_token::instruction::initialize_account;",
   "",
   "let ix = initialize_account(",
@@ -244,7 +226,6 @@ export const splCreateTokenAccountRustCode = [
 ].join("\n");
 
 export const lightCreateTokenAccountRustCode = [
-  "// light-token create token account",
   "use light_token_sdk::token::CreateTokenAccount;",
   "",
   "let ix = CreateTokenAccount::new(",
@@ -258,7 +239,6 @@ export const lightCreateTokenAccountRustCode = [
 
 // === CLOSE TOKEN ACCOUNT (RUST) ===
 export const splCloseAccountRustCode = [
-  "// SPL close account",
   "use spl_token::instruction::close_account;",
   "",
   "let ix = close_account(",
@@ -271,7 +251,6 @@ export const splCloseAccountRustCode = [
 ].join("\n");
 
 export const lightCloseAccountRustCode = [
-  "// light-token close account",
   "use light_token_sdk::token::{CloseAccount, LIGHT_TOKEN_PROGRAM_ID};",
   "",
   "let ix = CloseAccount::new(",
@@ -285,7 +264,6 @@ export const lightCloseAccountRustCode = [
 
 // === BLOG - CREATE ATA (different comments) ===
 export const blogSplCreateAtaCode = [
-  "// Create SPL token account",
   "const ix = createAssociatedTokenAccountInstruction(",
   "  payer,",
   "  ata,",
@@ -295,7 +273,6 @@ export const blogSplCreateAtaCode = [
 ].join("\n");
 
 export const blogLightCreateAtaCode = [
-  "// Create light-token account",
   "const ix = CreateAssociatedTokenAccount.new(",
   "  payer,",
   "  account,",
@@ -306,7 +283,6 @@ export const blogLightCreateAtaCode = [
 
 // === BURN (RUST) ===
 export const splBurnRustCode = [
-  "// SPL burn",
   "use spl_token::instruction::burn;",
   "",
   "let ix = burn(",
@@ -320,7 +296,6 @@ export const splBurnRustCode = [
 ].join("\n");
 
 export const lightBurnRustCode = [
-  "// light-token burn",
   "use light_token_sdk::token::Burn;",
   "",
   "let ix = Burn {",
@@ -335,7 +310,6 @@ export const lightBurnRustCode = [
 
 // === FREEZE (RUST) ===
 export const splFreezeRustCode = [
-  "// SPL freeze",
   "use spl_token::instruction::freeze_account;",
   "",
   "let ix = freeze_account(",
@@ -348,7 +322,6 @@ export const splFreezeRustCode = [
 ].join("\n");
 
 export const lightFreezeRustCode = [
-  "// light-token freeze",
   "use light_token_sdk::token::Freeze;",
   "",
   "let ix = Freeze {",
@@ -361,7 +334,6 @@ export const lightFreezeRustCode = [
 
 // === THAW (RUST) ===
 export const splThawRustCode = [
-  "// SPL thaw",
   "use spl_token::instruction::thaw_account;",
   "",
   "let ix = thaw_account(",
@@ -374,7 +346,6 @@ export const splThawRustCode = [
 ].join("\n");
 
 export const lightThawRustCode = [
-  "// light-token thaw",
   "use light_token_sdk::token::Thaw;",
   "",
   "let ix = Thaw {",
@@ -387,7 +358,6 @@ export const lightThawRustCode = [
 
 // === APPROVE (RUST) ===
 export const splApproveRustCode = [
-  "// SPL approve",
   "use spl_token::instruction::approve;",
   "",
   "let ix = approve(",
@@ -401,7 +371,6 @@ export const splApproveRustCode = [
 ].join("\n");
 
 export const lightApproveRustCode = [
-  "// light-token approve",
   "use light_token_sdk::token::Approve;",
   "",
   "let ix = Approve {",
@@ -415,7 +384,6 @@ export const lightApproveRustCode = [
 
 // === REVOKE (RUST) ===
 export const splRevokeRustCode = [
-  "// SPL revoke",
   "use spl_token::instruction::revoke;",
   "",
   "let ix = revoke(",
@@ -427,7 +395,6 @@ export const splRevokeRustCode = [
 ].join("\n");
 
 export const lightRevokeRustCode = [
-  "// light-token revoke",
   "use light_token_sdk::token::Revoke;",
   "",
   "let ix = Revoke {",
@@ -439,7 +406,6 @@ export const lightRevokeRustCode = [
 
 // === CREATE MINT MACRO (ANCHOR) ===
 export const splCreateMintMacroCode = [
-  "// SPL Token (Anchor)",
   "#[account(",
   "    init,",
   "    payer = fee_payer,",
@@ -450,7 +416,6 @@ export const splCreateMintMacroCode = [
 ].join("\n");
 
 export const lightCreateMintMacroCode = [
-  "// light-token (Anchor)",
   "#[light_account(init,",
   "    mint::signer = mint_signer,",
   "    mint::authority = fee_payer,",
@@ -463,8 +428,6 @@ export const lightCreateMintMacroCode = [
 
 // === CREATE MINT WITH METADATA MACRO (ANCHOR) ===
 export const splCreateMintMetadataMacroCode = [
-  "// SPL Token-2022 (Anchor)",
-  "// Macro — only MetadataPointer is declarative",
   "#[account(",
   "    init,",
   "    payer = fee_payer,",
@@ -475,8 +438,7 @@ export const splCreateMintMetadataMacroCode = [
   ")]",
   "pub mint_account: InterfaceAccount<'info, Mint>,",
   "",
-  "// Metadata fields require a separate CPI call",
-  "// in the instruction handler:",
+  "// Metadata requires a separate CPI:",
   "token_metadata_initialize(",
   "    cpi_ctx,",
   "    params.name,",
@@ -486,7 +448,6 @@ export const splCreateMintMetadataMacroCode = [
 ].join("\n");
 
 export const lightCreateMintMetadataMacroCode = [
-  "// light-token (Anchor)",
   "#[light_account(",
   "    init,",
   "    mint,",
@@ -501,4 +462,114 @@ export const lightCreateMintMetadataMacroCode = [
   "    additional_metadata = params.additional_metadata.clone()",
   ")]",
   "pub mint: UncheckedAccount<'info>,",
+].join("\n");
+
+// === CREATE ATA MACRO (ANCHOR) ===
+export const splCreateAtaMacroCode = [
+  "#[account(",
+  "    init_if_needed,",
+  "    payer = fee_payer,",
+  "    associated_token::mint = mint,",
+  "    associated_token::authority = owner,",
+  ")]",
+  "pub ata: Account<'info, TokenAccount>,",
+].join("\n");
+
+export const lightCreateAtaMacroCode = [
+  "#[light_account(init,",
+  "    associated_token::authority = ata_owner,",
+  "    associated_token::mint = ata_mint,",
+  "    associated_token::bump = params.ata_bump",
+  ")]",
+  "pub ata: UncheckedAccount<'info>,",
+].join("\n");
+
+// === CREATE TOKEN ACCOUNT MACRO (ANCHOR) ===
+export const splCreateTokenAccountMacroCode = [
+  "#[account(",
+  "    init,",
+  "    payer = fee_payer,",
+  "    token::mint = mint,",
+  "    token::authority = authority,",
+  ")]",
+  "pub vault: Account<'info, TokenAccount>,",
+].join("\n");
+
+export const lightCreateTokenAccountMacroCode = [
+  "#[account(",
+  "    mut,",
+  "    seeds = [VAULT_SEED, mint.key().as_ref()],",
+  "    bump,",
+  ")]",
+  "#[light_account(init,",
+  "    token::authority = [VAULT_SEED, self.mint.key()],",
+  "    token::mint = mint,",
+  "    token::owner = vault_authority,",
+  "    token::bump = params.vault_bump",
+  ")]",
+  "pub vault: UncheckedAccount<'info>,",
+].join("\n");
+
+// === CREATE ATA CPI (RUST) ===
+export const splCreateAtaCpiCode = [
+  "use spl_associated_token_account::instruction::create_associated_token_account;",
+  "",
+  "let ix = create_associated_token_account(",
+  "    &payer.pubkey(),",
+  "    &owner.pubkey(),",
+  "    &mint,",
+  "    &spl_token::id(),",
+  ");",
+  "",
+  "invoke(&ix, &[payer, owner, mint])?;",
+].join("\n");
+
+export const lightCreateAtaCpiCode = [
+  "use light_token::instruction::CreateAssociatedAccountCpi;",
+  "",
+  "CreateAssociatedAccountCpi {",
+  "    payer: payer.clone(),",
+  "    owner: owner.clone(),",
+  "    mint: mint.clone(),",
+  "    ata: associated_token_account.clone(),",
+  "    bump,",
+  "}",
+  ".rent_free(",
+  "    compressible_config.clone(),",
+  "    rent_sponsor.clone(),",
+  "    system_program.clone(),",
+  ")",
+  ".invoke()?",
+].join("\n");
+
+// === CREATE TOKEN ACCOUNT CPI (RUST) ===
+export const splCreateTokenAccountCpiCode = [
+  "use spl_token::instruction::initialize_account;",
+  "",
+  "let ix = initialize_account(",
+  "    &spl_token::id(),",
+  "    &account,",
+  "    &mint,",
+  "    &owner,",
+  ")?;",
+  "",
+  "invoke(&ix, &[account, mint, owner])?;",
+].join("\n");
+
+export const lightCreateTokenAccountCpiCode = [
+  "use light_token::instruction::CreateTokenAccountCpi;",
+  "",
+  "CreateTokenAccountCpi {",
+  "    payer: payer.clone(),",
+  "    account: account.clone(),",
+  "    mint: mint.clone(),",
+  "    owner,",
+  "}",
+  ".rent_free(",
+  "    compressible_config.clone(),",
+  "    rent_sponsor.clone(),",
+  "    system_program.clone(),",
+  "    token_program.key,",
+  ")",
+  ".invoke()?",
 ].join("\n");

@@ -7,6 +7,7 @@ use light_compressible::CreateAccountsProof;
 use light_sdk::derive_light_cpi_signer;
 use light_sdk_macros::{light_program, LightAccounts};
 use light_sdk_types::CpiSigner;
+use light_token::AdditionalMetadata;
 
 declare_id!("HVmVqSJyMejBeUigePMSfX4aENJzCGHNxAJuT2PDMPRx");
 
@@ -20,6 +21,16 @@ pub struct CreateMintParams {
     // We must create a compressed address at creation to ensure the mint does not exist yet.
     pub create_accounts_proof: CreateAccountsProof,
     pub mint_signer_bump: u8,
+}
+
+#[derive(AnchorSerialize, AnchorDeserialize, Clone)]
+pub struct CreateMintWithMetadataParams {
+    pub create_accounts_proof: CreateAccountsProof,
+    pub mint_signer_bump: u8,
+    pub name: Vec<u8>,
+    pub symbol: Vec<u8>,
+    pub uri: Vec<u8>,
+    pub additional_metadata: Option<Vec<AdditionalMetadata>>,
 }
 
 #[derive(Accounts, LightAccounts)]
@@ -67,6 +78,56 @@ pub struct CreateMint<'info> {
     pub system_program: Program<'info, System>,
 }
 
+#[derive(Accounts, LightAccounts)]
+#[instruction(params: CreateMintWithMetadataParams)]
+pub struct CreateMintWithMetadata<'info> {
+    #[account(mut)]
+    pub fee_payer: Signer<'info>,
+
+    pub authority: Signer<'info>,
+
+    /// CHECK: Validated by light-token CPI
+    #[account(
+        seeds = [MINT_SIGNER_SEED, authority.key().as_ref()],
+        bump,
+    )]
+    pub mint_signer: UncheckedAccount<'info>,
+
+    /// CHECK: Validated by light-token CPI
+    #[account(mut)]
+    #[light_account(init,
+        mint::signer = mint_signer,
+        mint::authority = fee_payer,
+        mint::decimals = 9,
+        mint::seeds = &[MINT_SIGNER_SEED, self.authority.to_account_info().key.as_ref()],
+        mint::bump = params.mint_signer_bump,
+        mint::name = params.name.clone(),
+        mint::symbol = params.symbol.clone(),
+        mint::uri = params.uri.clone(),
+        mint::update_authority = authority,
+        mint::additional_metadata = params.additional_metadata.clone()
+    )]
+    pub mint: UncheckedAccount<'info>,
+
+    /// CHECK: Validated by light-token CPI
+    pub compression_config: AccountInfo<'info>,
+
+    /// CHECK: Validated by light-token CPI
+    pub light_token_compressible_config: AccountInfo<'info>,
+
+    /// CHECK: Validated by light-token CPI
+    #[account(mut)]
+    pub rent_sponsor: AccountInfo<'info>,
+
+    /// CHECK: Light token program for CPI
+    pub light_token_program: AccountInfo<'info>,
+
+    /// CHECK: Validated by light-token CPI
+    pub light_token_cpi_authority: AccountInfo<'info>,
+
+    pub system_program: Program<'info, System>,
+}
+
 #[light_program]
 #[program]
 pub mod light_token_macro_create_mint {
@@ -76,6 +137,14 @@ pub mod light_token_macro_create_mint {
     pub fn create_mint<'info>(
         ctx: Context<'_, '_, '_, 'info, CreateMint<'info>>,
         params: CreateMintParams,
+    ) -> Result<()> {
+        Ok(())
+    }
+
+    #[allow(unused_variables)]
+    pub fn create_mint_with_metadata<'info>(
+        ctx: Context<'_, '_, '_, 'info, CreateMintWithMetadata<'info>>,
+        params: CreateMintWithMetadataParams,
     ) -> Result<()> {
         Ok(())
     }
@@ -183,6 +252,118 @@ async fn test_create_mint() {
     rpc.create_and_send_transaction(&[instruction], &payer.pubkey(), &[&payer, &authority])
         .await
         .expect("CreateMint should succeed");
+
+    // Verify mint exists on-chain
+    let mint_account = rpc
+        .get_account(mint_pda)
+        .await
+        .unwrap()
+        .expect("Mint should exist on-chain");
+
+    // Parse and verify mint data
+    use light_token_interface::state::Mint;
+    let mint: Mint = borsh::BorshDeserialize::deserialize(&mut &mint_account.data[..])
+        .expect("Failed to deserialize Mint");
+
+    // Verify decimals match what was specified in #[light_account(init)]
+    assert_eq!(mint.base.decimals, 9, "Mint should have 9 decimals");
+
+    // Verify mint authority matches fee_payer
+    assert_eq!(
+        mint.base.mint_authority,
+        Some(payer.pubkey().to_bytes().into()),
+        "Mint authority should be fee_payer"
+    );
+}
+
+/// Test creating a mint with token metadata using the #[light_account(init, mint, ...)] macro.
+#[tokio::test]
+async fn test_create_mint_with_metadata() {
+    use light_token_macro_create_mint::{CreateMintWithMetadataParams, MINT_SIGNER_SEED};
+
+    let program_id = light_token_macro_create_mint::ID;
+    let mut config =
+        ProgramTestConfig::new_v2(true, Some(vec![("light_token_macro_create_mint", program_id)]));
+    config = config.with_light_protocol_events();
+
+    let mut rpc = LightProgramTest::new(config).await.unwrap();
+    let payer = rpc.get_payer().insecure_clone();
+
+    // Set up program data PDA for rent-free config
+    let program_data_pda = setup_mock_program_data(&mut rpc, &payer, &program_id);
+
+    // Initialize rent-free config
+    let (init_config_ix, config_pda) = InitializeRentFreeConfig::new(
+        &program_id,
+        &payer.pubkey(),
+        &program_data_pda,
+        RENT_SPONSOR,
+        payer.pubkey(),
+    )
+    .build();
+
+    rpc.create_and_send_transaction(&[init_config_ix], &payer.pubkey(), &[&payer])
+        .await
+        .expect("Initialize config should succeed");
+
+    let authority = Keypair::new();
+
+    // Derive PDA for mint signer
+    let (mint_signer_pda, mint_signer_bump) = Pubkey::find_program_address(
+        &[MINT_SIGNER_SEED, authority.pubkey().as_ref()],
+        &program_id,
+    );
+
+    // Derive mint PDA from mint signer
+    let (mint_pda, _) = find_mint_address(&mint_signer_pda);
+
+    // Get proof for creating the mint account
+    let proof_result = get_create_accounts_proof(
+        &rpc,
+        &program_id,
+        vec![CreateAccountsProofInput::mint(mint_signer_pda)],
+    )
+    .await
+    .unwrap();
+
+    let accounts = light_token_macro_create_mint::accounts::CreateMintWithMetadata {
+        fee_payer: payer.pubkey(),
+        authority: authority.pubkey(),
+        mint_signer: mint_signer_pda,
+        mint: mint_pda,
+        compression_config: config_pda,
+        light_token_compressible_config: COMPRESSIBLE_CONFIG_V1,
+        rent_sponsor: RENT_SPONSOR,
+        light_token_program: LIGHT_TOKEN_PROGRAM_ID.into(),
+        light_token_cpi_authority: light_token_types::CPI_AUTHORITY_PDA.into(),
+        system_program: solana_sdk::system_program::ID,
+    };
+
+    let instruction_data =
+        light_token_macro_create_mint::instruction::CreateMintWithMetadata {
+            params: CreateMintWithMetadataParams {
+                create_accounts_proof: proof_result.create_accounts_proof,
+                mint_signer_bump,
+                name: b"Example Token".to_vec(),
+                symbol: b"EXT".to_vec(),
+                uri: b"https://example.com/token.json".to_vec(),
+                additional_metadata: None,
+            },
+        };
+
+    let instruction = Instruction {
+        program_id,
+        accounts: [
+            accounts.to_account_metas(None),
+            proof_result.remaining_accounts,
+        ]
+        .concat(),
+        data: instruction_data.data(),
+    };
+
+    rpc.create_and_send_transaction(&[instruction], &payer.pubkey(), &[&payer, &authority])
+        .await
+        .expect("CreateMintWithMetadata should succeed");
 
     // Verify mint exists on-chain
     let mint_account = rpc

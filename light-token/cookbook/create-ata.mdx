@@ -18,6 +18,10 @@ import {
   lightCreateAtaCode,
   splCreateAtaRustCode,
   lightCreateAtaRustCode,
+  splCreateAtaMacroCode,
+  lightCreateAtaMacroCode,
+  splCreateAtaCpiCode,
+  lightCreateAtaCpiCode,
 } from "/snippets/code-samples/code-compare-snippets.jsx";
 import ActionCode from "/snippets/code-snippets/light-token/create-ata/action.mdx";
 import InstructionCode from "/snippets/code-snippets/light-token/create-ata/instruction.mdx";
@@ -120,6 +124,18 @@ Compare to SPL:
 
 </Tab>
 <Tab title="Program">
+<Tabs>
+<Tab title="CPI">
+
+Compare to SPL:
+
+<CodeCompare
+  firstCode={lightCreateAtaCpiCode}
+  secondCode={splCreateAtaCpiCode}
+  firstLabel="light-token"
+  secondLabel="SPL"
+  language="rust"
+/>
 
 <Note>
 Find [a full code example at the end](#full-code-example).
@@ -193,9 +209,6 @@ CreateAssociatedAccountCpi {
 </Steps>
 # Full Code Example
 
-<Tabs>
-<Tab title="Anchor">
-
 <Info>
   View the full example with shared test utilities:
   [examples-light-token](https://github.com/Lightprotocol/examples-light-token/tree/main/program-examples/anchor/sdk-basics/create-ata).
@@ -204,14 +217,92 @@ CreateAssociatedAccountCpi {
 <AnchorProgramCode />
 
 </Tab>
+<Tab title="Anchor Macros">
 
-<Tab title="Macros">
+Compare to SPL:
+
+<CodeCompare
+  firstCode={lightCreateAtaMacroCode}
+  secondCode={splCreateAtaMacroCode}
+  firstLabel="light-token"
+  secondLabel="SPL"
+  language="rust"
+/>
+
+<Note>
+Find [a full code example at the end](#full-code-example-1).
+</Note>
+
+<Steps>
+
+<Step>
+### Dependencies
+
+```toml
+[dependencies]
+light-sdk = { version = "0.18.0", features = ["anchor", "v2", "cpi-context"] }
+light-sdk-macros = "0.18.0"
+light-compressible = "0.1.0"
+anchor-lang = "0.31"
+```
+
+</Step>
+
+<Step>
+### Program
+
+Add `#[light_program]` above `#[program]`:
+
+```rust
+use light_sdk_macros::light_program;
+
+#[light_program]
+#[program]
+pub mod light_token_macro_create_ata {
+    use super::*;
+
+    pub fn create_ata<'info>(
+        ctx: Context<'_, '_, '_, 'info, CreateAta<'info>>,
+        params: CreateAtaParams,
+    ) -> Result<()> {
+        Ok(())
+    }
+}
+```
+
+</Step>
+
+<Step>
+### Accounts struct
+
+Derive `LightAccounts` on your `Accounts` struct and add `#[light_account(...)]` next to `#[account(...)]`.
+
+```rust
+/// CHECK: Validated by light-token CPI
+#[account(mut)]
+#[light_account(init,
+    associated_token::authority = ata_owner,
+    associated_token::mint = ata_mint,
+    associated_token::bump = params.ata_bump
+)]
+pub ata: UncheckedAccount<'info>,
+```
+
+</Step>
+
+</Steps>
+
+# Full code example
+
+<Info>
+  View the full example with test:
+  [examples-light-token-anchor](https://github.com/Lightprotocol/examples-light-token-anchor/tree/main/program-examples/anchor/basic-macros/create-ata).
+</Info>
 
 <AnchorMacroCode />
 
 </Tab>
 </Tabs>
-
 </Tab>
 
 </Tabs>
