@@ -11,6 +11,9 @@ export const CodeCompare = ({
   const [copied, setCopied] = useState(false);
   const containerRef = useRef(null);
   const animationRef = useRef(null);
+  const firstPreRef = useRef(null);
+  const secondPreRef = useRef(null);
+  const [containerHeight, setContainerHeight] = useState(null);
 
   // When slider is on the right (100%), show first code; on left (0%), show second code
   const showingFirst = sliderPercent > 50;
@@ -151,6 +154,14 @@ export const CodeCompare = ({
     };
   }, []);
 
+  // Measure and animate height when toggling
+  useEffect(() => {
+    const activeRef = showingFirst ? firstPreRef : secondPreRef;
+    if (activeRef.current) {
+      setContainerHeight(activeRef.current.scrollHeight);
+    }
+  }, [showingFirst]);
+
   return (
     <>
       <div
@@ -248,13 +259,17 @@ export const CodeCompare = ({
           aria-valuemax={100}
           aria-label="Code comparison slider"
         >
-          <div className="relative" style={{ minHeight: "140px", overflow: "hidden" }}>
-            <div style={{ display: "grid" }}>
+          <div className="relative" style={{ minHeight: "140px", overflow: "hidden", height: containerHeight ? `${containerHeight}px` : "auto", transition: "height 0.3s ease" }}>
+            <div style={{ position: "relative" }}>
               {/* Second code (background) - shown when slider is on left */}
               <pre
+                ref={secondPreRef}
                 className="m-0 p-4 text-zinc-700 dark:text-white/80 bg-transparent"
                 style={{
-                  gridArea: "1/1",
+                  position: showingFirst ? "absolute" : "relative",
+                  top: 0,
+                  left: 0,
+                  right: 0,
                   fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
                   fontSize: "13px",
                   lineHeight: "1.6",
@@ -266,9 +281,13 @@ export const CodeCompare = ({
 
               {/* First code (foreground) with clip-path - revealed when slider moves right */}
               <pre
+                ref={firstPreRef}
                 className="m-0 p-4 text-zinc-700 dark:text-white/80 bg-white dark:bg-zinc-900"
                 style={{
-                  gridArea: "1/1",
+                  position: showingFirst ? "relative" : "absolute",
+                  top: 0,
+                  left: 0,
+                  right: 0,
                   fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
                   fontSize: "13px",
                   lineHeight: "1.6",
