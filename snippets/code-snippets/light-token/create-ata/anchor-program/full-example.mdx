@@ -61,17 +61,17 @@ pub struct CreateAtaAccounts<'info> {
 ```
 
 ```rust test.rs
-use anchor_lang::InstructionData;
+use anchor_lang::{InstructionData, ToAccountMetas};
 use light_client::indexer::AddressWithTree;
 use light_program_test::{Indexer, LightProgramTest, ProgramTestConfig, Rpc};
-use light_token_anchor_create_ata::{instruction::CreateAta, ID};
+use light_token_anchor_create_ata::{accounts, instruction::CreateAta, ID};
 use light_token::instruction::{
     CreateMint, CreateMintParams, config_pda, derive_mint_compressed_address, derive_token_ata,
     find_mint_address, rent_sponsor_pda, LIGHT_TOKEN_PROGRAM_ID,
 };
 use anchor_lang::system_program;
 use solana_sdk::{
-    instruction::{AccountMeta, Instruction},
+    instruction::Instruction,
     signature::Keypair,
     signer::Signer,
 };
@@ -145,16 +145,17 @@ async fn test_create_ata() {
 
     let ix = Instruction {
         program_id: ID,
-        accounts: vec![
-            AccountMeta::new_readonly(LIGHT_TOKEN_PROGRAM_ID, false),
-            AccountMeta::new_readonly(payer.pubkey(), false),
-            AccountMeta::new_readonly(mint_pda, false),
-            AccountMeta::new(payer.pubkey(), true),
-            AccountMeta::new(ata, false),
-            AccountMeta::new_readonly(system_program::ID, false),
-            AccountMeta::new_readonly(compressible_config, false),
-            AccountMeta::new(rent_sponsor, false),
-        ],
+        accounts: accounts::CreateAtaAccounts {
+            light_token_program: LIGHT_TOKEN_PROGRAM_ID,
+            owner: payer.pubkey(),
+            mint: mint_pda,
+            payer: payer.pubkey(),
+            associated_token_account: ata,
+            system_program: system_program::ID,
+            compressible_config,
+            rent_sponsor,
+        }
+        .to_account_metas(Some(true)),
         data: CreateAta {
             bump: ata_bump,
             idempotent: false,

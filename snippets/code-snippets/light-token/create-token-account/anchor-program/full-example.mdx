@@ -35,7 +35,7 @@ pub struct CreateTokenAccountAccounts<'info> {
     pub payer: Signer<'info>,
     /// CHECK: Validated by light-token CPI
     #[account(mut)]
-    pub account: AccountInfo<'info>,
+    pub account: Signer<'info>,
     /// CHECK: Validated by light-token CPI
     pub mint: AccountInfo<'info>,
     /// CHECK: Validated by light-token CPI
@@ -50,17 +50,17 @@ pub struct CreateTokenAccountAccounts<'info> {
 ```
 
 ```rust test.rs
-use anchor_lang::InstructionData;
+use anchor_lang::{InstructionData, ToAccountMetas};
 use light_client::indexer::AddressWithTree;
 use light_program_test::{Indexer, LightProgramTest, ProgramTestConfig, Rpc};
-use light_token_anchor_create_token_account::{instruction::CreateTokenAccount, ID};
+use light_token_anchor_create_token_account::{accounts, instruction::CreateTokenAccount, ID};
 use light_token::instruction::{
     CreateMint, CreateMintParams, config_pda, derive_mint_compressed_address,
     find_mint_address, rent_sponsor_pda, LIGHT_TOKEN_PROGRAM_ID,
 };
 use anchor_lang::system_program;
 use solana_sdk::{
-    instruction::{AccountMeta, Instruction},
+    instruction::Instruction,
     pubkey::Pubkey,
     signature::Keypair,
     signer::Signer,
@@ -137,15 +137,16 @@ async fn test_create_token_account() {
 
     let ix = Instruction {
         program_id: ID,
-        accounts: vec![
-            AccountMeta::new(payer.pubkey(), true),
-            AccountMeta::new(token_account.pubkey(), true),
-            AccountMeta::new_readonly(mint_pda, false),
-            AccountMeta::new_readonly(compressible_config, false),
-            AccountMeta::new(rent_sponsor, false),
-            AccountMeta::new_readonly(system_program::ID, false),
-            AccountMeta::new_readonly(LIGHT_TOKEN_PROGRAM_ID, false),
-        ],
+        accounts: accounts::CreateTokenAccountAccounts {
+            payer: payer.pubkey(),
+            account: token_account.pubkey(),
+            mint: mint_pda,
+            compressible_config,
+            rent_sponsor,
+            system_program: system_program::ID,
+            light_token_program: LIGHT_TOKEN_PROGRAM_ID,
+        }
+        .to_account_metas(Some(true)),
         data: CreateTokenAccount { owner }.data(),
     };
 

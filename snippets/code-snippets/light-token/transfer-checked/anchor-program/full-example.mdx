@@ -50,16 +50,11 @@ pub struct TransferCheckedAccounts<'info> {
 ```
 
 ```rust test.rs
-use anchor_lang::InstructionData;
+use anchor_lang::{InstructionData, ToAccountMetas};
 use light_program_test::Rpc;
 use light_token::instruction::LIGHT_TOKEN_PROGRAM_ID;
-use light_token_anchor_transfer_checked::{instruction::TransferChecked, ID};
-use solana_sdk::{
-    instruction::{AccountMeta, Instruction},
-    signature::Keypair,
-    signer::Signer,
-    system_program,
-};
+use light_token_anchor_transfer_checked::{accounts, instruction::TransferChecked, ID};
+use solana_sdk::{instruction::Instruction, signature::Keypair, signer::Signer, system_program};
 use test_utils::{create_ata_for_owner, mint_tokens, setup_test_env};
 
 #[tokio::test]
@@ -80,14 +75,15 @@ async fn test_transfer_checked() {
 
     let ix = Instruction {
         program_id: ID,
-        accounts: vec![
-            AccountMeta::new_readonly(LIGHT_TOKEN_PROGRAM_ID, false),
-            AccountMeta::new(env.ata, false),
-            AccountMeta::new_readonly(env.mint_pda, false),
-            AccountMeta::new(dest_ata, false),
-            AccountMeta::new_readonly(env.payer.pubkey(), true),
-            AccountMeta::new_readonly(system_program::ID, false),
-        ],
+        accounts: accounts::TransferCheckedAccounts {
+            light_token_program: LIGHT_TOKEN_PROGRAM_ID,
+            source: env.ata,
+            mint: env.mint_pda,
+            destination: dest_ata,
+            authority: env.payer.pubkey(),
+            system_program: system_program::ID,
+        }
+        .to_account_metas(Some(true)),
         data: TransferChecked {
             amount: transfer_amount,
             decimals,

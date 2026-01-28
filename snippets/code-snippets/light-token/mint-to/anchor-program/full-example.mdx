@@ -42,15 +42,11 @@ pub struct MintToAccounts<'info> {
 ```
 
 ```rust test.rs
-use anchor_lang::InstructionData;
+use anchor_lang::{InstructionData, ToAccountMetas};
 use light_program_test::Rpc;
 use light_token::instruction::LIGHT_TOKEN_PROGRAM_ID;
-use light_token_anchor_mint_to::{instruction::MintTo, ID};
-use solana_sdk::{
-    instruction::{AccountMeta, Instruction},
-    signer::Signer,
-    system_program,
-};
+use light_token_anchor_mint_to::{accounts, instruction::MintTo, ID};
+use solana_sdk::{instruction::Instruction, signer::Signer, system_program};
 use test_utils::setup_test_env;
 
 #[tokio::test(flavor = "multi_thread")]
@@ -61,13 +57,14 @@ async fn test_mint_to() {
     let amount = 1_000_000u64;
     let ix = Instruction {
         program_id: ID,
-        accounts: vec![
-            AccountMeta::new_readonly(LIGHT_TOKEN_PROGRAM_ID, false),
-            AccountMeta::new(env.mint_pda, false),
-            AccountMeta::new(env.ata, false),
-            AccountMeta::new_readonly(env.payer.pubkey(), true),
-            AccountMeta::new_readonly(system_program::ID, false),
-        ],
+        accounts: accounts::MintToAccounts {
+            light_token_program: LIGHT_TOKEN_PROGRAM_ID,
+            mint: env.mint_pda,
+            destination: env.ata,
+            authority: env.payer.pubkey(),
+            system_program: system_program::ID,
+        }
+        .to_account_metas(Some(true)),
         data: MintTo { amount }.data(),
     };
 

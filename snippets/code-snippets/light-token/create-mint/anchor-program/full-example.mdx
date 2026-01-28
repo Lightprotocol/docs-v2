@@ -129,16 +129,16 @@ pub struct CreateMintAccounts<'info> {
 ```
 
 ```rust test.rs
-use anchor_lang::InstructionData;
+use anchor_lang::{InstructionData, ToAccountMetas};
 use light_program_test::{Indexer, LightProgramTest, ProgramTestConfig, Rpc};
-use light_token_anchor_create_mint::{instruction::CreateMint, ID};
+use light_token_anchor_create_mint::{accounts, instruction::CreateMint, ID};
 use light_token::instruction::{
     config_pda, derive_mint_compressed_address, find_mint_address, rent_sponsor_pda,
     SystemAccounts, LIGHT_TOKEN_PROGRAM_ID,
 };
 use anchor_lang::system_program;
 use solana_sdk::{
-    instruction::{AccountMeta, Instruction},
+    instruction::Instruction,
     signature::Keypair,
     signer::Signer,
 };
@@ -180,23 +180,24 @@ async fn test_create_mint() {
     // Call the anchor program to create mint
     let ix = Instruction {
         program_id: ID,
-        accounts: vec![
-            AccountMeta::new_readonly(LIGHT_TOKEN_PROGRAM_ID, false),
-            AccountMeta::new(mint_seed.pubkey(), true),
-            AccountMeta::new_readonly(mint_authority, false),
-            AccountMeta::new(payer.pubkey(), true),
-            AccountMeta::new(address_tree.tree, false),
-            AccountMeta::new(output_queue, false),
-            AccountMeta::new_readonly(system_accounts.light_system_program, false),
-            AccountMeta::new_readonly(system_accounts.cpi_authority_pda, false),
-            AccountMeta::new_readonly(system_accounts.registered_program_pda, false),
-            AccountMeta::new_readonly(system_accounts.account_compression_authority, false),
-            AccountMeta::new_readonly(system_accounts.account_compression_program, false),
-            AccountMeta::new_readonly(system_program::ID, false),
-            AccountMeta::new_readonly(config_pda(), false),
-            AccountMeta::new(mint_pda, false),
-            AccountMeta::new(rent_sponsor_pda(), false),
-        ],
+        accounts: accounts::CreateMintAccounts {
+            light_token_program: LIGHT_TOKEN_PROGRAM_ID,
+            mint_seed: mint_seed.pubkey(),
+            authority: mint_authority,
+            payer: payer.pubkey(),
+            address_tree: address_tree.tree,
+            output_queue,
+            light_system_program: system_accounts.light_system_program,
+            cpi_authority_pda: system_accounts.cpi_authority_pda,
+            registered_program_pda: system_accounts.registered_program_pda,
+            account_compression_authority: system_accounts.account_compression_authority,
+            account_compression_program: system_accounts.account_compression_program,
+            system_program: system_program::ID,
+            compressible_config: config_pda(),
+            mint: mint_pda,
+            rent_sponsor: rent_sponsor_pda(),
+        }
+        .to_account_metas(Some(true)),
         data: CreateMint {
             decimals,
             address_merkle_tree_root_index: rpc_result.addresses[0].root_index,

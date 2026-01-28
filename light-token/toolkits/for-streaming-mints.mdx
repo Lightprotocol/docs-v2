@@ -19,26 +19,37 @@ Find devnet examples [here](https://github.com/Lightprotocol/examples-light-toke
 
 ```toml Cargo.toml
 [dependencies]
-helius-laserstream = "0.1"
+helius-laserstream = "0.1.5"
 tokio = { version = "1", features = ["full"] }
 futures = "0.3"
-light-event = "0.2"
-light-compressed-account = "0.7"
-light-token-interface = "0.1"
-borsh = "0.10"
+anyhow = "1"
+dotenvy = "0.15"
 bs58 = "0.5"
+borsh = "0.10"
+
+# Light Protocol dependencies (git until published to crates.io)
+light-event = { git = "https://github.com/Lightprotocol/light-protocol" }
+light-compressed-account = { git = "https://github.com/Lightprotocol/light-protocol", features = ["std"] }
+light-token-interface = { git = "https://github.com/Lightprotocol/light-protocol" }
 ```
 
 ```rust
-use futures::StreamExt;
-use helius_laserstream::{subscribe, LaserstreamConfig};
-use light_event::parse::event_from_light_transaction;
-use light_token_interface::state::Mint;
-use light_token_interface::state::extensions::ExtensionStruct;
 use borsh::BorshDeserialize;
+use futures::StreamExt;
+use helius_laserstream::solana::storage::confirmed_block::{CompiledInstruction, Message};
+use helius_laserstream::{subscribe, LaserstreamConfig};
+use light_compressed_account::Pubkey;
+use light_event::parse::event_from_light_transaction;
+use light_token_interface::state::{ExtensionStruct, Mint};
 
 const LIGHT_SYSTEM_PROGRAM: &str = "SySTEM1eSU2p4BGQfQpimFEWWSC1XDFeun3Nqzz3rT7";
-const LIGHT_TOKEN_PROGRAM_ID: &str = "cTokenmWW8bLPjZEBAUgYy3zKxQZW6VKi7bqNFEVv3m";
+
+// Light Token Program ID bytes (cTokenmWW8bLPjZEBAUgYy3zKxQZW6VKi7bqNFEVv3m)
+const LIGHT_TOKEN_PROGRAM_BYTES: [u8; 32] = [
+    3, 89, 128, 47, 145, 178, 244, 191, 100, 152, 66, 240, 127, 251, 205, 1,
+    168, 38, 248, 106, 170, 164, 111, 0, 118, 231, 126, 151, 147, 169, 169, 4,
+];
+
 const COMPRESSED_MINT_DISCRIMINATOR: [u8; 8] = [0, 0, 0, 0, 0, 0, 0, 1];
 ```
 
@@ -99,25 +110,33 @@ while let Some(update) = stream.next().await {
 ### Parse Events
 
 ```rust
-fn process_transaction(msg: &Message, meta: Option<&TransactionStatusMeta>) {
-    let account_keys = extract_account_keys(msg, meta);
+fn process_transaction(message: &Message, light_token_program_id: &Pubkey) -> anyhow::Result<()> {
+    let account_keys: Vec<Pubkey> = message
+        .account_keys
+        .iter()
+        .filter_map(|k| {
+            if k.len() == 32 {
+                let arr: [u8; 32] = k.as_slice().try_into().ok()?;
+                Some(Pubkey::from(arr))
+            } else {
+                None
+            }
+        })
+        .collect();
 
     let (program_ids, instruction_data, accounts_per_ix) =
-        extract_instructions(msg, meta, &account_keys);
+        extract_light_transaction(&account_keys, &message.instructions);
 
-    match event_from_light_transaction(&program_ids, &instruction_data, accounts_per_ix) {
-        Ok(Some(batches)) => {
-            for batch in batches {
-                println!(
-                    "Event: {} inputs, {} outputs",
-                    batch.event.input_compressed_account_hashes.len(),
-                    batch.event.output_compressed_accounts.len()
-                );
-            }
+    if let Some(batches) =
+        event_from_light_transaction(&program_ids, &instruction_data, accounts_per_ix)?
+    {
+        for batch in &batches {
+            let event = &batch.event;
+            // Process outputs...
         }
-        Ok(None) => {} // No compressed account events
-        Err(e) => eprintln!("Parse error: {:?}", e),
     }
+
+    Ok(())
 }
 ```
 
@@ -127,35 +146,23 @@ fn process_transaction(msg: &Message, meta: Option<&TransactionStatusMeta>) {
 ### Extract Mints
 
 ```rust
-for output in event.output_compressed_accounts.iter() {
-    let owner = output.compressed_account.owner;
+let light_token_program_id = Pubkey::from(LIGHT_TOKEN_PROGRAM_BYTES);
 
-    // Check if owned by light token program
-    let light_token_program_id = bs58::decode(LIGHT_TOKEN_PROGRAM_ID).into_vec().unwrap();
-    if owner != light_token_program_id.as_slice() {
+for output in &event.output_compressed_accounts {
+    // Filter by owner (Light Token Program)
+    if output.compressed_account.owner != light_token_program_id {
         continue;
     }
 
-    // Check discriminator
+    // Check for mint discriminator
     let data = match &output.compressed_account.data {
         Some(d) if d.discriminator == COMPRESSED_MINT_DISCRIMINATOR => &d.data,
         _ => continue,
     };
 
-    // Deserialize
-    let mint = Mint::try_from_slice(data)?;
-
-    // Check if new (address not in inputs)
-    let is_new = output
-        .compressed_account
-        .address
-        .map(|addr| {
-            !event.input_compressed_account_hashes.iter().any(|h| *h == addr)
-        })
-        .unwrap_or(true);
-
-    if is_new {
-        println!("New mint: {}", bs58::encode(mint.metadata.mint).into_string());
+    // Deserialize mint
+    if let Ok(mint) = Mint::deserialize(&mut data.as_slice()) {
+        println!("Mint: {:?}", mint.metadata.mint);
     }
 }
 ```

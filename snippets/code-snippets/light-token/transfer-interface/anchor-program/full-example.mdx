@@ -48,13 +48,13 @@ pub struct TransferAccounts<'info> {
 
 ```rust test.rs
 use anchor_lang::system_program;
-use anchor_lang::InstructionData;
+use anchor_lang::{InstructionData, ToAccountMetas};
 use light_program_test::Rpc;
 use light_token::instruction::LIGHT_TOKEN_PROGRAM_ID;
-use light_token_anchor_transfer_interface::{instruction::Transfer, ID};
+use light_token_anchor_transfer_interface::{accounts, instruction::Transfer, ID};
 use light_token_types::CPI_AUTHORITY_PDA;
 use solana_sdk::{
-    instruction::{AccountMeta, Instruction},
+    instruction::Instruction,
     pubkey::Pubkey,
     signature::Keypair,
     signer::Signer,
@@ -78,15 +78,16 @@ async fn test_transfer() {
 
     let ix = Instruction {
         program_id: ID,
-        accounts: vec![
-            AccountMeta::new_readonly(LIGHT_TOKEN_PROGRAM_ID, false),
-            AccountMeta::new(env.ata, false),
-            AccountMeta::new(dest_ata, false),
-            AccountMeta::new_readonly(env.payer.pubkey(), true),
-            AccountMeta::new(env.payer.pubkey(), true),
-            AccountMeta::new_readonly(cpi_authority_pda, false),
-            AccountMeta::new_readonly(system_program::ID, false),
-        ],
+        accounts: accounts::TransferAccounts {
+            light_token_program: LIGHT_TOKEN_PROGRAM_ID,
+            source: env.ata,
+            destination: dest_ata,
+            authority: env.payer.pubkey(),
+            payer: env.payer.pubkey(),
+            cpi_authority: cpi_authority_pda,
+            system_program: system_program::ID,
+        }
+        .to_account_metas(Some(true)),
         data: Transfer {
             amount: transfer_amount,
             decimals,

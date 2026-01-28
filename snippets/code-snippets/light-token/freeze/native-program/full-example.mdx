@@ -91,7 +91,7 @@ async fn freeze_signed_cpi() {
     let initial_amount = 1_000_000u64;
 
     // Create mint with PDA as freeze authority and mint tokens to payer
-    let (mint, atas) = setup_mint_with_tokens(
+    let (mint, associated_token_accounts) = setup_mint_with_tokens(
         &mut rpc,
         &payer,
         payer.pubkey(),
@@ -101,7 +101,7 @@ async fn freeze_signed_cpi() {
     )
     .await;
 
-    let ata = atas[0];
+    let ata = associated_token_accounts[0];
 
     let ix = build_freeze_signed_cpi_ix(ata, mint, pda_authority, bump);
 

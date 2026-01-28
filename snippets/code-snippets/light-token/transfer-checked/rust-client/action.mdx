@@ -18,7 +18,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Create recipient associated token account
     let recipient = Keypair::new();
-    let recipient_associated_token_account = CreateAta {
+    let (_signature, recipient_associated_token_account) = CreateAta {
         mint,
         owner: recipient.pubkey(),
         idempotent: true,
@@ -35,7 +35,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         destination: recipient_associated_token_account,
         amount: 1000,
         decimals,
-        max_top_up: None,
     }
     .execute(&mut rpc, &payer, &payer)
     .await?;

@@ -35,16 +35,11 @@ pub struct RevokeAccounts<'info> {
 ```
 
 ```rust test.rs
-use anchor_lang::InstructionData;
+use anchor_lang::{InstructionData, ToAccountMetas};
 use light_program_test::Rpc;
 use light_token::instruction::{Approve, LIGHT_TOKEN_PROGRAM_ID};
-use light_token_anchor_revoke::{instruction::Revoke, ID};
-use solana_sdk::{
-    instruction::{AccountMeta, Instruction},
-    signature::Keypair,
-    signer::Signer,
-    system_program,
-};
+use light_token_anchor_revoke::{accounts, instruction::Revoke, ID};
+use solana_sdk::{instruction::Instruction, signature::Keypair, signer::Signer, system_program};
 use test_utils::{mint_tokens, setup_test_env};
 
 #[tokio::test]
@@ -74,12 +69,13 @@ async fn test_revoke() {
     // Call the anchor program to revoke delegation
     let ix = Instruction {
         program_id: ID,
-        accounts: vec![
-            AccountMeta::new_readonly(LIGHT_TOKEN_PROGRAM_ID, false),
-            AccountMeta::new(env.ata, false),
-            AccountMeta::new_readonly(env.payer.pubkey(), true),
-            AccountMeta::new_readonly(system_program::ID, false),
-        ],
+        accounts: accounts::RevokeAccounts {
+            light_token_program: LIGHT_TOKEN_PROGRAM_ID,
+            token_account: env.ata,
+            owner: env.payer.pubkey(),
+            system_program: system_program::ID,
+        }
+        .to_account_metas(Some(true)),
         data: Revoke {}.data(),
     };
 

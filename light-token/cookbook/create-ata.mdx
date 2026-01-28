@@ -24,7 +24,7 @@ import InstructionCode from "/snippets/code-snippets/light-token/create-ata/inst
 import RustActionCode from "/snippets/code-snippets/light-token/create-ata/rust-client/action.mdx";
 import RustInstructionCode from "/snippets/code-snippets/light-token/create-ata/rust-client/instruction.mdx";
 import AnchorProgramCode from "/snippets/code-snippets/light-token/create-ata/anchor-program/full-example.mdx";
-import NativeProgramCode from "/snippets/code-snippets/light-token/create-ata/native-program/full-example.mdx";
+import AnchorMacroCode from "/snippets/code-snippets/light-token/create-ata/anchor-macro/full-example.mdx";
 
 1. Associated light-token accounts can hold token balances of light, SPL, or Token 2022 mints.
 2. Light-ATAs are on-chain accounts like SPL ATA's, but the light token program sponsors the rent-exemption cost for you.
@@ -205,14 +205,9 @@ CreateAssociatedAccountCpi {
 
 </Tab>
 
-<Tab title="Native Rust">
+<Tab title="Macros">
 
-<Info>
-  View the full example with shared test utilities:
-  [examples-light-token-native](https://github.com/Lightprotocol/examples-light-token-native/tree/main/program-examples/native).
-</Info>
-
-<NativeProgramCode />
+<AnchorMacroCode />
 
 </Tab>
 </Tabs>

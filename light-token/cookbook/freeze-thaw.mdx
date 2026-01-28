@@ -18,9 +18,7 @@ import {
 import FreezeInstructionCode from "/snippets/code-snippets/light-token/freeze-thaw/rust-client/freeze-instruction.mdx";
 import ThawInstructionCode from "/snippets/code-snippets/light-token/freeze-thaw/rust-client/thaw-instruction.mdx";
 import FreezeAnchorProgramCode from "/snippets/code-snippets/light-token/freeze/anchor-program/full-example.mdx";
-import FreezeNativeProgramCode from "/snippets/code-snippets/light-token/freeze/native-program/full-example.mdx";
 import ThawAnchorProgramCode from "/snippets/code-snippets/light-token/thaw/anchor-program/full-example.mdx";
-import ThawNativeProgramCode from "/snippets/code-snippets/light-token/thaw/native-program/full-example.mdx";
 
 1. Freeze prevents all transfers or token burns from a specific light-token account.
 2. Once frozen, the account cannot send tokens, receive tokens, or be closed until it is thawed. 
@@ -196,9 +194,6 @@ ThawCpi {
 <Tabs>
 <Tab title="Freeze">
 
-<Tabs>
-<Tab title="Anchor">
-
 <Info>
   View the full example with shared test utilities:
   [examples-light-token](https://github.com/Lightprotocol/examples-light-token/tree/main/program-examples/anchor/programs/freeze).
@@ -208,24 +203,7 @@ ThawCpi {
 
 </Tab>
 
-<Tab title="Native Rust">
-
-<Info>
-  View the full example with shared test utilities:
-  [examples-light-token-native](https://github.com/Lightprotocol/examples-light-token-native/tree/main/program-examples/native).
-</Info>
-
-<FreezeNativeProgramCode />
-
-</Tab>
-</Tabs>
-
-</Tab>
-
 <Tab title="Thaw">
-
-<Tabs>
-<Tab title="Anchor">
 
 <Info>
   View the full example with shared test utilities:
@@ -233,20 +211,6 @@ ThawCpi {
 </Info>
 
 <ThawAnchorProgramCode />
-
-</Tab>
-
-<Tab title="Native Rust">
-
-<Info>
-  View the full example with shared test utilities:
-  [examples-light-token-native](https://github.com/Lightprotocol/examples-light-token-native/tree/main/program-examples/native).
-</Info>
-
-<ThawNativeProgramCode />
-
-</Tab>
-</Tabs>
 
 </Tab>
 </Tabs>

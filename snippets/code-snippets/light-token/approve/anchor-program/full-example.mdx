@@ -39,16 +39,11 @@ pub struct ApproveAccounts<'info> {
 ```
 
 ```rust test.rs
-use anchor_lang::InstructionData;
+use anchor_lang::{InstructionData, ToAccountMetas};
 use light_program_test::Rpc;
 use light_token::instruction::LIGHT_TOKEN_PROGRAM_ID;
-use light_token_anchor_approve::{instruction::Approve, ID};
-use solana_sdk::{
-    instruction::{AccountMeta, Instruction},
-    signature::Keypair,
-    signer::Signer,
-    system_program,
-};
+use light_token_anchor_approve::{accounts, instruction::Approve, ID};
+use solana_sdk::{instruction::Instruction, signature::Keypair, signer::Signer, system_program};
 use test_utils::{mint_tokens, setup_test_env};
 
 #[tokio::test]
@@ -65,13 +60,14 @@ async fn test_approve() {
 
     let ix = Instruction {
         program_id: ID,
-        accounts: vec![
-            AccountMeta::new_readonly(LIGHT_TOKEN_PROGRAM_ID, false),
-            AccountMeta::new(env.ata, false),
-            AccountMeta::new_readonly(delegate.pubkey(), false),
-            AccountMeta::new_readonly(env.payer.pubkey(), true),
-            AccountMeta::new_readonly(system_program::ID, false),
-        ],
+        accounts: accounts::ApproveAccounts {
+            light_token_program: LIGHT_TOKEN_PROGRAM_ID,
+            token_account: env.ata,
+            delegate: delegate.pubkey(),
+            owner: env.payer.pubkey(),
+            system_program: system_program::ID,
+        }
+        .to_account_metas(Some(true)),
         data: Approve { amount: approve_amount }.data(),
     };
 

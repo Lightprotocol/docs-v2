@@ -16,7 +16,7 @@ import {
 import RustInstructionCode from "/snippets/code-snippets/light-token/burn/rust-client/instruction.mdx";
 import BurnCheckedRustInstructionCode from "/snippets/code-snippets/light-token/burn-checked/rust-client/instruction.mdx";
 import AnchorProgramCode from "/snippets/code-snippets/light-token/burn/anchor-program/full-example.mdx";
-import NativeProgramCode from "/snippets/code-snippets/light-token/burn/native-program/full-example.mdx";
+
 
 1. Burn permanently destroys tokens by reducing the balance in a token account. 
 2. Burned tokens are removed from circulation and decreases the supply tracked on the mint account.
@@ -118,29 +118,12 @@ BurnCpi {
 
 # Full Code Example
 
-<Tabs>
-<Tab title="Anchor">
-
 <Info>
   View the full example with shared test utilities:
   [examples-light-token](https://github.com/Lightprotocol/examples-light-token/tree/main/program-examples/anchor/programs/burn).
 </Info>
 
 <AnchorProgramCode />
-
-</Tab>
-
-<Tab title="Native Rust">
-
-<Info>
-  View the full example with shared test utilities:
-  [examples-light-token-native](https://github.com/Lightprotocol/examples-light-token-native/tree/main/program-examples/native).
-</Info>
-
-<NativeProgramCode />
-
-</Tab>
-</Tabs>
 
 </Tab>
 

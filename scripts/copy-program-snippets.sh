@@ -79,7 +79,7 @@ done
 # ANCHOR PROGRAMS
 # =============================================================================
 
-ANCHOR_EXAMPLES_DIR="/home/tilo/Workspace/examples-light-token/program-examples/anchor/programs-sdk"
+ANCHOR_EXAMPLES_DIR="/home/tilo/Workspace/examples-light-token-anchor/program-examples/anchor/basic-instructions"
 
 # Anchor recipes (output-name:anchor-dir-name)
 # Some have different directory names (e.g., close-token-account uses 'close' dir)
@@ -96,6 +96,7 @@ ANCHOR_RECIPES=(
     "freeze:freeze"
     "thaw:thaw"
     "transfer-checked:transfer-checked"
+    "mint-to-checked:mint-to-checked"
 )
 
 echo ""
@@ -152,12 +153,12 @@ done
 # ANCHOR MACROS
 # =============================================================================
 
-ANCHOR_MACROS_DIR="/home/tilo/Workspace/examples-light-token/program-examples/anchor/macro-basics"
+ANCHOR_MACROS_DIR="/home/tilo/Workspace/examples-light-token-anchor/program-examples/anchor/basic-macros"
 
 ANCHOR_MACRO_RECIPES=(
-    "create-mint:create-mint-macro"
-    "create-ata:create-ata-macro"
-    "create-token-account:create-token-account-macro"
+    "create-mint:create-mint"
+    "create-ata:create-ata"
+    "create-token-account:create-token-account"
 )
 
 echo ""
