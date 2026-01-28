@@ -7,7 +7,10 @@ use solana_program::{
     program_error::ProgramError,
 };
 
-pub fn mint_to_checked_invoke(accounts: &[AccountInfo], data: &[u8]) -> ProgramResult {
+pub fn mint_to_checked_invoke(
+    accounts: &[AccountInfo],
+    data: &[u8],
+) -> ProgramResult {
     let [mint, destination, authority, system_program, _token_program] =
         accounts
     else {
@@ -74,8 +77,8 @@ mod shared;
 use light_client::rpc::Rpc;
 use shared::{
     build_mint_to_checked_cpi_ix, build_mint_to_checked_signed_cpi_ix,
-    create_test_rpc, get_authority_pda, setup_mint_with_pda_authority,
-    setup_mint_with_tokens, create_ata,
+    create_ata, create_test_rpc, get_authority_pda,
+    setup_mint_with_pda_authority, setup_mint_with_tokens,
 };
 use solana_sdk::{signature::Keypair, signer::Signer};
 
@@ -84,7 +87,7 @@ async fn mint_to_checked_cpi() {
     let mut rpc = create_test_rpc().await;
     let payer = rpc.get_payer().insecure_clone();
 
-    let (mint, atas) = setup_mint_with_tokens(
+    let (mint, associated_token_accounts) = setup_mint_with_tokens(
         &mut rpc,
         &payer,
         payer.pubkey(),
@@ -98,7 +101,7 @@ async fn mint_to_checked_cpi() {
 
     let ix = build_mint_to_checked_cpi_ix(
         mint,
-        atas[0],
+        associated_token_accounts[0],
         payer.pubkey(),
         mint_amount,
         9,
@@ -116,10 +119,12 @@ async fn mint_to_checked_signed_cpi() {
 
     let (pda_authority, bump) = get_authority_pda();
 
-    let mint = setup_mint_with_pda_authority(&mut rpc, &payer, pda_authority, 9).await;
+    let mint =
+        setup_mint_with_pda_authority(&mut rpc, &payer, pda_authority, 9).await;
 
     let recipient = Keypair::new();
-    let recipient_ata = create_ata(&mut rpc, &payer, recipient.pubkey(), mint).await;
+    let recipient_ata =
+        create_ata(&mut rpc, &payer, recipient.pubkey(), mint).await;
 
     let mint_amount = 1_000_000u64;
 

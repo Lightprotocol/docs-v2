@@ -18,13 +18,17 @@ import {
   lightCreateMintCode,
   splCreateMintRustCode,
   lightCreateMintRustCode,
+  splCreateMintMacroCode,
+  lightCreateMintMacroCode,
+  splCreateMintMetadataMacroCode,
+  lightCreateMintMetadataMacroCode,
 } from "/snippets/code-samples/code-compare-snippets.jsx";
 import ActionCode from "/snippets/code-snippets/light-token/create-mint/action.mdx";
 import InstructionCode from "/snippets/code-snippets/light-token/create-mint/instruction.mdx";
 import RustActionCode from "/snippets/code-snippets/light-token/create-mint/rust-client/action.mdx";
 import RustInstructionCode from "/snippets/code-snippets/light-token/create-mint/rust-client/instruction.mdx";
-import NativeProgramCode from "/snippets/code-snippets/light-token/create-mint/native-program/full-example.mdx";
 import AnchorProgramCode from "/snippets/code-snippets/light-token/create-mint/anchor-program/full-example.mdx";
+import AnchorMacroCode from "/snippets/code-snippets/light-token/create-mint/anchor-macro/full-example.mdx";
 import CompressibleRentExplained from "/snippets/compressible-rent-explained.mdx";
 
 1. Mint accounts uniquely represent a token on Solana and store its global metadata.
@@ -131,6 +135,10 @@ Compare to SPL:
 </Tab>
 
 <Tab title="Program">
+
+<Tabs>
+
+<Tab title="CPI">
 
 <Note>
 Find [a full code example at the end](#full-code-example).
@@ -322,18 +330,166 @@ CreateMintCpi::new(
 
 </Tab>
 
-<Tab title="Native Rust">
 
-<Info>
-  View the full example with shared test utilities:
-  [examples-light-token-native](https://github.com/Lightprotocol/examples-light-token-native/tree/main/program-examples/native).
-</Info>
+</Tabs>
+</Tab>
+<Tab title="Anchor Macros">
 
-<NativeProgramCode />
+<Note>
+Find [a full code example at the end](#full-code-example).
+</Note>
 
+Compare to SPL:
+
+<Tabs>
+<Tab title="Mint">
+<CodeCompare
+  firstCode={lightCreateMintMacroCode}
+  secondCode={splCreateMintMacroCode}
+  firstLabel="light-token"
+  secondLabel="SPL"
+  language="rust"
+/>
+</Tab>
+<Tab title="With Token Metadata">
+<CodeCompare
+  firstCode={lightCreateMintMetadataMacroCode}
+  secondCode={splCreateMintMetadataMacroCode}
+  firstLabel="light-token"
+  secondLabel="SPL Token-2022"
+  language="rust"
+/>
 </Tab>
 </Tabs>
 
+
+Dependencies
+
+```toml
+[dependencies]
+
+light-sdk = { version = "0.18.0", features = ["anchor", "v2", "cpi-context"] }
+light-sdk-macros = { version = "0.18.0" }
+light-token = { version = "0.3.0", features = ["anchor"] }
+
+light-anchor-spl = { version = "0.31" }    # TokenInterface uses light_token::ID
+anchor-lang = "0.31"
+```
+
+Add `#[light_program]` above `#[program]`:
+
+```rust
+use light_sdk_macros::light_program;
+
+#[light_program]
+#[program]
+pub mod my_amm {
+    use super::*;
+
+    pub fn initialize_pool(ctx: Context<InitializePool>, params: InitializeParams) -> Result<()> {
+        process_initialize_pool(ctx, params)
+    }
+
+    // These don't change
+    pub fn swap(ctx: Context<Swap>, amount_in: u64, min_out: u64) -> Result<()> {
+        process_swap(ctx, amount_in, min_out)
+    }
+}
+```
+
+Derive `LightAccounts` on your `Accounts` struct and add `#[light_account(...)]` next to `#[account(...)]`.
+
+```rust
+#[account(mut)]
+#[light_account(
+    init,
+    mint,
+    mint_signer = lp_mint_signer,
+    authority = authority,
+    decimals = 9,
+    mint_seeds = &[LP_MINT_SIGNER_SEED, pool_state.key().as_ref(), &[params.mint_signer_bump]],
+    authority_seeds = &[AUTH_SEED.as_bytes(), &[params.authority_bump]]
+)]
+pub lp_mint: UncheckedAccount<'info>,
+```
+
+We also need to add `light_token_interface_config`, `rent_sponsor`, and `light_token_cpi_authority`.
+
+```rust
+use light_sdk::interface::CreateAccountsProof;
+use light_sdk_macros::LightAccounts;
+use light_token::instruction::{COMPRESSIBLE_CONFIG_V1, RENT_SPONSOR as LIGHT_TOKEN_RENT_SPONSOR};
+
+#[derive(AnchorSerialize, AnchorDeserialize, Clone)]
+pub struct InitializeParams {
+    pub create_accounts_proof: CreateAccountsProof,
+    pub lp_mint_signer_bump: u8,
+    pub creator_lp_token_bump: u8,
+    pub authority_bump: u8,
+}
+
+#[derive(Accounts, LightAccounts)]
+#[instruction(params: InitializeParams)]
+pub struct InitializePool<'info> {
+    #[account(mut)]
+    pub creator: Signer<'info>,
+
+    #[account(mut, seeds = [AUTH_SEED.as_bytes()], bump)]
+    pub authority: UncheckedAccount<'info>,
+
+    #[account(
+        init,
+        seeds = [POOL_SEED.as_bytes(), token_0_mint.key().as_ref(), token_1_mint.key().as_ref()],
+        bump,
+        payer = creator,
+        space = 8 + PoolState::INIT_SPACE
+    )]
+    #[light_account(init)]
+    pub pool_state: Box<Account<'info, PoolState>>,
+
+    pub token_0_mint: Box<InterfaceAccount<'info, Mint>>,
+    pub token_1_mint: Box<InterfaceAccount<'info, Mint>>,
+
+    #[account(seeds = [POOL_LP_MINT_SIGNER_SEED, pool_state.key().as_ref()], bump)]
+    pub lp_mint_signer: UncheckedAccount<'info>,
+
+    #[account(mut)]
+    #[light_account(init, mint,
+        mint_signer = lp_mint_signer,
+        authority = authority,
+        decimals = 9,
+        mint_seeds = &[POOL_LP_MINT_SIGNER_SEED, self.pool_state.to_account_info().key.as_ref(), &[params.lp_mint_signer_bump]],
+        authority_seeds = &[AUTH_SEED.as_bytes(), &[params.authority_bump]]
+    )]
+    pub lp_mint: UncheckedAccount<'info>,
+
+    #[account(mut, seeds = [POOL_VAULT_SEED.as_bytes(), pool_state.key().as_ref(), token_0_mint.key().as_ref()], bump)]
+    #[light_account(token, authority = [AUTH_SEED.as_bytes()])]
+    pub token_0_vault: UncheckedAccount<'info>,
+
+    #[account(mut, seeds = [POOL_VAULT_SEED.as_bytes(), pool_state.key().as_ref(), token_1_mint.key().as_ref()], bump)]
+    #[light_account(token, authority = [AUTH_SEED.as_bytes()])]
+    pub token_1_vault: UncheckedAccount<'info>,
+
+    #[account(mut)]
+    pub creator_lp_token: UncheckedAccount<'info>,
+
+
+    pub light_interface_config: AccountInfo<'info>,
+    #[account(address = COMPRESSIBLE_CONFIG_V1)]
+    pub light_token_interface_config: AccountInfo<'info>,
+    #[account(mut, address = LIGHT_TOKEN_RENT_SPONSOR)]
+    pub rent_sponsor: AccountInfo<'info>,
+    pub light_token_program: AccountInfo<'info>,
+    pub light_token_cpi_authority: AccountInfo<'info>,
+    pub system_program: Program<'info, System>,
+}
+```
+
+<AnchorMacroCode />
+
+</Tab>
+</Tabs>
 </Tab>
 
 </Tabs>

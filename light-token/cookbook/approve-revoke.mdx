@@ -20,9 +20,7 @@ import ApproveInstructionCode from "/snippets/code-snippets/light-token/approve-
 import RevokeActionCode from "/snippets/code-snippets/light-token/approve-revoke/rust-client/revoke-action.mdx";
 import RevokeInstructionCode from "/snippets/code-snippets/light-token/approve-revoke/rust-client/revoke-instruction.mdx";
 import ApproveAnchorProgramCode from "/snippets/code-snippets/light-token/approve/anchor-program/full-example.mdx";
-import ApproveNativeProgramCode from "/snippets/code-snippets/light-token/approve/native-program/full-example.mdx";
 import RevokeAnchorProgramCode from "/snippets/code-snippets/light-token/revoke/anchor-program/full-example.mdx";
-import RevokeNativeProgramCode from "/snippets/code-snippets/light-token/revoke/native-program/full-example.mdx";
 
 1. Approve grants a delegate permission to transfer up to a specified amount of tokens from your account.
     * Each token account can have only one delegate at a time. 
@@ -210,9 +208,6 @@ revoke_cpi.invoke_signed(&[signer_seeds])?;
 <Tabs>
 <Tab title="Approve">
 
-<Tabs>
-<Tab title="Anchor">
-
 <Info>
   View the full example with shared test utilities:
   [examples-light-token](https://github.com/Lightprotocol/examples-light-token/tree/main/program-examples/anchor/programs/approve).
@@ -222,24 +217,7 @@ revoke_cpi.invoke_signed(&[signer_seeds])?;
 
 </Tab>
 
-<Tab title="Native Rust">
-
-<Info>
-  View the full example with shared test utilities:
-  [examples-light-token-native](https://github.com/Lightprotocol/examples-light-token-native/tree/main/program-examples/native).
-</Info>
-
-<ApproveNativeProgramCode />
-
-</Tab>
-</Tabs>
-
-</Tab>
-
 <Tab title="Revoke">
-
-<Tabs>
-<Tab title="Anchor">
 
 <Info>
   View the full example with shared test utilities:
@@ -247,20 +225,6 @@ revoke_cpi.invoke_signed(&[signer_seeds])?;
 </Info>
 
 <RevokeAnchorProgramCode />
-
-</Tab>
-
-<Tab title="Native Rust">
-
-<Info>
-  View the full example with shared test utilities:
-  [examples-light-token-native](https://github.com/Lightprotocol/examples-light-token-native/tree/main/program-examples/native).
-</Info>
-
-<RevokeNativeProgramCode />
-
-</Tab>
-</Tabs>
 
 </Tab>
 </Tabs>

@@ -17,7 +17,6 @@ import {
 } from "/snippets/code-samples/code-compare-snippets.jsx";
 import RustInstructionCode from "/snippets/code-snippets/light-token/close-token-account/rust-client/instruction.mdx";
 import AnchorProgramCode from "/snippets/code-snippets/light-token/close-token-account/anchor-program/full-example.mdx";
-import NativeProgramCode from "/snippets/code-snippets/light-token/close-token-account/native-program/full-example.mdx";
 
 1. Closing a light-token account transfers remaining lamports to a destination account and the rent sponsor can reclaim sponsored rent.
 2. Light token accounts can be closed by the owner.
@@ -126,29 +125,12 @@ CloseAccountCpi {
 
 # Full Code Example
 
-<Tabs>
-<Tab title="Anchor">
-
 <Info>
   View the full example with shared test utilities:
   [examples-light-token](https://github.com/Lightprotocol/examples-light-token/tree/main/program-examples/anchor/programs/close).
 </Info>
 
 <AnchorProgramCode />
-
-</Tab>
-
-<Tab title="Native Rust">
-
-<Info>
-  View the full example with shared test utilities:
-  [examples-light-token-native](https://github.com/Lightprotocol/examples-light-token-native/tree/main/program-examples/native).
-</Info>
-
-<NativeProgramCode />
-
-</Tab>
-</Tabs>
 
 </Tab>
 

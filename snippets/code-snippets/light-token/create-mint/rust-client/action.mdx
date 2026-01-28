@@ -2,14 +2,13 @@
 use light_client::rpc::Rpc;
 use light_token_client::actions::{CreateMint, TokenMetadata};
 use rust_client::setup_rpc_and_payer;
-use solana_sdk::{signature::Keypair, signer::Signer};
+use solana_sdk::signer::Signer;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let (mut rpc, payer) = setup_rpc_and_payer().await;
-    let mint_seed = Keypair::new();
 
-    let result = CreateMint {
+    let (signature, mint) = CreateMint {
         decimals: 9,
         freeze_authority: None,
         token_metadata: Some(TokenMetadata {
@@ -19,17 +18,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             update_authority: Some(payer.pubkey()),
             additional_metadata: Some(vec![("type".to_string(), "example".to_string())]),
         }),
+        seed: None,
     }
-    .execute(&mut rpc, &payer, &mint_seed)
+    .execute(&mut rpc, &payer, &payer)
     .await?;
 
-    let data = rpc.get_account(result.mint).await?;
-    println!(
-        "Mint: {} exists: {} Tx: {}",
-        result.mint,
-        data.is_some(),
-        result.signature
-    );
+    let data = rpc.get_account(mint).await?;
+    println!("Mint: {mint} exists: {} Tx: {signature}", data.is_some());
 
     Ok(())
 }

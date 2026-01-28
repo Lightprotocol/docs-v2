@@ -1,32 +1,32 @@
 ```rust
 use light_token_client::actions::{CreateAta, CreateMint};
 use rust_client::setup_rpc_and_payer;
-use solana_sdk::{signature::Keypair, signer::Signer};
+use solana_sdk::signer::Signer;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let (mut rpc, payer) = setup_rpc_and_payer().await;
-    let mint_seed = Keypair::new();
 
     // Create mint
-    let mint_result = CreateMint {
+    let (_signature, mint) = CreateMint {
         decimals: 9,
         freeze_authority: None,
         token_metadata: None,
+        seed: None,
     }
-    .execute(&mut rpc, &payer, &mint_seed)
+    .execute(&mut rpc, &payer, &payer)
     .await?;
 
     // Create associated token account
-    let associated_token_account = CreateAta {
-        mint: mint_result.mint,
+    let (_signature, associated_token_account) = CreateAta {
+        mint,
         owner: payer.pubkey(),
         idempotent: true,
     }
     .execute(&mut rpc, &payer)
     .await?;
 
-    println!("ATA: {associated_token_account}");
+    println!("Associated token account: {associated_token_account}");
 
     Ok(())
 }

@@ -436,3 +436,69 @@ export const lightRevokeRustCode = [
   "}",
   ".instruction()?;",
 ].join("\n");
+
+// === CREATE MINT MACRO (ANCHOR) ===
+export const splCreateMintMacroCode = [
+  "// SPL Token (Anchor)",
+  "#[account(",
+  "    init,",
+  "    payer = fee_payer,",
+  "    mint::decimals = 9,",
+  "    mint::authority = fee_payer,",
+  ")]",
+  "pub mint: InterfaceAccount<'info, Mint>,",
+].join("\n");
+
+export const lightCreateMintMacroCode = [
+  "// light-token (Anchor)",
+  "#[light_account(init,",
+  "    mint::signer = mint_signer,",
+  "    mint::authority = fee_payer,",
+  "    mint::decimals = 9,",
+  "    mint::seeds = &[MINT_SIGNER_SEED, authority.key().as_ref()],",
+  "    mint::bump = params.mint_signer_bump",
+  ")]",
+  "pub mint: UncheckedAccount<'info>,",
+].join("\n");
+
+// === CREATE MINT WITH METADATA MACRO (ANCHOR) ===
+export const splCreateMintMetadataMacroCode = [
+  "// SPL Token-2022 (Anchor)",
+  "// Macro — only MetadataPointer is declarative",
+  "#[account(",
+  "    init,",
+  "    payer = fee_payer,",
+  "    mint::decimals = 9,",
+  "    mint::authority = fee_payer,",
+  "    extensions::metadata_pointer::authority = fee_payer,",
+  "    extensions::metadata_pointer::metadata_address = mint_account,",
+  ")]",
+  "pub mint_account: InterfaceAccount<'info, Mint>,",
+  "",
+  "// Metadata fields require a separate CPI call",
+  "// in the instruction handler:",
+  "token_metadata_initialize(",
+  "    cpi_ctx,",
+  "    params.name,",
+  "    params.symbol,",
+  "    params.uri,",
+  ")?;",
+].join("\n");
+
+export const lightCreateMintMetadataMacroCode = [
+  "// light-token (Anchor)",
+  "#[light_account(",
+  "    init,",
+  "    mint,",
+  "    mint_signer = mint_signer,",
+  "    authority = fee_payer,",
+  "    decimals = 9,",
+  "    mint_seeds = &[MINT_SIGNER_SEED, authority.key().as_ref(), &[params.mint_signer_bump]],",
+  "    name = params.name.clone(),",
+  "    symbol = params.symbol.clone(),",
+  "    uri = params.uri.clone(),",
+  "    update_authority = authority,",
+  "    additional_metadata = params.additional_metadata.clone()",
+  ")]",
+  "pub mint: UncheckedAccount<'info>,",
+].join("\n");

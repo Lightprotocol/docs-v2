@@ -13,7 +13,7 @@ pub fn close_invoke(accounts: &[AccountInfo], _data: &[u8]) -> ProgramResult {
         return Err(ProgramError::NotEnoughAccountKeys);
     };
 
-    // Close token account. Must be empty (balance = 0)
+    // Close token account. Must be empty (balance == 0)
     CloseAccountCpi {
         token_program: token_program.clone(),
         account: account.clone(),

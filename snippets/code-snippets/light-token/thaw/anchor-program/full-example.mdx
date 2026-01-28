@@ -36,14 +36,11 @@ pub struct ThawAccounts<'info> {
 ```
 
 ```rust test.rs
-use anchor_lang::InstructionData;
+use anchor_lang::{InstructionData, ToAccountMetas};
 use light_program_test::Rpc;
 use light_token::instruction::{Freeze, LIGHT_TOKEN_PROGRAM_ID};
-use light_token_anchor_thaw::{instruction::Thaw, ID};
-use solana_sdk::{
-    instruction::{AccountMeta, Instruction},
-    signer::Signer,
-};
+use light_token_anchor_thaw::{accounts, instruction::Thaw, ID};
+use solana_sdk::{instruction::Instruction, signer::Signer};
 use test_utils::{mint_tokens, setup_test_env_with_freeze};
 
 #[tokio::test]
@@ -70,12 +67,13 @@ async fn test_thaw() {
     // Call the anchor program to thaw account
     let ix = Instruction {
         program_id: ID,
-        accounts: vec![
-            AccountMeta::new_readonly(LIGHT_TOKEN_PROGRAM_ID, false),
-            AccountMeta::new(env.ata, false),
-            AccountMeta::new_readonly(env.mint_pda, false),
-            AccountMeta::new_readonly(env.freeze_authority, true),
-        ],
+        accounts: accounts::ThawAccounts {
+            light_token_program: LIGHT_TOKEN_PROGRAM_ID,
+            token_account: env.ata,
+            mint: env.mint_pda,
+            freeze_authority: env.freeze_authority,
+        }
+        .to_account_metas(Some(true)),
         data: Thaw {}.data(),
     };
 
