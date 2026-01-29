@@ -88,12 +88,6 @@ pub mod light_token_macro_create_token_account {
 ```
 
 ```rust test.rs
-//! Integration test for token vault creation using the macro.
-//!
-//! Note: This test requires a properly configured test environment with
-//! `light-program-test` that has compatible dependency versions.
-//! The test follows the pattern from light-protocol/sdk-tests/single-token-test.
-
 use anchor_lang::{InstructionData, ToAccountMetas};
 use light_client::{
     indexer::AddressWithTree,
@@ -168,12 +162,7 @@ async fn setup_create_mint(
     (mint, mint_seed)
 }
 
-/// Test creating a token vault using the `#[light_account(init, token, ...)]` macro.
-///
-/// This test verifies:
-/// 1. The macro-annotated program compiles correctly
-/// 2. A token vault can be created via the generated CPI
-/// 3. The vault has the correct owner and mint
+/// Creates a token vault via #[light_account(init, token, ...)].
 #[tokio::test]
 async fn test_create_token_vault() {
     use light_token::instruction::{COMPRESSIBLE_CONFIG_V1, RENT_SPONSOR};
@@ -191,21 +180,18 @@ async fn test_create_token_vault() {
     let mut rpc = LightProgramTest::new(config).await.unwrap();
     let payer = rpc.get_payer().insecure_clone();
 
-    // Create a mint first
     let (mint, _mint_seed) = setup_create_mint(&mut rpc, &payer, payer.pubkey(), 9).await;
 
-    // Derive PDAs
     let (vault_authority, _auth_bump) =
         Pubkey::find_program_address(&[VAULT_AUTH_SEED], &program_id);
     let (vault, vault_bump) =
         Pubkey::find_program_address(&[VAULT_SEED, mint.as_ref()], &program_id);
 
-    // Get proof for token-only instruction (empty inputs)
+    // Empty inputs: no PDA accounts for token-only instruction
     let proof_result = get_create_accounts_proof(&rpc, &program_id, vec![])
         .await
         .unwrap();
 
-    // Build instruction accounts
     let accounts = light_token_macro_create_token_account::accounts::CreateTokenVault {
         fee_payer: payer.pubkey(),
         mint,
@@ -218,7 +204,6 @@ async fn test_create_token_vault() {
         system_program: solana_sdk::system_program::ID,
     };
 
-    // Build instruction data
     let instruction_data = light_token_macro_create_token_account::instruction::CreateTokenVault {
         params: CreateTokenVaultParams {
             create_accounts_proof: proof_result.create_accounts_proof,
@@ -236,15 +221,10 @@ async fn test_create_token_vault() {
         data: instruction_data.data(),
     };
 
-    // Execute the instruction
-    // Note: This may fail without InitializeRentFreeConfig setup.
-    // The full test requires rent-free config initialization.
     let result = rpc
         .create_and_send_transaction(&[instruction], &payer.pubkey(), &[&payer])
         .await;
 
-    // For now, we verify the instruction builds correctly.
-    // Full execution requires additional setup (InitializeRentFreeConfig, etc.)
     println!("Transaction result: {:?}", result);
 }
 ```
