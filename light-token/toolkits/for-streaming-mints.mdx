@@ -17,6 +17,8 @@ Find devnet examples [here](https://github.com/Lightprotocol/examples-light-toke
 
 ## Setup
 
+Light mints are Solana accounts owned by the Light Token Program. Subscribe to account updates to detect new mints and changes.
+
 ```toml Cargo.toml
 [dependencies]
 helius-laserstream = "0.1.5"
@@ -27,30 +29,27 @@ dotenvy = "0.15"
 bs58 = "0.5"
 borsh = "0.10"
 
-# Light Protocol dependencies (git until published to crates.io)
-light-event = { git = "https://github.com/Lightprotocol/light-protocol" }
-light-compressed-account = { git = "https://github.com/Lightprotocol/light-protocol", features = ["std"] }
-light-token-interface = { git = "https://github.com/Lightprotocol/light-protocol" }
+light-token-interface = "0.3.0"
+light-compressed-account = { version = "0.9.0", features = ["std"] }
 ```
 
 ```rust
 use borsh::BorshDeserialize;
 use futures::StreamExt;
-use helius_laserstream::solana::storage::confirmed_block::{CompiledInstruction, Message};
+use helius_laserstream::grpc::subscribe_request_filter_accounts_filter::Filter;
+use helius_laserstream::grpc::subscribe_request_filter_accounts_filter_memcmp::Data;
+use helius_laserstream::grpc::{
+    SubscribeRequestFilterAccounts, SubscribeRequestFilterAccountsFilter,
+    SubscribeRequestFilterAccountsFilterMemcmp,
+};
 use helius_laserstream::{subscribe, LaserstreamConfig};
-use light_compressed_account::Pubkey;
-use light_event::parse::event_from_light_transaction;
 use light_token_interface::state::{ExtensionStruct, Mint};
 
-const LIGHT_SYSTEM_PROGRAM: &str = "SySTEM1eSU2p4BGQfQpimFEWWSC1XDFeun3Nqzz3rT7";
+const LIGHT_TOKEN_PROGRAM_ID: &str = "cTokenmWW8bLPjZEBAUgYy3zKxQZW6VKi7bqNFEVv3m";
 
-// Light Token Program ID bytes (cTokenmWW8bLPjZEBAUgYy3zKxQZW6VKi7bqNFEVv3m)
-const LIGHT_TOKEN_PROGRAM_BYTES: [u8; 32] = [
-    3, 89, 128, 47, 145, 178, 244, 191, 100, 152, 66, 240, 127, 251, 205, 1,
-    168, 38, 248, 106, 170, 164, 111, 0, 118, 231, 126, 151, 147, 169, 169, 4,
-];
-
-const COMPRESSED_MINT_DISCRIMINATOR: [u8; 8] = [0, 0, 0, 0, 0, 0, 0, 1];
+/// Byte offset of account_type in the Mint account data.
+/// BaseMint (82) + MintMetadata (67) + reserved (16) = 165
+const ACCOUNT_TYPE_OFFSET: u64 = 165;
 ```
 
 <Steps>
@@ -82,13 +81,19 @@ let config = LaserstreamConfig::new(
 </Tabs>
 
 ```rust
+// Subscribe to Solana accounts owned by the Light Token Program
+// with account_type = 1 (Mint) at byte offset 165
 let request = helius_laserstream::grpc::SubscribeRequest {
-    transactions: [(
-        "light".to_string(),
-        helius_laserstream::grpc::SubscribeRequestFilterTransactions {
-            vote: Some(false),
-            failed: Some(false),
-            account_include: vec![LIGHT_SYSTEM_PROGRAM.to_string()],
+    accounts: [(
+        "light_mints".to_string(),
+        SubscribeRequestFilterAccounts {
+            owner: vec![LIGHT_TOKEN_PROGRAM_ID.to_string()],
+            filters: vec![SubscribeRequestFilterAccountsFilter {
+                filter: Some(Filter::Memcmp(SubscribeRequestFilterAccountsFilterMemcmp {
+                    offset: ACCOUNT_TYPE_OFFSET,
+                    data: Some(Data::Bytes(vec![1])),
+                })),
+            }],
             ..Default::default()
         },
     )]
@@ -100,77 +105,41 @@ let (stream, _handle) = subscribe(config, request);
 tokio::pin!(stream);
 
 while let Some(update) = stream.next().await {
-    // Process transactions...
+    // Process account updates...
 }
 ```
 
 </Step>
 
 <Step>
-### Parse Events
+### Deserialize mint accounts
 
 ```rust
-fn process_transaction(message: &Message, light_token_program_id: &Pubkey) -> anyhow::Result<()> {
-    let account_keys: Vec<Pubkey> = message
-        .account_keys
-        .iter()
-        .filter_map(|k| {
-            if k.len() == 32 {
-                let arr: [u8; 32] = k.as_slice().try_into().ok()?;
-                Some(Pubkey::from(arr))
-            } else {
-                None
+if let Some(helius_laserstream::grpc::subscribe_update::UpdateOneof::Account(
+    account_update,
+)) = msg.update_oneof
+{
+    if let Some(account_info) = account_update.account {
+        let pubkey = bs58::encode(&account_info.pubkey).into_string();
+
+        match Mint::deserialize(&mut account_info.data.as_slice()) {
+            Ok(mint) => {
+                println!("Mint: {}", pubkey);
+                println!("  decimals: {}", mint.base.decimals);
+                println!("  supply: {}", mint.base.supply);
             }
-        })
-        .collect();
-
-    let (program_ids, instruction_data, accounts_per_ix) =
-        extract_light_transaction(&account_keys, &message.instructions);
-
-    if let Some(batches) =
-        event_from_light_transaction(&program_ids, &instruction_data, accounts_per_ix)?
-    {
-        for batch in &batches {
-            let event = &batch.event;
-            // Process outputs...
+            Err(e) => {
+                eprintln!("Failed to deserialize mint {}: {}", pubkey, e);
+            }
         }
     }
-
-    Ok(())
 }
 ```
 
 </Step>
 
 <Step>
-### Extract Mints
-
-```rust
-let light_token_program_id = Pubkey::from(LIGHT_TOKEN_PROGRAM_BYTES);
-
-for output in &event.output_compressed_accounts {
-    // Filter by owner (Light Token Program)
-    if output.compressed_account.owner != light_token_program_id {
-        continue;
-    }
-
-    // Check for mint discriminator
-    let data = match &output.compressed_account.data {
-        Some(d) if d.discriminator == COMPRESSED_MINT_DISCRIMINATOR => &d.data,
-        _ => continue,
-    };
-
-    // Deserialize mint
-    if let Ok(mint) = Mint::deserialize(&mut data.as_slice()) {
-        println!("Mint: {:?}", mint.metadata.mint);
-    }
-}
-```
-
-</Step>
-
-<Step>
-### Extract Token Metadata from Mint Extensions
+### Extract Token Metadata from mint extensions
 
 ```rust
 fn extract_metadata(mint: &Mint) -> Option<(String, String, String)> {
@@ -225,7 +194,7 @@ pub struct BaseMint {
     pub freeze_authority: Option<Pubkey>,
 }
 
-/// Light Protocol metadata for compressed mints (67 bytes)
+/// Light Protocol metadata for mints (67 bytes)
 #[repr(C)]
 pub struct MintMetadata {
     pub version: u8,
