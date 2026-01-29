@@ -22,6 +22,10 @@ import {
   lightCreateMintMacroCode,
   splCreateMintMetadataMacroCode,
   lightCreateMintMetadataMacroCode,
+  splCreateMintCpiCode,
+  lightCreateMintCpiCode,
+  splCreateMintMetadataCpiCode,
+  lightCreateMintMetadataCpiCode,
 } from "/snippets/code-samples/code-compare-snippets.jsx";
 import ActionCode from "/snippets/code-snippets/light-token/create-mint/action.mdx";
 import InstructionCode from "/snippets/code-snippets/light-token/create-mint/instruction.mdx";
@@ -142,13 +146,26 @@ Compare to SPL:
 
 Compare to SPL:
 
+<Tabs>
+<Tab title="Mint">
 <CodeCompare
-  firstCode={lightCreateMintRustCode}
-  secondCode={splCreateMintRustCode}
+  firstCode={lightCreateMintCpiCode}
+  secondCode={splCreateMintCpiCode}
   firstLabel="light-token"
   secondLabel="SPL"
   language="rust"
 />
+</Tab>
+<Tab title="With Token Metadata">
+<CodeCompare
+  firstCode={lightCreateMintMetadataCpiCode}
+  secondCode={splCreateMintMetadataCpiCode}
+  firstLabel="light-token"
+  secondLabel="SPL Token-2022"
+  language="rust"
+/>
+</Tab>
+</Tabs>
 
 <Note>
 Find [a full code example at the end](#full-code-example).

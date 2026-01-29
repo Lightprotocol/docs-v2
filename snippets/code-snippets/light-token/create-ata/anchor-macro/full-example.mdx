@@ -67,8 +67,6 @@ pub mod light_token_macro_create_ata {
 ```
 
 ```rust test.rs
-//! Integration test for Light Protocol ATA creation using the macro.
-
 use anchor_lang::{InstructionData, ToAccountMetas};
 use light_client::interface::{get_create_accounts_proof, InitializeRentFreeConfig};
 use light_program_test::{
@@ -82,8 +80,7 @@ use solana_keypair::Keypair;
 use solana_pubkey::Pubkey;
 use solana_signer::Signer;
 
-/// Setup helper: Creates a compressed mint directly using the ctoken SDK.
-/// Returns (mint_pda, mint_seed_keypair)
+/// Creates a compressed mint. Returns (mint_pda, mint_seed_keypair).
 async fn setup_create_mint(
     rpc: &mut (impl Rpc + Indexer),
     payer: &Keypair,
@@ -146,7 +143,7 @@ async fn setup_create_mint(
     (mint, mint_seed)
 }
 
-/// Test creating a Light Protocol ATA using the macro.
+/// Creates a Light Protocol ATA via the macro.
 #[tokio::test]
 async fn test_create_ata() {
     use light_token_macro_create_ata::CreateAtaParams;
@@ -174,7 +171,6 @@ async fn test_create_ata() {
         .await
         .expect("Initialize config should succeed");
 
-    // Setup mint first
     let (mint, _mint_seed) = setup_create_mint(
         &mut rpc,
         &payer,
@@ -183,18 +179,14 @@ async fn test_create_ata() {
     )
     .await;
 
-    // The ATA owner will be the payer
     let ata_owner = payer.pubkey();
-
-    // Derive the ATA address using Light Token SDK's derivation
     let (ata, ata_bump) = light_token::instruction::derive_token_ata(&ata_owner, &mint);
 
-    // Get proof (no PDA accounts for ATA-only instruction)
+    // No PDA accounts needed for ATA-only instruction
     let proof_result = get_create_accounts_proof(&rpc, &program_id, vec![])
         .await
         .unwrap();
 
-    // Build instruction
     let accounts = light_token_macro_create_ata::accounts::CreateAta {
         fee_payer: payer.pubkey(),
         ata_mint: mint,
@@ -227,25 +219,18 @@ async fn test_create_ata() {
         .await
         .expect("CreateAta instruction should succeed");
 
-    // Verify ATA exists on-chain
     let ata_account = rpc
         .get_account(ata)
         .await
         .unwrap()
         .expect("ATA should exist on-chain");
 
-    // Parse and verify token data
     use light_token_interface::state::Token;
     let token: Token = borsh::BorshDeserialize::deserialize(&mut &ata_account.data[..])
         .expect("Failed to deserialize Token");
 
-    // Verify owner
     assert_eq!(token.owner, ata_owner.to_bytes(), "ATA owner should match");
-
-    // Verify mint
     assert_eq!(token.mint, mint.to_bytes(), "ATA mint should match");
-
-    // Verify initial amount is 0
     assert_eq!(token.amount, 0, "ATA amount should be 0 initially");
 }
 ```
