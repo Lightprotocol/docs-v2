@@ -28,7 +28,6 @@ const payer = Keypair.fromSecretKey(
 );
 
 (async function () {
-
     // Setup: Get SPL tokens (needed to wrap)
     const { mint } = await createMint(rpc, payer, payer.publicKey, 9);
     const splAta = await createAssociatedTokenAccount(
@@ -58,6 +57,7 @@ const payer = Keypair.fromSecretKey(
         mint,
         bn(500),
         splInterfaceInfo,
+        9, // decimals - must match the mint decimals
         payer.publicKey
     );
 
