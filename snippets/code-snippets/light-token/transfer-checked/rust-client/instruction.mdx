@@ -25,10 +25,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let recipient = Keypair::new();
     let recipient_associated_token_account = get_associated_token_address(&recipient.pubkey(), &mint);
 
-    let create_ata_instruction = CreateAssociatedTokenAccount::new(payer.pubkey(), recipient.pubkey(), mint)
+    let create_associated_token_account_instruction = CreateAssociatedTokenAccount::new(payer.pubkey(), recipient.pubkey(), mint)
         .instruction()?;
 
-    rpc.create_and_send_transaction(&[create_ata_instruction], &payer.pubkey(), &[&payer])
+    rpc.create_and_send_transaction(&[create_associated_token_account_instruction], &payer.pubkey(), &[&payer])
         .await?;
 
     // TransferChecked validates decimals match the mint's decimals

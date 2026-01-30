@@ -29,10 +29,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Create Light associated token account
     let light_associated_token_account = get_associated_token_address(&payer.pubkey(), &mint);
 
-    let create_ata_instruction =
+    let create_associated_token_account_instruction =
         CreateAssociatedTokenAccount::new(payer.pubkey(), payer.pubkey(), mint).instruction()?;
 
-    rpc.create_and_send_transaction(&[create_ata_instruction], &payer.pubkey(), &[&payer])
+    rpc.create_and_send_transaction(&[create_associated_token_account_instruction], &payer.pubkey(), &[&payer])
         .await?;
 
     // SPL interface PDA for Mint (holds SPL tokens when transferred to Light Token)

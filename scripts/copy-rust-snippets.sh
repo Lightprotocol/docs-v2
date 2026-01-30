@@ -3,11 +3,16 @@
 # Script to copy Rust client code from examples-light-token-rust-client to docs snippets
 # Creates action.mdx and instruction.mdx files wrapped in rust code blocks
 
-EXAMPLES_DIR="/home/tilo/Workspace/examples-light-token-rust-client/rust-client"
+EXAMPLES_DIR="/home/tilo/Workspace/examples-light-token/rust-client"
 SNIPPETS_DIR="/home/tilo/Workspace/docs/snippets/code-snippets/light-token"
 
 # Full recipes (action + instruction in same directory)
-FULL_RECIPES=("create-mint" "create-ata" "mint-to" "transfer-interface" "transfer-checked")
+FULL_RECIPES=("create-mint" "mint-to" "transfer-interface" "transfer-checked")
+
+# Full recipes with name mapping (target-dir:source-filename)
+FULL_RECIPES_MAPPED=(
+    "create-ata:create_associated_token_account"
+)
 
 # Action-only recipes (action file only)
 ACTION_ONLY=("wrap" "unwrap")
@@ -57,6 +62,31 @@ for recipe in "${FULL_RECIPES[@]}"; do
 
     # Instruction file
     instruction_file="$EXAMPLES_DIR/instructions/$rust_name.rs"
+    if [ -f "$instruction_file" ]; then
+        wrap_rust "$instruction_file" "$output_dir/instruction.mdx"
+    else
+        echo "  WARNING: Not found - $instruction_file"
+    fi
+done
+
+echo ""
+echo "--- Full recipes (mapped names) ---"
+for mapping in "${FULL_RECIPES_MAPPED[@]}"; do
+    output_name="${mapping%%:*}"
+    source_name="${mapping##*:}"
+    echo "Processing: $output_name (source: $source_name.rs)"
+
+    output_dir="$SNIPPETS_DIR/$output_name/rust-client"
+    mkdir -p "$output_dir"
+
+    action_file="$EXAMPLES_DIR/actions/$source_name.rs"
+    if [ -f "$action_file" ]; then
+        wrap_rust "$action_file" "$output_dir/action.mdx"
+    else
+        echo "  WARNING: Not found - $action_file"
+    fi
+
+    instruction_file="$EXAMPLES_DIR/instructions/$source_name.rs"
     if [ -f "$instruction_file" ]; then
         wrap_rust "$instruction_file" "$output_dir/instruction.mdx"
     else

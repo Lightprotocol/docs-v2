@@ -15,16 +15,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let owner = Keypair::new();
 
-    let create_ata_instruction =
+    let create_associated_token_account_instruction =
         CreateAssociatedTokenAccount::new(payer.pubkey(), owner.pubkey(), mint).instruction()?;
 
     let sig = rpc
-        .create_and_send_transaction(&[create_ata_instruction], &payer.pubkey(), &[&payer])
+        .create_and_send_transaction(&[create_associated_token_account_instruction], &payer.pubkey(), &[&payer])
         .await?;
 
     let associated_token_account = get_associated_token_address(&owner.pubkey(), &mint);
     let data = rpc.get_account(associated_token_account).await?;
-    println!("ATA: {associated_token_account} exists: {} Tx: {sig}", data.is_some());
+    println!("Associated token account: {associated_token_account} exists: {} Tx: {sig}", data.is_some());
 
     Ok(())
 }
