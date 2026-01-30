@@ -19,6 +19,10 @@ import {
 } from "/snippets/code-samples/code-compare-snippets.jsx";
 import ActionCode from "/snippets/code-snippets/light-token/create-mint/action.mdx";
 import InstructionCode from "/snippets/code-snippets/light-token/create-mint/instruction.mdx";
+import SplActionCode from "/snippets/code-snippets/light-token/create-spl-mint/action.mdx";
+import SplInstructionCode from "/snippets/code-snippets/light-token/create-spl-mint/instruction.mdx";
+import TokenPoolActionCode from "/snippets/code-snippets/light-token/create-token-pool/action.mdx";
+import TokenPoolInstructionCode from "/snippets/code-snippets/light-token/create-token-pool/instruction.mdx";
 
 1. Mint accounts uniquely represent a token on Solana and store its global metadata.
 2. Light mints are on-chain accounts like SPL mints, but the light token program sponsors the rent-exemption cost for you.
@@ -73,6 +77,32 @@ Compare to SPL:
 
 </Step>
 </Steps>
+
+## Create SPL Mint with Token Pool
+
+Pass `TOKEN_PROGRAM_ID` to create a standard SPL mint with a token pool in one transaction. This enables compression for the mint.
+
+<Tabs>
+<Tab title="Action">
+<SplActionCode />
+</Tab>
+<Tab title="Instruction">
+<SplInstructionCode />
+</Tab>
+</Tabs>
+
+## Enable Existing SPL Mints with Light ATAs
+
+Register a token pool for an existing SPL mint to enable compression. No mint authority required.
+
+<Tabs>
+<Tab title="Action">
+<TokenPoolActionCode />
+</Tab>
+<Tab title="Instruction">
+<TokenPoolInstructionCode />
+</Tab>
+</Tabs>
 
 </Tab>
 

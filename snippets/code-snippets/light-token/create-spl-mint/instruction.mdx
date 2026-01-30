@@ -1,0 +1,77 @@
+```typescript
+import "dotenv/config";
+import {
+    Keypair,
+    SystemProgram,
+    Transaction,
+    sendAndConfirmTransaction,
+} from "@solana/web3.js";
+import { createRpc } from "@lightprotocol/stateless.js";
+import { CompressedTokenProgram } from "@lightprotocol/compressed-token";
+import {
+    MINT_SIZE,
+    TOKEN_PROGRAM_ID,
+    createInitializeMint2Instruction,
+} from "@solana/spl-token";
+import { homedir } from "os";
+import { readFileSync } from "fs";
+
+// devnet:
+const RPC_URL = `https://devnet.helius-rpc.com?api-key=${process.env.API_KEY!}`;
+const rpc = createRpc(RPC_URL);
+// localnet:
+// const rpc = createRpc();
+
+const payer = Keypair.fromSecretKey(
+    new Uint8Array(
+        JSON.parse(readFileSync(`${homedir()}/.config/solana/id.json`, "utf8"))
+    )
+);
+
+(async function () {
+    const mintKeypair = Keypair.generate();
+    const decimals = 9;
+
+    // Get rent for mint account
+    const rentExemptBalance = await rpc.getMinimumBalanceForRentExemption(MINT_SIZE);
+
+    // Instruction 1: Create mint account
+    const createMintAccountIx = SystemProgram.createAccount({
+        fromPubkey: payer.publicKey,
+        lamports: rentExemptBalance,
+        newAccountPubkey: mintKeypair.publicKey,
+        programId: TOKEN_PROGRAM_ID,
+        space: MINT_SIZE,
+    });
+
+    // Instruction 2: Initialize mint
+    const initializeMintIx = createInitializeMint2Instruction(
+        mintKeypair.publicKey,
+        decimals,
+        payer.publicKey, // mint authority
+        null, // freeze authority
+        TOKEN_PROGRAM_ID
+    );
+
+    // Instruction 3: Create SPL interface pda (token pool, enables compression of the SPL mint's tokens)
+    const createTokenPoolIx = await CompressedTokenProgram.createTokenPool({
+        feePayer: payer.publicKey,
+        mint: mintKeypair.publicKey,
+        tokenProgramId: TOKEN_PROGRAM_ID,
+    });
+
+    const tx = new Transaction().add(
+        createMintAccountIx,
+        initializeMintIx,
+        createTokenPoolIx
+    );
+
+    const signature = await sendAndConfirmTransaction(rpc, tx, [
+        payer,
+        mintKeypair,
+    ]);
+
+    console.log("Mint:", mintKeypair.publicKey.toBase58());
+    console.log("Tx:", signature);
+})();
+```

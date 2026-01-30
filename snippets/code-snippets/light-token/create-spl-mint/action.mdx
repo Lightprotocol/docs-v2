@@ -1,0 +1,39 @@
+```typescript
+import "dotenv/config";
+import { Keypair } from "@solana/web3.js";
+import { createRpc } from "@lightprotocol/stateless.js";
+import { createMintInterface } from "@lightprotocol/compressed-token";
+import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
+import { homedir } from "os";
+import { readFileSync } from "fs";
+
+// devnet:
+const RPC_URL = `https://devnet.helius-rpc.com?api-key=${process.env.API_KEY!}`;
+const rpc = createRpc(RPC_URL);
+// localnet:
+// const rpc = createRpc();
+
+const payer = Keypair.fromSecretKey(
+    new Uint8Array(
+        JSON.parse(readFileSync(`${homedir()}/.config/solana/id.json`, "utf8"))
+    )
+);
+
+(async function () {
+    // Creates SPL mint + SPL interface pda (token pool) in one transaction
+    const mintKeypair = Keypair.generate();
+    const { mint, transactionSignature } = await createMintInterface(
+        rpc,
+        payer,
+        payer,
+        null,
+        9,
+        mintKeypair,
+        undefined,
+        TOKEN_PROGRAM_ID
+    );
+
+    console.log("Mint:", mint.toBase58());
+    console.log("Tx:", transactionSignature);
+})();
+```
