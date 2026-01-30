@@ -25,42 +25,44 @@ The base library to use Light Token Accounts, Light Mints, and compressed token 
 - support `TokenMetadata`.
 - have the same rent-config as light token accounts
 
-## CPI Operations
+## Program Examples
 
 For full program examples, see the [Light Token Examples](https://github.com/Lightprotocol/examples-light-token).
 
-| Operation | Docs guide | GitHub example |
-|-----------|-----------|----------------|
-| `CreateAssociatedAccountCpi` | [create-ata](https://zkcompression.com/light-token/cookbook/create-ata) | [example](https://github.com/Lightprotocol/examples-light-token/tree/main/program-examples/anchor/basic-instructions/create-ata) |
-| `CreateTokenAccountCpi` | [create-token-account](https://zkcompression.com/light-token/cookbook/create-token-account) | [example](https://github.com/Lightprotocol/examples-light-token/tree/main/program-examples/anchor/basic-instructions/create-token-account) |
-| `CreateMintCpi` | [create-mint](https://zkcompression.com/light-token/cookbook/create-mint) | [example](https://github.com/Lightprotocol/examples-light-token/tree/main/program-examples/anchor/basic-instructions/create-mint) |
-| `MintToCpi` | [mint-to](https://zkcompression.com/light-token/cookbook/mint-to) | [example](https://github.com/Lightprotocol/examples-light-token/tree/main/program-examples/anchor/basic-instructions/mint-to) |
-| `MintToCheckedCpi` | [mint-to](https://zkcompression.com/light-token/cookbook/mint-to) | [example](https://github.com/Lightprotocol/examples-light-token/tree/main/program-examples/anchor/basic-instructions/mint-to-checked) |
-| `BurnCpi` | [burn](https://zkcompression.com/light-token/cookbook/burn) | [example](https://github.com/Lightprotocol/examples-light-token/tree/main/program-examples/anchor/basic-instructions/burn) |
-| `TransferCheckedCpi` | [transfer-checked](https://zkcompression.com/light-token/cookbook/transfer-checked) | [example](https://github.com/Lightprotocol/examples-light-token/tree/main/program-examples/anchor/basic-instructions/transfer-checked) |
-| `TransferInterfaceCpi` | [transfer-interface](https://zkcompression.com/light-token/cookbook/transfer-interface) | [example](https://github.com/Lightprotocol/examples-light-token/tree/main/program-examples/anchor/basic-instructions/transfer-interface) |
-| `ApproveCpi` | [approve-revoke](https://zkcompression.com/light-token/cookbook/approve-revoke) | [example](https://github.com/Lightprotocol/examples-light-token/tree/main/program-examples/anchor/basic-instructions/approve) |
-| `RevokeCpi` | [approve-revoke](https://zkcompression.com/light-token/cookbook/approve-revoke) | [example](https://github.com/Lightprotocol/examples-light-token/tree/main/program-examples/anchor/basic-instructions/revoke) |
-| `FreezeCpi` | [freeze-thaw](https://zkcompression.com/light-token/cookbook/freeze-thaw) | [example](https://github.com/Lightprotocol/examples-light-token/tree/main/program-examples/anchor/basic-instructions/freeze) |
-| `ThawCpi` | [freeze-thaw](https://zkcompression.com/light-token/cookbook/freeze-thaw) | [example](https://github.com/Lightprotocol/examples-light-token/tree/main/program-examples/anchor/basic-instructions/thaw) |
-| `CloseAccountCpi` | [close-token-account](https://zkcompression.com/light-token/cookbook/close-token-account) | [example](https://github.com/Lightprotocol/examples-light-token/tree/main/program-examples/anchor/basic-instructions/close-token-account) |
+### Instructions
 
-### Common Operations
+The instructions use pure CPI calls which you can combine with existing and / or light macros.
+For existing programs, you can replace spl_token with light_token instructions as you need. The API is a superset of SPL-token so switching is straightforward.
 
-| Operation | Instruction Builder | CPI Builder |
-|-----------|----------------|-------------|
-| Create Associated Token Account | `CreateAssociatedTokenAccount` | `CreateAssociatedAccountCpi` |
-| Create Token Account | `CreateTokenAccount` | `CreateTokenAccountCpi` |
-| Transfer | `Transfer` | `TransferCpi` |
-| Transfer Interface (auto-detect) | `TransferInterface` | `TransferInterfaceCpi` |
-| Close Token account | `CloseAccount` | `CloseAccountCpi` |
-| Create Mint | `CreateMint` | `CreateMintCpi` |
-| MintTo | `MintTo` | `MintToCpi` |
+|  | Description |
+|---------|-------------|
+| [approve](https://github.com/Lightprotocol/examples-light-token/blob/main/programs/anchor/basic-instructions/approve/src/lib.rs) | Approve delegate via CPI |
+| [burn](https://github.com/Lightprotocol/examples-light-token/blob/main/programs/anchor/basic-instructions/burn/src/lib.rs) | Burn tokens via CPI |
+| [close](https://github.com/Lightprotocol/examples-light-token/blob/main/programs/anchor/basic-instructions/close/src/lib.rs) | Close token account via CPI |
+| [create-associated-token-account](https://github.com/Lightprotocol/examples-light-token/blob/main/programs/anchor/basic-instructions/create-ata/src/lib.rs) | Create associated light-token account via CPI |
+| [create-mint](https://github.com/Lightprotocol/examples-light-token/blob/main/programs/anchor/basic-instructions/create-mint/src/lib.rs) | Create light-token mint via CPI |
+| [create-token-account](https://github.com/Lightprotocol/examples-light-token/blob/main/programs/anchor/basic-instructions/create-token-account/src/lib.rs) | Create light-token account via CPI |
+| [freeze](https://github.com/Lightprotocol/examples-light-token/blob/main/programs/anchor/basic-instructions/freeze/src/lib.rs) | Freeze token account via CPI |
+| [mint-to](https://github.com/Lightprotocol/examples-light-token/blob/main/programs/anchor/basic-instructions/mint-to/src/lib.rs) | Mint tokens via CPI |
+| [revoke](https://github.com/Lightprotocol/examples-light-token/blob/main/programs/anchor/basic-instructions/revoke/src/lib.rs) | Revoke delegate via CPI |
+| [thaw](https://github.com/Lightprotocol/examples-light-token/blob/main/programs/anchor/basic-instructions/thaw/src/lib.rs) | Thaw token account via CPI |
+| [transfer-checked](https://github.com/Lightprotocol/examples-light-token/blob/main/programs/anchor/basic-instructions/transfer-checked/src/lib.rs) | Transfer with mint validation via CPI |
+| [transfer-interface](https://github.com/Lightprotocol/examples-light-token/blob/main/programs/anchor/basic-instructions/transfer-interface/src/lib.rs) | Transfer between light-token, T22, and SPL accounts via CPI |
 
-### Features
+### Macros
 
-1. `anchor` - Derives AnchorSerialize, AnchorDeserialize instead of BorshSerialize, BorshDeserialize.
-2. `compressible` - utility functions for compressible sdk macros.
+|  | Description |
+|---------|-------------|
+| [counter](https://github.com/Lightprotocol/examples-light-token/tree/main/programs/anchor/basic-macros/counter) | Create PDA with sponsored rent-exemption |
+| [create-associated-token-account](https://github.com/Lightprotocol/examples-light-token/tree/main/programs/anchor/basic-macros/create-ata) | Create associated light-token account |
+| [create-mint](https://github.com/Lightprotocol/examples-light-token/tree/main/programs/anchor/basic-macros/create-mint) | Create light-token mint |
+| [create-token-account](https://github.com/Lightprotocol/examples-light-token/tree/main/programs/anchor/basic-macros/create-token-account) | Create light-token account |
+
+### Examples
+
+|  | Description |
+|---------|-------------|
+| [create-and-transfer](https://github.com/Lightprotocol/examples-light-token/tree/main/programs/anchor/create-and-transfer) | Create account via macro and transfer via CPI |
 
 ## TypeScript Client
 
@@ -82,19 +84,19 @@ Rust client for light-token. Each action builds, signs, and sends the transactio
 ### TypeScript Examples
 
 - **create-mint** - Create a light-token mint
-  - [Action](typescript-client/actions/create-mint.ts) | [Instruction](typescript-client/instructions/create-mint.ts)
+  - [Action](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/actions/create-mint.ts) | [Instruction](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/instructions/create-mint.ts)
 - **create-ata** - Create an associated light-token account
-  - [Action](typescript-client/actions/create-ata.ts) | [Instruction](typescript-client/instructions/create-ata.ts)
+  - [Action](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/actions/create-ata.ts) | [Instruction](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/instructions/create-ata.ts)
 - **load-ata** - Load token accounts from light-token, compressed tokens, SPL/T22 to one unified balance.
-  - [Action](typescript-client/actions/load-ata.ts) | [Instruction](typescript-client/instructions/load-ata.ts)
+  - [Action](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/actions/load-ata.ts) | [Instruction](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/instructions/load-ata.ts)
 - **mint-to** - Mint tokens to a light-account
-  - [Action](typescript-client/actions/mint-to.ts) | [Instruction](typescript-client/instructions/mint-to.ts)
+  - [Action](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/actions/mint-to.ts) | [Instruction](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/instructions/mint-to.ts)
 - **transfer-interface** - Transfer between light-token, T22, and SPL accounts
-  - [Action](typescript-client/actions/transfer-interface.ts) | [Instruction](typescript-client/instructions/transfer-interface.ts)
+  - [Action](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/actions/transfer-interface.ts) | [Instruction](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/instructions/transfer-interface.ts)
 - **wrap** - Wrap SPL/T22 to light-token
-  - [Action](typescript-client/actions/wrap.ts)
+  - [Action](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/actions/wrap.ts)
 - **unwrap** - Unwrap light-token to SPL/T22
-  - [Action](typescript-client/actions/unwrap.ts)
+  - [Action](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/actions/unwrap.ts)
 
 ## Toolkits
 
