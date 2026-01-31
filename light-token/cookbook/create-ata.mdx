@@ -75,6 +75,36 @@ Compare to SPL:
 </Step>
 </Steps>
 
+<Accordion title="Passing Custom Rent Config">
+
+The SDK uses the protocol's rent sponsor and config PDA by default. To pass a custom config explicitly:
+
+```typescript
+import { createAssociatedTokenAccountInterfaceInstruction } from "@lightprotocol/compressed-token";
+
+const ix = createAssociatedTokenAccountInterfaceInstruction(
+    payer.publicKey,
+    associatedToken,
+    owner.publicKey,
+    mint,
+    undefined, // token program id, defaults to light-token
+    undefined, // associated token program id, defaults to light-token
+    {
+        compressibleConfig: {
+            tokenAccountVersion: 3,
+            rentPayment: 16,
+            compressionOnly: 1,
+            writeTopUp: 766,
+            compressToAccountPubkey: null,
+        },
+        configAccount: new PublicKey("ACXg8a7VaqecBWrSbdu73W4Pg9gsqXJ3EXAqkHyhvVXg"), // light token default config pda
+        rentPayerPda: new PublicKey("r18WwUxfG8kQ69bQPAB2jV6zGNKy3GosFGctjQoV4ti"), // light token default rent sponsor pda
+    },
+);
+```
+
+</Accordion>
+
 </Tab>
 
 <Tab title="Rust Client">
