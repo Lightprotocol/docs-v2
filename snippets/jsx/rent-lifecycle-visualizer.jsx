@@ -15,12 +15,12 @@ export const RentLifecycleVisualizer = () => {
   const [resetCount, setResetCount] = useState(0);
   const [timelineStarted, setTimelineStarted] = useState(false);
 
-  // Constants from rent config
-  const LAMPORTS_PER_TICK = 58.2; // 582 per second = 1.5 epochs/s (1.5x speed)
-  const INITIAL_RENT = 6208; // 24h of rent (16 epochs × 388)
-  const TOPUP_LAMPORTS = 776; // 3h worth (2 epochs)
-  const TOPUP_THRESHOLD = 776; // Top up when below 3h of rent
-  const COLD_THRESHOLD = 388; // Cold when below 1 epoch of rent
+  // Constants from rent config (272-byte compressible ctoken account)
+  const LAMPORTS_PER_TICK = 60; // 600 per second = 1.5 epochs/s (1.5x speed)
+  const INITIAL_RENT = 6400; // 24h of rent (16 epochs × 400)
+  const TOPUP_LAMPORTS = 800; // 3h worth (2 epochs)
+  const TOPUP_THRESHOLD = 800; // Top up when below 3h of rent
+  const COLD_THRESHOLD = 400; // Cold when below 1 epoch of rent
   // Time scale: 1.5x speed → ~10.7s to deplete, 29s total cycle
 
   // Colors
@@ -113,14 +113,14 @@ export const RentLifecycleVisualizer = () => {
 
     // Color based on lamports threshold
     if (lamports > TOPUP_THRESHOLD) {
-      // Above 776: stay red (hot)
+      // Above 800: stay red (hot)
       return RED;
     } else if (lamports > COLD_THRESHOLD) {
-      // Between 776 and 388: fade red → blue
+      // Between 800 and 400: fade red → blue
       const t = 1 - (lamports - COLD_THRESHOLD) / (TOPUP_THRESHOLD - COLD_THRESHOLD);
       return interpolateColor(RED, BLUE, t);
     } else {
-      // Below 388: cold (blue)
+      // Below 400: cold (blue)
       return BLUE;
     }
   };
@@ -220,7 +220,7 @@ export const RentLifecycleVisualizer = () => {
               triggerHighlight();
               triggerFlyingArrow(INITIAL_RENT, lastLineIndexRef.current);
             } else if (phase === "hot") {
-              // Only top up if below threshold (3h = 776 lamports = 2 epochs)
+              // Only top up if below threshold (3h = 800 lamports = 2 epochs)
               setLamports((currentLamports) => {
                 if (currentLamports > 0 && currentLamports < TOPUP_THRESHOLD) {
                   triggerHighlight();

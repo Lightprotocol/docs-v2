@@ -5,7 +5,7 @@ export const LightTokenVsSplCalculator = () => {
   const ACCOUNT_STORAGE_OVERHEAD = 128;
   const LAMPORTS_PER_BYTE = 6960;
   const DATA_LEN = 165; // SPL token account size
-  const LIGHT_TOKEN_DEFAULT_CREATION_COST = 17208; // Default rent config: 6,208 prepaid rent (24h) + 11,000 compression incentive
+  const LIGHT_TOKEN_DEFAULT_CREATION_COST = 17400; // Default rent config: 6,400 prepaid rent (24h) + 11,000 compression cost
   const LAMPORTS_PER_SOL = 1_000_000_000;
 
   const ACCOUNTS_MAX = 1000000;
