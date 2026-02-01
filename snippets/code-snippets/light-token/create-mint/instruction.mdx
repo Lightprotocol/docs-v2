@@ -25,7 +25,7 @@ const COMPRESSED_MINT_SEED = Buffer.from("compressed_mint");
 function findMintAddress(mintSigner: PublicKey): [PublicKey, number] {
     return PublicKey.findProgramAddressSync(
         [COMPRESSED_MINT_SEED, mintSigner.toBuffer()],
-        CTOKEN_PROGRAM_ID
+        CTOKEN_PROGRAM_ID,
     );
 }
 
@@ -37,8 +37,8 @@ const rpc = createRpc();
 
 const payer = Keypair.fromSecretKey(
     new Uint8Array(
-        JSON.parse(readFileSync(`${homedir()}/.config/solana/id.json`, "utf8"))
-    )
+        JSON.parse(readFileSync(`${homedir()}/.config/solana/id.json`, "utf8")),
+    ),
 );
 
 (async function () {
@@ -49,7 +49,7 @@ const payer = Keypair.fromSecretKey(
 
     const validityProof = await rpc.getValidityProofV2(
         [],
-        [{ address: mintPda.toBytes(), treeInfo: addressTreeInfo }]
+        [{ address: mintPda.toBytes(), treeInfo: addressTreeInfo }],
     );
 
     const ix = createMintInstruction(
@@ -64,13 +64,13 @@ const payer = Keypair.fromSecretKey(
         createTokenMetadata(
             "Example Token",
             "EXT",
-            "https://example.com/metadata.json"
-        )
+            "https://example.com/metadata.json",
+        ),
     );
 
     const tx = new Transaction().add(
         ComputeBudgetProgram.setComputeUnitLimit({ units: 1_000_000 }),
-        ix
+        ix,
     );
     const signature = await sendAndConfirmTransaction(rpc, tx, [
         payer,

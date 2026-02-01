@@ -8,13 +8,20 @@ keywords: ["approve delegate solana", "revoke delegate solana", "token delegatio
 ---
 
 import TokenClientPrerequisites from "/snippets/light-token-guides/light-token-client-prerequisites.mdx";
+import FullSetup from "/snippets/setup/full-setup.mdx";
 import { CodeCompare } from "/snippets/jsx/code-compare.jsx";
 import {
+  splApproveCode,
+  lightApproveCode,
+  splRevokeCode,
+  lightRevokeCode,
   splApproveRustCode,
   lightApproveRustCode,
   splRevokeRustCode,
   lightRevokeRustCode,
 } from "/snippets/code-samples/code-compare-snippets.jsx";
+import TsApproveActionCode from "/snippets/code-snippets/light-token/approve-revoke/approve-action.mdx";
+import TsRevokeActionCode from "/snippets/code-snippets/light-token/approve-revoke/revoke-action.mdx";
 import ApproveActionCode from "/snippets/code-snippets/light-token/approve-revoke/rust-client/approve-action.mdx";
 import ApproveInstructionCode from "/snippets/code-snippets/light-token/approve-revoke/rust-client/approve-instruction.mdx";
 import RevokeActionCode from "/snippets/code-snippets/light-token/approve-revoke/rust-client/revoke-action.mdx";
@@ -29,6 +36,61 @@ import RevokeAnchorProgramCode from "/snippets/code-snippets/light-token/revoke/
 3. Only the token account owner can approve or revoke delegates.
 
 <Tabs>
+
+<Tab title="TypeScript Client">
+
+<Tabs>
+<Tab title="Approve">
+
+`approve` grants a delegate permission to transfer up to a specified amount of tokens.
+
+<CodeCompare
+  firstCode={lightApproveCode}
+  secondCode={splApproveCode}
+  firstLabel="light-token"
+  secondLabel="SPL"
+/>
+
+</Tab>
+<Tab title="Revoke">
+
+`revoke` removes all delegate permissions from a light-token account.
+
+<CodeCompare
+  firstCode={lightRevokeCode}
+  secondCode={splRevokeCode}
+  firstLabel="light-token"
+  secondLabel="SPL"
+/>
+
+</Tab>
+</Tabs>
+
+<Info>
+  Find the source code
+  [here](https://github.com/Lightprotocol/examples-light-token/tree/main/typescript-client/actions).
+</Info>
+
+<Steps>
+<Step>
+### Approve a delegate
+
+<FullSetup />
+
+<TsApproveActionCode />
+
+</Step>
+
+<Step>
+### Revoke a delegate
+
+<TsRevokeActionCode />
+
+</Step>
+</Steps>
+
+</Tab>
+
 <Tab title="Rust Client">
 
 <Tabs>

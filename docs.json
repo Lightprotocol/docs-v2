@@ -56,7 +56,9 @@
             "pages": [
               "light-token/toolkits/overview",
               "light-token/toolkits/for-payments",
-              "light-token/toolkits/for-wallets"
+              "light-token/toolkits/for-wallets",
+              "light-token/toolkits/for-streaming-mints",
+              "light-token/toolkits/for-streaming-tokens"
             ]
           },
           {

@@ -4,9 +4,8 @@ import { Keypair } from "@solana/web3.js";
 import { createRpc } from "@lightprotocol/stateless.js";
 import {
     createMintInterface,
-    createAtaInterface,
-    mintToInterface,
-    getAssociatedTokenAddressInterface,
+    mintToCompressed,
+    approve,
 } from "@lightprotocol/compressed-token";
 import { homedir } from "os";
 import { readFileSync } from "fs";
@@ -25,21 +24,16 @@ const payer = Keypair.fromSecretKey(
 
 (async function () {
     const { mint } = await createMintInterface(rpc, payer, payer, null, 9);
+    await mintToCompressed(rpc, payer, mint, payer, [{ recipient: payer.publicKey, amount: 1000n }]);
 
-    const recipient = Keypair.generate();
-    await createAtaInterface(rpc, payer, mint, recipient.publicKey);
-
-    const destination = getAssociatedTokenAddressInterface(
-        mint,
-        recipient.publicKey,
-    );
-    const tx = await mintToInterface(
+    const delegate = Keypair.generate();
+    const tx = await approve(
         rpc,
         payer,
         mint,
-        destination,
+        500,
         payer,
-        1_000_000_000,
+        delegate.publicKey,
     );
 
     console.log("Tx:", tx);

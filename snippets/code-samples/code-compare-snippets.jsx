@@ -404,6 +404,56 @@ export const lightRevokeRustCode = [
   ".instruction()?;",
 ].join("\n");
 
+// === APPROVE (TYPESCRIPT) ===
+export const splApproveCode = [
+  'import { approve } from "@solana/spl-token";',
+  "",
+  "const tx = await approve(",
+  "  connection,",
+  "  payer,",
+  "  source,",
+  "  delegate,",
+  "  owner,",
+  "  amount",
+  ");",
+].join("\n");
+
+export const lightApproveCode = [
+  'import { approve } from "@lightprotocol/compressed-token";',
+  "",
+  "const tx = await approve(",
+  "  rpc,",
+  "  payer,",
+  "  mint,",
+  "  amount,",
+  "  owner,",
+  "  delegate",
+  ");",
+].join("\n");
+
+// === REVOKE (TYPESCRIPT) ===
+export const splRevokeCode = [
+  'import { revoke } from "@solana/spl-token";',
+  "",
+  "const tx = await revoke(",
+  "  connection,",
+  "  payer,",
+  "  source,",
+  "  owner",
+  ");",
+].join("\n");
+
+export const lightRevokeCode = [
+  'import { revoke } from "@lightprotocol/compressed-token";',
+  "",
+  "const tx = await revoke(",
+  "  rpc,",
+  "  payer,",
+  "  delegatedAccounts,",
+  "  owner",
+  ");",
+].join("\n");
+
 // === CREATE MINT MACRO (ANCHOR) ===
 export const splCreateMintMacroCode = [
   "#[account(",
