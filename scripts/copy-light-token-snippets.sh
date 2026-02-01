@@ -13,6 +13,7 @@ RECIPES=("create-mint" "create-ata" "mint-to" "transfer-interface" "load-ata" "w
 wrap_typescript() {
     local input_file="$1"
     local output_file="$2"
+    mkdir -p "$(dirname "$output_file")"
     echo '```typescript' > "$output_file"
     cat "$input_file" >> "$output_file"
     echo '```' >> "$output_file"
@@ -37,6 +38,19 @@ for recipe in "${RECIPES[@]}"; do
         wrap_typescript "$instruction_file" "$SNIPPETS_DIR/$recipe/instruction.mdx"
     else
         echo "  WARNING: Not found - $instruction_file"
+    fi
+done
+
+# Indexing toolkit snippets
+INDEXING_DIR="/home/tilo/Workspace/examples-light-token/toolkits/indexing-tokens"
+echo "Processing: indexing-tokens toolkit"
+
+for variant in "warm-up-action" "warm-up-instruction"; do
+    src="$INDEXING_DIR/$variant.ts"
+    if [ -f "$src" ]; then
+        wrap_typescript "$src" "$SNIPPETS_DIR/warm-up/$variant.mdx"
+    else
+        echo "  WARNING: Not found - $src"
     fi
 done
 
