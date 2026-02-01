@@ -3,13 +3,12 @@ import "dotenv/config";
 import { Keypair } from "@solana/web3.js";
 import {
     createRpc,
-    bn,
     buildAndSignTx,
     sendAndConfirmTx,
 } from "@lightprotocol/stateless.js";
 import {
-    createMint,
-    mintTo,
+    createMintInterface,
+    mintToCompressed,
     createLoadAtaInstructions,
     getAssociatedTokenAddressInterface,
 } from "@lightprotocol/compressed-token";
@@ -18,30 +17,35 @@ import { readFileSync } from "fs";
 
 // devnet:
 // const RPC_URL = `https://devnet.helius-rpc.com?api-key=${process.env.API_KEY!}`;
-const rpc = createRpc(RPC_URL);
+// const rpc = createRpc(RPC_URL);
 // localnet:
-// const rpc = createRpc();
+const rpc = createRpc();
 
 const payer = Keypair.fromSecretKey(
     new Uint8Array(
-        JSON.parse(readFileSync(`${homedir()}/.config/solana/id.json`, "utf8"))
-    )
+        JSON.parse(readFileSync(`${homedir()}/.config/solana/id.json`, "utf8")),
+    ),
 );
 
 (async function () {
-    // Setup: mint directly to cold state
-    const { mint } = await createMint(rpc, payer, payer.publicKey, 9);
-    await mintTo(rpc, payer, mint, payer.publicKey, payer, bn(1000));
+    // Inactive Light Tokens are cryptographically preserved on the Solana ledger
+    // as compressed tokens (cold storage)
+    // Setup: Get compressed tokens in light-token associated token account
+    const { mint } = await createMintInterface(rpc, payer, payer, null, 9);
+    await mintToCompressed(rpc, payer, mint, payer, [{ recipient: payer.publicKey, amount: 1000n }]);
 
-    const lightTokenAta = getAssociatedTokenAddressInterface(mint, payer.publicKey);
+    const lightTokenAta = getAssociatedTokenAddressInterface(
+        mint,
+        payer.publicKey,
+    );
 
-    // load from cold to hot state
+    // Load compressed tokens to light associated token account (hot balance)
     const ixs = await createLoadAtaInstructions(
         rpc,
         lightTokenAta,
         payer.publicKey,
         mint,
-        payer.publicKey
+        payer.publicKey,
     );
 
     if (ixs.length === 0) return console.log("Nothing to load");
