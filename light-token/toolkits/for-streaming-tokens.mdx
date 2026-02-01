@@ -5,153 +5,41 @@ description: "Light token accounts follow the same layout as SPL-token accounts,
 keywords: ["streaming tokens for solana apps", "scalable token distribution on solana", "token streaming for developers"]
 ---
 
-import ToolkitsSetup from "/snippets/setup/toolkits-setup.mdx";
+import ActionCode from "/snippets/code-snippets/light-token/load-ata/action.mdx";
+import InstructionCode from "/snippets/code-snippets/light-token/load-ata/instruction.mdx";
 
-When a market becomes inactive, its token accounts and related PDAs will be compressed - their state is committed and effectively frozen until a client decompresses it.
+When a market becomes inactive, its token accounts and related PDAs will 
+be compressed autoatically (cold storage). 
+The state is cryptographically preserved on the Solana ledger.
 While compressed, pure on-chain lookups will return uninitialized.
 
-Your indexer should keep tracking, quoting, and routing markets even if the on-chain account shows `is_initialized: false`, `is_compressed: true`. To trade a cold market, the first client must prepend an idempotent decompress "warm up" instruction.
+Your indexer should keep tracking, quoting, and routing markets even if the 
+on-chain account shows `is_initialized: false`, `is_compressed: true`. 
+To trade a cold market, the first client must prepend an 
+idempotent decompress "warm up" instruction.
 
 <Info>
   Find the source code
   [here](https://github.com/Lightprotocol/light-protocol/blob/main/js/compressed-token/tests/e2e/load-ata-standard.test.ts).
 </Info>
 
-## Setup
-
-<ToolkitsSetup />
-
 <Steps>
 <Step>
-### Load Compressed Tokens to Hot Balance
+### Load compressed tokens (cold storage) to Associated Token Account (hot balance)
 
-<CodeGroup>
-```typescript Action
-import { Keypair } from "@solana/web3.js";
-import { createRpc, bn } from "@lightprotocol/stateless.js";
-import {
-  createMint,
-  mintTo,
-  loadAta,
-  getAssociatedTokenAddressInterface,
-} from "@lightprotocol/compressed-token";
-
-async function main() {
-  const rpc = createRpc();
-  const payer = Keypair.generate();
-  await rpc.requestAirdrop(payer.publicKey, 10e9);
-
-  const owner = Keypair.generate();
-  await rpc.requestAirdrop(owner.publicKey, 1e9);
-
-  const mintAuthority = Keypair.generate();
-  const mintKeypair = Keypair.generate();
-  const { mint } = await createMint(
-    rpc,
-    payer,
-    mintAuthority.publicKey,
-    9,
-    mintKeypair,
-  );
-
-  await mintTo(rpc, payer, mint, owner.publicKey, mintAuthority, bn(1000));
-
-  // Get light-token ATA address
-  const tokenAta = getAssociatedTokenAddressInterface(mint, owner.publicKey);
-
-  // Load compressed tokens to hot balance
-  // Creates ATA if needed, returns null if nothing to load
-  const signature = await loadAta(rpc, tokenAta, owner, mint, payer);
-
-  if (signature) {
-    console.log("Loaded tokens to hot balance");
-    console.log("Transaction:", signature);
-  } else {
-    console.log("Nothing to load");
-  }
-}
-
-main().catch(console.error);
-```
-
-```typescript Instruction
-import { Keypair, ComputeBudgetProgram } from "@solana/web3.js";
-import {
-  createRpc,
-  bn,
-  buildAndSignTx,
-  sendAndConfirmTx,
-  dedupeSigner,
-} from "@lightprotocol/stateless.js";
-import {
-  createMint,
-  mintTo,
-  createLoadAtaInstructions,
-  getAssociatedTokenAddressInterface,
-} from "@lightprotocol/compressed-token";
-
-async function main() {
-  const rpc = createRpc();
-  const payer = Keypair.generate();
-  await rpc.requestAirdrop(payer.publicKey, 10e9);
-
-  const owner = Keypair.generate();
-  await rpc.requestAirdrop(owner.publicKey, 1e9);
-
-  const mintAuthority = Keypair.generate();
-  const mintKeypair = Keypair.generate();
-  const { mint } = await createMint(
-    rpc,
-    payer,
-    mintAuthority.publicKey,
-    9,
-    mintKeypair
-  );
-
-  await mintTo(rpc, payer, mint, owner.publicKey, mintAuthority, bn(1000));
-
-  // Get light-token ATA address
-  const tokenAta = getAssociatedTokenAddressInterface(mint, owner.publicKey);
-
-  // Create load instructions
-  const ixs = await createLoadAtaInstructions(
-    rpc,
-    tokenAta,
-    owner.publicKey,
-    mint,
-    payer.publicKey
-  );
-
-  if (ixs.length === 0) {
-    console.log("Nothing to load");
-    return;
-  }
-
-  // Build, sign, and send transaction
-  const { blockhash } = await rpc.getLatestBlockhash();
-  const additionalSigners = dedupeSigner(payer, [owner]);
-
-  const tx = buildAndSignTx(
-    [ComputeBudgetProgram.setComputeUnitLimit({ units: 500_000 }), ...ixs],
-    payer,
-    blockhash,
-    additionalSigners
-  );
-
-  const signature = await sendAndConfirmTx(rpc, tx);
-  console.log("Loaded tokens to hot balance");
-  console.log("Transaction:", signature);
-}
-
-main().catch(console.error);
-```
-
-</CodeGroup>
+<Tabs>
+<Tab title="Action">
+<ActionCode />
+</Tab>
+<Tab title="Instruction">
+<InstructionCode />
+</Tab>
+</Tabs>
 
 </Step>
 </Steps>
 
-# Stream Light-Mint Accounts
+# Stream light-mint accounts
 
 <Card
   title="Toolkit to stream light-mints"
