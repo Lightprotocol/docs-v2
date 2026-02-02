@@ -7,9 +7,9 @@ keywords: ["nullifiers on solana", "prevent double spending", "compressed pdas",
 For some use cases, such as sending payments, you might want to prevent the
 onchain instruction from being executed more than once.
 
-Nullifier-program is a utility that lets you easily create rent-free nullifiers.
-Prepend or append this instruction to your transaction to prevent your main
-action from being executed more than once.
+The nullifier program is a utility reference implementation that lets you easily
+create rent-free nullifiers. Prepend or append this instruction to your
+transaction to prevent your main action from being executed more than once.
 
 The program derives a PDA from a given identifier (nonce, uuid, hash of
 signature). If the identifier has been used before, the rent free PDA already
@@ -19,7 +19,6 @@ exists, causing the whole transaction to fail.
 | | |
 |---|---|
 | **Program ID** | `NFLx5WGPrTHHvdRNsidcrNcLxRruMC92E4yv7zhZBoT` |
-| **Cost** | ~15,000 lamports per nullifier (no rent) |
 | **Source** | [github.com/Lightprotocol/nullifier-program](https://github.com/Lightprotocol/nullifier-program/) |
 
 ## How It Works
@@ -36,15 +35,15 @@ exists, causing the whole transaction to fail.
 
 ```toml
 [dependencies]
-light-nullifier-program = "0.1.0"
-light-client = "0.16.0"
+light-nullifier-program = "0.1.1"
+light-client = "0.18.0"
 ```
 
 </Tab>
 <Tab title="TS">
 
 ```bash
-npm install @lightprotocol/nullifier-program @lightprotocol/stateless.js
+npm install @lightprotocol/nullifier-program @lightprotocol/stateless.js@beta
 ```
 
 </Tab>
