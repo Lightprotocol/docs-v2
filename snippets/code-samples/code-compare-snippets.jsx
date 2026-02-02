@@ -120,7 +120,7 @@ export const splTransferRustCode = [
 ].join("\n");
 
 export const lightTransferRustCode = [
-  "use light_token_sdk::token::TransferInterface;",
+  "use light_token::instruction::TransferInterface;",
   "",
   "let ix = TransferInterface {",
   "    source,",
@@ -150,7 +150,7 @@ export const splCreateAtaRustCode = [
 ].join("\n");
 
 export const lightCreateAtaRustCode = [
-  "use light_token_sdk::token::CreateAssociatedTokenAccount;",
+  "use light_token::instruction::CreateAssociatedTokenAccount;",
   "",
   "let ix = CreateAssociatedTokenAccount::new(",
   "    payer.pubkey(),",
@@ -174,7 +174,7 @@ export const splCreateMintRustCode = [
 ].join("\n");
 
 export const lightCreateMintRustCode = [
-  "use light_token_sdk::token::CreateMint;",
+  "use light_token::instruction::CreateMint;",
   "",
   "let ix = CreateMint::new(",
   "    params,",
@@ -201,7 +201,7 @@ export const splMintToRustCode = [
 ].join("\n");
 
 export const lightMintToRustCode = [
-  "use light_token_sdk::token::MintTo;",
+  "use light_token::instruction::MintTo;",
   "",
   "let ix = MintTo {",
   "    mint,",
@@ -209,6 +209,7 @@ export const lightMintToRustCode = [
   "    amount,",
   "    authority: payer.pubkey(),",
   "    max_top_up: None,",
+  "    fee_payer: None,",
   "}",
   ".instruction()?;",
 ].join("\n");
@@ -226,7 +227,7 @@ export const splCreateTokenAccountRustCode = [
 ].join("\n");
 
 export const lightCreateTokenAccountRustCode = [
-  "use light_token_sdk::token::CreateTokenAccount;",
+  "use light_token::instruction::CreateTokenAccount;",
   "",
   "let ix = CreateTokenAccount::new(",
   "    payer.pubkey(),",
@@ -251,7 +252,7 @@ export const splCloseAccountRustCode = [
 ].join("\n");
 
 export const lightCloseAccountRustCode = [
-  "use light_token_sdk::token::{CloseAccount, LIGHT_TOKEN_PROGRAM_ID};",
+  "use light_token::instruction::{CloseAccount, LIGHT_TOKEN_PROGRAM_ID};",
   "",
   "let ix = CloseAccount::new(",
   "    LIGHT_TOKEN_PROGRAM_ID,",
@@ -296,7 +297,7 @@ export const splBurnRustCode = [
 ].join("\n");
 
 export const lightBurnRustCode = [
-  "use light_token_sdk::token::Burn;",
+  "use light_token::instruction::Burn;",
   "",
   "let ix = Burn {",
   "    source,",
@@ -304,6 +305,7 @@ export const lightBurnRustCode = [
   "    amount,",
   "    authority: payer.pubkey(),",
   "    max_top_up: None,",
+  "    fee_payer: None,",
   "}",
   ".instruction()?;",
 ].join("\n");
@@ -322,7 +324,7 @@ export const splFreezeRustCode = [
 ].join("\n");
 
 export const lightFreezeRustCode = [
-  "use light_token_sdk::token::Freeze;",
+  "use light_token::instruction::Freeze;",
   "",
   "let ix = Freeze {",
   "    token_account: ata,",
@@ -346,7 +348,7 @@ export const splThawRustCode = [
 ].join("\n");
 
 export const lightThawRustCode = [
-  "use light_token_sdk::token::Thaw;",
+  "use light_token::instruction::Thaw;",
   "",
   "let ix = Thaw {",
   "    token_account: ata,",
@@ -371,7 +373,7 @@ export const splApproveRustCode = [
 ].join("\n");
 
 export const lightApproveRustCode = [
-  "use light_token_sdk::token::Approve;",
+  "use light_token::instruction::Approve;",
   "",
   "let ix = Approve {",
   "    token_account: ata,",
@@ -395,7 +397,7 @@ export const splRevokeRustCode = [
 ].join("\n");
 
 export const lightRevokeRustCode = [
-  "use light_token_sdk::token::Revoke;",
+  "use light_token::instruction::Revoke;",
   "",
   "let ix = Revoke {",
   "    token_account: ata,",

@@ -8,17 +8,13 @@ We recommend to use default values, but you can customize the rent config based 
 2. Set the lamports per write a transaction payer will pay for top ups
 
 ```rust
-use light_token_sdk::token::{
-    CompressibleParams,
-    CreateTokenAccount,
-    light_token_v1_config_pda,      // helper to derive config PDA
-    light_token_v1_rent_sponsor_pda // helper to derive rent sponsor PDA
-};
+use light_token::instruction::{CompressibleParams, CreateTokenAccount};
+use light_compressible::config::CompressibleConfig;
 use light_token_types::state::TokenDataVersion;
 
 let compressible_params = CompressibleParams {
-    compressible_config: light_token_v1_config_pda(),
-    rent_sponsor: light_token_v1_rent_sponsor_pda(),
+    compressible_config: CompressibleConfig::light_token_v1_config_pda(),
+    rent_sponsor: CompressibleConfig::light_token_v1_rent_sponsor_pda(),
     pre_pay_num_epochs: 35,           // ~52h
     lamports_per_write: Some(788),
     compress_to_account_pubkey: None,
