@@ -7,7 +7,6 @@ keywords: ["close token account on solana", "reclaim rent on solana"]
 
 ---
 
-import CloseAccountInfosAccountsList from "/snippets/accounts-list/close-account-infos-accounts-list.mdx";
 import TokenClientPrerequisites from "/snippets/light-token-guides/light-token-client-prerequisites.mdx";
 import ClientCustomRentConfig from "/snippets/light-token-guides/client-custom-rent-config.mdx";
 import { CodeCompare } from "/snippets/jsx/code-compare.jsx";
@@ -16,8 +15,6 @@ import {
   lightCloseAccountRustCode,
 } from "/snippets/code-samples/code-compare-snippets.jsx";
 import RustInstructionCode from "/snippets/code-snippets/light-token/close-token-account/rust-client/instruction.mdx";
-import AnchorProgramCode from "/snippets/code-snippets/light-token/close-token-account/anchor-program/full-example.mdx";
-
 1. Closing a Light Token account transfers remaining lamports to a destination account and the rent sponsor can reclaim sponsored rent.
 2. Light token accounts can be closed by the owner.
 
@@ -66,71 +63,6 @@ Compare to SPL:
 
 </Step>
 </Steps>
-</Tab>
-
-<Tab title="Program">
-
-<Note>
-Find [a full code example at the end](#full-code-example).
-</Note>
-<Steps>
-<Step>
-
-### Build Account Infos and CPI the Light Token Program
-
-Use `invoke` for external signers or `invoke_signed` when the authority is a PDA.
-
-<Tabs>
-<Tab title="invoke (External signer)">
-
-```rust
-use light_token::instruction::CloseAccountCpi;
-
-CloseAccountCpi {
-    token_program: token_program.clone(),
-    account: account.clone(),
-    destination: destination.clone(),
-    owner: owner.clone(),
-    rent_sponsor: rent_sponsor.clone(),
-}
-.invoke()?;
-```
-
-</Tab>
-<Tab title="invoke_signed (PDA owner)">
-
-```rust
-use light_token::instruction::CloseAccountCpi;
-
-CloseAccountCpi {
-    token_program: token_program.clone(),
-    account: account.clone(),
-    destination: destination.clone(),
-    owner: owner.clone(),
-    rent_sponsor: rent_sponsor.clone(),
-}
-.invoke_signed(&[signer_seeds])?;
-```
-
-</Tab>
-</Tabs>
-
-<Accordion title="Account List">
-  <CloseAccountInfosAccountsList />
-</Accordion>
-
-</Step>
-</Steps>
-
-# Full Code Example
-
-<Info>
-  View the full example with shared test utilities:
-  [examples-light-token](https://github.com/Lightprotocol/examples-light-token/tree/main/programs/anchor/basic-instructions/close).
-</Info>
-
-<AnchorProgramCode />
-
 </Tab>
 
 </Tabs>
