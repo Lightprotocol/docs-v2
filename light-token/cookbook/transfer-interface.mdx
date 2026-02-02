@@ -1,6 +1,6 @@
 ---
 title: Transfer Interface
-description: Program and client guide for transfers between light-token and SPL token accounts. The interface detects account types and invokes the right programs.
+description: Program and client guide for transfers between Light Token and SPL token accounts. The interface detects account types and invokes the right programs.
 keywords: ["transfer tokens on solana", "token transfer on solana", "interface methods on solana", "spl transfer for developers"]
 ---
 
@@ -28,29 +28,29 @@ import AnchorProgramCode from "/snippets/code-snippets/light-token/transfer-inte
 <table>
   <tbody>
     <tr>
-      <td style={{ width: "33%" }}>**light-token -> light-token Account**</td>
+      <td style={{ width: "33%" }}>**Light Token -> Light Token Account**</td>
       <td>
         <ul>
-          <li>Transfers tokens between light-token accounts</li>
+          <li>Transfers tokens between Light Token accounts</li>
         </ul>
       </td>
     </tr>
     <tr>
-      <td>**SPL token -> light-token Account**</td>
+      <td>**SPL token -> Light Token Account**</td>
       <td>
         <ul>
-          <li>Transfers SPL tokens to light-token accounts</li>
+          <li>Transfers SPL tokens to Light Token accounts</li>
           <li>SPL tokens are locked in interface PDA</li>
-          <li>Tokens are minted to light-token account</li>
+          <li>Tokens are minted to Light Token account</li>
         </ul>
       </td>
     </tr>
     <tr>
-      <td>**light-token -> SPL Account**</td>
+      <td>**Light Token -> SPL Account**</td>
       <td>
         <ul>
           <li>Releases SPL tokens from interface PDA to SPL account</li>
-          <li>Burns tokens in source light-token account</li>
+          <li>Burns tokens in source Light Token account</li>
         </ul>
       </td>
     </tr>
@@ -61,7 +61,7 @@ import AnchorProgramCode from "/snippets/code-snippets/light-token/transfer-inte
 
 <Tab title="TypeScript Client">
 
-The `transferInterface` function transfers tokens between token accounts (SPL, Token-2022, or Light) in a single call.
+The `transferInterface` function transfers tokens between token accounts (SPL, Token 2022, or Light) in a single call.
 
 Compare to SPL:
 
@@ -100,7 +100,7 @@ Compare to SPL:
 
 <Tab title="Rust Client">
 
-Use the unified `TransferInterface` to transfer tokens between token accounts (SPL, Token-2022, or Light) in a single call.
+Use the unified `TransferInterface` to transfer tokens between token accounts (SPL, Token 2022, or Light) in a single call.
 
 <CodeCompare
   firstCode={lightTransferRustCode}
@@ -122,13 +122,13 @@ Use the unified `TransferInterface` to transfer tokens between token accounts (S
 ### Transfer Interface
 
 The example transfers 
-1. SPL token -> light-token, 
-2. light-token -> light-token, and 
-3. light-token -> SPL token.
+1. SPL token -> Light Token,
+2. Light Token -> Light Token, and
+3. Light Token -> SPL token.
 
 <Info>
   Find the full example including shared test utilities in the
-  [examples-light-token repo](https://github.com/Lightprotocol/examples-light-token/tree/main/rust-client/tests).
+  [examples-light-token repo](https://github.com/Lightprotocol/examples-light-token/tree/main/rust-client).
 </Info>
 
 <Tabs>
@@ -155,7 +155,7 @@ Find [a full code example at the end](#full-code-example).
 
 ### Transfer Interface CPI
 
-The `TransferInterfaceCpi` transfers tokens between token accounts (SPL, Token-2022, or light-token).
+The `TransferInterfaceCpi` transfers tokens between token accounts (SPL, Token 2022, or Light Token).
 
 <Tabs>
   <Tab title="invoke (External signer)">
@@ -191,7 +191,7 @@ TransferInterfaceCpi::new(
     destination.clone(),
     authority.clone(),
     payer.clone(),
-    ctoken_authority.clone(),
+    light_token_authority.clone(),
     system_program.clone(),
 )
 .invoke_signed(&[signer_seeds])?;
@@ -207,7 +207,7 @@ TransferInterfaceCpi::new(
 
 <Info>
   View the full example with shared test utilities:
-  [examples-light-token](https://github.com/Lightprotocol/examples-light-token/tree/main/program-examples/anchor/programs/transfer-interface).
+  [examples-light-token](https://github.com/Lightprotocol/examples-light-token/tree/main/programs/anchor/basic-instructions/transfer-interface).
 </Info>
 
 <AnchorProgramCode />

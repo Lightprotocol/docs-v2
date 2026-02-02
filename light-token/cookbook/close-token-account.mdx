@@ -1,7 +1,7 @@
 ---
 title: Close Light Token Account
 sidebarTitle: Close Token Account
-description: Program guide to close light-token accounts via CPI. Includes step-by-step implementation and full code examples.
+description: Program guide to close Light Token accounts via CPI. Includes step-by-step implementation and full code examples.
 keywords: ["close token account on solana", "reclaim rent on solana"]
 ---
 
@@ -18,19 +18,19 @@ import {
 import RustInstructionCode from "/snippets/code-snippets/light-token/close-token-account/rust-client/instruction.mdx";
 import AnchorProgramCode from "/snippets/code-snippets/light-token/close-token-account/anchor-program/full-example.mdx";
 
-1. Closing a light-token account transfers remaining lamports to a destination account and the rent sponsor can reclaim sponsored rent.
+1. Closing a Light Token account transfers remaining lamports to a destination account and the rent sponsor can reclaim sponsored rent.
 2. Light token accounts can be closed by the owner.
 
 <Info>
 The <Tooltip tip="The `compression_authority` is a PDA of the Light Registry program. It claims rent for the rent sponsor from compressible accounts that are compressed and closed.">`compression_authority`</Tooltip>
-closes the account and preserves the balance as compressed token account when the account becomes <Tooltip tip="An account is compressible when it has rent for less than 1 epoch (360 lamports for a 260-byte light-token account).">compressible</Tooltip>. 
+closes the account and preserves the balance as compressed token account when the account becomes <Tooltip tip="An account is compressible when it has rent for less than 1 epoch (360 lamports for a 260-byte Light Token account).">compressible</Tooltip>. 
 The account is reinstated in flight with the same state the next time it is accessed.
 </Info>
 
 <Tabs>
 <Tab title="Rust Client">
 
-Use `CloseTokenAccount` to close an empty light-token account.
+Use `CloseTokenAccount` to close an empty Light Token account.
 
 Compare to SPL:
 
@@ -51,11 +51,11 @@ Compare to SPL:
 </Step>
 
 <Step>
-### Close light-token Account
+### Close Light Token Account
 
 <Info>
   Find the full example including shared test utilities in the
-  [examples-light-token repo](https://github.com/Lightprotocol/examples-light-token/tree/main/rust-client/tests).
+  [examples-light-token repo](https://github.com/Lightprotocol/examples-light-token/tree/main/rust-client).
 </Info>
 
 <Tabs>
@@ -78,8 +78,7 @@ Find [a full code example at the end](#full-code-example).
 
 ### Build Account Infos and CPI the Light Token Program
 
-1. Define the account to close and destination for remaining lamports
-2. Use `invoke` or `invoke_signed` when a CPI requires a PDA signer.
+Use `invoke` for external signers or `invoke_signed` when the authority is a PDA.
 
 <Tabs>
 <Tab title="invoke (External signer)">
@@ -127,7 +126,7 @@ CloseAccountCpi {
 
 <Info>
   View the full example with shared test utilities:
-  [examples-light-token](https://github.com/Lightprotocol/examples-light-token/tree/main/program-examples/anchor/programs/close).
+  [examples-light-token](https://github.com/Lightprotocol/examples-light-token/tree/main/programs/anchor/basic-instructions/close).
 </Info>
 
 <AnchorProgramCode />
@@ -141,7 +140,7 @@ CloseAccountCpi {
 {" "}
 
 <Card
-  title="Go back to the overview for the light-token standard."
+  title="Go back to the overview for the Light Token standard."
   icon="chevron-right"
   color="#0066ff"
   href="/light-token/welcome"

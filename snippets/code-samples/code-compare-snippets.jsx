@@ -691,7 +691,7 @@ export const lightCreateMintMetadataCpiCode = [
   "            update_authority: Some(authority.key.to_bytes().into()),",
   '            name: b"Example Token".to_vec(),',
   '            symbol: b"EXT".to_vec(),',
-  '            uri: b"https://example.com/token.json".to_vec(),',
+  '            uri: b"https://example.com/metadata.json".to_vec(),',
   "            additional_metadata: None,",
   "        },",
   "    ),",

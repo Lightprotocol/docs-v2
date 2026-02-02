@@ -1,7 +1,7 @@
 ---
 title: Approve and Revoke Delegates
 sidebarTitle: Approve / Revoke
-description: Rust client guide to approve and revoke delegates for light-token accounts. Includes step-by-step implementation and full code examples.
+description: Rust client guide to approve and revoke delegates for Light Token accounts. Includes step-by-step implementation and full code examples.
 keywords: ["approve delegate solana", "revoke delegate solana", "token delegation"]
 ---
 
@@ -32,7 +32,7 @@ import RevokeAnchorProgramCode from "/snippets/code-snippets/light-token/revoke/
 1. Approve grants a delegate permission to transfer up to a specified amount of tokens from your account.
     * Each token account can have only one delegate at a time. 
     * Any new approval overwrites the previous one.
-2. Revoke removes all delegate permissions from a light-token account.
+2. Revoke removes all delegate permissions from a Light Token account.
 3. Only the token account owner can approve or revoke delegates.
 
 <Tabs>
@@ -54,7 +54,7 @@ import RevokeAnchorProgramCode from "/snippets/code-snippets/light-token/revoke/
 </Tab>
 <Tab title="Revoke">
 
-`revoke` removes all delegate permissions from a light-token account.
+`revoke` removes all delegate permissions from a Light Token account.
 
 <CodeCompare
   firstCode={lightRevokeCode}
@@ -131,7 +131,7 @@ import RevokeAnchorProgramCode from "/snippets/code-snippets/light-token/revoke/
 
 <Info>
   Find the full example including shared test utilities in the
-  [examples-light-token repo](https://github.com/Lightprotocol/examples-light-token/tree/main/rust-client/tests).
+  [examples-light-token repo](https://github.com/Lightprotocol/examples-light-token/tree/main/rust-client).
 </Info>
 
 <Tabs>
@@ -174,8 +174,7 @@ Find [a full code example at the end](#full-code-example).
 
 ### Build Account Infos and CPI the Light Token Program
 
-1. Define the light-token account, delegate, and amount to approve
-2. Use `invoke` or `invoke_signed`, when a CPI requires a PDA signer.
+Use `invoke` for external signers or `invoke_signed` when the authority is a PDA.
 
 <Tabs>
 <Tab title="invoke (External signer)">
@@ -224,8 +223,7 @@ approve_cpi.invoke_signed(&[signer_seeds])?;
 
 ### Build Account Infos and CPI the Light Token Program
 
-1. Define the light-token account to revoke delegation from
-2. Use `invoke` or `invoke_signed`, when a CPI requires a PDA signer.
+Use `invoke` for external signers or `invoke_signed` when the authority is a PDA.
 
 <Tabs>
 <Tab title="invoke (External signer)">
@@ -272,7 +270,7 @@ revoke_cpi.invoke_signed(&[signer_seeds])?;
 
 <Info>
   View the full example with shared test utilities:
-  [examples-light-token](https://github.com/Lightprotocol/examples-light-token/tree/main/program-examples/anchor/programs/approve).
+  [examples-light-token](https://github.com/Lightprotocol/examples-light-token/tree/main/programs/anchor/basic-instructions/approve).
 </Info>
 
 <ApproveAnchorProgramCode />
@@ -283,7 +281,7 @@ revoke_cpi.invoke_signed(&[signer_seeds])?;
 
 <Info>
   View the full example with shared test utilities:
-  [examples-light-token](https://github.com/Lightprotocol/examples-light-token/tree/main/program-examples/anchor/programs/revoke).
+  [examples-light-token](https://github.com/Lightprotocol/examples-light-token/tree/main/programs/anchor/basic-instructions/revoke).
 </Info>
 
 <RevokeAnchorProgramCode />
@@ -298,7 +296,7 @@ revoke_cpi.invoke_signed(&[signer_seeds])?;
 # Next Steps
 
 <Card
-  title="Go back to the overview for the light-token standard"
+  title="Go back to the overview for the Light Token standard"
   icon="chevron-right"
   color="#0066ff"
   href="/light-token/welcome"

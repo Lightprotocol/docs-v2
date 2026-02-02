@@ -1,5 +1,6 @@
 ---
 title: Mint to Light Token Accounts
+sidebarTitle: Mint To
 description: Client and program guide to mint tokens to a account. Includes step-by-step implementation and full code examples.
 keywords: ["mint tokens on solana", "spl mint to for developers", "token minting for protocols"]
 ---
@@ -23,10 +24,10 @@ import InstructionCode from "/snippets/code-snippets/light-token/mint-to/instruc
 import RustActionCode from "/snippets/code-snippets/light-token/mint-to/rust-client/action.mdx";
 import RustInstructionCode from "/snippets/code-snippets/light-token/mint-to/rust-client/instruction.mdx";
 import AnchorProgramCode from "/snippets/code-snippets/light-token/mint-to/anchor-program/full-example.mdx";
-import AnchorMintToCheckedCode from "/snippets/code-snippets/light-token/mint-to-checked/anchor-program/full-example.mdx";
+
 
 1. Mint To creates new tokens of a mint and deposits them to a specified token account.
-2. Before we can mint any tokens, we need an initialized mint account (SPL, Token-2022 or Light) for which we hold the mint authority.
+2. Before we can mint any tokens, we need an initialized mint account (SPL, Token 2022 or Light) for which we hold the mint authority.
 
 <Tabs>
 
@@ -34,7 +35,7 @@ import AnchorMintToCheckedCode from "/snippets/code-snippets/light-token/mint-to
 
 `mintToInterface` mints tokens to token accounts in a single call.
 
-The function auto-detects the token program (SPL, Token-2022, or Light) from the mint address.
+The function auto-detects the token program (SPL, Token 2022, or Light) from the mint address.
 
 Compare to SPL:
 
@@ -72,7 +73,7 @@ Compare to SPL:
 
 <Tab title="Rust Client">
 
-Use `MintTo` to mint tokens to a light-token account.
+Use `MintTo` to mint tokens to a Light Token account.
 
 Compare to SPL:
 
@@ -97,7 +98,7 @@ Compare to SPL:
 
 <Info>
   Find the full example including shared test utilities in the
-  [examples-light-token repo](https://github.com/Lightprotocol/examples-light-token/tree/main/rust-client/tests).
+  [examples-light-token repo](https://github.com/Lightprotocol/examples-light-token/tree/main/rust-client).
 </Info>
 
 <Tabs>
@@ -178,87 +179,10 @@ MintToCpi {
 
 <Info>
   View the full example with shared test utilities:
-  [examples-light-token](https://github.com/Lightprotocol/examples-light-token/tree/main/program-examples/anchor/programs/mint-to).
+  [examples-light-token](https://github.com/Lightprotocol/examples-light-token/tree/main/programs/anchor/basic-instructions/mint-to).
 </Info>
 
 <AnchorProgramCode />
-
-</Tab>
-
-<Tab title="Program (Mint to Checked)">
-
-<Note>
-MintToChecked validates that the decimals parameter matches the mint's decimals.
-Find [a full code example at the end](#full-code-example-1).
-</Note>
-
-<Steps>
-
-<Step>
-
-### Build Account Infos and CPI the Light Token Program
-
-Use `invoke` for external signers or `invoke_signed` when the authority is a PDA.
-
-<Tabs>
-<Tab title="invoke (External signer)">
-
-```rust
-use light_token::instruction::MintToCheckedCpi;
-
-MintToCheckedCpi {
-    mint: mint.clone(),
-    destination: destination.clone(),
-    amount,
-    decimals,
-    authority: authority.clone(),
-    system_program: system_program.clone(),
-    fee_payer: None,
-    max_top_up: None,
-}
-.invoke()
-```
-
-</Tab>
-<Tab title="invoke_signed (PDA authority)">
-
-```rust
-use light_token::instruction::MintToCheckedCpi;
-
-let signer_seeds: &[&[u8]] = &[MINT_AUTHORITY_SEED, &[bump]];
-
-MintToCheckedCpi {
-    mint: mint.clone(),
-    destination: destination.clone(),
-    amount,
-    decimals,
-    authority: authority.clone(),
-    system_program: system_program.clone(),
-    fee_payer: None,
-    max_top_up: None,
-}
-.invoke_signed(&[signer_seeds])
-```
-
-</Tab>
-</Tabs>
-
-<Info>
-  `fee_payer` and `max_top_up` are optional fields to customize rent top-ups.
-  Set to `None` to use defaults.
-</Info>
-
-</Step>
-</Steps>
-
-# Full Code Example
-
-<Info>
-  View the full example with shared test utilities:
-  [examples-light-token](https://github.com/Lightprotocol/examples-light-token/tree/main/program-examples/anchor/programs/mint-to-checked).
-</Info>
-
-<AnchorMintToCheckedCode />
 
 </Tab>
 </Tabs>
@@ -266,7 +190,7 @@ MintToCheckedCpi {
 # Next Steps
 
 <Card
-  title="Learn to use the transfer interface for light-token <> SPL token transfers"
+  title="Learn to use the transfer interface for Light Token <> SPL token transfers"
   icon="chevron-right"
   color="#0066ff"
   href="/light-token/cookbook/transfer-interface"

@@ -1,7 +1,7 @@
 ---
 title: Create Light Token Account
 sidebarTitle: Create Token Account
-description: Client and program guide to create light-token accounts. Includes step-by-step implementation and full code examples.
+description: Client and program guide to create Light Token accounts. Includes step-by-step implementation and full code examples.
 keywords: ["token account on solana", "rent free token account for apps", "rent free solana accounts"]
 ---
 
@@ -58,7 +58,7 @@ Compare to SPL:
 
 <Info>
   Find the full example including shared test utilities in the
-  [examples-light-token repo](https://github.com/Lightprotocol/examples-light-token/tree/main/rust-client/tests).
+  [examples-light-token repo](https://github.com/Lightprotocol/examples-light-token/tree/main/rust-client).
 </Info>
 
 <Tabs>
@@ -94,10 +94,7 @@ Find [a full code example at the end](#full-code-example).
 
 ### Build Account Infos and CPI the Light Token Program
 
-1. Pass token account fields and call `.rent_free()` with rent config accounts.
-2. Use `invoke` or `invoke_signed`:
-   - When `account` is an external keypair, use `invoke`.
-   - When `account` is a PDA, use `invoke_signed` with its seeds.
+Use `invoke` for external signers or `invoke_signed` when the authority is a PDA.
 
 <Tabs>
 <Tab title="invoke (External signer)">
@@ -155,7 +152,7 @@ CreateTokenAccountCpi {
 
 <Info>
   View the full example with shared test utilities:
-  [examples-light-token](https://github.com/Lightprotocol/examples-light-token/tree/main/program-examples/anchor/sdk-basics/create-token-account).
+  [examples-light-token](https://github.com/Lightprotocol/examples-light-token/tree/main/programs/anchor/basic-instructions/create-token-account).
 </Info>
 
 <AnchorProgramCode />
@@ -205,9 +202,9 @@ use light_sdk_macros::light_program;
 pub mod light_token_macro_create_token_account {
     use super::*;
 
-    pub fn create_token_vault<'info>(
-        ctx: Context<'_, '_, '_, 'info, CreateTokenVault<'info>>,
-        params: CreateTokenVaultParams,
+    pub fn create_token_account<'info>(
+        ctx: Context<'_, '_, '_, 'info, CreateTokenAccount<'info>>,
+        params: CreateTokenAccountParams,
     ) -> Result<()> {
         Ok(())
     }
@@ -245,7 +242,7 @@ pub vault: UncheckedAccount<'info>,
 
 <Info>
   View the full example with test:
-  [examples-light-token-anchor](https://github.com/Lightprotocol/examples-light-token-anchor/tree/main/program-examples/anchor/basic-macros/create-token-account).
+  [examples-light-token](https://github.com/Lightprotocol/examples-light-token/tree/main/programs/anchor/basic-macros/create-token-account).
 </Info>
 
 <AnchorMacroCode />
@@ -257,7 +254,7 @@ pub vault: UncheckedAccount<'info>,
 </Tabs>
 # Next Steps
   <Card
-    title="Learn how to mint tokens to light-token accounts"
+    title="Learn how to mint tokens to Light Token accounts"
     icon="chevron-right"
     color="#0066ff"
     href="/light-token/cookbook/mint-to"

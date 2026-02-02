@@ -1,7 +1,7 @@
 ---
 title: Burn Light Tokens
 sidebarTitle: Burn
-description: Rust client guide to burn light-tokens. Includes step-by-step implementation and full code examples.
+description: Rust client guide to burn Light Tokens. Includes step-by-step implementation and full code examples.
 keywords: ["burn tokens on solana", "destroy tokens solana", "reduce token supply"]
 ---
 
@@ -44,11 +44,11 @@ Compare to SPL:
 </Step>
 
 <Step>
-### Burn Light-Tokens
+### Burn Light Tokens
 
 <Info>
   Find the full example including shared test utilities in the
-  [examples-light-token repo](https://github.com/Lightprotocol/examples-light-token/tree/main/rust-client/tests).
+  [examples-light-token repo](https://github.com/Lightprotocol/examples-light-token/tree/main/rust-client).
 </Info>
 
 <Tabs>
@@ -71,8 +71,7 @@ Find [a full code example at the end](#full-code-example).
 
 ### Build Account Infos and CPI the Light Token Program
 
-1. Use `invoke` when the authority is an external signer
-2. Use `invoke_signed` when the authority is a PDA
+Use `invoke` for external signers or `invoke_signed` when the authority is a PDA.
 
 <Tabs>
 <Tab title="invoke (External signer)">
@@ -120,7 +119,7 @@ BurnCpi {
 
 <Info>
   View the full example with shared test utilities:
-  [examples-light-token](https://github.com/Lightprotocol/examples-light-token/tree/main/program-examples/anchor/programs/burn).
+  [examples-light-token](https://github.com/Lightprotocol/examples-light-token/tree/main/programs/anchor/basic-instructions/burn).
 </Info>
 
 <AnchorProgramCode />
@@ -132,7 +131,7 @@ BurnCpi {
 # Next Steps
 
 <Card
-  title="Learn to freeze and thaw light-token accounts"
+  title="Learn to freeze and thaw Light Token accounts"
   icon="chevron-right"
   color="#0066ff"
   href="/light-token/cookbook/freeze-thaw"
