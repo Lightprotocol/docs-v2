@@ -4,10 +4,11 @@ description: Create rent-free nullifier PDAs to prevent duplicate actions.
 keywords: ["nullifiers on solana", "prevent double spending", "compressed pdas", "rent-free nullifiers"]
 ---
 
-For some use cases, such as sending payments, you might want to prevent the
-onchain instruction from being executed more than once. 
+For some use cases, such as sending payments, you might want to prevent your
+onchain instruction from being executed more than once.
 
-The nullifier program shown below makes this easy for you:
+The nullifier program utility solves this for you.
+We also deployed a reference implementation to public networks so you can get started quickly:
 
 | | |
 |---|---|
@@ -189,6 +190,8 @@ const exists = account !== null;
 </Tabs>
 
 ---
+
+Note that this is a reference implementation. Feel free to fork and modify the program and SDKs to fit your use case!
 
 <Callout type="info">
 Questions or need support? [Telegram](https://t.me/swen_light) | [email](mailto:support@lightprotocol.com) | [Discord](https://discord.com/invite/7cJ8BhAXhu)
