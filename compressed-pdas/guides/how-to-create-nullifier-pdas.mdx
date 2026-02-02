@@ -119,10 +119,10 @@ const tx = new Transaction().add(
 ```rust
 use light_nullifier_program::sdk::{fetch_proof, build_instruction};
 
-// Step 1: Fetch validity proof
+// Step 1: Fetch proof
 let proof_result = fetch_proof(&mut rpc, &id).await?;
 
-// Step 2: Build instruction (sync, no RPC)
+// Step 2: Build instruction
 let nullifier_ix = build_instruction(payer.pubkey(), id, proof_result);
 
 // Add to transaction
@@ -140,13 +140,13 @@ let tx = Transaction::new_signed_with_payer(
 ```typescript
 import { fetchProof, buildInstruction } from "@lightprotocol/nullifier-program";
 
-// Step 1: Fetch validity proof
+// Step 1: Fetch proof
 const proofResult = await fetchProof(rpc, id);
 
-// Step 2: Build instruction (sync, no RPC)
+// Step 2: Build instruction
 const nullifierIx = buildInstruction(payer.publicKey, id, proofResult);
 
-// Add to transaction
+// Combine with your transaction
 const tx = new Transaction().add(
   nullifierIx,
   // your main instruction
