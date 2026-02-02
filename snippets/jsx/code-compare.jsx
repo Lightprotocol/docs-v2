@@ -33,16 +33,19 @@ export const CodeCompare = ({
       const rustPattern =
         /(\/\/.*$)|(["'])(?:(?!\2)[^\\]|\\.)*?\2|\b(use|let|mut|pub|fn|struct|impl|enum|mod|const|static|trait|type|where|for|in|if|else|match|loop|while|return|self|Self|true|false|Some|None|Ok|Err|Result|Option|vec!)\b|::([a-zA-Z_][a-zA-Z0-9_]*)|&amp;([a-zA-Z_][a-zA-Z0-9_]*)|\b([a-zA-Z_][a-zA-Z0-9_]*)\s*(?=\()|(\?)/gm;
 
-      return escaped.replace(rustPattern, (match, comment, stringQuote, keyword, pathSegment, reference, func, questionMark) => {
-        if (comment) return `<span style="color:#6b7280;font-style:italic">${match}</span>`;
-        if (stringQuote) return `<span style="color:#059669">${match}</span>`;
-        if (keyword) return `<span style="color:#db2777">${match}</span>`;
-        if (pathSegment) return `::<span style="color:#0891b2">${pathSegment}</span>`;
-        if (reference) return `&amp;<span style="color:#6366f1">${reference}</span>`;
-        if (func) return `<span style="color:#2563eb">${match}</span>`;
-        if (questionMark) return `<span style="color:#db2777">?</span>`;
-        return match;
-      });
+      return escaped.replace(
+        rustPattern,
+        (match, comment, stringQuote, keyword, pathSegment, reference, func, questionMark) => {
+          if (comment) return `<span style="color:#6b7280;font-style:italic">${match}</span>`;
+          if (stringQuote) return `<span style="color:#059669">${match}</span>`;
+          if (keyword) return `<span style="color:#db2777">${match}</span>`;
+          if (pathSegment) return `::<span style="color:#0891b2">${pathSegment}</span>`;
+          if (reference) return `&amp;<span style="color:#6366f1">${reference}</span>`;
+          if (func) return `<span style="color:#2563eb">${match}</span>`;
+          if (questionMark) return `<span style="color:#db2777">?</span>`;
+          return match;
+        }
+      );
     }
 
     // JavaScript/TypeScript syntax highlighting (default)
@@ -169,12 +172,8 @@ export const CodeCompare = ({
         style={{ fontFamily: "Inter, sans-serif" }}
       >
         {/* Header with toggle */}
-        <div
-          className="flex items-center justify-between px-4 py-3 border-b border-zinc-200 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-900"
-        >
-          <span
-            className="text-sm font-medium text-zinc-600 dark:text-zinc-300"
-          >
+        <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-200 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-900">
+          <span className="text-sm font-medium text-zinc-600 dark:text-zinc-300">
             {showingFirst ? firstLabel : secondLabel}
           </span>
 
@@ -187,13 +186,32 @@ export const CodeCompare = ({
               style={{ background: "transparent", border: "none", cursor: "pointer" }}
             >
               {copied ? (
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2">
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#22c55e"
+                  strokeWidth="2"
+                >
                   <path d="M20 6L9 17l-5-5" />
                 </svg>
               ) : (
                 <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                  <path d="M14.25 5.25H7.25C6.14543 5.25 5.25 6.14543 5.25 7.25V14.25C5.25 15.3546 6.14543 16.25 7.25 16.25H14.25C15.3546 16.25 16.25 15.3546 16.25 14.25V7.25C16.25 6.14543 15.3546 5.25 14.25 5.25Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                  <path d="M2.80103 11.998L1.77203 5.07397C1.61003 3.98097 2.36403 2.96397 3.45603 2.80197L10.38 1.77297C11.313 1.63397 12.19 2.16297 12.528 3.00097" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path
+                    d="M14.25 5.25H7.25C6.14543 5.25 5.25 6.14543 5.25 7.25V14.25C5.25 15.3546 6.14543 16.25 7.25 16.25H14.25C15.3546 16.25 16.25 15.3546 16.25 14.25V7.25C16.25 6.14543 15.3546 5.25 14.25 5.25Z"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M2.80103 11.998L1.77203 5.07397C1.61003 3.98097 2.36403 2.96397 3.45603 2.80197L10.38 1.77297C11.313 1.63397 12.19 2.16297 12.528 3.00097"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
                 </svg>
               )}
             </button>
@@ -207,41 +225,44 @@ export const CodeCompare = ({
                 width: "56px",
                 height: "28px",
                 borderRadius: "14px",
-                boxShadow: "inset -2px -2px 4px rgba(255,255,255,0.3), inset 2px 2px 4px rgba(0,0,0,0.1)",
+                boxShadow:
+                  "inset -2px -2px 4px rgba(255,255,255,0.3), inset 2px 2px 4px rgba(0,0,0,0.1)",
                 cursor: "pointer",
                 transition: "all 0.3s ease",
               }}
             >
-            {/* Toggle button */}
-            <div
-              className="bg-white dark:bg-zinc-300"
-              style={{
-                position: "absolute",
-                width: "24px",
-                height: "24px",
-                borderRadius: "12px",
-                top: "2px",
-                left: showingFirst ? "30px" : "2px",
-                boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
-                transition: "all 0.3s ease-in-out",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              {/* LED */}
+              {/* Toggle button */}
               <div
+                className="bg-white dark:bg-zinc-300"
                 style={{
-                  width: "6px",
-                  height: "6px",
-                  background: showingFirst ? "#0066ff" : "#999",
-                  borderRadius: "50%",
-                  boxShadow: showingFirst ? "0 0 5px 1px rgba(0, 102, 255, 0.6)" : "0 0 4px 1px rgba(0, 0, 0, 0.1)",
+                  position: "absolute",
+                  width: "24px",
+                  height: "24px",
+                  borderRadius: "12px",
+                  top: "2px",
+                  left: showingFirst ? "30px" : "2px",
+                  boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
                   transition: "all 0.3s ease-in-out",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
                 }}
-              />
+              >
+                {/* LED */}
+                <div
+                  style={{
+                    width: "6px",
+                    height: "6px",
+                    background: showingFirst ? "#0066ff" : "#999",
+                    borderRadius: "50%",
+                    boxShadow: showingFirst
+                      ? "0 0 5px 1px rgba(0, 102, 255, 0.6)"
+                      : "0 0 4px 1px rgba(0, 0, 0, 0.1)",
+                    transition: "all 0.3s ease-in-out",
+                  }}
+                />
+              </div>
             </div>
-          </div>
           </div>
         </div>
 
@@ -259,7 +280,15 @@ export const CodeCompare = ({
           aria-valuemax={100}
           aria-label="Code comparison slider"
         >
-          <div className="relative" style={{ minHeight: "140px", overflow: "hidden", height: containerHeight ? `${containerHeight}px` : "auto", transition: "height 0.3s ease" }}>
+          <div
+            className="relative"
+            style={{
+              minHeight: "140px",
+              overflow: "hidden",
+              height: containerHeight ? `${containerHeight}px` : "auto",
+              transition: "height 0.3s ease",
+            }}
+          >
             <div style={{ position: "relative" }}>
               {/* Second code (background) - shown when slider is on left */}
               <pre
