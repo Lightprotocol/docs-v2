@@ -1,12 +1,8 @@
 ```toml Cargo.toml
 [dependencies]
-light-compressed-token-sdk = "0.1"
-light-client = "0.1"
-light-token-types = "0.1"
-solana-sdk = "2.2"
-borsh = "0.10"
-tokio = { version = "1.36", features = ["full"] }
-
-[dev-dependencies]
-light-program-test = "0.1"  # For in-memory tests with LiteSVM
+light-token = "0.4.0"
+light-client = { version = "0.19.0", features = ["v2"] }
+solana-sdk = "2"
+borsh = "0.10.4"
+tokio = { version = "1", features = ["full"] }
 ```

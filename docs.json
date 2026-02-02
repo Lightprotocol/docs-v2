@@ -55,7 +55,9 @@
             "pages": [
               "light-token/toolkits/overview",
               "light-token/toolkits/for-payments",
-              "light-token/toolkits/for-wallets"
+              "light-token/toolkits/for-wallets",
+              "light-token/toolkits/for-streaming-mints",
+              "light-token/toolkits/for-streaming-tokens"
             ]
           },
           {
@@ -63,16 +65,29 @@
             "pages": [
               "light-token/cookbook/overview",
               {
+                "group": "Examples",
+                "expanded": true,
+                "pages": [
+                  "light-token/examples/client"
+                ]
+              },
+              {
                 "group": "Recipes",
+                "expanded": true,
                 "pages": [
                   "light-token/cookbook/create-mint",
                   "light-token/cookbook/create-ata",
                   "light-token/cookbook/create-token-account",
                   "light-token/cookbook/mint-to",
-                  "light-token/cookbook/close-token-account",
                   "light-token/cookbook/transfer-interface",
+                  "light-token/cookbook/transfer-checked",
+                  "light-token/cookbook/approve-revoke",
+                  "light-token/cookbook/freeze-thaw",
                   "light-token/cookbook/wrap-unwrap",
-                  "light-token/cookbook/load-ata"
+                  "light-token/cookbook/load-ata",
+                  "light-token/cookbook/close-token-account",
+                  "light-token/cookbook/burn"
+
                 ]
               }
             ]
@@ -254,7 +269,6 @@
               "references/whitepaper",
               "references/node-operators",
               "references/terminology",
-              "references/light-token-terminology",
               "references/migration-v1-to-v2",
               "support",
               "references/security"

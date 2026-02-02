@@ -1,0 +1,31 @@
+```rust
+use borsh::BorshDeserialize;
+use light_client::rpc::Rpc;
+use light_token_client::actions::Revoke;
+use rust_client::{setup, SetupContext};
+use solana_sdk::signer::Signer;
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // Setup creates mint and associated token account with approved delegate
+    let SetupContext {
+        mut rpc,
+        payer,
+        associated_token_account,
+        ..
+    } = setup().await;
+
+    let sig = Revoke {
+        token_account: associated_token_account,
+        owner: Some(payer.pubkey()),
+    }
+    .execute(&mut rpc, &payer)
+    .await?;
+
+    let data = rpc.get_account(associated_token_account).await?.ok_or("Account not found")?;
+    let token = light_token_interface::state::Token::deserialize(&mut &data.data[..])?;
+    println!("Delegate: {:?} Tx: {sig}", token.delegate);
+
+    Ok(())
+}
+```

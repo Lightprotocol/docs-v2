@@ -1,0 +1,39 @@
+```rust
+use borsh::BorshDeserialize;
+use light_client::rpc::Rpc;
+use light_token_client::actions::Wrap;
+use rust_client::{setup_for_wrap, WrapContext};
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // Setup creates SPL associated token account with tokens and empty Light associated token account
+    let WrapContext {
+        mut rpc,
+        payer,
+        mint,
+        source_associated_token_account,
+        light_associated_token_account,
+        decimals,
+    } = setup_for_wrap().await;
+
+    // Wrap tokens from SPL associated token account to Light Token associated token account
+    let sig = Wrap {
+        source_spl_ata: source_associated_token_account,
+        destination: light_associated_token_account,
+        mint,
+        amount: 500_000,
+        decimals,
+    }
+    .execute(&mut rpc, &payer, &payer)
+    .await?;
+
+    let data = rpc
+        .get_account(light_associated_token_account)
+        .await?
+        .ok_or("Account not found")?;
+    let token = light_token_interface::state::Token::deserialize(&mut &data.data[..])?;
+    println!("Balance: {} Tx: {sig}", token.amount);
+
+    Ok(())
+}
+```

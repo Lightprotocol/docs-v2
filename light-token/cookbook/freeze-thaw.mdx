@@ -1,0 +1,102 @@
+---
+title: Freeze and Thaw Light Token Accounts
+sidebarTitle: Freeze / Thaw
+description: Rust client guide to freeze and thaw Light Token accounts. Includes step-by-step implementation and full code examples.
+keywords: ["freeze token account solana", "thaw token account solana", "token account management"]
+---
+
+---
+
+import TokenClientPrerequisites from "/snippets/light-token-guides/light-token-client-prerequisites.mdx";
+import { CodeCompare } from "/snippets/jsx/code-compare.jsx";
+import {
+  splFreezeRustCode,
+  lightFreezeRustCode,
+  splThawRustCode,
+  lightThawRustCode,
+} from "/snippets/code-samples/code-compare-snippets.jsx";
+import FreezeInstructionCode from "/snippets/code-snippets/light-token/freeze-thaw/rust-client/freeze-instruction.mdx";
+import ThawInstructionCode from "/snippets/code-snippets/light-token/freeze-thaw/rust-client/thaw-instruction.mdx";
+
+1. Freeze prevents all transfers or token burns from a specific Light Token account.
+2. Once frozen, the account cannot send tokens, receive tokens, or be closed until it is thawed. 
+3. Thaw re-enables transfers on a frozen Light Token account.
+4. Only the freeze authority (set at mint creation) can freeze or thaw accounts.
+5. If the freeze authority is revoked (set to null) on the mint account, tokens can never be frozen.
+
+<Tabs>
+<Tab title="Rust Client">
+
+<Tabs>
+<Tab title="Freeze">
+
+<CodeCompare
+  firstCode={lightFreezeRustCode}
+  secondCode={splFreezeRustCode}
+  firstLabel="light-token"
+  secondLabel="SPL"
+  language="rust"
+/>
+
+</Tab>
+<Tab title="Thaw">
+
+<CodeCompare
+  firstCode={lightThawRustCode}
+  secondCode={splThawRustCode}
+  firstLabel="light-token"
+  secondLabel="SPL"
+  language="rust"
+/>
+
+</Tab>
+</Tabs>
+
+<Steps>
+<Step>
+### Prerequisites
+
+<TokenClientPrerequisites />
+
+</Step>
+
+<Step>
+### Freeze or thaw Light Token accounts
+
+<Info>
+  Find the full example including shared test utilities in the
+  [examples-light-token](https://github.com/Lightprotocol/examples-light-token/tree/main/rust-client).
+</Info>
+
+<Tabs>
+<Tab title="Freeze">
+<Tabs>
+<Tab title="Instruction">
+<FreezeInstructionCode />
+</Tab>
+</Tabs>
+</Tab>
+<Tab title="Thaw">
+<Tabs>
+<Tab title="Instruction">
+<ThawInstructionCode />
+</Tab>
+</Tabs>
+</Tab>
+</Tabs>
+
+</Step>
+</Steps>
+</Tab>
+
+</Tabs>
+
+# Next Steps
+
+<Card
+  title="Learn to approve and revoke delegates"
+  icon="chevron-right"
+  color="#0066ff"
+  href="/light-token/cookbook/approve-revoke"
+  horizontal
+/>

@@ -1,7 +1,7 @@
 ---
-title: Wrap & Unwrap SPL/Token-22 <> Light Token
+title: Wrap & Unwrap SPL/Token 2022 <> Light Token
 sidebarTitle: Wrap & Unwrap SPL
-description: Move tokens between SPL/Token-22 token and light-token accounts. Use to interact with applications that only support SPL/Token-22.
+description: Move tokens between SPL/Token 2022 token and Light Token accounts. Use to interact with applications that only support SPL/Token 2022.
 keywords: ["wrap tokens on solana", "unwrap tokens for developers", "spl to light token conversion"]
 ---
 
@@ -12,9 +12,12 @@ import WrapActionCode from "/snippets/code-snippets/light-token/wrap/action.mdx"
 import WrapInstructionCode from "/snippets/code-snippets/light-token/wrap/instruction.mdx";
 import UnwrapActionCode from "/snippets/code-snippets/light-token/unwrap/action.mdx";
 import UnwrapInstructionCode from "/snippets/code-snippets/light-token/unwrap/instruction.mdx";
+import WrapRustActionCode from "/snippets/code-snippets/light-token/wrap/rust-client/action.mdx";
+import UnwrapRustActionCode from "/snippets/code-snippets/light-token/unwrap/rust-client/action.mdx";
+import TokenClientPrerequisites from "/snippets/light-token-guides/light-token-client-prerequisites.mdx";
 
-- **Wrap**: Move tokens from SPL/T22 account → light-token ATA (hot balance)
-- **Unwrap**: Move tokens from light-token ATA (hot balance) → SPL/T22 account
+- **Wrap**: Move tokens from SPL/T22 account → Light Token ATA (hot balance)
+- **Unwrap**: Move tokens from Light Token ATA (hot balance) → SPL/T22 account
 
 <Info>
   Find the source code:
@@ -23,7 +26,8 @@ import UnwrapInstructionCode from "/snippets/code-snippets/light-token/unwrap/in
   [unwrap.ts](https://github.com/Lightprotocol/light-protocol/blob/0c4e2417b2df2d564721b89e18d1aad3665120e7/js/compressed-token/src/v3/actions/unwrap.ts)
 </Info>
 
-## Get Started
+<Tabs>
+<Tab title="TypeScript Client">
 
 <Tabs>
 <Tab title="Wrap">
@@ -65,6 +69,69 @@ import UnwrapInstructionCode from "/snippets/code-snippets/light-token/unwrap/in
 
 </Step>
 </Steps>
+
+</Tab>
+</Tabs>
+
+</Tab>
+<Tab title="Rust Client">
+
+<Tabs>
+<Tab title="Wrap">
+
+<Steps>
+<Step>
+### Prerequisites
+
+<TokenClientPrerequisites />
+
+</Step>
+
+<Step>
+### Wrap SPL tokens to Light Token ATA
+
+<Info>
+  Find the full example including shared test utilities in the
+  [examples-light-token](https://github.com/Lightprotocol/examples-light-token/tree/main/rust-client).
+</Info>
+
+<Tabs>
+<Tab title="Action">
+<WrapRustActionCode />
+</Tab>
+</Tabs>
+</Step>
+</Steps>
+
+</Tab>
+<Tab title="Unwrap">
+
+<Steps>
+<Step>
+### Prerequisites
+
+<TokenClientPrerequisites />
+
+</Step>
+
+<Step>
+### Unwrap Light Tokens to SPL account
+
+<Info>
+  Find the full example including shared test utilities in the
+  [examples-light-token](https://github.com/Lightprotocol/examples-light-token/tree/main/rust-client).
+</Info>
+
+<Tabs>
+<Tab title="Action">
+<UnwrapRustActionCode />
+</Tab>
+</Tabs>
+</Step>
+</Steps>
+
+</Tab>
+</Tabs>
 
 </Tab>
 </Tabs>

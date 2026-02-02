@@ -1,0 +1,74 @@
+```rust
+use anchor_spl::token::spl_token;
+use borsh::BorshDeserialize;
+use light_client::rpc::Rpc;
+use light_program_test::{LightProgramTest, ProgramTestConfig};
+use light_token::{
+    instruction::{
+        get_associated_token_address, CreateAssociatedTokenAccount, SplInterface,
+        TransferInterface, LIGHT_TOKEN_PROGRAM_ID,
+    },
+    spl_interface::find_spl_interface_pda_with_index,
+};
+use rust_client::{setup_spl_associated_token_account, setup_spl_mint};
+use solana_sdk::signer::Signer;
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let mut rpc = LightProgramTest::new(ProgramTestConfig::new_v2(true, None)).await?;
+
+    let payer = rpc.get_payer().insecure_clone();
+    let decimals = 2u8;
+    let amount = 10_000u64;
+
+    // Setup creates mint, mints tokens and creates SPL associated token account
+    let mint = setup_spl_mint(&mut rpc, &payer, decimals).await;
+    let spl_associated_token_account = setup_spl_associated_token_account(&mut rpc, &payer, &mint, &payer.pubkey(), amount).await;
+    let (interface_pda, interface_bump) = find_spl_interface_pda_with_index(&mint, 0, false);
+
+    // Create Light associated token account
+    let light_associated_token_account = get_associated_token_address(&payer.pubkey(), &mint);
+
+    let create_associated_token_account_instruction =
+        CreateAssociatedTokenAccount::new(payer.pubkey(), payer.pubkey(), mint).instruction()?;
+
+    rpc.create_and_send_transaction(&[create_associated_token_account_instruction], &payer.pubkey(), &[&payer])
+        .await?;
+
+    // SPL interface PDA for Mint (holds SPL tokens when transferred to Light Token)
+    let spl_interface = SplInterface {
+        mint,
+        spl_token_program: spl_token::ID,
+        spl_interface_pda: interface_pda,
+        spl_interface_pda_bump: interface_bump,
+    };
+
+    // Transfers tokens between token accounts (SPL, Token-2022, or Light) in a single call.
+    let transfer_instruction = TransferInterface {
+        source: spl_associated_token_account,
+        destination: light_associated_token_account,
+        amount,
+        decimals,
+        authority: payer.pubkey(),
+        payer: payer.pubkey(),
+        spl_interface: Some(spl_interface),
+        max_top_up: None,
+        source_owner: spl_token::ID,
+        destination_owner: LIGHT_TOKEN_PROGRAM_ID,
+    }
+    .instruction()?;
+
+    let sig = rpc
+        .create_and_send_transaction(&[transfer_instruction], &payer.pubkey(), &[&payer])
+        .await?;
+
+    let data = rpc
+        .get_account(light_associated_token_account)
+        .await?
+        .ok_or("Account not found")?;
+    let token = light_token_interface::state::Token::deserialize(&mut &data.data[..])?;
+    println!("Balance: {} Tx: {sig}", token.amount);
+
+    Ok(())
+}
+```

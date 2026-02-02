@@ -1,6 +1,11 @@
 ```typescript
 import "dotenv/config";
-import { Keypair, ComputeBudgetProgram, Transaction, sendAndConfirmTransaction } from "@solana/web3.js";
+import {
+    Keypair,
+    ComputeBudgetProgram,
+    Transaction,
+    sendAndConfirmTransaction,
+} from "@solana/web3.js";
 import { createRpc, bn, DerivationMode } from "@lightprotocol/stateless.js";
 import {
     createMintInterface,
@@ -13,26 +18,25 @@ import { homedir } from "os";
 import { readFileSync } from "fs";
 
 // devnet:
-const RPC_URL = `https://devnet.helius-rpc.com?api-key=${process.env.API_KEY!}`;
-const rpc = createRpc(RPC_URL);
+// const RPC_URL = `https://devnet.helius-rpc.com?api-key=${process.env.API_KEY!}`;
+// const rpc = createRpc(RPC_URL);
 // localnet:
-// const rpc = createRpc();
+const rpc = createRpc();
 
 const payer = Keypair.fromSecretKey(
     new Uint8Array(
-        JSON.parse(readFileSync(`${homedir()}/.config/solana/id.json`, "utf8"))
-    )
+        JSON.parse(readFileSync(`${homedir()}/.config/solana/id.json`, "utf8")),
+    ),
 );
 
 (async function () {
-
     const { mint } = await createMintInterface(rpc, payer, payer, null, 9);
 
     const recipient = Keypair.generate();
     await createAtaInterface(rpc, payer, mint, recipient.publicKey);
     const destination = getAssociatedTokenAddressInterface(
         mint,
-        recipient.publicKey
+        recipient.publicKey,
     );
 
     const mintInterface = await getMintInterface(rpc, mint);
@@ -49,7 +53,7 @@ const payer = Keypair.fromSecretKey(
                 },
             ],
             [],
-            DerivationMode.compressible
+            DerivationMode.compressible,
         );
     }
 
@@ -59,12 +63,12 @@ const payer = Keypair.fromSecretKey(
         payer.publicKey,
         payer.publicKey,
         1_000_000_000,
-        validityProof
+        validityProof,
     );
 
     const tx = new Transaction().add(
         ComputeBudgetProgram.setComputeUnitLimit({ units: 500_000 }),
-        ix
+        ix,
     );
     const signature = await sendAndConfirmTransaction(rpc, tx, [payer]);
 

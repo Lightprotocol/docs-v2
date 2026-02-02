@@ -192,7 +192,9 @@
     "offramps",
     "zkcompression",
     "Tasktool",
-    "clippy"
+    "clippy",
+    "Raydium",
+    "raydium"
   ],
   "ignorePaths": [
     "node_modules",

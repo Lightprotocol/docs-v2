@@ -1,7 +1,7 @@
 ---
-title: Load Token Balances to Light ATA
-sidebarTitle: Load ATA
-description: Unify token balances from compressed tokens (cold), SPL, and Token-2022 to one light ATA.
+title: Load Token Balances to Light Associated Token Account
+sidebarTitle: Load Associated Token Account
+description: Unify token balances from compressed tokens (cold Light Tokens), SPL, and Token 2022 to one light ATA.
 keywords: ["load ata on solana", "get token balance for wallets"]
 ---
 
@@ -12,7 +12,7 @@ import ActionCode from "/snippets/code-snippets/light-token/load-ata/action.mdx"
 import InstructionCode from "/snippets/code-snippets/light-token/load-ata/instruction.mdx";
 
 1. `loadAta` unifies tokens from multiple sources to a single ATA:
-    * Compressed tokens (cold) -> Decompresses -> light ATA
+    * Compressed tokens (cold Light Tokens) -> Decompresses -> light ATA
     * SPL balance (if wrap=true) -> Wraps -> light ATA
     * T22 balance (if wrap=true) -> Wraps -> light ATA
 
@@ -24,11 +24,9 @@ import InstructionCode from "/snippets/code-snippets/light-token/load-ata/instru
 Find the source code [here](https://github.com/Lightprotocol/light-protocol/blob/0c4e2417b2df2d564721b89e18d1aad3665120e7/js/compressed-token/src/v3/actions/load-ata.ts).
 </Info>
 
-## Get Started
-
 <Steps>
 <Step>
-### Load Compressed Tokens to Hot Balance
+### Unify Tokens to Light-ATA Balance
 
 <FullSetup />
 

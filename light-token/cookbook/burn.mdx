@@ -1,0 +1,73 @@
+---
+title: Burn Light Tokens
+sidebarTitle: Burn
+description: Rust client guide to burn Light Tokens. Includes step-by-step implementation and full code examples.
+keywords: ["burn tokens on solana", "destroy tokens solana", "reduce token supply"]
+---
+
+---
+
+import TokenClientPrerequisites from "/snippets/light-token-guides/light-token-client-prerequisites.mdx";
+import { CodeCompare } from "/snippets/jsx/code-compare.jsx";
+import {
+  splBurnRustCode,
+  lightBurnRustCode,
+} from "/snippets/code-samples/code-compare-snippets.jsx";
+import RustInstructionCode from "/snippets/code-snippets/light-token/burn/rust-client/instruction.mdx";
+import BurnCheckedRustInstructionCode from "/snippets/code-snippets/light-token/burn-checked/rust-client/instruction.mdx";
+
+
+
+1. Burn permanently destroys tokens by reducing the balance in a token account. 
+2. Burned tokens are removed from circulation and decreases the supply tracked on the mint account.
+3. Only the token account owner (or approved delegate) can burn tokens.
+
+<Tabs>
+<Tab title="Rust Client">
+
+Compare to SPL:
+
+<CodeCompare
+  firstCode={lightBurnRustCode}
+  secondCode={splBurnRustCode}
+  firstLabel="light-token"
+  secondLabel="SPL"
+  language="rust"
+/>
+
+<Steps>
+<Step>
+### Prerequisites
+
+<TokenClientPrerequisites />
+
+</Step>
+
+<Step>
+### Burn Light Tokens
+
+<Info>
+  Find the full example including shared test utilities in the
+  [examples-light-token](https://github.com/Lightprotocol/examples-light-token/tree/main/rust-client).
+</Info>
+
+<Tabs>
+<Tab title="Instruction">
+<RustInstructionCode />
+</Tab>
+</Tabs>
+</Step>
+</Steps>
+</Tab>
+
+</Tabs>
+
+# Next Steps
+
+<Card
+  title="Learn to freeze and thaw Light Token accounts"
+  icon="chevron-right"
+  color="#0066ff"
+  href="/light-token/cookbook/freeze-thaw"
+  horizontal
+/>

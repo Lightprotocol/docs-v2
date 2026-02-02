@@ -17,29 +17,42 @@ Find devnet examples [here](https://github.com/Lightprotocol/examples-light-toke
 
 ## Setup
 
+Light mints are Solana accounts owned by the Light Token Program. Subscribe to account updates to detect new mints and changes.
+
 ```toml Cargo.toml
 [dependencies]
 helius-laserstream = "0.1"
 tokio = { version = "1", features = ["full"] }
 futures = "0.3"
-light-event = "0.3"
-light-compressed-account = "0.8"
-light-token-interface = "0.2"
-borsh = "0.10"
+anyhow = "1"
+dotenvy = "0.15"
 bs58 = "0.5"
+borsh = "0.10"
+
+light-token-interface = "0.3.0"
+light-compressed-account = { version = "0.9.0", features = ["std"] }
+
+# Pin blake3 to avoid constant_time_eq edition2024 issue
+blake3 = "=1.5.5"
 ```
 
 ```rust
-use futures::StreamExt;
-use helius_laserstream::{subscribe, LaserstreamConfig};
-use light_event::parse::event_from_light_transaction;
-use light_token_interface::state::mint::Mint;
-use light_token_interface::state::extensions::ExtensionStruct;
 use borsh::BorshDeserialize;
+use futures::StreamExt;
+use helius_laserstream::grpc::subscribe_request_filter_accounts_filter::Filter;
+use helius_laserstream::grpc::subscribe_request_filter_accounts_filter_memcmp::Data;
+use helius_laserstream::grpc::{
+    SubscribeRequestFilterAccounts, SubscribeRequestFilterAccountsFilter,
+    SubscribeRequestFilterAccountsFilterMemcmp,
+};
+use helius_laserstream::{subscribe, LaserstreamConfig};
+use light_token_interface::state::{ExtensionStruct, Mint};
 
-const LIGHT_SYSTEM_PROGRAM: &str = "SySTEM1eSU2p4BGQfQpimFEWWSC1XDFeun3Nqzz3rT7";
 const LIGHT_TOKEN_PROGRAM_ID: &str = "cTokenmWW8bLPjZEBAUgYy3zKxQZW6VKi7bqNFEVv3m";
-const COMPRESSED_MINT_DISCRIMINATOR: [u8; 8] = [0, 0, 0, 0, 0, 0, 0, 1];
+
+/// Byte offset of account_type in the Mint account data.
+/// BaseMint (82) + MintMetadata (67) + reserved (16) = 165
+const ACCOUNT_TYPE_OFFSET: u64 = 165;
 ```
 
 <Steps>
@@ -71,13 +84,20 @@ let config = LaserstreamConfig::new(
 </Tabs>
 
 ```rust
+// Subscribe to Solana accounts owned by the Light Token Program
+// with account_type = 1 (Mint) at byte offset 165
 let request = helius_laserstream::grpc::SubscribeRequest {
-    transactions: [(
-        "light".to_string(),
-        helius_laserstream::grpc::SubscribeRequestFilterTransactions {
-            vote: Some(false),
-            failed: Some(false),
-            account_include: vec![LIGHT_SYSTEM_PROGRAM.to_string()],
+    accounts: [(
+        "light_mints".to_string(),
+        SubscribeRequestFilterAccounts {
+            owner: vec![LIGHT_TOKEN_PROGRAM_ID.to_string()],
+            filters: vec![SubscribeRequestFilterAccountsFilter {
+                filter: Some(Filter::Memcmp(SubscribeRequestFilterAccountsFilterMemcmp {
+                    offset: ACCOUNT_TYPE_OFFSET,
+                    data: Some(Data::Bytes(vec![1])),
+                })),
+            }],
+            nonempty_txn_signature: Some(true),
             ..Default::default()
         },
     )]
@@ -89,34 +109,53 @@ let (stream, _handle) = subscribe(config, request);
 tokio::pin!(stream);
 
 while let Some(update) = stream.next().await {
-    // Process transactions...
+    // Process account updates...
 }
 ```
 
 </Step>
 
 <Step>
-### Parse Events
+### Deserialize mint accounts
 
 ```rust
-fn process_transaction(msg: &Message, meta: Option<&TransactionStatusMeta>) {
-    let account_keys = extract_account_keys(msg, meta);
+if let Some(helius_laserstream::grpc::subscribe_update::UpdateOneof::Account(
+    account_update,
+)) = msg.update_oneof
+{
+    if let Some(account_info) = account_update.account {
+        let pubkey = bs58::encode(&account_info.pubkey).into_string();
+        let tx_sig = account_info
+            .txn_signature
+            .as_ref()
+            .map(|s| bs58::encode(s).into_string())
+            .unwrap_or_default();
 
-    let (program_ids, instruction_data, accounts_per_ix) =
-        extract_instructions(msg, meta, &account_keys);
+        match Mint::deserialize(&mut account_info.data.as_slice()) {
+            Ok(mint) => {
+                println!("Mint: {}", pubkey);
+                println!("  tx: {}", tx_sig);
+                println!("  decimals: {}", mint.base.decimals);
+                println!("  supply: {}", mint.base.supply);
 
-    match event_from_light_transaction(&program_ids, &instruction_data, accounts_per_ix) {
-        Ok(Some(batches)) => {
-            for batch in batches {
-                println!(
-                    "Event: {} inputs, {} outputs",
-                    batch.event.input_compressed_account_hashes.len(),
-                    batch.event.output_compressed_accounts.len()
-                );
+                if let Some(authority) = &mint.base.mint_authority {
+                    println!(
+                        "  mint_authority: {}",
+                        bs58::encode(authority.to_bytes()).into_string()
+                    );
+                }
+
+                if let Some(authority) = &mint.base.freeze_authority {
+                    println!(
+                        "  freeze_authority: {}",
+                        bs58::encode(authority.to_bytes()).into_string()
+                    );
+                }
+            }
+            Err(e) => {
+                eprintln!("Failed to deserialize mint {}: {}", pubkey, e);
             }
         }
-        Ok(None) => {} // No compressed account events
-        Err(e) => eprintln!("Parse error: {:?}", e),
     }
 }
 ```
@@ -124,46 +163,7 @@ fn process_transaction(msg: &Message, meta: Option<&TransactionStatusMeta>) {
 </Step>
 
 <Step>
-### Extract Mints
-
-```rust
-for output in event.output_compressed_accounts.iter() {
-    let owner = output.compressed_account.owner;
-
-    // Check if owned by light token program
-    let light_token_program_id = bs58::decode(LIGHT_TOKEN_PROGRAM_ID).into_vec().unwrap();
-    if owner != light_token_program_id.as_slice() {
-        continue;
-    }
-
-    // Check discriminator
-    let data = match &output.compressed_account.data {
-        Some(d) if d.discriminator == COMPRESSED_MINT_DISCRIMINATOR => &d.data,
-        _ => continue,
-    };
-
-    // Deserialize
-    let mint = Mint::try_from_slice(data)?;
-
-    // Check if new (address not in inputs)
-    let is_new = output
-        .compressed_account
-        .address
-        .map(|addr| {
-            !event.input_compressed_account_hashes.iter().any(|h| *h == addr)
-        })
-        .unwrap_or(true);
-
-    if is_new {
-        println!("New mint: {}", bs58::encode(mint.metadata.mint).into_string());
-    }
-}
-```
-
-</Step>
-
-<Step>
-### Extract Token Metadata from Mint Extensions
+### Extract Token Metadata from mint extensions
 
 ```rust
 fn extract_metadata(mint: &Mint) -> Option<(String, String, String)> {
@@ -202,16 +202,13 @@ if let Some((name, symbol, uri)) = extract_metadata(&mint) {
 pub struct Mint {
     pub base: BaseMint,
     pub metadata: MintMetadata,
-    /// Reserved bytes (16 bytes) for T22 layout compatibility.
     pub reserved: [u8; 16],
-    /// Account type discriminator at byte offset 165 (1 = Mint, 2 = Account)
     pub account_type: u8,
-    /// Compression info embedded directly in the mint
     pub compression: CompressionInfo,
     pub extensions: Option<Vec<ExtensionStruct>>,
 }
 
-/// SPL compatible basemint structure (82 bytes)
+/// SPL-compatible base mint structure
 #[repr(C)]
 pub struct BaseMint {
     pub mint_authority: Option<Pubkey>,
@@ -221,19 +218,13 @@ pub struct BaseMint {
     pub freeze_authority: Option<Pubkey>,
 }
 
-/// Light Protocol-specific metadata for compressed mints.
-/// Total size: 67 bytes
+/// Light Protocol metadata for mints (67 bytes)
 #[repr(C)]
 pub struct MintMetadata {
-    /// Version for upgradability
     pub version: u8,
-    /// Whether the compressed mint has been decompressed to a Mint Solana account.
     pub mint_decompressed: bool,
-    /// PDA derived from mint_signer
     pub mint: Pubkey,
-    /// Signer pubkey used to derive the mint PDA
     pub mint_signer: [u8; 32],
-    /// Bump seed from mint PDA derivation
     pub bump: u8,
 }
 ```
