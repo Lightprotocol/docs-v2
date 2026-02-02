@@ -10,6 +10,7 @@ keywords: ["transfer tokens solana", "checked transfer", "decimal validation"]
 import TokenClientPrerequisites from "/snippets/light-token-guides/light-token-client-prerequisites.mdx";
 import RustActionCode from "/snippets/code-snippets/light-token/transfer-checked/rust-client/action.mdx";
 import RustInstructionCode from "/snippets/code-snippets/light-token/transfer-checked/rust-client/instruction.mdx";
+
 1. TransferChecked validates that the decimals parameter matches the mint's decimals.
 2. Use for Light→Light transfers when you need decimal verification.
 3. For transfers involving SPL or Token 2022 accounts, use [Transfer Interface](/light-token/cookbook/transfer-interface) instead.
@@ -30,7 +31,7 @@ import RustInstructionCode from "/snippets/code-snippets/light-token/transfer-ch
 
 <Info>
   Find the full example including shared test utilities in the
-  [examples-light-token repo](https://github.com/Lightprotocol/examples-light-token/tree/main/rust-client).
+  [examples-light-token](https://github.com/Lightprotocol/examples-light-token/tree/main/rust-client).
 </Info>
 
 <Tabs>
