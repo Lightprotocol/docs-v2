@@ -1,7 +1,7 @@
 ```rust
-use light_token_sdk::token::CompressibleParamsInfos;
+use light_token::instruction::CompressibleParamsCpi;
 
-let compressible_params = CompressibleParamsInfos::new(
+let compressible_params = CompressibleParamsCpi::new(
     compressible_config.clone(),
     rent_sponsor.clone(),
     system_program.clone(),

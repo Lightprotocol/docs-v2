@@ -120,7 +120,7 @@ export const splTransferRustCode = [
 ].join("\n");
 
 export const lightTransferRustCode = [
-  "use light_token_sdk::token::TransferInterface;",
+  "use light_token::instruction::TransferInterface;",
   "",
   "let ix = TransferInterface {",
   "    source,",
@@ -150,7 +150,7 @@ export const splCreateAtaRustCode = [
 ].join("\n");
 
 export const lightCreateAtaRustCode = [
-  "use light_token_sdk::token::CreateAssociatedTokenAccount;",
+  "use light_token::instruction::CreateAssociatedTokenAccount;",
   "",
   "let ix = CreateAssociatedTokenAccount::new(",
   "    payer.pubkey(),",
@@ -174,14 +174,14 @@ export const splCreateMintRustCode = [
 ].join("\n");
 
 export const lightCreateMintRustCode = [
-  "use light_token_sdk::token::CreateMint;",
+  "use light_token::instruction::CreateMint;",
   "",
   "let ix = CreateMint::new(",
   "    params,",
   "    mint_seed.pubkey(),",
   "    payer.pubkey(),",
-  "    address_tree.tree,",
-  "    output_queue,",
+  "    address_tree.tree,", 
+  "    output_queue,", 
   ")",
   ".instruction()?;",
 ].join("\n");
@@ -201,7 +201,7 @@ export const splMintToRustCode = [
 ].join("\n");
 
 export const lightMintToRustCode = [
-  "use light_token_sdk::token::MintTo;",
+  "use light_token::instruction::MintTo;",
   "",
   "let ix = MintTo {",
   "    mint,",
@@ -209,6 +209,7 @@ export const lightMintToRustCode = [
   "    amount,",
   "    authority: payer.pubkey(),",
   "    max_top_up: None,",
+  "    fee_payer: None,",
   "}",
   ".instruction()?;",
 ].join("\n");
@@ -226,7 +227,7 @@ export const splCreateTokenAccountRustCode = [
 ].join("\n");
 
 export const lightCreateTokenAccountRustCode = [
-  "use light_token_sdk::token::CreateTokenAccount;",
+  "use light_token::instruction::CreateTokenAccount;",
   "",
   "let ix = CreateTokenAccount::new(",
   "    payer.pubkey(),",
@@ -251,7 +252,7 @@ export const splCloseAccountRustCode = [
 ].join("\n");
 
 export const lightCloseAccountRustCode = [
-  "use light_token_sdk::token::{CloseAccount, LIGHT_TOKEN_PROGRAM_ID};",
+  "use light_token::instruction::{CloseAccount, LIGHT_TOKEN_PROGRAM_ID};",
   "",
   "let ix = CloseAccount::new(",
   "    LIGHT_TOKEN_PROGRAM_ID,",
@@ -296,7 +297,7 @@ export const splBurnRustCode = [
 ].join("\n");
 
 export const lightBurnRustCode = [
-  "use light_token_sdk::token::Burn;",
+  "use light_token::instruction::Burn;",
   "",
   "let ix = Burn {",
   "    source,",
@@ -304,6 +305,7 @@ export const lightBurnRustCode = [
   "    amount,",
   "    authority: payer.pubkey(),",
   "    max_top_up: None,",
+  "    fee_payer: None,",
   "}",
   ".instruction()?;",
 ].join("\n");
@@ -322,7 +324,7 @@ export const splFreezeRustCode = [
 ].join("\n");
 
 export const lightFreezeRustCode = [
-  "use light_token_sdk::token::Freeze;",
+  "use light_token::instruction::Freeze;",
   "",
   "let ix = Freeze {",
   "    token_account: ata,",
@@ -346,7 +348,7 @@ export const splThawRustCode = [
 ].join("\n");
 
 export const lightThawRustCode = [
-  "use light_token_sdk::token::Thaw;",
+  "use light_token::instruction::Thaw;",
   "",
   "let ix = Thaw {",
   "    token_account: ata,",
@@ -371,7 +373,7 @@ export const splApproveRustCode = [
 ].join("\n");
 
 export const lightApproveRustCode = [
-  "use light_token_sdk::token::Approve;",
+  "use light_token::instruction::Approve;",
   "",
   "let ix = Approve {",
   "    token_account: ata,",
@@ -395,7 +397,7 @@ export const splRevokeRustCode = [
 ].join("\n");
 
 export const lightRevokeRustCode = [
-  "use light_token_sdk::token::Revoke;",
+  "use light_token::instruction::Revoke;",
   "",
   "let ix = Revoke {",
   "    token_account: ata,",
@@ -470,7 +472,7 @@ export const lightCreateMintMacroCode = [
   "    mint::signer = mint_signer,",
   "    mint::authority = fee_payer,",
   "    mint::decimals = 9,",
-  "    mint::seeds = &[MINT_SIGNER_SEED, authority.key().as_ref()],",
+  "    mint::seeds = &[MINT_SIGNER_SEED, self.authority.to_account_info().key.as_ref()],",
   "    mint::bump = params.mint_signer_bump",
   ")]",
   "pub mint: UncheckedAccount<'info>,",
@@ -498,18 +500,16 @@ export const splCreateMintMetadataMacroCode = [
 ].join("\n");
 
 export const lightCreateMintMetadataMacroCode = [
-  "#[light_account(",
-  "    init,",
-  "    mint,",
-  "    mint_signer = mint_signer,",
-  "    authority = fee_payer,",
-  "    decimals = 9,",
-  "    mint_seeds = &[MINT_SIGNER_SEED, authority.key().as_ref(), &[params.mint_signer_bump]],",
-  "    name = params.name.clone(),",
-  "    symbol = params.symbol.clone(),",
-  "    uri = params.uri.clone(),",
-  "    update_authority = authority,",
-  "    additional_metadata = params.additional_metadata.clone()",
+  "#[light_account(init,",
+  "    mint::signer = mint_signer,",
+  "    mint::authority = fee_payer,",
+  "    mint::decimals = 9,",
+  "    mint::seeds = &[MINT_SIGNER_SEED, self.authority.to_account_info().key.as_ref()],",
+  "    mint::bump = params.mint_signer_bump,",
+  "    mint::name = params.name.clone(),",
+  "    mint::symbol = params.symbol.clone(),",
+  "    mint::uri = params.uri.clone(),",
+  "    mint::update_authority = authority",
   ")]",
   "pub mint: UncheckedAccount<'info>,",
 ].join("\n");
@@ -642,18 +642,20 @@ export const splCreateMintCpiCode = [
 export const lightCreateMintCpiCode = [
   "use light_token::instruction::CreateMintCpi;",
   "",
-  "CreateMintCpi::new(",
-  "    mint_seed.clone(),",
-  "    authority.clone(),",
-  "    payer.clone(),",
-  "    address_tree.clone(),",
-  "    output_queue.clone(),",
-  "    compressible_config.clone(),",
-  "    mint.clone(),",
-  "    rent_sponsor.clone(),",
+  "CreateMintCpi {",
+  "    mint_seed: mint_seed.clone(),",
+  "    authority: authority.clone(),",
+  "    payer: payer.clone(),",
+  "    address_tree: address_tree.clone(),",
+  "    output_queue: output_queue.clone(),",
+  "    compressible_config: compressible_config.clone(),",
+  "    mint: mint.clone(),",
+  "    rent_sponsor: rent_sponsor.clone(),",
   "    system_accounts,",
+  "    cpi_context: None,",
+  "    cpi_context_account: None,",
   "    params,",
-  ")",
+  "}",
   ".invoke()?",
 ].join("\n");
 
@@ -697,17 +699,19 @@ export const lightCreateMintMetadataCpiCode = [
   "    ),",
   "]);",
   "",
-  "CreateMintCpi::new(",
-  "    mint_seed.clone(),",
-  "    authority.clone(),",
-  "    payer.clone(),",
-  "    address_tree.clone(),",
-  "    output_queue.clone(),",
-  "    compressible_config.clone(),",
-  "    mint.clone(),",
-  "    rent_sponsor.clone(),",
+  "CreateMintCpi {",
+  "    mint_seed: mint_seed.clone(),",
+  "    authority: authority.clone(),",
+  "    payer: payer.clone(),",
+  "    address_tree: address_tree.clone(),",
+  "    output_queue: output_queue.clone(),",
+  "    compressible_config: compressible_config.clone(),",
+  "    mint: mint.clone(),",
+  "    rent_sponsor: rent_sponsor.clone(),",
   "    system_accounts,",
+  "    cpi_context: None,",
+  "    cpi_context_account: None,",
   "    params, // includes extensions",
-  ")",
+  "}",
   ".invoke()?",
 ].join("\n");

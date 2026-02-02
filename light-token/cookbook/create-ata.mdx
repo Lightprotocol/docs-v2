@@ -27,6 +27,8 @@ import ActionCode from "/snippets/code-snippets/light-token/create-ata/action.md
 import InstructionCode from "/snippets/code-snippets/light-token/create-ata/instruction.mdx";
 import RustActionCode from "/snippets/code-snippets/light-token/create-ata/rust-client/action.mdx";
 import RustInstructionCode from "/snippets/code-snippets/light-token/create-ata/rust-client/instruction.mdx";
+import AnchorProgramCode from "/snippets/code-snippets/light-token/create-ata/anchor-program/full-example.mdx";
+import AnchorMacroCode from "/snippets/code-snippets/light-token/create-ata/anchor-macro/full-example.mdx";
 
 1. Associated Light Token accounts can hold token balances of light, SPL, or Token 2022 mints.
 2. Light-ATAs are on-chain accounts like SPL ATA's, but the light token program sponsors the rent-exemption cost for you.
@@ -104,8 +106,7 @@ Compare to SPL:
 ### Create ATA
 
 <Info>
-  Find the full example including shared test utilities in the
-  [examples-light-token](https://github.com/Lightprotocol/examples-light-token/tree/main/rust-client).
+  View the [source code](https://github.com/Lightprotocol/light-protocol/blob/main/sdk-libs/token-sdk/src/instruction/create_ata.rs) and [full example](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/instructions/create_associated_token_account.rs) with shared test utilities.
 </Info>
 
 <Tabs>
@@ -120,6 +121,185 @@ Compare to SPL:
 </Step>
 </Steps>
 
+</Tab>
+<Tab title="Program">
+<Tabs>
+<Tab title="CPI">
+
+Compare to SPL:
+
+<CodeCompare
+  firstCode={lightCreateAtaCpiCode}
+  secondCode={splCreateAtaCpiCode}
+  firstLabel="light-token"
+  secondLabel="SPL"
+  language="rust"
+/>
+
+<Note>
+Find [a full code example at the end](#full-code-example).
+</Note>
+<Steps>
+
+<Step>
+
+### Build Account Infos and CPI the Light Token Program
+
+1. Pass ATA accounts and call `.rent_free()` with rent config accounts.
+2. Use `invoke` or `invoke_signed`:
+   - When the `payer` is an external wallet, use `invoke`.
+   - When the `payer` is a PDA, use `invoke_signed` with its seeds.
+
+<Note>
+  The light-ATA address is derived from `[owner, light_token_program_id, mint]`.
+  Unlike Light Token accounts, owner and mint are passed as accounts, not in
+  instruction data.
+</Note>
+
+<Tabs>
+<Tab title="invoke (External signer)">
+
+```rust
+use light_token::instruction::CreateAssociatedAccountCpi;
+
+CreateAssociatedAccountCpi {
+    payer: payer.clone(),
+    owner: owner.clone(),
+    mint: mint.clone(),
+    ata: associated_token_account.clone(),
+    bump,
+}
+.rent_free(
+    compressible_config.clone(),
+    rent_sponsor.clone(),
+    system_program.clone(),
+)
+.invoke()
+```
+
+</Tab>
+<Tab title="invoke_signed (PDA signer)">
+
+```rust
+use light_token::instruction::CreateAssociatedAccountCpi;
+
+let signer_seeds: &[&[u8]] = &[ATA_SEED, &[authority_bump]];
+
+CreateAssociatedAccountCpi {
+    payer: payer.clone(),
+    owner: owner.clone(),
+    mint: mint.clone(),
+    ata: associated_token_account.clone(),
+    bump,
+}
+.rent_free(
+    compressible_config.clone(),
+    rent_sponsor.clone(),
+    system_program.clone(),
+)
+.invoke_signed(&[signer_seeds])
+```
+
+</Tab>
+</Tabs>
+<TokenCreateATAAccountsList />
+
+</Step>
+</Steps>
+# Full Code Example
+
+<Info>
+  View the [source code](https://github.com/Lightprotocol/light-protocol/blob/main/sdk-libs/token-sdk/src/instruction/create_ata.rs) and [full example](https://github.com/Lightprotocol/examples-light-token/tree/main/programs/anchor/basic-instructions/create-associated-token-account) with shared test utilities.
+</Info>
+
+<AnchorProgramCode />
+
+</Tab>
+<Tab title="Anchor Macros">
+
+Compare to SPL:
+
+<CodeCompare
+  firstCode={lightCreateAtaMacroCode}
+  secondCode={splCreateAtaMacroCode}
+  firstLabel="light-token"
+  secondLabel="SPL"
+  language="rust"
+/>
+
+<Note>
+Find [a full code example at the end](#full-code-example-1).
+</Note>
+
+<Steps>
+
+<Step>
+### Dependencies
+
+```toml
+[dependencies]
+light-sdk = { version = "0.18.0", features = ["anchor", "v2", "cpi-context"] }
+light-sdk-macros = "0.18.0"
+light-compressible = "0.1.0"
+anchor-lang = "0.31"
+```
+
+</Step>
+
+<Step>
+### Program
+
+Add `#[light_program]` above `#[program]`:
+
+```rust
+use light_sdk_macros::light_program;
+
+#[light_program]
+#[program]
+pub mod light_token_macro_create_ata {
+    use super::*;
+
+    pub fn create_ata<'info>(
+        ctx: Context<'_, '_, '_, 'info, CreateAta<'info>>,
+        params: CreateAtaParams,
+    ) -> Result<()> {
+        Ok(())
+    }
+}
+```
+
+</Step>
+
+<Step>
+### Accounts struct
+
+Derive `LightAccounts` on your `Accounts` struct and add `#[light_account(...)]` next to `#[account(...)]`.
+
+```rust
+/// CHECK: Validated by light-token CPI
+#[account(mut)]
+#[light_account(init,
+    associated_token::authority = ata_owner,
+    associated_token::mint = ata_mint,
+    associated_token::bump = params.ata_bump
+)]
+pub ata: UncheckedAccount<'info>,
+```
+
+</Step>
+
+</Steps>
+
+# Full code example
+
+<Info>
+  View the [source code](https://github.com/Lightprotocol/light-protocol/blob/main/sdk-libs/token-sdk/src/instruction/create_ata.rs) and [full example](https://github.com/Lightprotocol/examples-light-token/tree/main/programs/anchor/basic-macros/create-associated-token-account) with shared test utilities.
+</Info>
+
+<AnchorMacroCode />
+
+</Tab>
+</Tabs>
 </Tab>
 
 </Tabs>

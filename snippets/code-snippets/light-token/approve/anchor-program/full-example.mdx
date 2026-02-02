@@ -1,0 +1,84 @@
+<CodeGroup>
+```rust lib.rs
+#![allow(unexpected_cfgs, deprecated)]
+
+use anchor_lang::prelude::*;
+use light_token::instruction::ApproveCpi;
+
+declare_id!("37XmzKqSG2VD1ZBvzyfbt1HN1mT1bqVAmfzX2ziB3KT1");
+
+#[program]
+pub mod light_token_anchor_approve {
+    use super::*;
+
+    pub fn approve(ctx: Context<ApproveAccounts>, amount: u64) -> Result<()> {
+        ApproveCpi {
+            token_account: ctx.accounts.token_account.to_account_info(),
+            delegate: ctx.accounts.delegate.to_account_info(),
+            owner: ctx.accounts.owner.to_account_info(),
+            system_program: ctx.accounts.system_program.to_account_info(),
+            amount,
+        }
+        .invoke()?;
+        Ok(())
+    }
+}
+
+#[derive(Accounts)]
+pub struct ApproveAccounts<'info> {
+    /// CHECK: Light token program for CPI
+    pub light_token_program: AccountInfo<'info>,
+    /// CHECK: Validated by light-token CPI
+    #[account(mut)]
+    pub token_account: AccountInfo<'info>,
+    /// CHECK: Validated by light-token CPI
+    pub delegate: AccountInfo<'info>,
+    pub owner: Signer<'info>,
+    pub system_program: Program<'info, System>,
+}
+```
+
+```rust test.rs
+use anchor_lang::{InstructionData, ToAccountMetas};
+use light_program_test::Rpc;
+use light_token::instruction::LIGHT_TOKEN_PROGRAM_ID;
+use light_token_anchor_approve::{accounts, instruction::Approve, ID};
+use anchor_lang::system_program;
+use solana_sdk::{instruction::Instruction, signature::Keypair, signer::Signer};
+use test_utils::{mint_tokens, setup_test_env};
+
+#[tokio::test]
+async fn test_approve() {
+    let mut env = setup_test_env("light_token_anchor_approve", ID).await;
+
+    // Mint tokens first
+    let mint_amount = 1_000_000u64;
+    mint_tokens(&mut env.rpc, &env.payer, env.mint_pda, env.associated_token_account, mint_amount).await;
+
+    // Call the anchor program to approve delegate
+    let delegate = Keypair::new();
+    let approve_amount = 500_000u64;
+
+    let ix = Instruction {
+        program_id: ID,
+        accounts: accounts::ApproveAccounts {
+            light_token_program: LIGHT_TOKEN_PROGRAM_ID,
+            token_account: env.associated_token_account,
+            delegate: delegate.pubkey(),
+            owner: env.payer.pubkey(),
+            system_program: system_program::ID,
+        }
+        .to_account_metas(Some(true)),
+        data: Approve { amount: approve_amount }.data(),
+    };
+
+    let sig = env
+        .rpc
+        .create_and_send_transaction(&[ix], &env.payer.pubkey(), &[&env.payer])
+        .await
+        .unwrap();
+
+    println!("Tx: {}", sig);
+}
+```
+</CodeGroup>

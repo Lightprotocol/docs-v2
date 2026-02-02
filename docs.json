@@ -68,7 +68,8 @@
                 "group": "Examples",
                 "expanded": true,
                 "pages": [
-                  "light-token/examples/client"
+                  "light-token/examples/client",
+                  "light-token/examples/program"
                 ]
               },
               {

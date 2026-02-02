@@ -1,0 +1,88 @@
+<CodeGroup>
+```rust lib.rs
+#![allow(unexpected_cfgs, deprecated)]
+
+use anchor_lang::prelude::*;
+use light_token::instruction::MintToCheckedCpi;
+
+declare_id!("DGu3ofzac2Zndn95z2q9gCp8zHgW22YpMeEWj2up3QDb");
+
+#[program]
+pub mod light_token_anchor_mint_to_checked {
+    use super::*;
+
+    pub fn mint_to_checked(
+        ctx: Context<MintToCheckedAccounts>,
+        amount: u64,
+        decimals: u8,
+    ) -> Result<()> {
+        MintToCheckedCpi {
+            mint: ctx.accounts.mint.to_account_info(),
+            destination: ctx.accounts.destination.to_account_info(),
+            amount,
+            decimals,
+            authority: ctx.accounts.authority.to_account_info(),
+            system_program: ctx.accounts.system_program.to_account_info(),
+            max_top_up: None,
+            fee_payer: None,
+        }
+        .invoke()?;
+        Ok(())
+    }
+}
+
+#[derive(Accounts)]
+pub struct MintToCheckedAccounts<'info> {
+    /// CHECK: Light token program for CPI
+    pub light_token_program: AccountInfo<'info>,
+    /// CHECK: Validated by light-token CPI
+    #[account(mut)]
+    pub mint: AccountInfo<'info>,
+    /// CHECK: Validated by light-token CPI
+    #[account(mut)]
+    pub destination: AccountInfo<'info>,
+    pub authority: Signer<'info>,
+    pub system_program: Program<'info, System>,
+}
+```
+
+```rust test.rs
+use anchor_lang::{InstructionData, ToAccountMetas};
+use light_program_test::Rpc;
+use light_token::instruction::LIGHT_TOKEN_PROGRAM_ID;
+use light_token_anchor_mint_to_checked::{accounts, instruction::MintToChecked, ID};
+use solana_sdk::{instruction::Instruction, signer::Signer, system_program};
+use test_utils::setup_test_env;
+
+#[tokio::test(flavor = "multi_thread")]
+async fn test_mint_to_checked() {
+    let mut env = setup_test_env("light_token_anchor_mint_to_checked", ID).await;
+
+    // MintToChecked validates decimals match the mint's decimals.
+    // No mint_tokens call - the test IS minting tokens via CPI.
+    let amount = 1_000_000u64;
+    let decimals = 9u8;
+    let ix = Instruction {
+        program_id: ID,
+        accounts: accounts::MintToCheckedAccounts {
+            light_token_program: LIGHT_TOKEN_PROGRAM_ID,
+            mint: env.mint_pda,
+            destination: env.ata,
+            authority: env.payer.pubkey(),
+            system_program: system_program::ID,
+        }
+        .to_account_metas(Some(true)),
+        data: MintToChecked { amount, decimals }.data(),
+    };
+
+    env.rpc
+        .create_and_send_transaction(&[ix], &env.payer.pubkey(), &[&env.payer])
+        .await
+        .unwrap();
+
+    // Verify the account exists and has data
+    let ata_data = env.rpc.get_account(env.ata).await.unwrap().unwrap();
+    assert!(!ata_data.data.is_empty(), "ATA account should have data");
+}
+```
+</CodeGroup>
