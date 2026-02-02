@@ -84,9 +84,9 @@
                   "light-token/cookbook/approve-revoke",
                   "light-token/cookbook/freeze-thaw",
                   "light-token/cookbook/wrap-unwrap",
-                  "light-token/cookbook/load-ata"
+                  "light-token/cookbook/load-ata",
                   "light-token/cookbook/close-token-account",
-                  "light-token/cookbook/burn",
+                  "light-token/cookbook/burn"
 
                 ]
               }
