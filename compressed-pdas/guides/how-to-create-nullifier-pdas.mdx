@@ -35,7 +35,7 @@ exists, causing the whole transaction to fail.
 
 ```toml
 [dependencies]
-light-nullifier-program = "0.1.1"
+light-nullifier-program = "0.1.2"
 light-client = "0.18.0"
 ```
 
@@ -98,8 +98,8 @@ const nullifierIx = await createNullifierIx(rpc, payer.publicKey, id);
 
 // Combine with your transaction
 const tx = new Transaction().add(
-  ComputeBudgetProgram.setComputeUnitLimit({ units: 500_000 }),
   nullifierIx,
+  // your main instruction
   SystemProgram.transfer({
     fromPubkey: payer.publicKey,
     toPubkey: recipient,
@@ -148,8 +148,8 @@ const nullifierIx = buildInstruction(payer.publicKey, id, proofResult);
 
 // Add to transaction
 const tx = new Transaction().add(
-  ComputeBudgetProgram.setComputeUnitLimit({ units: 500_000 }),
   nullifierIx,
+  // your main instruction
   SystemProgram.transfer({
     fromPubkey: payer.publicKey,
     toPubkey: recipient,
