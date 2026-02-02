@@ -1,0 +1,77 @@
+```typescript
+import "dotenv/config";
+import { Keypair } from "@solana/web3.js";
+import {
+    createRpc,
+    buildAndSignTx,
+    sendAndConfirmTx,
+} from "@lightprotocol/stateless.js";
+import {
+    createMintInterface,
+    createAtaInterface,
+    mintToCompressed,
+    createLoadAtaInstructions,
+    createTransferInterfaceInstruction,
+    getAssociatedTokenAddressInterface,
+} from "@lightprotocol/compressed-token";
+import { homedir } from "os";
+import { readFileSync } from "fs";
+
+// devnet:
+// const RPC_URL = `https://devnet.helius-rpc.com?api-key=${process.env.API_KEY!}`;
+// const rpc = createRpc(RPC_URL);
+// localnet:
+const rpc = createRpc();
+
+const payer = Keypair.fromSecretKey(
+    new Uint8Array(
+        JSON.parse(readFileSync(`${homedir()}/.config/solana/id.json`, "utf8")),
+    ),
+);
+
+(async function () {
+    // Inactive Light Tokens are cryptographically preserved on the Solana ledger
+    // as compressed tokens (cold storage)
+    // Setup: Get compressed tokens in light-token associated token account
+    const { mint } = await createMintInterface(rpc, payer, payer, null, 9);
+    await mintToCompressed(rpc, payer, mint, payer, [{ recipient: payer.publicKey, amount: 1000n }]);
+
+    const recipient = Keypair.generate();
+    await createAtaInterface(rpc, payer, mint, recipient.publicKey);
+
+    const senderAta = getAssociatedTokenAddressInterface(mint, payer.publicKey);
+    const recipientAta = getAssociatedTokenAddressInterface(
+        mint,
+        recipient.publicKey,
+    );
+
+    // Warm up: load compressed tokens (cold) to sender's hot balance
+    // Returns [] if already hot — safe to call unconditionally
+    const loadIxs = await createLoadAtaInstructions(
+        rpc,
+        senderAta,
+        payer.publicKey,
+        mint,
+        payer.publicKey,
+    );
+
+    if (loadIxs.length > 0) {
+        const blockhash = await rpc.getLatestBlockhash();
+        const loadTx = buildAndSignTx(loadIxs, payer, blockhash.blockhash);
+        await sendAndConfirmTx(rpc, loadTx);
+    }
+
+    // Trade: transfer from hot balance
+    const transferIx = createTransferInterfaceInstruction(
+        senderAta,
+        recipientAta,
+        payer.publicKey,
+        500n,
+    );
+
+    const blockhash = await rpc.getLatestBlockhash();
+    const tradeTx = buildAndSignTx([transferIx], payer, blockhash.blockhash);
+    const signature = await sendAndConfirmTx(rpc, tradeTx);
+
+    console.log("Tx:", signature);
+})();```

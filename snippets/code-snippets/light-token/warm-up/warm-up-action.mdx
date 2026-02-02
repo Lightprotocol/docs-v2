@@ -1,0 +1,57 @@
+```typescript
+import "dotenv/config";
+import { Keypair } from "@solana/web3.js";
+import { createRpc } from "@lightprotocol/stateless.js";
+import {
+    createMintInterface,
+    createAtaInterface,
+    mintToCompressed,
+    loadAta,
+    transferInterface,
+    getAssociatedTokenAddressInterface,
+} from "@lightprotocol/compressed-token";
+import { homedir } from "os";
+import { readFileSync } from "fs";
+
+// devnet:
+// const RPC_URL = `https://devnet.helius-rpc.com?api-key=${process.env.API_KEY!}`;
+// const rpc = createRpc(RPC_URL);
+// localnet:
+const rpc = createRpc();
+
+const payer = Keypair.fromSecretKey(
+    new Uint8Array(
+        JSON.parse(readFileSync(`${homedir()}/.config/solana/id.json`, "utf8")),
+    ),
+);
+
+(async function () {
+    // Inactive Light Tokens are cryptographically preserved on the Solana ledger
+    // as compressed tokens (cold storage)
+    // Setup: Get compressed tokens in light-token associated token account
+    const { mint } = await createMintInterface(rpc, payer, payer, null, 9);
+    await mintToCompressed(rpc, payer, mint, payer, [{ recipient: payer.publicKey, amount: 1000n }]);
+
+    const recipient = Keypair.generate();
+    await createAtaInterface(rpc, payer, mint, recipient.publicKey);
+
+    const senderAta = getAssociatedTokenAddressInterface(mint, payer.publicKey);
+    const recipientAta = getAssociatedTokenAddressInterface(mint, recipient.publicKey);
+
+    // Warm up: load compressed tokens to associated token account
+    // Returns null if already hot
+    await loadAta(rpc, senderAta, payer, mint, payer);
+
+    // Transfer tokens from hot balance
+    const tx = await transferInterface(
+        rpc,
+        payer,
+        senderAta,
+        mint,
+        recipientAta,
+        payer,
+        500n,
+    );
+
+    console.log("Tx:", tx);
+})();```
