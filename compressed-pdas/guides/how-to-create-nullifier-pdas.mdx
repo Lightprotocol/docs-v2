@@ -59,7 +59,7 @@ use light_client::{LightClient, LightClientConfig};
 use solana_sdk::{system_instruction, transaction::Transaction};
 
 let mut rpc = LightClient::new(
-    LightClientConfig::new("https://devnet.helius-rpc.com/?api-key=...")
+    LightClientConfig::new("https://mainnet.helius-rpc.com/?api-key=...")
 ).await?;
 
 // Create a unique 32-byte ID
@@ -86,7 +86,7 @@ import { createNullifierIx } from "@lightprotocol/nullifier-program";
 import { createRpc } from "@lightprotocol/stateless.js";
 import { Transaction, SystemProgram, ComputeBudgetProgram } from "@solana/web3.js";
 
-const rpc = createRpc("https://devnet.helius-rpc.com/?api-key=...");
+const rpc = createRpc("https://mainnet.helius-rpc.com/?api-key=...");
 
 // Create a unique 32-byte ID (e.g., hash of payment inputs)
 const id = new Uint8Array(32);
