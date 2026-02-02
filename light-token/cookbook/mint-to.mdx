@@ -23,7 +23,6 @@ import ActionCode from "/snippets/code-snippets/light-token/mint-to/action.mdx";
 import InstructionCode from "/snippets/code-snippets/light-token/mint-to/instruction.mdx";
 import RustActionCode from "/snippets/code-snippets/light-token/mint-to/rust-client/action.mdx";
 import RustInstructionCode from "/snippets/code-snippets/light-token/mint-to/rust-client/instruction.mdx";
-import AnchorProgramCode from "/snippets/code-snippets/light-token/mint-to/anchor-program/full-example.mdx";
 
 
 1. Mint To creates new tokens of a mint and deposits them to a specified token account.
@@ -114,77 +113,6 @@ Compare to SPL:
 </Steps>
 </Tab>
 
-<Tab title="Program">
-
-<Note>Find [a full code example at the end](#full-code-example).</Note>
-
-<Steps>
-
-<Step>
-
-### Build Account Infos and CPI the Light Token Program
-
-Use `invoke` for external signers or `invoke_signed` when the authority is a PDA.
-
-<Tabs>
-<Tab title="invoke (External signer)">
-
-```rust
-use light_token::instruction::MintToCpi;
-
-MintToCpi {
-    mint: mint.clone(),
-    destination: destination.clone(),
-    amount,
-    authority: authority.clone(),
-    system_program: system_program.clone(),
-    fee_payer: None,
-    max_top_up: None,
-}
-.invoke()
-```
-
-</Tab>
-<Tab title="invoke_signed (PDA authority)">
-
-```rust
-use light_token::instruction::MintToCpi;
-
-let signer_seeds: &[&[u8]] = &[MINT_AUTHORITY_SEED, &[bump]];
-
-MintToCpi {
-    mint: mint.clone(),
-    destination: destination.clone(),
-    amount,
-    authority: authority.clone(),
-    system_program: system_program.clone(),
-    fee_payer: None,
-    max_top_up: None,
-}
-.invoke_signed(&[signer_seeds])
-```
-
-</Tab>
-</Tabs>
-
-<Info>
-  `fee_payer` and `max_top_up` are optional fields to customize rent top-ups.
-  Set to `None` to use defaults.
-</Info>
-
-</Step>
-</Steps>
-
-# Full Code Example
-
-<Info>
-  View the full example with shared test utilities:
-  [examples-light-token](https://github.com/Lightprotocol/examples-light-token/tree/main/programs/anchor/basic-instructions/mint-to).
-</Info>
-
-<AnchorProgramCode />
-
-</Tab>
 </Tabs>
 
 # Next Steps
