@@ -1,0 +1,197 @@
+---
+title: Create Nullifier PDAs
+description: Create rent-free nullifier PDAs to prevent duplicate actions.
+keywords: ["nullifiers on solana", "prevent double spending", "compressed pdas", "rent-free nullifiers"]
+---
+
+For some use cases, such as sending payments, you might want to prevent the
+onchain instruction from being executed more than once.
+
+Nullifier-program is a utility that lets you easily create rent-free nullifiers.
+Prepend or append this instruction to your transaction to prevent your main
+action from being executed more than once.
+
+The program derives a PDA from a given identifier (nonce, uuid, hash of
+signature). If the identifier has been used before, the rent free PDA already
+exists, causing the whole transaction to fail.
+
+
+| | |
+|---|---|
+| **Program ID** | `NFLx5WGPrTHHvdRNsidcrNcLxRruMC92E4yv7zhZBoT` |
+| **Cost** | ~15,000 lamports per nullifier (no rent) |
+| **Source** | [github.com/Lightprotocol/nullifier-program](https://github.com/Lightprotocol/nullifier-program/) |
+
+## How It Works
+
+1. Derives PDA from `["nullifier", id]` seeds
+2. Creates an empty rent-free PDA at that address
+3. If the address exists, the whole transaction fails
+4. Prepend or append this instruction to your transaction.
+
+## Dependencies
+
+<Tabs>
+<Tab title="Rust">
+
+```toml
+[dependencies]
+light-nullifier-program = { git = "https://github.com/Lightprotocol/nullifier-program" }
+light-client = "0.16.0"
+```
+
+</Tab>
+<Tab title="TS">
+
+```bash
+npm install @lightprotocol/nullifier-program @lightprotocol/stateless.js
+```
+
+</Tab>
+</Tabs>
+
+## Using the Helper
+
+<Tabs>
+<Tab title="Rust">
+
+```rust
+use light_nullifier_program::sdk::{create_nullifier_ix, PROGRAM_ID};
+use light_client::{LightClient, LightClientConfig};
+use solana_sdk::{system_instruction, transaction::Transaction};
+
+let mut rpc = LightClient::new(
+    LightClientConfig::new("https://devnet.helius-rpc.com/?api-key=...")
+).await?;
+
+// Create a unique 32-byte ID
+let id: [u8; 32] = /* hash of payment inputs or random */;
+
+// Build nullifier instruction
+let nullifier_ix = create_nullifier_ix(&mut rpc, payer.pubkey(), id).await?;
+
+// Combine with your transaction
+let transfer_ix = system_instruction::transfer(&payer.pubkey(), &recipient, 1_000_000);
+let tx = Transaction::new_signed_with_payer(
+    &[nullifier_ix, transfer_ix],
+    Some(&payer.pubkey()),
+    &[&payer],
+    recent_blockhash,
+);
+```
+
+</Tab>
+<Tab title="TS">
+
+```typescript
+import { createNullifierIx } from "@lightprotocol/nullifier-program";
+import { createRpc } from "@lightprotocol/stateless.js";
+import { Transaction, SystemProgram, ComputeBudgetProgram } from "@solana/web3.js";
+
+const rpc = createRpc("https://devnet.helius-rpc.com/?api-key=...");
+
+// Create a unique 32-byte ID (e.g., hash of payment inputs)
+const id = new Uint8Array(32);
+crypto.getRandomValues(id);
+
+// Build nullifier instruction
+const nullifierIx = await createNullifierIx(rpc, payer.publicKey, id);
+
+// Combine with your transaction
+const tx = new Transaction().add(
+  ComputeBudgetProgram.setComputeUnitLimit({ units: 500_000 }),
+  nullifierIx,
+  SystemProgram.transfer({
+    fromPubkey: payer.publicKey,
+    toPubkey: recipient,
+    lamports: 1_000_000,
+  })
+);
+```
+
+</Tab>
+</Tabs>
+
+## Manually Fetching Async Proof
+
+<Tabs>
+<Tab title="Rust">
+
+```rust
+use light_nullifier_program::sdk::{fetch_proof, build_instruction};
+
+// Step 1: Fetch validity proof
+let proof_result = fetch_proof(&mut rpc, &id).await?;
+
+// Step 2: Build instruction (sync, no RPC)
+let nullifier_ix = build_instruction(payer.pubkey(), id, proof_result);
+
+// Add to transaction
+let tx = Transaction::new_signed_with_payer(
+    &[nullifier_ix, transfer_ix],
+    Some(&payer.pubkey()),
+    &[&payer],
+    recent_blockhash,
+);
+```
+
+</Tab>
+<Tab title="TS">
+
+```typescript
+import { fetchProof, buildInstruction } from "@lightprotocol/nullifier-program";
+
+// Step 1: Fetch validity proof
+const proofResult = await fetchProof(rpc, id);
+
+// Step 2: Build instruction (sync, no RPC)
+const nullifierIx = buildInstruction(payer.publicKey, id, proofResult);
+
+// Add to transaction
+const tx = new Transaction().add(
+  ComputeBudgetProgram.setComputeUnitLimit({ units: 500_000 }),
+  nullifierIx,
+  SystemProgram.transfer({
+    fromPubkey: payer.publicKey,
+    toPubkey: recipient,
+    lamports: 1_000_000,
+  })
+);
+```
+
+</Tab>
+</Tabs>
+
+## Check If Nullifier Exists
+
+<Tabs>
+<Tab title="Rust">
+
+```rust
+use light_nullifier_program::sdk::derive_nullifier_address;
+
+let address = derive_nullifier_address(&id);
+let account = rpc.get_compressed_account(None, Some(address)).await?;
+let exists = account.value.is_some();
+```
+
+</Tab>
+<Tab title="TS">
+
+```typescript
+import { deriveNullifierAddress } from "@lightprotocol/nullifier-program";
+import { bn } from "@lightprotocol/stateless.js";
+
+const address = deriveNullifierAddress(id);
+const account = await rpc.getCompressedAccount(bn(address.toBytes()));
+const exists = account !== null;
+```
+
+</Tab>
+</Tabs>
+
+---
+
+<Callout type="info">
+Questions or need support? [Telegram](https://t.me/swen_light) | [email](mailto:support@lightprotocol.com) | [Discord](https://discord.com/invite/7cJ8BhAXhu)
+</Callout>

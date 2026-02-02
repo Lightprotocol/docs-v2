@@ -126,7 +126,8 @@
                   "compressed-pdas/guides/how-to-update-compressed-accounts",
                   "compressed-pdas/guides/how-to-close-compressed-accounts",
                   "compressed-pdas/guides/how-to-reinitialize-compressed-accounts",
-                  "compressed-pdas/guides/how-to-burn-compressed-accounts"
+                  "compressed-pdas/guides/how-to-burn-compressed-accounts",
+                  "compressed-pdas/guides/how-to-create-nullifier-pdas"
                 ]
               },
               "compressed-pdas/program-examples",
