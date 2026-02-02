@@ -21,7 +21,7 @@ Light mints are Solana accounts owned by the Light Token Program. Subscribe to a
 
 ```toml Cargo.toml
 [dependencies]
-helius-laserstream = "0.1.5"
+helius-laserstream = "0.1"
 tokio = { version = "1", features = ["full"] }
 futures = "0.3"
 anyhow = "1"
@@ -31,6 +31,9 @@ borsh = "0.10"
 
 light-token-interface = "0.3.0"
 light-compressed-account = { version = "0.9.0", features = ["std"] }
+
+# Pin blake3 to avoid constant_time_eq edition2024 issue
+blake3 = "=1.5.5"
 ```
 
 ```rust
@@ -94,6 +97,7 @@ let request = helius_laserstream::grpc::SubscribeRequest {
                     data: Some(Data::Bytes(vec![1])),
                 })),
             }],
+            nonempty_txn_signature: Some(true),
             ..Default::default()
         },
     )]
@@ -121,12 +125,32 @@ if let Some(helius_laserstream::grpc::subscribe_update::UpdateOneof::Account(
 {
     if let Some(account_info) = account_update.account {
         let pubkey = bs58::encode(&account_info.pubkey).into_string();
+        let tx_sig = account_info
+            .txn_signature
+            .as_ref()
+            .map(|s| bs58::encode(s).into_string())
+            .unwrap_or_default();
 
         match Mint::deserialize(&mut account_info.data.as_slice()) {
             Ok(mint) => {
                 println!("Mint: {}", pubkey);
+                println!("  tx: {}", tx_sig);
                 println!("  decimals: {}", mint.base.decimals);
                 println!("  supply: {}", mint.base.supply);
+
+                if let Some(authority) = &mint.base.mint_authority {
+                    println!(
+                        "  mint_authority: {}",
+                        bs58::encode(authority.to_bytes()).into_string()
+                    );
+                }
+
+                if let Some(authority) = &mint.base.freeze_authority {
+                    println!(
+                        "  freeze_authority: {}",
+                        bs58::encode(authority.to_bytes()).into_string()
+                    );
+                }
             }
             Err(e) => {
                 eprintln!("Failed to deserialize mint {}: {}", pubkey, e);
