@@ -131,8 +131,10 @@
           },
           {
             "group": "Compressed PDAs",
+            "expanded": true,
             "pages": [
               "compressed-pdas/overview",
+              "client-library/client-guide",
               {
                 "group": "Program Guides",
                 "pages": [
@@ -146,7 +148,6 @@
                 ]
               },
               "compressed-pdas/program-examples",
-              "client-library/client-guide",
               "compressed-pdas/solana-attestation-service"
             ]
           },
