@@ -131,7 +131,7 @@ import RevokeAnchorProgramCode from "/snippets/code-snippets/light-token/revoke/
 
 <Info>
   Find the full example including shared test utilities in the
-  [examples-light-token](https://github.com/Lightprotocol/examples-light-token/tree/main/rust-client).
+  [examples-light-token repo](https://github.com/Lightprotocol/examples-light-token/tree/main/rust-client).
 </Info>
 
 <Tabs>
@@ -159,6 +159,136 @@ import RevokeAnchorProgramCode from "/snippets/code-snippets/light-token/revoke/
 
 </Step>
 </Steps>
+</Tab>
+
+<Tab title="Program">
+
+<Note>
+Find [a full code example at the end](#full-code-example).
+</Note>
+
+<Tabs>
+<Tab title="Approve">
+<Steps>
+<Step>
+
+### Build Account Infos and CPI the Light Token Program
+
+Use `invoke` for external signers or `invoke_signed` when the authority is a PDA.
+
+<Tabs>
+<Tab title="invoke (External signer)">
+
+```rust
+use light_token::instruction::ApproveCpi;
+
+ApproveCpi {
+    token_account: token_account.clone(),
+    delegate: delegate.clone(),
+    owner: owner.clone(),
+    system_program: system_program.clone(),
+    amount,
+}
+.invoke()?;
+```
+
+</Tab>
+<Tab title="invoke_signed (PDA owner)">
+
+```rust
+use light_token::instruction::ApproveCpi;
+
+let approve_cpi = ApproveCpi {
+    token_account: token_account.clone(),
+    delegate: delegate.clone(),
+    owner: owner.clone(),
+    system_program: system_program.clone(),
+    amount,
+};
+
+let signer_seeds: &[&[u8]] = &[TOKEN_ACCOUNT_SEED, &[bump]];
+approve_cpi.invoke_signed(&[signer_seeds])?;
+```
+
+</Tab>
+</Tabs>
+
+</Step>
+</Steps>
+</Tab>
+
+<Tab title="Revoke">
+<Steps>
+<Step>
+
+### Build Account Infos and CPI the Light Token Program
+
+Use `invoke` for external signers or `invoke_signed` when the authority is a PDA.
+
+<Tabs>
+<Tab title="invoke (External signer)">
+
+```rust
+use light_token::instruction::RevokeCpi;
+
+RevokeCpi {
+    token_account: token_account.clone(),
+    owner: owner.clone(),
+    system_program: system_program.clone(),
+}
+.invoke()?;
+```
+
+</Tab>
+<Tab title="invoke_signed (PDA owner)">
+
+```rust
+use light_token::instruction::RevokeCpi;
+
+let revoke_cpi = RevokeCpi {
+    token_account: token_account.clone(),
+    owner: owner.clone(),
+    system_program: system_program.clone(),
+};
+
+let signer_seeds: &[&[u8]] = &[TOKEN_ACCOUNT_SEED, &[bump]];
+revoke_cpi.invoke_signed(&[signer_seeds])?;
+```
+
+</Tab>
+</Tabs>
+
+</Step>
+</Steps>
+</Tab>
+</Tabs>
+
+# Full Code Example
+
+<Tabs>
+<Tab title="Approve">
+
+<Info>
+  View the full example with shared test utilities:
+  [examples-light-token](https://github.com/Lightprotocol/examples-light-token/tree/main/programs/anchor/basic-instructions/approve).
+</Info>
+
+<ApproveAnchorProgramCode />
+
+</Tab>
+
+<Tab title="Revoke">
+
+<Info>
+  View the full example with shared test utilities:
+  [examples-light-token](https://github.com/Lightprotocol/examples-light-token/tree/main/programs/anchor/basic-instructions/revoke).
+</Info>
+
+<RevokeAnchorProgramCode />
+
+</Tab>
+</Tabs>
+
 </Tab>
 
 </Tabs>

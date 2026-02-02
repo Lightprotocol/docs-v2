@@ -15,7 +15,7 @@ import {
 } from "/snippets/code-samples/code-compare-snippets.jsx";
 import RustInstructionCode from "/snippets/code-snippets/light-token/burn/rust-client/instruction.mdx";
 import BurnCheckedRustInstructionCode from "/snippets/code-snippets/light-token/burn-checked/rust-client/instruction.mdx";
-
+import AnchorProgramCode from "/snippets/code-snippets/light-token/burn/anchor-program/full-example.mdx";
 
 
 1. Burn permanently destroys tokens by reducing the balance in a token account. 
@@ -48,7 +48,7 @@ Compare to SPL:
 
 <Info>
   Find the full example including shared test utilities in the
-  [examples-light-token](https://github.com/Lightprotocol/examples-light-token/tree/main/rust-client).
+  [examples-light-token repo](https://github.com/Lightprotocol/examples-light-token/tree/main/rust-client).
 </Info>
 
 <Tabs>
@@ -58,6 +58,72 @@ Compare to SPL:
 </Tabs>
 </Step>
 </Steps>
+</Tab>
+
+<Tab title="Program">
+
+<Note>
+Find [a full code example at the end](#full-code-example).
+</Note>
+
+<Steps>
+<Step>
+
+### Build Account Infos and CPI the Light Token Program
+
+Use `invoke` for external signers or `invoke_signed` when the authority is a PDA.
+
+<Tabs>
+<Tab title="invoke (External signer)">
+
+```rust
+use light_token::instruction::BurnCpi;
+
+BurnCpi {
+    source: source.clone(),
+    mint: mint.clone(),
+    amount,
+    authority: authority.clone(),
+    system_program: system_program.clone(),
+    fee_payer: None,
+    max_top_up: None,
+}
+.invoke()
+```
+
+</Tab>
+<Tab title="invoke_signed (PDA owner)">
+
+```rust
+use light_token::instruction::BurnCpi;
+
+BurnCpi {
+    source: source.clone(),
+    mint: mint.clone(),
+    amount,
+    authority: authority.clone(),
+    system_program: system_program.clone(),
+    fee_payer: None,
+    max_top_up: None,
+}
+.invoke_signed(&[signer_seeds])
+```
+
+</Tab>
+</Tabs>
+
+</Step>
+</Steps>
+
+# Full Code Example
+
+<Info>
+  View the full example with shared test utilities:
+  [examples-light-token](https://github.com/Lightprotocol/examples-light-token/tree/main/programs/anchor/basic-instructions/burn).
+</Info>
+
+<AnchorProgramCode />
+
 </Tab>
 
 </Tabs>

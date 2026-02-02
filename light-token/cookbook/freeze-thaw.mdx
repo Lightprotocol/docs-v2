@@ -17,6 +17,8 @@ import {
 } from "/snippets/code-samples/code-compare-snippets.jsx";
 import FreezeInstructionCode from "/snippets/code-snippets/light-token/freeze-thaw/rust-client/freeze-instruction.mdx";
 import ThawInstructionCode from "/snippets/code-snippets/light-token/freeze-thaw/rust-client/thaw-instruction.mdx";
+import FreezeAnchorProgramCode from "/snippets/code-snippets/light-token/freeze/anchor-program/full-example.mdx";
+import ThawAnchorProgramCode from "/snippets/code-snippets/light-token/thaw/anchor-program/full-example.mdx";
 
 1. Freeze prevents all transfers or token burns from a specific Light Token account.
 2. Once frozen, the account cannot send tokens, receive tokens, or be closed until it is thawed. 
@@ -65,7 +67,7 @@ import ThawInstructionCode from "/snippets/code-snippets/light-token/freeze-thaw
 
 <Info>
   Find the full example including shared test utilities in the
-  [examples-light-token](https://github.com/Lightprotocol/examples-light-token/tree/main/rust-client).
+  [examples-light-token repo](https://github.com/Lightprotocol/examples-light-token/tree/main/rust-client).
 </Info>
 
 <Tabs>
@@ -87,6 +89,132 @@ import ThawInstructionCode from "/snippets/code-snippets/light-token/freeze-thaw
 
 </Step>
 </Steps>
+</Tab>
+
+<Tab title="Program">
+
+<Note>
+Find [a full code example at the end](#full-code-example).
+</Note>
+
+<Tabs>
+<Tab title="Freeze">
+<Steps>
+<Step>
+
+### Build Account Infos and CPI the Light Token Program
+
+Use `invoke` for external signers or `invoke_signed` when the authority is a PDA.
+
+<Tabs>
+<Tab title="invoke (External signer)">
+
+```rust
+use light_token::instruction::FreezeCpi;
+
+FreezeCpi {
+    token_account: ctx.accounts.token_account.to_account_info(),
+    mint: ctx.accounts.mint.to_account_info(),
+    freeze_authority: ctx.accounts.freeze_authority.to_account_info(),
+}
+.invoke()?;
+```
+
+</Tab>
+<Tab title="invoke_signed (PDA authority)">
+
+```rust
+use light_token::instruction::FreezeCpi;
+
+let signer_seeds = authority_seeds!(bump);
+
+FreezeCpi {
+    token_account: token_account.clone(),
+    mint: mint.clone(),
+    freeze_authority: freeze_authority.clone(),
+}
+.invoke_signed(&[signer_seeds])
+```
+
+</Tab>
+</Tabs>
+
+</Step>
+</Steps>
+</Tab>
+
+<Tab title="Thaw">
+<Steps>
+<Step>
+
+### Build Account Infos and CPI the Light Token Program
+
+Use `invoke` for external signers or `invoke_signed` when the authority is a PDA.
+
+<Tabs>
+<Tab title="invoke (External signer)">
+
+```rust
+use light_token::instruction::ThawCpi;
+
+ThawCpi {
+    token_account: ctx.accounts.token_account.to_account_info(),
+    mint: ctx.accounts.mint.to_account_info(),
+    freeze_authority: ctx.accounts.freeze_authority.to_account_info(),
+}
+.invoke()?;
+```
+
+</Tab>
+<Tab title="invoke_signed (PDA authority)">
+
+```rust
+use light_token::instruction::ThawCpi;
+
+let signer_seeds = authority_seeds!(bump);
+
+ThawCpi {
+    token_account: token_account.clone(),
+    mint: mint.clone(),
+    freeze_authority: freeze_authority.clone(),
+}
+.invoke_signed(&[signer_seeds])
+```
+
+</Tab>
+</Tabs>
+
+</Step>
+</Steps>
+</Tab>
+</Tabs>
+
+# Full Code Example
+
+<Tabs>
+<Tab title="Freeze">
+
+<Info>
+  View the full example with shared test utilities:
+  [examples-light-token](https://github.com/Lightprotocol/examples-light-token/tree/main/programs/anchor/basic-instructions/freeze).
+</Info>
+
+<FreezeAnchorProgramCode />
+
+</Tab>
+
+<Tab title="Thaw">
+
+<Info>
+  View the full example with shared test utilities:
+  [examples-light-token](https://github.com/Lightprotocol/examples-light-token/tree/main/programs/anchor/basic-instructions/thaw).
+</Info>
+
+<ThawAnchorProgramCode />
+
+</Tab>
+</Tabs>
+
 </Tab>
 
 </Tabs>

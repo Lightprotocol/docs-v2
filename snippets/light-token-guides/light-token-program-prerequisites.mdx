@@ -1,0 +1,99 @@
+<Accordion title="Dependencies">
+
+<CodeGroup>
+```toml Anchor Cargo.toml
+[dependencies]
+light-token = "0.4.0"
+light-token-types = "0.4.0"
+anchor-lang = "0.31.1"
+
+[dev-dependencies]
+light-program-test = { version = "0.19.0", features = ["v2"] }
+light-client = { version = "0.19.0", features = ["v2"] }
+solana-sdk = "2"
+tokio = { version = "1", features = ["full"] }
+```
+
+```toml Native Rust Cargo.toml
+[dependencies]
+light-token = "0.4.0"
+light-compressible = "0.4.0"
+light-token-interface = "0.3.0"
+light-compressed-account = "0.9.0"
+borsh = "0.10.4"
+solana-program = "2.2"
+
+[dev-dependencies]
+light-program-test = { version = "0.19.0", features = ["v2"] }
+light-client = { version = "0.19.0", features = ["v2"] }
+solana-sdk = "2"
+tokio = { version = "1", features = ["full"] }
+```
+</CodeGroup>
+
+</Accordion>
+
+<Accordion title="Developer Environment">
+
+<Tabs>
+<Tab title="In-Memory (LightProgramTest)">
+
+Test with LiteSVM:
+
+```bash
+# Initialize project
+cargo init my-light-project
+cd my-light-project
+
+# Build
+cargo build-sbf
+
+# Run tests
+cargo test-sbf
+```
+
+```rust
+use light_program_test::{LightProgramTest, ProgramTestConfig};
+use solana_sdk::signer::Signer;
+
+#[tokio::test]
+async fn test_example() {
+    let mut rpc = LightProgramTest::new(ProgramTestConfig::default())
+        .await
+        .unwrap();
+
+    let payer = rpc.get_payer().insecure_clone();
+    println!("Payer: {}", payer.pubkey());
+}
+```
+
+</Tab>
+<Tab title="Localnet">
+
+```bash
+npm install -g @lightprotocol/zk-compression-cli@beta
+```
+
+```bash
+# Start local test validator (in separate terminal)
+light test-validator
+```
+
+</Tab>
+<Tab title="Devnet">
+
+Replace `<your-api-key>` with your actual API key. [Get your API key here](https://www.helius.dev/zk-compression).
+
+```rust
+use light_client::rpc::{LightClient, LightClientConfig, Rpc};
+
+let rpc_url = "https://devnet.helius-rpc.com?api-key=<your_api_key>";
+let rpc = LightClient::new(
+    LightClientConfig::new(rpc_url.to_string(), None, None)
+).await?;
+```
+
+</Tab>
+</Tabs>
+
+</Accordion>

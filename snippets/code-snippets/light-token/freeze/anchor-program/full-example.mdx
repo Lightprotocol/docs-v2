@@ -1,0 +1,75 @@
+<CodeGroup>
+```rust lib.rs
+#![allow(unexpected_cfgs, deprecated)]
+
+use anchor_lang::prelude::*;
+use light_token::instruction::FreezeCpi;
+
+declare_id!("JBMzMJX4sqCQfNVbosP2oqP1KZ5ZDWiwYTrupk687qXZ");
+
+#[program]
+pub mod light_token_anchor_freeze {
+    use super::*;
+
+    pub fn freeze(ctx: Context<FreezeAccounts>) -> Result<()> {
+        FreezeCpi {
+            token_account: ctx.accounts.token_account.to_account_info(),
+            mint: ctx.accounts.mint.to_account_info(),
+            freeze_authority: ctx.accounts.freeze_authority.to_account_info(),
+        }
+        .invoke()?;
+        Ok(())
+    }
+}
+
+#[derive(Accounts)]
+pub struct FreezeAccounts<'info> {
+    /// CHECK: Light token program for CPI
+    pub light_token_program: AccountInfo<'info>,
+    /// CHECK: Validated by light-token CPI
+    #[account(mut)]
+    pub token_account: AccountInfo<'info>,
+    /// CHECK: Validated by light-token CPI
+    pub mint: AccountInfo<'info>,
+    pub freeze_authority: Signer<'info>,
+}
+```
+
+```rust test.rs
+use anchor_lang::{InstructionData, ToAccountMetas};
+use light_program_test::Rpc;
+use light_token::instruction::LIGHT_TOKEN_PROGRAM_ID;
+use light_token_anchor_freeze::{accounts, instruction::Freeze, ID};
+use solana_sdk::{instruction::Instruction, signer::Signer};
+use test_utils::{mint_tokens, setup_test_env_with_freeze};
+
+#[tokio::test]
+async fn test_freeze() {
+    let mut env = setup_test_env_with_freeze("light_token_anchor_freeze", ID).await;
+
+    // Mint tokens first
+    mint_tokens(&mut env.rpc, &env.payer, env.mint_pda, env.associated_token_account, 1_000_000).await;
+
+    // Call the anchor program to freeze account
+    let ix = Instruction {
+        program_id: ID,
+        accounts: accounts::FreezeAccounts {
+            light_token_program: LIGHT_TOKEN_PROGRAM_ID,
+            token_account: env.associated_token_account,
+            mint: env.mint_pda,
+            freeze_authority: env.freeze_authority,
+        }
+        .to_account_metas(Some(true)),
+        data: Freeze {}.data(),
+    };
+
+    let sig = env
+        .rpc
+        .create_and_send_transaction(&[ix], &env.payer.pubkey(), &[&env.payer])
+        .await
+        .unwrap();
+
+    println!("Tx: {}", sig);
+}
+```
+</CodeGroup>

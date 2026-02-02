@@ -22,6 +22,8 @@ import ActionCode from "/snippets/code-snippets/light-token/transfer-interface/a
 import InstructionCode from "/snippets/code-snippets/light-token/transfer-interface/instruction.mdx";
 import RustActionCode from "/snippets/code-snippets/light-token/transfer-interface/rust-client/action.mdx";
 import RustInstructionCode from "/snippets/code-snippets/light-token/transfer-interface/rust-client/instruction.mdx";
+import AnchorProgramCode from "/snippets/code-snippets/light-token/transfer-interface/anchor-program/full-example.mdx";
+
 
 <table>
   <tbody>
@@ -126,7 +128,7 @@ The example transfers
 
 <Info>
   Find the full example including shared test utilities in the
-  [examples-light-token](https://github.com/Lightprotocol/examples-light-token/tree/main/rust-client).
+  [examples-light-token repo](https://github.com/Lightprotocol/examples-light-token/tree/main/rust-client).
 </Info>
 
 <Tabs>
@@ -140,6 +142,75 @@ The example transfers
 
 </Step>
 </Steps>
+
+</Tab>
+
+<Tab title="Program">
+
+<Note>
+Find [a full code example at the end](#full-code-example).
+</Note>
+<Steps>
+<Step>
+
+### Transfer Interface CPI
+
+The `TransferInterfaceCpi` transfers tokens between token accounts (SPL, Token 2022, or Light Token).
+
+<Tabs>
+  <Tab title="invoke (External signer)">
+
+```rust
+use light_token::instruction::TransferInterfaceCpi;
+
+TransferInterfaceCpi::new(
+    amount,
+    decimals,
+    source.clone(),
+    destination.clone(),
+    authority.clone(),
+    payer.clone(),
+    light_token_authority.clone(),
+    system_program.clone(),
+)
+.invoke()?;
+```
+
+  </Tab>
+  <Tab title="invoke_signed (PDA signer)">
+
+```rust
+use light_token::instruction::TransferInterfaceCpi;
+
+let signer_seeds = authority_seeds!(bump);
+
+TransferInterfaceCpi::new(
+    amount,
+    decimals,
+    source.clone(),
+    destination.clone(),
+    authority.clone(),
+    payer.clone(),
+    light_token_authority.clone(),
+    system_program.clone(),
+)
+.invoke_signed(&[signer_seeds])?;
+```
+
+  </Tab>
+</Tabs>
+
+</Step>
+</Steps>
+
+# Full Code Example
+
+<Info>
+  View the full example with shared test utilities:
+  [examples-light-token](https://github.com/Lightprotocol/examples-light-token/tree/main/programs/anchor/basic-instructions/transfer-interface).
+</Info>
+
+<AnchorProgramCode />
 
 </Tab>
 

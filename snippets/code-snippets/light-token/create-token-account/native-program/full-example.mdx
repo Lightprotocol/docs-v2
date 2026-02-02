@@ -1,0 +1,170 @@
+<CodeGroup>
+```rust instruction.rs
+use super::authority_seeds;
+use light_token::instruction::CreateTokenAccountCpi;
+use solana_program::{
+    account_info::AccountInfo, entrypoint::ProgramResult,
+    program_error::ProgramError, pubkey::Pubkey,
+};
+
+/// Account order:
+/// - accounts[0]: payer (signer, mut)
+/// - accounts[1]: account (signer for invoke, PDA for invoke_signed, mut)
+/// - accounts[2]: mint (readonly)
+/// - accounts[3]: compressible_config (readonly)
+/// - accounts[4]: system_program (readonly)
+/// - accounts[5]: rent_sponsor (mut)
+/// - accounts[6]: light_token_program (readonly)
+pub fn create_token_account_invoke(
+    accounts: &[AccountInfo],
+    data: &[u8],
+) -> ProgramResult {
+    let [payer, account, mint, compressible_config, system_program, rent_sponsor, token_program] =
+        accounts
+    else {
+        return Err(ProgramError::NotEnoughAccountKeys);
+    };
+
+    if data.len() < 32 {
+        return Err(ProgramError::InvalidInstructionData);
+    }
+
+    let owner = Pubkey::try_from(&data[0..32])
+        .map_err(|_| ProgramError::InvalidInstructionData)?;
+
+    // Create token account. Works with light, spl, t22 mints
+    CreateTokenAccountCpi {
+        payer: payer.clone(),
+        account: account.clone(),
+        mint: mint.clone(),
+        owner,
+    }
+    .rent_free(
+        compressible_config.clone(),
+        rent_sponsor.clone(),
+        system_program.clone(),
+        token_program.key,
+    )
+    .invoke()
+}
+
+pub fn create_token_account_invoke_signed(
+    program_id: &Pubkey,
+    accounts: &[AccountInfo],
+    data: &[u8],
+) -> ProgramResult {
+    let [payer, account, mint, compressible_config, system_program, rent_sponsor, _token_program] =
+        accounts
+    else {
+        return Err(ProgramError::NotEnoughAccountKeys);
+    };
+
+    if data.len() < 33 {
+        return Err(ProgramError::InvalidInstructionData);
+    }
+
+    let owner = Pubkey::try_from(&data[0..32])
+        .map_err(|_| ProgramError::InvalidInstructionData)?;
+    let authority_bump = data[32];
+    let signer_seeds = authority_seeds!(authority_bump);
+
+    CreateTokenAccountCpi {
+        payer: payer.clone(),
+        account: account.clone(),
+        mint: mint.clone(),
+        owner,
+    }
+    .rent_free(
+        compressible_config.clone(),
+        rent_sponsor.clone(),
+        system_program.clone(),
+        program_id,
+    )
+    .invoke_signed(signer_seeds)
+}
+```
+
+```rust test.rs
+mod shared;
+
+use light_client::rpc::Rpc;
+use shared::{
+    build_create_token_account_cpi_ix,
+    build_create_token_account_signed_cpi_ix, create_test_rpc,
+    get_authority_pda, setup_mint_with_tokens,
+};
+use solana_sdk::{signature::Keypair, signer::Signer};
+
+#[tokio::test(flavor = "multi_thread")]
+async fn create_token_account_cpi() {
+    let mut rpc = create_test_rpc().await;
+    let payer = rpc.get_payer().insecure_clone();
+
+    let (mint, _) = setup_mint_with_tokens(
+        &mut rpc,
+        &payer,
+        payer.pubkey(),
+        None,
+        9,
+        vec![],
+    )
+    .await;
+
+    let token_account = Keypair::new();
+    let owner = payer.pubkey();
+
+    let ix = build_create_token_account_cpi_ix(
+        payer.pubkey(),
+        token_account.pubkey(),
+        mint,
+        owner,
+    );
+
+    rpc.create_and_send_transaction(
+        &[ix],
+        &payer.pubkey(),
+        &[&payer, &token_account],
+    )
+    .await
+    .unwrap();
+
+    let account = rpc.get_account(token_account.pubkey()).await.unwrap();
+    assert!(account.is_some());
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn create_token_account_signed_cpi() {
+    let mut rpc = create_test_rpc().await;
+    let payer = rpc.get_payer().insecure_clone();
+
+    let (pda_account, authority_bump) = get_authority_pda();
+
+    let (mint, _) = setup_mint_with_tokens(
+        &mut rpc,
+        &payer,
+        payer.pubkey(),
+        None,
+        9,
+        vec![],
+    )
+    .await;
+
+    let owner = payer.pubkey();
+
+    let ix = build_create_token_account_signed_cpi_ix(
+        payer.pubkey(),
+        pda_account,
+        mint,
+        owner,
+        authority_bump,
+    );
+
+    rpc.create_and_send_transaction(&[ix], &payer.pubkey(), &[&payer])
+        .await
+        .unwrap();
+
+    let account = rpc.get_account(pda_account).await.unwrap();
+    assert!(account.is_some());
+}
+```
+</CodeGroup>

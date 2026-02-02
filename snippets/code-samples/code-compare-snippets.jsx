@@ -180,8 +180,8 @@ export const lightCreateMintRustCode = [
   "    params,",
   "    mint_seed.pubkey(),",
   "    payer.pubkey(),",
-  "    address_tree.tree,",
-  "    output_queue,",
+  "    address_tree.tree,", 
+  "    output_queue,", 
   ")",
   ".instruction()?;",
 ].join("\n");

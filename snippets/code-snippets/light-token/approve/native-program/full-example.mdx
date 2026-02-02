@@ -1,0 +1,137 @@
+<CodeGroup>
+```rust instruction.rs
+use super::authority_seeds;
+use light_token::instruction::ApproveCpi;
+use solana_program::{
+    account_info::AccountInfo, entrypoint::ProgramResult,
+    program_error::ProgramError,
+};
+
+pub fn approve_invoke(accounts: &[AccountInfo], data: &[u8]) -> ProgramResult {
+    let [token_account, delegate, owner, system_program, _token_program] =
+        accounts
+    else {
+        return Err(ProgramError::NotEnoughAccountKeys);
+    };
+
+    let amount = u64::from_le_bytes(
+        data.try_into()
+            .map_err(|_| ProgramError::InvalidInstructionData)?,
+    );
+
+    // Approve delegate to transfer tokens on behalf of owner
+    ApproveCpi {
+        token_account: token_account.clone(),
+        delegate: delegate.clone(),
+        owner: owner.clone(),
+        system_program: system_program.clone(),
+        amount,
+    }
+    .invoke()
+}
+
+pub fn approve_invoke_signed(
+    accounts: &[AccountInfo],
+    data: &[u8],
+) -> ProgramResult {
+    let [token_account, delegate, owner, system_program, _token_program] =
+        accounts
+    else {
+        return Err(ProgramError::NotEnoughAccountKeys);
+    };
+
+    if data.len() < 9 {
+        return Err(ProgramError::InvalidInstructionData);
+    }
+
+    let amount = u64::from_le_bytes(data[0..8].try_into().unwrap());
+    let bump = data[8];
+    let signer_seeds = authority_seeds!(bump);
+
+    ApproveCpi {
+        token_account: token_account.clone(),
+        delegate: delegate.clone(),
+        owner: owner.clone(),
+        system_program: system_program.clone(),
+        amount,
+    }
+    .invoke_signed(&[signer_seeds])
+}
+```
+
+```rust test.rs
+mod shared;
+
+use borsh::BorshDeserialize;
+use light_client::rpc::Rpc;
+use light_token_interface::state::Token;
+use shared::{
+    build_approve_cpi_ix, build_approve_signed_cpi_ix, create_test_rpc,
+    get_authority_pda, setup, setup_pda_owned_ata, SetupContext,
+};
+use solana_sdk::{signature::Keypair, signer::Signer};
+
+#[tokio::test(flavor = "multi_thread")]
+async fn approve_cpi() {
+    // Setup: create mint and ATA with tokens
+    let SetupContext {
+        mut rpc,
+        payer,
+        ata,
+        ..
+    } = setup().await;
+
+    let delegate = Keypair::new();
+    let delegate_amount = 500_000u64;
+
+    let ix = build_approve_cpi_ix(
+        ata,
+        delegate.pubkey(),
+        payer.pubkey(),
+        delegate_amount,
+    );
+
+    rpc.create_and_send_transaction(&[ix], &payer.pubkey(), &[&payer])
+        .await
+        .unwrap();
+
+    // Verify delegate is set
+    let account_data = rpc.get_account(ata).await.unwrap().unwrap();
+    let token_state = Token::deserialize(&mut &account_data.data[..]).unwrap();
+    assert_eq!(token_state.delegate, Some(delegate.pubkey().into()));
+    assert_eq!(token_state.delegated_amount, delegate_amount);
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn approve_signed_cpi() {
+    let mut rpc = create_test_rpc().await;
+    let payer = rpc.get_payer().insecure_clone();
+
+    let (pda_owner, bump) = get_authority_pda();
+
+    let (_mint, ata) =
+        setup_pda_owned_ata(&mut rpc, &payer, pda_owner, 1_000_000).await;
+
+    let delegate = Keypair::new();
+    let delegate_amount = 500_000u64;
+
+    let ix = build_approve_signed_cpi_ix(
+        ata,
+        delegate.pubkey(),
+        pda_owner,
+        delegate_amount,
+        bump,
+    );
+
+    rpc.create_and_send_transaction(&[ix], &payer.pubkey(), &[&payer])
+        .await
+        .unwrap();
+
+    // Verify delegate is set
+    let account_data = rpc.get_account(ata).await.unwrap().unwrap();
+    let token_state = Token::deserialize(&mut &account_data.data[..]).unwrap();
+    assert_eq!(token_state.delegate, Some(delegate.pubkey().into()));
+    assert_eq!(token_state.delegated_amount, delegate_amount);
+}
+```
+</CodeGroup>

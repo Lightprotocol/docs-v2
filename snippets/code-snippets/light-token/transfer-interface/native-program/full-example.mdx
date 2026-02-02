@@ -1,0 +1,185 @@
+<CodeGroup>
+```rust instruction.rs
+use super::authority_seeds;
+use light_token::instruction::TransferInterfaceCpi;
+use solana_program::{
+    account_info::AccountInfo, entrypoint::ProgramResult,
+    program_error::ProgramError,
+};
+
+pub fn transfer_invoke(accounts: &[AccountInfo], data: &[u8]) -> ProgramResult {
+    let [source, destination, authority, payer, light_token_authority, system_program, _token_program] =
+        accounts
+    else {
+        return Err(ProgramError::NotEnoughAccountKeys);
+    };
+
+    if data.len() < 9 {
+        return Err(ProgramError::InvalidInstructionData);
+    }
+
+    let amount = u64::from_le_bytes(data[0..8].try_into().unwrap());
+    let decimals = data[8];
+
+    // Transfer tokens between accounts (SPL, Token-2022, or Light)
+    TransferInterfaceCpi::new(
+        amount,
+        decimals,
+        source.clone(),
+        destination.clone(),
+        authority.clone(),
+        payer.clone(),
+        light_token_authority.clone(),
+        system_program.clone(),
+    )
+    .invoke()
+}
+
+pub fn transfer_invoke_signed(
+    accounts: &[AccountInfo],
+    data: &[u8],
+) -> ProgramResult {
+    let [source, destination, authority, payer, light_token_authority, system_program, _token_program] =
+        accounts
+    else {
+        return Err(ProgramError::NotEnoughAccountKeys);
+    };
+
+    if data.len() < 10 {
+        return Err(ProgramError::InvalidInstructionData);
+    }
+
+    let amount = u64::from_le_bytes(data[0..8].try_into().unwrap());
+    let decimals = data[8];
+    let bump = data[9];
+    let signer_seeds = authority_seeds!(bump);
+
+    TransferInterfaceCpi::new(
+        amount,
+        decimals,
+        source.clone(),
+        destination.clone(),
+        authority.clone(),
+        payer.clone(),
+        light_token_authority.clone(),
+        system_program.clone(),
+    )
+    .invoke_signed(&[signer_seeds])
+}
+```
+
+```rust test.rs
+mod shared;
+
+use light_client::rpc::Rpc;
+use light_token::instruction::cpi_authority;
+use shared::{
+    build_transfer_interface_cpi_ix, build_transfer_interface_signed_cpi_ix,
+    create_ata, create_test_rpc, get_authority_pda, setup, setup_pda_owned_ata,
+    SetupContext,
+};
+use solana_sdk::{signature::Keypair, signer::Signer};
+
+#[tokio::test(flavor = "multi_thread")]
+async fn transfer_interface_cpi() {
+    let SetupContext {
+        mut rpc,
+        payer,
+        mint,
+        ata,
+        ..
+    } = setup().await;
+
+    let transfer_amount = 500_000u64;
+
+    // Setup: create mint and token accounts
+    let recipient = Keypair::new();
+    let recipient_ata =
+        create_ata(&mut rpc, &payer, recipient.pubkey(), mint).await;
+
+    // 1. Transfer from source to destination
+    let ix = build_transfer_interface_cpi_ix(
+        ata,
+        recipient_ata,
+        payer.pubkey(),
+        payer.pubkey(),
+        cpi_authority(),
+        transfer_amount,
+        9,
+    );
+
+    rpc.create_and_send_transaction(&[ix], &payer.pubkey(), &[&payer])
+        .await
+        .unwrap();
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn transfer_interface_signed_cpi() {
+    let mut rpc = create_test_rpc().await;
+    let payer = rpc.get_payer().insecure_clone();
+
+    let (pda_authority, bump) = get_authority_pda();
+    let initial_amount = 1_000_000u64;
+
+    // Setup: create mint and token accounts
+    let (mint, pda_ata) =
+        setup_pda_owned_ata(&mut rpc, &payer, pda_authority, initial_amount)
+            .await;
+
+    let recipient = Keypair::new();
+    let recipient_ata =
+        create_ata(&mut rpc, &payer, recipient.pubkey(), mint).await;
+
+    let transfer_amount = 500_000u64;
+    // 1. Transfer from source to destination
+    let ix = build_transfer_interface_signed_cpi_ix(
+        pda_ata,
+        recipient_ata,
+        pda_authority,
+        payer.pubkey(),
+        cpi_authority(),
+        transfer_amount,
+        9,
+        bump,
+    );
+
+    rpc.create_and_send_transaction(&[ix], &payer.pubkey(), &[&payer])
+        .await
+        .unwrap();
+}
+
+/// Transfers exact balance from token account.
+#[tokio::test(flavor = "multi_thread")]
+async fn transfer_exact_balance_cpi() {
+    let SetupContext {
+        mut rpc,
+        payer,
+        mint,
+        ata,
+        ..
+    } = setup().await;
+
+    // The setup() function creates an ATA with 1_000_000 tokens
+    let exact_balance = 1_000_000u64;
+
+    let recipient = Keypair::new();
+    let recipient_ata =
+        create_ata(&mut rpc, &payer, recipient.pubkey(), mint).await;
+
+    // Transfer the exact balance, leaving source with 0
+    let ix = build_transfer_interface_cpi_ix(
+        ata,
+        recipient_ata,
+        payer.pubkey(),
+        payer.pubkey(),
+        cpi_authority(),
+        exact_balance,
+        9,
+    );
+
+    rpc.create_and_send_transaction(&[ix], &payer.pubkey(), &[&payer])
+        .await
+        .unwrap();
+}
+```
+</CodeGroup>
