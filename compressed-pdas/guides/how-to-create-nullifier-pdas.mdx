@@ -5,16 +5,9 @@ keywords: ["nullifiers on solana", "prevent double spending", "compressed pdas",
 ---
 
 For some use cases, such as sending payments, you might want to prevent the
-onchain instruction from being executed more than once.
+onchain instruction from being executed more than once. 
 
-The nullifier program is a utility reference implementation that lets you easily
-create rent-free nullifiers. Prepend or append this instruction to your
-transaction to prevent your main action from being executed more than once.
-
-The program derives a PDA from a given identifier (nonce, uuid, hash of
-signature). If the identifier has been used before, the rent free PDA already
-exists, causing the whole transaction to fail.
-
+The nullifier program shown below makes this easy for you:
 
 | | |
 |---|---|
@@ -29,7 +22,7 @@ For the usage example source code, see here: [create_nullifier.rs](https://githu
 
 ## How It Works
 
-1. Derives PDA from `["nullifier", id]` seeds
+1. Derives PDA from `["nullifier", id]` seeds (where `id` is your unique identifier, e.g. a nonce, uuid, hash of signature, etc.)
 2. Creates an empty rent-free PDA at that address
 3. If the address exists, the whole transaction fails
 4. Prepend or append this instruction to your transaction.
@@ -117,7 +110,7 @@ const tx = new Transaction().add(
 </Tab>
 </Tabs>
 
-## Manually Fetching Async Proof
+## Manually Fetching Proof
 
 <Tabs>
 <Tab title="Rust">
