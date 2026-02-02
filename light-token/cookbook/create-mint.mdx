@@ -1,5 +1,5 @@
 ---
-title: Create Mint Account wih Token Metadata
+title: Create Mint Account with Token Metadata
 sidebarTitle: Create Mint Account
 description: Program and client guides to create a mint with token metadata. Includes step-by-step implementation and full code examples.
 keywords: ["create mint account on solana", "rent free mint on solana", "rent free token mints on solana", "spl create mint alternative"]
@@ -50,7 +50,7 @@ import CompressibleRentExplained from "/snippets/compressible-rent-explained.mdx
 `createMintInterface` is a unified interface that dispatches to different mint creation paths based on programId:
 
 - `TOKEN_PROGRAM_ID` or `TOKEN_2022_PROGRAM_ID` → delegates to SPL or T22 `createMint`
-- Otherwise it defaults to `LIGHT_TOKEN_PROGRAM_ID` → creates a light-token mint
+- Otherwise it defaults to `LIGHT_TOKEN_PROGRAM_ID` → creates a Light Token mint
 
 You can use the same interface regardless of mint type.
 
@@ -96,8 +96,8 @@ Compare to SPL:
 
 <Tab title="Rust Client">
 
-`CreateMint` creates an on-chain mint account that can optionally include token metadata. 
-The instruction creates under the hood a compressed mint address for when the mint is inactive.
+`CreateMint` creates an on-chain mint account that can optionally include token metadata.
+The instruction also writes a compressed mint address to the address Merkle tree, which preserves the mint state when the on-chain account is compressed.
 
 Compare to SPL: 
 
@@ -122,7 +122,7 @@ Compare to SPL:
 
 <Info>
   Find the full example including shared test utilities in the
-  [examples-light-token repo](https://github.com/Lightprotocol/examples-light-token/tree/main/rust-client/tests).
+  [examples-light-token repo](https://github.com/Lightprotocol/examples-light-token/tree/main/rust-client).
 </Info>
 
 <Tabs>
@@ -161,7 +161,7 @@ Compare to SPL:
   firstCode={lightCreateMintMetadataCpiCode}
   secondCode={splCreateMintMetadataCpiCode}
   firstLabel="light-token"
-  secondLabel="SPL Token-2022"
+  secondLabel="SPL Token 2022"
   language="rust"
 />
 </Tab>
@@ -350,7 +350,7 @@ CreateMintCpi::new(
 
 <Info>
   View the full example with shared test utilities:
-  [examples-light-token](https://github.com/Lightprotocol/examples-light-token/tree/main/program-examples/anchor/sdk-basics/create-mint).
+  [examples-light-token](https://github.com/Lightprotocol/examples-light-token/tree/main/programs/anchor/basic-instructions/create-mint).
 </Info>
 
 <AnchorProgramCode />
@@ -379,7 +379,7 @@ Compare to SPL:
   firstCode={lightCreateMintMetadataMacroCode}
   secondCode={splCreateMintMetadataMacroCode}
   firstLabel="light-token"
-  secondLabel="SPL Token-2022"
+  secondLabel="SPL Token 2022"
   language="rust"
 />
 </Tab>
@@ -481,7 +481,7 @@ pub mint: UncheckedAccount<'info>,
 
 <Info>
   View the full example with test:
-  [examples-light-token-anchor](https://github.com/Lightprotocol/examples-light-token-anchor/tree/main/program-examples/anchor/basic-macros/create-mint).
+  [examples-light-token](https://github.com/Lightprotocol/examples-light-token/tree/main/programs/anchor/basic-macros/create-mint).
 </Info>
 
 <AnchorMacroCode />
@@ -495,7 +495,7 @@ pub mint: UncheckedAccount<'info>,
 # Next Steps
 
 <Card
-  title="Learn how to mint tokens to light-token accounts."
+  title="Learn how to mint tokens to Light Token accounts."
   icon="chevron-right"
   color="#0066ff"
   href="/light-token/cookbook/mint-to"

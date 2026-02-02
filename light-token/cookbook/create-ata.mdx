@@ -1,7 +1,7 @@
 ---
 title: Create Associated Light Token Accounts
 sidebarTitle: Create Associated Token Account
-description: Client and program guide to create associated light-token accounts. Includes step-by-step implementation and full code examples.
+description: Client and program guide to create associated Light Token accounts. Includes step-by-step implementation and full code examples.
 keywords: ["associated token account on solana", "create ata for solana tokens", "rent free ata on solana", "rent free accounts on solana"]
 ---
 
@@ -30,7 +30,7 @@ import RustInstructionCode from "/snippets/code-snippets/light-token/create-ata/
 import AnchorProgramCode from "/snippets/code-snippets/light-token/create-ata/anchor-program/full-example.mdx";
 import AnchorMacroCode from "/snippets/code-snippets/light-token/create-ata/anchor-macro/full-example.mdx";
 
-1. Associated light-token accounts can hold token balances of light, SPL, or Token 2022 mints.
+1. Associated Light Token accounts can hold token balances of light, SPL, or Token 2022 mints.
 2. Light-ATAs are on-chain accounts like SPL ATA's, but the light token program sponsors the rent-exemption cost for you.
 
 <Accordion title="Light Rent Config Explained">
@@ -41,7 +41,7 @@ import AnchorMacroCode from "/snippets/code-snippets/light-token/create-ata/anch
 
 <Tab title="TypeScript Client">
 
-The `createAtaInterface` function creates an associated light-token account in a single call.
+The `createAtaInterface` function creates an associated Light Token account in a single call.
 
 Compare to SPL:
 
@@ -107,7 +107,7 @@ Compare to SPL:
 
 <Info>
   Find the full example including shared test utilities in the
-  [examples-light-token repo](https://github.com/Lightprotocol/examples-light-token/tree/main/rust-client/tests).
+  [examples-light-token repo](https://github.com/Lightprotocol/examples-light-token/tree/main/rust-client).
 </Info>
 
 <Tabs>
@@ -153,7 +153,7 @@ Find [a full code example at the end](#full-code-example).
 
 <Note>
   The light-ATA address is derived from `[owner, light_token_program_id, mint]`.
-  Unlike light-token accounts, owner and mint are passed as accounts, not in
+  Unlike Light Token accounts, owner and mint are passed as accounts, not in
   instruction data.
 </Note>
 
@@ -211,7 +211,7 @@ CreateAssociatedAccountCpi {
 
 <Info>
   View the full example with shared test utilities:
-  [examples-light-token](https://github.com/Lightprotocol/examples-light-token/tree/main/program-examples/anchor/sdk-basics/create-ata).
+  [examples-light-token](https://github.com/Lightprotocol/examples-light-token/tree/main/programs/anchor/basic-instructions/create-ata).
 </Info>
 
 <AnchorProgramCode />
@@ -296,7 +296,7 @@ pub ata: UncheckedAccount<'info>,
 
 <Info>
   View the full example with test:
-  [examples-light-token-anchor](https://github.com/Lightprotocol/examples-light-token-anchor/tree/main/program-examples/anchor/basic-macros/create-ata).
+  [examples-light-token](https://github.com/Lightprotocol/examples-light-token/tree/main/programs/anchor/basic-macros/create-ata).
 </Info>
 
 <AnchorMacroCode />
@@ -311,7 +311,7 @@ pub ata: UncheckedAccount<'info>,
 {" "}
 
 <Card
-  title="Learn how to mint light-tokens"
+  title="Learn how to mint Light Tokens"
   icon="chevron-right"
   color="#0066ff"
   href="/light-token/cookbook/mint-to"

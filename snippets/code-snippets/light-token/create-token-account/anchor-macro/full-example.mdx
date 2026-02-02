@@ -18,14 +18,14 @@ pub const VAULT_AUTH_SEED: &[u8] = b"vault_auth";
 pub const VAULT_SEED: &[u8] = b"vault";
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone)]
-pub struct CreateTokenVaultParams {
+pub struct CreateTokenAccountParams {
     pub create_accounts_proof: CreateAccountsProof,
     pub vault_bump: u8,
 }
 
 #[derive(Accounts, LightAccounts)]
-#[instruction(params: CreateTokenVaultParams)]
-pub struct CreateTokenVault<'info> {
+#[instruction(params: CreateTokenAccountParams)]
+pub struct CreateTokenAccount<'info> {
     #[account(mut)]
     pub fee_payer: Signer<'info>,
 
@@ -78,9 +78,9 @@ pub mod light_token_macro_create_token_account {
     use super::*;
 
     #[allow(unused_variables)]
-    pub fn create_token_vault<'info>(
-        ctx: Context<'_, '_, '_, 'info, CreateTokenVault<'info>>,
-        params: CreateTokenVaultParams,
+    pub fn create_token_account<'info>(
+        ctx: Context<'_, '_, '_, 'info, CreateTokenAccount<'info>>,
+        params: CreateTokenAccountParams,
     ) -> Result<()> {
         Ok(())
     }
@@ -164,10 +164,10 @@ async fn setup_create_mint(
 
 /// Creates a token vault via #[light_account(init, token, ...)].
 #[tokio::test]
-async fn test_create_token_vault() {
+async fn test_create_token_account() {
     use light_token::instruction::{COMPRESSIBLE_CONFIG_V1, RENT_SPONSOR};
     use light_token_macro_create_token_account::{
-        CreateTokenVaultParams, VAULT_AUTH_SEED, VAULT_SEED,
+        CreateTokenAccountParams, VAULT_AUTH_SEED, VAULT_SEED,
     };
     use light_token_types::CPI_AUTHORITY_PDA;
 
@@ -192,7 +192,7 @@ async fn test_create_token_vault() {
         .await
         .unwrap();
 
-    let accounts = light_token_macro_create_token_account::accounts::CreateTokenVault {
+    let accounts = light_token_macro_create_token_account::accounts::CreateTokenAccount {
         fee_payer: payer.pubkey(),
         mint,
         vault_authority,
@@ -204,8 +204,8 @@ async fn test_create_token_vault() {
         system_program: solana_sdk::system_program::ID,
     };
 
-    let instruction_data = light_token_macro_create_token_account::instruction::CreateTokenVault {
-        params: CreateTokenVaultParams {
+    let instruction_data = light_token_macro_create_token_account::instruction::CreateTokenAccount {
+        params: CreateTokenAccountParams {
             create_accounts_proof: proof_result.create_accounts_proof,
             vault_bump,
         },

@@ -1,7 +1,7 @@
 ---
 title: Freeze and Thaw Light Token Accounts
 sidebarTitle: Freeze / Thaw
-description: Rust client guide to freeze and thaw light-token accounts. Includes step-by-step implementation and full code examples.
+description: Rust client guide to freeze and thaw Light Token accounts. Includes step-by-step implementation and full code examples.
 keywords: ["freeze token account solana", "thaw token account solana", "token account management"]
 ---
 
@@ -20,9 +20,9 @@ import ThawInstructionCode from "/snippets/code-snippets/light-token/freeze-thaw
 import FreezeAnchorProgramCode from "/snippets/code-snippets/light-token/freeze/anchor-program/full-example.mdx";
 import ThawAnchorProgramCode from "/snippets/code-snippets/light-token/thaw/anchor-program/full-example.mdx";
 
-1. Freeze prevents all transfers or token burns from a specific light-token account.
+1. Freeze prevents all transfers or token burns from a specific Light Token account.
 2. Once frozen, the account cannot send tokens, receive tokens, or be closed until it is thawed. 
-3. Thaw re-enables transfers on a frozen light-token account.
+3. Thaw re-enables transfers on a frozen Light Token account.
 4. Only the freeze authority (set at mint creation) can freeze or thaw accounts.
 5. If the freeze authority is revoked (set to null) on the mint account, tokens can never be frozen.
 
@@ -63,11 +63,11 @@ import ThawAnchorProgramCode from "/snippets/code-snippets/light-token/thaw/anch
 </Step>
 
 <Step>
-### Freeze or thaw light-token accounts
+### Freeze or thaw Light Token accounts
 
 <Info>
   Find the full example including shared test utilities in the
-  [examples-light-token repo](https://github.com/Lightprotocol/examples-light-token/tree/main/rust-client/tests).
+  [examples-light-token repo](https://github.com/Lightprotocol/examples-light-token/tree/main/rust-client).
 </Info>
 
 <Tabs>
@@ -104,7 +104,7 @@ Find [a full code example at the end](#full-code-example).
 
 ### Build Account Infos and CPI the Light Token Program
 
-Define the light-token account to freeze, the mint it belongs to, and the freeze authority. Use `invoke` for external signers or `invoke_signed` when the authority is a PDA.
+Use `invoke` for external signers or `invoke_signed` when the authority is a PDA.
 
 <Tabs>
 <Tab title="invoke (External signer)">
@@ -149,7 +149,7 @@ FreezeCpi {
 
 ### Build Account Infos and CPI the Light Token Program
 
-Define the frozen light-token account to thaw, the mint it belongs to, and the freeze authority. Use `invoke` for external signers or `invoke_signed` when the authority is a PDA.
+Use `invoke` for external signers or `invoke_signed` when the authority is a PDA.
 
 <Tabs>
 <Tab title="invoke (External signer)">
@@ -196,7 +196,7 @@ ThawCpi {
 
 <Info>
   View the full example with shared test utilities:
-  [examples-light-token](https://github.com/Lightprotocol/examples-light-token/tree/main/program-examples/anchor/programs/freeze).
+  [examples-light-token](https://github.com/Lightprotocol/examples-light-token/tree/main/programs/anchor/basic-instructions/freeze).
 </Info>
 
 <FreezeAnchorProgramCode />
@@ -207,7 +207,7 @@ ThawCpi {
 
 <Info>
   View the full example with shared test utilities:
-  [examples-light-token](https://github.com/Lightprotocol/examples-light-token/tree/main/program-examples/anchor/programs/thaw).
+  [examples-light-token](https://github.com/Lightprotocol/examples-light-token/tree/main/programs/anchor/basic-instructions/thaw).
 </Info>
 
 <ThawAnchorProgramCode />
