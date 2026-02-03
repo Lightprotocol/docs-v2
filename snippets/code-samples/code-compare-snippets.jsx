@@ -517,7 +517,7 @@ export const lightCreateMintMetadataMacroCode = [
 // === CREATE ATA MACRO (ANCHOR) ===
 export const splCreateAtaMacroCode = [
   "#[account(",
-  "    init_if_needed,",
+  "    init,",
   "    payer = fee_payer,",
   "    associated_token::mint = mint,",
   "    associated_token::authority = owner,",
@@ -526,7 +526,8 @@ export const splCreateAtaMacroCode = [
 ].join("\n");
 
 export const lightCreateAtaMacroCode = [
-  "#[light_account(init,",
+  "#[light_account(",
+  "    init,",
   "    associated_token::authority = ata_owner,",
   "    associated_token::mint = ata_mint,",
   "    associated_token::bump = params.ata_bump",

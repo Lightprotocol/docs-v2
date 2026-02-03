@@ -278,7 +278,8 @@ Derive `LightAccounts` on your `Accounts` struct and add `#[light_account(...)]`
 ```rust
 /// CHECK: Validated by light-token CPI
 #[account(mut)]
-#[light_account(init,
+#[light_account(
+    init,
     associated_token::authority = ata_owner,
     associated_token::mint = ata_mint,
     associated_token::bump = params.ata_bump
