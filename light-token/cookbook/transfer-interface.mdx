@@ -23,6 +23,7 @@ import InstructionCode from "/snippets/code-snippets/light-token/transfer-interf
 import RustActionCode from "/snippets/code-snippets/light-token/transfer-interface/rust-client/action.mdx";
 import RustInstructionCode from "/snippets/code-snippets/light-token/transfer-interface/rust-client/instruction.mdx";
 import AnchorProgramCode from "/snippets/code-snippets/light-token/transfer-interface/anchor-program/full-example.mdx";
+import CreateAndTransferCode from "/snippets/code-snippets/light-token/transfer-interface/anchor-program/create-and-transfer-example.mdx";
 
 
 <table>
@@ -202,13 +203,31 @@ TransferInterfaceCpi::new(
 </Step>
 </Steps>
 
-# Full Code Example
+# Full code example
+
+<Tabs>
+<Tab title="CPI">
 
 <Info>
   View the [source code](https://github.com/Lightprotocol/light-protocol/blob/main/sdk-libs/token-sdk/src/instruction/transfer_interface.rs) and [full example](https://github.com/Lightprotocol/examples-light-token/tree/main/programs/anchor/basic-instructions/transfer-interface) with shared test utilities.
 </Info>
 
 <AnchorProgramCode />
+
+</Tab>
+
+<Tab title="Setup ATA with Macro and CPI">
+
+Uses the `#[light_account(init, associated_token::...)]` macro to create the destination ATA during the transfer.
+
+<Info>
+  View the [full example](https://github.com/Lightprotocol/examples-light-token/tree/main/programs/anchor/create-and-transfer) with test utilities.
+</Info>
+
+<CreateAndTransferCode />
+
+</Tab>
+</Tabs>
 
 </Tab>
 

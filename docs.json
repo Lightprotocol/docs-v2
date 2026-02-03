@@ -52,10 +52,10 @@
                   "light-token/toolkits/overview",
                   "light-token/toolkits/for-payments",
                   "light-token/toolkits/for-wallets",
+                  "compressed-tokens/for-privy",
                   "light-token/toolkits/for-streaming-mints",
                   "light-token/toolkits/for-streaming-tokens",
-                  "compressed-tokens/advanced-guides/airdrop",
-                  "compressed-tokens/for-privy"
+                  "compressed-tokens/advanced-guides/airdrop"
                 ]
               },
               {
