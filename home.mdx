@@ -1,12 +1,13 @@
 ---
 title: "Home"
 mode: "custom"
-keywords: ["light protocol", "zk compression on solana", "scalable solana infrastructure", "rent free accounts on solana", "create tokens on solana", "scalable infrastructure for solana apps", "privacy on solana", "shielded transactions on solana"]
+keywords: ["solana tokens", "spl tokens", "light protocol", "helius", "zk compression on solana", "scalable solana infrastructure", "rent free accounts on solana", "create tokens on solana", "scalable infrastructure for solana apps", "privacy on solana", "shielded transactions on solana"]
 ---
 
 import { Footer } from "/snippets/jsx/footer.jsx";
 import { HeroCubeGrid } from "/snippets/jsx/hero-cube-grid.jsx";
 import { LiquidGlassPill } from "/snippets/jsx/liquid-glass-pill.jsx";
+import SdkReference from "/snippets/overview-tables/sdk-reference.mdx";
 
 {/* Hero with animation - styles in style.css (no flash) */}
 
@@ -180,45 +181,7 @@ codex mcp add deepwiki -- npx -y mcp-remote@latest https://mcp.deepwiki.com/mcp
 
 ## SDK Reference
 
-### TypeScript
-
-<CardGroup cols={2}>
-  <Card
-    title="@lightprotocol/stateless.js"
-    icon="js"
-    href="https://lightprotocol.github.io/light-protocol/stateless.js/index.html"
-  >
-    Client SDK for Light Token and Compressed Accounts
-  </Card>
-  <Card
-    title="@lightprotocol/compressed-token"
-    icon="coins"
-    href="https://lightprotocol.github.io/light-protocol/compressed-token/index.html"
-  >
-    Client for Light Token and Compressed Tokens.
-  </Card>
-</CardGroup>
-
-### Rust
-
-<CardGroup cols={2}>
-  <Card title="light-token" icon="coins" href="https://docs.rs/light-token/latest/light_token/">
-    Light Token program SDK.
-  </Card>
-  <Card title="light-client" icon="rust" href="https://docs.rs/light-client/latest/light_client/">
-    Rust client for Light Token and ZK Compression.
-  </Card>
-  <Card title="light-sdk" icon="cube" href="https://docs.rs/light-sdk/latest/light_sdk/">
-    Core SDK for on-chain programs.
-  </Card>
-  <Card
-    title="light-program-test"
-    icon="flask-vial"
-    href="https://docs.rs/crate/light-program-test/latest"
-  >
-    Testing framework for programs.
-  </Card>
-</CardGroup>
+<SdkReference />
 
 </div>
 
