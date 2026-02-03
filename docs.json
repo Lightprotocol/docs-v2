@@ -1,6 +1,6 @@
 {
   "$schema": "https://mintlify.com/docs.json",
-  "theme": "aspen",
+  "theme": "maple",
   "name": "Light Protocol",
   "colors": {
     "primary": "#0066FF",
@@ -20,122 +20,64 @@
     }
   },
   "navigation": {
-    "tabs": [
+    "anchors": [
       {
-        "tab": "Home",
+        "anchor": "Documentation",
+        "icon": "book",
         "groups": [
           {
-            "group": "Overview",
+            "group": "Get Started",
             "pages": [
               "home"
             ]
-          }
-        ]
-      },
-      {
-        "tab": "Light Token Program",
-        "groups": [
+          },
           {
-            "group": "Get Started",
+            "group": "Light Token",
             "pages": [
               "light-token/welcome",
               "light-token/quickstart",
-              "light-token/faq"
-            ]
-          },
-          {
-            "group": "DeFi",
-            "pages": [
-              "light-token/defi/routers",
-              "light-token/defi/programs"
-            ]
-          },
-          {
-            "group": "Toolkits",
-            "pages": [
-              "light-token/toolkits/overview",
-              "light-token/toolkits/for-payments",
-              "light-token/toolkits/for-wallets",
-              "light-token/toolkits/for-streaming-mints",
-              "light-token/toolkits/for-streaming-tokens"
-            ]
-          },
-          {
-            "group": "Cookbook",
-            "pages": [
-              "light-token/cookbook/overview",
+              "light-token/faq",
               {
-                "group": "Examples",
-                "expanded": true,
+                "group": "DeFi",
                 "pages": [
-                  "light-token/examples/client",
-                  "light-token/examples/program"
+                  "light-token/defi/routers",
+                  "light-token/defi/programs"
                 ]
               },
               {
-                "group": "Recipes",
-                "expanded": true,
+                "group": "Toolkits",
                 "pages": [
-                  "light-token/cookbook/create-mint",
-                  "light-token/cookbook/create-ata",
-                  "light-token/cookbook/create-token-account",
-                  "light-token/cookbook/mint-to",
-                  "light-token/cookbook/transfer-interface",
-                  "light-token/cookbook/transfer-checked",
-                  "light-token/cookbook/approve-revoke",
-                  "light-token/cookbook/freeze-thaw",
-                  "light-token/cookbook/wrap-unwrap",
-                  "light-token/cookbook/load-ata",
-                  "light-token/cookbook/close-token-account",
-                  "light-token/cookbook/burn"
-
+                  "light-token/toolkits/overview",
+                  "light-token/toolkits/for-payments",
+                  "light-token/toolkits/for-wallets"
                 ]
-              }
-            ]
-          },
-          {
-            "group": "Learn",
-            "pages": [
-              "learn/light-token-standard",
-              "learn/ai-tools-guide"
-            ]
-          },
-          {
-            "group": "SDK Reference",
-            "pages": [
-              "api-reference/libraries/light-sdk",
-              "api-reference/libraries/light-token",
-              "api-reference/libraries/light-program-test",
-              "api-reference/libraries/light-client",
-              "api-reference/libraries/stateless-js",
-              "api-reference/libraries/compressed-token"
-            ]
-          }
-        ]
-      },
-      {
-        "tab": "ZK Compression",
-        "groups": [
-          {
-            "group": "Get Started",
-            "pages": [
-              "welcome",
-              "quickstart"
-            ]
-          },
-          {
-            "group": "ZK",
-            "pages": [
-              "zk/overview",
-              "zk/examples"
+              },
+              {
+                "group": "Cookbook",
+                "pages": [
+                  "light-token/cookbook/overview",
+                  {
+                    "group": "Recipes",
+                    "pages": [
+                      "light-token/cookbook/create-mint",
+                      "light-token/cookbook/create-ata",
+                      "light-token/cookbook/create-token-account",
+                      "light-token/cookbook/mint-to",
+                      "light-token/cookbook/close-token-account",
+                      "light-token/cookbook/transfer-interface",
+                      "light-token/cookbook/wrap-unwrap",
+                      "light-token/cookbook/load-ata"
+                    ]
+                  }
+                ]
+              },
+              "learn/light-token-standard"
             ]
           },
           {
             "group": "Compressed PDAs",
-            "expanded": true,
             "pages": [
               "compressed-pdas/overview",
-              "client-library/client-guide",
               {
                 "group": "Program Guides",
                 "pages": [
@@ -144,12 +86,32 @@
                   "compressed-pdas/guides/how-to-update-compressed-accounts",
                   "compressed-pdas/guides/how-to-close-compressed-accounts",
                   "compressed-pdas/guides/how-to-reinitialize-compressed-accounts",
-                  "compressed-pdas/guides/how-to-burn-compressed-accounts",
-                  "compressed-pdas/guides/how-to-create-nullifier-pdas"
+                  "compressed-pdas/guides/how-to-burn-compressed-accounts"
                 ]
               },
               "compressed-pdas/program-examples",
+              "client-library/client-guide",
               "compressed-pdas/solana-attestation-service"
+            ]
+          },
+          {
+            "group": "ZK",
+            "pages": [
+              "zk/overview",
+              "zk/examples"
+            ]
+          }
+        ]
+      },
+      {
+        "anchor": "References",
+        "icon": "code",
+        "groups": [
+          {
+            "group": "ZK Compression",
+            "pages": [
+              "welcome",
+              "quickstart"
             ]
           },
           {
@@ -229,19 +191,24 @@
             ]
           },
           {
-            "group": "Learn",
+            "group": "SDK Reference",
             "pages": [
-              {
-                "group": "Core Concepts",
-                "pages": [
-                  "learn/core-concepts",
-                  "learn/core-concepts/compressed-account-model",
-                  "learn/core-concepts/merkle-trees-validity-proofs",
-                  "learn/core-concepts/transaction-lifecycle",
-                  "learn/core-concepts/considerations"
-                ]
-              },
-              "learn/ai-tools-guide"
+              "api-reference/libraries/light-sdk",
+              "api-reference/libraries/light-token",
+              "api-reference/libraries/light-program-test",
+              "api-reference/libraries/light-client",
+              "api-reference/libraries/stateless-js",
+              "api-reference/libraries/compressed-token"
+            ]
+          },
+          {
+            "group": "Core Concepts",
+            "pages": [
+              "learn/core-concepts",
+              "learn/core-concepts/compressed-account-model",
+              "learn/core-concepts/merkle-trees-validity-proofs",
+              "learn/core-concepts/transaction-lifecycle",
+              "learn/core-concepts/considerations"
             ]
           },
           {
@@ -271,19 +238,33 @@
               "references/whitepaper",
               "references/node-operators",
               "references/terminology",
+              "references/light-token-terminology",
               "references/migration-v1-to-v2",
-              "support",
               "references/security"
             ]
-          },
+          }
+        ]
+      },
+      {
+        "anchor": "AI Tools",
+        "icon": "robot",
+        "groups": [
           {
-            "group": "SDK Reference",
+            "group": "AI Tools",
             "pages": [
-              "api-reference/libraries/stateless-js",
-              "api-reference/libraries/compressed-token",
-              "api-reference/libraries/light-client",
-              "api-reference/libraries/light-sdk",
-              "api-reference/libraries/light-program-test"
+              "learn/ai-tools-guide"
+            ]
+          }
+        ]
+      },
+      {
+        "anchor": "Support",
+        "icon": "headset",
+        "groups": [
+          {
+            "group": "Support",
+            "pages": [
+              "support"
             ]
           }
         ]
