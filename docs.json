@@ -130,9 +130,14 @@
         "icon": "code",
         "groups": [
           {
-            "group": "ZK Compression",
+            "group": "References",
             "pages": [
-              "welcome",
+              "references/overview"
+            ]
+          },
+          {
+            "group": "Developer Tools",
+            "pages": [
               {
                 "group": "Error Cheatsheet",
                 "expanded": true,
@@ -155,22 +160,22 @@
             ]
           },
           {
-            "group": "Core Concepts",
+            "group": "Learn",
             "pages": [
-              "learn/core-concepts",
-              "learn/core-concepts/compressed-account-model",
-              "learn/core-concepts/merkle-trees-validity-proofs",
-              "learn/core-concepts/transaction-lifecycle",
-              "learn/core-concepts/considerations"
-            ]
-          },
-          {
-            "group": "References",
-            "pages": [
-              "references/whitepaper",
+              {
+                "group": "Core Concepts (ZK Compression)",
+                "pages": [
+                  "learn/core-concepts",
+                  "learn/core-concepts/compressed-account-model",
+                  "learn/core-concepts/merkle-trees-validity-proofs",
+                  "learn/core-concepts/transaction-lifecycle",
+                  "learn/core-concepts/considerations"
+                ]
+              },
               "references/node-operators",
+              "references/security",
               "references/terminology",
-              "references/security"
+              "references/whitepaper"
             ]
           },
           {
@@ -353,7 +358,11 @@
   "redirects": [
     {
       "source": "/landing",
-      "destination": "/welcome"
+      "destination": "/home"
+    },
+    {
+      "source": "/welcome",
+      "destination": "/home"
     }
   ]
 }

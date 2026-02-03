@@ -183,42 +183,6 @@ pub struct CompressedAccountData {
 - `data_hash`: Hash of the `data` field (32 bytes).
   - When computing the compressed account hash for the state tree, the protocol uses this fixed-size hash instead of the variable-length data bytes.
 
-# Compressed Token Account
-
-Compressed token accounts store token balance, owner, and other information of token accounts (SPL, Token-2022, or Light).
-
-1. Any Solana token account can be compressed/decompressed at will.
-2. We recommend to use compressed tokens for token distribution.
-
-<Note>
-  Learn how the Light token program uses ZK Compression under the hood
-  [here](/learn/light-token-standard).
-</Note>
-
-<Tabs>
-  <Tab title="Diagram">
-    <Frame>
-      <img
-        src="/images/compressed-token-explainer.png"
-        alt="Diagram showing compressed token account structure with three components: Hash (identifier for compressed token account in purple box), Account (struct containing Data bytes, Executable flag, Lamports balance, and Address set to None), and AccountData (containing Mint, Owner, Amount, and Extensions fields marked as unimplemented)"
-      />
-    </Frame>
-  </Tab>
-  <Tab title="Source Code">
-    ```rust
-    pub struct TokenData {
-        pub mint: Pubkey,
-        pub owner: Pubkey,
-        pub amount: u64,
-        pub delegate: Option<Pubkey>,
-        pub state: u8,
-        /// Placeholder for TokenExtension tlv data (unimplemented)
-        pub tlv: Option<Vec<u8>>,
-    }
-    ```
-  </Tab>
-</Tabs>
-
 # Next Steps
 
 <Card

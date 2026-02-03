@@ -1,27 +1,10 @@
 ---
-title: "Welcome to ZK Compression"
+title: "High-level System Overview"
 sidebarTitle: "Overview"
-description: "ZK Compression is a Solana account primitive that lets you create tokens and PDAs without rent-exemption with L1 performance and security."
+description: "Overview to how compressed PDA work with ZK Compression."
 keywords: ["zk compression concepts", "compressed accounts explained", "zk on solana"]
 ---
 
-<Frame>![](/images/banner-image.png)</Frame>
-
-## What is ZK Compression?
-
-Storage cost of Solana accounts are reduced by combining generalized state compression and <Tooltip tip="A cryptographic proof to verify the validity of a statement without revealing the underlying data. ZK Compression uses a Groth16 SNARK zk proof with a constant 128 bytes size">zero-knowledge proofs</Tooltip>.
-The Light Token Program uses ZK Compression under the hood.
-
-### State Compression
-   State compression stores account data on the Solana ledger instead of in millions of on-chain accounts. Only a small fingerprint of all accounts is stored on-chain for cryptographic integrity. Using Light Protocol, programs can use the account data inside Solana's virtual machine as if it were stored on-chain.
-
-### ZK
-    The protocol uses 128 byte zero-knowledge proofs (validity proofs) to verify the integrity of
-    the compressed accounts. By default, this is all done under the hood. You can fetch validity
-    proofs from RPC providers that support ZK Compression.
-
-
-## High Level System Overview
 <Steps>
 <Step>
 

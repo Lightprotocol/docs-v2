@@ -1,0 +1,102 @@
+---
+title: References
+sidebarTitle: Overview
+description: Developer tools (error cheatsheet, addresses and urls, migration guide) and learn core concepts.
+keywords: ["zk compression on solana", "scalable solana infrastructure", "compressed accounts on solana", "privacy on solana", "zk on solana", "shielded transactions on solana"]
+---
+
+---
+
+import WelcomePageInstall from "/snippets/setup/welcome-page-install.mdx";
+import { RentLifecycleVisualizer } from "/snippets/jsx/rent-lifecycle-visualizer.jsx";
+import CompressibleRentExplained from "/snippets/compressible-rent-explained.mdx";
+
+# Developer Tools
+
+<CardGroup cols={2}>
+  <Card title="Error Cheatsheet" icon="bug" href="/resources/error-cheatsheet">
+    Debug common errors and issues.
+  </Card>
+  <Card title="Addresses and URLs" icon="link" href="/resources/addresses-and-urls">
+    RPC endpoints and Merkle tree/ program/ account addresses.
+  </Card>
+  <Card title="CLI Installation" icon="terminal" href="/resources/cli-installation">
+    Install the Light CLI.
+  </Card>
+  <Card title="Migration Guide" icon="arrow-right" href="/references/migration-v1-to-v2">
+    Migrate Merkle trees from v1 to v2.
+  </Card>
+</CardGroup>
+
+<CardGroup cols={2}>
+  <Card title="Client SDKs" icon="code" href="/resources/sdks/client-development">
+    TypeScript and Rust client libraries.
+  </Card>
+  <Card title="Program SDKs" icon="cube" href="/resources/sdks/program-development">
+    Build programs with compressed accounts.
+  </Card>
+</CardGroup>
+
+# Learn
+
+
+## What is Light Token?
+
+Light token is a high-performance token standard that is functionally equivalent to SPL, but stores mint and token accounts more efficiently. This reduces account creation cost while being more CU efficient than SPL on hot paths.
+
+<CardGroup cols={2}>
+  <Card title="Light Token Standard" icon="graduation-cap" href="/learn/light-token-standard">
+    Core concepts of the Light Token program.
+  </Card>
+  <Card title="FAQ" icon="circle-question" href="/light-token/faq">
+    Frequently asked questions.
+  </Card>
+</CardGroup>
+
+## What is ZK Compression?
+
+ZK Compression is a Solana account primitive that lets you create tokens and PDAs without rent-exemption with L1 performance and security.
+
+Storage cost of Solana accounts are reduced by combining generalized state compression and <Tooltip tip="A cryptographic proof to verify the validity of a statement without revealing the underlying data. ZK Compression uses a Groth16 SNARK zk proof with a constant 128 bytes size">zero-knowledge proofs</Tooltip>.
+The Light Token Program uses ZK Compression under the hood.
+
+<Steps>
+  <Step title="State Compression">
+   State compression stores account data on the Solana ledger instead of in millions of on-chain accounts. Only a small fingerprint of all accounts is stored on-chain for cryptographic integrity. Using Light Protocol, programs can use the account data inside Solana's virtual machine as if it were stored on-chain.
+
+  </Step>
+  <Step title="ZK">
+    The protocol uses 128 byte zero-knowledge proofs (validity proofs) to verify the integrity of
+    the compressed accounts. By default, this is all done under the hood. You can fetch validity
+    proofs from RPC providers that support ZK Compression.
+  </Step>
+</Steps>
+
+<CardGroup cols={2}>
+  <Card title="Core Concepts" icon="graduation-cap" href="/learn/core-concepts">
+    ZK Compression architecture and account model.
+  </Card>
+  <Card title="Terminology" icon="book" href="/references/terminology">
+    Glossary of key terms.
+  </Card>
+  <Card title="Whitepaper" icon="file-lines" href="/references/whitepaper">
+    Technical specification and research.
+  </Card>
+  <Card title="Security" icon="shield-check" href="/references/security">
+    Audits, bug bounty, and formal verification.
+  </Card>
+  <Card title="Node Operators" icon="server" href="/references/node-operators">
+    Run your own indexer node.
+  </Card>
+</CardGroup>
+
+## Legacy API
+
+<CardGroup cols={2}>
+  <Card title="Compressed Tokens" icon="coins" href="/compressed-tokens/overview">
+    For token distribution and storage of inactive tokens.
+  </Card>
+  <Card title="JSON RPC Methods" icon="brackets-curly" href="/api-reference/json-rpc-methods/overview">
+    Compression RPC API reference.
+  </Card>
+</CardGroup>
