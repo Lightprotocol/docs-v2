@@ -54,7 +54,8 @@
                   "light-token/toolkits/for-wallets",
                   "light-token/toolkits/for-streaming-mints",
                   "light-token/toolkits/for-streaming-tokens",
-                  "compressed-tokens/advanced-guides/airdrop"
+                  "compressed-tokens/advanced-guides/airdrop",
+                  "compressed-tokens/for-privy"
                 ]
               },
               {
@@ -169,7 +170,6 @@
               "references/whitepaper",
               "references/node-operators",
               "references/terminology",
-              "references/light-token-terminology",
               "references/security"
             ]
           },
@@ -177,7 +177,6 @@
             "group": "Compressed Tokens (legacy)",
             "pages": [
               "compressed-tokens/overview",
-              "compressed-tokens/for-privy",
               {
                 "group": "Cookbook",
                 "pages": [
