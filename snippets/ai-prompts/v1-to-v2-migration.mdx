@@ -43,15 +43,18 @@ Find all v1 patterns:
 
 ### Phase 2: Update dependencies
 
-Add v2 feature to Cargo.toml:
+Update Cargo.toml. V2 is the default - no feature flag needed:
 
+    # On-chain program
     [dependencies]
-    light-sdk = { version = "0.17", features = ["anchor", "v2"] }
-    light-sdk-types = { version = "0.17", features = ["v2"] }
+    light-sdk = { version = "0.17.1", features = ["anchor"] }
+    light-hasher = "5.0.0"
 
-    [dev-dependencies]
-    light-program-test = { version = "0.17", features = ["v2"] }
-    light-client = { version = "0.17", features = ["v2"] }
+    # Off-chain client
+    [dependencies]
+    light-client = "0.17.2"
+
+Note: V2 is now the default in all crates. Only specify `features = ["v2"]` if you disabled default features.
 
 ### Phase 3: Rust SDK replacements
 
@@ -60,7 +63,7 @@ Add v2 feature to Cargo.toml:
 | address::v1::derive_address | address::v2::derive_address |
 | cpi::v1::CpiAccounts | cpi::v2::CpiAccounts |
 | cpi::v1::LightSystemProgramCpi | cpi::v2::LightSystemProgramCpi |
-| constants::ADDRESS_TREE_V1 | light_sdk_types::ADDRESS_TREE_V2 |
+| constants::ADDRESS_TREE_V1 | constants::ADDRESS_TREE_V2 |
 | .into_new_address_params_packed(seed) | .into_new_address_params_assigned_packed(seed, Some(0)) |
 | .add_system_accounts(config) | .add_system_accounts_v2(config) |
 

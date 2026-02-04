@@ -10,12 +10,130 @@ import V1ToV2MigrationPrompt from "/snippets/ai-prompts/v1-to-v2-migration.mdx";
 
 |                       | v1                    | v2                 |
 |-----------------------|-----------------------|--------------------|
+| CU consumption        | Baseline              | Up to 70% less     |
 | Merkle tree type      | Concurrent            | Batched            |
 | State tree depth      | 26 (~67M leaves)      | 32 (~4B leaves)    |
 | Address tree depth    | 26                    | 40                 |
 | Address tree accounts | Separate tree + queue | Single batch tree  |
 
 <Tabs>
+<Tab title="Rust">
+
+### Update Cargo.toml
+
+in 0.17.x onward, V2 is a recommended default feature.
+
+**On-chain program:**
+
+```toml
+[dependencies]
+light-sdk = "0.17.1"
+light-hasher = "5.0.0"
+```
+
+For Anchor programs, add the `anchor` feature:
+
+```toml
+[dependencies]
+light-sdk = { version = "0.17.1", features = ["anchor"] }
+```
+
+**Off-chain client:**
+
+```toml
+[dependencies]
+light-client = "0.17.2"
+```
+
+
+### Update imports
+
+```rust
+// v1
+use light_sdk::{
+    address::v1::derive_address,
+    constants::ADDRESS_TREE_V1,
+    cpi::v1::{CpiAccounts, LightSystemProgramCpi},
+};
+```
+
+```rust
+// v2
+use light_sdk::{
+    address::v2::derive_address,
+    cpi::v2::{CpiAccounts, LightSystemProgramCpi},
+    constants::ADDRESS_TREE_V2,
+};
+```
+
+### Update address derivation
+
+The `derive_address` function signature remains the same, but the internal derivation logic differs. No code changes needed beyond updating the import path.
+
+### Update address params
+
+Replace `into_new_address_params_packed()` with `into_new_address_params_assigned_packed()`:
+
+```rust
+// v1
+let new_address_params = instruction_data
+    .address_tree_info
+    .into_new_address_params_packed(address_seed);
+```
+
+```rust
+// v2
+let new_address_params = instruction_data
+    .address_tree_info
+    .into_new_address_params_assigned_packed(address_seed, Some(0));
+```
+
+The second parameter specifies the output queue index. Use `Some(0)` to assign the address to the first available queue.
+
+### Update tree validation
+
+If your program validates the address tree pubkey, update the constant:
+
+```rust
+// v1
+if address_tree_pubkey.to_bytes() != ADDRESS_TREE_V1 {
+    return Err(ProgramError::InvalidAccountData);
+}
+```
+
+```rust
+// v2
+if address_tree_pubkey.to_bytes() != ADDRESS_TREE_V2 {
+    return Err(ProgramError::InvalidAccountData);
+}
+```
+
+### Update client code (light-client)
+
+The `light-client` crate handles v1/v2 automatically. The `get_validity_proof` method routes to the v2 endpoint when the v2 feature is enabled (default):
+
+```rust
+use light_client::{
+    rpc::{LightClient, LightClientConfig, Rpc},
+    indexer::Indexer,
+};
+
+let rpc = LightClient::new(
+    LightClientConfig::new("https://mainnet.helius-rpc.com/?api-key=YOUR_KEY")
+).await?;
+
+// Query compressed accounts
+let accounts = rpc
+    .get_compressed_accounts_by_owner(&owner, None, None)
+    .await?;
+
+// get_validity_proof automatically uses v2 endpoint (default)
+let proof_result = rpc
+    .get_validity_proof(hashes, addresses_with_trees, None)
+    .await?;
+```
+
+</Tab>
 <Tab title="TypeScript">
 
 ### Update imports
@@ -119,140 +237,6 @@ const remainingAccounts = PackedAccounts.newWithSystemAccountsV2(systemAccountCo
 ```
 
 </Tab>
-<Tab title="Rust">
-
-### Update Cargo.toml
-
-Add the `v2` feature flag to your dependencies:
-
-```toml
-[dependencies]
-light-sdk = { version = "0.16", features = ["v2"] }
-light-sdk-types = { version = "0.3", features = ["v2"] }
-```
-
-### Update imports
-
-```rust
-// v1
-use light_sdk::{
-    address::v1::derive_address,
-    constants::ADDRESS_TREE_V1,
-    cpi::v1::{CpiAccounts, LightSystemProgramCpi},
-};
-```
-
-```rust
-// v2
-use light_sdk::{
-    address::v2::derive_address,
-    cpi::v2::{CpiAccounts, LightSystemProgramCpi},
-};
-use light_sdk_types::ADDRESS_TREE_V2;
-```
-
-### Update address derivation
-
-The `derive_address` function signature remains the same, but the internal derivation logic differs. No code changes needed beyond updating the import path.
-
-### Update address params
-
-Replace `into_new_address_params_packed()` with `into_new_address_params_assigned_packed()`:
-
-```rust
-// v1
-let new_address_params = instruction_data
-    .address_tree_info
-    .into_new_address_params_packed(address_seed);
-```
-
-```rust
-// v2
-let new_address_params = instruction_data
-    .address_tree_info
-    .into_new_address_params_assigned_packed(address_seed, Some(0));
-```
-
-The second parameter specifies the output queue index. Use `Some(0)` to assign the address to the first available queue.
-
-### Update tree validation
-
-If your program validates the address tree pubkey, update the constant:
-
-```rust
-// v1
-if address_tree_pubkey.to_bytes() != ADDRESS_TREE_V1 {
-    return Err(ProgramError::InvalidAccountData);
-}
-```
-
-```rust
-// v2
-if address_tree_pubkey.to_bytes() != ADDRESS_TREE_V2 {
-    return Err(ProgramError::InvalidAccountData);
-}
-```
-
-</Tab>
-<Tab title="Pinocchio">
-
-The Pinocchio SDK follows the same import changes as the Rust SDK, plus one additional API change.
-
-### Update imports
-
-```rust
-// v1
-use light_sdk_pinocchio::{
-    address::v1::derive_address,
-    constants::ADDRESS_TREE_V1,
-    cpi::v1::{CpiAccounts, LightSystemProgramCpi},
-};
-```
-
-```rust
-// v2
-use light_sdk_pinocchio::{
-    address::v2::derive_address,
-    cpi::v2::{CpiAccounts, LightSystemProgramCpi},
-};
-use light_sdk_types::ADDRESS_TREE_V2;
-```
-
-### Update CpiAccounts
-
-`CpiAccounts::try_new_with_config()` becomes `CpiAccounts::new_with_config()` (infallible):
-
-```rust
-// v1
-let cpi_accounts = CpiAccounts::try_new_with_config(signer, &accounts[1..], config)
-    .map_err(to_custom_error_u32)?;
-```
-
-```rust
-// v2
-let cpi_accounts = CpiAccounts::new_with_config(signer, &accounts[1..], config);
-```
-
-### Update address params
-
-Same as the Rust SDK:
-
-```rust
-// v1
-let new_address_params = instruction_data
-    .address_tree_info
-    .into_new_address_params_packed(address_seed);
-```
-
-```rust
-// v2
-let new_address_params = instruction_data
-    .address_tree_info
-    .into_new_address_params_assigned_packed(address_seed, Some(0));
-```
-
-</Tab>
-
 <Tab title="AI Prompt">
 <V1ToV2MigrationPrompt />
 </Tab>
