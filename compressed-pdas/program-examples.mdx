@@ -3,15 +3,6 @@ title: Program Examples
 description: Program example repository for compressed accounts with tests.
 ---
 
-## Airdrop Claim Reference Implementations
-
-* **Basic**: [**simple-claim**](https://github.com/Lightprotocol/program-examples-airdrop-implementations/simple-claim) - Distributes compressed tokens that get decompressed to SPL on claim.
-* **Advanced**: [**merkle-distributor**](https://github.com/Lightprotocol/distributor) - Distributes SPL tokens, uses compressed PDAs to track claims with linear vesting, partial claims, clawback and admin controls.
-
-<Info>
-For simple client side distribution visit [this example](https://github.com/Lightprotocol/example-token-distribution).
-</Info>
-
 ## Basic Operations
 
 * [**basic-operations/anchor**](https://github.com/Lightprotocol/program-examples/tree/main/basic-operations/anchor) - Anchor program with Rust and TypeScript tests
@@ -50,9 +41,19 @@ Full compressed account lifecycle (create, increment, decrement, reset, close):
 
 * [**nullifier-program**](https://github.com/Lightprotocol/nullifier-program) - For some use cases, such as sending payments, you might want to prevent your onchain instruction from being executed more than once. Creates a rent-free PDA derived from an id. If the id has been used before, the PDA already exists, causing the instruction to fail.
 
+## Token Claim Reference Implementations
+
+* **Basic**: [**simple-claim**](https://github.com/Lightprotocol/program-examples-airdrop-implementations/simple-claim) - Distributes compressed tokens that get decompressed to SPL on claim.
+* **Advanced**: [**merkle-distributor**](https://github.com/Lightprotocol/distributor) - Distributes SPL tokens, uses compressed PDAs to track claims with linear vesting, partial claims, clawback and admin controls.
+
+<Info>
+For simple client side distribution visit [this example](https://github.com/Lightprotocol/example-token-distribution).
+</Info>
+
 ## ZK-ID Program
 
 * [**zk-id**](https://github.com/Lightprotocol/program-examples/tree/main/zk-id) - A minimal Solana program that uses zero-knowledge proofs for identity verification with compressed accounts.
+
 
 # Next Steps
 
