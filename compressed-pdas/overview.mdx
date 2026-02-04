@@ -1,36 +1,88 @@
 ---
 title: Overview & Program Template
-description: Compressed PDAs provide full functionality of accounts at PDAs, without rent-exemption per account.
+description: Compressed PDAs provide full composability and functionality of accounts at PDAs, without rent-exemption per account. 
 keywords: ["rent free program derived addresses", "rent free pda accounts", "compressed pda on solana", "infrastructure for depins on solana", "scalable solana infrastructure", "stake accounts for depins", "cost efficient stake accounts", "scalable reward distribution on solana"]
 ---
 
 import ProgramExamplesTable from '/snippets/overview-tables/program-examples-table.mdx';
 import DevelopmentEnvironmentSetup from '/snippets/setup/development-environment-setup.mdx';
+import CompressedPdasGuidesTable from '/snippets/overview-tables/compressed-pdas-guides-table.mdx';
+import SdkReferenceCompressedPdas from '/snippets/overview-tables/sdk-reference-compressed-pdas.mdx';
 
 
 | Creation      | Regular PDA Account    | Compressed PDA         |
 | :------------- | :--------------------- | :---------------------- |
 | 100-byte PDA  | 	~1,600,000 lamports          | 15,000 lamports     |
 
-Compressed PDAs are derived using a specific program address and seed, like regular PDAs. Custom programs invoke the <Tooltip tip="The program enforces compressed account layout with ownership and sum checks. It is invoked to create and interact with compressed accounts and tokens.">Light System program</Tooltip> to create and update accounts, instead of the System program.
+Compressed PDAs are derived using a specific program address and seed, like regular PDAs.
+Custom programs invoke the <Tooltip tip="The program enforces compressed account layout with ownership and sum checks. It is invoked to create and interact with compressed accounts and tokens.">Light System program</Tooltip> 
+to create and update compressed accounts, instead of the System program.
+Compressed PDAs are compressed accounts with an addresses.
 
-#### Compressed PDAs at a Glance
+<Tabs>
+  <Tab title="Create">
+    <div className="hidden dark:block">
+    <Frame>
+      ![](/images/Untitled.png)
+    </Frame>
+    </div>
+    <div className="block dark:hidden">
+      <Frame>
+        ![](/images/image-22.png)
+      </Frame>
+    </div>
+  </Tab>
+  <Tab title="Update">
+    <div className="hidden dark:block">
+    <Frame>
+      ![](/images/Untitled-1.png)
+    </Frame>
+    </div>
+    <div className="block dark:hidden">
+      <Frame>
+      ![](/images/image-20.png)
+    </Frame>
+      </div>
+  </Tab>
+  <Tab title="Close">
+    <div className="hidden dark:block">
+    <Frame>
+      ![](/images/Untitled-4.png)
+    </Frame>
+    </div>
+    <div className="block dark:hidden">
+      <Frame>
+      ![](/images/image-23.png)
+    </Frame>
+    </div>
+  </Tab>
+  <Tab title="Reinitialize">
+    <div className="hidden dark:block">
+    <Frame>
+      ![](/images/program-reinit-1.png)
+    </Frame>
+    </div>
+    <div className="block dark:hidden">
+      <Frame>
+      ![](/images/program-reinit.png)
+    </Frame>
+    </div>
+  </Tab>
+  <Tab title="Burn">
+    <div className="hidden dark:block">
+    <Frame>
+      ![](/images/program-burn-1.png)
+    </Frame>
+    </div>
+    <div className="block dark:hidden">
+      <Frame>
+      ![](/images/program-burn.png)
+    </Frame>
+    </div>
+  </Tab>
+</Tabs>
 
-<CardGroup cols={3}>
-<Card title="Rent free PDAs">
-  Create accounts at program-derived addresses without upfront rent exempt balance.
-</Card>
-<Card title="Full PDA Functionality">
-  Persistent unique identification and program ownership.
-</Card>
-<Card title="Composable">
-  CPI support between compressed and regular PDAs.
-</Card>
-</CardGroup>
-
-# Start Building
-
-Developing with compressed PDAs works similar to regular PDAs and involves minimal setup:
+# Start Building with the Program Template
 
 <Steps>
 <Step>
@@ -174,10 +226,17 @@ Caused by:
 
 </Accordion>
 
+## Guides
+
+<CompressedPdasGuidesTable />
+
 ## Program Examples
 
 <ProgramExamplesTable />
 
+## SDK Reference
+
+<SdkReferenceCompressedPdas />
 
 # Next Steps
 

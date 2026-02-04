@@ -16,11 +16,11 @@ Building a ZK Solana program requires:
 4. An indexer to serve Merkle proofs
 5. Encrypted state
 
-## Nullifiers on Solana
+## Nullifiers for ZK on Solana
 
 A nullifier is a deterministically derived hash to ensure an action can only be performed once.
 The nullifier cannot be linked to the action or user.
-For example Zcash uses nullifiers to prevent double spending. 
+For example Zcash uses nullifiers to prevent double spending.
 
 To implement nullifiers we need a data structure that ensures every nullifier is only created once and never deleted.
 On Solana a straight forward way to implement nullifiers is to create a PDA account with the nullifier as seed.

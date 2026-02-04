@@ -1,5 +1,6 @@
 ---
 title: "AI Tools Guide"
+sidebarTitle: "Guide"
 description: "Guidance to AI tools when working with ZK Compression. Includes MCP server, DeepWiki, and AI Search guides."
 ---
 
@@ -153,24 +154,47 @@ mcp__deepwiki__ask_question("Lightprotocol/light-protocol", "your question")
 You can specify any public GitHub repo that is indexed with DeepWiki. When you connect to the MCP, you specify the repository when calling the tools. Learn more [here](https://docs.devin.ai/work-with-devin/deepwiki-mcp).
 </Tip>
 
-<div style={{ display: 'flex', alignItems: 'center', gap: '0.5em' }}>
-  <h3 style={{ margin: 0 }}>Alternative: DeepWiki Web</h3>
-  <a href="https://deepwiki.com/Lightprotocol/light-protocol" style={{ margin: 0 }}>
-    <img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki" style={{ marginTop: 0, marginBottom: 0, verticalAlign: 'middle' }} />
+<Accordion title="Alternative: DeepWiki Web" icon="globe">
+  If you don't have the MCP installed, use DeepWiki in your browser.
+
+  <a href="https://deepwiki.com/Lightprotocol/light-protocol">
+    <img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki" />
   </a>
-</div>
 
-If you don't have the MCP installed we recommend to use AskDevin in your browser.
+  <Frame>
+    <iframe
+      width="100%"
+      height="420"
+      src="https://drive.google.com/file/d/1irbZC4NpSE6F1XctIel0yXyVmwvRsjaU/preview"
+      title="DeepWiki Video"
+      frameborder="0"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+      referrerpolicy="strict-origin-when-cross-origin"
+      allowfullscreen
+    ></iframe>
+  </Frame>
+</Accordion>
 
-<Frame>
-  <iframe
-    width="100%"
-    height="420"
-    src="https://drive.google.com/file/d/1irbZC4NpSE6F1XctIel0yXyVmwvRsjaU/preview"
-    title="DeepWiki Video"
-    frameborder="0"
-    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-    referrerpolicy="strict-origin-when-cross-origin"
-    allowfullscreen
-  ></iframe>
-</Frame>
+## AI agents
+
+## `skill.md`
+
+`skill.md` is a structured capability file that tells agents what they can do
+with DFlow, what inputs they need, and what constraints apply. If you're
+building with agents, start here.
+
+* View: [`/skill.md`](https://zkcompression.com/skill.md)
+
+## `llms.txt`
+
+`llms.txt` is an index of the docs. It lists key pages with descriptions
+so agents can find answers quickly.
+
+* View: [`/llms.txt`](https://zkcompression.com/llms.txt)
+
+## `llms-full.txt`
+
+`llms-full.txt` is the full, expanded index for agents that want complete
+coverage.
+
+* View: [`/llms-full.txt`](https://zkcompression.com/llms-full.txt)
