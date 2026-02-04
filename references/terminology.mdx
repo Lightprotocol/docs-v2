@@ -42,7 +42,8 @@ A set of [validators](https://solana.com/docs/references/terminology#validator) 
 
 ## Compressed PDA
 
-Compressed accounts at Program Derived Addresses.
+Compressed accounts with an address stored in an address Merkle tree.
+Full Solana PDA functionality and composability without rent-exemption.
 
 ## Compressed account
 
@@ -58,23 +59,21 @@ An SPL token mint uniquely represents a token on the Solana network and stores g
 
 SPL tokens can be compressed if the mint has a token pool account set up. Anyone can create a token pool PDA for any given SPL mint.
 
-## Token Pool Account
+## SPL Interface PDA Account
 
-SPL token account that holds SPL tokens corresponding to compressed tokens in circulation. Tokens are deposited during compression and withdrawn during decompression, owned by the Light Token Program's CPI authority PDA.
-
-## Concurrency
-
-The ability to process multiple Merkle tree update requests simultaneously without invalidating each other, as long as they don't modify the same leaf.
-
-Concurrency in ZK Compression allows parallel operations on different tree leaves without requiring locks.
+SPL interface PDA account that holds SPL tokens corresponding to compressed tokens and Light Tokens in circulation. 
+Owned by the Light Token Program's CPI authority PDA.
 
 ## Compressed Token
 
-An SPL token in compressed form. Compressed tokens do not require an associated token account per holder.
+An SPL token in compressed form. 
+Compressed tokens do not require an associated token account per holder.
 
 ## Compressed Token account
 
-An account type in the Light Token Program to store information about an individual's ownership of a specific token (mint). Compressed token accounts do not require a rent exempt balance upon creation.
+An account type in the Light Token Program to store information about an individual's ownership of a specific token (mint). 
+Compressed token accounts do not require a rent exempt balance upon creation.
+Compressed token accounts are compressed accounts that do not need an address.
 
 ## Light Token Program
 

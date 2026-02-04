@@ -34,12 +34,10 @@ You can find a complete rent-free AMM reference implementation [here](https://gi
 
 ```toml
 [dependencies]
-
-light-sdk = { version = "0.18.0", features = ["anchor", "v2", "cpi-context"] }
-light-sdk-macros = { version = "0.18.0" }
-light-token = { version = "0.3.0", features = ["anchor"] }
-
-light-anchor-spl = { version = "0.31" }    # TokenInterface uses light_token::ID
+light-sdk = { version = "0.19.0", features = ["anchor", "v2", "cpi-context"] }
+light-sdk-macros = "0.19.0"
+light-token = { version = "0.4.0", features = ["anchor"] }
+light-anchor-spl = "0.31"    # TokenInterface uses light_token::ID
 anchor-lang = "0.31"
 ```
 

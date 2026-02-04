@@ -5,8 +5,6 @@ description: Developer tools (error cheatsheet, addresses and urls, migration gu
 keywords: ["zk compression on solana", "scalable solana infrastructure", "compressed accounts on solana", "privacy on solana", "zk on solana", "shielded transactions on solana"]
 ---
 
----
-
 import WelcomePageInstall from "/snippets/setup/welcome-page-install.mdx";
 import { RentLifecycleVisualizer } from "/snippets/jsx/rent-lifecycle-visualizer.jsx";
 import CompressibleRentExplained from "/snippets/compressible-rent-explained.mdx";
@@ -28,17 +26,11 @@ import CompressibleRentExplained from "/snippets/compressible-rent-explained.mdx
   </Card>
 </CardGroup>
 
-<CardGroup cols={2}>
-  <Card title="Client SDKs" icon="code" href="/resources/sdks/client-development">
-    TypeScript and Rust client libraries.
-  </Card>
-  <Card title="Program SDKs" icon="cube" href="/resources/sdks/program-development">
-    Build programs with compressed accounts.
-  </Card>
-</CardGroup>
+<Card title="SDK Reference" icon="code" href="/api-reference/sdk">
+  TypeScript and Rust SDKs for client and program development.
+</Card>
 
 # Learn
-
 
 ## What is Light Token?
 
@@ -86,17 +78,6 @@ The Light Token Program uses ZK Compression under the hood.
     Audits, bug bounty, and formal verification.
   </Card>
   <Card title="Node Operators" icon="server" href="/references/node-operators">
-    Run your own indexer node.
-  </Card>
-</CardGroup>
-
-## Legacy API
-
-<CardGroup cols={2}>
-  <Card title="Compressed Tokens" icon="coins" href="/compressed-tokens/overview">
-    For token distribution and storage of inactive tokens.
-  </Card>
-  <Card title="JSON RPC Methods" icon="brackets-curly" href="/api-reference/json-rpc-methods/overview">
-    Compression RPC API reference.
+    Learn how to run ZK Compression infrastructure, such as Forester nodes, Photon indexers and Prover nodes.
   </Card>
 </CardGroup>

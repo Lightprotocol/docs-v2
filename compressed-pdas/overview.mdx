@@ -1,6 +1,6 @@
 ---
 title: Overview & Program Template
-description: Compressed PDAs provide full composability and functionality of accounts at PDAs, without rent-exemption per account.
+description: Compressed PDAs provide full composability and functionality of accounts at PDAs, without rent-exemption per account. 
 keywords: ["rent free program derived addresses", "rent free pda accounts", "compressed pda on solana", "infrastructure for depins on solana", "scalable solana infrastructure", "stake accounts for depins", "cost efficient stake accounts", "scalable reward distribution on solana"]
 ---
 
@@ -14,7 +14,10 @@ import SdkReferenceCompressedPdas from '/snippets/overview-tables/sdk-reference-
 | :------------- | :--------------------- | :---------------------- |
 | 100-byte PDA  | 	~1,600,000 lamports          | 15,000 lamports     |
 
-Compressed PDAs are derived using a specific program address and seed, like regular PDAs. Custom programs invoke the <Tooltip tip="The program enforces compressed account layout with ownership and sum checks. It is invoked to create and interact with compressed accounts and tokens.">Light System program</Tooltip> to create and update accounts, instead of the System program.
+Compressed PDAs are derived using a specific program address and seed, like regular PDAs.
+Custom programs invoke the <Tooltip tip="The program enforces compressed account layout with ownership and sum checks. It is invoked to create and interact with compressed accounts and tokens.">Light System program</Tooltip> 
+to create and update compressed accounts, instead of the System program.
+Compressed PDAs are compressed accounts with an addresses.
 
 <Tabs>
   <Tab title="Create">

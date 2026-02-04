@@ -52,10 +52,8 @@
                   "light-token/toolkits/overview",
                   "light-token/toolkits/for-payments",
                   "light-token/toolkits/for-wallets",
-                  "compressed-tokens/for-privy",
                   "light-token/toolkits/for-streaming-mints",
-                  "light-token/toolkits/for-streaming-tokens",
-                  "compressed-tokens/advanced-guides/airdrop"
+                  "light-token/toolkits/for-streaming-tokens"
                 ]
               },
               {
@@ -92,6 +90,76 @@
                 ]
               },
               "learn/light-token-standard"
+            ]
+          },
+          {
+            "group": "Compressed Tokens",
+            "pages": [
+              "compressed-tokens/overview",
+              {
+                "group": "Cookbook",
+                "pages": [
+                  "compressed-tokens/guides/create-compressed-token-accounts",
+                  "compressed-tokens/guides/mint-compressed-tokens",
+                  "compressed-tokens/guides/transfer-compressed-tokens",
+                  "compressed-tokens/guides/compress-decompress",
+                  "compressed-tokens/guides/compress-spl-token-account",
+                  "compressed-tokens/guides/create-mint-with-token-pool",
+                  "compressed-tokens/guides/add-token-pools-to-mint-accounts",
+                  "compressed-tokens/guides/merge-compressed-token-accounts",
+                  "compressed-tokens/guides/delegate"
+                ]
+              },
+              {
+                "group": "Implementation Guides",
+                "pages": [
+                  {
+                    "group": "Integration",
+                    "expanded": true,
+                    "pages": [
+                      "compressed-tokens/for-privy",
+                      "compressed-tokens/advanced-guides/airdrop",
+                      "compressed-tokens/advanced-guides/how-to-combine-operations-in-one-transaction",
+                      "compressed-tokens/advanced-guides/add-wallet-support-for-compressed-tokens",
+                      "compressed-tokens/advanced-guides/use-token-2022-with-compression"
+                    ]
+                  }
+                ]
+              },
+              {
+                "group": "JSON RPC Methods",
+                "pages": [
+                  "api-reference/json-rpc-methods/overview",
+                  {
+                    "group": "Methods",
+                    "expanded": true,
+                    "pages": [
+                      "api-reference/json-rpc-methods/methods",
+                      "api-reference/json-rpc-methods/getcompressedaccount",
+                      "api-reference/json-rpc-methods/getcompressedaccountsbyowner",
+                      "api-reference/json-rpc-methods/getcompressedbalancebyowner",
+                      "api-reference/json-rpc-methods/getcompressedbalance",
+                      "api-reference/json-rpc-methods/getcompressedminttokenholders",
+                      "api-reference/json-rpc-methods/getcompressedtokenaccountbalance",
+                      "api-reference/json-rpc-methods/getcompressedtokenaccountbydelegate",
+                      "api-reference/json-rpc-methods/getcompressedtokenaccountsbyowner",
+                      "api-reference/json-rpc-methods/getcompressedtokenbalancesbyowner",
+                      "api-reference/json-rpc-methods/getcompressionsignaturesforaccount",
+                      "api-reference/json-rpc-methods/getcompressionsignaturesforaddress",
+                      "api-reference/json-rpc-methods/getcompressionsignaturesforowner",
+                      "api-reference/json-rpc-methods/getcompressionsignaturesfortokenowner",
+                      "api-reference/json-rpc-methods/getindexerhealth",
+                      "api-reference/json-rpc-methods/getindexerslot",
+                      "api-reference/json-rpc-methods/getlatestcompressionsignatures",
+                      "api-reference/json-rpc-methods/getlatestnonvotingsignatures",
+                      "api-reference/json-rpc-methods/getmultiplecompressedaccounts",
+                      "api-reference/json-rpc-methods/getmultiplenewaddressproofs",
+                      "api-reference/json-rpc-methods/gettransactionwithcompressioninfo",
+                      "api-reference/json-rpc-methods/getvalidityproof"
+                    ]
+                  }
+                ]
+              }
             ]
           },
           {
@@ -148,14 +216,7 @@
               },
               "resources/addresses-and-urls",
               "references/migration-v1-to-v2",
-              {
-                "group": "SDKs",
-                "expanded": true,
-                "pages": [
-                  "resources/sdks/client-development",
-                  "resources/sdks/program-development"
-                ]
-              },
+              "api-reference/sdk",
               "resources/cli-installation"
             ]
           },
@@ -176,74 +237,6 @@
               "references/security",
               "references/terminology",
               "references/whitepaper"
-            ]
-          },
-          {
-            "group": "Compressed Tokens (legacy)",
-            "pages": [
-              "compressed-tokens/overview",
-              {
-                "group": "Cookbook",
-                "pages": [
-                  "compressed-tokens/guides/create-compressed-token-accounts",
-                  "compressed-tokens/guides/mint-compressed-tokens",
-                  "compressed-tokens/guides/transfer-compressed-tokens",
-                  "compressed-tokens/guides/compress-decompress",
-                  "compressed-tokens/guides/compress-spl-token-account",
-                  "compressed-tokens/guides/create-mint-with-token-pool",
-                  "compressed-tokens/guides/add-token-pools-to-mint-accounts",
-                  "compressed-tokens/guides/merge-compressed-token-accounts",
-                  "compressed-tokens/guides/delegate"
-                ]
-              },
-              {
-                "group": "Implementation Guides",
-                "pages": [
-                  {
-                    "group": "Integration",
-                    "expanded": true,
-                    "pages": [
-                      "compressed-tokens/advanced-guides/how-to-combine-operations-in-one-transaction",
-                      "compressed-tokens/advanced-guides/add-wallet-support-for-compressed-tokens",
-                      "compressed-tokens/advanced-guides/use-token-2022-with-compression"
-                    ]
-                  }
-                ]
-              },
-              {
-                "group": "JSON RPC Methods",
-                "pages": [
-                  "api-reference/json-rpc-methods/overview",
-                  {
-                    "group": "Methods",
-                    "expanded": true,
-                    "pages": [
-                      "api-reference/json-rpc-methods/methods",
-                      "api-reference/json-rpc-methods/getcompressedaccount",
-                      "api-reference/json-rpc-methods/getcompressedaccountsbyowner",
-                      "api-reference/json-rpc-methods/getcompressedbalancebyowner",
-                      "api-reference/json-rpc-methods/getcompressedbalance",
-                      "api-reference/json-rpc-methods/getcompressedminttokenholders",
-                      "api-reference/json-rpc-methods/getcompressedtokenaccountbalance",
-                      "api-reference/json-rpc-methods/getcompressedtokenaccountbydelegate",
-                      "api-reference/json-rpc-methods/getcompressedtokenaccountsbyowner",
-                      "api-reference/json-rpc-methods/getcompressedtokenbalancesbyowner",
-                      "api-reference/json-rpc-methods/getcompressionsignaturesforaccount",
-                      "api-reference/json-rpc-methods/getcompressionsignaturesforaddress",
-                      "api-reference/json-rpc-methods/getcompressionsignaturesforowner",
-                      "api-reference/json-rpc-methods/getcompressionsignaturesfortokenowner",
-                      "api-reference/json-rpc-methods/getindexerhealth",
-                      "api-reference/json-rpc-methods/getindexerslot",
-                      "api-reference/json-rpc-methods/getlatestcompressionsignatures",
-                      "api-reference/json-rpc-methods/getlatestnonvotingsignatures",
-                      "api-reference/json-rpc-methods/getmultiplecompressedaccounts",
-                      "api-reference/json-rpc-methods/getmultiplenewaddressproofs",
-                      "api-reference/json-rpc-methods/gettransactionwithcompressioninfo",
-                      "api-reference/json-rpc-methods/getvalidityproof"
-                    ]
-                  }
-                ]
-              }
             ]
           }
         ]
@@ -295,12 +288,12 @@
   "navbar": {
     "links": [
       {
-        "label": "stateless.js",
+        "label": "@lightprotocol/stateless.js",
         "icon": "js",
         "href": "https://lightprotocol.github.io/light-protocol/stateless.js/index.html"
       },
       {
-        "label": "compressed-token",
+        "label": "@lightprotocol/compressed-token",
         "icon": "js",
         "href": "https://lightprotocol.github.io/light-protocol/compressed-token/index.html"
       },
@@ -363,6 +356,18 @@
     {
       "source": "/welcome",
       "destination": "/home"
+    },
+    {
+      "source": "/learn/ai-tools-guide",
+      "destination": "/ai-tools/guide"
+    },
+    {
+      "source": "/resources/sdks/client-development",
+      "destination": "/api-reference/sdk"
+    },
+    {
+      "source": "/resources/sdks/program-development",
+      "destination": "/api-reference/sdk"
     }
   ]
 }
