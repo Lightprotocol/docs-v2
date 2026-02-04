@@ -88,8 +88,7 @@
                     ]
                   }
                 ]
-              },
-              "learn/light-token-standard"
+              }
             ]
           },
           {
@@ -194,7 +193,7 @@
         ]
       },
       {
-        "anchor": "References",
+        "anchor": "Developer Tools & Learn",
         "icon": "code",
         "groups": [
           {
@@ -217,12 +216,14 @@
               "resources/addresses-and-urls",
               "references/migration-v1-to-v2",
               "api-reference/sdk",
-              "resources/cli-installation"
+              "resources/cli-installation",
+              "references/node-operators"
             ]
           },
           {
             "group": "Learn",
             "pages": [
+              "learn/light-token-standard",
               {
                 "group": "Core Concepts (ZK Compression)",
                 "pages": [
@@ -233,7 +234,6 @@
                   "learn/core-concepts/considerations"
                 ]
               },
-              "references/node-operators",
               "references/security",
               "references/terminology",
               "references/whitepaper"

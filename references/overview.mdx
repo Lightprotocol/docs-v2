@@ -48,9 +48,9 @@ Light token is a high-performance token standard that is functionally equivalent
 ## What is ZK Compression?
 
 ZK Compression is a Solana account primitive that lets you create tokens and PDAs without rent-exemption with L1 performance and security.
+The Light Token Program uses ZK Compression under the hood.
 
 Storage cost of Solana accounts are reduced by combining generalized state compression and <Tooltip tip="A cryptographic proof to verify the validity of a statement without revealing the underlying data. ZK Compression uses a Groth16 SNARK zk proof with a constant 128 bytes size">zero-knowledge proofs</Tooltip>.
-The Light Token Program uses ZK Compression under the hood.
 
 <Steps>
   <Step title="State Compression">
@@ -76,8 +76,5 @@ The Light Token Program uses ZK Compression under the hood.
   </Card>
   <Card title="Security" icon="shield-check" href="/references/security">
     Audits, bug bounty, and formal verification.
-  </Card>
-  <Card title="Node Operators" icon="server" href="/references/node-operators">
-    Learn how to run ZK Compression infrastructure, such as Forester nodes, Photon indexers and Prover nodes.
   </Card>
 </CardGroup>
