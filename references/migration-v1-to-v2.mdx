@@ -110,23 +110,31 @@ if address_tree_pubkey.to_bytes() != ADDRESS_TREE_V2 {
 
 ### Update client code (light-client)
 
-The `light-client` crate handles v1/v2 automatically. The `get_validity_proof` method routes to the v2 endpoint when the v2 feature is enabled (default):
-
 ```rust
-use light_client::{
-    rpc::{LightClient, LightClientConfig, Rpc},
-    indexer::Indexer,
-};
+use light_client::rpc::{LightClient, LightClientConfig, Rpc};
 
 let rpc = LightClient::new(
     LightClientConfig::new("https://mainnet.helius-rpc.com/?api-key=YOUR_KEY")
 ).await?;
+```
 
-// Query compressed accounts
-let accounts = rpc
-    .get_compressed_accounts_by_owner(&owner, None, None)
-    .await?;
+**Tree info methods:**
 
+```rust
+// v1
+let address_tree = rpc.get_address_tree_v1();
+let state_tree = rpc.get_random_state_tree_info_v1()?;
+```
+
+```rust
+// v2
+let address_tree = rpc.get_address_tree_v2();
+let state_tree = rpc.get_random_state_tree_info()?; // returns v2 when feature enabled
+```
+
+**Validity proofs:**
+
+```rust
 // get_validity_proof automatically uses v2 endpoint (default)
 let proof_result = rpc
     .get_validity_proof(hashes, addresses_with_trees, None)
