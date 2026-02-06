@@ -21,7 +21,24 @@ import V1ToV2MigrationPrompt from "/snippets/ai-prompts/v1-to-v2-migration.mdx";
 
 ### Update Cargo.toml
 
-in 0.17.x onward, V2 is a recommended default feature.
+In 0.17.x onward, `v2` is a default feature of `light-sdk`. Make sure it stays enabled.
+
+<Info>
+When you specify `features = [...]` in Cargo.toml, Cargo **disables default features**.
+If you need extra features like `keccak` or `anchor`, either keep defaults explicitly
+or add `v2` to your features list:
+
+```toml
+# This DISABLES v2 (default features are off):
+light-sdk = { version = "0.17.1", features = ["keccak"] }
+
+# Either of these keeps v2 enabled:
+light-sdk = { version = "0.17.1", features = ["keccak", "v2"] }
+light-sdk = { version = "0.17.1", default-features = true, features = ["keccak"] }
+```
+
+Without `v2`, `add_system_accounts_v2` and `cpi::v2` are not available.
+</Info>
 
 **On-chain program:**
 
@@ -42,7 +59,7 @@ light-sdk = { version = "0.17.1", features = ["anchor"] }
 
 ```toml
 [dependencies]
-light-client = "0.17.2"
+light-client = { version = "0.17.2", features = ["v2"] }
 ```
 
 
@@ -108,14 +125,75 @@ if address_tree_pubkey.to_bytes() != ADDRESS_TREE_V2 {
 }
 ```
 
+### Update client-side account packing
+
+```rust
+use light_sdk::instruction::{PackedAccounts, SystemAccountMetaConfig};
+
+let config = SystemAccountMetaConfig::new(YOUR_PROGRAM_ID);
+let mut packed = PackedAccounts::default();
+```
+
+```rust
+// v1
+packed.add_system_accounts(config)?;
+```
+
+```rust
+// v2
+packed.add_system_accounts_v2(config)?;
+```
+
+**Full v2 client example**
+
+```rust
+use light_client::rpc::{LightClient, LightClientConfig, Rpc, Indexer};
+use light_sdk::{
+    address::v2::derive_address,
+    instruction::{PackedAccounts, SystemAccountMetaConfig},
+};
+
+// 1. Build PackedAccounts with v2 system accounts
+let config = SystemAccountMetaConfig::new(YOUR_PROGRAM_ID);
+let mut packed = PackedAccounts::default();
+packed.add_system_accounts_v2(config)?;
+
+// 2. Fetch validity proof
+let address_tree = rpc.get_address_tree_v2();
+let (address, _) = derive_address(&[b"my_seed", &id], &address_tree.tree, &YOUR_PROGRAM_ID);
+
+let rpc_result = rpc
+    .get_validity_proof(
+        vec![],
+        vec![AddressWithTree { address, tree: address_tree.tree }],
+        None,
+    )
+    .await?
+    .value;
+
+// 3. Pack tree infos into remaining accounts
+let tree_infos = rpc_result.pack_tree_infos(&mut packed);
+let address_tree_info = tree_infos.address_trees[0];
+
+// 4. Pack output state tree
+let state_tree = rpc.get_random_state_tree_info()?;
+let output_state_tree_index = state_tree.pack_output_tree_index(&mut packed)?;
+
+// 5. Convert to account metas for the instruction
+let (remaining_accounts, _system_offset, _packed_offset) = packed.to_account_metas();
+```
+
 ### Update client code (light-client)
 
 ```rust
 use light_client::rpc::{LightClient, LightClientConfig, Rpc};
 
-let rpc = LightClient::new(
-    LightClientConfig::new("https://mainnet.helius-rpc.com/?api-key=YOUR_KEY")
-).await?;
+let rpc_url = "https://mainnet.helius-rpc.com/?api-key=YOUR_KEY".to_string();
+let photon_url = "https://mainnet.helius-rpc.com".to_string();
+let api_key = "YOUR_KEY".to_string();
+
+let config = LightClientConfig::new(rpc_url, Some(photon_url), Some(api_key));
+let mut rpc = LightClient::new(config).await?;
 ```
 
 **Tree info methods:**
