@@ -1,0 +1,61 @@
+Two data structures:
+- `cache: HashMap<[u8; 32], T>` -- hot account state (for quoting/routing)
+- `cold_cache: HashMap<[u8; 32], AccountInterface>` -- cold accounts with `ColdContext` (for building load instructions)
+
+```rust
+use helius_laserstream::grpc::subscribe_update::UpdateOneof;
+
+Some(UpdateOneof::Transaction(tx_update)) => {
+    if let Some(ref tx_info) = tx_update.transaction {
+        for pubkey in find_closed_accounts(tx_info) {
+            if cache.remove(&pubkey).is_some() {
+                // Async: fetch AccountInterface with ColdContext.
+                // Cold accounts are inactive, so this completes well
+                // before anyone tries to swap through them.
+                let rpc = rpc.clone();
+                tokio::spawn(async move {
+                    if let Ok(Some(iface)) = rpc.get_account_interface(&pubkey, None).await {
+                        cold_cache.insert(pubkey, iface);
+                    }
+                });
+            }
+        }
+    }
+}
+```
+
+```rust
+fn find_closed_accounts(
+    tx_info: &helius_laserstream::grpc::SubscribeUpdateTransactionInfo,
+) -> Vec<[u8; 32]> {
+    let meta = match &tx_info.meta {
+        Some(m) => m,
+        None => return vec![],
+    };
+    let msg = match tx_info.transaction.as_ref().and_then(|t| t.message.as_ref()) {
+        Some(m) => m,
+        None => return vec![],
+    };
+
+    let mut all_keys: Vec<&[u8]> = msg.account_keys.iter().map(|k| k.as_slice()).collect();
+    all_keys.extend(meta.loaded_writable_addresses.iter().map(|k| k.as_slice()));
+    all_keys.extend(meta.loaded_readonly_addresses.iter().map(|k| k.as_slice()));
+
+    let mut closed = Vec::new();
+    for (i, key) in all_keys.iter().enumerate() {
+        if key.len() == 32
+            && meta.pre_balances.get(i).copied().unwrap_or(0) > 0
+            && meta.post_balances.get(i).copied().unwrap_or(1) == 0
+        {
+            closed.push(<[u8; 32]>::try_from(*key).unwrap());
+        }
+    }
+    closed
+}
+```
+
+`cache.remove` filters out unrelated closures in the same transaction. No discriminator
+check is needed -- `compress_and_close` always drains lamports to zero.
+
+To build transactions that decompress cold accounts, see
+[Router Integration](/light-token/defi/routers).

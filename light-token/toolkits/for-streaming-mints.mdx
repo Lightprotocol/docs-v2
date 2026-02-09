@@ -1,39 +1,49 @@
 ---
-title: "Toolkit for Streaming Light Mint Accounts"
-sidebarTitle: "For Streaming Mints"
-description: "Guide to stream light-mints and metadata using Laserstream."
-keywords: ["streaming mints for token issuers", "bulk token minting for protocols", "rent free token mints on solana"]
+title: "Streaming Mint Accounts"
+sidebarTitle: "Mint Accounts"
+description: "Stream light-mint accounts and metadata via Laserstream."
+keywords: ["streaming mint accounts solana", "laserstream light mint", "grpc mint streaming"]
 ---
+
+import FindClosedAccounts from '/snippets/code-snippets/streaming/find-closed-accounts.mdx';
 
 | Event | Description |
 |:------|:------------|
 | **New mints** | Raw mint data |
 | **Mint updates** | Supply changes, authority changes |
 | **TokenMetadata** | Name, symbol, URI, additional_metadata |
+| **Cold/hot transitions** | Mint compressed or decompressed |
 
 <Note>
-Find devnet examples [here](https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/streaming-tokens).
+This guide is for teams building custom data pipelines (aggregators, market makers).
+If you just need account lookups, use [`get_account_interface`](/light-token/defi/routers) instead.
 </Note>
 
-## Setup
+## Architecture
 
-Light mints are Solana accounts owned by the Light Token Program. Subscribe to account updates to detect new mints and changes.
+Light mints are Solana accounts owned by the Light Token Program. The streaming
+setup requires two gRPC subscriptions:
+
+| Subscription | Detects | How |
+|:-------------|:--------|:----|
+| Account sub (`owner: cToken...`, `account_type == 1`) | Hot state + cold-to-hot | Pubkey cache lookup |
+| Transaction sub (`account_include: cToken...`) | Hot-to-cold | Balance heuristic (`pre > 0, post == 0`) |
+
+The account subscription delivers all state changes while mints are hot.
+The transaction subscription is needed to detect mints going cold
+(`CompressAndCloseMint` changes the owner to System Program, which the account
+subscription no longer matches).
+
+## Setup
 
 ```toml Cargo.toml
 [dependencies]
 helius-laserstream = "0.1"
 tokio = { version = "1", features = ["full"] }
 futures = "0.3"
-anyhow = "1"
-dotenvy = "0.15"
 bs58 = "0.5"
 borsh = "0.10"
-
 light-token-interface = "0.3.0"
-light-compressed-account = { version = "0.9.0", features = ["std"] }
-
-# Pin blake3 to avoid constant_time_eq edition2024 issue
-blake3 = "=1.5.5"
 ```
 
 ```rust
@@ -43,22 +53,19 @@ use helius_laserstream::grpc::subscribe_request_filter_accounts_filter::Filter;
 use helius_laserstream::grpc::subscribe_request_filter_accounts_filter_memcmp::Data;
 use helius_laserstream::grpc::{
     SubscribeRequestFilterAccounts, SubscribeRequestFilterAccountsFilter,
-    SubscribeRequestFilterAccountsFilterMemcmp,
+    SubscribeRequestFilterAccountsFilterMemcmp, SubscribeRequestFilterTransactions,
 };
 use helius_laserstream::{subscribe, LaserstreamConfig};
 use light_token_interface::state::{ExtensionStruct, Mint};
 
 const LIGHT_TOKEN_PROGRAM_ID: &str = "cTokenmWW8bLPjZEBAUgYy3zKxQZW6VKi7bqNFEVv3m";
-
-/// Byte offset of account_type in the Mint account data.
-/// BaseMint (82) + MintMetadata (67) + reserved (16) = 165
 const ACCOUNT_TYPE_OFFSET: u64 = 165;
 ```
 
 <Steps>
 
 <Step>
-### Connect to Laserstream
+### Connect
 
 <Tabs>
 <Tab title="Mainnet">
@@ -83,34 +90,44 @@ let config = LaserstreamConfig::new(
 </Tab>
 </Tabs>
 
+</Step>
+
+<Step>
+### Subscribe
+
 ```rust
-// Subscribe to Solana accounts owned by the Light Token Program
-// with account_type = 1 (Mint) at byte offset 165
-let request = helius_laserstream::grpc::SubscribeRequest {
-    accounts: [(
-        "light_mints".to_string(),
-        SubscribeRequestFilterAccounts {
-            owner: vec![LIGHT_TOKEN_PROGRAM_ID.to_string()],
-            filters: vec![SubscribeRequestFilterAccountsFilter {
-                filter: Some(Filter::Memcmp(SubscribeRequestFilterAccountsFilterMemcmp {
-                    offset: ACCOUNT_TYPE_OFFSET,
-                    data: Some(Data::Bytes(vec![1])),
-                })),
-            }],
-            nonempty_txn_signature: Some(true),
-            ..Default::default()
-        },
-    )]
-    .into(),
-    ..Default::default()
-};
+let mut request = helius_laserstream::grpc::SubscribeRequest::default();
+
+// 1. Account sub: mint state tracking + cold-to-hot detection.
+//    account_type == 1 (Mint) at byte offset 165.
+request.accounts.insert(
+    "light_mints".to_string(),
+    SubscribeRequestFilterAccounts {
+        owner: vec![LIGHT_TOKEN_PROGRAM_ID.to_string()],
+        filters: vec![SubscribeRequestFilterAccountsFilter {
+            filter: Some(Filter::Memcmp(SubscribeRequestFilterAccountsFilterMemcmp {
+                offset: ACCOUNT_TYPE_OFFSET,
+                data: Some(Data::Bytes(vec![1])),
+            })),
+        }],
+        nonempty_txn_signature: Some(true),
+        ..Default::default()
+    },
+);
+
+// 2. Transaction sub: hot-to-cold detection.
+request.transactions.insert(
+    "light_token_txns".to_string(),
+    SubscribeRequestFilterTransactions {
+        vote: Some(false),
+        failed: Some(false),
+        account_include: vec![LIGHT_TOKEN_PROGRAM_ID.to_string()],
+        ..Default::default()
+    },
+);
 
 let (stream, _handle) = subscribe(config, request);
 tokio::pin!(stream);
-
-while let Some(update) = stream.next().await {
-    // Process account updates...
-}
 ```
 
 </Step>
@@ -119,41 +136,23 @@ while let Some(update) = stream.next().await {
 ### Deserialize mint accounts
 
 ```rust
-if let Some(helius_laserstream::grpc::subscribe_update::UpdateOneof::Account(
-    account_update,
-)) = msg.update_oneof
-{
+use helius_laserstream::grpc::subscribe_update::UpdateOneof;
+
+Some(UpdateOneof::Account(account_update)) => {
     if let Some(account_info) = account_update.account {
-        let pubkey = bs58::encode(&account_info.pubkey).into_string();
-        let tx_sig = account_info
-            .txn_signature
-            .as_ref()
-            .map(|s| bs58::encode(s).into_string())
-            .unwrap_or_default();
+        let pubkey: [u8; 32] = account_info.pubkey.as_slice().try_into().unwrap();
 
         match Mint::deserialize(&mut account_info.data.as_slice()) {
             Ok(mint) => {
-                println!("Mint: {}", pubkey);
-                println!("  tx: {}", tx_sig);
-                println!("  decimals: {}", mint.base.decimals);
-                println!("  supply: {}", mint.base.supply);
-
-                if let Some(authority) = &mint.base.mint_authority {
-                    println!(
-                        "  mint_authority: {}",
-                        bs58::encode(authority.to_bytes()).into_string()
-                    );
-                }
-
-                if let Some(authority) = &mint.base.freeze_authority {
-                    println!(
-                        "  freeze_authority: {}",
-                        bs58::encode(authority.to_bytes()).into_string()
-                    );
-                }
+                cold_cache.remove(&pubkey); // no longer cold
+                cache.insert(pubkey, mint);
             }
             Err(e) => {
-                eprintln!("Failed to deserialize mint {}: {}", pubkey, e);
+                eprintln!(
+                    "Failed to deserialize mint {}: {}",
+                    bs58::encode(&pubkey).into_string(),
+                    e
+                );
             }
         }
     }
@@ -163,7 +162,14 @@ if let Some(helius_laserstream::grpc::subscribe_update::UpdateOneof::Account(
 </Step>
 
 <Step>
-### Extract Token Metadata from mint extensions
+### Detect mints going cold
+
+<FindClosedAccounts />
+
+</Step>
+
+<Step>
+### Extract TokenMetadata
 
 ```rust
 fn extract_metadata(mint: &Mint) -> Option<(String, String, String)> {
@@ -178,14 +184,6 @@ fn extract_metadata(mint: &Mint) -> Option<(String, String, String)> {
         }
     }
     None
-}
-```
-
-```rust
-if let Some((name, symbol, uri)) = extract_metadata(&mint) {
-    println!("  Name: {}", name);
-    println!("  Symbol: {}", symbol);
-    println!("  URI: {}", uri);
 }
 ```
 
@@ -208,7 +206,6 @@ pub struct Mint {
     pub extensions: Option<Vec<ExtensionStruct>>,
 }
 
-/// SPL-compatible base mint structure
 #[repr(C)]
 pub struct BaseMint {
     pub mint_authority: Option<Pubkey>,
@@ -218,7 +215,6 @@ pub struct BaseMint {
     pub freeze_authority: Option<Pubkey>,
 }
 
-/// Light Protocol metadata for mints (67 bytes)
 #[repr(C)]
 pub struct MintMetadata {
     pub version: u8,
@@ -248,10 +244,8 @@ pub struct AdditionalMetadata {
 }
 ```
 
-# Index Tokens
-
 <Card
-  title="Toolkit to stream light-token accounts"
+  title="Streaming Token Accounts"
   icon="chevron-right"
   color="#0066ff"
   href="/light-token/toolkits/for-streaming-tokens"
