@@ -69,8 +69,8 @@ This only adds latency if markets are cold.
 let pubkeys = sdk.instruction_accounts(&AmmInstruction::Swap);
 
 // Fetch their current state
-let accounts = rpc.fetch_accounts(&pubkeys, None).await?;
-let cold: Vec<_> = accounts.into_iter().filter(|a| a.is_cold()).collect();
+let accounts = rpc.get_multiple_account_interfaces(pubkeys.iter().collect(), None).await?.value;
+let cold: Vec<_> = accounts.into_iter().flatten().filter(|a| a.is_cold()).collect();
 
 // If any are cold, build load instructions
 if !cold.is_empty() {
@@ -119,8 +119,8 @@ let mut ixs = vec![];
 
 // Check which accounts the swap references and fetch them
 let pubkeys = sdk.instruction_accounts(&AmmInstruction::Swap);
-let accounts = rpc.fetch_accounts(&pubkeys, None).await?;
-let cold: Vec<_> = accounts.into_iter().filter(|a| a.is_cold()).collect();
+let accounts = rpc.get_multiple_account_interfaces(pubkeys.iter().collect(), None).await?.value;
+let cold: Vec<_> = accounts.into_iter().flatten().filter(|a| a.is_cold()).collect();
 
 // If any are cold, build load instructions
 if !cold.is_empty() {
