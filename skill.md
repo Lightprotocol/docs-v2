@@ -12,7 +12,7 @@ allowed-tools:
   - WebFetch(https://zkcompression.com/*)
   - WebFetch(https://github.com/Lightprotocol/*)
 
-primitives:
+primitives and use cases:
   - name: Light Token
     use_case: >
       Most token use cases (launchpads, DeFi, payments).
