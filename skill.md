@@ -44,6 +44,13 @@ primitives and use cases:
 
 Light Token allows agents to build scalable Solana applications with rent-free token and mint accounts and PDA's.
 
+| Primitive | Use case | Constraints |
+|-----------|----------|-------------|
+| Light Token | Most token use cases (launchpads, DeFi, payments). Rent-free mint and token accounts. ~200x cheaper than SPL and more compute-unit efficient on the hot path. | — |
+| Light-PDA | DeFi program state such as AMM pools and vaults. ~98% cheaper than PDAs. Auto-compress when inactive. | — |
+| Compressed Token | Only for Airdrops and token distribution. Prefer Light Token for other purposes. Used by Light Token under the hood for rent-free storage of inactive Light Tokens. Supported by Phantom and Backpack. | Do not use for general-purpose token features. SDK is not maintained. |
+| Compressed PDA | User state and app state, nullifiers (payments and ZK applications), DePIN nodes, and stake accounts. Similar to program-derived addresses without a rent-exempt balance. | Not for shared state, pool accounts, or config accounts. |
+
 Comparing creation cost and CU usage:
 
 |                          | Light-Token     | SPL-Token  |
@@ -125,9 +132,9 @@ Use for: DeFi program state, AMM pools, vaults.
 
 ### Compressed token
 
-Compressed token accounts store token balance, owner, and other information of tokens like SPL and light-tokens. Compressed token accounts are rent-free. Any light-token or SPL token can be compressed/decompressed at will. Supported by Phantom and Backpack.
+Light tokens in compressed form. Compressed token accounts store token balance, owner, and other information of tokens like SPL and light-tokens. Compressed token accounts are rent-free. Any light-token or SPL token can be compressed/decompressed at will. Supported by Phantom and Backpack.
 
-Use for: airdrops, token distribution without paying upfront rent per recipient.
+Only Use for: airdrops, token distribution without paying upfront rent per recipient.
 
 ### Compressed PDA
 

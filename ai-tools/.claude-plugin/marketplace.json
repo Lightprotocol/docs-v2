@@ -10,52 +10,52 @@
   },
   "plugins": [
     {
-      "name": "error-codes",
-      "source": "./skills/error-codes",
-      "description": "ZK Compression error code reference (6000-16034) with hex lookup",
-      "category": "Reference"
-    },
-    {
-      "name": "light-testing",
-      "source": "./skills/light-testing",
-      "description": "Test Light Protocol programs and clients on localnet, devnet, and mainnet",
-      "category": "Testing"
-    },
-    {
-      "name": "make-program-rent-free",
-      "source": "./skills/make-program-rent-free",
-      "description": "Migrate Solana programs to Light Protocol compressed accounts",
-      "category": "Programs"
-    },
-    {
-      "name": "pda",
-      "source": "./skills/pda",
-      "description": "Compressed PDA patterns and LightAccount operations",
-      "category": "Programs"
-    },
-    {
-      "name": "research-deepwiki",
-      "source": "./skills/research-deepwiki",
-      "description": "Query Light Protocol repository via DeepWiki MCP for errors and implementation questions",
-      "category": "Research"
-    },
-    {
-      "name": "solana-airdrop",
-      "source": "./skills/solana-airdrop",
+      "name": "airdrop",
+      "source": "./skills/airdrop",
       "description": "Distribute SPL tokens at 5000x lower cost for airdrops, DePINs, and token distribution",
       "category": "Tokens"
     },
     {
-      "name": "zk-nullifier",
-      "source": "./skills/zk-nullifier",
-      "description": "Privacy-preserving applications with ZK nullifiers to prevent double spending",
-      "category": "Security"
+      "name": "ask-mcp",
+      "source": "./skills/ask-mcp",
+      "description": "Query Light Protocol repository via DeepWiki MCP for errors and implementation questions",
+      "category": "Research"
     },
     {
       "name": "data-streaming",
       "source": "./skills/data-streaming",
       "description": "Stream Light Protocol account state via Laserstream gRPC with hot/cold lifecycle tracking",
       "category": "Data"
+    },
+    {
+      "name": "defi-program",
+      "source": "./skills/defi-program",
+      "description": "Build rent-free DeFi programs (AMMs, vaults, lending) with Anchor or Pinocchio",
+      "category": "DeFi"
+    },
+    {
+      "name": "defi-router",
+      "source": "./skills/defi-router",
+      "description": "Integrate rent-free markets into routers and aggregators",
+      "category": "DeFi"
+    },
+    {
+      "name": "payments-and-wallets",
+      "source": "./skills/payments-and-wallets",
+      "description": "Payment flows and wallet integrations with light-token",
+      "category": "Payments"
+    },
+    {
+      "name": "testing",
+      "source": "./skills/testing",
+      "description": "Test Light Protocol programs and clients on localnet, devnet, and mainnet",
+      "category": "Testing"
+    },
+    {
+      "name": "zk-nullifier",
+      "source": "./skills/zk-nullifier",
+      "description": "Privacy-preserving applications with ZK nullifiers to prevent double spending",
+      "category": "Security"
     }
   ]
 }
