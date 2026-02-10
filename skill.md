@@ -180,7 +180,7 @@ Use rent-free PDAs for: user state, app state, nullifiers for payments, DePIN no
 | `Close` | [close-token-account](https://zkcompression.com/light-token/cookbook/close-token-account) | [instruction](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/instructions/close.rs) |
 | `Wrap` | [wrap-unwrap](https://zkcompression.com/light-token/cookbook/wrap-unwrap) | [action](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/actions/wrap.rs) |
 | `Unwrap` | [wrap-unwrap](https://zkcompression.com/light-token/cookbook/wrap-unwrap) | [action](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/actions/unwrap.rs) |
-| `SplToLight` | — | [instruction](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/instructions/spl_to_light_transfer.rs) |
+| `SplToLight` | — | [example](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/instructions/spl_to_light_transfer.rs) |
 
 #### Program (`light_token`)
 
@@ -190,6 +190,7 @@ Use rent-free PDAs for: user state, app state, nullifiers for payments, DePIN no
 |---------|-------------|
 | [cp-swap-reference](https://github.com/Lightprotocol/cp-swap-reference) | Fork of Raydium AMM that creates markets without paying rent-exemption |
 | [create-and-transfer](https://github.com/Lightprotocol/examples-light-token/tree/main/programs/anchor/create-and-transfer) | Create account via macro and transfer via CPI |
+| [pinocchio-swap](https://github.com/Lightprotocol/examples-light-token/tree/main/pinocchio/swap) | Light Token swap reference implementation |
 
 ##### Macros
 
