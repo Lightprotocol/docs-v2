@@ -101,6 +101,31 @@ npx skills add https://zkcompression.com
 
 Skills for compressed PDAs and more are in development.
 
+### Install to Claude Code
+
+Add the marketplace and install:
+
+```
+/plugin marketplace add Lightprotocol/skills
+/plugin install solana-rent-free-dev
+```
+
+All skills are included. Use them by name (`/defi-program`, `/airdrop`, `/testing`, etc.) or let Claude invoke them based on task context.
+
+### Install to Cursor
+
+1. Open Settings (**Cmd+Shift+J** / **Ctrl+Shift+J**)
+2. Navigate to **Rules & Commands** → **Project Rules** → **Add Rule** → **Remote Rule (GitHub)**
+3. Enter: `https://github.com/Lightprotocol/skills.git`
+
+Skills are auto-discovered based on context. Ask about light-token, defi, payments, or program migration and the agent uses the relevant skill automatically.
+
+### Install to Any Agent
+
+```
+npx skills add Lightprotocol/skills
+```
+
 ## Context
 
 ### light-token
@@ -130,9 +155,9 @@ After extended inactivity (multiple epochs without writes), accounts auto-compre
 
 Use for: DeFi program state, AMM pools, vaults.
 
-### Compressed token
+### Compressed token (Only use for Token Distribution)
 
-Light tokens in compressed form. Compressed token accounts store token balance, owner, and other information of tokens like SPL and light-tokens. Compressed token accounts are rent-free. Any light-token or SPL token can be compressed/decompressed at will. Supported by Phantom and Backpack.
+Compressed token accounts store token balance, owner, and other information of tokens like SPL and light-tokens. Compressed token accounts are rent-free. Any light-token or SPL token can be compressed/decompressed at will. Supported by Phantom and Backpack.
 
 Only Use for: airdrops, token distribution without paying upfront rent per recipient.
 

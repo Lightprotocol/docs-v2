@@ -1,0 +1,734 @@
+~~~~text
+---
+argument-hint: <project_path>
+description: Implement wallet integration for compressed tokens with light-token unified interface
+allowed-tools: [Bash, Read, Glob, Grep, Task, mcp__deepwiki, mcp__zkcompression]
+---
+
+## Task: Implement light-token wallet toolkit (TypeScript)
+
+References:
+- Toolkit Guide: https://zkcompression.com/light-token/toolkits/for-wallets
+- SDK Reference: https://lightprotocol.github.io/light-protocol/compressed-token/index.html
+- GitHub Examples: https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/payments-and-wallets
+
+MCP:
+* deepwiki https://mcp.deepwiki.com/mcp
+* zkcompression https://www.zkcompression.com/mcp
+
+## Workflow
+
+- This plan must execute without user intervention
+- All questions have been resolved in planning phase
+- If blocked, find alternative approach - do not stop
+- Keep working until ALL todos are complete
+- Use Task tool with subagents for parallel research or when stuck
+- Use subagents with Read, Glob, Grep, and Deepwiki permissions when stuck
+- Always assign Tasks to subagents and tell the user
+
+## DeepWiki fallback
+
+```
+mcp__deepwiki__read_wiki_structure("Lightprotocol/light-protocol"),
+mcp__deepwiki__read_wiki_contents("Lightprotocol/light-protocol"),
+mcp__deepwiki__ask_question("Lightprotocol/light-protocol", "<question>")
+```
+
+## Quick Reference
+
+| Operation | Function | Purpose |
+|-----------|----------|---------|
+| Connect | createRpc() | Connect to ZK Compression RPC endpoint |
+| Get/Create ATA | getOrCreateAtaInterface() | Get or create associated token account |
+| Derive ATA | getAssociatedTokenAddressInterface() | Calculate ATA address from mint and owner |
+| Get Balance | getAtaInterface() | Fetch account balance and state |
+| Get Cold Balance | getCompressedTokenAccountsByOwner() | Query compressed (cold) token accounts |
+| Load Cold Tokens | loadAta() | Decompress cold tokens to hot ATA |
+| Transfer | transferInterface() | Send tokens between accounts |
+| Transaction History | getSignaturesForOwnerInterface() | Get transaction signatures for owner |
+| Wrap | wrap() | Convert SPL tokens to light-token format |
+| Unwrap | unwrap() | Convert light-token to SPL tokens |
+
+## Overview
+
+Wallets must handle both hot (on-chain) and cold (compressed) token balances. When accounts become inactive, compressed tokens transition to cold storage in Merkle trees. Wallets must aggregate both balances and warm up cold tokens before transactions.
+
+**Balance Types:**
+
+| State | Storage | Query Method | Cost |
+|-------|---------|--------------|------|
+| Hot (On-chain) | ATA account | getAtaInterface() | ~17,208 lamports (24h rent) |
+| Cold (Compressed) | Merkle tree | getCompressedTokenAccountsByOwner() | Rent-free |
+
+**Key Wallet Operations:**
+
+| Operation | SPL | Light |
+|-----------|-----|-------|
+| Create Account | getOrCreateAssociatedTokenAccount() | getOrCreateAtaInterface() |
+| Get Balance | getAccount() | getAtaInterface() + getCompressedTokenAccountsByOwner() |
+| Send | transferChecked() | transferInterface() (auto-loads if cold) |
+| Transaction History | getSignaturesForAddress() | getSignaturesForOwnerInterface() |
+
+### Phase 1: Index project
+
+```bash
+grep -r "createRpc\|@lightprotocol/compressed-token\|@solana/web3.js" src/
+```
+
+### Phase 2: Add dependencies
+
+```bash
+npm install --save \
+    @lightprotocol/compressed-token@0.22.1-alpha.1 \
+    @lightprotocol/stateless.js@0.22.1-alpha.1 \
+    @solana/web3.js \
+    @solana/spl-token
+```
+
+### Phase 3: Implement wallet operations
+
+See Code Reference below for TypeScript implementations.
+
+#### 1. Setup and RPC Connection
+
+**RPC Setup**: Connect to ZK Compression RPC endpoint (Helius, Triton, or localnet)
+   - Use `createRpc(RPC_ENDPOINT)` with devnet or local URLs
+   - For devnet: `https://devnet.helius-rpc.com?api-key=${API_KEY}`
+   - For localnet: `createRpc()` with no arguments
+
+**Import Functions**: Import unified interface functions
+   - `getOrCreateAtaInterface` - Get or create ATA
+   - `getAtaInterface` - Fetch hot account info
+   - `getAssociatedTokenAddressInterface` - Derive ATA address
+   - `transferInterface` - Transfer tokens
+   - `loadAta` - Load cold tokens to hot ATA
+   - `wrap` - Wrap from SPL
+   - `unwrap` - Unwrap to SPL
+
+#### 2. Create or Get Wallet Account
+
+**Two Approaches:**
+
+**A. Action Approach (Recommended)**
+1. Call `getOrCreateAtaInterface(rpc, payer, mint, owner)`
+2. Returns account info with `ata.parsed.address` and `ata.parsed.amount`
+3. Idempotent - safe to call multiple times
+
+**B. Instruction Approach (Manual Transaction Control)**
+1. Derive ATA using `getAssociatedTokenAddressInterface(mint, owner)`
+2. Create idempotent ATA instruction with `createAssociatedTokenAccountInterfaceIdempotentInstruction()`
+3. Add to transaction and send
+
+#### 3. Get Total Balance
+
+**Wallet Must Query Both Hot and Cold Balances:**
+
+1. **Get Hot Balance**: Fetch on-chain ATA balance
+   - Derive ATA with `getAssociatedTokenAddressInterface(mint, owner)`
+   - Fetch account with `getAtaInterface(rpc, ata, owner, mint)`
+   - Returns null if account doesn't exist
+   - Access balance via `account.parsed.amount`
+
+2. **Get Cold Balance**: Fetch compressed token balance from Merkle trees
+   - Query with `rpc.getCompressedTokenAccountsByOwner(owner, { mint })`
+   - Sum all `account.parsed.amount` values
+   - Returns empty array if no compressed accounts
+
+3. **Calculate Total**: `totalBalance = hotBalance + coldBalance`
+
+#### 4. Load Cold Tokens (Before Sending)
+
+**When to Load:**
+- Before sending if `coldBalance > 0`
+- When user wants all tokens in hot state
+- When preparing for multiple transactions
+
+**Loading Process:**
+1. Derive ATA using `getAssociatedTokenAddressInterface(mint, owner)`
+2. Call `loadAta(rpc, ata, owner, mint, payer)`
+3. Returns transaction signature or null if nothing to load
+4. Decompresses all cold tokens to hot ATA
+
+#### 5. Send Tokens
+
+**Two Approaches:**
+
+**A. Action Approach (Recommended - Auto-loads Cold Tokens)**
+1. Ensure recipient ATA exists: `getOrCreateAtaInterface(rpc, payer, mint, recipient)`
+2. Derive source and destination ATAs
+3. Transfer with `transferInterface(rpc, payer, sourceAta, mint, destinationAta, owner, amount)`
+4. Auto-loads cold tokens if needed
+
+**B. Instruction Approach (Manual Transaction Control)**
+1. Load cold tokens first if `coldBalance > 0`
+2. Derive source and destination ATAs
+3. Optionally add idempotent ATA creation for recipient
+4. Add transfer instruction with `createTransferInterfaceInstruction(sourceAta, destinationAta, owner, amount)`
+5. Build and send transaction
+
+#### 6. Transaction History
+
+**Get Transaction Signatures:**
+1. Call `rpc.getSignaturesForOwnerInterface(owner)` for owner-wide history
+2. Or use `getSignaturesForAddressInterface(address)` for address-specific history
+3. Access signatures via `result.signatures`
+4. Fetch full transaction details with `getTransactionWithCompressionInfo(signature)`
+
+#### 7. Wrap from SPL
+
+**Convert SPL to light-token:**
+
+**A. Action Approach**
+1. Get SPL ATA: `getAssociatedTokenAddressSync(mint, owner.publicKey)`
+2. Get light-token ATA: `getAssociatedTokenAddressInterface(mint, owner.publicKey)`
+3. Call `wrap(rpc, payer, splAta, tokenAta, owner, mint, amount)`
+
+**B. Instruction Approach**
+1. Get both ATAs (SPL and light-token)
+2. Fetch SPL interface info: `getSplInterfaceInfos(rpc, mint)` and find initialized interface
+3. Create wrap instruction: `createWrapInstruction(splAta, tokenAta, owner.publicKey, mint, amount, splInterfaceInfo)`
+
+#### 8. Unwrap to SPL
+
+**Convert light-token to SPL:**
+
+**A. Action Approach**
+1. Ensure SPL ATA exists
+2. Call `unwrap(rpc, payer, splAta, owner, mint, amount)`
+3. Auto-loads cold tokens if needed
+
+**B. Instruction Approach**
+1. Get light-token ATA: `getAssociatedTokenAddressInterface(mint, owner.publicKey)`
+2. Get SPL ATA: `getAssociatedTokenAddressSync(mint, owner.publicKey)` (must exist)
+3. Fetch SPL interface info: `getSplInterfaceInfos(rpc, mint)`
+4. Add load ATA instructions for light-token account
+5. Create unwrap instruction: `createUnwrapInstruction(tokenAta, splAta, owner.publicKey, mint, amount, splInterfaceInfo)`
+
+### Phase 4: Test
+
+Run the client code. On failure, debug and retry. Assign debugging to subagents with Task tool.
+
+For localnet testing:
+```bash
+light test-validator
+```
+
+For devnet/mainnet, ensure RPC endpoint supports ZK Compression (Helius, Triton).
+
+## Code Reference
+
+### Setup
+
+```typescript
+import "dotenv/config";
+import { Keypair } from "@solana/web3.js";
+import { createRpc } from "@lightprotocol/stateless.js";
+import {
+  getOrCreateAtaInterface,
+  getAtaInterface,
+  getAssociatedTokenAddressInterface,
+  transferInterface,
+  loadAta,
+  wrap,
+  unwrap,
+} from "@lightprotocol/compressed-token/unified";
+import { homedir } from "os";
+import { readFileSync } from "fs";
+
+const RPC_URL = `https://devnet.helius-rpc.com?api-key=${process.env.API_KEY!}`;
+const rpc = createRpc(RPC_URL);
+
+const payer = Keypair.fromSecretKey(
+    new Uint8Array(
+        JSON.parse(readFileSync(`${homedir()}/.config/solana/id.json`, "utf8"))
+    )
+);
+```
+
+### Create or Get Wallet Account (Action Approach)
+
+```typescript
+import { getOrCreateAtaInterface } from "@lightprotocol/compressed-token/unified";
+
+const ata = await getOrCreateAtaInterface(rpc, payer, mint, owner.publicKey);
+const walletAddress = ata.parsed.address;
+
+console.log("Wallet ATA:", walletAddress.toBase58());
+console.log("Initial balance:", ata.parsed.amount);
+```
+
+### Create or Get Wallet Account (Instruction Approach)
+
+```typescript
+import { Transaction } from "@solana/web3.js";
+import {
+  createAssociatedTokenAccountInterfaceIdempotentInstruction,
+  getAssociatedTokenAddressInterface,
+} from "@lightprotocol/compressed-token/unified";
+import { LIGHT_TOKEN_PROGRAM_ID } from "@lightprotocol/stateless.js";
+
+const ata = getAssociatedTokenAddressInterface(mint, owner.publicKey);
+
+const tx = new Transaction().add(
+  createAssociatedTokenAccountInterfaceIdempotentInstruction(
+    payer.publicKey,
+    ata,
+    owner.publicKey,
+    mint,
+    LIGHT_TOKEN_PROGRAM_ID
+  )
+);
+
+// Safe to call multiple times - idempotent
+```
+
+### Get Total Balance (Hot + Cold)
+
+```typescript
+import {
+  getAssociatedTokenAddressInterface,
+  getAtaInterface,
+} from "@lightprotocol/compressed-token/unified";
+
+async function getTotalBalance(
+  rpc: any,
+  mint: PublicKey,
+  owner: PublicKey
+): Promise<bigint> {
+  // Get hot balance from on-chain ATA
+  const ata = getAssociatedTokenAddressInterface(mint, owner);
+  let hotBalance = BigInt(0);
+
+  try {
+    const account = await getAtaInterface(rpc, ata, owner, mint);
+    hotBalance = account.parsed.amount;
+  } catch (e) {
+    // Account doesn't exist - hot balance is 0
+  }
+
+  // Get cold balance from compressed accounts
+  const compressedAccounts = await rpc.getCompressedTokenAccountsByOwner(
+    owner,
+    { mint }
+  );
+
+  const coldBalance = compressedAccounts.items.reduce(
+    (sum, account) => sum + account.parsed.amount,
+    BigInt(0)
+  );
+
+  return hotBalance + coldBalance;
+}
+
+// Usage
+const totalBalance = await getTotalBalance(rpc, mint, owner.publicKey);
+console.log("Total balance:", totalBalance);
+```
+
+### Get Balance Breakdown
+
+```typescript
+async function getBalanceBreakdown(
+  rpc: any,
+  mint: PublicKey,
+  owner: PublicKey
+) {
+  const ata = getAssociatedTokenAddressInterface(mint, owner);
+
+  // Get hot balance
+  let hotBalance = BigInt(0);
+  let hotExists = false;
+
+  try {
+    const account = await getAtaInterface(rpc, ata, owner, mint);
+    hotBalance = account.parsed.amount;
+    hotExists = true;
+  } catch (e) {
+    // Account doesn't exist
+  }
+
+  // Get cold balance
+  const compressedAccounts = await rpc.getCompressedTokenAccountsByOwner(
+    owner,
+    { mint }
+  );
+
+  const coldBalance = compressedAccounts.items.reduce(
+    (sum, account) => sum + account.parsed.amount,
+    BigInt(0)
+  );
+
+  return {
+    total: hotBalance + coldBalance,
+    hot: hotBalance,
+    cold: coldBalance,
+    hotExists,
+    compressedAccountCount: compressedAccounts.items.length,
+  };
+}
+
+// Usage
+const breakdown = await getBalanceBreakdown(rpc, mint, owner.publicKey);
+console.log("Total:", breakdown.total);
+console.log("Hot:", breakdown.hot, "(exists:", breakdown.hotExists + ")");
+console.log("Cold:", breakdown.cold, "(accounts:", breakdown.compressedAccountCount + ")");
+```
+
+### Load Cold Tokens to Hot Balance
+
+```typescript
+import {
+  loadAta,
+  getAssociatedTokenAddressInterface,
+} from "@lightprotocol/compressed-token/unified";
+
+const ata = getAssociatedTokenAddressInterface(mint, owner.publicKey);
+
+// Load all cold tokens to hot ATA
+const signature = await loadAta(rpc, ata, owner, mint, payer);
+
+if (signature) {
+  console.log("Loaded cold tokens to hot balance");
+  console.log("Transaction:", signature);
+} else {
+  console.log("No cold tokens to load");
+}
+```
+
+### Send Tokens (Action Approach with Auto-load)
+
+```typescript
+import {
+  getOrCreateAtaInterface,
+  transferInterface,
+  getAssociatedTokenAddressInterface,
+} from "@lightprotocol/compressed-token/unified";
+
+// Ensure recipient ATA exists (creates if needed)
+await getOrCreateAtaInterface(rpc, payer, mint, recipient);
+
+// Transfer - auto-loads cold tokens if needed
+const sourceAta = getAssociatedTokenAddressInterface(mint, owner.publicKey);
+const destinationAta = getAssociatedTokenAddressInterface(mint, recipient);
+
+await transferInterface(
+  rpc,
+  payer,
+  sourceAta,
+  mint,
+  destinationAta,
+  owner,
+  amount
+);
+
+console.log("Transfer complete");
+```
+
+### Send Tokens (Instruction Approach with Manual Load)
+
+```typescript
+import { Transaction } from "@solana/web3.js";
+import {
+  createAssociatedTokenAccountInterfaceIdempotentInstruction,
+  createLoadAtaInstructions,
+  createTransferInterfaceInstruction,
+  getAssociatedTokenAddressInterface,
+} from "@lightprotocol/compressed-token/unified";
+import { LIGHT_TOKEN_PROGRAM_ID } from "@lightprotocol/stateless.js";
+
+const sourceAta = getAssociatedTokenAddressInterface(mint, owner.publicKey);
+const destinationAta = getAssociatedTokenAddressInterface(mint, recipient);
+
+const tx = new Transaction();
+
+// Load cold tokens if needed
+const loadInstructions = await createLoadAtaInstructions(
+  rpc,
+  sourceAta,
+  owner.publicKey,
+  mint,
+  payer.publicKey
+);
+tx.add(...loadInstructions);
+
+// Create recipient ATA idempotently
+tx.add(
+  createAssociatedTokenAccountInterfaceIdempotentInstruction(
+    payer.publicKey,
+    destinationAta,
+    recipient,
+    mint,
+    LIGHT_TOKEN_PROGRAM_ID
+  )
+);
+
+// Transfer
+tx.add(
+  createTransferInterfaceInstruction(
+    sourceAta,
+    destinationAta,
+    owner.publicKey,
+    amount
+  )
+);
+```
+
+### Transaction History
+
+```typescript
+// Get all transactions for owner
+const result = await rpc.getSignaturesForOwnerInterface(owner.publicKey);
+
+console.log("Total signatures:", result.signatures.length);
+
+// Get transaction details
+for (const sig of result.signatures.slice(0, 10)) {
+  const txInfo = await rpc.getTransactionWithCompressionInfo(sig);
+  console.log("Signature:", sig);
+  console.log("Slot:", txInfo.slot);
+  console.log("Block time:", txInfo.blockTime);
+}
+
+// Or get address-specific history
+const addressSigs = await rpc.getSignaturesForAddressInterface(ata);
+```
+
+### Wrap from SPL (Action Approach)
+
+```typescript
+import { getAssociatedTokenAddressSync } from "@solana/spl-token";
+import {
+  wrap,
+  getAssociatedTokenAddressInterface,
+} from "@lightprotocol/compressed-token/unified";
+
+// SPL ATA with tokens to wrap
+const splAta = getAssociatedTokenAddressSync(mint, owner.publicKey);
+// light-token ATA destination
+const tokenAta = getAssociatedTokenAddressInterface(mint, owner.publicKey);
+
+await wrap(rpc, payer, splAta, tokenAta, owner, mint, amount);
+
+console.log("Wrapped SPL tokens to light-token");
+```
+
+### Wrap from SPL (Instruction Approach)
+
+```typescript
+import { Transaction } from "@solana/web3.js";
+import { getAssociatedTokenAddressSync } from "@solana/spl-token";
+import {
+  createWrapInstruction,
+  getAssociatedTokenAddressInterface,
+} from "@lightprotocol/compressed-token/unified";
+import { getSplInterfaceInfos } from "@lightprotocol/compressed-token";
+
+const splAta = getAssociatedTokenAddressSync(mint, owner.publicKey);
+const tokenAta = getAssociatedTokenAddressInterface(mint, owner.publicKey);
+
+const splInterfaceInfos = await getSplInterfaceInfos(rpc, mint);
+const splInterfaceInfo = splInterfaceInfos.find((i) => i.isInitialized);
+
+const tx = new Transaction().add(
+  createWrapInstruction(
+    splAta,
+    tokenAta,
+    owner.publicKey,
+    mint,
+    amount,
+    splInterfaceInfo
+  )
+);
+```
+
+### Unwrap to SPL (Action Approach)
+
+```typescript
+import { getAssociatedTokenAddressSync } from "@solana/spl-token";
+
+// SPL ATA must exist
+const splAta = getAssociatedTokenAddressSync(mint, owner.publicKey);
+
+// Auto-loads cold tokens if needed
+await unwrap(rpc, payer, splAta, owner, mint, amount);
+
+console.log("Unwrapped light-token to SPL");
+```
+
+### Unwrap to SPL (Instruction Approach)
+
+```typescript
+import { Transaction } from "@solana/web3.js";
+import { getAssociatedTokenAddressSync } from "@solana/spl-token";
+import {
+  createLoadAtaInstructions,
+  createUnwrapInstruction,
+  getAssociatedTokenAddressInterface,
+} from "@lightprotocol/compressed-token/unified";
+import { getSplInterfaceInfos } from "@lightprotocol/compressed-token";
+
+const tokenAta = getAssociatedTokenAddressInterface(mint, owner.publicKey);
+const splAta = getAssociatedTokenAddressSync(mint, owner.publicKey);
+
+const splInterfaceInfos = await getSplInterfaceInfos(rpc, mint);
+const splInterfaceInfo = splInterfaceInfos.find((i) => i.isInitialized);
+
+const tx = new Transaction().add(
+  ...(await createLoadAtaInstructions(
+    rpc,
+    tokenAta,
+    owner.publicKey,
+    mint,
+    payer.publicKey
+  )),
+  createUnwrapInstruction(
+    tokenAta,
+    splAta,
+    owner.publicKey,
+    mint,
+    amount,
+    splInterfaceInfo
+  )
+);
+```
+
+### Complete Example: Wallet Balance and Send Flow
+
+```typescript
+import "dotenv/config";
+import { Keypair, PublicKey } from "@solana/web3.js";
+import { createRpc } from "@lightprotocol/stateless.js";
+import {
+  getOrCreateAtaInterface,
+  transferInterface,
+  getAssociatedTokenAddressInterface,
+  getAtaInterface,
+} from "@lightprotocol/compressed-token/unified";
+import { homedir } from "os";
+import { readFileSync } from "fs";
+
+const RPC_URL = `https://devnet.helius-rpc.com?api-key=${process.env.API_KEY!}`;
+const rpc = createRpc(RPC_URL);
+
+const payer = Keypair.fromSecretKey(
+    new Uint8Array(
+        JSON.parse(readFileSync(`${homedir()}/.config/solana/id.json`, "utf8"))
+    )
+);
+
+async function getTotalBalance(
+  mint: PublicKey,
+  owner: PublicKey
+): Promise<bigint> {
+  const ata = getAssociatedTokenAddressInterface(mint, owner);
+  let hotBalance = BigInt(0);
+
+  try {
+    const account = await getAtaInterface(rpc, ata, owner, mint);
+    hotBalance = account.parsed.amount;
+  } catch (e) {
+    // Account doesn't exist
+  }
+
+  const compressedAccounts = await rpc.getCompressedTokenAccountsByOwner(
+    owner,
+    { mint }
+  );
+
+  const coldBalance = compressedAccounts.items.reduce(
+    (sum, account) => sum + account.parsed.amount,
+    BigInt(0)
+  );
+
+  return hotBalance + coldBalance;
+}
+
+(async function () {
+    const mint = /* existing mint publickey */;
+    const recipient = /* recipient publickey */;
+    const amount = BigInt(1_000_000); // 1 token with 6 decimals
+
+    // Check balance
+    const balance = await getTotalBalance(mint, payer.publicKey);
+    console.log("Total balance:", balance);
+
+    if (balance < amount) {
+        console.log("Insufficient balance");
+        return;
+    }
+
+    // Ensure recipient ATA exists
+    await getOrCreateAtaInterface(rpc, payer, mint, recipient);
+
+    // Send tokens (auto-loads cold tokens if needed)
+    const sourceAta = getAssociatedTokenAddressInterface(mint, payer.publicKey);
+    const destinationAta = getAssociatedTokenAddressInterface(mint, recipient);
+
+    await transferInterface(
+        rpc,
+        payer,
+        sourceAta,
+        mint,
+        destinationAta,
+        payer,
+        amount
+    );
+
+    console.log("Transfer complete");
+
+    // Check new balance
+    const newBalance = await getTotalBalance(mint, payer.publicKey);
+    console.log("New balance:", newBalance);
+})();
+```
+
+### Important Notes
+
+1. **Hot vs Cold Balance**: Wallets must aggregate both hot (on-chain) and cold (compressed) balances to show correct total
+
+2. **Balance Query Pattern**:
+   - Hot: Query on-chain ATA with `getAtaInterface()`
+   - Cold: Query Merkle trees with `getCompressedTokenAccountsByOwner()`
+   - Total: Sum both balances
+
+3. **Auto-loading**: Action helpers (`transferInterface`, `unwrap`) automatically load cold tokens
+   - Wallet UX: Show loading state when cold balance exists
+   - Alternative: Pre-load with `loadAta()` before showing send UI
+
+4. **Account Creation**: Use `getOrCreateAtaInterface()` for recipient
+   - Idempotent - safe to call multiple times
+   - Returns account info immediately
+   - Wallet can share address before account exists
+
+5. **Transaction History**:
+   - `getSignaturesForOwnerInterface(owner)` - All signatures for owner
+   - `getSignaturesForAddressInterface(address)` - Signatures for specific address
+   - `getTransactionWithCompressionInfo(signature)` - Full transaction details
+
+6. **Wrap/Unwrap**: Allow users to convert between SPL and light-token
+   - Wrap: SPL → light-token (saves rent)
+   - Unwrap: light-token → SPL (for compatibility)
+   - Both support auto-loading of cold tokens
+
+7. **Cost Savings**: light-token accounts cost ~11,000 lamports vs ~2,000,000 lamports for SPL accounts
+   - Wallets can highlight savings to users
+   - Cold storage is rent-free
+
+8. **Network Requirements**:
+   - RPC endpoint must support ZK Compression (Helius, Triton)
+   - For localnet, run `light test-validator`
+
+9. **Token State Transitions**:
+   - Mint → Cold (compressed in Merkle trees)
+   - Load → Hot (on-chain ATA)
+   - Inactive → Cold (automatic after period of inactivity)
+   - Transfer → May auto-load if source is cold
+
+10. **Wallet UI Recommendations**:
+    - Show total balance prominently
+    - Display hot/cold breakdown in details
+    - Indicate when load operation will occur
+    - Show cost savings vs SPL tokens
+    - Support wrap/unwrap in token actions
+
+~~~~

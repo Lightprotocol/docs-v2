@@ -1,0 +1,580 @@
+~~~~text
+---
+argument-hint: <project_path>
+description: Wrap SPL/Token-22 tokens to Light Token accounts and unwrap back to SPL in Rust
+allowed-tools: [Bash, Read, Glob, Grep, Task, mcp__deepwiki, mcp__zkcompression]
+---
+
+## Task: Wrap & Unwrap SPL/Token-22 <> Light Token (Rust)
+
+References:
+- Cookbook Guide: https://zkcompression.com/light-token/cookbook/wrap-unwrap
+- SDK Reference: https://docs.rs/light-token-client/latest/light_token_client/
+- GitHub Example: https://github.com/Lightprotocol/examples-light-token/tree/rust-client/rust-client/example-actions
+
+MCP:
+* deepwiki https://mcp.deepwiki.com/mcp
+* zkcompression https://www.zkcompression.com/mcp
+
+## Workflow
+
+- This plan must execute without user intervention
+- All questions have been resolved in planning phase
+- If blocked, find alternative approach - do not stop
+- Keep working until ALL todos are complete
+- Use Task tool with subagents for parallel research or when stuck
+- Use subagents with Read, Glob, Grep, and Deepwiki permissions when stuck
+- Always assign Tasks to subagents and tell the user
+
+## DeepWiki fallback
+
+```
+mcp__deepwiki__read_wiki_structure("Lightprotocol/light-protocol"),
+mcp__deepwiki__read_wiki_contents("Lightprotocol/light-protocol"),
+mcp__deepwiki__ask_question("Lightprotocol/light-protocol", "<question>")
+```
+
+## Quick Reference
+
+| Operation | Function/Type | Purpose |
+|-----------|---------------|---------|
+| Wrap | Wrap::execute() | Transfer tokens from SPL ATA to Light Token ATA |
+| Unwrap | Unwrap::execute() | Transfer tokens from Light Token ATA to SPL ATA |
+| Connect | LightClient::new_with_retry() | Connect to ZK Compression RPC endpoint |
+| Setup SPL Mint | spl_token::instruction::initialize_mint() | Create SPL mint with interface PDA |
+| Create SPL ATA | spl_associated_token_account::instruction::create_associated_token_account_idempotent() | Create SPL associated token account |
+| Create Light ATA | CreateAssociatedTokenAccount::new().instruction() | Create Light Token associated token account |
+| Get Light ATA Address | derive_token_ata() | Derive Light Token ATA address from owner and mint |
+
+### Phase 1: Index project
+
+```bash
+grep -r "light_token_client\|light_client\|solana_sdk" src/
+```
+
+### Phase 2: Add dependencies
+
+```toml
+[dependencies]
+light-client = "0.13.0"
+light-token-client = "0.2.0"
+light-token = "0.1.0"
+solana-sdk = "2.1.6"
+anchor-spl = "0.30"
+tokio = { version = "1.41", features = ["full"] }
+dotenvy = "0.15"
+serde_json = "1.0"
+bs58 = "0.5"
+```
+
+### Phase 3: Implement wrap and unwrap
+
+See Code Reference below for Rust implementation.
+
+#### Wrap: SPL → Light Token ATA
+
+1. **Setup SPL Infrastructure**: Create SPL mint and SPL ATA with tokens
+   - Use `spl_token::instruction::initialize_mint()` to create SPL mint
+   - Use `CreateSplInterfacePda::new().instruction()` to create interface PDA (required for wrap/unwrap)
+   - Use `spl_associated_token_account::instruction::create_associated_token_account_idempotent()` for SPL ATA
+   - Mint tokens to SPL ATA using `spl_token::instruction::mint_to()`
+
+2. **Create Light Token ATA**: Set up destination Light Token account
+   - Use `derive_token_ata(&owner, &mint)` to get Light Token ATA address
+   - Use `CreateAssociatedTokenAccount::new(payer, owner, mint).instruction()` to create Light ATA
+   - This ATA stores tokens rent-free in compressed form
+
+3. **Execute Wrap**: Transfer tokens from SPL ATA to Light Token ATA
+   - Create `Wrap` struct with `source_spl_ata`, `destination` (Light ATA), `mint`, `amount`, `decimals`
+   - Call `.execute(&mut rpc, &payer, &authority)` to send transaction
+   - Authority must own the source SPL ATA
+   - Returns transaction signature on success
+
+#### Unwrap: Light Token ATA → SPL
+
+1. **Setup Prerequisites**: Ensure Light Token ATA has tokens and SPL ATA exists
+   - If starting from scratch, follow wrap setup steps first
+   - If Light ATA already has tokens, only create empty SPL ATA
+   - Use same SPL ATA creation process as wrap
+
+2. **Execute Unwrap**: Transfer tokens from Light Token ATA to SPL ATA
+   - Create `Unwrap` struct with `source` (Light ATA), `destination_spl_ata`, `mint`, `amount`, `decimals`
+   - Call `.execute(&mut rpc, &payer, &authority)` to send transaction
+   - Authority must own the source Light Token ATA
+   - Returns transaction signature on success
+
+### Phase 4: Test
+
+Run the client code. On failure, debug and retry. Assign debugging to subagents with Task tool.
+
+For localnet testing:
+```bash
+light test-validator
+```
+
+For devnet/mainnet, ensure RPC endpoint supports ZK Compression (Helius, Triton).
+
+## Code Reference
+
+### Complete Wrap Example
+
+```rust
+use light_client::rpc::{LightClient, LightClientConfig};
+use light_token_client::actions::Wrap;
+use light_token::instruction::{derive_token_ata, CreateAssociatedTokenAccount};
+use light_token::spl_interface::CreateSplInterfacePda;
+use anchor_spl::token::spl_token;
+use anchor_spl::associated_token::spl_associated_token_account;
+use solana_sdk::{
+    pubkey::Pubkey,
+    signature::Keypair,
+    signer::Signer,
+    system_instruction,
+};
+use std::env;
+
+#[tokio::main]
+async fn main() {
+    dotenvy::dotenv().ok();
+
+    // Connect to RPC
+    let api_key = env::var("api_key").expect("api_key must be set");
+    let config = LightClientConfig::devnet(
+        Some("https://devnet.helius-rpc.com".to_string()),
+        Some(api_key),
+    );
+    let mut rpc = LightClient::new_with_retry(config, None)
+        .await
+        .expect("Failed to initialize LightClient");
+
+    let payer = load_keypair(&env::var("KEYPAIR_PATH").unwrap()).unwrap();
+
+    // 1. Create SPL mint
+    let mint_keypair = Keypair::new();
+    let mint = mint_keypair.pubkey();
+    let decimals = 9u8;
+
+    let mint_rent = rpc
+        .get_minimum_balance_for_rent_exemption(82) // SPL Mint size
+        .await
+        .unwrap();
+
+    let create_mint_ix = system_instruction::create_account(
+        &payer.pubkey(),
+        &mint,
+        mint_rent,
+        82,
+        &spl_token::ID,
+    );
+
+    let init_mint_ix = spl_token::instruction::initialize_mint(
+        &spl_token::ID,
+        &mint,
+        &payer.pubkey(),
+        None,
+        decimals,
+    )
+    .unwrap();
+
+    rpc.create_and_send_transaction(
+        &[create_mint_ix, init_mint_ix],
+        &payer.pubkey(),
+        &[&payer, &mint_keypair],
+    )
+    .await
+    .unwrap();
+
+    // 2. Create SPL interface PDA (required for wrap/unwrap)
+    let create_interface_ix =
+        CreateSplInterfacePda::new(payer.pubkey(), mint, spl_token::ID, false).instruction();
+
+    rpc.create_and_send_transaction(&[create_interface_ix], &payer.pubkey(), &[&payer])
+        .await
+        .unwrap();
+
+    // 3. Create SPL ATA and mint tokens
+    let spl_ata = spl_associated_token_account::get_associated_token_address(
+        &payer.pubkey(),
+        &mint,
+    );
+
+    let create_spl_ata_ix =
+        spl_associated_token_account::instruction::create_associated_token_account_idempotent(
+            &payer.pubkey(),
+            &payer.pubkey(),
+            &mint,
+            &spl_token::ID,
+        );
+
+    let mint_to_ix = spl_token::instruction::mint_to(
+        &spl_token::ID,
+        &mint,
+        &spl_ata,
+        &payer.pubkey(),
+        &[],
+        1_000_000, // Initial amount
+    )
+    .unwrap();
+
+    rpc.create_and_send_transaction(
+        &[create_spl_ata_ix, mint_to_ix],
+        &payer.pubkey(),
+        &[&payer],
+    )
+    .await
+    .unwrap();
+
+    // 4. Create Light Token ATA
+    let (light_ata, _) = derive_token_ata(&payer.pubkey(), &mint);
+
+    let create_light_ata_ix =
+        CreateAssociatedTokenAccount::new(payer.pubkey(), payer.pubkey(), mint)
+            .instruction()
+            .unwrap();
+
+    rpc.create_and_send_transaction(&[create_light_ata_ix], &payer.pubkey(), &[&payer])
+        .await
+        .unwrap();
+
+    // 5. Wrap: Transfer from SPL ATA to Light Token ATA
+    let wrap_tx = Wrap {
+        source_spl_ata: spl_ata,
+        destination: light_ata,
+        mint,
+        amount: 500_000,
+        decimals,
+    }
+    .execute(&mut rpc, &payer, &payer)
+    .await
+    .unwrap();
+
+    println!("\n=== Wrap Transaction ===");
+    println!("Signature: {}", wrap_tx);
+    println!("Wrapped 500,000 tokens from SPL ATA to Light Token ATA");
+    println!("SPL ATA: {}", spl_ata);
+    println!("Light ATA: {}", light_ata);
+}
+
+fn load_keypair(path: &str) -> Result<Keypair, Box<dyn std::error::Error>> {
+    let path = if path.starts_with("~") {
+        path.replace("~", &env::var("HOME").unwrap_or_default())
+    } else {
+        path.to_string()
+    };
+    let file = std::fs::read_to_string(&path)?;
+    let bytes: Vec<u8> = serde_json::from_str(&file)?;
+    Ok(Keypair::try_from(&bytes[..])?)
+}
+```
+
+### Complete Unwrap Example
+
+```rust
+use light_client::rpc::{LightClient, LightClientConfig};
+use light_token_client::actions::Unwrap;
+use light_token::instruction::derive_token_ata;
+use anchor_spl::token::spl_token;
+use anchor_spl::associated_token::spl_associated_token_account;
+use solana_sdk::{pubkey::Pubkey, signature::Keypair, signer::Signer};
+use std::env;
+
+#[tokio::main]
+async fn main() {
+    dotenvy::dotenv().ok();
+
+    // Connect to RPC
+    let api_key = env::var("api_key").expect("api_key must be set");
+    let config = LightClientConfig::devnet(
+        Some("https://devnet.helius-rpc.com".to_string()),
+        Some(api_key),
+    );
+    let mut rpc = LightClient::new_with_retry(config, None)
+        .await
+        .expect("Failed to initialize LightClient");
+
+    let payer = load_keypair(&env::var("KEYPAIR_PATH").unwrap()).unwrap();
+
+    // Assume: SPL mint and Light Token ATA with tokens already exist
+    // (from previous wrap operation)
+    let mint = Pubkey::new_from_array([/* your mint pubkey bytes */]);
+    let decimals = 9u8;
+
+    let (light_ata, _) = derive_token_ata(&payer.pubkey(), &mint);
+
+    // 1. Create SPL ATA for unwrapping destination
+    let spl_ata = spl_associated_token_account::get_associated_token_address(
+        &payer.pubkey(),
+        &mint,
+    );
+
+    let create_spl_ata_ix =
+        spl_associated_token_account::instruction::create_associated_token_account_idempotent(
+            &payer.pubkey(),
+            &payer.pubkey(),
+            &mint,
+            &spl_token::ID,
+        );
+
+    rpc.create_and_send_transaction(&[create_spl_ata_ix], &payer.pubkey(), &[&payer])
+        .await
+        .unwrap();
+
+    // 2. Unwrap: Transfer from Light Token ATA to SPL ATA
+    let unwrap_tx = Unwrap {
+        source: light_ata,
+        destination_spl_ata: spl_ata,
+        mint,
+        amount: 500_000,
+        decimals,
+    }
+    .execute(&mut rpc, &payer, &payer)
+    .await
+    .unwrap();
+
+    println!("\n=== Unwrap Transaction ===");
+    println!("Signature: {}", unwrap_tx);
+    println!("Unwrapped 500,000 tokens from Light Token ATA to SPL ATA");
+    println!("Light ATA: {}", light_ata);
+    println!("SPL ATA: {}", spl_ata);
+}
+
+fn load_keypair(path: &str) -> Result<Keypair, Box<dyn std::error::Error>> {
+    let path = if path.starts_with("~") {
+        path.replace("~", &env::var("HOME").unwrap_or_default())
+    } else {
+        path.to_string()
+    };
+    let file = std::fs::read_to_string(&path)?;
+    let bytes: Vec<u8> = serde_json::from_str(&file)?;
+    Ok(Keypair::try_from(&bytes[..])?)
+}
+```
+
+### Combined Wrap and Unwrap in One Example
+
+```rust
+use light_client::rpc::{LightClient, LightClientConfig};
+use light_token_client::actions::{Wrap, Unwrap};
+use light_token::instruction::{derive_token_ata, CreateAssociatedTokenAccount};
+use light_token::spl_interface::CreateSplInterfacePda;
+use anchor_spl::token::spl_token;
+use anchor_spl::associated_token::spl_associated_token_account;
+use solana_sdk::{
+    pubkey::Pubkey,
+    signature::Keypair,
+    signer::Signer,
+    system_instruction,
+};
+use std::env;
+
+#[tokio::main]
+async fn main() {
+    dotenvy::dotenv().ok();
+
+    let api_key = env::var("api_key").expect("api_key must be set");
+    let config = LightClientConfig::devnet(
+        Some("https://devnet.helius-rpc.com".to_string()),
+        Some(api_key),
+    );
+    let mut rpc = LightClient::new_with_retry(config, None)
+        .await
+        .expect("Failed to initialize LightClient");
+
+    let payer = load_keypair(&env::var("KEYPAIR_PATH").unwrap()).unwrap();
+
+    // Setup: Create SPL mint, interface PDA, and accounts
+    let (mint, spl_ata, light_ata, decimals) = setup_mint_and_accounts(&mut rpc, &payer).await;
+
+    // Wrap: SPL → Light Token ATA
+    let wrap_tx = Wrap {
+        source_spl_ata: spl_ata,
+        destination: light_ata,
+        mint,
+        amount: 500_000,
+        decimals,
+    }
+    .execute(&mut rpc, &payer, &payer)
+    .await
+    .unwrap();
+
+    println!("\n=== Wrap ===");
+    println!("Wrapped 500,000 tokens");
+    println!("Tx: {}", wrap_tx);
+
+    // Unwrap: Light Token ATA → SPL
+    let unwrap_tx = Unwrap {
+        source: light_ata,
+        destination_spl_ata: spl_ata,
+        mint,
+        amount: 250_000,
+        decimals,
+    }
+    .execute(&mut rpc, &payer, &payer)
+    .await
+    .unwrap();
+
+    println!("\n=== Unwrap ===");
+    println!("Unwrapped 250,000 tokens");
+    println!("Tx: {}", unwrap_tx);
+}
+
+async fn setup_mint_and_accounts<R: light_client::rpc::Rpc>(
+    rpc: &mut R,
+    payer: &Keypair,
+) -> (Pubkey, Pubkey, Pubkey, u8) {
+    let mint_keypair = Keypair::new();
+    let mint = mint_keypair.pubkey();
+    let decimals = 9u8;
+
+    // Create SPL mint
+    let mint_rent = rpc
+        .get_minimum_balance_for_rent_exemption(82)
+        .await
+        .unwrap();
+
+    let create_mint_ix = system_instruction::create_account(
+        &payer.pubkey(),
+        &mint,
+        mint_rent,
+        82,
+        &spl_token::ID,
+    );
+
+    let init_mint_ix = spl_token::instruction::initialize_mint(
+        &spl_token::ID,
+        &mint,
+        &payer.pubkey(),
+        None,
+        decimals,
+    )
+    .unwrap();
+
+    rpc.create_and_send_transaction(
+        &[create_mint_ix, init_mint_ix],
+        &payer.pubkey(),
+        &[payer, &mint_keypair],
+    )
+    .await
+    .unwrap();
+
+    // Create interface PDA
+    let create_interface_ix =
+        CreateSplInterfacePda::new(payer.pubkey(), mint, spl_token::ID, false).instruction();
+
+    rpc.create_and_send_transaction(&[create_interface_ix], &payer.pubkey(), &[payer])
+        .await
+        .unwrap();
+
+    // Create SPL ATA with tokens
+    let spl_ata = spl_associated_token_account::get_associated_token_address(
+        &payer.pubkey(),
+        &mint,
+    );
+
+    let create_spl_ata_ix =
+        spl_associated_token_account::instruction::create_associated_token_account_idempotent(
+            &payer.pubkey(),
+            &payer.pubkey(),
+            &mint,
+            &spl_token::ID,
+        );
+
+    let mint_to_ix = spl_token::instruction::mint_to(
+        &spl_token::ID,
+        &mint,
+        &spl_ata,
+        &payer.pubkey(),
+        &[],
+        1_000_000,
+    )
+    .unwrap();
+
+    rpc.create_and_send_transaction(
+        &[create_spl_ata_ix, mint_to_ix],
+        &payer.pubkey(),
+        &[payer],
+    )
+    .await
+    .unwrap();
+
+    // Create Light Token ATA
+    let (light_ata, _) = derive_token_ata(&payer.pubkey(), &mint);
+
+    let create_light_ata_ix =
+        CreateAssociatedTokenAccount::new(payer.pubkey(), payer.pubkey(), mint)
+            .instruction()
+            .unwrap();
+
+    rpc.create_and_send_transaction(&[create_light_ata_ix], &payer.pubkey(), &[payer])
+        .await
+        .unwrap();
+
+    (mint, spl_ata, light_ata, decimals)
+}
+
+fn load_keypair(path: &str) -> Result<Keypair, Box<dyn std::error::Error>> {
+    let path = if path.starts_with("~") {
+        path.replace("~", &env::var("HOME").unwrap_or_default())
+    } else {
+        path.to_string()
+    };
+    let file = std::fs::read_to_string(&path)?;
+    let bytes: Vec<u8> = serde_json::from_str(&file)?;
+    Ok(Keypair::try_from(&bytes[..])?)
+}
+```
+
+### Important Notes
+
+1. **SPL Interface PDA**: Required for wrap/unwrap operations. Create once per SPL mint using `CreateSplInterfacePda`.
+
+2. **Light Token ATA**: Stores tokens in compressed form (rent-free). Derive address with `derive_token_ata()`.
+
+3. **Authority Handling**: The `authority` parameter must be the owner of the source account (SPL ATA for wrap, Light ATA for unwrap). If payer and authority differ, both must sign.
+
+4. **Amount Units**: Amounts are in base units (not decimals). For 9 decimals, 1_000_000 = 0.001 tokens.
+
+5. **Transaction Signers**: The SDK automatically handles signers. Provide payer and authority keypairs to `.execute()`.
+
+6. **RPC Endpoint**: Wrap/unwrap operations require a ZK Compression-enabled RPC (Helius, Triton, or localnet with `light test-validator`).
+
+7. **Error Handling**: Production code should handle `RpcError` from `.execute()` calls appropriately.
+
+8. **Account State**: After wrap, SPL ATA balance decreases, Light ATA balance increases. After unwrap, the reverse occurs.
+
+### Environment Setup
+
+Create a `.env` file with your configuration:
+
+```bash
+# API key for Helius RPC (devnet or mainnet)
+api_key=your_api_key_here
+
+# Keypair path
+KEYPAIR_PATH=~/.config/solana/id.json
+```
+
+### Testing
+
+Run as a test:
+
+```bash
+cargo test --test wrap_unwrap_test -- --nocapture
+```
+
+Or create a binary in `examples/wrap_unwrap.rs`:
+
+```rust
+#[tokio::main]
+async fn main() {
+    // Copy the combined example code here
+}
+```
+
+Then run:
+
+```bash
+cargo run --example wrap_unwrap
+```
+
+~~~~

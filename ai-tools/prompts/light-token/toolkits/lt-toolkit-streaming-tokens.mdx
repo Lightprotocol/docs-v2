@@ -1,0 +1,382 @@
+~~~~text
+---
+argument-hint: <project_path>
+description: Load compressed token accounts into hot balance for streaming/indexing applications (TypeScript)
+allowed-tools: [Bash, Read, Glob, Grep, Task, mcp__deepwiki, mcp__zkcompression]
+---
+
+## Task: Load compressed tokens to hot balance (TypeScript)
+
+References:
+- Toolkit Guide: https://zkcompression.com/light-token/toolkits/for-streaming-tokens
+- SDK Reference: https://lightprotocol.github.io/light-protocol/compressed-token/index.html
+- GitHub Example: https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits
+
+MCP:
+* deepwiki https://mcp.deepwiki.com/mcp
+* zkcompression https://www.zkcompression.com/mcp
+
+## Context
+
+When markets or applications become inactive, compressed token accounts transition to "cold storage" - their state is committed to Merkle trees and frozen until decompressed. While compressed (cold), on-chain lookups return `is_initialized: false` and `is_compressed: true`.
+
+Indexers and streaming applications must continue tracking, quoting, and routing even when accounts show as uninitialized. The first client to interact with a cold account must prepend an idempotent "warm up" instruction that loads the compressed balance into hot (on-chain) state.
+
+This toolkit demonstrates how to load compressed token balances into Associated Token Accounts (ATAs) for applications that need hot balances.
+
+## Workflow
+
+- This plan must execute without user intervention
+- All questions have been resolved in planning phase
+- If blocked, find alternative approach - do not stop
+- Keep working until ALL todos are complete
+- Use Task tool with subagents for parallel research or when stuck
+- Use subagents with Read, Glob, Grep, and Deepwiki permissions when stuck
+- Always assign Tasks to subagents and tell the user
+
+## DeepWiki fallback
+
+```
+mcp__deepwiki__read_wiki_structure("Lightprotocol/light-protocol"),
+mcp__deepwiki__read_wiki_contents("Lightprotocol/light-protocol"),
+mcp__deepwiki__ask_question("Lightprotocol/light-protocol", "<question>")
+```
+
+## Quick Reference
+
+| Operation | Function | Purpose |
+|-----------|----------|---------|
+| Connect | createRpc() | Connect to ZK Compression RPC endpoint |
+| Get ATA Address | getAssociatedTokenAddressInterface() | Derive light-token ATA address from mint and owner |
+| Load (Action) | loadAta() | High-level action: decompress cold tokens to hot ATA, returns signature or null |
+| Load (Instruction) | createLoadAtaInstructions() | Build instructions for manual transaction construction |
+| Create Mint | createMint() | Create compressed token mint for testing |
+| Mint Tokens | mintTo() | Mint compressed tokens to owner (creates cold balance) |
+| Check Balance | getCompressedTokenAccountsByOwner() | Query compressed (cold) token accounts |
+
+### Phase 1: Index project
+
+```bash
+grep -r "createRpc\|@lightprotocol/compressed-token\|@solana/web3.js" src/
+```
+
+### Phase 2: Add dependencies
+
+```bash
+npm install --save \
+    @lightprotocol/compressed-token@0.22.1-alpha.1 \
+    @lightprotocol/stateless.js@0.22.1-alpha.1 \
+    @solana/web3.js
+```
+
+### Phase 3: Implement token loading
+
+See Code Reference below for TypeScript implementation.
+
+**Two Approaches:**
+
+1. **Action (Recommended)**: Use `loadAta()` for simple, automatic loading
+   - Idempotent: returns null if nothing to load
+   - Automatically creates ATA if needed
+   - Returns transaction signature or null
+   - Example: Action code below
+
+2. **Instruction (Advanced)**: Use `createLoadAtaInstructions()` for manual transaction control
+   - Gives full control over transaction construction
+   - Useful for batching multiple instructions
+   - Returns empty array if nothing to load
+   - Example: Instruction code below
+
+#### Action Approach
+
+1. **RPC Setup**: Connect to ZK Compression RPC endpoint (Helius, Triton, or localnet)
+   - Use `createRpc()` with mainnet, devnet, or local URLs
+   - For devnet: `https://devnet.helius-rpc.com?api-key=${API_KEY}`
+   - For localnet: `createRpc()` with no arguments
+
+2. **Create Test Mint**: For testing, create a compressed token mint
+   - Use `createMint(rpc, payer, mintAuthority, decimals, keypair?)`
+   - Returns `{ mint, transactionSignature }`
+
+3. **Mint Tokens**: Create compressed (cold) token balance
+   - Use `mintTo(rpc, payer, mint, destination, authority, amount)`
+   - Creates compressed token accounts (cold storage)
+   - Tokens are stored in Merkle trees, not on-chain accounts
+
+4. **Get ATA Address**: Derive the light-token ATA address
+   - Use `getAssociatedTokenAddressInterface(mint, owner)`
+   - Returns the PDA for light-token ATA (different from SPL ATA)
+
+5. **Load Tokens**: Call `loadAta()` to decompress cold tokens to hot ATA
+   - Parameters: `(rpc, ata, owner, mint, payer?, confirmOptions?, interfaceOptions?, wrap?)`
+   - Idempotent: returns null if nothing to load
+   - Creates ATA if it doesn't exist
+   - Decompresses all compressed tokens to hot balance
+   - Returns transaction signature or null
+
+#### Instruction Approach
+
+1. **RPC Setup**: Same as Action approach
+
+2. **Create Test Setup**: Same as Action approach (create mint, mint tokens)
+
+3. **Get ATA Address**: Same as Action approach
+
+4. **Create Load Instructions**: Build instructions for loading
+   - Use `createLoadAtaInstructions(rpc, ata, owner, mint, payer?, options?, wrap?)`
+   - Returns empty array if nothing to load
+   - Returns array of instructions to execute
+
+5. **Build Transaction**: Create transaction with compute budget
+   - Add `ComputeBudgetProgram.setComputeUnitLimit({ units: 500_000 })`
+   - Add load instructions
+   - Get latest blockhash
+
+6. **Sign and Send**: Execute the transaction
+   - Use `buildAndSignTx()` to build and sign
+   - Use `sendAndConfirmTx()` to send and confirm
+   - Handle owner as additional signer if different from payer
+
+### Phase 4: Test
+
+Run the client code. On failure, debug and retry. Assign debugging to subagents with Task tool.
+
+For localnet testing:
+```bash
+light test-validator
+```
+
+For devnet/mainnet, ensure RPC endpoint supports ZK Compression (Helius, Triton).
+
+## Code Reference
+
+### Action Approach (Recommended)
+
+```typescript
+import { Keypair } from "@solana/web3.js";
+import { createRpc, bn } from "@lightprotocol/stateless.js";
+import {
+  createMint,
+  mintTo,
+  loadAta,
+  getAssociatedTokenAddressInterface,
+} from "@lightprotocol/compressed-token";
+
+async function main() {
+  const rpc = createRpc();
+  const payer = Keypair.generate();
+  await rpc.requestAirdrop(payer.publicKey, 10e9);
+
+  const owner = Keypair.generate();
+  await rpc.requestAirdrop(owner.publicKey, 1e9);
+
+  const mintAuthority = Keypair.generate();
+  const mintKeypair = Keypair.generate();
+  const { mint } = await createMint(
+    rpc,
+    payer,
+    mintAuthority.publicKey,
+    9,
+    mintKeypair,
+  );
+
+  await mintTo(rpc, payer, mint, owner.publicKey, mintAuthority, bn(1000));
+
+  // Get light-token ATA address
+  const tokenAta = getAssociatedTokenAddressInterface(mint, owner.publicKey);
+
+  // Load compressed tokens to hot balance
+  // Creates ATA if needed, returns null if nothing to load
+  const signature = await loadAta(rpc, tokenAta, owner, mint, payer);
+
+  if (signature) {
+    console.log("Loaded tokens to hot balance");
+    console.log("Transaction:", signature);
+  } else {
+    console.log("Nothing to load");
+  }
+}
+
+main().catch(console.error);
+```
+
+### Instruction Approach (Advanced)
+
+```typescript
+import { Keypair, ComputeBudgetProgram } from "@solana/web3.js";
+import {
+  createRpc,
+  bn,
+  buildAndSignTx,
+  sendAndConfirmTx,
+  dedupeSigner,
+} from "@lightprotocol/stateless.js";
+import {
+  createMint,
+  mintTo,
+  createLoadAtaInstructions,
+  getAssociatedTokenAddressInterface,
+} from "@lightprotocol/compressed-token";
+
+async function main() {
+  const rpc = createRpc();
+  const payer = Keypair.generate();
+  await rpc.requestAirdrop(payer.publicKey, 10e9);
+
+  const owner = Keypair.generate();
+  await rpc.requestAirdrop(owner.publicKey, 1e9);
+
+  const mintAuthority = Keypair.generate();
+  const mintKeypair = Keypair.generate();
+  const { mint } = await createMint(
+    rpc,
+    payer,
+    mintAuthority.publicKey,
+    9,
+    mintKeypair
+  );
+
+  await mintTo(rpc, payer, mint, owner.publicKey, mintAuthority, bn(1000));
+
+  // Get light-token ATA address
+  const tokenAta = getAssociatedTokenAddressInterface(mint, owner.publicKey);
+
+  // Create load instructions
+  const ixs = await createLoadAtaInstructions(
+    rpc,
+    tokenAta,
+    owner.publicKey,
+    mint,
+    payer.publicKey
+  );
+
+  if (ixs.length === 0) {
+    console.log("Nothing to load");
+    return;
+  }
+
+  // Build, sign, and send transaction
+  const { blockhash } = await rpc.getLatestBlockhash();
+  const additionalSigners = dedupeSigner(payer, [owner]);
+
+  const tx = buildAndSignTx(
+    [ComputeBudgetProgram.setComputeUnitLimit({ units: 500_000 }), ...ixs],
+    payer,
+    blockhash,
+    additionalSigners
+  );
+
+  const signature = await sendAndConfirmTx(rpc, tx);
+  console.log("Loaded tokens to hot balance");
+  console.log("Transaction:", signature);
+}
+
+main().catch(console.error);
+```
+
+### Key Differences
+
+| Aspect | Action Approach | Instruction Approach |
+|--------|----------------|---------------------|
+| Complexity | Simple, one function call | More setup required |
+| Control | Automatic | Full manual control |
+| Use Case | Most streaming/indexing scenarios | Batching, custom flows |
+| Transaction Building | Auto-built and sent | Must build and send |
+| Empty State Handling | Returns null | Returns empty array |
+| ATA Creation | Automatic if needed | Automatic if needed |
+
+### Load Behavior
+
+The `loadAta()` and `createLoadAtaInstructions()` functions handle two scenarios:
+
+1. **Standard Mode** (`wrap=false`, default):
+   - Decompresses compressed (cold) tokens to the target ATA
+   - Target can be light-token ATA (direct), SPL ATA (via pool), or T22 ATA (via pool)
+   - Does NOT wrap SPL/T22 balances
+   - Use for: Loading cold tokens to hot state without changing token type
+
+2. **Unified Mode** (`wrap=true`):
+   - Wraps SPL/T22 tokens AND decompresses all to light-token ATA
+   - Target MUST be a light-token ATA
+   - Consolidates all token types into compressed format
+   - Use for: Applications that want all tokens in compressed format
+
+For streaming/indexing, **standard mode** (`wrap=false`) is recommended.
+
+### Understanding Token States
+
+**Cold (Compressed)**:
+- State stored in Merkle trees
+- On-chain lookup shows `is_initialized: false`, `is_compressed: true`
+- Rent-free storage
+- Query via `getCompressedTokenAccountsByOwner()`
+
+**Hot (On-chain)**:
+- State stored in on-chain ATA account
+- Standard account queries work
+- Requires rent
+- Query via standard `getAccount()` or RPC methods
+
+**Loading Process**:
+1. Fetch compressed token accounts (cold)
+2. Get validity proof from RPC
+3. Decompress cold tokens to hot ATA
+4. Nullify old Merkle tree entries
+5. Update hot ATA balance
+
+### Important Notes
+
+1. **Idempotency**: Both `loadAta()` and `createLoadAtaInstructions()` are idempotent
+   - Return null/empty if nothing to load
+   - Safe to call multiple times
+   - Automatically create ATA if needed
+
+2. **ATA Derivation**: Light-token ATAs use different derivation than SPL ATAs
+   - Always use `getAssociatedTokenAddressInterface()` for light-token ATAs
+   - Do NOT use `getAssociatedTokenAddressSync()` from `@solana/spl-token`
+
+3. **Network Selection**:
+   - Devnet: Use Helius RPC with API key
+   - Localnet: Use `createRpc()` with no arguments (requires `light test-validator`)
+   - Mainnet: Use production RPC endpoint
+
+4. **Compute Budget**: Loading compressed tokens requires higher compute units
+   - Recommended: 500,000 compute units
+   - Automatically handled in `loadAta()` action
+   - Must manually add in instruction approach
+
+5. **Warm-up Pattern**: For inactive markets/accounts
+   - First transaction must load (decompress) cold state
+   - Subsequent transactions work with hot state
+   - Design your indexer to track both cold and hot balances
+
+### Indexer Integration Pattern
+
+```typescript
+// Check both cold and hot balances
+const coldBalance = await getCompressedBalance(rpc, owner, mint);
+const hotBalance = await getHotBalance(rpc, ataAddress);
+const totalBalance = coldBalance + hotBalance;
+
+// If cold balance exists, warm up before trading
+if (coldBalance > BigInt(0)) {
+  await loadAta(rpc, ataAddress, owner, mint);
+  // Now hot balance = totalBalance, cold balance = 0
+}
+
+// Continue with hot balance operations
+```
+
+### Testing Checklist
+
+- [ ] Can create compressed token mint
+- [ ] Can mint compressed tokens (creates cold balance)
+- [ ] Can load cold tokens to hot ATA (action approach)
+- [ ] Can build load instructions (instruction approach)
+- [ ] Returns null/empty when nothing to load
+- [ ] Creates ATA if it doesn't exist
+- [ ] Handles multiple load operations (additive)
+- [ ] Works on localnet with test-validator
+- [ ] Works on devnet with Helius RPC
+
+~~~~

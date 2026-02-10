@@ -1,0 +1,522 @@
+~~~~text
+---
+argument-hint: <project_path>
+description: Implement stablecoin payment infrastructure with light-token unified interface
+allowed-tools: [Bash, Read, Glob, Grep, Task, mcp__deepwiki, mcp__zkcompression]
+---
+
+## Task: Implement light-token payment toolkit (TypeScript)
+
+References:
+- Toolkit Guide: https://zkcompression.com/light-token/toolkits/for-payments
+- SDK Reference: https://lightprotocol.github.io/light-protocol/compressed-token/index.html
+- GitHub Examples: https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/payments-and-wallets
+
+MCP:
+* deepwiki https://mcp.deepwiki.com/mcp
+* zkcompression https://www.zkcompression.com/mcp
+
+## Workflow
+
+- This plan must execute without user intervention
+- All questions have been resolved in planning phase
+- If blocked, find alternative approach - do not stop
+- Keep working until ALL todos are complete
+- Use Task tool with subagents for parallel research or when stuck
+- Use subagents with Read, Glob, Grep, and Deepwiki permissions when stuck
+- Always assign Tasks to subagents and tell the user
+
+## DeepWiki fallback
+
+```
+mcp__deepwiki__read_wiki_structure("Lightprotocol/light-protocol"),
+mcp__deepwiki__read_wiki_contents("Lightprotocol/light-protocol"),
+mcp__deepwiki__ask_question("Lightprotocol/light-protocol", "<question>")
+```
+
+## Quick Reference
+
+| Operation | Function | Purpose |
+|-----------|----------|---------|
+| Connect | createRpc() | Connect to ZK Compression RPC endpoint |
+| Get/Create ATA | getOrCreateAtaInterface() | Get or create associated token account |
+| Derive ATA | getAssociatedTokenAddressInterface() | Calculate ATA address from mint and owner |
+| Transfer | transferInterface() | Send tokens between accounts |
+| Get Balance | getAtaInterface() | Fetch account balance |
+| Transaction History | getSignaturesForOwnerInterface() | Get transaction signatures for owner |
+| Wrap | wrap() | Convert SPL tokens to light-token format |
+| Unwrap | unwrap() | Convert light-token to SPL tokens |
+
+## Overview
+
+The light-token API matches the SPL-token API with compression benefits:
+
+**Cost Comparison:**
+
+| Creation Cost | SPL | light-token |
+|---------------|-----|-------------|
+| Token Account | ~2,000,000 lamports | ~11,000 lamports |
+
+**Key Functions:**
+
+| Operation | SPL | Light |
+|-----------|-----|-------|
+| Get/Create ATA | getOrCreateAssociatedTokenAccount() | getOrCreateAtaInterface() |
+| Derive ATA | getAssociatedTokenAddress() | getAssociatedTokenAddressInterface() |
+| Transfer | transferChecked() | transferInterface() |
+| Get Balance | getAccount() | getAtaInterface() |
+| Tx History | getSignaturesForAddress() | getSignaturesForOwnerInterface() |
+
+### Phase 1: Index project
+
+```bash
+grep -r "createRpc\|@lightprotocol/compressed-token\|@solana/web3.js" src/
+```
+
+### Phase 2: Add dependencies
+
+```bash
+npm install --save \
+    @lightprotocol/compressed-token@0.22.1-alpha.1 \
+    @lightprotocol/stateless.js@0.22.1-alpha.1 \
+    @solana/web3.js \
+    @solana/spl-token
+```
+
+### Phase 3: Implement payment operations
+
+See Code Reference below for TypeScript implementations.
+
+#### 1. Setup and RPC Connection
+
+**RPC Setup**: Connect to ZK Compression RPC endpoint (Helius, Triton, or localnet)
+   - Use `createRpc(RPC_ENDPOINT)` with devnet or local URLs
+   - For devnet: `https://devnet.helius-rpc.com?api-key=${API_KEY}`
+   - For localnet: `createRpc()` with no arguments
+
+**Import Functions**: Import unified interface functions
+   - `getOrCreateAtaInterface` - Get or create ATA
+   - `getAtaInterface` - Fetch account info
+   - `getAssociatedTokenAddressInterface` - Derive ATA address
+   - `transferInterface` - Transfer tokens
+   - `wrap` - Wrap from SPL
+   - `unwrap` - Unwrap to SPL
+
+#### 2. Receive Payments
+
+**Two Approaches:**
+
+**A. Instruction Approach (Manual Transaction Control)**
+1. Derive recipient ATA using `getAssociatedTokenAddressInterface(mint, recipient)`
+2. Create idempotent ATA instruction with `createAssociatedTokenAccountInterfaceIdempotentInstruction()`
+3. Add load ATA instructions using `createLoadAtaInstructions(rpc, ata, owner, mint, payer)`
+4. Build transaction with all instructions
+
+**B. Action Approach (Recommended)**
+1. Call `getOrCreateAtaInterface(rpc, payer, mint, recipient)`
+2. Returns account info with `ata.parsed.address` and `ata.parsed.amount`
+3. Share address with sender
+
+#### 3. Send Payments
+
+**Two Approaches:**
+
+**A. Instruction Approach (Manual Transaction Control)**
+1. Derive source and destination ATAs
+2. Optionally add idempotent ATA creation for recipient
+3. Add load ATA instructions for source account
+4. Add transfer instruction with `createTransferInterfaceInstruction(sourceAta, destinationAta, owner, amount)`
+
+**B. Action Approach (Recommended)**
+1. Ensure recipient ATA exists: `getOrCreateAtaInterface(rpc, payer, mint, recipient)`
+2. Derive source and destination ATAs
+3. Transfer with `transferInterface(rpc, payer, sourceAta, mint, destinationAta, owner, amount)`
+
+#### 4. Show Balance
+
+**Get Account Balance:**
+1. Derive ATA using `getAssociatedTokenAddressInterface(mint, owner)`
+2. Fetch account with `getAtaInterface(rpc, ata, owner, mint)`
+3. Access balance via `account.parsed.amount`
+
+#### 5. Transaction History
+
+**Get Transaction Signatures:**
+1. Call `rpc.getSignaturesForOwnerInterface(owner)` for owner-wide history
+2. Or use `getSignaturesForAddressInterface(address)` for address-specific history
+3. Access signatures via `result.signatures`
+
+#### 6. Wrap from SPL
+
+**Convert SPL to light-token:**
+
+**A. Instruction Approach**
+1. Get SPL ATA: `getAssociatedTokenAddressSync(mint, owner.publicKey)`
+2. Get light-token ATA: `getAssociatedTokenAddressInterface(mint, owner.publicKey)`
+3. Fetch SPL interface info: `getSplInterfaceInfos(rpc, mint)` and find initialized interface
+4. Create wrap instruction: `createWrapInstruction(splAta, tokenAta, owner.publicKey, mint, amount, splInterfaceInfo)`
+
+**B. Action Approach**
+1. Get both ATAs (SPL and light-token)
+2. Call `wrap(rpc, payer, splAta, tokenAta, owner, mint, amount)`
+
+#### 7. Unwrap to SPL
+
+**Convert light-token to SPL:**
+
+**A. Instruction Approach**
+1. Get light-token ATA: `getAssociatedTokenAddressInterface(mint, owner.publicKey)`
+2. Get SPL ATA: `getAssociatedTokenAddressSync(mint, owner.publicKey)` (must exist)
+3. Fetch SPL interface info: `getSplInterfaceInfos(rpc, mint)`
+4. Add load ATA instructions for light-token account
+5. Create unwrap instruction: `createUnwrapInstruction(tokenAta, splAta, owner.publicKey, mint, amount, splInterfaceInfo)`
+
+**B. Action Approach**
+1. Ensure SPL ATA exists
+2. Call `unwrap(rpc, payer, splAta, owner, mint, amount)`
+
+### Phase 4: Test
+
+Run the client code. On failure, debug and retry. Assign debugging to subagents with Task tool.
+
+For localnet testing:
+```bash
+light test-validator
+```
+
+For devnet/mainnet, ensure RPC endpoint supports ZK Compression (Helius, Triton).
+
+## Code Reference
+
+### Setup
+
+```typescript
+import "dotenv/config";
+import { Keypair, Transaction } from "@solana/web3.js";
+import { createRpc } from "@lightprotocol/stateless.js";
+import {
+  getOrCreateAtaInterface,
+  getAtaInterface,
+  getAssociatedTokenAddressInterface,
+  transferInterface,
+  wrap,
+  unwrap,
+} from "@lightprotocol/compressed-token/unified";
+import { homedir } from "os";
+import { readFileSync } from "fs";
+
+const RPC_URL = `https://devnet.helius-rpc.com?api-key=${process.env.API_KEY!}`;
+const rpc = createRpc(RPC_URL);
+
+const payer = Keypair.fromSecretKey(
+    new Uint8Array(
+        JSON.parse(readFileSync(`${homedir()}/.config/solana/id.json`, "utf8"))
+    )
+);
+```
+
+### Receive Payments (Action Approach)
+
+```typescript
+import { getOrCreateAtaInterface } from "@lightprotocol/compressed-token/unified";
+
+const ata = await getOrCreateAtaInterface(rpc, payer, mint, recipient);
+// Share ata.parsed.address with sender
+
+console.log("Balance:", ata.parsed.amount);
+```
+
+### Receive Payments (Instruction Approach)
+
+```typescript
+import { Transaction } from "@solana/web3.js";
+import {
+  createAssociatedTokenAccountInterfaceIdempotentInstruction,
+  createLoadAtaInstructions,
+  getAssociatedTokenAddressInterface,
+} from "@lightprotocol/compressed-token/unified";
+import { LIGHT_TOKEN_PROGRAM_ID } from "@lightprotocol/stateless.js";
+
+const ata = getAssociatedTokenAddressInterface(mint, recipient);
+
+const tx = new Transaction().add(
+  createAssociatedTokenAccountInterfaceIdempotentInstruction(
+    payer.publicKey,
+    ata,
+    recipient,
+    mint,
+    LIGHT_TOKEN_PROGRAM_ID
+  ),
+  ...(await createLoadAtaInstructions(
+    rpc,
+    ata,
+    recipient,
+    mint,
+    payer.publicKey
+  ))
+);
+```
+
+### Send Payments (Action Approach)
+
+```typescript
+import {
+  getOrCreateAtaInterface,
+  transferInterface,
+  getAssociatedTokenAddressInterface,
+} from "@lightprotocol/compressed-token/unified";
+
+// Ensure recipient ATA exists (creates if needed)
+await getOrCreateAtaInterface(rpc, payer, mint, recipient);
+
+// Then transfer
+const sourceAta = getAssociatedTokenAddressInterface(mint, owner.publicKey);
+const destinationAta = getAssociatedTokenAddressInterface(mint, recipient);
+await transferInterface(
+  rpc,
+  payer,
+  sourceAta,
+  mint,
+  destinationAta,
+  owner,
+  amount
+);
+```
+
+### Send Payments (Instruction Approach)
+
+```typescript
+import { Transaction } from "@solana/web3.js";
+import {
+  createAssociatedTokenAccountInterfaceIdempotentInstruction,
+  createLoadAtaInstructions,
+  createTransferInterfaceInstruction,
+  getAssociatedTokenAddressInterface,
+} from "@lightprotocol/compressed-token/unified";
+import { LIGHT_TOKEN_PROGRAM_ID } from "@lightprotocol/stateless.js";
+
+const sourceAta = getAssociatedTokenAddressInterface(mint, owner.publicKey);
+const destinationAta = getAssociatedTokenAddressInterface(mint, recipient);
+
+const tx = new Transaction().add(
+  createAssociatedTokenAccountInterfaceIdempotentInstruction(
+    payer.publicKey,
+    destinationAta,
+    recipient,
+    mint,
+    LIGHT_TOKEN_PROGRAM_ID
+  ),
+  ...(await createLoadAtaInstructions(
+    rpc,
+    sourceAta,
+    owner.publicKey,
+    mint,
+    payer.publicKey
+  )),
+  createTransferInterfaceInstruction(
+    sourceAta,
+    destinationAta,
+    owner.publicKey,
+    amount
+  )
+);
+```
+
+### Show Balance
+
+```typescript
+import {
+  getAssociatedTokenAddressInterface,
+  getAtaInterface,
+} from "@lightprotocol/compressed-token/unified";
+
+const ata = getAssociatedTokenAddressInterface(mint, owner);
+const account = await getAtaInterface(rpc, ata, owner, mint);
+
+console.log("Balance:", account.parsed.amount);
+```
+
+### Transaction History
+
+```typescript
+const result = await rpc.getSignaturesForOwnerInterface(owner);
+
+console.log("All signatures:", result.signatures);
+
+// Or for address-specific history
+const addressSigs = await rpc.getSignaturesForAddressInterface(ata);
+```
+
+### Wrap from SPL (Action Approach)
+
+```typescript
+import { getAssociatedTokenAddressSync } from "@solana/spl-token";
+import {
+  wrap,
+  getAssociatedTokenAddressInterface,
+} from "@lightprotocol/compressed-token/unified";
+
+// SPL ATA with tokens to wrap
+const splAta = getAssociatedTokenAddressSync(mint, owner.publicKey);
+// light-token ATA destination
+const tokenAta = getAssociatedTokenAddressInterface(mint, owner.publicKey);
+
+await wrap(rpc, payer, splAta, tokenAta, owner, mint, amount);
+```
+
+### Wrap from SPL (Instruction Approach)
+
+```typescript
+import { Transaction } from "@solana/web3.js";
+import { getAssociatedTokenAddressSync } from "@solana/spl-token";
+import {
+  createWrapInstruction,
+  getAssociatedTokenAddressInterface,
+} from "@lightprotocol/compressed-token/unified";
+import { getSplInterfaceInfos } from "@lightprotocol/compressed-token";
+
+const splAta = getAssociatedTokenAddressSync(mint, owner.publicKey);
+const tokenAta = getAssociatedTokenAddressInterface(mint, owner.publicKey);
+
+const splInterfaceInfos = await getSplInterfaceInfos(rpc, mint);
+const splInterfaceInfo = splInterfaceInfos.find((i) => i.isInitialized);
+
+const tx = new Transaction().add(
+  createWrapInstruction(
+    splAta,
+    tokenAta,
+    owner.publicKey,
+    mint,
+    amount,
+    splInterfaceInfo
+  )
+);
+```
+
+### Unwrap to SPL (Action Approach)
+
+```typescript
+import { getAssociatedTokenAddressSync } from "@solana/spl-token";
+
+// SPL ATA must exist
+const splAta = getAssociatedTokenAddressSync(mint, owner.publicKey);
+
+await unwrap(rpc, payer, splAta, owner, mint, amount);
+```
+
+### Unwrap to SPL (Instruction Approach)
+
+```typescript
+import { Transaction } from "@solana/web3.js";
+import { getAssociatedTokenAddressSync } from "@solana/spl-token";
+import {
+  createLoadAtaInstructions,
+  createUnwrapInstruction,
+  getAssociatedTokenAddressInterface,
+} from "@lightprotocol/compressed-token/unified";
+import { getSplInterfaceInfos } from "@lightprotocol/compressed-token";
+
+const tokenAta = getAssociatedTokenAddressInterface(mint, owner.publicKey);
+const splAta = getAssociatedTokenAddressSync(mint, owner.publicKey);
+
+const splInterfaceInfos = await getSplInterfaceInfos(rpc, mint);
+const splInterfaceInfo = splInterfaceInfos.find((i) => i.isInitialized);
+
+const tx = new Transaction().add(
+  ...(await createLoadAtaInstructions(
+    rpc,
+    tokenAta,
+    owner.publicKey,
+    mint,
+    payer.publicKey
+  )),
+  createUnwrapInstruction(
+    tokenAta,
+    splAta,
+    owner.publicKey,
+    mint,
+    amount,
+    splInterfaceInfo
+  )
+);
+```
+
+### Complete Example: Send and Receive Flow
+
+```typescript
+import "dotenv/config";
+import { Keypair } from "@solana/web3.js";
+import { createRpc } from "@lightprotocol/stateless.js";
+import {
+  getOrCreateAtaInterface,
+  transferInterface,
+  getAssociatedTokenAddressInterface,
+} from "@lightprotocol/compressed-token/unified";
+import { homedir } from "os";
+import { readFileSync } from "fs";
+
+const RPC_URL = `https://devnet.helius-rpc.com?api-key=${process.env.API_KEY!}`;
+const rpc = createRpc(RPC_URL);
+
+const payer = Keypair.fromSecretKey(
+    new Uint8Array(
+        JSON.parse(readFileSync(`${homedir()}/.config/solana/id.json`, "utf8"))
+    )
+);
+
+(async function () {
+    const mint = /* existing mint publickey */;
+    const recipient = /* recipient publickey */;
+    const amount = 1_000_000; // 1 token with 6 decimals
+
+    // Recipient: Create ATA to receive payment
+    const recipientAta = await getOrCreateAtaInterface(rpc, payer, mint, recipient);
+    console.log("Recipient ATA:", recipientAta.parsed.address.toBase58());
+
+    // Sender: Transfer tokens
+    const sourceAta = getAssociatedTokenAddressInterface(mint, payer.publicKey);
+    const destinationAta = getAssociatedTokenAddressInterface(mint, recipient);
+
+    await transferInterface(
+        rpc,
+        payer,
+        sourceAta,
+        mint,
+        destinationAta,
+        payer,
+        amount
+    );
+
+    console.log("Transfer complete");
+})();
+```
+
+### Important Notes
+
+1. **Unified Interface**: All functions work with SPL, Token-2022, and Light Token programs
+
+2. **Action vs Instruction**:
+   - Action helpers: Simple, automatic transaction handling
+   - Instruction builders: Manual control for batching operations
+
+3. **Load ATA Instructions**: light-token accounts require loading account data before use
+   - Use `createLoadAtaInstructions()` when building manual transactions
+   - Action helpers handle this automatically
+
+4. **Idempotent Creation**: Use `createAssociatedTokenAccountInterfaceIdempotentInstruction()` to safely create ATAs that may already exist
+
+5. **SPL Interface Info**: Wrap/unwrap operations require SPL interface info
+   - Fetch with `getSplInterfaceInfos(rpc, mint)`
+   - Find initialized interface with `.find((i) => i.isInitialized)`
+
+6. **Network Requirements**:
+   - RPC endpoint must support ZK Compression (Helius, Triton)
+   - For localnet, run `light test-validator`
+
+7. **Transaction History**:
+   - `getSignaturesForOwnerInterface(owner)` - All signatures for owner
+   - `getSignaturesForAddressInterface(address)` - Signatures for specific address
+
+8. **Cost Savings**: light-token accounts cost ~11,000 lamports vs ~2,000,000 lamports for SPL accounts
+
+~~~~

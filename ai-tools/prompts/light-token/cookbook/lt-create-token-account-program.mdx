@@ -1,0 +1,326 @@
+---
+argument-hint: <project_path>
+description: Create light-token account with Solana program
+allowed-tools: [Bash, Read, Glob, Grep, Task, mcp__deepwiki, mcp__zkcompression]
+---
+
+## Task: Create light-token account with Solana program
+
+Create a Solana program that creates light-token accounts with configurable rent management.
+
+References:
+- Guide: https://zkcompression.com/light-token/cookbook/create-token-account
+- SDK Reference: https://docs.rs/light-token/latest/light_token/
+- GitHub Example: https://github.com/Lightprotocol/light-protocol/blob/main/sdk-tests/sdk-light-token-test/src/create_token_account.rs
+
+MCP:
+* deepwiki https://mcp.deepwiki.com/mcp
+* zkcompression https://www.zkcompression.com/mcp
+
+## Workflow
+
+- This plan must execute without user intervention
+- All questions have been resolved in planning phase
+- If blocked, find alternative approach - do not stop
+- Keep working until ALL todos are complete
+- Use Task tool with subagents for parallel research or when stuck
+- Use subagents with Read, Glob, Grep, and Deepwiki permissions when stuck
+- Always assign Tasks to subagents and tell the user
+
+## DeepWiki fallback
+
+```
+mcp__deepwiki__read_wiki_structure("Lightprotocol/light-protocol"),
+mcp__deepwiki__read_wiki_contents("Lightprotocol/light-protocol"),
+mcp__deepwiki__ask_question("Lightprotocol/light-protocol", "<question>")
+```
+
+## Quick Reference
+
+| Operation | Regular SPL Token Account | Light Token Account |
+| --------- | ------------------------- | ------------------- |
+| Storage | On-chain account with rent | Compressible account with rent config |
+| Creation | `spl_token::instruction::initialize_account()` | CPI to Light Token Program |
+| Rent | Rent-exempt minimum (~2 million lamports) | Configurable rent epochs (~17,208 lamports for 24h) |
+| Owner | Token account owner pubkey | Owner pubkey in token state |
+| Authorization | Owner signs directly | Owner signs, account can be PDA |
+| Data structure | SPL Token state | Light Token state with optional compressible extension |
+
+### Phase 1: Index project
+
+```bash
+find . -name "Cargo.toml" -o -name "lib.rs"
+```
+
+### Phase 2: Add dependencies
+
+Add to `programs/[name]/Cargo.toml` or `Cargo.toml`:
+
+```toml
+[dependencies]
+light-token = "0.16.0"
+solana-program = "2.1.7"
+borsh = "1.5.3"
+```
+
+### Phase 3: Implement program
+
+See Code Reference below. Implementation follows these steps:
+
+1. **Instruction data**: Define parameters (owner, rent config)
+   - Source: https://github.com/Lightprotocol/light-protocol/blob/main/sdk-tests/sdk-light-token-test/src/create_token_account.rs#L7-L13
+2. **Compressible params**: Build rent configuration with `CompressibleParamsCpi::new()`
+   - Source: https://github.com/Lightprotocol/light-protocol/blob/main/sdk-tests/sdk-light-token-test/src/create_token_account.rs#L36-L41
+3. **Account infos struct**: Build `CreateTokenAccountCpi` with accounts and owner
+   - Source: https://github.com/Lightprotocol/light-protocol/blob/main/sdk-tests/sdk-light-token-test/src/create_token_account.rs#L43-L50
+4. **Invoke CPI**: Call `invoke()` for external signer or `invoke_signed()` for PDA signer
+   - Source: https://github.com/Lightprotocol/light-protocol/blob/main/sdk-tests/sdk-light-token-test/src/create_token_account.rs#L50
+   - Source: https://github.com/Lightprotocol/light-protocol/blob/main/sdk-tests/sdk-light-token-test/src/create_token_account.rs#L88-L95
+
+### Phase 4: Test
+
+Build and test the program:
+
+```bash
+cargo build-sbf && cargo test-sbf
+```
+
+On failure, debug and retry. Assign always to subagents with Task tool.
+
+## Code Reference
+
+### Full Program Implementation
+
+```rust
+use borsh::{BorshDeserialize, BorshSerialize};
+use light_token::instruction::{CompressibleParamsCpi, CreateTokenAccountCpi};
+use solana_program::{account_info::AccountInfo, program_error::ProgramError, pubkey::Pubkey};
+
+use crate::{ID, TOKEN_ACCOUNT_SEED};
+
+/// Instruction data for create token account
+#[derive(BorshSerialize, BorshDeserialize, Debug)]
+pub struct CreateTokenAccountData {
+    pub owner: Pubkey,
+    pub pre_pay_num_epochs: u8,
+    pub lamports_per_write: u32,
+}
+
+/// Handler for creating a compressible token account (invoke)
+///
+/// Uses the builder pattern from the token module. This demonstrates how to:
+/// 1. Build the account infos struct with compressible params
+/// 2. Call the invoke() method which handles instruction building and CPI
+///
+/// Account order:
+/// - accounts[0]: payer (signer)
+/// - accounts[1]: account to create (signer)
+/// - accounts[2]: mint
+/// - accounts[3]: compressible_config
+/// - accounts[4]: system_program
+/// - accounts[5]: rent_sponsor
+pub fn process_create_token_account_invoke(
+    accounts: &[AccountInfo],
+    data: CreateTokenAccountData,
+) -> Result<(), ProgramError> {
+    if accounts.len() < 6 {
+        return Err(ProgramError::NotEnoughAccountKeys);
+    }
+
+    // Build the compressible params using constructor
+    let compressible_params = CompressibleParamsCpi::new(
+        accounts[3].clone(),
+        accounts[5].clone(),
+        accounts[4].clone(),
+    );
+
+    // Build the account infos struct and invoke with custom compressible params
+    CreateTokenAccountCpi {
+        payer: accounts[0].clone(),
+        account: accounts[1].clone(),
+        mint: accounts[2].clone(),
+        owner: data.owner,
+    }
+    .invoke_with(compressible_params)?;
+
+    Ok(())
+}
+
+/// Handler for creating a compressible token account with PDA ownership (invoke_signed)
+///
+/// Account order:
+/// - accounts[0]: payer (signer)
+/// - accounts[1]: account to create (PDA, will be derived and verified)
+/// - accounts[2]: mint
+/// - accounts[3]: compressible_config
+/// - accounts[4]: system_program
+/// - accounts[5]: rent_sponsor
+pub fn process_create_token_account_invoke_signed(
+    accounts: &[AccountInfo],
+    data: CreateTokenAccountData,
+) -> Result<(), ProgramError> {
+    if accounts.len() < 6 {
+        return Err(ProgramError::NotEnoughAccountKeys);
+    }
+
+    // Derive the PDA for the token account
+    let (pda, bump) = Pubkey::find_program_address(&[TOKEN_ACCOUNT_SEED], &ID);
+
+    // Verify the account to create is the PDA
+    if &pda != accounts[1].key {
+        return Err(ProgramError::InvalidSeeds);
+    }
+
+    // Build the compressible params using constructor
+    let compressible_params = CompressibleParamsCpi::new(
+        accounts[3].clone(),
+        accounts[5].clone(),
+        accounts[4].clone(),
+    );
+
+    // Invoke with PDA signing and custom compressible params
+    let signer_seeds: &[&[u8]] = &[TOKEN_ACCOUNT_SEED, &[bump]];
+    CreateTokenAccountCpi {
+        payer: accounts[0].clone(),
+        account: accounts[1].clone(),
+        mint: accounts[2].clone(),
+        owner: data.owner,
+    }
+    .invoke_signed_with(compressible_params, &[signer_seeds])?;
+
+    Ok(())
+}
+```
+
+### Instruction Data Structure
+
+```rust
+use light_compressed_account::Pubkey;
+use light_zero_copy::ZeroCopy;
+use crate::{
+    instructions::extensions::compressible::CompressibleExtensionInstructionData,
+    AnchorDeserialize, AnchorSerialize,
+};
+
+#[repr(C)]
+#[derive(Debug, Clone, AnchorSerialize, AnchorDeserialize, ZeroCopy)]
+pub struct CreateTokenAccountInstructionData {
+    /// The owner of the token account
+    pub owner: Pubkey,
+    /// Optional compressible configuration for the token account
+    pub compressible_config: Option<CompressibleExtensionInstructionData>,
+}
+```
+
+## Key Concepts
+
+### Light Token Accounts vs SPL Token Accounts
+
+**SPL Token Accounts:**
+- Stored directly on-chain in account data
+- Require rent-exempt minimum (~2 million lamports for lifetime)
+- Created with `spl_token::instruction::initialize_account()`
+- Identified by 32-byte address
+- Owner pubkey in SPL Token state
+
+**Light Token Accounts:**
+- Compressible Solana accounts with token state
+- Configurable rent epochs (~17,208 lamports for 24h default)
+- Created via CPI to Light Token Program
+- Can be regular Solana accounts or PDAs
+- Owner pubkey in Light Token state with optional compressible extension
+
+### Core Components
+
+1. **CreateTokenAccountCpi**: Builder pattern for token account creation
+   - `payer`: Account paying for rent and fees
+   - `account`: New token account to create (can be PDA)
+   - `mint`: Mint account (light, SPL, or Token 2022 mint)
+   - `owner`: Token account owner pubkey
+   - `invoke()`: For external signer
+   - `invoke_with()`: For external signer with custom rent config
+   - `invoke_signed()`: For PDA signer with default rent config
+   - `invoke_signed_with()`: For PDA signer with custom rent config
+
+2. **CompressibleParamsCpi**: Rent configuration for token accounts
+   - `compressible_config`: Global config account
+   - `rent_sponsor`: Account sponsoring rent
+   - `system_program`: Solana System Program
+   - Default: 24h prepaid rent + compression incentive (~17,208 lamports)
+   - Auto top-up: 776 lamports when below 3h rent during transfers
+
+3. **Rent Config**: Light token accounts use compressible rent model
+   - Creation: Pay ~17,208 lamports for 24h rent + compression incentive
+   - Transfers: Auto top-up 776 lamports when below 3h rent
+   - No rent-exemption: Protocol sponsors rent-exemption
+   - Transaction cost: ~10,000 lamports for compression + 1,000 protocol incentive
+
+4. **PDA Token Accounts**: Token accounts can be PDAs
+   - Derive PDA with `Pubkey::find_program_address()`
+   - Verify account matches derived PDA
+   - Use `invoke_signed()` or `invoke_signed_with()` with signer seeds
+   - Common pattern for program-controlled token accounts
+
+### Security
+
+- **Account validation**: Verify account count before indexing
+- **PDA verification**: Check derived PDA matches provided account
+- **Owner specification**: Token account owner must be explicitly set
+- **Signer requirements**: Payer and account must be signers (or PDA for account)
+- **Rent config**: Use trusted compressible_config and rent_sponsor accounts
+
+### Common Errors
+
+| Error | Cause | Solution |
+|-------|-------|----------|
+| `ProgramError::NotEnoughAccountKeys` | Missing required accounts | Ensure all 6 accounts are provided |
+| `ProgramError::InvalidSeeds` | PDA mismatch | Verify PDA derivation matches account |
+| `ProgramError::MissingRequiredSignature` | Account not signer | Ensure account keypair signs transaction |
+| CPI failure | Invalid compressible params | Check compressible_config and rent_sponsor accounts |
+
+### Default Rent Configuration
+
+Light token accounts implement a default rent config:
+1. At creation: Pay ~17,208 lamports for 24h rent + compression incentive
+2. During transfers: Auto top-up 776 lamports when rent below 3h
+3. Rent-exemption: Sponsored by protocol (not paid by user)
+4. Compression cost: ~10,000 lamports transaction cost + 1,000 protocol incentive
+
+### Account Requirements
+
+Required accounts (in order):
+1. **payer** - Signer, mutable, pays rent and fees
+2. **account** - Signer (or PDA), mutable, new token account
+3. **mint** - Light, SPL, or Token 2022 mint account
+4. **compressible_config** - Global compressible configuration
+5. **system_program** - Solana System Program
+6. **rent_sponsor** - Account sponsoring rent payments
+
+### Token Account State
+
+Light token accounts store:
+- `mint`: Mint pubkey (32 bytes)
+- `owner`: Owner pubkey (32 bytes)
+- `amount`: Token balance (u64)
+- `delegate`: Optional delegate pubkey
+- `state`: Account state (initialized, frozen, etc.)
+- `is_native`: Optional native token indicator
+- `delegated_amount`: Delegated token amount (u64)
+- `close_authority`: Optional close authority pubkey
+- `extensions`: Optional extensions including compressible config
+
+### Verification Pattern
+
+After creating token account, verify with:
+
+```rust
+use borsh::BorshDeserialize;
+use light_token_interface::state::Token;
+
+let account_data = rpc.get_account(account_pubkey).await?.unwrap();
+let token_state = Token::deserialize(&mut &account_data.data[..])?;
+
+assert_eq!(token_state.mint, mint.to_bytes(), "Mint should match");
+assert_eq!(token_state.owner, owner.to_bytes(), "Owner should match");
+assert_eq!(token_state.amount, 0, "Initial amount should be 0");
+```

@@ -1,0 +1,77 @@
+~~~~text
+---
+argument-hint: <project_path>
+description: Add compressed token support to Privy React app
+allowed-tools: [Bash, Read, Glob, Grep, Task, mcp__deepwiki, mcp__zkcompression]
+---
+
+## Task: Add compressed token support to Privy React app
+
+References:
+- Privy Docs: https://docs.privy.io/recipes/solana/send-spl-tokens
+- Privy React Examples:
+  - SPL: https://github.com/privy-io/examples/tree/main/privy-react-starter
+  - Compressed: https://github.com/Lightprotocol/examples-zk-compression/tree/main/privy/react-privy-compressed
+- SPL vs Compressed comparison: https://github.com/Lightprotocol/examples-zk-compression/blob/main/privy/COMPARISON.md
+- Compressed Token Guide for Privy React: https://zkcompression.com/compressed-tokens/for-privy
+
+MCP:
+* deepwiki https://mcp.deepwiki.com/mcp
+* ZK Compression https://www.zkcompression.com/mcp
+
+## Workflow
+
+- This plan must execute without user intervention
+- All questions have been resolved in planning phase
+- If blocked, find alternative approach - do not stop
+- Keep working until ALL todos are complete
+- Use Task tool with subagents for parallel research or when stuck
+- Use subagents with Read, Glob, Grep, and Deepwiki permissions when stuck
+- Always assign Tasks to subagents and tell the user
+
+## DeepWiki fallback
+
+```
+mcp__deepwiki__read_wiki_structure("Lightprotocol/light-protocol"),
+mcp__deepwiki__read_wiki_contents("Lightprotocol/light-protocol"),
+mcp__deepwiki__ask_question("Lightprotocol/light-protocol", "<question>")
+```
+
+## Quick Reference
+
+| Operation      | SPL                            | Compressed                                     |
+| -------------- | ------------------------------ | ---------------------------------------------- |
+| Transfer       | transferChecked()              | transfer()                                     |
+| Compress SPL to recipient       | N/A                            | compress()                                     |
+| Decompress to SPL    | N/A                            | decompress()                                   |
+| Get Balance    | getAccount()                   | getCompressedTokenAccountsByOwner()            |
+| Tx History     | getSignaturesForAddress()      | getCompressionSignaturesForOwner()             |
+
+### Phase 1: Index project
+
+```bash
+grep -r "createTransferInstruction\|getAssociatedTokenAddress\|@solana/spl-token" src/
+```
+
+### Phase 2: Add dependencies
+
+```bash
+npm install @lightprotocol/stateless.js @lightprotocol/compressed-token
+```
+
+### Phase 3: Implement operations
+
+See Code Reference below all signed with Privy SDK.
+
+1. **Setup**: Connect to ZK Compression RPC (Helius, Triton) https://github.com/Lightprotocol/examples-zk-compression/blob/main/privy/react-privy-compressed/src/config/rpc.ts
+2. **Get Balance**: Fetch SPL and compressed token balances https://github.com/Lightprotocol/examples-zk-compression/blob/main/privy/react-privy-compressed/src/hooks/useCompressedBalances.ts
+3. **Transfer**: Send compressed tokens to another recipient, signed with Privy SDK https://github.com/Lightprotocol/examples-zk-compression/blob/main/privy/react-privy-compressed/src/hooks/useTransfer.ts
+4. **Compress**: Convert SPL to compressed tokens and send to a recipient in one instruction https://github.com/Lightprotocol/examples-zk-compression/blob/main/privy/react-privy-compressed/src/hooks/useCompress.ts
+5. **Decompress**: Convert compressed tokens back to SPL tokens for offramps https://github.com/Lightprotocol/examples-zk-compression/blob/main/privy/react-privy-compressed/src/hooks/useDecompress.ts
+6. **Tx History**: Fetch compressed token transaction history for an owner
+
+### Phase 4: Test
+
+Run the implemented functions. On failure, debug and retry. Assign always to subagents with Tasktool
+
+~~~~

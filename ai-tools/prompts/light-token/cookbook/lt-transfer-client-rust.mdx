@@ -1,0 +1,581 @@
+~~~~text
+---
+argument-hint: <project_path>
+description: Transfer tokens between SPL and light-token accounts in Rust
+allowed-tools: [Bash, Read, Glob, Grep, Task, mcp__deepwiki, mcp__zkcompression]
+---
+
+## Task: Transfer tokens (Rust)
+
+References:
+- Cookbook Guide: https://zkcompression.com/light-token/cookbook/transfer-interface
+- SDK Reference: https://docs.rs/light-token/latest/light_token/
+- GitHub Example: https://github.com/Lightprotocol/examples-light-token
+
+MCP:
+* deepwiki https://mcp.deepwiki.com/mcp
+* zkcompression https://www.zkcompression.com/mcp
+
+## Workflow
+
+- This plan must execute without user intervention
+- All questions have been resolved in planning phase
+- If blocked, find alternative approach - do not stop
+- Keep working until ALL todos are complete
+- Use Task tool with subagents for parallel research or when stuck
+- Use subagents with Read, Glob, Grep, and Deepwiki permissions when stuck
+- Always assign Tasks to subagents and tell the user
+
+## DeepWiki fallback
+
+```
+mcp__deepwiki__read_wiki_structure("Lightprotocol/light-protocol"),
+mcp__deepwiki__read_wiki_contents("Lightprotocol/light-protocol"),
+mcp__deepwiki__ask_question("Lightprotocol/light-protocol", "<question>")
+```
+
+## Quick Reference
+
+| Operation | Type/Function | Purpose |
+|-----------|---------------|---------|
+| Connect | LightClient::new_with_retry() | Connect to ZK Compression RPC endpoint |
+| Create SPL Interface PDA | CreateSplInterfacePda::new().instruction() | Create PDA for SPL ↔ light-token transfers |
+| Derive Token ATA | derive_token_ata() | Derive light-token associated token account |
+| Create Token ATA | CreateAssociatedTokenAccount::new().instruction() | Create light-token ATA |
+| Transfer SPL → light-token | TransferFromSpl::new().instruction() | Move SPL tokens to light-token account |
+| Transfer light-token → light-token | Transfer::new().instruction() | Move light-tokens between accounts |
+| Find SPL Interface PDA | find_spl_interface_pda_with_index() | Derive SPL interface PDA address |
+
+### Phase 1: Index project
+
+```bash
+grep -r "light_token_sdk\|light_client\|solana_sdk" src/
+```
+
+### Phase 2: Add dependencies
+
+```toml
+[dependencies]
+light-client = "0.13.0"
+light-token-sdk = "0.1.0"
+anchor-spl = "0.30.1"
+solana-sdk = "2.1.6"
+spl-token = "4.0"
+spl-token-2022 = "6.0"
+spl-pod = "0.4"
+tokio = { version = "1.41", features = ["full"] }
+dotenvy = "0.15"
+serde_json = "1.0"
+```
+
+### Phase 3: Implement transfer interface
+
+See Code Reference below for Rust implementation.
+
+1. **RPC Setup**: Connect to ZK Compression RPC endpoint (Helius, Triton, or localnet)
+   - Use `LightClientConfig::devnet()` or `LightClientConfig::mainnet()` with RPC URL and API key
+   - Use `LightClient::new_with_retry()` to initialize client
+   - For localnet: Configure with localhost URL
+
+2. **Create SPL Mint** (for SPL → light-token transfers):
+   - Create mint keypair with `Keypair::new()`
+   - Create mint account with rent exemption
+   - Initialize mint with `spl_token::instruction::initialize_mint()`
+   - Specify decimals and mint authority
+
+3. **Create SPL Interface PDA**:
+   - Use `CreateSplInterfacePda::new(payer, mint, spl_token_program)`
+   - Call `.instruction()` to build instruction
+   - Send transaction to create PDA
+   - PDA holds SPL tokens during transfers
+
+4. **Create and Fund SPL Token Account**:
+   - Create SPL token account keypair
+   - Initialize account with mint and owner
+   - Mint SPL tokens to account with `spl_token::instruction::mint_to()`
+   - Verify balance with `get_account()` and parse `PodAccount`
+
+5. **Create Sender's light-token ATA**:
+   - Derive ATA address with `derive_token_ata(&owner, &mint)`
+   - Create instruction with `CreateAssociatedTokenAccount::new(payer, owner, mint)`
+   - Call `.instruction()` to build instruction
+   - Send transaction to create ATA
+
+6. **Transfer SPL → light-token**:
+   - Find SPL interface PDA with `find_spl_interface_pda_with_index(&mint, 0)`
+   - Build `TransferFromSpl` instruction:
+     - `amount`: Number of tokens to transfer
+     - `spl_interface_pda_bump`: Bump seed from PDA derivation
+     - `source_spl_token_account`: SPL account to transfer from
+     - `destination_token_account`: light-token ATA to transfer to
+     - `authority`: Owner of source SPL account
+     - `mint`: Mint public key
+     - `payer`: Transaction fee payer
+     - `spl_interface_pda`: Interface PDA address
+     - `spl_token_program`: SPL token program ID
+   - Call `.instruction()` to build instruction
+   - Send transaction
+
+7. **Create Recipient's light-token ATA**:
+   - Generate recipient keypair
+   - Derive recipient's ATA address
+   - Create instruction with `CreateAssociatedTokenAccount::new()`
+   - Can combine with transfer in single transaction
+
+8. **Transfer light-token → light-token**:
+   - Build `Transfer` instruction:
+     - `source`: Sender's light-token ATA
+     - `destination`: Recipient's light-token ATA
+     - `amount`: Number of tokens to transfer
+     - `authority`: Owner of source account
+     - `max_top_up`: Optional rent top-up (None for standard transfers)
+   - Call `.instruction()` to build instruction
+   - Optionally add compute budget instruction
+   - Combine with ATA creation for atomic operation
+   - Send transaction with authority signer
+
+### Phase 4: Test
+
+Run the client code. On failure, debug and retry. Assign debugging to subagents with Task tool.
+
+For localnet testing:
+```bash
+light test-validator
+```
+
+For devnet/mainnet, ensure RPC endpoint supports ZK Compression (Helius, Triton).
+
+## Code Reference
+
+### Complete Transfer Interface Example
+
+```rust
+use anchor_spl::token::{spl_token, Mint};
+use light_client::rpc::{LightClient, LightClientConfig, Rpc};
+use light_token_sdk::{
+    token::{
+        derive_token_ata, CreateAssociatedTokenAccount,
+        Transfer, TransferFromSpl,
+    },
+    spl_interface::{find_spl_interface_pda_with_index, CreateSplInterfacePda},
+};
+use serde_json;
+use solana_sdk::compute_budget::ComputeBudgetInstruction;
+use solana_sdk::program_pack::Pack;
+use solana_sdk::{signature::Keypair, signer::Signer};
+use spl_token_2022::pod::PodAccount;
+use std::convert::TryFrom;
+use std::env;
+use std::fs;
+
+/// Test SPL → light-token → light-token
+//  with ATA creation + transfer in one transaction
+#[tokio::test(flavor = "multi_thread")]
+async fn test_spl_to_token_to_token() {
+    dotenvy::dotenv().ok();
+
+    let keypair_path = env::var("KEYPAIR_PATH")
+        .unwrap_or_else(|_| format!("{}/.config/solana/id.json", env::var("HOME").unwrap()));
+    let payer = load_keypair(&keypair_path).expect("Failed to load keypair");
+    let api_key = env::var("api_key") // Set api_key in your .env
+        .expect("api_key environment variable must be set");
+
+    let config = LightClientConfig::devnet(
+        Some("https://devnet.helius-rpc.com".to_string()),
+        Some(api_key),
+    );
+    let mut rpc = LightClient::new_with_retry(config, None)
+        .await
+        .expect("Failed to initialize LightClient");
+
+    // 2. Create SPL mint
+    let mint_keypair = Keypair::new();
+    let mint = mint_keypair.pubkey();
+    let decimals = 2u8;
+
+    let mint_rent = rpc
+        .get_minimum_balance_for_rent_exemption(Mint::LEN)
+        .await
+        .unwrap();
+
+    let create_mint_account_ix = solana_sdk::system_instruction::create_account(
+        &payer.pubkey(),
+        &mint,
+        mint_rent,
+        Mint::LEN as u64,
+        &spl_token::ID,
+    );
+
+    let initialize_mint_ix = spl_token::instruction::initialize_mint(
+        &spl_token::ID,
+        &mint,
+        &payer.pubkey(),
+        None,
+        decimals,
+    )
+    .unwrap();
+
+    rpc.create_and_send_transaction(
+        &[create_mint_account_ix, initialize_mint_ix],
+        &payer.pubkey(),
+        &[&payer, &mint_keypair],
+    )
+    .await
+    .unwrap();
+
+    // 3. Create SPL interface PDA
+    let create_spl_interface_pda_ix =
+        CreateSplInterfacePda::new(payer.pubkey(), mint, anchor_spl::token::ID).instruction();
+
+    rpc.create_and_send_transaction(&[create_spl_interface_pda_ix], &payer.pubkey(), &[&payer])
+        .await
+        .unwrap();
+
+    let mint_amount = 10_000u64;
+    let spl_to_token_amount = 7_000u64;
+    let token_transfer_amount = 3_000u64;
+
+    // 4. Create SPL token account
+    let spl_token_account_keypair = Keypair::new();
+    let token_account_rent = rpc
+        .get_minimum_balance_for_rent_exemption(spl_token::state::Account::LEN)
+        .await
+        .unwrap();
+    let create_token_account_ix = solana_sdk::system_instruction::create_account(
+        &payer.pubkey(),
+        &spl_token_account_keypair.pubkey(),
+        token_account_rent,
+        spl_token::state::Account::LEN as u64,
+        &spl_token::ID,
+    );
+    let init_token_account_ix = spl_token::instruction::initialize_account(
+        &spl_token::ID,
+        &spl_token_account_keypair.pubkey(),
+        &mint,
+        &payer.pubkey(),
+    )
+    .unwrap();
+    rpc.create_and_send_transaction(
+        &[create_token_account_ix, init_token_account_ix],
+        &payer.pubkey(),
+        &[&spl_token_account_keypair, &payer],
+    )
+    .await
+    .unwrap();
+
+    // 5. Mint SPL tokens to the SPL account
+    let mint_to_ix = spl_token::instruction::mint_to(
+        &spl_token::ID,
+        &mint,
+        &spl_token_account_keypair.pubkey(),
+        &payer.pubkey(),
+        &[&payer.pubkey()],
+        mint_amount,
+    )
+    .unwrap();
+    rpc.create_and_send_transaction(&[mint_to_ix], &payer.pubkey(), &[&payer])
+        .await
+        .unwrap();
+
+    // Verify SPL account has tokens
+    let spl_account_data = rpc
+        .get_account(spl_token_account_keypair.pubkey())
+        .await
+        .unwrap()
+        .unwrap();
+    let spl_account =
+        spl_pod::bytemuck::pod_from_bytes::<PodAccount>(&spl_account_data.data).unwrap();
+    let initial_spl_balance: u64 = spl_account.amount.into();
+    assert_eq!(initial_spl_balance, mint_amount);
+
+    // 6. Create sender's token ATA
+    let (sender_token_ata, _bump) = derive_token_ata(&payer.pubkey(), &mint);
+    let create_ata_instruction =
+        CreateAssociatedTokenAccount::new(payer.pubkey(), payer.pubkey(), mint)
+            .instruction()
+            .unwrap();
+
+    rpc.create_and_send_transaction(&[create_ata_instruction], &payer.pubkey(), &[&payer])
+        .await
+        .unwrap();
+
+    // Verify sender's token ATA was created
+    let token_account_data = rpc.get_account(sender_token_ata).await.unwrap().unwrap();
+    assert!(
+        !token_account_data.data.is_empty(),
+        "Sender token ATA should exist"
+    );
+
+    // 7. Transfer SPL tokens to sender's token account
+    let (spl_interface_pda, spl_interface_pda_bump) = find_spl_interface_pda_with_index(&mint, 0);
+
+    let spl_to_token_ix = TransferFromSpl {
+        amount: spl_to_token_amount,
+        spl_interface_pda_bump,
+        source_spl_token_account: spl_token_account_keypair.pubkey(),
+        destination_token_account: sender_token_ata,
+        authority: payer.pubkey(),
+        mint,
+        payer: payer.pubkey(),
+        spl_interface_pda,
+        spl_token_program: anchor_spl::token::ID,
+    }
+    .instruction()
+    .unwrap();
+
+    rpc.create_and_send_transaction(&[spl_to_token_ix], &payer.pubkey(), &[&payer])
+        .await
+        .unwrap();
+
+    // 8. Create recipient ATA + transfer token→token in one transaction
+    let recipient = Keypair::new();
+    let (recipient_token_ata, _) = derive_token_ata(&recipient.pubkey(), &mint);
+
+    let create_recipient_ata_ix = CreateAssociatedTokenAccount::new(
+        payer.pubkey(),
+        recipient.pubkey(),
+        mint,
+    )
+    .instruction()
+    .unwrap();
+
+    let token_transfer_ix = Transfer {
+        source: sender_token_ata,
+        destination: recipient_token_ata,
+        amount: token_transfer_amount,
+        authority: payer.pubkey(),
+        max_top_up: None,
+    }
+    .instruction()
+    .unwrap();
+
+    let compute_unit_ix = ComputeBudgetInstruction::set_compute_unit_limit(10_000);
+    rpc.create_and_send_transaction(
+        &[compute_unit_ix, create_recipient_ata_ix, token_transfer_ix],
+        &payer.pubkey(),
+        &[&payer],
+    )
+    .await
+    .unwrap();
+}
+
+fn load_keypair(path: &str) -> Result<Keypair, Box<dyn std::error::Error>> {
+    let path = if path.starts_with("~") {
+        path.replace("~", &env::var("HOME").unwrap_or_default())
+    } else {
+        path.to_string()
+    };
+    let file = fs::read_to_string(&path)?;
+    let bytes: Vec<u8> = serde_json::from_str(&file)?;
+    Ok(Keypair::try_from(&bytes[..])?)
+}
+```
+
+### Transfer Type Configuration
+
+The transfer interface detects account types and routes to the correct operation:
+
+#### SPL → light-token Transfer
+
+```rust
+use light_token_sdk::token::TransferFromSpl;
+use light_token_sdk::spl_interface::find_spl_interface_pda_with_index;
+
+// Find SPL interface PDA (holds SPL tokens)
+let (spl_interface_pda, spl_interface_pda_bump) = find_spl_interface_pda_with_index(&mint, 0);
+
+// Build transfer instruction
+let transfer_ix = TransferFromSpl {
+    amount: 7_000u64,
+    spl_interface_pda_bump,
+    source_spl_token_account: spl_account.pubkey(),
+    destination_token_account: light_token_ata,
+    authority: owner.pubkey(),
+    mint,
+    payer: payer.pubkey(),
+    spl_interface_pda,
+    spl_token_program: anchor_spl::token::ID,
+}
+.instruction()
+.unwrap();
+```
+
+**What happens:**
+- SPL tokens locked in `spl_interface_pda`
+- light-tokens minted to `destination_token_account`
+- Requires `authority` signature (owner of source SPL account)
+
+#### light-token → light-token Transfer
+
+```rust
+use light_token_sdk::token::Transfer;
+
+let transfer_ix = Transfer {
+    source: sender_light_ata,
+    destination: recipient_light_ata,
+    amount: 3_000u64,
+    authority: sender.pubkey(),
+    max_top_up: None,
+}
+.instruction()
+.unwrap();
+```
+
+**What happens:**
+- Tokens transferred between light-token accounts
+- Compressed state updates in ZK compression trees
+- Requires `authority` signature (owner of source account)
+
+#### light-token → SPL Transfer
+
+```rust
+use light_token_sdk::token::TransferToSpl;
+
+let transfer_ix = TransferToSpl {
+    amount: 5_000u64,
+    spl_interface_pda_bump,
+    source_token_account: light_token_ata,
+    destination_spl_token_account: spl_account.pubkey(),
+    authority: owner.pubkey(),
+    mint,
+    payer: payer.pubkey(),
+    spl_interface_pda,
+    spl_token_program: anchor_spl::token::ID,
+}
+.instruction()
+.unwrap();
+```
+
+**What happens:**
+- light-tokens burned in `source_token_account`
+- SPL tokens released from `spl_interface_pda` to `destination_spl_token_account`
+- Requires `authority` signature (owner of source light-token account)
+
+### Atomic Operations
+
+Combine ATA creation and transfer in one transaction:
+
+```rust
+use solana_sdk::compute_budget::ComputeBudgetInstruction;
+
+// Create recipient ATA instruction
+let create_ata_ix = CreateAssociatedTokenAccount::new(
+    payer.pubkey(),
+    recipient.pubkey(),
+    mint,
+)
+.instruction()
+.unwrap();
+
+// Create transfer instruction
+let transfer_ix = Transfer {
+    source: sender_ata,
+    destination: recipient_ata,
+    amount: 1_000_000,
+    authority: sender.pubkey(),
+    max_top_up: None,
+}
+.instruction()
+.unwrap();
+
+// Optional: Add compute budget for complex operations
+let compute_unit_ix = ComputeBudgetInstruction::set_compute_unit_limit(10_000);
+
+// Send all instructions in single transaction
+rpc.create_and_send_transaction(
+    &[compute_unit_ix, create_ata_ix, transfer_ix],
+    &payer.pubkey(),
+    &[&payer],
+)
+.await
+.unwrap();
+```
+
+### RPC Configuration
+
+Configure RPC client for different networks:
+
+```rust
+use light_client::rpc::{LightClient, LightClientConfig};
+
+// Devnet
+let config = LightClientConfig::devnet(
+    Some("https://devnet.helius-rpc.com".to_string()),
+    Some(api_key),
+);
+let mut rpc = LightClient::new_with_retry(config, None).await?;
+
+// Mainnet
+let config = LightClientConfig::mainnet(
+    Some("https://mainnet.helius-rpc.com".to_string()),
+    Some(api_key),
+);
+let mut rpc = LightClient::new_with_retry(config, None).await?;
+
+// Localnet
+let config = LightClientConfig::new(
+    Some("http://127.0.0.1:8899".to_string()),
+    None,
+);
+let mut rpc = LightClient::new_with_retry(config, None).await?;
+```
+
+### Important Notes
+
+1. **SPL Interface PDA**: Required for all SPL ↔ light-token transfers. Create once per mint with `CreateSplInterfacePda`. The PDA holds SPL tokens during bridging operations.
+
+2. **PDA Index**: Use `find_spl_interface_pda_with_index(&mint, 0)` for standard transfers. Index parameter allows multiple interface PDAs per mint for advanced use cases.
+
+3. **Authority Signatures**:
+   - SPL → light-token: Requires authority of source SPL account
+   - light-token → light-token: Requires authority of source light-token account
+   - light-token → SPL: Requires authority of source light-token account
+
+4. **Compute Budget**: Token transfers may require compute budget adjustments when combined with ATA creation. Set appropriate limit with `ComputeBudgetInstruction::set_compute_unit_limit()`.
+
+5. **Atomic Operations**: Create recipient ATA and transfer in single transaction for better UX. Ensures both succeed or both fail.
+
+6. **Balance Verification**: Verify balances before transfers:
+   - SPL accounts: Use `rpc.get_account()` and parse with `pod_from_bytes::<PodAccount>()`
+   - light-token accounts: Use `rpc.get_compressed_account()` from indexer
+
+7. **Error Handling**: Production code should handle errors from RPC calls, instruction building, and transaction submission.
+
+8. **Rent Exemption**: SPL accounts require rent exemption. Use `rpc.get_minimum_balance_for_rent_exemption()` to calculate required lamports.
+
+### Environment Setup
+
+Create a `.env` file with your configuration:
+
+```bash
+# API key for Helius RPC (devnet or mainnet)
+api_key=your_api_key_here
+
+# Optional: Custom keypair path
+KEYPAIR_PATH=~/.config/solana/id.json
+```
+
+### Testing
+
+Run the example with:
+
+```bash
+cargo test test_spl_to_token_to_token -- --nocapture
+```
+
+Or create a binary example in `examples/transfer_interface.rs`:
+
+```rust
+#[tokio::main]
+async fn main() {
+    // Copy the test code here but remove #[tokio::test] attribute
+}
+```
+
+Then run:
+
+```bash
+cargo run --example transfer_interface
+```
+
+~~~~

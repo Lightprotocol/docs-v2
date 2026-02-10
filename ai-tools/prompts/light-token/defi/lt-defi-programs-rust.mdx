@@ -1,0 +1,628 @@
+~~~~text
+---
+argument-hint: <project_path>
+description: Build high-performance DeFi programs with rent-free accounts in Rust
+allowed-tools: [Bash, Read, Glob, Grep, Task, mcp__deepwiki, mcp__zkcompression]
+---
+
+## Task: Build DeFi programs with rent-free accounts
+
+Build high-performance DeFi programs (AMMs, lending, vaults) using Light SDK for rent-free PDAs, token accounts, and mints.
+
+References:
+- Guide: https://zkcompression.com/light-token/defi/programs
+- SDK Reference: https://docs.rs/light-token/latest/light_token/
+- GitHub Reference: https://github.com/Lightprotocol/cp-swap-reference
+
+MCP:
+* deepwiki https://mcp.deepwiki.com/mcp
+* zkcompression https://www.zkcompression.com/mcp
+
+## Workflow
+
+- Execute without user intervention
+- All questions resolved in planning phase
+- If blocked, find alternative approach - do not stop
+- Keep working until ALL todos are complete
+- Use Task tool with subagents for parallel research or when stuck
+- Use subagents with Read, Glob, Grep, and Deepwiki permissions when stuck
+- Always assign Tasks to subagents and inform user
+
+## DeepWiki fallback
+
+```
+mcp__deepwiki__read_wiki_structure("Lightprotocol/light-protocol"),
+mcp__deepwiki__read_wiki_contents("Lightprotocol/light-protocol"),
+mcp__deepwiki__ask_question("Lightprotocol/light-protocol", "<question>")
+```
+
+## Quick Reference
+
+| Area | Change | Effect |
+|------|--------|--------|
+| State struct | Derive `LightAccount`, add `compression_info: Option<CompressionInfo>` | Rent-free PDAs |
+| Accounts | Derive `LightAccounts`, add `#[light_account]` attributes | Rent-free token accounts/mints |
+| Program module | Add `#[light_program]` above `#[program]` | SDK macro integration |
+| Instructions | Replace SPL-token with light-token CPIs | Rent-free operations |
+
+Your program logic stays the same. The Light SDK pays rent-exemption for PDAs, token accounts, and mints (98% cost savings).
+
+### Phase 1: Index existing program
+
+```bash
+find . -name "Cargo.toml" -o -name "lib.rs" -o -name "Anchor.toml"
+grep -r "use anchor_lang" programs/
+grep -r "#\[program\]" programs/
+grep -r "#\[account\]" programs/
+grep -r "spl_token" programs/
+```
+
+### Phase 2: Add dependencies
+
+Add to `programs/[name]/Cargo.toml`:
+
+```toml
+[dependencies]
+light-sdk = { version = "0.18.0", features = ["anchor", "v2", "cpi-context"] }
+light-sdk-macros = { version = "0.18.0" }
+light-token = { version = "0.3.0", features = ["anchor"] }
+light-anchor-spl = { version = "0.31" }
+anchor-lang = "0.31"
+```
+
+### Phase 3: Migrate state structs
+
+Find all state structs with `grep -r "#\[account\]" programs/`.
+
+For each state struct:
+
+| Original | Migration |
+|----------|-----------|
+| `#[derive(InitSpace)]` | Add `LightAccount` to derive list |
+| No `compression_info` field | Add `pub compression_info: Option<CompressionInfo>` |
+| No imports | Add `use light_sdk::{compressible::CompressionInfo, LightDiscriminator};` |
+| No imports | Add `use light_sdk_macros::LightAccount;` |
+
+Example:
+
+```rust
+// Before:
+#[derive(Default, Debug, InitSpace)]
+#[account]
+pub struct PoolState {
+    pub token_0_vault: Pubkey,
+    pub token_1_vault: Pubkey,
+    pub lp_mint: Pubkey,
+}
+
+// After:
+use light_sdk::{compressible::CompressionInfo, LightDiscriminator};
+use light_sdk_macros::LightAccount;
+
+#[derive(Default, Debug, InitSpace, LightAccount)]
+#[account]
+pub struct PoolState {
+    pub compression_info: Option<CompressionInfo>,
+    pub token_0_vault: Pubkey,
+    pub token_1_vault: Pubkey,
+    pub lp_mint: Pubkey,
+}
+```
+
+### Phase 4: Add light_program macro
+
+Find program module with `grep -r "#\[program\]" programs/`.
+
+| Original | Migration |
+|----------|-----------|
+| `#[program]` | Add `#[light_program]` above it |
+| No imports | Add `use light_sdk_macros::light_program;` |
+
+Example:
+
+```rust
+// Before:
+#[program]
+pub mod my_amm {
+    use super::*;
+    // ...
+}
+
+// After:
+use light_sdk_macros::light_program;
+
+#[light_program]
+#[program]
+pub mod my_amm {
+    use super::*;
+    // ...
+}
+```
+
+### Phase 5: Migrate Accounts structs
+
+Find all `#[derive(Accounts)]` structs with `grep -r "#\[derive(Accounts)\]" programs/`.
+
+For each Accounts struct:
+
+1. Add `LightAccounts` to derive list
+2. Add imports: `use light_sdk::interface::CreateAccountsProof;` and `use light_sdk_macros::LightAccounts;`
+3. Add imports: `use light_token::instruction::{COMPRESSIBLE_CONFIG_V1, RENT_SPONSOR as LIGHT_TOKEN_RENT_SPONSOR};`
+4. Add to instruction params struct: `pub create_accounts_proof: CreateAccountsProof`
+5. Add required accounts at end of struct:
+   - `pub light_interface_config: AccountInfo<'info>`
+   - `#[account(address = COMPRESSIBLE_CONFIG_V1)] pub light_token_interface_config: AccountInfo<'info>`
+   - `#[account(mut, address = LIGHT_TOKEN_RENT_SPONSOR)] pub rent_sponsor: AccountInfo<'info>`
+   - `pub light_token_program: AccountInfo<'info>`
+   - `pub light_token_cpi_authority: AccountInfo<'info>`
+
+For PDA accounts (pool state, config):
+
+```rust
+#[account(
+    init,
+    seeds = [...],
+    bump,
+    payer = creator,
+    space = 8 + PoolState::INIT_SPACE
+)]
+#[light_account(init)]
+pub pool_state: Box<Account<'info, PoolState>>,
+```
+
+For token accounts:
+
+```rust
+#[account(
+    mut,
+    seeds = [b"vault", pool_state.key().as_ref(), mint.key().as_ref()],
+    bump
+)]
+#[light_account(
+    init,
+    token,
+    authority = [AUTH_SEED.as_bytes()],
+    mint = token_mint,
+    owner = authority,
+)]
+pub token_vault: UncheckedAccount<'info>,
+```
+
+For mints:
+
+```rust
+#[account(mut)]
+#[light_account(
+    init,
+    mint,
+    mint_signer = lp_mint_signer,
+    authority = authority,
+    decimals = 9,
+    mint_seeds = &[LP_MINT_SIGNER_SEED, pool_state.key().as_ref(), &[params.mint_signer_bump]],
+    authority_seeds = &[AUTH_SEED.as_bytes(), &[params.authority_bump]]
+)]
+pub lp_mint: UncheckedAccount<'info>,
+```
+
+For associated token accounts (ATAs):
+
+```rust
+#[light_account(
+    init,
+    associated_token,
+    owner = creator,
+    mint = lp_mint,
+    compressible = Some(compressible_params)
+)]
+pub creator_lp_token: UncheckedAccount<'info>,
+```
+
+### Phase 6: Migrate instruction logic
+
+Find all instruction handlers with `grep -r "pub fn.*Context" programs/`.
+
+For each instruction using SPL token:
+
+| SPL Token | Light Token | Import |
+|-----------|-------------|--------|
+| `spl_token::instruction::mint_to` | `MintToCpi { mint, destination, amount, authority, system_program, max_top_up }.invoke_signed(seeds)` | `use light_token::instruction::MintToCpi;` |
+| `spl_token::instruction::transfer` | `TransferCpi { from, to, amount, authority, system_program, max_top_up }.invoke_signed(seeds)` | `use light_token::instruction::TransferCpi;` |
+| Token interface transfer | `TransferInterfaceCpi { from, to, mint, amount, authority, system_program, max_top_up }.invoke_signed(seeds)` | `use light_token::instruction::TransferInterfaceCpi;` |
+| `spl_token::instruction::initialize_account` | `CreateTokenAccountCpi { payer, account, mint, owner }.rent_free(...).invoke_signed(seeds)` | `use light_token::instruction::CreateTokenAccountCpi;` |
+| ATA creation | `CreateTokenAtaCpi { payer, owner, mint, ata, bump }.idempotent().rent_free(...).invoke()` | `use light_token::instruction::CreateTokenAtaCpi;` |
+
+Example migration:
+
+```rust
+// Before (SPL):
+token::mint_to(
+    CpiContext::new_with_signer(
+        ctx.accounts.token_program.to_account_info(),
+        MintTo {
+            mint: ctx.accounts.lp_mint.to_account_info(),
+            to: ctx.accounts.creator_lp_token.to_account_info(),
+            authority: ctx.accounts.authority.to_account_info(),
+        },
+        &[&[AUTH_SEED.as_bytes(), &[ctx.bumps.authority]]],
+    ),
+    1000,
+)?;
+
+// After (Light):
+use light_token::instruction::MintToCpi;
+
+MintToCpi {
+    mint: ctx.accounts.lp_mint.to_account_info(),
+    destination: ctx.accounts.creator_lp_token.to_account_info(),
+    amount: 1000,
+    authority: ctx.accounts.authority.to_account_info(),
+    system_program: ctx.accounts.system_program.to_account_info(),
+    max_top_up: None,
+}
+.invoke_signed(&[&[AUTH_SEED.as_bytes(), &[ctx.bumps.authority]]])?;
+```
+
+CreateTokenAccountCpi example with rent-free:
+
+```rust
+use light_token::instruction::CreateTokenAccountCpi;
+
+CreateTokenAccountCpi {
+    payer: ctx.accounts.creator.to_account_info(),
+    account: ctx.accounts.token_0_vault.to_account_info(),
+    mint: ctx.accounts.token_0_mint.to_account_info(),
+    owner: ctx.accounts.authority.key(),
+}
+.rent_free(
+    ctx.accounts.light_token_interface_config.to_account_info(),
+    ctx.accounts.rent_sponsor.to_account_info(),
+    ctx.accounts.system_program.to_account_info(),
+    &crate::ID,
+)
+.invoke_signed(&[
+    POOL_VAULT_SEED.as_bytes(),
+    pool_key.as_ref(),
+    ctx.accounts.token_0_mint.key().as_ref(),
+    &[ctx.bumps.token_0_vault],
+])?;
+```
+
+CreateTokenAtaCpi example with rent-free:
+
+```rust
+use light_token::instruction::CreateTokenAtaCpi;
+
+CreateTokenAtaCpi {
+    payer: ctx.accounts.creator.to_account_info(),
+    owner: ctx.accounts.creator.to_account_info(),
+    mint: ctx.accounts.lp_mint.to_account_info(),
+    ata: ctx.accounts.creator_lp_token.to_account_info(),
+    bump: params.creator_lp_token_bump,
+}
+.idempotent()
+.rent_free(
+    ctx.accounts.light_token_interface_config.to_account_info(),
+    ctx.accounts.rent_sponsor.to_account_info(),
+    ctx.accounts.system_program.to_account_info(),
+)
+.invoke()?;
+```
+
+### Phase 7: Build and test loop
+
+**Required commands (no shortcuts):**
+
+For Anchor programs:
+
+    anchor build
+    anchor test
+
+For Native programs:
+
+    cargo build-sbf
+    cargo test-sbf
+
+**NO shortcuts allowed:**
+
+- Do NOT use `cargo build` (must use `cargo build-sbf`)
+- Do NOT use `cargo test` (must use `cargo test-sbf`)
+- Tests MUST run against real BPF bytecode
+
+**On failure:** Spawn debugger agent with error context.
+
+**Loop rules:**
+
+1. Each debugger gets fresh context + previous debug reports
+2. Each attempt tries something DIFFERENT
+3. **NEVER GIVE UP** - keep spawning until fixed
+
+Do NOT proceed until all tests pass.
+
+## Code Reference
+
+### Full Example: AMM Initialize Instruction
+
+```rust
+use anchor_lang::prelude::*;
+use light_sdk::{compressible::CompressionInfo, LightDiscriminator};
+use light_sdk_macros::{light_program, LightAccount, LightAccounts};
+use light_token::instruction::{
+    CreateTokenAccountCpi, CreateTokenAtaCpi, MintToCpi,
+    COMPRESSIBLE_CONFIG_V1, RENT_SPONSOR as LIGHT_TOKEN_RENT_SPONSOR,
+};
+
+declare_id!("YOUR_PROGRAM_ID");
+
+const POOL_SEED: &str = "pool";
+const POOL_VAULT_SEED: &str = "vault";
+const POOL_LP_MINT_SIGNER_SEED: &[u8] = b"lp_mint_signer";
+const AUTH_SEED: &str = "authority";
+
+#[derive(Default, Debug, InitSpace, LightAccount)]
+#[account]
+pub struct PoolState {
+    pub compression_info: Option<CompressionInfo>,
+    pub token_0_vault: Pubkey,
+    pub token_1_vault: Pubkey,
+    pub lp_mint: Pubkey,
+    pub token_0_amount: u64,
+    pub token_1_amount: u64,
+}
+
+#[derive(AnchorSerialize, AnchorDeserialize, Clone)]
+pub struct InitializeParams {
+    pub create_accounts_proof: CreateAccountsProof,
+    pub lp_mint_signer_bump: u8,
+    pub creator_lp_token_bump: u8,
+    pub authority_bump: u8,
+}
+
+#[derive(Accounts, LightAccounts)]
+#[instruction(params: InitializeParams)]
+pub struct InitializePool<'info> {
+    #[account(mut)]
+    pub creator: Signer<'info>,
+
+    #[account(mut, seeds = [AUTH_SEED.as_bytes()], bump)]
+    pub authority: UncheckedAccount<'info>,
+
+    #[account(
+        init,
+        seeds = [POOL_SEED.as_bytes(), token_0_mint.key().as_ref(), token_1_mint.key().as_ref()],
+        bump,
+        payer = creator,
+        space = 8 + PoolState::INIT_SPACE
+    )]
+    #[light_account(init)]
+    pub pool_state: Box<Account<'info, PoolState>>,
+
+    pub token_0_mint: Box<InterfaceAccount<'info, Mint>>,
+    pub token_1_mint: Box<InterfaceAccount<'info, Mint>>,
+
+    #[account(seeds = [POOL_LP_MINT_SIGNER_SEED, pool_state.key().as_ref()], bump)]
+    pub lp_mint_signer: UncheckedAccount<'info>,
+
+    #[account(mut)]
+    #[light_account(init, mint,
+        mint_signer = lp_mint_signer,
+        authority = authority,
+        decimals = 9,
+        mint_seeds = &[POOL_LP_MINT_SIGNER_SEED, self.pool_state.to_account_info().key.as_ref(), &[params.lp_mint_signer_bump]],
+        authority_seeds = &[AUTH_SEED.as_bytes(), &[params.authority_bump]]
+    )]
+    pub lp_mint: UncheckedAccount<'info>,
+
+    #[account(mut, seeds = [POOL_VAULT_SEED.as_bytes(), pool_state.key().as_ref(), token_0_mint.key().as_ref()], bump)]
+    #[light_account(token, authority = [AUTH_SEED.as_bytes()])]
+    pub token_0_vault: UncheckedAccount<'info>,
+
+    #[account(mut, seeds = [POOL_VAULT_SEED.as_bytes(), pool_state.key().as_ref(), token_1_mint.key().as_ref()], bump)]
+    #[light_account(token, authority = [AUTH_SEED.as_bytes()])]
+    pub token_1_vault: UncheckedAccount<'info>,
+
+    #[account(mut)]
+    pub creator_lp_token: UncheckedAccount<'info>,
+
+    pub light_interface_config: AccountInfo<'info>,
+    #[account(address = COMPRESSIBLE_CONFIG_V1)]
+    pub light_token_interface_config: AccountInfo<'info>,
+    #[account(mut, address = LIGHT_TOKEN_RENT_SPONSOR)]
+    pub rent_sponsor: AccountInfo<'info>,
+    pub light_token_program: AccountInfo<'info>,
+    pub light_token_cpi_authority: AccountInfo<'info>,
+    pub system_program: Program<'info, System>,
+}
+
+#[light_program]
+#[program]
+pub mod my_amm {
+    use super::*;
+
+    pub fn initialize_pool(ctx: Context<InitializePool>, params: InitializeParams) -> Result<()> {
+        let pool_key = ctx.accounts.pool_state.key();
+
+        // Create rent-free token vault for token_0
+        CreateTokenAccountCpi {
+            payer: ctx.accounts.creator.to_account_info(),
+            account: ctx.accounts.token_0_vault.to_account_info(),
+            mint: ctx.accounts.token_0_mint.to_account_info(),
+            owner: ctx.accounts.authority.key(),
+        }
+        .rent_free(
+            ctx.accounts.light_token_interface_config.to_account_info(),
+            ctx.accounts.rent_sponsor.to_account_info(),
+            ctx.accounts.system_program.to_account_info(),
+            &crate::ID,
+        )
+        .invoke_signed(&[
+            POOL_VAULT_SEED.as_bytes(),
+            pool_key.as_ref(),
+            ctx.accounts.token_0_mint.key().as_ref(),
+            &[ctx.bumps.token_0_vault],
+        ])?;
+
+        // Create rent-free token vault for token_1
+        CreateTokenAccountCpi {
+            payer: ctx.accounts.creator.to_account_info(),
+            account: ctx.accounts.token_1_vault.to_account_info(),
+            mint: ctx.accounts.token_1_mint.to_account_info(),
+            owner: ctx.accounts.authority.key(),
+        }
+        .rent_free(
+            ctx.accounts.light_token_interface_config.to_account_info(),
+            ctx.accounts.rent_sponsor.to_account_info(),
+            ctx.accounts.system_program.to_account_info(),
+            &crate::ID,
+        )
+        .invoke_signed(&[
+            POOL_VAULT_SEED.as_bytes(),
+            pool_key.as_ref(),
+            ctx.accounts.token_1_mint.key().as_ref(),
+            &[ctx.bumps.token_1_vault],
+        ])?;
+
+        // Create rent-free ATA for LP tokens
+        CreateTokenAtaCpi {
+            payer: ctx.accounts.creator.to_account_info(),
+            owner: ctx.accounts.creator.to_account_info(),
+            mint: ctx.accounts.lp_mint.to_account_info(),
+            ata: ctx.accounts.creator_lp_token.to_account_info(),
+            bump: params.creator_lp_token_bump,
+        }
+        .idempotent()
+        .rent_free(
+            ctx.accounts.light_token_interface_config.to_account_info(),
+            ctx.accounts.rent_sponsor.to_account_info(),
+            ctx.accounts.system_program.to_account_info(),
+        )
+        .invoke()?;
+
+        // Mint initial LP tokens
+        MintToCpi {
+            mint: ctx.accounts.lp_mint.to_account_info(),
+            destination: ctx.accounts.creator_lp_token.to_account_info(),
+            amount: 1000,
+            authority: ctx.accounts.authority.to_account_info(),
+            system_program: ctx.accounts.system_program.to_account_info(),
+            max_top_up: None,
+        }
+        .invoke_signed(&[&[AUTH_SEED.as_bytes(), &[ctx.bumps.authority]]])?;
+
+        // Populate pool state
+        let pool = &mut ctx.accounts.pool_state;
+        pool.token_0_vault = ctx.accounts.token_0_vault.key();
+        pool.token_1_vault = ctx.accounts.token_1_vault.key();
+        pool.lp_mint = ctx.accounts.lp_mint.key();
+        pool.token_0_amount = 0;
+        pool.token_1_amount = 0;
+
+        Ok(())
+    }
+
+    // Your swap, deposit, withdraw instructions stay mostly the same
+    // Only replace SPL token instructions with light-token equivalents
+}
+```
+
+## Testing
+
+### Integration Test Setup
+
+```rust
+use light_program_test::{LightProgramTest, ProgramTestConfig, Rpc};
+use light_sdk::interface::rent::SLOTS_PER_EPOCH;
+use light_client::interface::{create_load_instructions, LightProgramInterface, AccountSpec};
+
+#[tokio::test]
+async fn test_pool_lifecycle() {
+    let config = ProgramTestConfig::new_v2(true, Some(vec![("my_amm", MY_AMM_ID)]));
+    let mut rpc = LightProgramTest::new(config).await.unwrap();
+
+    // 1. Init pool (rent-free)
+    // ... build and send init instruction ...
+    assert!(rpc.get_account_interface(&pool_address, &program_id).await.unwrap().is_some());
+
+    // 2. Swap (hot path - works normally)
+    // ... build and send swap instruction ...
+
+    // 3. Trigger compression (advance time)
+    rpc.warp_slot_forward(SLOTS_PER_EPOCH * 30).await.unwrap();
+
+    let pool_interface = rpc
+        .get_account_interface(&pool_address, &program_id)
+        .await
+        .unwrap();
+    assert!(pool_interface.is_cold()); // get_account would return None
+
+    // 4. Load cold account back
+    let mut sdk = AmmSdk::from_keyed_accounts(&[pool_interface]).unwrap();
+    let accounts_to_fetch = sdk.get_accounts_to_update(&AmmInstruction::Deposit);
+    let keyed_accounts = rpc.get_multiple_account_interfaces(&accounts_to_fetch).await.unwrap();
+    sdk.update(&keyed_accounts).unwrap();
+
+    let specs = sdk.get_specs_for_instruction(&AmmInstruction::Deposit);
+    let load_ixs = create_load_instructions(
+        &specs,
+        payer.pubkey(),
+        config_pda,
+        payer.pubkey(),
+        &rpc,
+    ).await.unwrap();
+
+    // 5. Send transaction
+    rpc.create_and_send_transaction(&load_ixs, &payer.pubkey(), &[&payer]).await.unwrap();
+    assert!(rpc.get_account_interface(&pool_address, &program_id).await.unwrap().is_hot());
+}
+```
+
+## Key Concepts
+
+### Account States
+
+| State | Storage | Latency/CU | Your Code Changes |
+|-------|---------|-----------|-------------------|
+| Hot (active) | On-chain | No change | No change |
+| Cold (inactive) | Compressed | +load instruction | No change |
+
+### Compression Trigger
+
+Miners automatically compress when virtual rent is below threshold (24h without write bump). Active pools never compress.
+
+### Client Integration
+
+Ship an SDK crate implementing `LightProgramInterface` trait so clients can:
+- Fetch account state (hot or cold)
+- Get accounts to update for instruction
+- Generate load instructions for cold accounts
+- Update SDK state after fetching
+
+Reference: https://github.com/Lightprotocol/cp-swap-reference/blob/main/programs/cp-swap/tests/program.rs#L409
+
+## Migration Checklist
+
+- [ ] Dependencies added to Cargo.toml
+- [ ] All state structs derive `LightAccount` and have `compression_info` field
+- [ ] Program module has `#[light_program]` macro
+- [ ] All Accounts structs derive `LightAccounts`
+- [ ] All init PDAs have `#[light_account(init)]`
+- [ ] All token accounts have `#[light_account(init, token, ...)]`
+- [ ] All mints have `#[light_account(init, mint, ...)]`
+- [ ] Required accounts added: `light_token_interface_config`, `rent_sponsor`, `light_token_cpi_authority`
+- [ ] SPL token instructions replaced with light-token CPIs
+- [ ] `.rent_free()` called on CreateTokenAccountCpi and CreateTokenAtaCpi
+- [ ] Tests updated to use `LightProgramTest`
+- [ ] Integration tests verify hot/cold account transitions
+- [ ] `anchor build` succeeds
+- [ ] `anchor test` passes
+
+## Common Errors
+
+| Error | Cause | Solution |
+|-------|-------|----------|
+| Missing `compression_info` field | State struct not migrated | Add `pub compression_info: Option<CompressionInfo>` |
+| Account not rent-free | Missing `.rent_free()` call | Add `.rent_free(light_token_interface_config, rent_sponsor, system_program, &program_id)` |
+| Missing required accounts | Accounts struct incomplete | Add `light_token_interface_config`, `rent_sponsor`, `light_token_cpi_authority` |
+| CPI fails | Wrong seeds or authority | Verify `invoke_signed` seeds match PDA derivation |
+| Build fails | Missing dependencies | Check Cargo.toml has all light-sdk dependencies |
+
+~~~~

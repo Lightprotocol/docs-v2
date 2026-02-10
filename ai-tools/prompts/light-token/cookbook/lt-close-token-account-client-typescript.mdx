@@ -1,0 +1,229 @@
+~~~~text
+---
+argument-hint: <project_path>
+description: Close light-token account (TypeScript - Not Currently Supported)
+allowed-tools: [Bash, Read, Glob, Grep, Task, mcp__deepwiki, mcp__zkcompression]
+---
+
+## Task: Close light-token account (TypeScript)
+
+TypeScript SDK does not support closing compressed token accounts.
+
+The `@lightprotocol/compressed-token` package does not export close account functionality. Close operations are only available through:
+
+1. Rust Client SDK - Use `light-token-sdk` with `CloseTokenAccount`
+2. Program CPI - Call light-token program from custom Solana programs
+
+References:
+- Cookbook Guide: https://zkcompression.com/light-token/cookbook/close-token-account
+- Rust SDK Reference: https://docs.rs/light-token/latest/light_token/
+- GitHub Program Example: https://github.com/Lightprotocol/examples-light-token/tree/main/program-examples/anchor/programs/close
+
+MCP:
+* deepwiki https://mcp.deepwiki.com/mcp
+* zkcompression https://www.zkcompression.com/mcp
+
+## Workflow
+
+- This plan must execute without user intervention
+- All questions have been resolved in planning phase
+- If blocked, find alternative approach - do not stop
+- Keep working until ALL todos are complete
+- Use Task tool with subagents for parallel research or when stuck
+- Use subagents with Read, Glob, Grep, and Deepwiki permissions when stuck
+- Always assign Tasks to subagents and tell the user
+
+## DeepWiki fallback
+
+```
+mcp__deepwiki__read_wiki_structure("Lightprotocol/light-protocol"),
+mcp__deepwiki__read_wiki_contents("Lightprotocol/light-protocol"),
+mcp__deepwiki__ask_question("Lightprotocol/light-protocol", "<question>")
+```
+
+## Current Status
+
+As of v0.22.1-alpha, the TypeScript SDK (`@lightprotocol/compressed-token`) does not export close account instructions.
+
+Available Instructions:
+- `createMintInstruction()` / `createMintInterface()`
+- `createAtaInstruction()` / `createAtaInterface()`
+- `mintToInstruction()` / `mintToInterface()`
+- `transferInstruction()` / `transferInterface()`
+- `decompressInstruction()` / `decompressInterface()`
+- `updateMintInstruction()`
+- `updateMetadataInstruction()`
+- `wrapInstruction()` / `unwrapInstruction()`
+
+Missing Instructions:
+- `closeAccountInstruction()` - Not implemented
+- `closeAccountInterface()` - Not implemented
+
+## Workarounds
+
+### Option 1: Use Rust Client SDK
+
+See the Rust client prompt for complete implementation:
+`/home/tilo/Workspace/ai-tools/prompts/light-token/cookbook/lt-close-token-account-client-rust.mdx`
+
+```bash
+# Switch to Rust for account closing operations
+cargo add light-client light-token-sdk light-token-interface
+```
+
+### Option 2: Manual Instruction Construction
+
+Build the instruction manually by calling the light-token program directly. This requires:
+
+1. Understanding the on-chain instruction format
+2. Manually encoding instruction data
+3. Providing correct account metas
+4. No SDK validation or helper functions
+
+Not recommended - error-prone and breaks if program changes.
+
+### Option 3: Wait for SDK Update
+
+Track SDK development:
+- GitHub: https://github.com/Lightprotocol/light-protocol
+- Discord: https://discord.gg/lightprotocol
+
+Close account support may be added in future releases.
+
+## Alternative: Program CPI Approach
+
+To close accounts from TypeScript:
+
+1. Create a custom Anchor program that performs the close via CPI
+2. Call your program from TypeScript using standard Anchor client
+3. Your program uses `CloseTokenAccountCpi` from `light-token-sdk`
+
+See program CPI prompt:
+`/home/tilo/Workspace/ai-tools/prompts/light-token/cookbook/lt-close-token-account-program.mdx`
+
+Example Architecture:
+
+```
+TypeScript Client → Custom Anchor Program → Light Token Program (close)
+```
+
+Advantages:
+- Leverage existing TypeScript tooling
+- Close logic handled on-chain
+- Can batch with other operations
+
+Implementation Steps:
+
+1. Create Anchor program with close handler
+2. Use `CloseTokenAccountCpi` in program
+3. Generate TypeScript client with Anchor
+4. Call program from TypeScript
+
+## Understanding Close Operations
+
+### What Happens When Closing
+
+1. Balance Check: Account must have zero token balance
+2. Lamport Transfer: Remaining lamports sent to destination
+3. Account Deletion: Account marked as closed
+4. Rent Reclamation: Rent sponsor can reclaim sponsored rent
+
+### Who Can Close Accounts
+
+Account Owner can close at any time (if balance is zero).
+
+Compression Authority can compress and close compressible accounts:
+- Compressible = rent for less than 1 epoch (360 lamports)
+- Compressed accounts can be decompressed later
+
+### Account Requirements
+
+Before closing:
+- Token balance must be 0
+- No pending delegates with delegated amounts
+- Account must exist and be owned by light-token program
+
+## Quick Reference (Rust Only)
+
+| Operation | Rust Function | TypeScript Status |
+|-----------|---------------|-------------------|
+| Close Account | `CloseTokenAccount::new().instruction()` | ❌ Not available |
+| Verify Balance | `Token::deserialize()` | ❌ No helper (manual RPC) |
+| Send Transaction | `rpc.create_and_send_transaction()` | ❌ Different API |
+
+## Related Operations (TypeScript Available)
+
+These operations are supported in TypeScript:
+
+- Create Account: `createAtaInterface()`
+- Transfer Tokens: `transferInterface()`
+- Decompress Tokens: `decompressInterface()`
+- Burn Tokens: Use transfer to burn address (not direct burn)
+
+## Future Development
+
+If SDK adds close support, expect this API:
+
+```typescript
+// Hypothetical future API (NOT CURRENTLY AVAILABLE)
+import { closeAccountInterface } from "@lightprotocol/compressed-token";
+
+const { signature } = await closeAccountInterface(
+    rpc,
+    payer,
+    account,      // Token account to close
+    destination,  // Where lamports go
+    owner         // Account owner (signer)
+);
+```
+
+Until then, use Rust client or program CPI approach.
+
+## Error Messages
+
+If you attempt to manually build close instructions:
+
+```
+Error: Transaction simulation failed: Instruction references unknown program
+```
+→ Instruction data format incorrect
+
+```
+Error: Account does not have enough lamports to perform operation
+```
+→ May occur with incorrect account ordering
+
+```
+Error: Custom program error: 0x11 (AccountNotEmpty)
+```
+→ Token balance is not zero
+
+## Verification After Closing
+
+Rust:
+```rust
+// Check account no longer exists
+let account = rpc.get_account(account_pubkey).await?;
+assert!(account.is_none(), "Account should be closed");
+```
+
+TypeScript equivalent:
+```typescript
+// Using standard Solana RPC
+const account = await connection.getAccountInfo(accountPubkey);
+console.assert(account === null, "Account should be closed");
+```
+
+## Next Steps
+
+1. Use Rust SDK if you need to close accounts now
+2. Create custom program if you must use TypeScript client
+3. Wait for SDK update if neither option works
+
+For Rust implementation:
+`/home/tilo/Workspace/ai-tools/prompts/light-token/cookbook/lt-close-token-account-client-rust.mdx`
+
+For program CPI implementation:
+`/home/tilo/Workspace/ai-tools/prompts/light-token/cookbook/lt-close-token-account-program.mdx`
+
+~~~~

@@ -1,0 +1,424 @@
+---
+argument-hint: <project_path>
+description: Create associated light-token account from Solana program
+allowed-tools: [Bash, Read, Glob, Grep, Task, mcp__deepwiki, mcp__zkcompression]
+---
+
+## Task: Create associated light-token account from Solana program
+
+Create a Solana program that creates associated light-token accounts with compressible rent configuration using CPI to the Light Token Program.
+
+References:
+- Guide: https://zkcompression.com/light-token/cookbook/create-ata
+- SDK Reference: https://docs.rs/light-token/latest/light_token/
+- GitHub Example: https://github.com/Lightprotocol/examples-light-token
+
+MCP:
+* deepwiki https://mcp.deepwiki.com/mcp
+* zkcompression https://www.zkcompression.com/mcp
+
+## Workflow
+
+- This plan must execute without user intervention
+- All questions have been resolved in planning phase
+- If blocked, find alternative approach - do not stop
+- Keep working until ALL todos are complete
+- Use Task tool with subagents for parallel research or when stuck
+- Use subagents with Read, Glob, Grep, and Deepwiki permissions when stuck
+- Always assign Tasks to subagents and tell the user
+
+## DeepWiki fallback
+
+```
+mcp__deepwiki__read_wiki_structure("Lightprotocol/light-protocol"),
+mcp__deepwiki__read_wiki_contents("Lightprotocol/light-protocol"),
+mcp__deepwiki__ask_question("Lightprotocol/light-protocol", "<question>")
+```
+
+## Quick Reference
+
+| Operation | SPL Token ATA | Light Token ATA |
+| --------- | ------------- | --------------- |
+| Storage | Rent-exempt account | Compressible account (rent paid periodically) |
+| Address derivation | `[owner, spl_token_program_id, mint]` | `[owner, light_token_program_id, mint]` |
+| Rent model | One-time rent exemption | Configurable rent (pre_pay_num_epochs + lamports_per_write) |
+| Creation | Create via ATA program | CPI to Light Token Program with compressible config |
+| Account type | Standard Solana account | CToken account with Compressible extension |
+
+### Phase 1: Index project
+
+```bash
+find . -name "Cargo.toml" -o -name "lib.rs"
+```
+
+### Phase 2: Add dependencies
+
+Add to `programs/[name]/Cargo.toml`:
+
+```toml
+[dependencies]
+light-token = "0.15.0"
+solana-program = "2.1.7"
+borsh = "1.5.1"
+```
+
+### Phase 3: Implement program
+
+See Code Reference below. Implementation follows these steps:
+
+1. **Instruction data**: Define parameters (bump, pre_pay_num_epochs, lamports_per_write)
+   - Source: https://github.com/Lightprotocol/light-protocol/blob/main/sdk-tests/sdk-light-token-test/src/create_ata.rs#L8-L13
+2. **Account order**: Define accounts (owner, mint, payer, ata, system_program, compressible_config, rent_sponsor)
+   - Source: https://github.com/Lightprotocol/light-protocol/blob/main/sdk-tests/sdk-light-token-test/src/create_ata.rs#L17-L24
+3. **Compressible config**: Build rent configuration using `CompressibleParamsCpi`
+   - Source: https://github.com/Lightprotocol/light-protocol/blob/main/sdk-tests/sdk-light-token-test/src/create_ata.rs#L32-L36
+4. **Build CPI struct**: Use `CreateTokenAtaCpi` with account references
+   - Source: https://github.com/Lightprotocol/light-protocol/blob/main/sdk-tests/sdk-light-token-test/src/create_ata.rs#L33-L39
+5. **Invoke CPI**: Use `.invoke()` or `.invoke_signed()` for PDA signers
+   - Source: https://github.com/Lightprotocol/light-protocol/blob/main/sdk-tests/sdk-light-token-test/src/create_ata.rs#L40-L45
+
+### Phase 4: Test
+
+Build and test the program:
+
+```bash
+cargo build-sbf && cargo test-sbf
+```
+
+On failure, debug and retry. Assign always to subagents with Task tool.
+
+## Code Reference
+
+### Full Native Program
+
+```rust
+use borsh::{BorshDeserialize, BorshSerialize};
+use light_token::instruction::CreateTokenAtaCpi;
+use solana_program::{account_info::AccountInfo, program_error::ProgramError, pubkey::Pubkey};
+
+use crate::{ATA_SEED, ID};
+
+/// Instruction data for create ATA (owner and mint passed as accounts)
+#[derive(BorshSerialize, BorshDeserialize, Debug)]
+pub struct CreateAtaData {
+    pub bump: u8,
+    pub pre_pay_num_epochs: u8,
+    pub lamports_per_write: u32,
+}
+
+/// Handler for creating a compressible associated token account (invoke)
+///
+/// Account order:
+/// - accounts[0]: owner
+/// - accounts[1]: mint
+/// - accounts[2]: payer (signer)
+/// - accounts[3]: associated token account (derived)
+/// - accounts[4]: system_program
+/// - accounts[5]: compressible_config
+/// - accounts[6]: rent_sponsor
+pub fn process_create_ata_invoke(
+    accounts: &[AccountInfo],
+    data: CreateAtaData,
+) -> Result<(), ProgramError> {
+    if accounts.len() < 7 {
+        return Err(ProgramError::NotEnoughAccountKeys);
+    }
+
+    CreateTokenAtaCpi {
+        payer: accounts[2].clone(),
+        owner: accounts[0].clone(),
+        mint: accounts[1].clone(),
+        ata: accounts[3].clone(),
+        bump: data.bump,
+    }
+    .rent_free(
+        accounts[5].clone(), // compressible_config
+        accounts[6].clone(), // rent_sponsor
+        accounts[4].clone(), // system_program
+    )
+    .invoke()?;
+
+    Ok(())
+}
+
+/// Handler for creating a compressible ATA with PDA ownership (invoke_signed)
+///
+/// Account order:
+/// - accounts[0]: owner
+/// - accounts[1]: mint
+/// - accounts[2]: payer (PDA, signer via invoke_signed)
+/// - accounts[3]: associated token account (derived)
+/// - accounts[4]: system_program
+/// - accounts[5]: compressible_config
+/// - accounts[6]: rent_sponsor
+pub fn process_create_ata_invoke_signed(
+    accounts: &[AccountInfo],
+    data: CreateAtaData,
+) -> Result<(), ProgramError> {
+    if accounts.len() < 7 {
+        return Err(ProgramError::NotEnoughAccountKeys);
+    }
+
+    // Derive the PDA that will act as payer/owner
+    let (pda, bump) = Pubkey::find_program_address(&[ATA_SEED], &ID);
+
+    // Verify the payer is the PDA
+    if &pda != accounts[2].key {
+        return Err(ProgramError::InvalidSeeds);
+    }
+
+    let signer_seeds: &[&[u8]] = &[ATA_SEED, &[bump]];
+
+    CreateTokenAtaCpi {
+        payer: accounts[2].clone(),
+        owner: accounts[0].clone(),
+        mint: accounts[1].clone(),
+        ata: accounts[3].clone(),
+        bump: data.bump,
+    }
+    .rent_free(
+        accounts[5].clone(), // compressible_config
+        accounts[6].clone(), // rent_sponsor
+        accounts[4].clone(), // system_program
+    )
+    .invoke_signed(&[signer_seeds])?;
+
+    Ok(())
+}
+```
+
+### Client Test (Rust)
+
+```rust
+use borsh::BorshDeserialize;
+use light_client::indexer::{AddressWithTree, Indexer};
+use light_client::rpc::{LightClient, LightClientConfig, Rpc};
+use light_token::instruction::{
+    derive_token_ata, CreateTokenAta, CreateCMint,
+    CreateCMintParams,
+};
+use light_token::state::Token;
+use serde_json;
+use solana_sdk::{pubkey::Pubkey, signature::Keypair, signer::Signer};
+use std::convert::TryFrom;
+use std::env;
+use std::fs;
+
+#[tokio::test(flavor = "multi_thread")]
+async fn test_create_associated_token_account() {
+    dotenvy::dotenv().ok();
+
+    let keypair_path = env::var("KEYPAIR_PATH")
+        .unwrap_or_else(|_| format!("{}/.config/solana/id.json", env::var("HOME").unwrap()));
+    let payer = load_keypair(&keypair_path).expect("Failed to load keypair");
+
+    let api_key = env::var("api_key")
+        .expect("api_key environment variable must be set");
+
+    let config = LightClientConfig::devnet(
+        Some("https://devnet.helius-rpc.com".to_string()),
+        Some(api_key),
+    );
+    let mut rpc = LightClient::new_with_retry(config, None)
+        .await
+        .expect("Failed to initialize LightClient");
+
+    // Step 1: Create compressed mint (prerequisite)
+    let (mint, _compression_address) = create_compressed_mint(&mut rpc, &payer, 9).await;
+
+    // Step 2: Define owner and derive ATA address
+    let owner = payer.pubkey();
+    let (ata_address, _bump) = derive_token_ata(&owner, &mint);
+
+    // Step 3: Build instruction using SDK builder
+    let instruction = CreateTokenAta::new(
+        payer.pubkey(),
+        owner,
+        mint,
+    )
+    .instruction()
+    .unwrap();
+
+    // Step 4: Send transaction (only payer signs, no account keypair needed)
+    rpc.create_and_send_transaction(&[instruction], &payer.pubkey(), &[&payer])
+        .await
+        .unwrap();
+
+    // Step 5: Verify light-ATA creation
+    let account_data = rpc.get_account(ata_address).await.unwrap().unwrap();
+    let token_state = Token::deserialize(&mut &account_data.data[..]).unwrap();
+
+    assert_eq!(token_state.mint, mint.to_bytes(), "Mint should match");
+    assert_eq!(token_state.owner, owner.to_bytes(), "Owner should match");
+    assert_eq!(token_state.amount, 0, "Initial amount should be 0");
+}
+
+pub async fn create_compressed_mint<R: Rpc + Indexer>(
+    rpc: &mut R,
+    payer: &Keypair,
+    decimals: u8,
+) -> (Pubkey, [u8; 32]) {
+    let mint_signer = Keypair::new();
+    let address_tree = rpc.get_address_tree_v2();
+
+    let _ = rpc.get_latest_active_state_trees().await;
+    let output_pubkey = match rpc
+        .get_random_state_tree_info()
+        .ok()
+        .or_else(|| rpc.get_random_state_tree_info_v1().ok())
+    {
+        Some(info) => info
+            .get_output_pubkey()
+            .expect("Invalid state tree type for output"),
+        None => {
+            let queues = rpc
+                .indexer_mut()
+                .expect("IndexerNotInitialized")
+                .get_queue_info(None)
+                .await
+                .expect("Failed to fetch queue info")
+                .value
+                .queues;
+            queues
+                .get(0)
+                .map(|q| q.queue)
+                .expect("NoStateTreesAvailable")
+        }
+    };
+
+    // Derive compression address
+    let compression_address = light_token::instruction::derive_cmint_compressed_address(
+        &mint_signer.pubkey(),
+        &address_tree.tree,
+    );
+
+    let mint_pda =
+        light_token::instruction::find_cmint_address(&mint_signer.pubkey()).0;
+
+    // Get validity proof for the address
+    let rpc_result = rpc
+        .get_validity_proof(
+            vec![],
+            vec![AddressWithTree {
+                address: compression_address,
+                tree: address_tree.tree,
+            }],
+            None,
+        )
+        .await
+        .unwrap()
+        .value;
+
+    // Build params
+    let params = CreateCMintParams {
+        decimals,
+        address_merkle_tree_root_index: rpc_result.addresses[0].root_index,
+        mint_authority: payer.pubkey(),
+        proof: rpc_result.proof.0.unwrap(),
+        compression_address,
+        mint: mint_pda,
+        freeze_authority: None,
+        extensions: None,
+    };
+
+    // Create instruction
+    let create_cmint = CreateCMint::new(
+        params,
+        mint_signer.pubkey(),
+        payer.pubkey(),
+        address_tree.tree,
+        output_pubkey,
+    );
+    let instruction = create_cmint.instruction().unwrap();
+
+    // Send transaction
+    rpc.create_and_send_transaction(&[instruction], &payer.pubkey(), &[payer, &mint_signer])
+        .await
+        .unwrap();
+
+    (mint_pda, compression_address)
+}
+
+fn load_keypair(path: &str) -> Result<Keypair, Box<dyn std::error::Error>> {
+    let path = if path.starts_with("~") {
+        path.replace("~", &env::var("HOME").unwrap_or_default())
+    } else {
+        path.to_string()
+    };
+    let file = fs::read_to_string(&path)?;
+    let bytes: Vec<u8> = serde_json::from_str(&file)?;
+    Ok(Keypair::try_from(&bytes[..])?)
+}
+```
+
+## Key Concepts
+
+### Light-ATA vs SPL-ATA
+
+**SPL Associated Token Account:**
+- Created via associated-token-account program
+- One-time rent exemption payment (~2 million lamports)
+- Account data stored permanently on-chain
+- Standard Solana account rent model
+
+**Light Associated Token Account:**
+- Created via CPI to Light Token Program
+- Compressible rent model with periodic payments
+- Default rent config: 17,208 lamports upfront (24h rent + compression incentive)
+- Auto top-up during transfers when rent below 3h (776 lamports)
+- Protocol-sponsored rent exemption
+
+### Core Components
+
+1. **CreateTokenAtaCpi**: Builder for creating ATA via CPI
+   - Sets owner, mint, payer, and bump seed
+   - `.rent_free()` attaches compressible config for rent management
+   - `.invoke()` for external signers, `.invoke_signed()` for PDA signers
+
+2. **Compressible Config**: Rent management configuration
+   - `pre_pay_num_epochs`: Number of epochs paid upfront (default: 16 = 24h)
+   - `lamports_per_write`: Lamports to add per write for top-ups (default: 776)
+   - `compressible_config` account: Global config defining rent parameters
+   - `rent_sponsor` account: Protocol account covering rent exemption
+
+3. **Address Derivation**: Deterministic ATA address
+   - Seeds: `[owner, light_token_program_id, mint]`
+   - Returns `(ata_address, bump)` tuple
+   - Same derivation as SPL ATA but with Light Token Program ID
+
+4. **CToken Account**: Decompressed token account structure
+   - Same layout as SPL Token account (165 bytes base)
+   - Includes Compressible extension for rent tracking
+   - Compatible with standard SPL Token operations
+
+### Rent Model
+
+**Default Configuration:**
+- **Upfront payment**: ~17,208 lamports
+  - 16,208 lamports: 24h rent (16 epochs × ~1,013 lamports/epoch)
+  - 1,000 lamports: Compression incentive for protocol
+- **Auto top-up**: 776 lamports when rent below 3h
+  - Triggers during transfer operations
+  - Paid by transaction payer
+  - Extends rent for 2 more epochs (3h)
+
+**Custom Configuration:**
+Programs can specify custom rent configs by modifying `CreateAtaData`:
+- `pre_pay_num_epochs`: 1-255 (default: 16)
+- `lamports_per_write`: 1-4,294,967,295 (default: 776)
+
+### Security
+
+- **Account validation**: Verify ATA is owned by system program before creation
+- **Derivation check**: Validate derived address matches expected seeds
+- **PDA verification**: When using `invoke_signed`, verify PDA matches expected seeds
+- **Compressible config**: Ensure config account is valid and active
+
+### Common Errors
+
+| Error | Cause | Solution |
+|-------|-------|----------|
+| `ProgramError::NotEnoughAccountKeys` | Missing accounts | Include all 7 required accounts |
+| `ProgramError::IllegalOwner` | ATA already initialized | Check account is owned by system program (all zeros) |
+| `ProgramError::InvalidSeeds` | PDA derivation mismatch | Verify PDA seeds match program ID and expected seeds |
+| `AtaRequiresCompressionOnly` | Invalid compressible config | Set `compression_only` flag in compressible config |

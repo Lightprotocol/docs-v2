@@ -1,0 +1,457 @@
+~~~~text
+---
+argument-hint: <project_path>
+description: Load compressed tokens to Associated Token Account in Rust
+allowed-tools: [Bash, Read, Glob, Grep, Task, mcp__deepwiki, mcp__zkcompression]
+---
+
+## Task: Load compressed tokens to ATA (Rust)
+
+References:
+- Cookbook Guide: https://zkcompression.com/light-token/cookbook/load-ata
+- SDK Reference: https://docs.rs/light-token/latest/light_token/
+- GitHub Example: https://github.com/Lightprotocol/examples-light-token
+- TypeScript Implementation: /home/tilo/Workspace/light-protocol/js/compressed-token/src/v3/actions/load-ata.ts
+
+MCP:
+* deepwiki https://mcp.deepwiki.com/mcp
+* zkcompression https://www.zkcompression.com/mcp
+
+## Workflow
+
+- This plan must execute without user intervention
+- All questions have been resolved in planning phase
+- If blocked, find alternative approach - do not stop
+- Keep working until ALL todos are complete
+- Use Task tool with subagents for parallel research or when stuck
+- Use subagents with Read, Glob, Grep, and Deepwiki permissions when stuck
+- Always assign Tasks to subagents and tell the user
+
+## DeepWiki fallback
+
+```
+mcp__deepwiki__read_wiki_structure("Lightprotocol/light-protocol"),
+mcp__deepwiki__read_wiki_contents("Lightprotocol/light-protocol"),
+mcp__deepwiki__ask_question("Lightprotocol/light-protocol", "<question>")
+```
+
+## Quick Reference
+
+| Operation | Type/Function | Purpose |
+|-----------|---------------|---------|
+| Connect | LightClient::new_with_retry() | Connect to ZK Compression RPC endpoint |
+| Get ATA Address | get_associated_token_address_interface() | Derive light ATA address from mint and owner |
+| Fetch Accounts | get_compressed_token_accounts_by_owner() | Query compressed token accounts (cold storage) |
+| Fetch Validity Proof | get_validity_proof() | Get proof for decompressing accounts |
+| Build Load Instruction | Decompress::new().instruction() | Build decompress instruction |
+| Optional: Create ATA | CreateAssociatedTokenAccount::new() | Create ATA if it doesn't exist |
+| Send Transaction | create_and_send_transaction() | Submit transaction to network |
+
+### Phase 1: Index project
+
+```bash
+grep -r "light_token_client\|light_client\|solana_sdk" src/
+```
+
+### Phase 2: Add dependencies
+
+```toml
+[dependencies]
+light-client = "0.13.0"
+light-token-client = "0.4.0"
+light-token-interface = "0.1.0"
+solana-sdk = "2.1.6"
+tokio = { version = "1.41", features = ["full"] }
+dotenvy = "0.15"
+serde_json = "1.0"
+bs58 = "0.5"
+```
+
+### Phase 3: Implement load ATA
+
+See Code Reference below for Rust implementation.
+
+1. **RPC Setup**: Connect to ZK Compression RPC endpoint
+   - Use `LightClientConfig::devnet()` or `LightClientConfig::mainnet()` with RPC URL and API key
+   - Use `LightClient::new_with_retry()` to initialize client
+   - For localnet: Configure with localhost URL
+
+2. **Get ATA Address**: Derive the light ATA address
+   - Use `get_associated_token_address_interface(&mint, &owner)` to get ATA pubkey
+   - This is the target account where tokens will be loaded
+
+3. **Query Compressed Accounts**: Fetch compressed tokens in cold storage
+   - Use `rpc.get_compressed_token_accounts_by_owner(&owner)` to get all compressed token accounts
+   - Filter by mint to get accounts for specific token
+   - Extract accounts with `amount > 0` (cold balance)
+
+4. **Check if Load Needed**: Verify there are tokens to load
+   - Sum up amounts from all compressed token accounts
+   - If total is zero, return early (idempotent behavior)
+
+5. **Fetch Validity Proof**: Get proof for decompressing accounts
+   - Use `rpc.get_validity_proof()` with account hashes and trees
+   - Pass compressed account hashes and state tree info
+   - Returns proof and root indices needed for instruction
+
+6. **Optional: Create ATA**: Create the ATA if it doesn't exist
+   - Query if ATA exists using `rpc.get_account()`
+   - If not found, create `CreateAssociatedTokenAccount` instruction
+   - ATA will be created idempotently
+
+7. **Build Decompress Instruction**: Create instruction to decompress tokens
+   - Use `Decompress::new()` with compressed accounts, proof, and destination ATA
+   - Specify the total amount to decompress
+   - Include all required account metas (trees, queues, system accounts)
+
+8. **Send Transaction**: Sign and submit transaction
+   - Combine create ATA instruction (if needed) and decompress instruction
+   - Use `rpc.create_and_send_transaction(&instructions, &payer.pubkey(), &[payer])`
+   - Returns transaction signature on success
+
+### Phase 4: Test
+
+Run the client code. On failure, debug and retry. Assign debugging to subagents with Task tool.
+
+For localnet testing:
+```bash
+light test-validator
+```
+
+For devnet/mainnet, ensure RPC endpoint supports ZK Compression (Helius, Triton).
+
+## Code Reference
+
+### Complete Load ATA Example
+
+```rust
+use light_client::indexer::{AddressWithTree, Indexer};
+use light_client::rpc::{LightClient, LightClientConfig, Rpc};
+use light_token_client::actions::{CreateAssociatedTokenAccount, Decompress};
+use light_token_interface::get_associated_token_address_interface;
+use serde_json;
+use solana_sdk::{bs58, pubkey::Pubkey, signature::Keypair, signer::Signer};
+use std::env;
+use std::fs;
+
+#[tokio::test(flavor = "multi_thread")]
+async fn test_load_ata() {
+    dotenvy::dotenv().ok();
+
+    // Load keypair from file
+    let keypair_path = env::var("KEYPAIR_PATH")
+        .unwrap_or_else(|_| format!("{}/.config/solana/id.json", env::var("HOME").unwrap()));
+    let payer = load_keypair(&keypair_path).expect("Failed to load keypair");
+
+    // Get API key from environment
+    let api_key = env::var("API_KEY")
+        .expect("API_KEY environment variable must be set");
+
+    // Connect to devnet RPC
+    let config = LightClientConfig::devnet(
+        Some("https://devnet.helius-rpc.com".to_string()),
+        Some(api_key),
+    );
+    let mut rpc = LightClient::new_with_retry(config, None)
+        .await
+        .expect("Failed to initialize LightClient");
+
+    // Assume mint was created and tokens were minted (see create-mint example)
+    let mint = Pubkey::new_from_array([...]); // Your mint pubkey
+
+    // Load compressed tokens to ATA
+    let signature = load_ata(&mut rpc, &payer, mint).await;
+
+    println!("\n=== Loaded Compressed Tokens to ATA ===");
+    println!("Transaction: {}", signature);
+}
+
+pub async fn load_ata<R: Rpc + Indexer>(
+    rpc: &mut R,
+    payer: &Keypair,
+    mint: Pubkey,
+) -> String {
+    let owner = payer.pubkey();
+
+    // 1. Derive ATA address
+    let light_ata = get_associated_token_address_interface(&mint, &owner);
+
+    // 2. Query compressed token accounts (cold storage)
+    let compressed_accounts = rpc
+        .get_compressed_token_accounts_by_owner(&owner)
+        .await
+        .expect("Failed to get compressed token accounts");
+
+    // 3. Filter accounts by mint and check if there's anything to load
+    let accounts_to_load: Vec<_> = compressed_accounts
+        .value
+        .items
+        .into_iter()
+        .filter(|acc| acc.parsed.mint == mint)
+        .filter(|acc| acc.parsed.amount > 0)
+        .collect();
+
+    if accounts_to_load.is_empty() {
+        println!("No compressed tokens to load");
+        return "null".to_string();
+    }
+
+    // 4. Calculate total amount to decompress
+    let total_amount: u64 = accounts_to_load
+        .iter()
+        .map(|acc| acc.parsed.amount)
+        .sum();
+
+    println!("Loading {} compressed tokens to ATA", total_amount);
+
+    // 5. Prepare account hashes and tree info for proof
+    let hashes_and_trees: Vec<_> = accounts_to_load
+        .iter()
+        .map(|acc| {
+            (
+                acc.compressedAccount.hash,
+                acc.compressedAccount.treeInfo.tree,
+                acc.compressedAccount.treeInfo.queue,
+            )
+        })
+        .collect();
+
+    // 6. Get validity proof for decompression
+    let proof_result = rpc
+        .get_validity_proof(
+            hashes_and_trees.iter().map(|(h, _, _)| *h).collect(),
+            vec![], // No new addresses for decompress
+            None,
+        )
+        .await
+        .expect("Failed to get validity proof")
+        .value;
+
+    let mut instructions = vec![];
+
+    // 7. Check if ATA exists, create if needed
+    match rpc.get_account(&light_ata).await {
+        Ok(_) => {
+            println!("ATA already exists");
+        }
+        Err(_) => {
+            println!("Creating ATA");
+            let create_ata_ix = CreateAssociatedTokenAccount::new(
+                payer.pubkey(),
+                light_ata,
+                owner,
+                mint,
+            )
+            .instruction()
+            .expect("Failed to create ATA instruction");
+
+            instructions.push(create_ata_ix);
+        }
+    }
+
+    // 8. Build decompress instruction
+    let decompress_ix = Decompress::new(
+        payer.pubkey(),
+        accounts_to_load.clone(),
+        light_ata,
+        total_amount,
+        proof_result.proof.0.unwrap(),
+        proof_result.root_indices,
+    )
+    .instruction()
+    .expect("Failed to create decompress instruction");
+
+    instructions.push(decompress_ix);
+
+    // 9. Send transaction
+    let signature = rpc
+        .create_and_send_transaction(&instructions, &payer.pubkey(), &[payer])
+        .await
+        .expect("Failed to send transaction");
+
+    signature.to_string()
+}
+
+fn load_keypair(path: &str) -> Result<Keypair, Box<dyn std::error::Error>> {
+    let path = if path.starts_with("~") {
+        path.replace("~", &env::var("HOME").unwrap_or_default())
+    } else {
+        path.to_string()
+    };
+    let file = fs::read_to_string(&path)?;
+    let bytes: Vec<u8> = serde_json::from_str(&file)?;
+    Ok(Keypair::try_from(&bytes[..])?)
+}
+```
+
+### Load ATA with Wrap (Unified Mode)
+
+For unified mode that also wraps SPL/Token-2022 balances to the light ATA:
+
+```rust
+use spl_token::{state::Account as TokenAccount, ID as TOKEN_PROGRAM_ID};
+use spl_token_2022::ID as TOKEN_2022_PROGRAM_ID;
+use light_token_client::actions::Wrap;
+
+pub async fn load_ata_unified<R: Rpc + Indexer>(
+    rpc: &mut R,
+    payer: &Keypair,
+    mint: Pubkey,
+) -> String {
+    let owner = payer.pubkey();
+    let light_ata = get_associated_token_address_interface(&mint, &owner);
+
+    let mut instructions = vec![];
+
+    // 1. Check for SPL token balance
+    let spl_ata = spl_associated_token_account::get_associated_token_address(
+        &owner,
+        &mint,
+    );
+
+    if let Ok(account) = rpc.get_account(&spl_ata).await {
+        let spl_account = TokenAccount::unpack(&account.data)
+            .expect("Failed to unpack SPL token account");
+
+        if spl_account.amount > 0 {
+            println!("Wrapping {} SPL tokens", spl_account.amount);
+
+            // Build wrap instruction
+            let wrap_ix = Wrap {
+                source_spl_ata: spl_ata,
+                destination: light_ata,
+                mint,
+                amount: spl_account.amount,
+                decimals: 9, // Get from mint info
+            }
+            .instruction()
+            .expect("Failed to create wrap instruction");
+
+            instructions.push(wrap_ix);
+        }
+    }
+
+    // 2. Decompress compressed tokens (same as standard mode)
+    // ... (use code from load_ata example above)
+
+    // 3. Send combined transaction
+    let signature = rpc
+        .create_and_send_transaction(&instructions, &payer.pubkey(), &[payer])
+        .await
+        .expect("Failed to send transaction");
+
+    signature.to_string()
+}
+```
+
+### RPC Configuration
+
+Configure RPC client for different networks:
+
+```rust
+use light_client::rpc::{LightClient, LightClientConfig};
+
+// Devnet
+let config = LightClientConfig::devnet(
+    Some("https://devnet.helius-rpc.com".to_string()),
+    Some(api_key),
+);
+let mut rpc = LightClient::new_with_retry(config, None).await?;
+
+// Mainnet
+let config = LightClientConfig::mainnet(
+    Some("https://mainnet.helius-rpc.com".to_string()),
+    Some(api_key),
+);
+let mut rpc = LightClient::new_with_retry(config, None).await?;
+
+// Localnet
+let config = LightClientConfig::new(
+    Some("http://127.0.0.1:8899".to_string()),
+    None,
+);
+let mut rpc = LightClient::new_with_retry(config, None).await?;
+```
+
+### Important Notes
+
+1. **Idempotent Behavior**: The function returns early if there are no compressed tokens to load, making it safe to call multiple times
+
+2. **Cold vs Hot Storage**:
+   - Cold: Compressed tokens stored in state trees (rent-free)
+   - Hot: Tokens in the light ATA (small rent cost, instant transfers)
+
+3. **Load Operations**:
+   - Standard mode (wrap=false): Decompress compressed tokens to ATA
+   - Unified mode (wrap=true): Wrap SPL/T22 + decompress to light ATA
+
+4. **ATA Creation**: The ATA is created idempotently if it doesn't exist
+
+5. **Validity Proof**: Required to prove the compressed accounts exist and can be decompressed
+
+6. **Account Queries**: Use `get_compressed_token_accounts_by_owner()` to find all compressed accounts, then filter by mint
+
+7. **Transaction Composition**: Multiple instructions can be combined (create ATA + decompress + wrap)
+
+8. **Error Handling**: Production code should handle RPC failures, proof generation errors, and transaction failures
+
+### Environment Setup
+
+Create a `.env` file with your configuration:
+
+```bash
+# API key for Helius RPC (devnet or mainnet)
+API_KEY=your_api_key_here
+
+# Optional: Custom keypair path
+KEYPAIR_PATH=~/.config/solana/id.json
+```
+
+### Testing
+
+Run the example with:
+
+```bash
+cargo test test_load_ata -- --nocapture
+```
+
+Or create a binary example in `examples/load_ata.rs`:
+
+```rust
+#[tokio::main]
+async fn main() {
+    // Copy the test code here but remove #[tokio::test] attribute
+}
+```
+
+Then run:
+
+```bash
+cargo run --example load_ata
+```
+
+### Integration with Other Operations
+
+Load ATA is typically used in these workflows:
+
+1. **After Minting**: Mint tokens to cold storage, then load to hot balance for transfers
+2. **Before Transfers**: Load tokens from cold to hot before making transfers
+3. **Unified Balance**: Combine SPL, T22, and compressed balances into single light ATA
+
+Example workflow:
+
+```rust
+// 1. Create mint
+let (mint_pda, _) = create_compressed_mint(&mut rpc, &payer, 9).await;
+
+// 2. Mint tokens to cold storage
+mint_to(&mut rpc, &payer, mint_pda, owner, 1000).await;
+
+// 3. Load to hot balance
+load_ata(&mut rpc, &payer, mint_pda).await;
+
+// 4. Now can transfer from hot balance
+transfer(&mut rpc, &payer, mint_pda, recipient, 100).await;
+```
+
+~~~~

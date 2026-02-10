@@ -1,0 +1,354 @@
+~~~~text
+---
+argument-hint: <project_path>
+description: Integrate rent-free AMMs on Solana using Light Protocol router interface (TypeScript)
+allowed-tools: [Bash, Read, Glob, Grep, Task, mcp__deepwiki, mcp__zkcompression]
+---
+
+## Task: Add router support for rent-free AMMs (TypeScript)
+
+References:
+- Router Guide: https://zkcompression.com/light-token/defi/routers
+- SDK Reference: https://lightprotocol.github.io/light-protocol/compressed-token/index.html
+- Reference Implementation: https://github.com/Lightprotocol/cp-swap-reference
+
+MCP:
+* deepwiki https://mcp.deepwiki.com/mcp
+* zkcompression https://www.zkcompression.com/mcp
+
+## Workflow
+
+- This plan must execute without user intervention
+- All questions have been resolved in planning phase
+- If blocked, find alternative approach - do not stop
+- Keep working until ALL todos are complete
+- Use Task tool with subagents for parallel research or when stuck
+- Use subagents with Read, Glob, Grep, and Deepwiki permissions when stuck
+- Always assign Tasks to subagents and tell the user
+
+## DeepWiki fallback
+
+```
+mcp__deepwiki__read_wiki_structure("Lightprotocol/light-protocol"),
+mcp__deepwiki__read_wiki_contents("Lightprotocol/light-protocol"),
+mcp__deepwiki__ask_question("Lightprotocol/light-protocol", "<question>")
+```
+
+## Quick Reference
+
+| Operation | Function/Type | Purpose |
+|-----------|--------------|---------|
+| Fetch Account | get_account_interface() | Returns AccountInterface (superset of Account) |
+| Initialize SDK | from_keyed_accounts() | Create program SDK from AccountInterface array |
+| Update Cache | update() | Update SDK state with new account data |
+| Load Cold Accounts | create_load_instructions() | Generate instructions to load compressed accounts |
+| Check Account State | is_cold() | Determine if account needs loading |
+| Quote | quote() | Calculate swap output (works for hot or cold) |
+
+### Phase 1: Index project
+
+```bash
+grep -r "get_account\|AccountInterface\|LightProgramInterface" src/
+grep -r "swap\|quote\|pool" src/
+```
+
+### Phase 2: Add dependencies
+
+```bash
+npm install --save \
+    light-client@0.18.0 \
+    example-amm-sdk@0.1
+```
+
+Note: `example-amm-sdk` represents the AMM team's SDK that implements `LightProgramInterface`. Replace with actual AMM SDK package.
+
+### Phase 3: Implement router integration
+
+See Code Reference below for TypeScript implementation.
+
+**Three Key Changes:**
+
+1. **Use get_account_interface instead of get_account**
+   - Returns `AccountInterface` with `Option<ColdContext>`
+   - Works for both hot and cold accounts
+   - Superset of standard `Account` type
+
+2. **Store AccountInterface in cache**
+   - Maintain cache of `&[AccountInterface]`
+   - Initialize SDK with `from_keyed_accounts(&[AccountInterface])`
+   - Update cache with `update(&[AccountInterface])`
+
+3. **Prepend create_load_instructions when cold**
+   - Check if any accounts are cold with `specs.iter().any(|s| s.is_cold())`
+   - Generate load instructions only if needed
+   - No-op if all accounts are hot
+
+#### Integration Steps
+
+1. **Fetch Account Interfaces**: Replace `get_account` with `get_account_interface`
+   - Use `rpc.get_account_interface(&pool_address, &program_id)`
+   - Returns `AccountInterface` with cold context
+   - Works identically for hot and cold accounts
+
+2. **Initialize SDK from Interfaces**: Create program SDK from account data
+   - Call `ExampleAmmSdk::from_keyed_accounts(&[pool_interface])`
+   - SDK implements `LightProgramInterface` trait
+   - Maintains internal cache of account states
+
+3. **Update SDK State**: Fetch and update related accounts
+   - Use `sdk.get_accounts_to_update(&LightInstruction::Swap)` to identify dependencies
+   - Fetch with `rpc.get_multiple_account_interfaces(&accounts_to_fetch)`
+   - Update SDK with `sdk.update(&keyed_accounts)`
+
+4. **Quote Swap**: Calculate expected output (works for hot or cold)
+   - Call `sdk.quote(amount_in, min_out)`
+   - Quoting works identically regardless of account state
+   - No special handling needed for cold accounts
+
+5. **Build Transaction**: Create swap transaction with conditional loading
+   - Get account specs with `sdk.get_specs_for_instruction(&LightInstruction::Swap)`
+   - Check if cold: `specs.iter().any(|s| s.is_cold())`
+   - Generate load instructions if needed: `create_load_instructions(&specs, payer, config_pda, rent_sponsor_pda, &rpc)`
+   - Append swap instruction: `sdk.swap_ix(&swap_params)`
+
+6. **Send Transaction**: Submit to network
+   - Use `rpc.send_transaction(&ixs, &payer)`
+   - Load instructions no-op if accounts are hot
+   - Transaction executes identically on hot or cold path
+
+### Phase 4: Test
+
+Run the client code. On failure, debug and retry. Assign debugging to subagents with Task tool.
+
+For localnet testing:
+```bash
+light test-validator
+```
+
+For devnet/mainnet, ensure RPC endpoint supports ZK Compression (Helius, Triton).
+
+## Code Reference
+
+### Full Router Integration
+
+```typescript
+import { Connection, Keypair, PublicKey, Transaction } from "@solana/web3.js";
+import {
+    createLoadInstructions,
+    LightProgramInterface,
+    AccountSpec
+} from "light-client/interface";
+import { ExampleAmmSdk } from "example-amm-sdk";
+
+async function integrateRouter() {
+    const rpc = new Connection("https://devnet.helius-rpc.com?api-key=YOUR_KEY");
+    const payer = Keypair.generate(); // Load your keypair
+    const pool_address = new PublicKey("..."); // Your pool address
+    const amount_in = 1_000_000;
+    const min_out = 950_000;
+
+    // 1. Fetch account interfaces (works for both hot and cold)
+    const pool_interface = await rpc.get_account_interface(
+        pool_address,
+        ExampleAmmSdk.program_id()
+    );
+
+    // 2. Initialize SDK from interfaces
+    let sdk = ExampleAmmSdk.from_keyed_accounts([pool_interface]);
+
+    // 3. Fetch related accounts and update SDK state
+    const accounts_to_fetch = sdk.get_accounts_to_update(
+        ExampleAmmSdk.LightInstruction.Swap
+    );
+    const keyed_accounts = await rpc.get_multiple_account_interfaces(
+        accounts_to_fetch
+    );
+    sdk.update(keyed_accounts);
+
+    // 4. Quote (works same for hot or cold)
+    const quote = sdk.quote(amount_in, min_out);
+    console.log("Expected output:", quote.amount_out);
+
+    // 5. Build transaction
+    let ixs = [];
+
+    // Prepend load instructions if any accounts are cold
+    const specs = sdk.get_specs_for_instruction(
+        ExampleAmmSdk.LightInstruction.Swap
+    );
+    if (specs.some(s => s.is_cold())) {
+        const load_ixs = await createLoadInstructions(
+            specs,
+            payer.publicKey,
+            sdk.light_config_pda(),
+            sdk.light_rent_sponsor_pda(),
+            rpc
+        );
+        ixs.push(...load_ixs);
+    }
+
+    // Add actual swap instruction
+    ixs.push(sdk.swap_ix({
+        amount_in,
+        min_out,
+        user: payer.publicKey
+    }));
+
+    // 6. Send
+    await rpc.send_transaction(ixs, payer);
+}
+```
+
+### Key Types and Traits
+
+```typescript
+// AccountInterface (replaces Account)
+interface AccountInterface {
+    key: PublicKey;
+    account: Account;
+    cold: ColdContext | null;
+}
+
+// Standard Account (nested inside AccountInterface)
+interface Account {
+    lamports: bigint;
+    data: Uint8Array;
+    owner: PublicKey;
+    executable: boolean;
+    rent_epoch: bigint;
+}
+
+// LightProgramInterface (implemented by AMM SDKs)
+interface LightProgramInterface<Instruction> {
+    from_keyed_accounts(accounts: AccountInterface[]): LightProgramInterface;
+    get_accounts_to_update(ix: Instruction): AccountToFetch[];
+    update(accounts: AccountInterface[]): void;
+    get_specs_for_instruction(ix: Instruction): AccountSpec[];
+}
+
+// AccountSpec (specifies load requirements)
+interface AccountSpec {
+    address: PublicKey;
+    is_cold(): boolean;
+}
+```
+
+### Hot vs Cold Account Handling
+
+| Aspect | Hot Account | Cold Account |
+|--------|-------------|--------------|
+| On-chain state | Yes | Ledger (compressed) |
+| get_account_interface | Returns immediately | Returns with ColdContext |
+| Quote | Works | Works |
+| Swap | Direct execution | Load first, then swap |
+| Transaction size | Normal | +100-2400 bytes* |
+| Compute units | Normal | +15k-400k CU* |
+| Latency | Normal | +0-200ms* |
+
+*Depends on number and type of cold accounts
+
+### When Accounts Go Cold
+
+Accounts become cold after compression by a miner. Compression triggers when accounts are inactive (no lamport bumps from fee payers) for a period, causing virtual rent balance to fall below threshold.
+
+**Best Practice**: Always prepend `create_load_instructions` to swap transactions. This ensures swaps execute regardless of account state and no-ops if accounts are hot.
+
+### Error Handling
+
+```typescript
+import { LightClientError } from "light-client/error";
+
+try {
+    const account = await rpc.get_account_interface(pool_address, program_id);
+    // Account exists (hot or cold)
+    // Proceed with quote and swap
+} catch (e) {
+    if (e instanceof LightClientError && e.kind === "AccountNotFound") {
+        // Account does not exist
+    } else {
+        // Other error
+    }
+}
+```
+
+### Jito Bundle Support (Large Transactions)
+
+If load instructions + swap instructions exceed Solana's 1232 byte limit:
+
+```typescript
+import { SystemProgram } from "@solana/web3.js";
+
+const JITO_TIP_ACCOUNTS = [
+    "96gYZGLnJYVFmbjzopPSU6QiEV5fGqZNyN9nmNhvrZU5",
+    "HFqU5x63VTqvQss8hp11i4wVV8bD44PvwucfZ2bU7gRe",
+    "Cw8CFyM9FkoMi7K7Crf6HNQqf4uEMzpKw6QNghXLvLkY",
+    "ADaUMid9yfUytqMBgopwjb2DTLSokTSzL1zt6iGPaS49",
+    "DfXygSm4jCyNCybVYYK6DwvWqjKee8pbDmJGcLWNDXjh",
+    "ADuUkR4vqLUMWXxW9gh6D6L8pMSawimctcNZ5pGwDcEt",
+    "DttWaMuVvTiduZRnguLF7jNxTgiMBZ1hyAumKUiL2KRL",
+    "3AVi9Tg9Uo68tJfuvoKvqKNWKkC5wPdSSdeBnizKZ6jT"
+];
+
+function jitoTipInstruction(payer: PublicKey, tipLamports: number) {
+    const tipAccount = JITO_TIP_ACCOUNTS[
+        Math.floor(Math.random() * JITO_TIP_ACCOUNTS.length)
+    ];
+    return SystemProgram.transfer({
+        fromPubkey: payer,
+        toPubkey: new PublicKey(tipAccount),
+        lamports: tipLamports
+    });
+}
+
+// Add tip to last transaction
+const tipIx = jitoTipInstruction(payer.publicKey, 10_000); // 10k lamports
+swap_ixs.push(tipIx);
+
+// Serialize transactions
+const loadTxBase64 = Buffer.from(loadTx.serialize()).toString("base64");
+const swapTxBase64 = Buffer.from(swapTx.serialize()).toString("base64");
+
+// Send bundle to Jito
+const response = await fetch(
+    "https://mainnet.block-engine.jito.wtf/api/v1/bundles",
+    {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            jsonrpc: "2.0",
+            id: 1,
+            method: "sendBundle",
+            params: [[loadTxBase64, swapTxBase64], { encoding: "base64" }]
+        })
+    }
+);
+```
+
+## Important Notes
+
+1. **Swap Instructions Unchanged**: Swap instructions remain identical for hot and cold accounts. Only difference is prepending load instructions when cold.
+
+2. **Quote Always Works**: `get_account_interface` returns full account state via the same `Account` type regardless of hot/cold status. Quoting works identically.
+
+3. **RPC Provider Support**: Interface endpoints require RPC providers like Helius or Triton, or self-hosted Photon indexer.
+
+4. **Indexer Dependency**: Hot markets work as long as Solana is up. Cold accounts cannot load until indexer/RPC recovers. Compression is cryptographically verifiable, so integrity and safety are independent of indexer.
+
+5. **API Beta Status**: Router integration API is in beta and subject to change.
+
+## Reference Implementation
+
+| Resource | Link |
+|----------|------|
+| AMM Program | https://github.com/Lightprotocol/cp-swap-reference |
+| LightProgramInterface Trait Impl | https://github.com/Lightprotocol/cp-swap-reference/blob/main/programs/cp-swap/tests/program.rs#L409 |
+| Client Test | https://github.com/Lightprotocol/cp-swap-reference/blob/main/programs/cp-swap/tests/program.rs |
+
+## Support
+
+Questions or need hands-on support?
+- Telegram: https://t.me/swen_light
+- Email: support@lightprotocol.com
+- Discord: https://discord.com/invite/7cJ8BhAXhu
+
+~~~~

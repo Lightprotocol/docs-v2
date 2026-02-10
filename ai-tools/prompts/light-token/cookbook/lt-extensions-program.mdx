@@ -1,0 +1,545 @@
+---
+argument-hint: <project_path>
+description: Add Token 2022 extensions to light-token mints using Anchor framework
+allowed-tools: [Bash, Read, Glob, Grep, Task, mcp__deepwiki, mcp__zkcompression]
+---
+
+## Task: Add Token 2022 extensions to light-token mints
+
+Add support for Token 2022 extensions (MetadataPointer, TokenMetadata, InterestBearingConfig, GroupPointer, TokenGroup, TokenGroupMember) to light-token mints in Anchor programs.
+
+References:
+- Guide: https://zkcompression.com/light-token/cookbook/extensions
+- SDK Reference: https://docs.rs/light-token/latest/light_token/
+- GitHub Example: https://github.com/Lightprotocol/light-protocol/blob/main/sdk-tests/csdk-anchor-full-derived-test/tests/mint/metadata_test.rs
+
+MCP:
+* deepwiki https://mcp.deepwiki.com/mcp
+* zkcompression https://www.zkcompression.com/mcp
+
+## Workflow
+
+- This plan must execute without user intervention
+- All questions have been resolved in planning phase
+- If blocked, find alternative approach - do not stop
+- Keep working until ALL todos are complete
+- Use Task tool with subagents for parallel research or when stuck
+- Use subagents with Read, Glob, Grep, and Deepwiki permissions when stuck
+- Always assign Tasks to subagents and tell the user
+
+## DeepWiki fallback
+
+```
+mcp__deepwiki__read_wiki_structure("Lightprotocol/light-protocol"),
+mcp__deepwiki__read_wiki_contents("Lightprotocol/light-protocol"),
+mcp__deepwiki__ask_question("Lightprotocol/light-protocol", "<question>")
+```
+
+## Quick Reference: Supported Extensions
+
+| Extension | light-token | Compressed Token | Notes |
+| --------- | ----------- | ---------------- | ----- |
+| MetadataPointer | ✓ | ✓ | Points to TokenMetadata extension |
+| TokenMetadata | ✓ | ✓ | Built-in name, symbol, uri, update_authority |
+| InterestBearingConfig | ✓ | ✓ | Configures interest rate |
+| GroupPointer | ✓ | ✓ | Points to TokenGroup extension |
+| GroupMemberPointer | ✓ | ✓ | Points to TokenGroupMember extension |
+| TokenGroup | ✓ | ✓ | Defines a token group |
+| TokenGroupMember | ✓ | ✓ | Adds mint to a group |
+| MintCloseAuthority | ✓ | - | Authority that can close mint |
+| TransferFeeConfig | ✓ | - | Fees must be zero |
+| DefaultAccountState | ✓ | - | Any state allowed |
+| PermanentDelegate | ✓ | - | Permanent delegate authority |
+| TransferHook | ✓ | - | program_id must be nil |
+| Pausable | ✓ | - | Pause/unpause account operations |
+| ConfidentialTransferMint | ✓ | - | Initialized but not enabled |
+| ConfidentialTransferFeeConfig | ✓ | - | Fees must be zero |
+| ConfidentialMintBurn | ✓ | - | Initialized but not enabled |
+
+### Phase 1: Index project
+
+```bash
+find . -name "Cargo.toml" -o -name "lib.rs" -o -name "Anchor.toml"
+```
+
+### Phase 2: Add dependencies
+
+Add to `programs/[name]/Cargo.toml`:
+
+```toml
+[dependencies]
+light-token = "0.12.1"
+light-token-interface = "0.7.0"
+anchor_lang = "0.31.1"
+```
+
+### Phase 3: Implement extensions
+
+See Code Reference below. Implementation follows these steps:
+
+1. **TokenMetadata Extension**: Set name, symbol, uri, update_authority, and optional additional_metadata
+   - Source: https://github.com/Lightprotocol/light-protocol/blob/main/sdk-tests/csdk-anchor-full-derived-test/tests/mint/metadata_test.rs#L78-L90
+2. **InterestBearing Extension**: Configure interest rate (basis points)
+   - Source: https://github.com/Lightprotocol/light-protocol/blob/main/sdk-tests/sdk-light-token-test/tests/test_create_mint.rs
+3. **TokenGroup Extension**: Define group properties (max_size, update_authority)
+   - Source: https://github.com/Lightprotocol/light-protocol/blob/main/sdk-tests/sdk-light-token-test/tests/test_create_mint.rs
+4. **TokenGroupMember Extension**: Add mint to group with group pointer
+   - Source: https://github.com/Lightprotocol/light-protocol/blob/main/sdk-tests/sdk-light-token-test/tests/test_create_mint.rs
+5. **Add Extensions to CreateMintParams**: Build extensions vector and pass to CPI
+   - Source: https://github.com/Lightprotocol/light-protocol/blob/main/sdk-tests/sdk-light-token-test/src/create_mint.rs#L71
+
+### Phase 4: Test
+
+Build and test the program:
+
+```bash
+anchor build && anchor test
+```
+
+On failure, debug and retry. Assign always to subagents with Task tool.
+
+## Code Reference
+
+### TokenMetadata Extension
+
+```rust
+use light_token::instruction::extensions::{
+    token_metadata::TokenMetadataInstructionData,
+    ExtensionInstructionData,
+};
+use light_token::AdditionalMetadata;
+
+let token_metadata = ExtensionInstructionData::TokenMetadata(
+    TokenMetadataInstructionData {
+        update_authority: authority.pubkey().to_bytes().into(),
+        name: b"My Token".to_vec(),
+        symbol: b"MTK".to_vec(),
+        uri: b"https://example.com/metadata.json".to_vec(),
+        additional_metadata: vec![
+            AdditionalMetadata {
+                key: b"category".to_vec(),
+                value: b"utility".to_vec(),
+            },
+            AdditionalMetadata {
+                key: b"version".to_vec(),
+                value: b"1.0.0".to_vec(),
+            },
+        ],
+    },
+);
+```
+
+**Metadata Rules:**
+- Standard fields (`name`, `symbol`, `uri`) can be updated by `update_authority`
+- `additional_metadata` keys set at creation can be modified or removed
+- New keys cannot be added to `additional_metadata` after creation
+
+### InterestBearingConfig Extension
+
+```rust
+use light_token::instruction::extensions::ExtensionInstructionData;
+
+let interest_bearing = ExtensionInstructionData::InterestBearingConfig {
+    rate_authority: Some(authority.pubkey().to_bytes().into()),
+    rate: 100, // 1% annual interest (basis points)
+};
+```
+
+**Interest Calculation:**
+- Rate in basis points (100 = 1%)
+- `rate_authority` can update the rate
+- Compounded per epoch
+
+### GroupPointer Extension
+
+```rust
+use light_token::instruction::extensions::ExtensionInstructionData;
+
+let group_pointer = ExtensionInstructionData::GroupPointer {
+    authority: Some(authority.pubkey().to_bytes().into()),
+    group_address: Some(group_mint.pubkey().to_bytes().into()),
+};
+```
+
+**Group Pointer Rules:**
+- Points to the TokenGroup extension address
+- `authority` can update the pointer
+- Set to `None` to disable
+
+### TokenGroup Extension
+
+```rust
+use light_token::instruction::extensions::ExtensionInstructionData;
+
+let token_group = ExtensionInstructionData::TokenGroup {
+    update_authority: Some(authority.pubkey().to_bytes().into()),
+    mint: group_mint.pubkey().to_bytes().into(),
+    size: 0, // Number of members (managed automatically)
+    max_size: 100, // Maximum group members
+};
+```
+
+**Group Management:**
+- `size` is updated automatically when members join
+- `max_size` limits total members
+- `update_authority` can modify group properties
+
+### GroupMemberPointer Extension
+
+```rust
+use light_token::instruction::extensions::ExtensionInstructionData;
+
+let group_member_pointer = ExtensionInstructionData::GroupMemberPointer {
+    authority: Some(authority.pubkey().to_bytes().into()),
+    member_address: Some(member_mint.pubkey().to_bytes().into()),
+};
+```
+
+### TokenGroupMember Extension
+
+```rust
+use light_token::instruction::extensions::ExtensionInstructionData;
+
+let token_group_member = ExtensionInstructionData::TokenGroupMember {
+    mint: member_mint.pubkey().to_bytes().into(),
+    group: group_mint.pubkey().to_bytes().into(),
+    member_number: 1, // Position in group (0-indexed)
+};
+```
+
+**Member Rules:**
+- `member_number` must be unique within group
+- Mint is automatically added to group's `size`
+- Group must exist before adding members
+
+### MintCloseAuthority Extension
+
+```rust
+use light_token::instruction::extensions::ExtensionInstructionData;
+
+let mint_close_authority = ExtensionInstructionData::MintCloseAuthority {
+    close_authority: Some(authority.pubkey().to_bytes().into()),
+};
+```
+
+**Close Authority:**
+- Can close the mint account
+- Set to `None` to disable closing
+- Not supported for compressed tokens (only light-token)
+
+### TransferFeeConfig Extension
+
+```rust
+use light_token::instruction::extensions::ExtensionInstructionData;
+
+let transfer_fee = ExtensionInstructionData::TransferFeeConfig {
+    transfer_fee_config_authority: Some(authority.pubkey().to_bytes().into()),
+    withdraw_withheld_authority: Some(authority.pubkey().to_bytes().into()),
+    transfer_fee_basis_points: 0, // MUST be 0
+    maximum_fee: 0, // MUST be 0
+};
+```
+
+**Fee Requirements:**
+- Both `transfer_fee_basis_points` and `maximum_fee` MUST be 0
+- Not supported for compressed tokens (only light-token)
+
+### DefaultAccountState Extension
+
+```rust
+use light_token::instruction::extensions::ExtensionInstructionData;
+use light_token_interface::state::AccountState;
+
+let default_state = ExtensionInstructionData::DefaultAccountState {
+    state: AccountState::Frozen, // or AccountState::Initialized
+};
+```
+
+**Account States:**
+- `AccountState::Initialized` - Normal operation
+- `AccountState::Frozen` - Transfers disabled
+- Not supported for compressed tokens (only light-token)
+
+### PermanentDelegate Extension
+
+```rust
+use light_token::instruction::extensions::ExtensionInstructionData;
+
+let permanent_delegate = ExtensionInstructionData::PermanentDelegate {
+    delegate: authority.pubkey().to_bytes().into(),
+};
+```
+
+**Permanent Delegate:**
+- Cannot be changed after mint creation
+- Can perform any operation on all token accounts
+- Not supported for compressed tokens (only light-token)
+
+### TransferHook Extension
+
+```rust
+use light_token::instruction::extensions::ExtensionInstructionData;
+use solana_pubkey::Pubkey;
+
+let transfer_hook = ExtensionInstructionData::TransferHook {
+    authority: Some(authority.pubkey().to_bytes().into()),
+    program_id: Some(Pubkey::default().to_bytes().into()), // MUST be nil (default)
+};
+```
+
+**Transfer Hook Rules:**
+- `program_id` MUST be nil (Pubkey::default())
+- Not supported for compressed tokens (only light-token)
+
+### Pausable Extension
+
+```rust
+use light_token::instruction::extensions::ExtensionInstructionData;
+
+let pausable = ExtensionInstructionData::Pausable {
+    pause_authority: Some(authority.pubkey().to_bytes().into()),
+};
+```
+
+**Pause Functionality:**
+- `pause_authority` can pause/unpause token operations
+- Set to `None` to disable pausing
+- Not supported for compressed tokens (only light-token)
+
+### Building CreateMintParams with Extensions
+
+```rust
+use light_token::instruction::{CreateMintParams, ExtensionInstructionData};
+
+let params = CreateMintParams {
+    decimals: 9,
+    address_merkle_tree_root_index: proof_result.address_merkle_tree_root_index,
+    mint_authority: authority.pubkey(),
+    proof: proof_result.proof,
+    compression_address: proof_result.compression_address,
+    mint: mint_pda,
+    bump: mint_bump,
+    freeze_authority: Some(authority.pubkey()),
+    extensions: Some(vec![
+        token_metadata,
+        interest_bearing,
+        group_pointer,
+        token_group,
+    ]),
+    rent_payment: 16,    // ~24 hours
+    write_top_up: 766,   // ~3 hours per write
+};
+```
+
+### Full Anchor Program Example
+
+```rust
+use anchor_lang::prelude::*;
+use light_token::instruction::{
+    CreateMintCpi, CreateMintParams, ExtensionInstructionData,
+    SystemAccountInfos, extensions::token_metadata::TokenMetadataInstructionData,
+};
+use light_token::{AdditionalMetadata, CompressedProof};
+
+declare_id!("YourProgramID");
+
+#[program]
+pub mod light_token_extensions {
+    use super::*;
+
+    pub fn create_mint_with_extensions(
+        ctx: Context<CreateMintAccounts>,
+        decimals: u8,
+        address_merkle_tree_root_index: u16,
+        compression_address: [u8; 32],
+        proof: CompressedProof,
+        bump: u8,
+        name: Vec<u8>,
+        symbol: Vec<u8>,
+        uri: Vec<u8>,
+    ) -> Result<()> {
+        let mint = light_token::instruction::find_mint_address(
+            ctx.accounts.mint_seed.key
+        ).0;
+
+        // TokenMetadata extension
+        let token_metadata = ExtensionInstructionData::TokenMetadata(
+            TokenMetadataInstructionData {
+                update_authority: ctx.accounts.authority.key().to_bytes().into(),
+                name,
+                symbol,
+                uri,
+                additional_metadata: vec![],
+            }
+        );
+
+        // InterestBearingConfig extension
+        let interest_bearing = ExtensionInstructionData::InterestBearingConfig {
+            rate_authority: Some(ctx.accounts.authority.key().to_bytes().into()),
+            rate: 100, // 1% annual
+        };
+
+        let params = CreateMintParams {
+            decimals,
+            address_merkle_tree_root_index,
+            mint_authority: *ctx.accounts.authority.key,
+            proof,
+            compression_address,
+            mint,
+            bump,
+            freeze_authority: Some(*ctx.accounts.authority.key),
+            extensions: Some(vec![token_metadata, interest_bearing]),
+            rent_payment: 16,
+            write_top_up: 766,
+        };
+
+        let system_accounts = SystemAccountInfos {
+            light_system_program: ctx.accounts.light_system_program.to_account_info(),
+            cpi_authority_pda: ctx.accounts.cpi_authority_pda.to_account_info(),
+            registered_program_pda: ctx.accounts.registered_program_pda.to_account_info(),
+            account_compression_authority: ctx.accounts.account_compression_authority.to_account_info(),
+            account_compression_program: ctx.accounts.account_compression_program.to_account_info(),
+            system_program: ctx.accounts.system_program.to_account_info(),
+        };
+
+        CreateMintCpi {
+            mint_seed: ctx.accounts.mint_seed.to_account_info(),
+            authority: ctx.accounts.authority.to_account_info(),
+            payer: ctx.accounts.payer.to_account_info(),
+            address_tree: ctx.accounts.address_tree.to_account_info(),
+            output_queue: ctx.accounts.output_queue.to_account_info(),
+            compressible_config: ctx.accounts.compressible_config.to_account_info(),
+            mint: ctx.accounts.mint.to_account_info(),
+            rent_sponsor: ctx.accounts.rent_sponsor.to_account_info(),
+            system_accounts,
+            cpi_context: None,
+            cpi_context_account: None,
+            params,
+        }
+        .invoke()?;
+
+        Ok(())
+    }
+}
+
+#[derive(Accounts)]
+pub struct CreateMintAccounts<'info> {
+    pub mint_seed: Signer<'info>,
+    /// CHECK: Validated by light-token CPI
+    pub authority: AccountInfo<'info>,
+    #[account(mut)]
+    pub payer: Signer<'info>,
+    /// CHECK: Validated by light-token CPI
+    #[account(mut)]
+    pub address_tree: AccountInfo<'info>,
+    /// CHECK: Validated by light-token CPI
+    #[account(mut)]
+    pub output_queue: AccountInfo<'info>,
+    /// CHECK: Validated by light-token CPI
+    pub light_system_program: AccountInfo<'info>,
+    /// CHECK: Validated by light-token CPI
+    pub cpi_authority_pda: AccountInfo<'info>,
+    /// CHECK: Validated by light-token CPI
+    pub registered_program_pda: AccountInfo<'info>,
+    /// CHECK: Validated by light-token CPI
+    pub account_compression_authority: AccountInfo<'info>,
+    /// CHECK: Validated by light-token CPI
+    pub account_compression_program: AccountInfo<'info>,
+    pub system_program: Program<'info, System>,
+    /// CHECK: Validated by light-token CPI
+    pub compressible_config: AccountInfo<'info>,
+    /// CHECK: Validated by light-token CPI - derived from find_mint_address(mint_seed)
+    #[account(mut)]
+    pub mint: AccountInfo<'info>,
+    /// CHECK: Validated by light-token CPI
+    #[account(mut)]
+    pub rent_sponsor: AccountInfo<'info>,
+    /// CHECK: Light token program for CPI
+    pub light_token_program: AccountInfo<'info>,
+}
+```
+
+## Key Concepts
+
+### Extension Compatibility
+
+**light-token (all extensions):**
+- Supports all Token 2022 extensions listed in the table
+- Some extensions have restrictions (fees must be zero, hooks must be nil)
+- Mints stored on-chain with compression address in tree
+
+**Compressed Token (limited extensions):**
+- Only supports: MetadataPointer, TokenMetadata, InterestBearingConfig, GroupPointer, GroupMemberPointer, TokenGroup, TokenGroupMember
+- Other extensions are not compatible with fully compressed tokens
+
+### Extension Lifecycle
+
+1. **Creation**: Extensions set in `CreateMintParams.extensions` vector
+2. **Updates**: Some extensions allow updates via `update_authority`
+3. **Immutability**: Extensions cannot be added or removed after mint creation
+
+### Metadata Extension Details
+
+**Standard Fields** (updatable by `update_authority`):
+- `name`: Token display name
+- `symbol`: Token ticker symbol
+- `uri`: Metadata JSON URI
+
+**Additional Metadata:**
+- Key-value pairs set at creation
+- Existing keys can be modified or removed
+- New keys cannot be added after creation
+- Use for immutable token properties
+
+### Interest-Bearing Tokens
+
+**Rate Configuration:**
+- Rate in basis points (100 = 1% annual)
+- Compounded per epoch
+- `rate_authority` can update rate
+
+**Interest Calculation:**
+- Applied automatically during token operations
+- Tracked in account balance
+- Uses Solana epoch timing
+
+### Token Groups
+
+**Group Hierarchy:**
+1. Create group mint with `TokenGroup` extension
+2. Create member mints with `TokenGroupMember` extension
+3. Member mints reference group via `GroupMemberPointer`
+4. Group tracks members via `size` field
+
+**Use Cases:**
+- NFT collections
+- Token families
+- Related asset sets
+
+### Security
+
+**Extension Validation:**
+- All extensions validated by Light Token Program
+- Invalid extension configurations cause CPI to fail
+- Test all extension combinations thoroughly
+
+**Authority Management:**
+- Different extensions have different authorities
+- Track which authority controls each extension
+- Use PDAs for program-controlled authorities
+
+**Proof Verification:**
+- Validity proof required for all mint creation
+- Proof validates mint address doesn't exist
+- Get proof from `getValidityProof()` RPC method
+
+### Common Errors
+
+| Error | Cause | Solution |
+|-------|-------|----------|
+| `InvalidExtension` | Unsupported extension for compressed token | Use only supported extensions for Compressed Token |
+| `InvalidMetadata` | Invalid metadata format | Verify name, symbol, uri are valid UTF-8 |
+| `InvalidFeeConfig` | Non-zero fees in TransferFeeConfig | Set both fee fields to 0 |
+| `InvalidHookConfig` | Non-nil program_id in TransferHook | Set program_id to Pubkey::default() |
+| `ExtensionNotFound` | Attempting to update non-existent extension | Verify extension was set during creation |
+| `InvalidAuthority` | Wrong authority for extension operation | Use correct authority for each extension type |

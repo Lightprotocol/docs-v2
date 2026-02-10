@@ -1,0 +1,303 @@
+```markdown expandable
+---
+argument-hint: <project_path>
+description: Create light-token transfer interface using Anchor framework
+allowed-tools: [Bash, Read, Glob, Grep, Task, mcp__deepwiki, mcp__zkcompression]
+---
+
+## Task: Create light-token transfer interface
+
+Create a Solana program using Anchor that transfers tokens between light-token accounts using the transfer interface.
+
+References:
+- Guide: https://zkcompression.com/light-token/cookbook/transfer-interface
+- SDK Reference: https://docs.rs/light-token/latest/light_token/
+- GitHub Example: https://github.com/Lightprotocol/examples-light-token
+
+MCP:
+* deepwiki https://mcp.deepwiki.com/mcp
+* zkcompression https://www.zkcompression.com/mcp
+
+## Workflow
+
+- This plan must execute without user intervention
+- All questions have been resolved in planning phase
+- If blocked, find alternative approach - do not stop
+- Keep working until ALL todos are complete
+- Use Task tool with subagents for parallel research or when stuck
+- Use subagents with Read, Glob, Grep, and Deepwiki permissions when stuck
+- Always assign Tasks to subagents and tell the user
+
+## DeepWiki fallback
+
+    mcp__deepwiki__read_wiki_structure("Lightprotocol/light-protocol"),
+    mcp__deepwiki__read_wiki_contents("Lightprotocol/light-protocol"),
+    mcp__deepwiki__ask_question("Lightprotocol/light-protocol", "<question>")
+
+## Quick Reference
+
+| Operation | SPL Token Transfer | Light-Token Transfer Interface |
+| --------- | ------------------ | ------------------------------ |
+| Account Detection | Manual checking required | Automatic detection |
+| Cross-Protocol | Separate instructions for SPL and Token-2022 | Single instruction handles all types |
+| Transfer Types | Single type per instruction | light-token ↔ light-token, SPL ↔ light-token |
+| CPI | Direct token program calls | CPI to Light Token Program |
+| Bridge Mechanism | N/A | SPL tokens locked in interface PDA |
+
+### Phase 1: Index project
+
+    find . -name "Cargo.toml" -o -name "lib.rs" -o -name "Anchor.toml"
+
+### Phase 2: Add dependencies
+
+Add to `programs/[name]/Cargo.toml`:
+
+    [dependencies]
+    light-token = "0.10.0"
+    light-token-types = "0.10.0"
+    anchor_lang = "0.31.1"
+
+### Phase 3: Implement program
+
+See Code Reference below. Implementation follows these steps:
+
+1. **Configure Transfer**: Set amount, decimals, source, destination, authority, payer, cpi_authority
+   - Source: /home/tilo/Workspace/examples-light-token/program-examples/anchor/programs/transfer-interface/src/lib.rs#L13-L22
+2. **CPI to Light Token Program**: Use `TransferInterfaceCpi::new()` with `.invoke()` or `.invoke_signed()`
+   - invoke: When authority is external signer
+   - invoke_signed: When authority is PDA (requires seeds)
+   - Source: /home/tilo/Workspace/examples-light-token/program-examples/anchor/programs/transfer-interface/src/lib.rs#L23
+
+### Phase 4: Test
+
+Build and test the program:
+
+    anchor build && anchor test
+
+On failure, debug and retry. Assign always to subagents with Task tool.
+
+## Code Reference
+
+### Transfer Interface Configuration
+
+    use light_token::instruction::TransferInterfaceCpi;
+
+    TransferInterfaceCpi::new(
+        amount,
+        decimals,
+        source.to_account_info(),
+        destination.to_account_info(),
+        authority.to_account_info(),
+        payer.to_account_info(),
+        cpi_authority.to_account_info(),
+        system_program.to_account_info(),
+    )
+
+**Important**: The transfer interface automatically detects account types and routes to the appropriate implementation:
+- light-token → light-token: Direct transfer
+- SPL → light-token: Locks SPL tokens in interface PDA, mints light-tokens
+- light-token → SPL: Burns light-tokens, releases SPL tokens from interface PDA
+
+### Anchor Account Structure
+
+    #[derive(Accounts)]
+    pub struct TransferAccounts<'info> {
+        /// CHECK: Validated by light-token CPI
+        #[account(mut)]
+        pub source: AccountInfo<'info>,
+        /// CHECK: Validated by light-token CPI
+        #[account(mut)]
+        pub destination: AccountInfo<'info>,
+        pub authority: Signer<'info>,
+        #[account(mut)]
+        pub payer: Signer<'info>,
+        /// CHECK: Validated by light-token CPI
+        pub cpi_authority: AccountInfo<'info>,
+        pub system_program: Program<'info, System>,
+        /// CHECK: Light token program for CPI
+        pub light_token_program: AccountInfo<'info>,
+    }
+
+**Note**: Source and destination accounts use `AccountInfo` with `/// CHECK` because the Light Token Program validates account types during CPI. The interface handles SPL token accounts, Token-2022 accounts, and light-token accounts.
+
+### CPI Variants
+
+#### invoke (External Signer)
+
+    use light_token::instruction::TransferInterfaceCpi;
+
+    pub fn transfer(ctx: Context<TransferAccounts>, amount: u64, decimals: u8) -> Result<()> {
+        TransferInterfaceCpi::new(
+            amount,
+            decimals,
+            ctx.accounts.source.to_account_info(),
+            ctx.accounts.destination.to_account_info(),
+            ctx.accounts.authority.to_account_info(),
+            ctx.accounts.payer.to_account_info(),
+            ctx.accounts.cpi_authority.to_account_info(),
+            ctx.accounts.system_program.to_account_info(),
+        )
+        .invoke()?;
+        Ok(())
+    }
+
+#### invoke_signed (PDA Authority)
+
+    use light_token::instruction::TransferInterfaceCpi;
+    use anchor_lang::prelude::*;
+
+    pub const TRANSFER_AUTHORITY_SEED: &[u8] = b"transfer_authority";
+
+    pub fn transfer_with_pda(ctx: Context<TransferAccounts>, amount: u64, decimals: u8) -> Result<()> {
+        // Derive the PDA for the authority
+        let (authority_pda, authority_bump) =
+            Pubkey::find_program_address(&[TRANSFER_AUTHORITY_SEED], ctx.program_id);
+
+        // Verify the authority account is the PDA we expect
+        require_keys_eq!(
+            authority_pda,
+            ctx.accounts.authority.key(),
+            ErrorCode::InvalidAuthority
+        );
+
+        TransferInterfaceCpi::new(
+            amount,
+            decimals,
+            ctx.accounts.source.to_account_info(),
+            ctx.accounts.destination.to_account_info(),
+            ctx.accounts.authority.to_account_info(),
+            ctx.accounts.payer.to_account_info(),
+            ctx.accounts.cpi_authority.to_account_info(),
+            ctx.accounts.system_program.to_account_info(),
+        )
+        .invoke_signed(&[&[TRANSFER_AUTHORITY_SEED, &[authority_bump]]])?;
+        Ok(())
+    }
+
+### Full Anchor Program Example
+
+    #![allow(unexpected_cfgs)]
+
+    use anchor_lang::prelude::*;
+    use light_token::instruction::TransferInterfaceCpi;
+
+    declare_id!("7kEQF6118CUMcr1TmnjQKqGz5HNdQE6edgUi63kpZrV6");
+
+    #[program]
+    pub mod light_token_anchor_transfer_interface {
+        use super::*;
+
+        pub fn transfer(ctx: Context<TransferAccounts>, amount: u64, decimals: u8) -> Result<()> {
+            TransferInterfaceCpi::new(
+                amount,
+                decimals,
+                ctx.accounts.source.to_account_info(),
+                ctx.accounts.destination.to_account_info(),
+                ctx.accounts.authority.to_account_info(),
+                ctx.accounts.payer.to_account_info(),
+                ctx.accounts.cpi_authority.to_account_info(),
+                ctx.accounts.system_program.to_account_info(),
+            )
+            .invoke()?;
+            Ok(())
+        }
+    }
+
+    #[derive(Accounts)]
+    pub struct TransferAccounts<'info> {
+        /// CHECK: Validated by light-token CPI
+        #[account(mut)]
+        pub source: AccountInfo<'info>,
+        /// CHECK: Validated by light-token CPI
+        #[account(mut)]
+        pub destination: AccountInfo<'info>,
+        pub authority: Signer<'info>,
+        #[account(mut)]
+        pub payer: Signer<'info>,
+        /// CHECK: Validated by light-token CPI
+        pub cpi_authority: AccountInfo<'info>,
+        pub system_program: Program<'info, System>,
+        /// CHECK: Light token program for CPI
+        pub light_token_program: AccountInfo<'info>,
+    }
+
+## Key Concepts
+
+### Transfer Interface vs Direct Transfer
+
+**Direct Transfer (SPL Token):**
+- Separate instructions for SPL and Token-2022
+- Manual account type checking required
+- No cross-protocol transfers
+- Direct token program CPI
+
+**Transfer Interface (Light Token):**
+- Single instruction for all account types
+- Automatic account type detection
+- Supports light-token ↔ light-token and SPL ↔ light-token
+- Unified interface via Light Token Program
+
+### Core Components
+
+1. **TransferInterfaceCpi**: CPI builder for transfer interface
+   - `amount`: Number of tokens to transfer
+   - `decimals`: Token decimal places (must match mint)
+   - `source`: Source account (SPL or light-token)
+   - `destination`: Destination account (SPL or light-token)
+   - `authority`: Transfer authority (must be Signer or PDA)
+   - `payer`: Fee payer account
+   - `cpi_authority`: Light Token CPI authority PDA
+   - `system_program`: Solana system program
+   - `.invoke()`: For external keypair signers
+   - `.invoke_signed()`: For PDA signers
+
+2. **Account Type Detection**: Automatic routing based on account data
+   - light-token accounts: Detected by Light Token Program account data format
+   - SPL token accounts: Detected by SPL token program ownership
+   - Token-2022 accounts: Detected by Token-2022 program ownership
+
+3. **Bridge Mechanism**: SPL ↔ light-token transfers use interface PDA
+   - SPL → light-token: SPL tokens locked in PDA, light-tokens minted
+   - light-token → SPL: light-tokens burned, SPL tokens released from PDA
+
+### Transfer Types
+
+1. **light-token → light-token**: Direct transfer between light-token accounts
+   ```rust
+   // Both source and destination are light-token ATAs
+   let (source_ata, _) = derive_token_ata(&sender.pubkey(), &mint_pda);
+   let (dest_ata, _) = derive_token_ata(&recipient.pubkey(), &mint_pda);
+   ```
+
+2. **SPL → light-token**: Locks SPL tokens, mints light-tokens
+   ```rust
+   // source is SPL token account, destination is light-token ATA
+   let spl_token_account = ...; // SPL token account
+   let (dest_ata, _) = derive_token_ata(&recipient.pubkey(), &mint_pda);
+   ```
+
+3. **light-token → SPL**: Burns light-tokens, releases SPL tokens
+   ```rust
+   // source is light-token ATA, destination is SPL token account
+   let (source_ata, _) = derive_token_ata(&sender.pubkey(), &mint_pda);
+   let spl_token_account = ...; // SPL token account
+   ```
+
+### Security
+
+- **Authority validation**: Transfer authority must be valid Signer or PDA
+- **Account validation**: Light Token Program validates account types during CPI
+- **PDA verification**: When using PDAs, verify derived address matches expected
+- **Decimal validation**: Decimals must match mint configuration
+
+### Common Errors
+
+| Error | Cause | Solution |
+|-------|-------|----------|
+| `ProgramError::InvalidSeeds` | PDA derivation mismatch | Verify PDA seeds match expected derivation |
+| `ProgramError::NotEnoughAccountKeys` | Missing required accounts | Check all accounts are provided in correct order |
+| `ProgramError::InvalidAccountData` | Wrong account type | Verify source/destination are valid token accounts |
+| Authority not Signer | Authority not marked as signer | Ensure authority is Signer in account constraints |
+| Decimal mismatch | Decimals don't match mint | Fetch decimals from mint account before transfer |
+| Insufficient balance | Source has fewer tokens than amount | Check source balance before transfer |
+```
