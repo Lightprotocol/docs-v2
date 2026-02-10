@@ -419,7 +419,7 @@ impl LightProgramInterface for AmmSdk {
             } else if pubkey == self.token_0_vault || pubkey == self.token_1_vault {
                 specs.push(AccountSpec::Token(account.clone()));
             }
-            // Mints are SPL accounts -- hot by definition.
+            // ...
         }
         Ok(specs)
     }
@@ -517,7 +517,7 @@ space. Both address spaces are checked before creation, preventing re-init
 attacks, even if the account is currently cold. </Accordion>
 
 <Accordion title="Who triggers compression?"> 
-Foresters compress accounts that have been inactive for an extended period of time (when their virtual rent balance drops below threshold).
+Miners (Forester nodes) compress accounts that have been inactive for an extended period of time (when their virtual rent balance drops below threshold).
 In practice, having to load cold accounts should be rare. The common path (hot) has no extra overhead and does not increase CU or txn size.
 </Accordion>
 

@@ -4,7 +4,7 @@ description: "Add support for rent-free AMMs on Solana."
 ---
 
 Your existing quoting, routing, and swap-building logic stays the same.
-The only addition: when a market has cold accounts, prepend load instructions before the swap.
+The only addition: when a market has cold accounts, detect them, and prepend load instructions before the swap.
 
 ## What changes
 
@@ -18,23 +18,65 @@ The only addition: when a market has cold accounts, prepend load instructions be
 
 ## Detecting cold accounts
 
-You already stream account state (e.g. via [LaserStream](https://docs.helius.dev/laserstream/overview)).
-Add a `cold_set: HashSet<Pubkey>` alongside your existing cache. When an account goes
-cold (balance drops to zero in a `compress_and_close` transaction), add it to the set.
-When an account comes back hot (account subscription delivers data), remove it.
+Add a cache for cold accounts. this can be separate from your regular account cache.
 
-For full streaming setup, see [Streaming Token Accounts](/light-token/data-streaming/for-streaming-tokens)
-and [Streaming Mints](/light-token/data-streaming/for-streaming-mints).
+```rust
+cold_cache: HashMap<[u8; 32], AccountInterface>, // Accounts with `ColdContext` (used for loading)
+```
 
-If you don't stream and just want point queries, `get_account_interface` returns
-both hot and cold account data transparently.
+If you stream, subscribe to accounts and transactions with the Light Token Program.
+
+| Subscription | Detects |
+|:-------------|:--------|
+| Account sub (`owner: cToken...`) | Hot state + cold-to-hot |
+| Transaction sub (`account_include: cToken...`) | Hot-to-cold |  
+
+**Hot-to-cold** -- in your transaction handler, listen to accounts whose balance dropped to zero. Async-fetch the `AccountInterface`
+(which includes the `ColdContext` needed for load instructions):
+
+```rust
+Some(UpdateOneof::Transaction(tx_update)) => {
+    if let Some(ref tx_info) = tx_update.transaction {
+        for pubkey in find_closed_accounts(tx_info) {
+            if cache.remove(&pubkey).is_some() {
+                let rpc = rpc.clone();
+                tokio::spawn(async move {
+                    if let Ok(Some(iface)) = rpc.get_account_interface(&pubkey, None).await {
+                        cold_cache.insert(pubkey, iface);
+                    }
+                });
+            }
+        }
+    }
+}
+```
+
+`find_closed_accounts` checks `pre_balances[i] > 0 && post_balances[i] == 0` across all transaction
+keys (including ALT-loaded addresses). See [full implementation](/light-token/toolkits/for-streaming-tokens#detecting-transitions).
+
+**Cold-to-hot** -- your existing account subscription picks up the hot account again. No cache changes needed because account state does not change while cold.
+
+```rust
+Some(UpdateOneof::Account(account_update)) => {
+    if let Some(account) = account_update.account {
+        let pubkey: [u8; 32] = account.pubkey.as_slice().try_into().unwrap();
+        // remove from cold cache.
+        cold_cache.remove(&pubkey);
+    }
+}
+```
+
+For the full streaming guide, see [Streaming Token Accounts](/light-token/toolkits/for-streaming-tokens)
+and [Streaming Mints](/light-token/toolkits/for-streaming-mints).
+
+If you don't stream, call `get_multiple_account_interfaces` at swap time and check `is_cold()` to detect cold accounts.
 
 ---
 
 ## Building swap transactions with cold accounts
 
 When you detect cold accounts in a market (via your `cold_set` or via `is_cold()` on fetched accounts),
-fetch their `ColdContext` and build load instructions.
+fetch their `ColdContext` via `get_account_interface` and build load instructions.
 
 ```rust
 use light_client::interface::{create_load_instructions, LightProgramInterface};
@@ -169,10 +211,10 @@ rpc.send_transaction(&ixs, &payer).await?;
 
 ### When does a market go cold?
 
-Accounts go cold after extended inactivity. Their virtual rent balance falls
-below a threshold and foresters compress them onto the Solana ledger.
+Accounts go cold after extended inactivity. Their virtual rent balance drops
+below a threshold and miners compress them onto the Solana ledger.
 
-They stay cold until a client loads them back in-flight via `create_load_instructions`.
+They stay cold until any client loads them back in-flight via `create_load_instructions`.
 
 **Touching cold markets is rare.** The hot path has zero overhead.
 
