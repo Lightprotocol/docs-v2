@@ -43,7 +43,7 @@ primitives and use cases:
 
 ## Capabilities
 
-Light Token allows agents to build scalable Solana applications with rent-free token and mint accounts and PDA's.|
+Light Token allows agents to build scalable Solana applications with rent-free token and mint accounts and PDA's.
 
 Comparing creation cost and CU usage:
 
@@ -58,7 +58,7 @@ Comparing creation cost and CU usage:
 Install this reference skill:
 
 ```bash
-npx skills add zkcompression.com/skill.md
+npx skills add https://zkcompression.com
 ```
 
 ## Workflow
