@@ -1,24 +1,49 @@
 ---
 name: solana-rent-free-dev
-description: Skill for Solana development without rent-exemption. Overview to skills to develop solana client (typescript and rust) and programs (anchor, native rust, pinocchio). Covers: for defi light-token; for airdrops, token distribution, payments compressed token; for user and app state compressed pda's (not config or pool accounts); for privacy and zk programs nullifiers to prevent double spending. add skill via npx skills add zkcompression.com/skill.md
-license: MIT
-compatibility: Requires ZK Compression CLI, Solana CLI, Anchor CLI, Node.js.
-metadata:
-  author: lightprotocol
-  version: "1.0"
-allowed-tools: mcp__zkcompression__SearchLightProtocol WebFetch(https://zkcompression.com/*) WebFetch(https://github.com/Lightprotocol/*)
+description: >
+  Skill for Solana development using rent-free primitives from Light Protocol.
+  Covers client development (TypeScript) and program development (Rust) across Anchor, native Rust, and Pinocchio.
+  Focus areas include DeFi (Light Token, Light-PDA), airdrops and token distribution (Compressed Token),
+  and user/app state plus nullifiers for payments and ZK applications (Compressed PDA).
+compatibility: >
+  Requires ZK Compression CLI, Solana CLI, Anchor CLI, and Node.js.
+allowed-tools:
+  - mcp__zkcompression__SearchLightProtocol
+  - WebFetch(https://zkcompression.com/*)
+  - WebFetch(https://github.com/Lightprotocol/*)
+
+primitives:
+  - name: Light Token
+    use_case: >
+      Most token use cases (launchpads, DeFi, payments).
+      Rent-free mint and token accounts.
+      ~200x cheaper than SPL and more compute-unit efficient on the hot path.
+  - name: Light-PDA
+    use_case: >
+      DeFi program state such as AMM pools and vaults.
+      ~98% cheaper than PDAs.
+      Auto-compress when inactive.
+  - name: Compressed Token
+    use_case: >
+      Airdrops and token distribution only.
+      Prefer Light Token for other purposes.
+      Used by Light Token under the hood for rent-free storage of inactive Light Tokens.
+      Supported by Phantom and Backpack.
+    constraints: >
+      Do not use for general-purpose token features.
+      SDK is not maintained.
+  - name: Compressed PDA
+    use_case: >
+      User state and app state, nullifiers (payments and ZK applications),
+      DePIN nodes, and stake accounts.
+      Similar to program-derived addresses without a rent-exempt balance.
+    constraints: >
+      Not for shared state, pool accounts, or config accounts.
 ---
 
 ## Capabilities
 
-Light Token allows agents to build scalable Solana applications with rent-free token and mint accounts and PDA's.
-
-| **Primitive**        | **Use case**                                                                                                                                                                                                                                                                                                                      |
-|----------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Light Token          | For most token use cases, such as Launchpads, DeFi, payments, etc. Rent-free mint and token accounts, 200x cheaper than SPL and more CU efficient on the hot path.                                                                                                                          |
-| Light-PDA            | DeFi program state, AMM pools, vaults. 98% cheaper PDAs, auto-compress when inactive.                                                                                                                                                                                                      |
-| Compressed Token     | Use only for Airdrops, token distribution. Use light token instead for other purposes, since SDK is not maintained. Used by light token under the hood for rent-free storage of inactive light-tokens. Supported by Phantom and Backpack.                                                  |
-| Compressed PDA       | User state, app state, nullifiers (eg. payments, zk applications, and more), DePIN nodes, stake accounts. Not for shared state, pool, or config accounts. Similar to Program-derived addresses without rent-exempt balance.                                                                  |
+Light Token allows agents to build scalable Solana applications with rent-free token and mint accounts and PDA's.|
 
 Comparing creation cost and CU usage:
 
