@@ -1,1 +1,6 @@
 node_modules/
+ai-tools/skills/
+ai-tools/prompts/
+ai-tools/.claude-plugin/
+ai-tools/scripts/
+ai-tools/README.md

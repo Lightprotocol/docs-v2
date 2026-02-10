@@ -103,7 +103,7 @@
             "group": "Learn",
             "pages": [
               "learn/light-token-standard",
-              "learn/ai-tools-guide"
+              "ai-tools/guide"
             ]
           },
           {
@@ -247,7 +247,7 @@
                   "learn/core-concepts/considerations"
                 ]
               },
-              "learn/ai-tools-guide"
+              "ai-tools/guide"
             ]
           },
           {
@@ -366,6 +366,10 @@
     {
       "source": "/landing",
       "destination": "/welcome"
+    },
+    {
+      "source": "https://www.zkcompression.com/learn/ai-tools-guide",
+      "destination": "https://www.zkcompression.com/ai-tools/guide"
     }
   ]
 }

@@ -1,4 +1,4 @@
-# Simple Airdrop (<10,000 recipients)
+# Simple Airdrop (&lt;10,000 recipients)
 
 Single transaction approach for small distributions.
 
