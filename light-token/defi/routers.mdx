@@ -40,6 +40,7 @@ Some(UpdateOneof::Transaction(tx_update)) => {
         for pubkey in find_closed_accounts(tx_info) {
             if cache.remove(&pubkey).is_some() {
                 let rpc = rpc.clone();
+                let cold_cache = cold_cache.clone();
                 tokio::spawn(async move {
                     if let Ok(Some(iface)) = rpc.get_account_interface(&pubkey, None).await {
                         cold_cache.insert(pubkey, iface);

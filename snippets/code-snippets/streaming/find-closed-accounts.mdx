@@ -13,6 +13,7 @@ Some(UpdateOneof::Transaction(tx_update)) => {
                 // Cold accounts are inactive, so this completes well
                 // before anyone tries to swap through them.
                 let rpc = rpc.clone();
+                let cold_cache = cold_cache.clone();
                 tokio::spawn(async move {
                     if let Ok(Some(iface)) = rpc.get_account_interface(&pubkey, None).await {
                         cold_cache.insert(pubkey, iface);
