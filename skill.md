@@ -82,16 +82,16 @@ npx skills add https://zkcompression.com
 
 ## Skills
 
-| Use case | Skill |
-|----------|-------|
-| Build DeFi programs (AMMs, vaults, lending) with Anchor or Pinocchio | [defi-program](skills/defi-program/) |
-| Integrate rent-free markets into routers and aggregators | [defi-router](skills/defi-router/) |
-| Stream account state via Laserstream gRPC | [data-streaming](skills/data-streaming/) |
-| Wallets and payment flows with light-token. Includes privy, wallet adapter, mobile wallet adapter signing. Optional nullifier to prevent your onchain instruction from being executed more than once. | [payments-and-wallets](skills/payments-and-wallets/) |
-| Airdrops, DePIN, token distribution | [airdrop](skills/airdrop/) |
-| Anti-double-spend nullifiers for Privacy-preserving ZK programs | [zk-nullifier](skills/zk-nullifier/) |
-| Testing programs and clients on localnet, devnet, mainnet | [testing](skills/testing/) |
-| Help with Debugging and Questions via DeepWiki MCP | [ask-mcp](skills/ask-mcp/) |
+| Use case                                                                                                                                                                                              | Skill                                                           |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| Build DeFi programs (AMMs, vaults, lending) with Anchor or Pinocchio                                                                                                                                  | [defi-program](ai-tools/skills/defi-program/)                  |
+| Integrate rent-free markets into routers and aggregators                                                                                                                                              | [defi-router](ai-tools/skills/defi-router/)                    |
+| Stream account state via Laserstream gRPC                                                                                                                                                             | [data-streaming](ai-tools/skills/data-streaming/)              |
+| Wallets and payment flows with light-token. Includes privy, wallet adapter, mobile wallet adapter signing. Optional nullifier to prevent your onchain instruction from being executed more than once. | [payments-and-wallets](ai-tools/skills/payments-and-wallets/)  |
+| Airdrops, DePIN, token distribution                                                                                                                                                                   | [airdrop](ai-tools/skills/airdrop/)                            |
+| Anti-double-spend nullifiers for Privacy-preserving ZK programs                                                                                                                                       | [zk-nullifier](ai-tools/skills/zk-nullifier/)                  |
+| Testing programs and clients on localnet, devnet, mainnet                                                                                                                                             | [testing](ai-tools/skills/testing/)                            |
+| Help with Debugging and Questions via DeepWiki MCP                                                                                                                                                    | [ask-mcp](ai-tools/skills/ask-mcp/)                            |
 
 Skills for compressed PDAs and more are in development.
 
