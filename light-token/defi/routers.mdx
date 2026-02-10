@@ -18,7 +18,7 @@ The only addition: when a market has cold accounts, detect them, and prepend loa
 
 ## Detecting cold accounts
 
-Add a cache for cold accounts. this can be separate from your regular account cache.
+Add a cache for cold accounts. This can be separate from your regular account cache.
 
 ```rust
 cold_cache: HashMap<[u8; 32], AccountInterface>, // Accounts with `ColdContext` (used for loading)
