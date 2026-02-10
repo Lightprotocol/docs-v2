@@ -11,7 +11,6 @@ allowed-tools:
   - mcp__zkcompression__SearchLightProtocol
   - WebFetch(https://zkcompression.com/*)
   - WebFetch(https://github.com/Lightprotocol/*)
-
 primitives and use cases:
   - name: Light Token
     use_case: >
