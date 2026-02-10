@@ -123,7 +123,7 @@ After extended inactivity (multiple epochs without writes), accounts auto-compre
 
 | Area | Change |
 |------|--------|
-| State struct | Derive `LightAccount`, add `compression_info: Option<CompressionInfo>` |
+| State struct | Derive `LightAccount`, add `compression_info: CompressionInfo` |
 | Accounts struct | Derive `LightAccounts`, add `#[light_account]` on init accounts |
 | Program module | Add `#[light_program]` above `#[program]` |
 | Instructions | No changes |
