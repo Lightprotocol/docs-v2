@@ -22,8 +22,7 @@ The Light-SDK sponsors rent-exemption for your PDAs, token accounts, and mints. 
 Audit overhead is minimal as your program logic is mostly untouched. The rest is
 macro-generated.
 
-If you don't use Anchor, [let us know](https://discord.com/invite/7cJ8BhAXhu).
-References for native solana-program integration coming soon.
+If you don't use Anchor, see the [Pinocchio Programs](./programs-pinocchio) guide.
 
 ---
 <Callout type="info">
@@ -351,7 +350,7 @@ pub fn process_initialize_pool(ctx: Context<InitializePool>, params: InitializeP
 ## Client SDK
 
 To make it easy for clients to integrate with your program, implement the
-`LightProgram` trait in your program's SDK crate.
+`LightProgramInterface` trait in your program's SDK crate.
 
 For a detailed example of how clients use this trait, check out the [Router Integration](./routers.mdx) page.
 
@@ -375,7 +374,7 @@ pub enum AmmInstruction {
     Withdraw,
 }
 
-impl LightProgram for AmmSdk {
+impl LightProgramInterface for AmmSdk {
     type Variant = LightAccountVariant;
     type Instruction = AmmInstruction;
 
@@ -442,7 +441,7 @@ impl LightProgram for AmmSdk {
 ```rust
 use light_program_test::{LightProgramTest, ProgramTestConfig, Rpc};
 use light_sdk::interface::rent::SLOTS_PER_EPOCH;
-use light_client::interface::{create_load_instructions, LightProgram};
+use light_client::interface::{create_load_instructions, LightProgramInterface};
 
 #[tokio::test]
 async fn test_pool_lifecycle() {

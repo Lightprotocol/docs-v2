@@ -3,87 +3,92 @@ title: "Router Integration"
 description: "Add support for rent-free AMMs on Solana."
 ---
 
-1. Use `get_account_interface` instead of `get_account` to store `AccountInterface`.
-2. Use the AMM's `LightProgram` trait to load inactive markets when needed.
+Your existing quoting, routing, and swap-building logic stays the same.
+The only addition: when a market has cold accounts, prepend load instructions before the swap.
 
+## What changes
 
-## Step 1: Use `get_account_interface`
+| | Hot market (99%+) | Cold market |
+|---|---|---|
+| Quoting | No change | No change |
+| Swap instruction | No change | No change |
+| Transaction | No change | Prepend `create_load_instructions` |
 
-`get_account_interface` is a new RPC endpoint that returns a superset of
-`get_account`. `AccountInterface` stores additional info in `Option<ColdContext>`
-that you will need later.
+---
 
-<div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-<div>
-<h4>Account</h4>
+## Detecting cold accounts
+
+You already stream account state (e.g. via [LaserStream](https://docs.helius.dev/laserstream/overview)).
+Add a `cold_set: HashSet<Pubkey>` alongside your existing cache. When an account goes
+cold (balance drops to zero in a `compress_and_close` transaction), add it to the set.
+When an account comes back hot (account subscription delivers data), remove it.
+
+For full streaming setup, see [Streaming Token Accounts](/light-token/data-streaming/for-streaming-tokens)
+and [Streaming Mints](/light-token/data-streaming/for-streaming-mints).
+
+If you don't stream and just want point queries, `get_account_interface` returns
+both hot and cold account data transparently.
+
+---
+
+## Building swap transactions with cold accounts
+
+When you detect cold accounts in a market (via your `cold_set` or via `is_cold()` on fetched accounts),
+fetch their `ColdContext` and build load instructions.
+
 ```rust
-pub struct Account {
-    pub lamports: u64,
-    pub data: Vec<u8>,
-    pub owner: Pubkey,
-    pub executable: bool,
-    pub rent_epoch: Epoch,
+use light_client::interface::{create_load_instructions, LightProgramInterface};
+
+// 1. Identify which accounts the swap touches
+let pubkeys = sdk.instruction_accounts(&AmmInstruction::Swap);
+
+// 2. Check which are cold (from your streaming cache, or fetch)
+let cold_pubkeys: Vec<_> = pubkeys.iter().filter(|p| cold_set.contains(p)).collect();
+
+// 3. If any are cold, fetch their ColdContext and build load instructions
+let mut ixs = vec![];
+if !cold_pubkeys.is_empty() {
+    let interfaces = rpc
+        .get_multiple_account_interfaces(cold_pubkeys, None)
+        .await?
+        .value;
+    let cold: Vec<_> = interfaces.into_iter().flatten().collect();
+    let specs = sdk.load_specs(&cold)?;
+    ixs.extend(create_load_instructions(&specs, payer, config_pda, &rpc).await?);
 }
+
+// 4. Swap instruction is unchanged
+ixs.push(sdk.swap_ix(&swap_params)?);
 ```
-</div>
-<div>
-<h4>AccountInterface</h4>
-```rust
-pub struct AccountInterface {
-   key: Pubkey,
-   account: Account,
-   cold: Option<ColdContext>
-}
-```
-</div>
-</div>
 
+---
 
-## Step 2: Use the LightProgram trait
-All rent-free programs expose a `LightProgram` trait in their SDK.
+## The LightProgramInterface trait
 
-Using this trait allows you to:
-
-1. Check which accounts a given instruction references.
-2. Build load specs for cold accounts needed by `create_load_instructions`.
+Each rent-free AMM SDK exposes this trait. It tells you which accounts an instruction
+touches and how to build load specs for cold ones.
 
 ```rust
-// AMM SDK implements this.
-pub trait LightProgram {
+pub trait LightProgramInterface {
     type Variant: Pack<AccountMeta> + Clone + Debug;
     type Instruction;
 
     fn program_id() -> Pubkey;
     fn instruction_accounts(&self, ix: &Self::Instruction) -> Vec<Pubkey>;
-    fn load_specs(&self, cold_accounts: &[AccountInterface]) -> Result<Vec<AccountSpec<Self::Variant>>, Box<dyn Error>>;
+    fn load_specs(
+        &self,
+        cold_accounts: &[AccountInterface],
+    ) -> Result<Vec<AccountSpec<Self::Variant>>, Box<dyn Error>>;
 }
 ```
 
-## Step 3: Load cold accounts when building Swap instructions
-When building Swap instructions, prepend a `create_load_instructions` call.
+- `instruction_accounts` -- returns the pubkeys the instruction reads/writes.
+- `load_specs` -- given cold `AccountInterface`s (with `ColdContext`), returns the `AccountSpec`s
+  that `create_load_instructions` needs to bring them back on-chain.
 
-This only adds latency if markets are cold.
+---
 
-```rust
-// Check which accounts the swap references
-let pubkeys = sdk.instruction_accounts(&AmmInstruction::Swap);
-
-// Fetch their current state
-let accounts = rpc.get_multiple_account_interfaces(pubkeys.iter().collect(), None).await?.value;
-let cold: Vec<_> = accounts.into_iter().flatten().filter(|a| a.is_cold()).collect();
-
-// If any are cold, build load instructions
-if !cold.is_empty() {
-    let specs = sdk.load_specs(&cold)?;
-    let load_ixs = create_load_instructions(&specs, payer.pubkey(), config_pda, &rpc).await?;
-    instructions.extend(load_ixs);
-}
-
-// add swap instruction...
-```
-
-
-## Full Example
+## Full example
 
 ### Dependencies
 
@@ -91,67 +96,61 @@ if !cold.is_empty() {
 [dependencies]
 light-client = {version = "0.18.0", features = ["v2"]}
 
-# Example Program SDK that implements LightProgram (provided by AMM team)
+# AMM SDK that implements LightProgramInterface (provided by the AMM team)
 example-amm-sdk = "0.1"
 ```
 
 ### Code
 
 ```rust expandable
-use light_client::interface::{create_load_instructions, LightProgram};
+use light_client::interface::{create_load_instructions, LightProgramInterface};
 use example_amm_sdk::{ExampleAmmSdk, AmmInstruction};
 
-// 1. Fetch pool state (works for both hot and cold)
-let pool_interface = rpc
-    .get_account_interface(&pool_address, None)
-    .await?
-    .value
-    .expect("pool should exist");
+// Construct SDK from pool data (same as before -- pool data is always available,
+// hot or cold, via get_account_interface or your cache).
+let sdk = ExampleAmmSdk::new(pool_address, pool_data)?;
 
-// 2. Construct SDK from pool data
-let sdk = ExampleAmmSdk::new(pool_address, pool_interface.data())?;
-
-// 3. Quote (works same for hot or cold -- data is always available)
+// Quote works the same regardless of hot/cold.
 let quote = sdk.quote(amount_in, min_out)?;
 
-// 4. Build transaction
+// Build transaction.
 let mut ixs = vec![];
 
-// Check which accounts the swap references and fetch them
+// Check if any swap accounts are cold.
 let pubkeys = sdk.instruction_accounts(&AmmInstruction::Swap);
-let accounts = rpc.get_multiple_account_interfaces(pubkeys.iter().collect(), None).await?.value;
-let cold: Vec<_> = accounts.into_iter().flatten().filter(|a| a.is_cold()).collect();
+let cold_pubkeys: Vec<_> = pubkeys.iter().filter(|p| cold_set.contains(p)).collect();
 
-// If any are cold, build load instructions
-if !cold.is_empty() {
+if !cold_pubkeys.is_empty() {
+    // Fetch ColdContext for cold accounts.
+    let interfaces = rpc
+        .get_multiple_account_interfaces(cold_pubkeys, None)
+        .await?
+        .value;
+    let cold: Vec<_> = interfaces.into_iter().flatten().collect();
     let specs = sdk.load_specs(&cold)?;
-    let load_ixs = create_load_instructions(&specs, payer.pubkey(), config_pda, &rpc).await?;
-    ixs.extend(load_ixs);
+    ixs.extend(create_load_instructions(&specs, payer.pubkey(), config_pda, &rpc).await?);
 }
 
-// Add actual swap instruction
+// Swap instruction is the same as without rent-free accounts.
 ixs.push(sdk.swap_ix(&swap_params)?);
 
-// 5. Send
 rpc.send_transaction(&ixs, &payer).await?;
 ```
 
-### Key Types
+### Key types
 
 | Type | Source | Purpose |
 |------|--------|---------|
-| `Rpc` trait | `light-client` | RPC client with `get_account_interface` methods |
-| `AccountInterface` | `light-client` | Unified hot/cold account type |
-| `LightProgram` | `light-client` | Trait that program SDKs implement |
-| `AccountSpec` | `light-client` | Specifies account load requirements |
+| `AccountInterface` | `light-client` | Account data with optional `ColdContext` |
+| `LightProgramInterface` | `light-client` | Trait that AMM SDKs implement |
+| `AccountSpec` | `light-client` | Input to `create_load_instructions` |
 
-### Reference Implementation
+### Reference implementation
 
 | Resource | Link |
 |----------|------|
 | AMM Program | [cp-swap-reference](https://github.com/Lightprotocol/cp-swap-reference) |
-| LightProgram Trait Impl | [CpSwapSdk](https://github.com/Lightprotocol/cp-swap-reference/blob/main/programs/cp-swap/tests/program.rs#L409) |
-| Client Test | [program.rs](https://github.com/Lightprotocol/cp-swap-reference/blob/main/programs/cp-swap/tests/program.rs) |
+| LightProgramInterface Trait Impl | [CpSwapSdk](https://github.com/Lightprotocol/cp-swap-reference/blob/main/programs/cp-swap/tests/program.rs#L409) |
 
 ---
 
@@ -166,68 +165,46 @@ rpc.send_transaction(&ixs, &payer).await?;
 | Tx size | Normal | +100-2400 bytes*|
 | CU | Normal | +15k-400k CU*|
 
-Latency, tx size, and CU depend on the number and type of cold accounts.
+*Depends on the number and type of cold accounts.*
 
 ### When does a market go cold?
-Accounts become "cold" after extended inactivity, causing their virtual rent balance to fall below a threshold. Once cold, they auto-compress onto the Solana ledger.
 
-They remain cold until the first client loads them back into the hot state in-flight via `create_load_instructions`.
+Accounts go cold after extended inactivity. Their virtual rent balance falls
+below a threshold and foresters compress them onto the Solana ledger.
 
-**In practice, touching cold markets is rare.** The common path ("hot") has no extra latency, tx size, or CU overhead.
+They stay cold until a client loads them back in-flight via `create_load_instructions`.
+
+**Touching cold markets is rare.** The hot path has zero overhead.
 
 ---
-## Error Handling
-
-```rust
-use light_client::error::LightClientError;
-
-match rpc.get_account_interface(&pool_address, None).await {
-    Ok(account) => {
-        // Account is hot or cold
-        // Proceed with quote and swap
-    }
-    Err(LightClientError::AccountNotFound) => {
-        // Account does not exist
-    }
-}
-```
 
 ## FAQ
 
 <Accordion title="Do I need to change my swap instructions?">
-No. In all cases, swap instructions stay the same.
-If the market is active (hot), the transaction is identical to today (UX, CU, latency, txn size,...). 
-If the market is inactive (cold), you additionally prepend `create_load_instructions`.
+No. Swap instructions are identical. If the market is hot, the transaction
+is the same as today. If cold, you prepend `create_load_instructions`.
 </Accordion>
 
-<Accordion title="Can I quote cold markets?"> Yes. `get_account_interface` is a
-superset of `get_account` and returns the full account state via the same `Account`
-type, regardless of whether the account is hot or cold. Quoting works all the same. </Accordion>
+<Accordion title="Can I quote cold markets?">
+Yes. `get_account_interface` returns full account data regardless of hot/cold.
+Quoting works the same.
+</Accordion>
 
-<Accordion title="Do rent-free markets increase latency?"> 
-  **Active markets (hot path)**: No additional latency.
+<Accordion title="Do rent-free markets increase latency?">
+**Hot (common path)**: No.
 
-  **Inactive markets (cold)**: Yes, loading accounts back into Solana's active state adds
-  1-200ms depending on whether a validity proof is needed. If loading multiple
-  cold accounts exceeds Solana's 1232 byte limit, use Jito bundles to maintain
-  atomicity and reduce latency. Future updates will continue to reduce
-  transaction size and CU usage for loading cold accounts. 
+**Cold**: Loading accounts adds 1-200ms depending on whether a validity proof
+is needed. If load + swap exceed Solana's 1232 byte limit, use Jito bundles.
 </Accordion>
 
 <Accordion title="How long do accounts stay hot after loading?">
-Accounts stay hot until they become inactive again. After extended inactivity (configurable by the program owner, e.g., 24h of no writes), their virtual rent balance falls below a threshold and foresters compress them back to cold state. Each write extends the "hot" period.
+Until they go inactive again. Each write resets the timer. The inactivity
+threshold is configurable by the program owner (e.g. 24h of no writes).
 </Accordion>
 
-<Accordion title="Does loading cold accounts exceed Solana's txn size limit?">
+<Accordion title="What if load + swap exceed Solana's tx size limit?">
 
-In some cases, yes. You can detect this at runtime by inspecting the Instructions returned by `create_load_instructions`. 
-
-Note that the SDK deduplicates many of the account keys over the wire, so
-instructions that may appear large in isolation will be incremental when
-combined with other instructions, such as Swap and Deposit.
-
-If load instructions + swap instructions exceed Solana's 1232 byte limit, send as a Jito bundle:
-
+Send as a Jito bundle:
 
 ```rust expandable
 use solana_sdk::{instruction::Instruction, pubkey::Pubkey, system_instruction};
@@ -249,8 +226,7 @@ fn jito_tip_ix(payer: &Pubkey, tip_lamports: u64) -> Instruction {
     system_instruction::transfer(payer, &tip_account, tip_lamports)
 }
 
-// Add tip to last transaction, serialize, send to Jito
-let tip_ix = jito_tip_ix(&payer.pubkey(), 10_000); // 10k lamports
+let tip_ix = jito_tip_ix(&payer.pubkey(), 10_000);
 swap_ixs.push(tip_ix);
 
 let bundle = vec![load_tx_base64, swap_tx_base64];
@@ -266,24 +242,21 @@ let resp = client
 ```
 </Accordion>
 
-<Accordion title="Do RPC providers support these interface endpoints?">
-Yes. The relevant RPC methods are supported by providers such as Helius and Triton and can also be self-hosted via the <a href="https://github.com/helius-labs/photon" target="_blank">open-source Photon indexer</a>, which is maintained by Helius Labs.
+<Accordion title="Do RPC providers support get_account_interface?">
+Yes. Supported by Helius and Triton. Can also be self-hosted via the
+<a href="https://github.com/helius-labs/photon" target="_blank">open-source Photon indexer</a>.
 </Accordion>
 
-<Accordion title="What if the indexer is down?"> 
-Hot markets work all the same as long as Solana is up. Cold accounts cannot be loaded into hot state until your indexer or RPC provider recovers.
-Note that compression is cryptographically verifiable, so integrity and safety are not dependent on the indexer or any other external service beyond the onchain protocol.
+<Accordion title="What if the indexer is down?">
+Hot markets work as long as Solana is up. Cold accounts can't be loaded until
+the indexer recovers. Compression is cryptographically verifiable -- integrity
+doesn't depend on the indexer.
 </Accordion>
 
-<Accordion title="I stream account state via LaserStream. How does this change the flow?">
-If you stream account state, you can detect cold transitions in real-time via a
-transaction subscription (see [Streaming Token Accounts](/light-token/toolkits/for-streaming-tokens)).
-On detection, async fetch `get_account_interface` for the cold account and cache
-the `ColdContext` locally. When a swap request arrives, the ColdContext is already
-cached -- `create_load_instructions` runs with zero additional latency.
-
-The `LightProgram` trait and transaction building flow are the same
-regardless of whether you stream or fetch per-request.
+<Accordion title="I don't stream. Can I still support cold markets?">
+Yes. At swap time, call `get_multiple_account_interfaces` for the instruction's
+accounts and check `is_cold()`. This adds a round-trip per swap but requires
+no streaming setup.
 </Accordion>
 
 ---

@@ -47,7 +47,8 @@
             "group": "DeFi",
             "pages": [
               "light-token/defi/routers",
-              "light-token/defi/programs"
+              "light-token/defi/programs",
+              "light-token/defi/programs-pinocchio"
             ]
           },
           {
