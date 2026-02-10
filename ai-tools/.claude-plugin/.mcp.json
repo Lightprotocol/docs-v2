@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "deepwiki": {
+      "serverUrl": "https://mcp.deepwiki.com/sse"
+    },
+    "zkcompression": {
+      "command": "npx",
+      "args": ["-y", "mcp-remote@latest", "https://www.zkcompression.com/mcp"]
+    }
+  }
+}
