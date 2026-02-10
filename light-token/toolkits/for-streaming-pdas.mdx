@@ -1,0 +1,331 @@
+---
+title: "Streaming Compressible PDAs"
+sidebarTitle: "Compressible PDAs"
+description: "Stream compressible PDA state transitions. Per-program account sub for hot state, per-program transaction sub for cold detection."
+keywords: ["streaming compressible pdas solana", "laserstream pda indexing", "grpc pda streaming"]
+visibility: "hidden"
+---
+
+<Note>
+Programs using the Light SDK expose standardized instruction discriminators for
+`compress_accounts_idempotent` and `decompress_accounts_idempotent`.
+Programs that don't implement these discriminators are not indexable with this approach.
+</Note>
+
+## Architecture
+
+Two per-program gRPC subscriptions. Nothing else.
+
+| Subscription | Detects | How |
+|:-------------|:--------|:----|
+| Account sub (`owner: ProgramX`) | Hot state + cold-to-hot | Pubkey cache lookup |
+| Transaction sub (`account_include: ProgramX`) | Hot-to-cold | 8-byte discriminator check + balance heuristic |
+
+**Why two?** Owner-filtered account subscriptions miss close events. When
+`compress_accounts_idempotent` closes a PDA, the owner changes to System Program.
+The account sub stops matching. The transaction sub catches it because the program
+is still in the transaction's account list.
+
+## Setup
+
+```toml Cargo.toml
+[dependencies]
+helius-laserstream = "0.1"
+tokio = { version = "1", features = ["full"] }
+futures = "0.3"
+bs58 = "0.5"
+```
+
+```rust
+use futures::StreamExt;
+use helius_laserstream::grpc::{
+    SubscribeRequestFilterAccounts, SubscribeRequestFilterTransactions,
+};
+use helius_laserstream::{subscribe, LaserstreamConfig};
+```
+
+<Steps>
+
+<Step>
+### Connect
+
+<Tabs>
+<Tab title="Mainnet">
+
+```rust
+let config = LaserstreamConfig::new(
+    "https://laserstream-mainnet-ewr.helius-rpc.com".to_string(),
+    std::env::var("HELIUS_API_KEY")?,
+);
+```
+
+</Tab>
+<Tab title="Devnet">
+
+```rust
+let config = LaserstreamConfig::new(
+    "https://laserstream-devnet-ewr.helius-rpc.com".to_string(),
+    std::env::var("HELIUS_API_KEY")?,
+);
+```
+
+</Tab>
+</Tabs>
+
+</Step>
+
+<Step>
+### Subscribe
+
+```rust
+const PROGRAM_ID: &str = "YourProgramId1111111111111111111111111111111";
+
+let mut request = helius_laserstream::grpc::SubscribeRequest::default();
+
+// 1. Account sub: hot state tracking + cold-to-hot detection.
+request.accounts.insert(
+    "program_pdas".to_string(),
+    SubscribeRequestFilterAccounts {
+        owner: vec![PROGRAM_ID.to_string()],
+        nonempty_txn_signature: Some(true),
+        ..Default::default()
+    },
+);
+
+// 2. Transaction sub: hot-to-cold detection.
+//    Catches all transactions involving the program.
+//    99.999% are regular operations -- filtered out by an 8-byte discriminator check.
+request.transactions.insert(
+    "program_txns".to_string(),
+    SubscribeRequestFilterTransactions {
+        vote: Some(false),
+        failed: Some(false),
+        account_include: vec![PROGRAM_ID.to_string()],
+        ..Default::default()
+    },
+);
+
+let (stream, _handle) = subscribe(config, request);
+tokio::pin!(stream);
+```
+
+</Step>
+
+</Steps>
+
+## Detecting transitions
+
+### Hot-to-cold
+
+The Light SDK generates a standardized `compress_accounts_idempotent` instruction on
+every conformant program. Its discriminator is stable (`sha256("global:compress_accounts_idempotent")[..8]`):
+
+```rust
+const COMPRESS_DISCRIMINATOR: [u8; 8] = [70, 236, 171, 120, 164, 93, 113, 181];
+```
+
+For each transaction update, check outer and inner instructions for this discriminator.
+If matched, use the balance heuristic to identify which PDAs were closed:
+
+```rust
+use helius_laserstream::grpc::subscribe_update::UpdateOneof;
+
+Some(UpdateOneof::Transaction(tx_update)) => {
+    if let Some(ref tx_info) = tx_update.transaction {
+        if !has_compress_instruction(tx_info) {
+            return; // 99.999% of transactions exit here.
+        }
+        for pubkey in find_closed_accounts(tx_info) {
+            // Only process accounts we're tracking.
+            // This filters out unrelated accounts that went to 0 in the same tx.
+            if let Some(last_hot_state) = cache.remove(&pubkey) {
+                cold_cache.insert(pubkey, last_hot_state);
+            }
+        }
+    }
+}
+```
+
+```rust
+fn has_compress_instruction(
+    tx_info: &helius_laserstream::grpc::SubscribeUpdateTransactionInfo,
+) -> bool {
+    let tx = match tx_info.transaction.as_ref() {
+        Some(t) => t,
+        None => return false,
+    };
+    let meta = match tx_info.meta.as_ref() {
+        Some(m) => m,
+        None => return false,
+    };
+    let msg = match tx.message.as_ref() {
+        Some(m) => m,
+        None => return false,
+    };
+
+    // Check outer instructions.
+    for ix in &msg.instructions {
+        if ix.data.len() >= 8 && ix.data[..8] == COMPRESS_DISCRIMINATOR {
+            return true;
+        }
+    }
+    // Check inner instructions (covers CPI-wrapped calls).
+    for inner in &meta.inner_instructions {
+        for ix in &inner.instructions {
+            if ix.data.len() >= 8 && ix.data[..8] == COMPRESS_DISCRIMINATOR {
+                return true;
+            }
+        }
+    }
+    false
+}
+```
+
+```rust
+fn find_closed_accounts(
+    tx_info: &helius_laserstream::grpc::SubscribeUpdateTransactionInfo,
+) -> Vec<[u8; 32]> {
+    let meta = match &tx_info.meta {
+        Some(m) => m,
+        None => return vec![],
+    };
+    let msg = match tx_info.transaction.as_ref().and_then(|t| t.message.as_ref()) {
+        Some(m) => m,
+        None => return vec![],
+    };
+
+    // Full account list: static keys + loaded ALT addresses.
+    let mut all_keys: Vec<&[u8]> = msg.account_keys.iter().map(|k| k.as_slice()).collect();
+    all_keys.extend(meta.loaded_writable_addresses.iter().map(|k| k.as_slice()));
+    all_keys.extend(meta.loaded_readonly_addresses.iter().map(|k| k.as_slice()));
+
+    let mut closed = Vec::new();
+    for (i, key) in all_keys.iter().enumerate() {
+        if key.len() == 32
+            && meta.pre_balances.get(i).copied().unwrap_or(0) > 0
+            && meta.post_balances.get(i).copied().unwrap_or(1) == 0
+        {
+            closed.push(<[u8; 32]>::try_from(*key).unwrap());
+        }
+    }
+    closed
+}
+```
+
+**Why this is tight:**
+- Discriminator check → only inspect compress transactions (no false positives from unrelated txns).
+- Balance heuristic → only flag accounts that actually closed (idempotent no-ops produce no balance changes).
+- `cache.remove` filter → only process accounts you're tracking (ignores unrelated closures in the same tx).
+
+**Edge case:** If compress and decompress execute in the same slot for the same PDA,
+the account sub may deliver the hot state before the tx sub delivers the cold event.
+The cold handler would then override the correct hot state. Resolve with slot tracking:
+record the slot when marking cold, ignore cold events older than the latest hot event.
+In practice this doesn't happen -- the forester compresses idle accounts, decompression
+is user-initiated, and both in the same slot is not a realistic scenario.
+
+### Cold-to-hot
+
+The account subscription delivers the re-created PDA. Match the pubkey against
+your cold cache:
+
+```rust
+Some(UpdateOneof::Account(account_update)) => {
+    if let Some(account) = account_update.account {
+        let pubkey: [u8; 32] = account.pubkey.as_slice().try_into().unwrap();
+
+        if cold_cache.remove(&pubkey).is_some() {
+            // Was cold, now hot. Parse with your program's deserializer.
+            cache.upsert_hot(pubkey, &account.data);
+        } else {
+            // New account or hot state update.
+            cache.upsert(pubkey, &account.data);
+        }
+    }
+}
+```
+
+This works because PDA pubkeys are deterministic. Same seeds, same program, same
+pubkey across hot/cold cycles. If the pubkey is in your cold cache, it was cold. Period.
+
+## Point queries
+
+`getAccountInfo` returns null for cold PDAs. Use `get_account_interface()` --
+it races hot and cold lookups:
+
+```rust
+use light_client::rpc::{LightClient, LightClientConfig, Rpc};
+
+let client = LightClient::new(config).await?;
+let result = client.get_account_interface(&pda_pubkey, None).await?;
+
+if let Some(account) = result.value {
+    let data = account.data();
+    if account.is_cold() {
+        // Compressed. data() returns full account bytes.
+    }
+}
+```
+
+## Lifecycle
+
+```
+  PDA created (hot)
+       |
+       | compress_accounts_idempotent (rent expired, forester)
+       v
+  PDA closed (cold) -- state in Merkle tree
+       |
+       | decompress_accounts_idempotent (user)
+       v
+  PDA re-created (hot) -- same pubkey
+```
+
+The compressed address `derive_address(pda_pubkey, tree, program_id)` is stable
+across cycles.
+
+<Expandable title="Universal indexing (unknown programs)">
+
+If you don't know which programs to index, subscribe to **Light System Program**
+transactions instead. All compression events CPI through it.
+
+Use `light-event` to parse compression events from inner instructions:
+
+```rust
+use light_event::parse::event_from_light_transaction;
+use light_compressible::DECOMPRESSED_PDA_DISCRIMINATOR;
+```
+
+**Going cold**: output accounts with `discriminator != DECOMPRESSED_PDA_DISCRIMINATOR`
+are real data being written to the Merkle tree.
+
+**Going hot**: output accounts with `discriminator == DECOMPRESSED_PDA_DISCRIMINATOR`
+are shell placeholders. `data[..32]` contains the PDA pubkey.
+
+This approach requires borsh deserialization and CPI pattern matching. It's the
+same pipeline used by the [Photon indexer](https://github.com/helius-labs/photon).
+
+</Expandable>
+
+<Warning>
+**TODO**: Consider exposing `compress_accounts_idempotent` / `decompress_accounts_idempotent`
+discriminators via the `LightProgramInterface` trait so indexers can discover compression
+instructions programmatically without hardcoding discriminator bytes.
+</Warning>
+
+<CardGroup cols={2}>
+<Card
+  title="Streaming Token Accounts"
+  icon="chevron-right"
+  color="#0066ff"
+  href="/light-token/toolkits/for-streaming-tokens"
+  horizontal
+/>
+<Card
+  title="Streaming Mint Accounts"
+  icon="chevron-right"
+  color="#0066ff"
+  href="/light-token/toolkits/for-streaming-mints"
+  horizontal
+/>
+</CardGroup>

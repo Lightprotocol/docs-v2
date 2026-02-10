@@ -1,48 +1,258 @@
 ---
-title: "Toolkit to Index Light Token Accounts"
-sidebarTitle: "For Indexing Tokens"
-description: "Light token accounts follow the same layout as SPL-token accounts, so you can reuse your existing parsers."
-keywords: ["streaming tokens for solana apps", "scalable token distribution on solana", "token streaming for developers"]
+title: "Streaming Token Accounts"
+sidebarTitle: "Token Accounts"
+description: "Stream light-token accounts via Laserstream. Same base layout as SPL Token."
+keywords: ["streaming token accounts solana", "laserstream light token", "grpc token streaming"]
 ---
 
-import ActionCode from "/snippets/code-snippets/light-token/load-ata/action.mdx";
-import InstructionCode from "/snippets/code-snippets/light-token/load-ata/instruction.mdx";
+import FindClosedAccounts from '/snippets/code-snippets/streaming/find-closed-accounts.mdx';
 
-When a market becomes inactive, its token accounts and related PDAs will 
-be compressed automatically (cold storage). 
-The state is cryptographically preserved on the Solana ledger.
-While compressed, pure on-chain lookups will return uninitialized.
+<Note>
+This guide is for teams building custom data pipelines (aggregators, market makers).
+If you just need account lookups, use [`get_account_interface`](/light-token/defi/routers) instead.
+</Note>
 
-Your indexer should keep tracking, quoting, and routing markets even if the 
-on-chain account shows `is_initialized: false`, `is_compressed: true`. 
-To trade a cold market, the first client must prepend an 
-idempotent decompress "warm up" instruction.
+## Architecture
 
-<Info>
-  Find the source code
-  [here](https://github.com/Lightprotocol/light-protocol/blob/main/js/compressed-token/tests/e2e/load-ata-standard.test.ts).
-</Info>
+Light token accounts share the same base layout as SPL Token (165 bytes), so you can
+use your existing parser. The streaming setup requires two gRPC subscriptions, both
+targeting the Light Token Program:
+
+| Subscription | Detects | How |
+|:-------------|:--------|:----|
+| Account sub (`owner: cToken...`) | Hot state + cold-to-hot | Pubkey cache lookup |
+| Transaction sub (`account_include: cToken...`) | Hot-to-cold | Balance heuristic (`pre > 0, post == 0`) |
+
+The account subscription delivers all state changes while accounts are hot.
+The transaction subscription is needed to detect accounts going cold
+(`compress_and_close` changes the owner to System Program, which the account
+subscription no longer matches).
+
+## Parsing
+
+```rust
+use spl_pod::bytemuck::pod_from_bytes;
+use spl_token_2022_interface::pod::PodAccount; // works for SPL-token, SPL-token-2022, and Light-token
+
+let parsed: &PodAccount = pod_from_bytes(&data[..165])?;
+```
+
+For accounts with extensions, truncate to 165 bytes before parsing.
+
+## Streaming
+
+```toml Cargo.toml
+[dependencies]
+helius-laserstream = "0.1"
+tokio = { version = "1", features = ["full"] }
+futures = "0.3"
+bs58 = "0.5"
+borsh = "0.10"
+light-token-interface = "0.3.0"
+```
+
+```rust
+use futures::StreamExt;
+use helius_laserstream::grpc::subscribe_request_filter_accounts_filter::Filter;
+use helius_laserstream::grpc::subscribe_request_filter_accounts_filter_memcmp::Data;
+use helius_laserstream::grpc::{
+    SubscribeRequestFilterAccounts, SubscribeRequestFilterAccountsFilter,
+    SubscribeRequestFilterAccountsFilterMemcmp, SubscribeRequestFilterTransactions,
+};
+use helius_laserstream::{subscribe, LaserstreamConfig};
+
+const LIGHT_TOKEN_PROGRAM_ID: &str = "cTokenmWW8bLPjZEBAUgYy3zKxQZW6VKi7bqNFEVv3m";
+const TOKEN_ACCOUNT_SIZE: u64 = 165;
+const ACCOUNT_TYPE_OFFSET: u64 = 165;
+const ACCOUNT_TYPE_TOKEN: u8 = 2;
+```
 
 <Steps>
+
 <Step>
-### Load compressed tokens (cold storage) to Associated Token Account (hot balance)
+### Connect
 
 <Tabs>
-<Tab title="Action">
-<ActionCode />
+<Tab title="Mainnet">
+
+```rust
+let config = LaserstreamConfig::new(
+    "https://laserstream-mainnet-ewr.helius-rpc.com".to_string(),
+    std::env::var("HELIUS_API_KEY")?,
+);
+```
+
 </Tab>
-<Tab title="Instruction">
-<InstructionCode />
+<Tab title="Devnet">
+
+```rust
+let config = LaserstreamConfig::new(
+    "https://laserstream-devnet-ewr.helius-rpc.com".to_string(),
+    std::env::var("HELIUS_API_KEY")?,
+);
+```
+
 </Tab>
 </Tabs>
 
 </Step>
+
+<Step>
+### Subscribe
+
+```rust
+let mut request = helius_laserstream::grpc::SubscribeRequest::default();
+
+// 1. Account sub: hot state tracking + cold-to-hot detection.
+request.accounts.insert(
+    "light_tokens".to_string(),
+    SubscribeRequestFilterAccounts {
+        owner: vec![LIGHT_TOKEN_PROGRAM_ID.to_string()],
+        filters: vec![SubscribeRequestFilterAccountsFilter {
+            filter: Some(Filter::Datasize(TOKEN_ACCOUNT_SIZE)),
+        }],
+        nonempty_txn_signature: Some(true),
+        ..Default::default()
+    },
+);
+request.accounts.insert(
+    "light_tokens_extended".to_string(),
+    SubscribeRequestFilterAccounts {
+        owner: vec![LIGHT_TOKEN_PROGRAM_ID.to_string()],
+        filters: vec![SubscribeRequestFilterAccountsFilter {
+            filter: Some(Filter::Memcmp(SubscribeRequestFilterAccountsFilterMemcmp {
+                offset: ACCOUNT_TYPE_OFFSET,
+                data: Some(Data::Bytes(vec![ACCOUNT_TYPE_TOKEN])),
+            })),
+        }],
+        nonempty_txn_signature: Some(true),
+        ..Default::default()
+    },
+);
+
+// 2. Transaction sub: hot-to-cold detection.
+request.transactions.insert(
+    "light_token_txns".to_string(),
+    SubscribeRequestFilterTransactions {
+        vote: Some(false),
+        failed: Some(false),
+        account_include: vec![LIGHT_TOKEN_PROGRAM_ID.to_string()],
+        ..Default::default()
+    },
+);
+
+let (stream, _handle) = subscribe(config, request);
+tokio::pin!(stream);
+```
+
+</Step>
+
 </Steps>
 
-# Stream light-mint accounts
+## Detecting transitions
+
+### Hot-to-cold
+
+For each transaction update, find accounts whose lamport balance dropped to zero.
+The `cache.remove` call ensures only accounts you're already tracking are processed:
+
+<FindClosedAccounts />
+
+### Cold-to-hot
+
+When a token account is decompressed, the account subscription delivers the
+re-created account. Match its pubkey against `cold_cache`:
+
+```rust
+Some(UpdateOneof::Account(account_update)) => {
+    if let Some(account) = account_update.account {
+        let pubkey: [u8; 32] = account.pubkey.as_slice().try_into().unwrap();
+        let parsed: &PodAccount = pod_from_bytes(&account.data[..165])?;
+
+        cold_cache.remove(&pubkey); // no longer cold
+        cache.insert(pubkey, *parsed);
+    }
+}
+```
+
+## Point queries
+
+`getAccountInfo` returns null for cold accounts. `get_account_interface()` races
+hot and cold lookups and returns raw account bytes that work with your standard SPL parser:
+
+```rust
+use light_client::rpc::{LightClient, LightClientConfig, Rpc};
+use spl_pod::bytemuck::pod_from_bytes;
+use spl_token_2022_interface::pod::PodAccount;
+
+let config = LightClientConfig::new(
+    "https://api.devnet.solana.com".to_string(),
+    Some("https://photon.helius.com?api-key=YOUR_KEY".to_string()),
+);
+let client = LightClient::new(config).await?;
+let result = client.get_account_interface(&pubkey, None).await?;
+
+if let Some(account) = result.value {
+    let parsed: &PodAccount = pod_from_bytes(&account.data()[..165])?;
+    if account.is_cold() {
+        // Compressed -- still valid for routing.
+    }
+}
+```
+
+## Data layout
+
+165 bytes base, identical to SPL Token Account.
+
+| Field | Offset | Size |
+|:------|:-------|:-----|
+| `mint` | 0 | 32 |
+| `owner` | 32 | 32 |
+| `amount` | 64 | 8 |
+| `delegate` | 72 | 36 |
+| `state` | 108 | 1 |
+| `is_native` | 109 | 12 |
+| `delegated_amount` | 121 | 8 |
+| `close_authority` | 129 | 36 |
+| `account_type` | 165 | 1 |
+
+`account_type = 2` at byte 165 indicates extensions follow (borsh-encoded `Option<Vec<ExtensionStruct>>`).
+
+<Expandable title="Light extensions">
+
+These are not needed for indexing or trading.
+
+```rust
+use borsh::BorshDeserialize;
+use light_token_interface::state::{Token, ExtensionStruct};
+
+let token = Token::deserialize(&mut data.as_slice())?;
+
+if let Some(exts) = &token.extensions {
+    for ext in exts {
+        if let ExtensionStruct::Compressible(info) = ext {
+            // info.compression_authority, info.rent_sponsor, info.last_claimed_slot
+        }
+    }
+}
+```
+
+| Variant | Description |
+|:--------|:------------|
+| `TokenMetadata(TokenMetadata)` | Name, symbol, URI, additional metadata |
+| `PausableAccount(PausableAccountExtension)` | Marker: mint is pausable (no data; pause state lives on mint) |
+| `PermanentDelegateAccount(PermanentDelegateAccountExtension)` | Marker: mint has permanent delegate |
+| `TransferFeeAccount(TransferFeeAccountExtension)` | Withheld fees from transfers |
+| `TransferHookAccount(TransferHookAccountExtension)` | Marker: mint has transfer hook |
+| `CompressedOnly(CompressedOnlyExtension)` | Compressed-only token (stores delegated amount) |
+| `Compressible(CompressibleExtension)` | Compression config: authority, rent sponsor, timing |
+
+Source: [`light-token-interface`](https://github.com/Lightprotocol/light-protocol/tree/main/program-libs/token-interface/src/state/extensions)
+
+</Expandable>
 
 <Card
-  title="Toolkit to stream light-mints"
+  title="Streaming Mint Accounts"
   icon="chevron-right"
   color="#0066ff"
   href="/light-token/toolkits/for-streaming-mints"
