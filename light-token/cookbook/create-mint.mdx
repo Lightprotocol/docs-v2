@@ -1,7 +1,7 @@
 ---
 title: Create Mint Account with Token Metadata
 sidebarTitle: Create Mint Account
-description: Program and client guides to create a mint with token metadata. Includes step-by-step implementation and full code examples.
+description: Create a Light mint, an SPL mint, or a Token 2022 mint with an interface PDA, or add an interface PDA to an existing mint.
 keywords: ["create mint account on solana", "rent free mint on solana", "rent free token mints on solana", "spl create mint alternative"]
 ---
 
@@ -29,6 +29,12 @@ import {
 } from "/snippets/code-samples/code-compare-snippets.jsx";
 import ActionCode from "/snippets/code-snippets/light-token/create-mint/action.mdx";
 import InstructionCode from "/snippets/code-snippets/light-token/create-mint/instruction.mdx";
+import SplActionCode from "/snippets/code-snippets/light-token/create-spl-mint/action.mdx";
+import SplInstructionCode from "/snippets/code-snippets/light-token/create-spl-mint/instruction.mdx";
+import T22ActionCode from "/snippets/code-snippets/light-token/create-t22-mint/action.mdx";
+import T22InstructionCode from "/snippets/code-snippets/light-token/create-t22-mint/instruction.mdx";
+import TokenPoolActionCode from "/snippets/code-snippets/light-token/create-token-pool/action.mdx";
+import TokenPoolInstructionCode from "/snippets/code-snippets/light-token/create-token-pool/instruction.mdx";
 import RustActionCode from "/snippets/code-snippets/light-token/create-mint/rust-client/action.mdx";
 import RustInstructionCode from "/snippets/code-snippets/light-token/create-mint/rust-client/instruction.mdx";
 import AnchorProgramCode from "/snippets/code-snippets/light-token/create-mint/anchor-program/full-example.mdx";
@@ -37,6 +43,7 @@ import CompressibleRentExplained from "/snippets/compressible-rent-explained.mdx
 
 1. Mint accounts uniquely represent a token on Solana and store its global metadata.
 2. Light mints are on-chain accounts like SPL mints, but the light token program sponsors the rent-exemption cost for you.
+3. Add an interface PDA to existing SPL or Token 2022 mints for interoperability with Light Token. The interface PDA holds SPL or Token 2022 tokens when wrapped to Light Token.
 
 <Accordion title="Light Rent Config Explained">
   <CompressibleRentExplained />
@@ -91,6 +98,45 @@ Compare to SPL:
 
 </Step>
 </Steps>
+
+## Create SPL mint with interface PDA
+
+Pass `TOKEN_PROGRAM_ID` to create a standard SPL mint with an interface PDA in one transaction. This enables compression for the mint.
+
+<Tabs>
+<Tab title="Action">
+<SplActionCode />
+</Tab>
+<Tab title="Instruction">
+<SplInstructionCode />
+</Tab>
+</Tabs>
+
+## Create Token 2022 mint with interface PDA
+
+Pass `TOKEN_2022_PROGRAM_ID` to create a Token-2022 mint with an interface PDA in one transaction. This enables compression for the mint.
+
+<Tabs>
+<Tab title="Action">
+<T22ActionCode />
+</Tab>
+<Tab title="Instruction">
+<T22InstructionCode />
+</Tab>
+</Tabs>
+
+## Enable existing SPL mints with Light ATAs
+
+Register an interface PDA for an existing SPL mint to enable compression. No mint authority required.
+
+<Tabs>
+<Tab title="Action">
+<TokenPoolActionCode />
+</Tab>
+<Tab title="Instruction">
+<TokenPoolInstructionCode />
+</Tab>
+</Tabs>
 
 </Tab>
 
