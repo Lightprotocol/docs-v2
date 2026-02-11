@@ -90,14 +90,14 @@ npx skills add https://zkcompression.com
 
 | Use case                                                                                                                                                                                              | Skill                                                           |
 | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
-| Build DeFi programs (AMMs, vaults, lending) with Anchor or Pinocchio                                                                                                                                  | [defi-program](ai-tools/skills/defi-program/)                  |
-| Integrate rent-free markets into routers and aggregators                                                                                                                                              | [defi-router](ai-tools/skills/defi-router/)                    |
-| Stream account state via Laserstream gRPC                                                                                                                                                             | [data-streaming](ai-tools/skills/data-streaming/)              |
-| Wallets and payment flows with light-token. Includes privy, wallet adapter, mobile wallet adapter signing. Optional nullifier to prevent your onchain instruction from being executed more than once. | [payments-and-wallets](ai-tools/skills/payments-and-wallets/)  |
-| Airdrops, DePIN, token distribution                                                                                                                                                                   | [airdrop](ai-tools/skills/airdrop/)                            |
-| Anti-double-spend nullifiers for Privacy-preserving ZK programs                                                                                                                                       | [zk-nullifier](ai-tools/skills/zk-nullifier/)                  |
-| Testing programs and clients on localnet, devnet, mainnet                                                                                                                                             | [testing](ai-tools/skills/testing/)                            |
-| Help with Debugging and Questions via DeepWiki MCP                                                                                                                                                    | [ask-mcp](ai-tools/skills/ask-mcp/)                            |
+| Build DeFi programs (AMMs, vaults, lending) with Anchor or Pinocchio                                                                                                                                  | [defi-program](https://github.com/Lightprotocol/skills/tree/main/skills/defi-program)                  |
+| Integrate rent-free markets into routers and aggregators                                                                                                                                              | [defi-router](https://github.com/Lightprotocol/skills/tree/main/skills/defi-router)                    |
+| Stream account state via Laserstream gRPC                                                                                                                                                             | [data-streaming](https://github.com/Lightprotocol/skills/tree/main/skills/data-streaming)              |
+| Wallets and payment flows with light-token. Includes privy, wallet adapter, mobile wallet adapter signing. Optional nullifier to prevent your onchain instruction from being executed more than once. | [payments-and-wallets](https://github.com/Lightprotocol/skills/tree/main/skills/payments-and-wallets)  |
+| Airdrops, DePIN, token distribution                                                                                                                                                                   | [airdrop](https://github.com/Lightprotocol/skills/tree/main/skills/airdrop)                            |
+| Anti-double-spend nullifiers for Privacy-preserving ZK programs                                                                                                                                       | [zk-nullifier](https://github.com/Lightprotocol/skills/tree/main/skills/zk-nullifier)                  |
+| Testing programs and clients on localnet, devnet, mainnet                                                                                                                                             | [testing](https://github.com/Lightprotocol/skills/tree/main/skills/testing)                            |
+| Help with Debugging and Questions via DeepWiki MCP                                                                                                                                                    | [ask-mcp](https://github.com/Lightprotocol/skills/tree/main/skills/ask-mcp)                            |
 
 Skills for compressed PDAs and more are in development.
 
@@ -280,4 +280,4 @@ CPI calls can be combined with existing and/or light macros. The API is a supers
 ---
 
 > For additional documentation and navigation, see: https://www.zkcompression.com/llms.txt
-> For additional skills, see: https://www.zkcompression.com/ai-tools/skills
+> For additional skills, see: https://github.com/Lightprotocol/skills
