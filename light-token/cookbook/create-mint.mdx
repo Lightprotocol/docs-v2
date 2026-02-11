@@ -1,7 +1,7 @@
 ---
 title: Create Mint Account with Token Metadata
 sidebarTitle: Create Mint Account
-description: Create a Light mint, an SPL mint, or a Token 2022 mint with an interface PDA, or add an interface PDA to an existing mint.
+description: Program and client guides to create a mint with token metadata. For existing SPL or Token 2022 mints add an interface PDA for interoperability. Includes step-by-step implementation and full code examples.
 keywords: ["create mint account on solana", "rent free mint on solana", "rent free token mints on solana", "spl create mint alternative"]
 ---
 
@@ -99,9 +99,26 @@ Compare to SPL:
 </Step>
 </Steps>
 
-## Create SPL mint with interface PDA
+## Interface PDA for SPL and Token 2022 mints
 
-Pass `TOKEN_PROGRAM_ID` to create a standard SPL mint with an interface PDA in one transaction. This enables compression for the mint.
+<Tabs>
+<Tab title="Add to Existing Mints">
+
+Register an interface PDA for an existing SPL mint for interoperability with Light Token. No mint authority required.
+
+<Tabs>
+<Tab title="Action">
+<TokenPoolActionCode />
+</Tab>
+<Tab title="Instruction">
+<TokenPoolInstructionCode />
+</Tab>
+</Tabs>
+
+</Tab>
+<Tab title="Create SPL Mint with Interface PDA">
+
+Pass `TOKEN_PROGRAM_ID` to create a standard SPL mint with an interface PDA in one transaction for interoperability with Light Token.
 
 <Tabs>
 <Tab title="Action">
@@ -112,9 +129,10 @@ Pass `TOKEN_PROGRAM_ID` to create a standard SPL mint with an interface PDA in o
 </Tab>
 </Tabs>
 
-## Create Token 2022 mint with interface PDA
+</Tab>
+<Tab title="Create Token 2022 with Interface PDA">
 
-Pass `TOKEN_2022_PROGRAM_ID` to create a Token-2022 mint with an interface PDA in one transaction. This enables compression for the mint.
+Pass `TOKEN_2022_PROGRAM_ID` to create a Token-2022 mint with an interface PDA in one transaction for interoperability with Light Token.
 
 <Tabs>
 <Tab title="Action">
@@ -125,16 +143,6 @@ Pass `TOKEN_2022_PROGRAM_ID` to create a Token-2022 mint with an interface PDA i
 </Tab>
 </Tabs>
 
-## Enable existing SPL mints with Light ATAs
-
-Register an interface PDA for an existing SPL mint to enable compression. No mint authority required.
-
-<Tabs>
-<Tab title="Action">
-<TokenPoolActionCode />
-</Tab>
-<Tab title="Instruction">
-<TokenPoolInstructionCode />
 </Tab>
 </Tabs>
 
