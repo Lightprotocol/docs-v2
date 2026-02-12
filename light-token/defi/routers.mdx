@@ -3,7 +3,7 @@ title: "Router Integration"
 description: "Add support for rent-free AMMs on Solana."
 ---
 
-Your existing quoting, routing, and swap-building logic stays the same.
+Your existing quoting, routing, and swap logic stays the same.
 The only addition: when a market has cold accounts, detect them, and prepend load instructions before the swap.
 
 ## What changes
@@ -18,10 +18,10 @@ The only addition: when a market has cold accounts, detect them, and prepend loa
 
 ## Detecting cold accounts
 
-Add a cache for cold accounts. This can be separate from your regular account cache.
+Add a cache for cold accounts. This can be independent from your regular account cache.
 
 ```rust
-cold_cache: HashMap<[u8; 32], AccountInterface>, // Accounts with `ColdContext` (used for loading)
+cold_cache: HashMap<[u8; 32], AccountInterface>, // Accounts that are currently cold (used for loading)
 ```
 
 If you stream, subscribe to accounts and transactions with the Light Token Program.
@@ -229,8 +229,7 @@ is the same as today. If cold, you prepend `create_load_instructions`.
 </Accordion>
 
 <Accordion title="Can I quote cold markets?">
-Yes. `get_account_interface` returns full account data regardless of hot/cold.
-Quoting works the same.
+Yes. You regular account cache stays the same even if a market is cold, so you can keep quoting with it.
 </Accordion>
 
 <Accordion title="Do rent-free markets increase latency?">
@@ -290,17 +289,15 @@ Yes. Supported by Helius and Triton. Can also be self-hosted via the
 <a href="https://github.com/helius-labs/photon" target="_blank">open-source Photon indexer</a>.
 </Accordion>
 
-<Accordion title="What if the indexer is down?">
-Hot markets work as long as Solana is up. Cold accounts can't be loaded until
-the indexer recovers. Compression is cryptographically verifiable -- integrity
-doesn't depend on the indexer.
-</Accordion>
+<Accordion title="What if the indexer is down?"> Hot markets work all the same
+as long as Solana is up. Cold accounts can't be loaded until the indexer
+recovers. Compression is cryptographically verifiable, and safety
+does not depend on the indexer. </Accordion>
 
-<Accordion title="I don't stream. Can I still support cold markets?">
-Yes. At swap time, call `get_multiple_account_interfaces` for the instruction's
-accounts and check `is_cold()`. This adds a round-trip per swap but requires
-no streaming setup.
-</Accordion>
+<Accordion title="I don't stream. Can I still support rent free markets?"> Yes.
+To read state, and to build txns, simply use `get_multiple_account_interfaces`
+for the instruction's accounts and check `is_cold()`. This adds a RPC round-trip
+but requires no streaming setup. </Accordion>
 
 ---
 <Callout type="info">
