@@ -103,7 +103,7 @@ loop handles the rare multi-transaction case automatically.
 Find a full code example [here](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments-and-wallets/receive.ts).
 </Note>
 
-Load creates the ATA if needed and consolidates compressed balances. Share the ATA address with the sender.
+Load creates the associated token account (ATA) if needed and loads any compressed state into it. Share the ATA address with the sender.
 
 <Tabs>
 <Tab title="Instruction">
@@ -187,7 +187,7 @@ Find a full code example: [instruction](https://github.com/Lightprotocol/example
 import { Transaction } from "@solana/web3.js";
 import { createTransferInterfaceInstructions } from "@lightprotocol/compressed-token/unified";
 
-// Each inner array = one transaction. Usually just one.
+// Returns TransactionInstruction[][]. Each inner array is one transaction. Almost always returns just one.
 const instructions = await createTransferInterfaceInstructions(
   rpc,
   payer.publicKey,
@@ -197,6 +197,7 @@ const instructions = await createTransferInterfaceInstructions(
   recipient
 );
 
+// loop handles the rare multi-transaction case automatically
 for (const ixs of instructions) {
   const tx = new Transaction().add(...ixs);
   await sendAndConfirmTransaction(rpc, tx, [payer, owner]);
