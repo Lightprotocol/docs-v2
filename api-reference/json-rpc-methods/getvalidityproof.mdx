@@ -210,7 +210,7 @@ async function generateProofForTransfer() {
     console.log(\`  Token accounts: ${hashes.length}\`);
     console.log(\`  Roots: ${validityProof.roots.length}\`);
 
-    // This proof is now ready to use with CompressedTokenProgram.transfer()
+    // This proof is now ready to use with LightTokenProgram.transfer()
     console.log('\nProof ready for token transfer instruction');
     console.log('Use this with:');
     console.log('  recentValidityProof: validityProof.compressedProof');

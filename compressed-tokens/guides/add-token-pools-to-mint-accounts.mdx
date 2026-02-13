@@ -1,22 +1,22 @@
 ---
-title: Create Token Pools for Compression to Existing Mints
-description: "Create a token pool for an existing SPL mint. Requires only fee_payer with no mint authority constraint."
-keywords: ["compressed token pools", "token pool on solana"]
+title: Create SPL Interface for Existing Mints
+description: "Create an SPL Interface PDA (omnibus account) for an existing SPL mint. Requires only fee_payer with no mint authority constraint."
+keywords: ["SPL interface", "compression", "omnibus account"]
 ---
 
 import FullSetup from "/snippets/setup/full-setup.mdx";
 import ActionCode from '/snippets/code-snippets/compressed-token/create-token-pool/action.mdx';
 
-Create a token for compression fo an existing SPL mint. `createTokenPool()` requires only `fee_payer` and has no mint authority constraint.
+Create an SPL interface (omnibus account) for an existing SPL mint. `createSplInterface()` requires only `fee_payer` and has no mint authority constraint.
 
 <Info>
-The token pool account itself requires rent, but individual compressed token accounts are rent-free.
+The SPL Interface PDA requires rent; individual compressed token accounts are rent-free.
 </Info>
 
 <CodeGroup>
 ```typescript function-create-token-pool.ts
-// Creates token pool account for existing SPL mint
-const transactionSignature = await createTokenPool(
+// Creates SPL interface (omnibus account) for existing SPL mint
+const transactionSignature = await createSplInterface(
     rpc,
     payer,
     mint,
@@ -25,14 +25,14 @@ const transactionSignature = await createTokenPool(
 </CodeGroup>
 
 <Check>
-**Best Practice:** Each mint supports a maximum of 4 token pools total. During compression/decompression operations, token pools get write-locked. Use `addTokenPools()` to create additional pools that increase per-block write-lock capacity.
+**Best Practice:** Each mint supports up to 4 SPL interfaces. During compression/decompression, SPL Interface PDAs get write-locked. Use `addTokenPools()` to create additional interfaces and increase per-block write-lock capacity.
 </Check>
 
 ## Get Started
 
 <Steps>
 <Step>
-### Create Token Pool
+### Create SPL interface
 
 <FullSetup />
 
@@ -43,14 +43,13 @@ const transactionSignature = await createTokenPool(
 # Troubleshooting
 
 <AccordionGroup>
-<Accordion title="TokenPool not found">
+<Accordion title="SPL interface not found">
 
-You're trying to access a token pool that doesn't exist.
+The mint has no SPL Interface PDA.
 
 ```typescript
-// Create the missing token pool
-const poolTx = await createTokenPool(rpc, payer, mint);
-console.log("Token pool created:", poolTx);
+const poolTx = await createSplInterface(rpc, payer, mint);
+console.log("SPL interface created:", poolTx);
 ```
 
 </Accordion>
@@ -59,9 +58,9 @@ console.log("Token pool created:", poolTx);
 # Advanced Configuration
 
 <AccordionGroup>
-<Accordion title="Batch Pool Creation">
+<Accordion title="Batch SPL interface creation">
 
-Create pools for multiple mints:
+Create SPL interfaces for multiple mints:
 
 ```typescript
 const mints = [
@@ -72,8 +71,8 @@ const mints = [
 
 for (const mint of mints) {
     try {
-        const poolTx = await createTokenPool(rpc, payer, mint);
-        console.log(`Pool created for ${mint.toBase58()}:`, poolTx);
+        const poolTx = await createSplInterface(rpc, payer, mint);
+        console.log(`SPL interface created for ${mint.toBase58()}:`, poolTx);
     } catch (error) {
         console.log(`Failed for ${mint.toBase58()}:`, error.message);
     }
@@ -82,14 +81,14 @@ for (const mint of mints) {
 
 </Accordion>
 
-<Accordion title="Create Pool with Token-2022">
+<Accordion title="Token-2022 mints">
 
-Create token pools for Token-2022 mints:
+Create SPL interface for Token-2022 mints:
 
 ```typescript
 import { TOKEN_2022_PROGRAM_ID } from '@solana/spl-token';
 
-const poolTx = await createTokenPool(
+const poolTx = await createSplInterface(
     rpc,
     payer,
     mint, // Token-2022 mint

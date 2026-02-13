@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { PublicKey, Transaction, ComputeBudgetProgram } from '@solana/web3.js';
 import { getAssociatedTokenAddressSync, getAccount } from '@solana/spl-token';
 import { bn, createRpc, selectStateTreeInfo } from '@lightprotocol/stateless.js';
-import { CompressedTokenProgram, getTokenPoolInfos, selectTokenPoolInfo } from '@lightprotocol/compressed-token';
+import { LightTokenProgram, getTokenPoolInfos, selectTokenPoolInfo } from '@lightprotocol/compressed-token';
 import type { ConnectedStandardSolanaWallet } from '@privy-io/js-sdk-core';
 import type { SignTransactionResult } from '@privy-io/react-auth/solana';
 
@@ -52,14 +52,14 @@ export function useCompress() {
       }
 
       // Get state tree to store compressed tokens
-      // Get token pool info. Stores SPL tokens in interface PDA when compressed.
+      // Get SPL interface info. SPL tokens are stored in the interface PDA when compressed.
       const stateTreeInfos = await rpc.getStateTreeInfos();
       const selectedTreeInfo = selectStateTreeInfo(stateTreeInfos);
       const tokenPoolInfos = await getTokenPoolInfos(rpc, mintPubkey);
       const tokenPoolInfo = selectTokenPoolInfo(tokenPoolInfos);
 
       // Create compress instruction
-      const instruction = await CompressedTokenProgram.compress({
+      const instruction = await LightTokenProgram.compress({
         payer: ownerPubkey,
         owner: ownerPubkey,
         source: ownerAta,

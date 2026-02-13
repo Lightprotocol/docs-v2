@@ -11,7 +11,7 @@ import {
     createMintInterface,
     createAtaInterface,
     mintToInterface,
-    createTransferInterfaceInstruction,
+    createLightTokenTransferInstruction,
     getAssociatedTokenAddressInterface,
 } from "@lightprotocol/compressed-token";
 import { homedir } from "os";
@@ -47,8 +47,8 @@ const payer = Keypair.fromSecretKey(
         recipient.publicKey,
     );
 
-    // Transfer tokens between light-token associate token accounts
-    const ix = createTransferInterfaceInstruction(
+    // Transfer tokens between light-token associated token accounts
+    const ix = createLightTokenTransferInstruction(
         senderAta,
         recipientAta,
         sender.publicKey,

@@ -20,7 +20,7 @@ const payer = Keypair.fromSecretKey(
 );
 
 (async function () {
-    // Creates SPL mint + SPL interface pda (token pool) in one transaction
+    // Creates SPL mint + SPL Interface PDA in one transaction
     const mintKeypair = Keypair.generate();
     const { mint, transactionSignature } = await createMintInterface(
         rpc,

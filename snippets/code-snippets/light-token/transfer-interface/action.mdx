@@ -33,10 +33,9 @@ const payer = Keypair.fromSecretKey(
     await mintToInterface(rpc, payer, mint, senderAta, payer, 1_000_000_000);
 
     const recipient = Keypair.generate();
-    await createAtaInterface(rpc, payer, mint, recipient.publicKey);
-    const recipientAta = getAssociatedTokenAddressInterface(mint, recipient.publicKey);
 
-    const tx = await transferInterface(rpc, payer, senderAta, mint, recipientAta, sender, 500_000_000);
+    // destination is a wallet pubkey; the action creates the recipient ATA.
+    const tx = await transferInterface(rpc, payer, senderAta, mint, recipient.publicKey, sender, 500_000_000);
 
     console.log("Tx:", tx);
 })();

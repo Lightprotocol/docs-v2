@@ -56,11 +56,11 @@ A 32-byte identifier uniquely that represents a compressed account's state, stor
 
 An SPL token mint uniquely represents a token on the Solana network and stores global metadata about the token, including `mint_authority`, `supply`, and `decimals`.
 
-SPL tokens can be compressed if the mint has a token pool account set up. Anyone can create a token pool PDA for any given SPL mint.
+SPL tokens can be compressed if the mint has an SPL Interface PDA set up. Anyone can create an SPL interface for any given SPL mint.
 
-## Token Pool Account
+## SPL Interface (omnibus account)
 
-SPL token account that holds SPL tokens corresponding to compressed tokens in circulation. Tokens are deposited during compression and withdrawn during decompression, owned by the Light Token Program's CPI authority PDA.
+An SPL token account (the SPL Interface PDA) that holds SPL tokens corresponding to compressed tokens in circulation. Tokens are deposited during compression and withdrawn during decompression; the account is owned by the Light Token Program's CPI authority PDA.
 
 ## Concurrency
 
@@ -106,7 +106,7 @@ A call from one [program](https://solana.com/docs/core/transactions#onchain-prog
 
 ## Decompression
 
-The process of converting a compressed to a regular Solana account. SPL tokens are withdrawn from the token pool to an Associated Token Account and compressed token accounts are invalidated.
+The process of converting a compressed to a regular Solana account. SPL tokens are withdrawn from the SPL Interface PDA to an Associated Token Account and compressed token accounts are invalidated.
 
 ## Forester node / Forester
 

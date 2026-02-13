@@ -11,7 +11,7 @@ import {
     mintToCompressed,
     createLoadAtaInstructions,
     getAssociatedTokenAddressInterface,
-} from "@lightprotocol/compressed-token";
+} from "@lightprotocol/compressed-token/unified";
 import { homedir } from "os";
 import { readFileSync } from "fs";
 
@@ -39,8 +39,8 @@ const payer = Keypair.fromSecretKey(
         payer.publicKey,
     );
 
-    // Load compressed tokens to light associated token account (hot balance)
-    const ixs = await createLoadAtaInstructions(
+    // Load compressed tokens to light associated token account (hot balance). Usually one tx. Empty = noop.
+    const instructions = await createLoadAtaInstructions(
         rpc,
         lightTokenAta,
         payer.publicKey,
@@ -48,11 +48,13 @@ const payer = Keypair.fromSecretKey(
         payer.publicKey,
     );
 
-    if (ixs.length === 0) return console.log("Nothing to load");
+    if (instructions.length === 0) return console.log("Nothing to load");
 
-    const blockhash = await rpc.getLatestBlockhash();
-    const tx = buildAndSignTx(ixs, payer, blockhash.blockhash);
-    const signature = await sendAndConfirmTx(rpc, tx);
-    console.log("Tx:", signature);
+    for (const ixs of instructions) {
+        const { blockhash } = await rpc.getLatestBlockhash();
+        const tx = buildAndSignTx(ixs, payer, blockhash);
+        const sig = await sendAndConfirmTx(rpc, tx);
+        console.log("Tx:", sig);
+    }
 })();
 ```

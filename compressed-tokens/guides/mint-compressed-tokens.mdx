@@ -1,7 +1,6 @@
 ---
 title: Mint Compressed Tokens
-description: "Mint tokens to compressed token accounts for recipients and increases a mint's token supply. Only the mint authority can perform this operation.
-"
+description: "Mint tokens to compressed token accounts for recipients and increases a mint's token supply. Only the mint authority can perform this operation."
 keywords: ["mint compressed tokens on solana", "scalable token minting"]
 ---
 
@@ -15,7 +14,7 @@ import InstructionCode from '/snippets/code-snippets/compressed-token/mint-to/in
 const transactionSignature = await mintTo(
     rpc,
     payer,
-    mint, // SPL mint with token pool for compression
+    mint, // SPL mint with SPL interface for compression
     recipient, // recipient address (toPubkey parameter)
     payer, // mint authority
     amount,
@@ -46,30 +45,30 @@ const transactionSignature = await mintTo(
 # Troubleshooting
 
 <AccordionGroup>
-<Accordion title="TokenPool not found">
+<Accordion title="SPL interface not found">
 
 
 ```typescript
-// Error message: "TokenPool not found. Please create a compressed token
-// pool for mint: [ADDRESS] via createTokenPool().
+// Error: SPL interface not found for this mint. Create a compressed token
+// SPL interface PDA for mint: [ADDRESS] via createSplInterface().
 ```
 
-The mint does no have a token pool for compression. Ensure you created the mint using `createMint`.
+The mint has no SPL Interface PDA. Ensure you created the mint using `createMint` or call `createSplInterface()` for an existing mint.
 
 ```typescript
-// Create mint with token pool for compression
+// Create mint with SPL interface for compression
 import { createMint } from '@lightprotocol/compressed-token';
 const { mint } = await createMint(rpc, payer, payer.publicKey, 9);
 ```
 
 </Accordion>
 
-<Accordion title="TokenPool mint does not match the provided mint">
+<Accordion title="SPL interface mint mismatch">
 
-The token pool info doesn't correspond to the mint address. Ensure you're fetching the correct pool:
+The SPL interface info doesn't correspond to the mint address. Ensure you're fetching the correct interface:
 
 ```typescript
-// Get the correct token pool for your mint
+// Get SPL interface infos for your mint
 const tokenPoolInfo = await getTokenPoolInfos(rpc, mint);
 ```
 
@@ -114,7 +113,7 @@ const amounts = [
 const transactionSignature = await mintTo(
     rpc,
     payer,
-    mint, // SPL mint with token pool for compression
+    mint, // SPL mint with SPL interface for compression
     recipients, // array of recipients (toPubkey parameter)
     payer, // mint authority
     amounts, // array of amounts (amount parameter)
@@ -134,7 +133,7 @@ import { approveAndMintTo } from '@lightprotocol/compressed-token';
 const transactionSignature = await approveAndMintTo(
     rpc,
     payer,
-    mint, // SPL mint with token pool for compression
+    mint, // SPL mint with SPL interface for compression
     recipient.publicKey, // recipient of minted tokens (toPubkey parameter)
     mintAuthority, // mint authority
     mintAmount,
