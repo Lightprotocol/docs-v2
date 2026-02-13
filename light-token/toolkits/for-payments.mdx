@@ -186,7 +186,8 @@ import {
 
 const ata = getAssociatedTokenAddressInterface(mint, recipient);
 
-// Returns TransactionInstruction[][]. Each inner array is one transaction. 
+// Returns TransactionInstruction[][]. 
+// Each inner array is one transaction. 
 // Almost always returns just one.
 const instructions = await createLoadAtaInstructions(
   rpc,
@@ -196,10 +197,10 @@ const instructions = await createLoadAtaInstructions(
   payer.publicKey
 );
 
-// loop handles the rare multi-transaction case automatically
 for (const ixs of instructions) {
   const tx = new Transaction().add(...ixs);
-  await sendAndConfirmTransaction(rpc, tx, [payer]);
+
+  // sign and send ...
 }
 ```
 
@@ -258,7 +259,8 @@ Find a full code example: [instruction](https://github.com/Lightprotocol/example
 import { Transaction } from "@solana/web3.js";
 import { createTransferInterfaceInstructions } from "@lightprotocol/compressed-token/unified";
 
-// Returns TransactionInstruction[][]. Each inner array is one transaction. 
+// Returns TransactionInstruction[][]. 
+// Each inner array is one transaction. 
 // Almost always returns just one.
 const instructions = await createTransferInterfaceInstructions(
   rpc,
@@ -269,10 +271,10 @@ const instructions = await createTransferInterfaceInstructions(
   recipient
 );
 
-// loop handles the rare multi-transaction case automatically
 for (const ixs of instructions) {
   const tx = new Transaction().add(...ixs);
-  await sendAndConfirmTransaction(rpc, tx, [payer, owner]);
+
+  // sign and send ...
 }
 ```
 
@@ -287,15 +289,18 @@ const transactions = instructions.map((ixs) => new Transaction().add(...ixs));
 const signed = await wallet.signAllTransactions(transactions);
 
 for (const tx of signed) {
+  // send...
   await sendAndConfirmTransaction(rpc, tx);
 }
 ```
 
 </Accordion>
 
-You can optimize sending by parallelizing the loads, and sending the transfer instruction after.
-
-<Accordion title="Optimize sending (parallel loads, then transfer)">
+While almost always you will have only one transfer transaction, you can
+optimize sending in the rare cases where you have multiple transactions.
+parallelize the loads, confirm them, and then send the transfer instruction
+after.
+<Accordion title="Optimize sending (parallel conditional loads, then transfer)">
 
 ```typescript
 import {

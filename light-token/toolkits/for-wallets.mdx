@@ -117,7 +117,8 @@ import {
 
 const ata = getAssociatedTokenAddressInterface(mint, recipient);
 
-// Returns TransactionInstruction[][]. Each inner array is one transaction. 
+// Returns TransactionInstruction[][]. 
+// Each inner array is one transaction. 
 // Almost always returns just one.
 const instructions = await createLoadAtaInstructions(
   rpc,
@@ -127,7 +128,6 @@ const instructions = await createLoadAtaInstructions(
   payer.publicKey
 );
 
-// loop handles the rare multi-transaction case automatically
 for (const ixs of instructions) {
   const tx = new Transaction().add(...ixs);
   await sendAndConfirmTransaction(rpc, tx, [payer]);
@@ -189,8 +189,7 @@ Find a full code example: [instruction](https://github.com/Lightprotocol/example
 import { Transaction } from "@solana/web3.js";
 import { createTransferInterfaceInstructions } from "@lightprotocol/compressed-token/unified";
 
-// Returns TransactionInstruction[][]. Each inner array is one transaction. 
-// Almost always returns just one.
+// Each inner array = one transaction. Usually just one.
 const instructions = await createTransferInterfaceInstructions(
   rpc,
   payer.publicKey,
@@ -200,7 +199,6 @@ const instructions = await createTransferInterfaceInstructions(
   recipient
 );
 
-// loop handles the rare multi-transaction case automatically
 for (const ixs of instructions) {
   const tx = new Transaction().add(...ixs);
   await sendAndConfirmTransaction(rpc, tx, [payer, owner]);
