@@ -50,7 +50,7 @@ import {
     sendAndConfirmTx,
     selectStateTreeInfo,
 } from '@lightprotocol/stateless.js';
-import { CompressedTokenProgram } from '@lightprotocol/compressed-token';
+import { LightTokenProgram } from '@lightprotocol/compressed-token';
 import {
     createMint,
     getOrCreateAssociatedTokenAccount,
@@ -109,10 +109,10 @@ async function createPoolAndCompress() {
     const outputStateTreeInfo = selectStateTreeInfo(await rpc.getStateTreeInfos());
 
     // Derive SPL Interface PDA
-    const tokenPoolPda = CompressedTokenProgram.deriveTokenPoolPda(mint);
+    const tokenPoolPda = LightTokenProgram.deriveTokenPoolPda(mint);
 
     // Create SPL interface instruction
-    const createSplInterfaceIx = await CompressedTokenProgram.createSplInterface({
+    const createSplInterfaceIx = await LightTokenProgram.createSplInterface({
         feePayer: payer.publicKey,
         mint,
         tokenProgramId: TOKEN_PROGRAM_ID,
@@ -130,7 +130,7 @@ async function createPoolAndCompress() {
     };
 
     // Create compress instruction
-    const compressIx = await CompressedTokenProgram.compress({
+    const compressIx = await LightTokenProgram.compress({
         outputStateTreeInfo,
         tokenPoolInfo,
         payer: payer.publicKey,

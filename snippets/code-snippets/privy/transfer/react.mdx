@@ -1,7 +1,7 @@
 ```typescript
 import { useState } from 'react';
 import { PublicKey, Transaction, ComputeBudgetProgram } from '@solana/web3.js';
-import { CompressedTokenProgram, selectMinCompressedTokenAccountsForTransfer } from '@lightprotocol/compressed-token';
+import { LightTokenProgram, selectMinCompressedTokenAccountsForTransfer } from '@lightprotocol/compressed-token';
 import { bn, createRpc } from '@lightprotocol/stateless.js';
 import type { ConnectedStandardSolanaWallet } from '@privy-io/js-sdk-core';
 import type { SignTransactionResult } from '@privy-io/react-auth/solana';
@@ -60,7 +60,7 @@ export function useTransfer() {
       );
 
       // Build transfer instruction
-      const transferIx = await CompressedTokenProgram.transfer({
+      const transferIx = await LightTokenProgram.transfer({
         payer: owner,
         inputCompressedTokenAccounts: inputAccounts,
         toAddress: recipient,

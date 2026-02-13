@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { PublicKey, Transaction, ComputeBudgetProgram } from '@solana/web3.js';
 import { getAssociatedTokenAddressSync, createAssociatedTokenAccountInstruction, getAccount, TokenAccountNotFoundError } from '@solana/spl-token';
-import { CompressedTokenProgram, selectMinCompressedTokenAccountsForTransfer, getSplInterfaceInfos, selectSplInterfaceInfosForDecompression } from '@lightprotocol/compressed-token';
+import { LightTokenProgram, selectMinCompressedTokenAccountsForTransfer, getSplInterfaceInfos, selectSplInterfaceInfosForDecompression } from '@lightprotocol/compressed-token';
 import { bn, createRpc } from '@lightprotocol/stateless.js';
 import type { ConnectedStandardSolanaWallet } from '@privy-io/js-sdk-core';
 import type { SignTransactionResult } from '@privy-io/react-auth/solana';
@@ -82,7 +82,7 @@ export function useDecompress() {
       }
 
       // Build decompress instruction
-      const decompressIx = await CompressedTokenProgram.decompress({
+      const decompressIx = await LightTokenProgram.decompress({
         payer: owner,
         inputCompressedTokenAccounts: inputAccounts,
         toAddress: destinationAta,

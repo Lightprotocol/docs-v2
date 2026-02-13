@@ -141,13 +141,13 @@ Ensure you have the latest `@lightprotocol/stateless.js` and `@lightprotocol/com
 ```typescript simple-airdrop.ts expandable highlight={29-30,45,74,100}
 // Simple Airdrop - LocalNet
 // 1. Load wallet and select compression infrastructure with getStateTreeInfos() and getTokenPoolInfos()
-// 2. Build CompressedTokenProgram.compress() instruction for multiple recipients in one transaction
+// 2. Build LightTokenProgram.compress() instruction for multiple recipients in one transaction
 // 3. Execute transaction with compute budget and confirm compression operation with sendAndConfirmTx()
 // 4. Verify distribution via getCompressedTokenAccountsByOwner
 
 import { Keypair, PublicKey, ComputeBudgetProgram } from "@solana/web3.js";
 import {
-  CompressedTokenProgram,
+  LightTokenProgram,
   getTokenPoolInfos,
   selectTokenPoolInfo,
 } from "@lightprotocol/compressed-token";
@@ -221,7 +221,7 @@ const owner = payer;
   );
 
   // Create compression instruction for multiple recipients in one transaction
-  const compressInstruction = await CompressedTokenProgram.compress({
+  const compressInstruction = await LightTokenProgram.compress({
     payer: payer.publicKey,
     owner: owner.publicKey,
     source: sourceTokenAccount.address, // source ATA holding SPL tokens
@@ -346,7 +346,7 @@ Run the airdrop script with your configured environment:
 
 ```typescript expandable
 // 1. Load environment and select compression infrastructure with getStateTreeInfos() and getTokenPoolInfos()
-// 2. Build CompressedTokenProgram.compress() instruction for multiple recipients in one transaction
+// 2. Build LightTokenProgram.compress() instruction for multiple recipients in one transaction
 // 3. Execute transaction with compute budget, address lookup table, and confirm with sendAndConfirmTx()
 // 4. Verify distribution via getCompressedTokenAccountsByOwner
 
@@ -356,7 +356,7 @@ import {
     ComputeBudgetProgram,
 } from '@solana/web3.js';
 import {
-    CompressedTokenProgram,
+    LightTokenProgram,
     getTokenPoolInfos,
     selectTokenPoolInfo,
 } from '@lightprotocol/compressed-token';
@@ -415,7 +415,7 @@ import { MINT_ADDRESS, PAYER_KEYPAIR, RPC_ENDPOINT } from '../constants';
         }),
     ];
 
-    const compressInstruction = await CompressedTokenProgram.compress({
+    const compressInstruction = await LightTokenProgram.compress({
         payer: payer.publicKey,
         owner: owner.publicKey,
         source: sourceTokenAccount.address,
@@ -480,11 +480,11 @@ Process recipients in chunks and create batched instructions with optimized comp
 ```typescript create-instructions.ts expandable
 
 // 1. Process recipients in chunks with selectStateTreeInfo() and selectTokenPoolInfo() per batch
-// 2. Create CompressedTokenProgram.compress() instructions with ComputeBudgetProgram limits for multiple recipients
+// 2. Create LightTokenProgram.compress() instructions with ComputeBudgetProgram limits for multiple recipients
 // 3. Return batched instructions for optimized large-scale airdrop execution
 
 import {
-  CompressedTokenProgram,
+  LightTokenProgram,
   TokenPoolInfo,
 } from "@lightprotocol/compressed-token";
 import {
@@ -561,7 +561,7 @@ export async function createAirdropInstructions({
 
       if (recipientBatch.length === 0) break;
 
-      const compressIx = await CompressedTokenProgram.compress({
+      const compressIx = await LightTokenProgram.compress({
         payer,
         owner: payer,
         source: sourceTokenAccount,
@@ -766,7 +766,7 @@ Put it all together in the main airdrop file.
 
 ```typescript airdrop.ts expandable
 // 1. Create compressed mint with createMint(), mint supply with mintTo(), get infrastructure with getStateTreeInfos() and getTokenPoolInfos() (SPL interface infos)
-// 2. Generate batched compression instructions with createAirdropInstructions() - create CompressedTokenProgram.compress() calls
+// 2. Generate batched compression instructions with createAirdropInstructions() - create LightTokenProgram.compress() calls
 // 3. Execute batched airdrop with signAndSendAirdropBatches() - sign transactions and confirm with sendAndConfirmTx() for large-scale distribution
 
 import { Keypair, LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
@@ -913,7 +913,7 @@ import {
 } from "@lightprotocol/stateless.js";
 import { ComputeBudgetProgram, Keypair, PublicKey } from "@solana/web3.js";
 import {
-  CompressedTokenProgram,
+  LightTokenProgram,
   getTokenPoolInfos,
   selectMinCompressedTokenAccountsForTransfer,
   selectTokenPoolInfosForDecompression,
@@ -968,7 +968,7 @@ const connection: Rpc = createRpc(RPC_ENDPOINT);
   );
 
   // 7. Build instruction
-  const ix = await CompressedTokenProgram.decompress({
+  const ix = await LightTokenProgram.decompress({
     payer: payer.publicKey,
     inputCompressedTokenAccounts: inputAccounts,
     toAddress: ata.address,

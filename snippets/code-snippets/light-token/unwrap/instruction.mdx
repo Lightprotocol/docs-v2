@@ -2,7 +2,6 @@
 import "dotenv/config";
 import {
     Keypair,
-    ComputeBudgetProgram,
     Transaction,
     sendAndConfirmTransaction,
 } from "@solana/web3.js";
@@ -10,12 +9,8 @@ import { createRpc, bn } from "@lightprotocol/stateless.js";
 import {
     createMintInterface,
     mintToCompressed,
-    createLoadAtaInstructions,
-    createUnwrapInstruction,
-    getAssociatedTokenAddressInterface,
-    getSplInterfaceInfos,
+    createUnwrapInstructions,
 } from "@lightprotocol/compressed-token/unified";
-import { getMint } from "@solana/spl-token";
 import { createAssociatedTokenAccount } from "@solana/spl-token";
 import { homedir } from "os";
 import { readFileSync } from "fs";
@@ -36,52 +31,27 @@ const payer = Keypair.fromSecretKey(
         { recipient: payer.publicKey, amount: 1000n },
     ]);
 
-    const lightTokenAta = getAssociatedTokenAddressInterface(mint, payer.publicKey);
-
-    // Usually one tx. Empty = noop.
-    const loadInstructions = await createLoadAtaInstructions(
-        rpc,
-        lightTokenAta,
-        payer.publicKey,
-        mint,
-        payer.publicKey
-    );
-    for (const ixs of loadInstructions) {
-        const tx = new Transaction().add(...ixs);
-        await sendAndConfirmTransaction(rpc, tx, [payer]);
-    }
-
     const splAta = await createAssociatedTokenAccount(
         rpc,
         payer,
         mint,
         payer.publicKey
     );
-    const splInterfaceInfos = await getSplInterfaceInfos(rpc, mint);
-    const splInterfaceInfo = splInterfaceInfos.find((i) => i.isInitialized);
-    if (!splInterfaceInfo) throw new Error("No SPL interface found");
 
-    const { decimals } = await getMint(
+    // Returns TransactionInstruction[][]. Each inner array is one txn.
+    // Handles loading cold state + unwrapping in one go.
+    const instructions = await createUnwrapInstructions(
         rpc,
-        mint,
-        undefined,
-        splInterfaceInfo.tokenProgram
-    );
-
-    const ix = createUnwrapInstruction(
-        lightTokenAta,
         splAta,
         payer.publicKey,
         mint,
         500n,
-        splInterfaceInfo,
-        decimals,
         payer.publicKey
     );
-    const tx = new Transaction().add(
-        ComputeBudgetProgram.setComputeUnitLimit({ units: 200_000 }),
-        ix
-    );
-    await sendAndConfirmTransaction(rpc, tx, [payer]);
+
+    for (const ixs of instructions) {
+        const tx = new Transaction().add(...ixs);
+        await sendAndConfirmTransaction(rpc, tx, [payer]);
+    }
 })();
 ```

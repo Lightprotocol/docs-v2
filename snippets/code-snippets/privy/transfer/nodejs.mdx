@@ -3,7 +3,7 @@ import 'dotenv/config';
 import {PrivyClient} from '@privy-io/node';
 import {createRpc, bn} from '@lightprotocol/stateless.js';
 import {PublicKey, Transaction, ComputeBudgetProgram} from '@solana/web3.js';
-import {CompressedTokenProgram, selectMinCompressedTokenAccountsForTransfer} from '@lightprotocol/compressed-token';
+import {LightTokenProgram, selectMinCompressedTokenAccountsForTransfer} from '@lightprotocol/compressed-token';
 
 const transferCompressedTokens = async (
   fromAddress: string,
@@ -42,7 +42,7 @@ const transferCompressedTokens = async (
   const proof = await connection.getValidityProof(inputAccounts.map(account => bn(account.compressedAccount.hash)));
 
   // Create transfer instruction
-  const instruction = await CompressedTokenProgram.transfer({
+  const instruction = await LightTokenProgram.transfer({
     payer: fromPubkey,
     inputCompressedTokenAccounts: inputAccounts,
     toAddress: toPubkey,

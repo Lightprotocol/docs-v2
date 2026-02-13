@@ -4,7 +4,7 @@ import {PrivyClient} from '@privy-io/node';
 import {createRpc, bn, selectStateTreeInfo} from '@lightprotocol/stateless.js';
 import {PublicKey, Transaction, ComputeBudgetProgram} from '@solana/web3.js';
 import {getAssociatedTokenAddressSync, getAccount} from '@solana/spl-token';
-import {CompressedTokenProgram, getTokenPoolInfos, selectTokenPoolInfo} from '@lightprotocol/compressed-token';
+import {LightTokenProgram, getTokenPoolInfos, selectTokenPoolInfo} from '@lightprotocol/compressed-token';
 
 const compressTokens = async (
   fromAddress: string,
@@ -41,7 +41,7 @@ const compressTokens = async (
   const tokenPoolInfo = selectTokenPoolInfo(tokenPoolInfos);
 
   // Create compress instruction
-  const instruction = await CompressedTokenProgram.compress({
+  const instruction = await LightTokenProgram.compress({
     payer: fromPubkey,
     owner: fromPubkey,
     source: ownerAta,
