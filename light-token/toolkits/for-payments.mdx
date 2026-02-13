@@ -186,7 +186,8 @@ import {
 
 const ata = getAssociatedTokenAddressInterface(mint, recipient);
 
-// Each inner array = one transaction. Usually just one. Empty = nothing to load.
+// Returns TransactionInstruction[][]. Each inner array is one transaction. 
+// Almost always returns just one.
 const instructions = await createLoadAtaInstructions(
   rpc,
   ata,
@@ -195,6 +196,7 @@ const instructions = await createLoadAtaInstructions(
   payer.publicKey
 );
 
+// loop handles the rare multi-transaction case automatically
 for (const ixs of instructions) {
   const tx = new Transaction().add(...ixs);
   await sendAndConfirmTransaction(rpc, tx, [payer]);
@@ -256,7 +258,8 @@ Find a full code example: [instruction](https://github.com/Lightprotocol/example
 import { Transaction } from "@solana/web3.js";
 import { createTransferInterfaceInstructions } from "@lightprotocol/compressed-token/unified";
 
-// Returns TransactionInstruction[][]. Each inner array is one transaction. Almost always returns just one.
+// Returns TransactionInstruction[][]. Each inner array is one transaction. 
+// Almost always returns just one.
 const instructions = await createTransferInterfaceInstructions(
   rpc,
   payer.publicKey,
@@ -280,7 +283,7 @@ Your app logic may require you to create a single sign request for your user. He
 ```typescript
 const transactions = instructions.map((ixs) => new Transaction().add(...ixs));
 
-// One approval for all (wallet.signAllTransactions)
+// One approval for all
 const signed = await wallet.signAllTransactions(transactions);
 
 for (const tx of signed) {
