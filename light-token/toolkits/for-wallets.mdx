@@ -91,8 +91,8 @@ const rpc = createRpc(RPC_ENDPOINT);
 
 <Info>
 **About loading**: Light tokens reduce account rent ~200x by auto-compressing inactive
-accounts. Before any action, the SDK detects compressed state and adds
-instructions to load it back on-chain. This almost always fits in a single
+accounts. Before any action, the SDK detects compressed (cold) state and adds
+instructions to load it back into hot state. This almost always fits in a single
 atomic transaction with your regular transfer. APIs return `TransactionInstruction[][]` so the same
 loop handles the rare multi-transaction case automatically.
 </Info>
