@@ -14,7 +14,7 @@ import ActionCode from '/snippets/code-snippets/compressed-token/compress-spl-ac
 const transactionSignature = await compressSplTokenAccount(
     rpc,
     payer,
-    mint, // SPL mint with token pool for compression
+    mint, // SPL mint with SPL interface for compression
     owner,
     tokenAccount, // SPL token account to compress
 );
@@ -25,7 +25,7 @@ const transactionSignature = await compressSplTokenAccount(
 const transactionSignature = await compressSplTokenAccount(
     rpc,
     payer,
-    mint, // SPL mint with token pool for compression
+    mint, // SPL mint with SPL interface for compression
     owner,
     tokenAccount, // SPL token account to compress
     remainingAmount, // amount to keep in SPL format
@@ -181,7 +181,7 @@ for (const { account, owner } of tokenAccounts) {
 # Next Steps
 
 <Card
-  title="How to Create a Mint Account with Token Pool"
+  title="How to create a mint with SPL interface"
   icon="chevron-right"
   color="#0066ff"
   href="/compressed-tokens/guides/create-mint-with-token-pool"

@@ -189,7 +189,7 @@ async fn test_transfer_spl_to_light() {
         .await
         .unwrap();
 
-    // 2. Create SPL token pool (spl_interface_pda)
+    // 2. Create SPL Interface PDA
     let create_pool_ix =
         CreateSplInterfacePda::new(payer.pubkey(), mint, spl_token::ID, false).instruction();
 

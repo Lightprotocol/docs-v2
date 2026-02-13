@@ -71,7 +71,7 @@ Run this `mint-spl-tokens.ts` to mint SPL tokens to your wallet.
 ```typescript mint-spl-tokens.ts expandable
 // Mint SPL Tokens for Airdrop - LocalNet
 // 1. Load wallet and connect to local validator
-// 2. Create SPL mint with token pool for compression via createMint()
+// 2. Create SPL mint with SPL interface via createMint()
 // 3. Create ATA and mint SPL tokens to sender for airdrop preparation
 // 4. Output mint address for use in simple-airdrop.ts
 
@@ -82,7 +82,7 @@ import {
   getOrCreateAssociatedTokenAccount,
   mintTo,
 } from "@solana/spl-token";
-import { createTokenPool } from "@lightprotocol/compressed-token";
+import { createSplInterface } from "@lightprotocol/compressed-token";
 import * as fs from 'fs';
 import * as os from 'os';
 
@@ -95,18 +95,18 @@ const secretKey = JSON.parse(fs.readFileSync(walletPath, 'utf8'));
 const payer = Keypair.fromSecretKey(Buffer.from(secretKey));
 
 (async () => {
-  // Step 2: Create SPL mint with token pool for compression
+  // Step 2: Create SPL mint with SPL interface
   const mint = await createMint(connection, payer, payer.publicKey, null, 9);
-  const poolTxId = await createTokenPool(connection, payer, mint);
+  const poolTxId = await createSplInterface(connection, payer, mint);
   console.log(`Mint address: ${mint.toBase58()}`);
-  console.log(`TokenPool created: ${poolTxId}`);
+  console.log(`SPL interface created: ${poolTxId}`);
 
   // Step 3: Create associated token account for sender
   // The sender will send tokens from this account to the recipients as compressed tokens.
   const ata = await getOrCreateAssociatedTokenAccount(
     connection,
     payer,
-    mint, // SPL mint with token pool for compression
+    mint, // SPL mint with SPL interface for compression
     payer.publicKey
   );
   console.log(`ATA address: ${ata.address.toBase58()}`);
@@ -116,7 +116,7 @@ const payer = Keypair.fromSecretKey(Buffer.from(secretKey));
   const mintToTxId = await mintTo(
     connection,
     payer,
-    mint, // SPL mint with token pool for compression
+    mint, // SPL mint with SPL interface for compression
     ata.address, // distributor ATA
     payer.publicKey,
     100_000_000_000 // amount: 100 tokens with 9 decimals
@@ -175,7 +175,7 @@ const payer = Keypair.fromSecretKey(Buffer.from(secretKey));
 const owner = payer;
 
 (async () => {
-  // Step 2: Select state tree and token pool
+  // Step 2: Select state tree and SPL interface
   const activeStateTrees = await connection.getStateTreeInfos();
   const treeInfo = selectStateTreeInfo(activeStateTrees);
 
@@ -187,7 +187,7 @@ const owner = payer;
   const sourceTokenAccount = await getOrCreateAssociatedTokenAccount(
     connection,
     payer,
-    mint, // SPL mint with token pool for compression
+    mint, // SPL mint with SPL interface for compression
     payer.publicKey
   );
 
@@ -227,7 +227,7 @@ const owner = payer;
     source: sourceTokenAccount.address, // source ATA holding SPL tokens
     toAddress: airDropAddresses, // recipient addresses for compressed tokens
     amount: amounts, // different amounts for each recipient
-    mint, // SPL mint with token pool for compression
+    mint, // SPL mint with SPL interface for compression
     tokenPoolInfo: info,
     outputStateTreeInfo: treeInfo, // destination state tree
   });
@@ -387,7 +387,7 @@ import { MINT_ADDRESS, PAYER_KEYPAIR, RPC_ENDPOINT } from '../constants';
     const treeInfos = await connection.getStateTreeInfos(); // Fixed: removed deprecated getCachedActiveStateTreeInfos
     const treeInfo = selectStateTreeInfo(treeInfos);
 
-    // 2. Select a token pool
+    // 2. Select SPL interface
     const tokenPoolInfos = await getTokenPoolInfos(connection, mintAddress);
     const tokenPoolInfo = selectTokenPoolInfo(tokenPoolInfos);
 
@@ -479,7 +479,7 @@ Process recipients in chunks and create batched instructions with optimized comp
 
 ```typescript create-instructions.ts expandable
 
-// 1. Process recipients in chunks with selectStateTreeInfo() and selectTokenPoolInfo() for each batch
+// 1. Process recipients in chunks with selectStateTreeInfo() and selectTokenPoolInfo() per batch
 // 2. Create CompressedTokenProgram.compress() instructions with ComputeBudgetProgram limits for multiple recipients
 // 3. Return batched instructions for optimized large-scale airdrop execution
 
@@ -765,7 +765,7 @@ export async function* signAndSendAirdropBatches(
 Put it all together in the main airdrop file.
 
 ```typescript airdrop.ts expandable
-// 1. Create compressed mint with createMint(), mint supply with mintTo(), get infrastructure with getStateTreeInfos() and getTokenPoolInfos()
+// 1. Create compressed mint with createMint(), mint supply with mintTo(), get infrastructure with getStateTreeInfos() and getTokenPoolInfos() (SPL interface infos)
 // 2. Generate batched compression instructions with createAirdropInstructions() - create CompressedTokenProgram.compress() calls
 // 3. Execute batched airdrop with signAndSendAirdropBatches() - sign transactions and confirm with sendAndConfirmTx() for large-scale distribution
 
@@ -851,7 +851,7 @@ const recipients = [
   // 6a: Fetch available state trees for compressed account storage
   const stateTreeInfos = await connection.getStateTreeInfos();
 
-  // 6b: Get token pool infos for compression operations
+  // 6b: Get SPL interface infos for compression
   const tokenPoolInfos = await getTokenPoolInfos(connection, mint);
 
   // Step 7: Create instruction batches for large-scale airdrop
@@ -863,7 +863,7 @@ const recipients = [
     sourceTokenAccount: ata.address, // source ATA holding SPL tokens
     mint, // token mint
     stateTreeInfos, // state trees for compressed accounts
-    tokenPoolInfos, // token pools for compression
+    tokenPoolInfos,
     computeUnitPrice: calculateComputeUnitPrice(10_000, 500_000), // dynamic priority fee
   });
 
@@ -958,7 +958,7 @@ const connection: Rpc = createRpc(RPC_ENDPOINT);
     inputAccounts.map((account) => account.compressedAccount.hash)
   );
 
-  // 5. Fetch token pool infos
+  // 5. Fetch SPL interface infos
   const tokenPoolInfos = await getTokenPoolInfos(connection, mint);
 
   // 6. Select

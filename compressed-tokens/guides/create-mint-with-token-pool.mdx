@@ -1,7 +1,7 @@
 ---
-title: Create a Mint Account with Token Pool for Compression
-description: "Create an SPL token mint with a token pool for compression. The token pool locks tokens while compressed and releases them when decompressed."
-keywords: ["register mint for compression", "compressed mint account"]
+title: Create a Mint with SPL Interface for Compression
+description: "Create an SPL token mint with an SPL Interface PDA (omnibus account) for compression. The SPL interface holds SPL tokens while compressed and releases them when decompressed."
+keywords: ["register mint for compression", "compressed mint account", "SPL interface"]
 ---
 
 import FullSetup from "/snippets/setup/full-setup.mdx";
@@ -9,11 +9,11 @@ import ActionCode from '/snippets/code-snippets/compressed-token/create-mint/act
 import InstructionCode from '/snippets/code-snippets/compressed-token/create-mint/instruction.mdx';
 
 The mint account itself requires rent (like regular SPL mints), but individual compressed token accounts are rent-free.
-Create a token pool for an existing SPL mint with [`createTokenPool()`](/compressed-tokens/guides/add-token-pools-to-mint-accounts) or use `createMint()` to create a new one from scratch.
+Create an SPL interface (omnibus account) for an existing SPL mint with [`createSplInterface()`](/compressed-tokens/guides/add-token-pools-to-mint-accounts) or use `createMint()` to create a new one from scratch.
 
 <CodeGroup>
 ```typescript createMint()
-// Create SPL mint with token pool for compression
+// Create SPL mint with SPL interface for compression
 const { mint, transactionSignature } = await createMint(
     rpc,
     payer,
@@ -24,14 +24,14 @@ const { mint, transactionSignature } = await createMint(
 </CodeGroup>
 
 <Tip>
-**Best Practice:** Each mint supports a maximum of 4 token pools total. During compression/decompression, token pools get write-locked. Use `addTokenPools()` to create additional pools that increase per-block write-lock capacity.
+**Best Practice:** Each mint supports up to 4 SPL interfaces. During compression/decompression, SPL Interface PDAs get write-locked. Use `addTokenPools()` to create additional interfaces and increase per-block write-lock capacity.
 </Tip>
 
 ## Get Started
 
 <Steps>
 <Step>
-### Create a Mint Account with Token Pool for Compression
+### Create a mint with SPL interface for compression
 
 <FullSetup />
 
@@ -91,7 +91,7 @@ const { mint, transactionSignature } = await createMint(
 # Next Steps
 
 <Card
-  title="How to Add Token Pools for Existing Mints"
+  title="How to add SPL interface for existing mints"
   icon="chevron-right"
   color="#0066ff"
   href="/compressed-tokens/guides/add-token-pools-to-mint-accounts"

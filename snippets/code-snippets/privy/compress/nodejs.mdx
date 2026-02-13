@@ -34,7 +34,7 @@ const compressTokens = async (
   }
 
   // Get state tree to store compressed tokens
-  //  Get token pool info. Stores SPL tokens in interface PDA when compressed.
+  // Get SPL interface info. SPL tokens are stored in the interface PDA when compressed.
   const stateTreeInfos = await connection.getStateTreeInfos();
   const selectedTreeInfo = selectStateTreeInfo(stateTreeInfos);
   const tokenPoolInfos = await getTokenPoolInfos(connection, mintPubkey);

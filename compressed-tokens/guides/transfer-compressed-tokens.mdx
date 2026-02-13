@@ -21,7 +21,7 @@ SPL token accounts can be compressed in the same transaction with `compress_or_d
 const transactionSignature = await transfer(
     rpc,
     payer,
-    mint, // SPL mint with token pool for compression
+    mint, // SPL mint with SPL interface for compression
     amount,
     payer,
     recipient, // destination address (toAddress parameter)

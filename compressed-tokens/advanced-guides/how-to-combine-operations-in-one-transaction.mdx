@@ -1,6 +1,6 @@
 ---
 title: Combine Instructions in One Transaction
-description: Guide to combine multiple instructions in a single transaction. Full code example for token pool creation and for first-time compression of existing SPL tokens.
+description: Combine multiple instructions in one transaction. Full example: create SPL Interface PDA and first-time compression of existing SPL tokens.
 keywords: ["batch token operations solana", "combine transactions solana"]
 ---
 
@@ -9,7 +9,7 @@ import SetupEnvironment from '/snippets/setup/setup-environment-tabs.mdx';
 
 The SDK provides instruction-level APIs that return instructions without sending transactions. Combine these instructions to build custom transactions with multiple instructions.
 <Note>
-This guide demonstrates creating a token pool and compressing existing SPL tokens in a single transaction.
+This guide demonstrates creating an SPL interface and compressing existing SPL tokens in a single transaction.
 </Note>
 # Full Code Example
 
@@ -32,11 +32,11 @@ Make sure you have dependencies and developer environment set up!
 </Step>
 
 <Step>
-### Create Token Pool + Compress
+### Create SPL interface + compress
 
 ```typescript create-pool-and-compress.ts highlight={26,71} expandable
 // 1. Setup: Create regular SPL token and mint to ATA
-// 2. Build instructions for create token pool and compress
+// 2. Build instructions for SPL interface and compress
 // 3. Combine instructions in one transaction
 // 4. Verify compressed balance
 
@@ -105,20 +105,20 @@ async function createPoolAndCompress() {
     console.log("Regular SPL token created:", mint.toBase58());
     console.log("ATA balance:", 1, "token");
 
-    // Step 2: Build instructions for create token pool and compress
+    // Step 2: Build instructions for SPL interface and compress
     const outputStateTreeInfo = selectStateTreeInfo(await rpc.getStateTreeInfos());
 
-    // Derive token pool PDA
+    // Derive SPL Interface PDA
     const tokenPoolPda = CompressedTokenProgram.deriveTokenPoolPda(mint);
 
-    // Create token pool instruction
-    const createTokenPoolIx = await CompressedTokenProgram.createTokenPool({
+    // Create SPL interface instruction
+    const createSplInterfaceIx = await CompressedTokenProgram.createSplInterface({
         feePayer: payer.publicKey,
         mint,
-        tokenProgram: TOKEN_PROGRAM_ID,
+        tokenProgramId: TOKEN_PROGRAM_ID,
     });
 
-    // Manually construct TokenPoolInfo for first-time compression
+    // Manually construct TokenPoolInfo for first-time compression (SPL interface not yet on-chain)
     const tokenPoolInfo = {
         mint: mint,
         tokenPoolPda: tokenPoolPda,
@@ -146,7 +146,7 @@ async function createPoolAndCompress() {
 
     const allInstructions = [
         ComputeBudgetProgram.setComputeUnitLimit({ units: 1_000_000 }),
-        createTokenPoolIx,
+        createSplInterfaceIx,
         compressIx,
     ];
 

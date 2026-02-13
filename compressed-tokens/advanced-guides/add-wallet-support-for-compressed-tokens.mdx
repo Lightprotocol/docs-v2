@@ -291,7 +291,7 @@ import * as fs from 'fs';
 import * as os from 'os';
 
 // 1. Setup RPC connection and load filesystem wallet for mint operations
-// 2. Call createMint() to create SPL mint with token pool for compression
+// 2. Call createMint() to create SPL mint with SPL interface for compression
 // 3. Call mintTo() to mint compressed tokens to filesystem wallet
 
 const connection: Rpc = createRpc(); // defaults to localhost:8899
@@ -307,7 +307,7 @@ const mintKeypair = Keypair.generate();
     await connection.requestAirdrop(payer.publicKey, 1e9);
     await new Promise(resolve => setTimeout(resolve, 1000));
 
-    // Create SPL mint with token pool for compression
+    // Create SPL mint with SPL interface for compression
     const { mint, transactionSignature } = await createMint(
         connection,
         payer,
@@ -322,7 +322,7 @@ const mintKeypair = Keypair.generate();
     const mintToTxId = await mintTo(
         connection,
         payer,
-        mint, // SPL mint with token pool for compression
+        mint, // SPL mint with SPL interface for compression
         payer.publicKey, // recipient address
         payer,
         10e9,
@@ -381,7 +381,7 @@ const amount = bn(1e8);
   // Step 2: Fetch compressed account hashes from state trees
   const compressedTokenAccounts =
     await connection.getCompressedTokenAccountsByOwner(owner.publicKey, {
-      mint, // SPL mint with token pool for compression
+      mint, // SPL mint with SPL interface for compression
     });
 
   if (compressedTokenAccounts.items.length === 0) {
@@ -474,7 +474,7 @@ import {
 } from "@lightprotocol/compressed-token";
 
 // 1. Setup RPC connection and fetch compressed token accounts with getCompressedTokenAccountsByOwner()
-// 2. Select accounts and token pool infos using selectMinCompressedTokenAccountsForTransfer() and selectTokenPoolInfosForDecompression()
+// 2. Select accounts and SPL interface infos using selectMinCompressedTokenAccountsForTransfer() and selectTokenPoolInfosForDecompression()
 // 3. Create decompress instruction with CompressedTokenProgram.decompress() and submit transaction
 
 // Step 1: Setup RPC connection and define decompression parameters
@@ -544,7 +544,7 @@ This example converts regular SPL tokens to compressed format using `CompressedT
 
 ```typescript
 // 1. Setup RPC connection and get user ATA with getOrCreateAssociatedTokenAccount()
-// 2. Fetch state tree and token pool infos using getStateTreeInfos() and getTokenPoolInfos()
+// 2. Fetch state tree and SPL interface infos using getStateTreeInfos() and getTokenPoolInfos()
 // 3. Create compress instruction with CompressedTokenProgram.compress() and submit transaction
 
 
@@ -584,7 +584,7 @@ const amount = 1e5; // 100K tokens to compress
   const treeInfos = await connection.getStateTreeInfos();
   const treeInfo = selectStateTreeInfo(treeInfos);
 
-  // Step 4: Fetch and select token pool info for compression
+  // Step 4: Fetch and select SPL interface info for compression
   const tokenPoolInfos = await getTokenPoolInfos(connection, mint);
   const tokenPoolInfo = selectTokenPoolInfo(tokenPoolInfos);
 
@@ -597,7 +597,7 @@ const amount = 1e5; // 100K tokens to compress
     amount, // amount to compress
     mint, // token mint address
     outputStateTreeInfo: treeInfo, // state tree for compressed accounts
-    tokenPoolInfo, // token pool for compression
+    tokenPoolInfo,
   });
 
   // Step 6: Build, sign, and submit compression transaction

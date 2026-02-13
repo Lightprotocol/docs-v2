@@ -20,7 +20,7 @@ import FullSetup from "/snippets/setup/full-setup.mdx";
 
 ```typescript
 // 1. Load wallet and connect to Localnet
-// 2. Create SPL mint with token pool for compression via createMint()
+// 2. Create SPL mint with SPL interface via createMint()
 // 3. Mint compressed tokens to recipient account via mintTo()
 // 4. Verify compressed token balance via getCompressedTokenAccountsByOwner
 
@@ -43,8 +43,8 @@ const connection = createRpc(RPC_ENDPOINT, COMPRESSION_ENDPOINT, PROVER_ENDPOINT
 
 const main = async () => {
   try {
-    // Step 2: Create SPL mint with token pool for compression
-    console.log("\nCreating SPL mint with token pool for compression");
+    // Step 2: Create SPL mint with SPL interface
+    console.log("\nCreating SPL mint with SPL interface for compression");
     const { mint, transactionSignature } = await createMint(
       connection,
       payer,
@@ -63,7 +63,7 @@ const main = async () => {
     const mintToTxId = await mintTo(
       connection,
       payer,
-      mint, // SPL mint with token pool for compression
+      mint, // SPL mint with SPL interface for compression
       payer.publicKey, // recipient.publicKey
       payer, // mintAuthority
       mintAmount
@@ -77,7 +77,7 @@ const main = async () => {
     // Step 4: Verify compressed token balance via getCompressedTokenAccountsByOwner
     const tokenAccounts = await connection.getCompressedTokenAccountsByOwner(
       payer.publicKey,
-      { mint } // SPL mint with token pool for compression
+      { mint } // SPL mint with SPL interface for compression
     );
   } catch (error: any) {
     console.error("Error:", error.message);

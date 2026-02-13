@@ -64,14 +64,14 @@ Run `compress-t22.ts`.
 ```typescript compress-t22.ts expandable
 // Token-2022 with ZK Compression - Local
 // 1. Load wallet and connect to local validator
-// 2. Create Token-2022 mint with metadata extension and register for compression via createTokenPool()
+// 2. Create Token-2022 mint with metadata extension and register for compression via createSplInterface()
 // 3. Mint SPL tokens to ATA, compress via compress(), and transfer compressed tokens via transfer()
 // 4. Verify balances via getTokenAccountBalance and getCompressedTokenAccountsByOwner
 
 import { confirmTx, createRpc } from "@lightprotocol/stateless.js";
 import {
   compress,
-  createTokenPool,
+  createSplInterface,
   transfer,
 } from "@lightprotocol/compressed-token";
 import {
@@ -177,10 +177,10 @@ const connection = createRpc(); // defaults to localhost:8899
   );
   console.log(`Token-2022 mint created with address: ${mint.publicKey.toString()}`);
 
-  // Step 3: Call createTokenPool() to initialize omnibus account
+  // Step 3: Call createSplInterface() to initialize omnibus account
   // and register Token-2022 mint with Light Token Program
   // Create PDA that holds SPL tokens for compressed tokens
-  const registerTxId = await createTokenPool(
+  const registerTxId = await createSplInterface(
     connection,
     payer,
     mint.publicKey, // Token-2022 mint to register with Light Token Program
@@ -192,7 +192,7 @@ const connection = createRpc(); // defaults to localhost:8899
   const ata = await getOrCreateAssociatedTokenAccount(
     connection,
     payer,
-    mint.publicKey, // Token-2022 mint with token pool for compression
+    mint.publicKey, // Token-2022 mint with SPL interface for compression
     payer.publicKey,
     undefined,
     undefined,
@@ -205,7 +205,7 @@ const connection = createRpc(); // defaults to localhost:8899
   const mintToTxId = await mintToSpl(
     connection,
     payer,
-    mint.publicKey, // Token-2022 mint with token pool for compression
+    mint.publicKey, // Token-2022 mint with SPL interface for compression
     ata.address, // destination token account
     payer.publicKey, // mint authority
     mintAmount, // amount to mint
@@ -222,7 +222,7 @@ const connection = createRpc(); // defaults to localhost:8899
   const compressTxId = await compress(
     connection,
     payer,
-    mint.publicKey, // Token-2022 mint with token pool for compression
+    mint.publicKey, // Token-2022 mint with SPL interface for compression
     compressAmount, // amount to compress
     payer, // owner of SPL tokens
     ata.address, // Source ATA for compression
@@ -237,7 +237,7 @@ const connection = createRpc(); // defaults to localhost:8899
   const transferTxId = await transfer(
     connection,
     payer,
-    mint.publicKey, // Token-2022 mint with token pool for compression
+    mint.publicKey, // Token-2022 mint with SPL interface for compression
     transferAmount,
     payer,
     transferRecipient.publicKey

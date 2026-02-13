@@ -56,7 +56,7 @@ export function useDecompress() {
         throw new Error('Insufficient compressed balance');
       }
 
-      // Get validity proof and token pool info
+      // Get validity proof and SPL interface info
       const proof = await rpc.getValidityProof(
         inputAccounts.map((account) => bn(account.compressedAccount.hash))
       );

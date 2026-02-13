@@ -2,7 +2,7 @@
 import "dotenv/config";
 import { Keypair, PublicKey } from "@solana/web3.js";
 import { createRpc } from "@lightprotocol/stateless.js";
-import { createTokenPool } from "@lightprotocol/compressed-token";
+import { createSplInterface } from "@lightprotocol/compressed-token";
 import { createMint as createSplMint, TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { homedir } from "os";
 import { readFileSync } from "fs";
@@ -27,8 +27,8 @@ const payer = Keypair.fromSecretKey(
     const mintKeypair = Keypair.generate();
     await createSplMint(rpc, payer, payer.publicKey, null, 9, mintKeypair, undefined, TOKEN_PROGRAM_ID);
 
-    // Create token pool for existing mint
-    const tx = await createTokenPool(rpc, payer, mintKeypair.publicKey);
+    // Create SPL interface for existing mint
+    const tx = await createSplInterface(rpc, payer, mintKeypair.publicKey);
 
     console.log("Mint:", mintKeypair.publicKey.toBase58());
     console.log("Tx:", tx);

@@ -16,7 +16,7 @@ The `approve()` and `revoke()` functions grant and remove delegate spending auth
 const approveSignature = await approve(
     rpc,
     payer,
-    mint, // SPL mint with token pool for compression
+    mint, // SPL mint with SPL interface for compression
     amount,
     owner,
     delegate.publicKey, // delegate account
@@ -61,7 +61,7 @@ const revokeSignature = await revoke(
 Before we approve or revoke delegates, we need:
 
 * compressed token accounts to delegate or revoke delegation from, and
-* an SPL mint with a token pool for compression. This token pool can be created for new SPL mints via [`createMint()`](/compressed-tokens/guides/create-mint-with-token-pool) or added to existing SPL mints via [`createTokenPool()`](/compressed-tokens/guides/add-token-pools-to-mint-accounts).
+* an SPL mint with an SPL interface. Create one for new mints via [`createMint()`](/compressed-tokens/guides/create-mint-with-token-pool) or for existing mints via [`createSplInterface()`](/compressed-tokens/guides/add-token-pools-to-mint-accounts).
 </Info>
 
 </Step>

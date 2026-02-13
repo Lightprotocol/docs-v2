@@ -53,8 +53,8 @@ const payer = Keypair.fromSecretKey(
         TOKEN_PROGRAM_ID
     );
 
-    // Instruction 3: Create SPL interface pda (token pool, enables compression of the SPL mint's tokens)
-    const createTokenPoolIx = await CompressedTokenProgram.createTokenPool({
+    // Instruction 3: Create SPL Interface PDA (enables compression for this mint)
+    const createSplInterfaceIx = await CompressedTokenProgram.createSplInterface({
         feePayer: payer.publicKey,
         mint: mintKeypair.publicKey,
         tokenProgramId: TOKEN_PROGRAM_ID,
@@ -63,7 +63,7 @@ const payer = Keypair.fromSecretKey(
     const tx = new Transaction().add(
         createMintAccountIx,
         initializeMintIx,
-        createTokenPoolIx
+        createSplInterfaceIx
     );
 
     const signature = await sendAndConfirmTransaction(rpc, tx, [

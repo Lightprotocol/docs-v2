@@ -56,7 +56,7 @@ const payer = Keypair.fromSecretKey(
 
     // Instruction 3: Create SPL interface PDA
     // Holds Token-2022 tokens when wrapped to light-token
-    const createSplInterfaceIx = await CompressedTokenProgram.createTokenPool({
+    const createSplInterfaceIx = await CompressedTokenProgram.createSplInterface({
         feePayer: payer.publicKey,
         mint: mintKeypair.publicKey,
         tokenProgramId: TOKEN_2022_PROGRAM_ID,

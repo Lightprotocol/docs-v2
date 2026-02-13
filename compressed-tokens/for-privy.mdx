@@ -96,7 +96,7 @@ const rpc = createRpc(RPC_ENDPOINT);
 <Info>
 Before we call compress or decompresss, we need:
 
-* An SPL mint with a interface PDA for compression. This PDA can be created for new SPL mints via [`createMint()`](/compressed-tokens/guides/create-mint-with-token-pool) or added to existing SPL mints via [`createTokenPool()`](/compressed-tokens/guides/add-token-pools-to-mint-accounts).
+* An SPL mint with a interface PDA for compression. This PDA can be created for new SPL mints via [`createMint()`](/compressed-tokens/guides/create-mint-with-token-pool) or added to existing SPL mints via [`createSplInterface()`](/compressed-tokens/guides/add-token-pools-to-mint-accounts).
 * For `compress()` SPL tokens in an Associated Token Account, or
 * For `decompress()` compressed token accounts with sufficient balance.
 </Info>

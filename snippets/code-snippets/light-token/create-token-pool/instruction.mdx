@@ -27,7 +27,7 @@ const payer = Keypair.fromSecretKey(
 (async function () {
     const existingMint = new PublicKey("YOUR_EXISTING_MINT_ADDRESS");
 
-    const ix = await CompressedTokenProgram.createTokenPool({
+    const ix = await CompressedTokenProgram.createSplInterface({
         feePayer: payer.publicKey,
         mint: existingMint,
         tokenProgramId: TOKEN_PROGRAM_ID,
