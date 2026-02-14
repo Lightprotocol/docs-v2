@@ -1,34 +1,49 @@
 ---
-title: Extensions
-description: Overview to Token 2022 extensions supported by light-tokens.
+title: Token-2022 Extensions
+description: "Token-2022 (T22) extensions supported by light-token. Includes restricted extensions: supported with constraints (e.g. zero fees, nil transfer hook)."
 hidden: true
 ---
+
+Light-token supports wrapping and holding balances from Token-2022 mints. The following T22 extensions are supported. Some are **restricted**: the extension is supported only when configured in a specific way (e.g. zero fees, transfer hook disabled).
+
+### Supported with restrictions
+
+| Extension | Restriction |
+|-----------|-------------|
+| TransferFeeConfig | Fees must be zero |
+| ConfidentialTransferFeeConfig | Fees must be zero |
+| DefaultAccountState | Any state allowed |
+| TransferHook | `program_id` must be nil (hook disabled) |
+| ConfidentialTransferMint | Initialized but not enabled |
+| ConfidentialMintBurn | Initialized but not enabled |
+
+### Full supported extensions list
 
 <table style={{fontSize: '0.85em'}}>
   <thead>
     <tr>
       <th style={{textAlign: 'left'}}>Extension Name</th>
-      <th style={{textAlign: 'left'}}>Description</th>
+      <th style={{textAlign: 'left'}}>Restriction / notes</th>
       <th style={{textAlign: 'center'}}>light-token</th>
       <th style={{textAlign: 'center'}}>Compressed Token</th>
     </tr>
   </thead>
   <tbody>
-    <tr><td>MetadataPointer</td><td>-</td><td style={{textAlign: 'center'}}>✓</td><td style={{textAlign: 'center'}}>✓</td></tr>
-    <tr><td>TokenMetadata</td><td>-</td><td style={{textAlign: 'center'}}>✓</td><td style={{textAlign: 'center'}}>✓</td></tr>
-    <tr><td>InterestBearingConfig</td><td>-</td><td style={{textAlign: 'center'}}>✓</td><td style={{textAlign: 'center'}}>✓</td></tr>
-    <tr><td>GroupPointer</td><td>-</td><td style={{textAlign: 'center'}}>✓</td><td style={{textAlign: 'center'}}>✓</td></tr>
-    <tr><td>GroupMemberPointer</td><td>-</td><td style={{textAlign: 'center'}}>✓</td><td style={{textAlign: 'center'}}>✓</td></tr>
-    <tr><td>TokenGroup</td><td>-</td><td style={{textAlign: 'center'}}>✓</td><td style={{textAlign: 'center'}}>✓</td></tr>
-    <tr><td>TokenGroupMember</td><td>-</td><td style={{textAlign: 'center'}}>✓</td><td style={{textAlign: 'center'}}>✓</td></tr>
-    <tr><td>MintCloseAuthority</td><td>-</td><td style={{textAlign: 'center'}}>✓</td><td style={{textAlign: 'center'}}>-</td></tr>
-    <tr><td>TransferFeeConfig</td><td>fees must be zero</td><td style={{textAlign: 'center'}}>✓</td><td style={{textAlign: 'center'}}>-</td></tr>
-    <tr><td>DefaultAccountState</td><td>any state allowed</td><td style={{textAlign: 'center'}}>✓</td><td style={{textAlign: 'center'}}>-</td></tr>
-    <tr><td>PermanentDelegate</td><td>-</td><td style={{textAlign: 'center'}}>✓</td><td style={{textAlign: 'center'}}>-</td></tr>
-    <tr><td>TransferHook</td><td>program_id must be nil</td><td style={{textAlign: 'center'}}>✓</td><td style={{textAlign: 'center'}}>-</td></tr>
-    <tr><td>Pausable</td><td>-</td><td style={{textAlign: 'center'}}>✓</td><td style={{textAlign: 'center'}}>-</td></tr>
-    <tr><td>ConfidentialTransferMint</td><td>initialized but not enabled</td><td style={{textAlign: 'center'}}>✓</td><td style={{textAlign: 'center'}}>-</td></tr>
-    <tr><td>ConfidentialTransferFeeConfig</td><td>fees must be zero</td><td style={{textAlign: 'center'}}>✓</td><td style={{textAlign: 'center'}}>-</td></tr>
-    <tr><td>ConfidentialMintBurn</td><td>initialized but not enabled</td><td style={{textAlign: 'center'}}>✓</td><td style={{textAlign: 'center'}}>-</td></tr>
+    <tr><td>MetadataPointer</td><td>-</td><td style={{textAlign: 'center'}}>Yes</td><td style={{textAlign: 'center'}}>Yes</td></tr>
+    <tr><td>TokenMetadata</td><td>-</td><td style={{textAlign: 'center'}}>Yes</td><td style={{textAlign: 'center'}}>Yes</td></tr>
+    <tr><td>InterestBearingConfig</td><td>-</td><td style={{textAlign: 'center'}}>Yes</td><td style={{textAlign: 'center'}}>Yes</td></tr>
+    <tr><td>GroupPointer</td><td>-</td><td style={{textAlign: 'center'}}>Yes</td><td style={{textAlign: 'center'}}>Yes</td></tr>
+    <tr><td>GroupMemberPointer</td><td>-</td><td style={{textAlign: 'center'}}>Yes</td><td style={{textAlign: 'center'}}>Yes</td></tr>
+    <tr><td>TokenGroup</td><td>-</td><td style={{textAlign: 'center'}}>Yes</td><td style={{textAlign: 'center'}}>Yes</td></tr>
+    <tr><td>TokenGroupMember</td><td>-</td><td style={{textAlign: 'center'}}>Yes</td><td style={{textAlign: 'center'}}>Yes</td></tr>
+    <tr><td>MintCloseAuthority</td><td>-</td><td style={{textAlign: 'center'}}>Yes</td><td style={{textAlign: 'center'}}>-</td></tr>
+    <tr><td>TransferFeeConfig</td><td>Fees must be zero</td><td style={{textAlign: 'center'}}>Yes</td><td style={{textAlign: 'center'}}>-</td></tr>
+    <tr><td>DefaultAccountState</td><td>Any state allowed</td><td style={{textAlign: 'center'}}>Yes</td><td style={{textAlign: 'center'}}>-</td></tr>
+    <tr><td>PermanentDelegate</td><td>-</td><td style={{textAlign: 'center'}}>Yes</td><td style={{textAlign: 'center'}}>-</td></tr>
+    <tr><td>TransferHook</td><td><code>program_id</code> must be nil</td><td style={{textAlign: 'center'}}>Yes</td><td style={{textAlign: 'center'}}>-</td></tr>
+    <tr><td>Pausable</td><td>-</td><td style={{textAlign: 'center'}}>Yes</td><td style={{textAlign: 'center'}}>-</td></tr>
+    <tr><td>ConfidentialTransferMint</td><td>Initialized but not enabled</td><td style={{textAlign: 'center'}}>Yes</td><td style={{textAlign: 'center'}}>-</td></tr>
+    <tr><td>ConfidentialTransferFeeConfig</td><td>Fees must be zero</td><td style={{textAlign: 'center'}}>Yes</td><td style={{textAlign: 'center'}}>-</td></tr>
+    <tr><td>ConfidentialMintBurn</td><td>Initialized but not enabled</td><td style={{textAlign: 'center'}}>Yes</td><td style={{textAlign: 'center'}}>-</td></tr>
   </tbody>
 </table>

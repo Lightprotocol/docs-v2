@@ -86,7 +86,8 @@ Find examples below.
 
 Yes, light-token accounts can hold tokens from light, SPL, or Token 2022 mints.
 
-SPL tokens can be deposited into light-token accounts and withdrawn back to SPL token accounts via the `transferInterface` method.
+SPL tokens can be transferred between SPL token accounts and light-token
+accounts via the `transferInterface` method.
 
 #### Do light-token accounts require rent?
 
@@ -102,12 +103,9 @@ The account is automatically compressed.
 Your tokens are cryptographically preserved as a compressed token account (rent-free).
 The account is loaded into hot account state in-flight when someone interacts with it again.
 
-#### Does light-token support extensions?
+#### Does light-token support Token-2022 extensions?
 
-Extensions are under development. Additional extensions can be requested.
-
-Coming soon:
-
+Yes. The following extensions are supported:
 - MetadataPointer
 - TokenMetadata
 - InterestBearingConfig
@@ -116,19 +114,19 @@ Coming soon:
 - TokenGroup
 - TokenGroupMember
 - MintCloseAuthority
-- TransferFeeConfig
-- DefaultAccountState
 - PermanentDelegate
-- TransferHook
 - Pausable
-- ConfidentialTransferMint
-- ConfidentialTransferFeeConfig
-- ConfidentialMintBurn
+- TransferFeeConfig (Fees must be zero)
+- ConfidentialTransferFeeConfig (Fees must be zero)
+- TransferHook (`program_id` must be nil)
+- ConfidentialTransferMint (Initialized but not enabled)
+- ConfidentialMintBurn (Initialized but not enabled)
+- DefaultAccountState (Any state allowed)
 
 #### What is the difference between light-token and compressed token?
 
-- **light-token**: Solana account that holds token balances of light-mints, SPL or Token 22 mints.
-- **Compressed token**: Compressed account storing token data. Rent-free, for storage and distribution.
+- **light-token** (Recommended): Solana account that holds token balances of light-mints, SPL or Token 22 mints. Highly CU efficient, ideal for DeFi and Payments. the token program pays the rent-exemption cost.
+- **Compressed token** (Legacy): Compressed account storing token data. Rent-free, for storage and distribution.
 
 #### I don't see the question I want answered
 
