@@ -1,6 +1,6 @@
 {
   "$schema": "https://mintlify.com/docs.json",
-  "theme": "aspen",
+  "theme": "maple",
   "name": "Light Protocol",
   "colors": {
     "primary": "#0066FF",
@@ -20,67 +20,24 @@
     }
   },
   "navigation": {
-    "tabs": [
+    "anchors": [
       {
-        "tab": "Home",
+        "anchor": "Documentation",
+        "icon": "book",
         "groups": [
           {
-            "group": "Overview",
+            "group": "Introduction",
             "pages": [
-              "home"
+              "home",
+              "faq"
             ]
-          }
-        ]
-      },
-      {
-        "tab": "Light Token Program",
-        "groups": [
+          },
           {
-            "group": "Get Started",
+            "group": "Light Token Program",
             "pages": [
               "light-token/welcome",
-              "light-token/quickstart",
-              "light-token/faq"
-            ]
-          },
-          {
-            "group": "DeFi",
-            "pages": [
-              "light-token/defi/routers",
-              "light-token/defi/programs",
-              "light-token/defi/programs-pinocchio"
-            ]
-          },
-          {
-            "group": "Data Streaming",
-            "pages": [
-              "light-token/toolkits/for-streaming-tokens",
-              "light-token/toolkits/for-streaming-mints"
-            ]
-          },
-          {
-            "group": "Toolkits",
-            "pages": [
-              "light-token/toolkits/overview",
-              "light-token/toolkits/for-payments",
-              "light-token/toolkits/for-wallets"
-            ]
-          },
-          {
-            "group": "Cookbook",
-            "pages": [
-              "light-token/cookbook/overview",
               {
-                "group": "Examples",
-                "expanded": true,
-                "pages": [
-                  "light-token/examples/client",
-                  "light-token/examples/program"
-                ]
-              },
-              {
-                "group": "Recipes",
-                "expanded": true,
+                "group": "Cookbook",
                 "pages": [
                   "light-token/cookbook/create-mint",
                   "light-token/cookbook/create-ata",
@@ -94,142 +51,83 @@
                   "light-token/cookbook/load-ata",
                   "light-token/cookbook/close-token-account",
                   "light-token/cookbook/burn"
-
+                ]
+              },
+              {
+                "group": "Examples",
+                "pages": [
+                  "light-token/examples/client",
+                  "light-token/examples/program"
                 ]
               }
             ]
           },
           {
-            "group": "Learn",
+            "group": "PDA Accounts",
             "pages": [
-              "learn/light-token-standard",
-              "ai-tools/guide"
-            ]
-          },
-          {
-            "group": "SDK Reference",
-            "pages": [
-              "api-reference/libraries/light-sdk",
-              "api-reference/libraries/light-token",
-              "api-reference/libraries/light-program-test",
-              "api-reference/libraries/light-client",
-              "api-reference/libraries/stateless-js",
-              "api-reference/libraries/compressed-token"
-            ]
-          }
-        ]
-      },
-      {
-        "tab": "ZK Compression",
-        "groups": [
-          {
-            "group": "Get Started",
-            "pages": [
-              "welcome",
-              "quickstart"
-            ]
-          },
-          {
-            "group": "ZK",
-            "pages": [
-              "zk/overview",
-              "zk/examples"
-            ]
-          },
-          {
-            "group": "Compressed PDAs",
-            "expanded": true,
-            "pages": [
-              "compressed-pdas/overview",
-              "client-library/client-guide",
+              "pda/overview",
+              "pda/light-pda/overview",
               {
-                "group": "Program Guides",
+                "group": "Compressed PDA",
                 "pages": [
-                  "compressed-pdas/guides",
-                  "compressed-pdas/guides/how-to-create-compressed-accounts",
-                  "compressed-pdas/guides/how-to-update-compressed-accounts",
-                  "compressed-pdas/guides/how-to-close-compressed-accounts",
-                  "compressed-pdas/guides/how-to-reinitialize-compressed-accounts",
-                  "compressed-pdas/guides/how-to-burn-compressed-accounts",
-                  "compressed-pdas/guides/how-to-create-nullifier-pdas"
-                ]
-              },
-              "compressed-pdas/program-examples",
-              "compressed-pdas/solana-attestation-service"
-            ]
-          },
-          {
-            "group": "Compressed Tokens",
-            "pages": [
-              "compressed-tokens/overview",
-              "compressed-tokens/for-privy",
-              "compressed-tokens/advanced-guides/airdrop",
-              {
-                "group": "Cookbook",
-                "pages": [
-                  "compressed-tokens/guides/create-compressed-token-accounts",
-                  "compressed-tokens/guides/mint-compressed-tokens",
-                  "compressed-tokens/guides/transfer-compressed-tokens",
-                  "compressed-tokens/guides/compress-decompress",
-                  "compressed-tokens/guides/compress-spl-token-account",
-                  "compressed-tokens/guides/create-mint-with-token-pool",
-                  "compressed-tokens/guides/add-token-pools-to-mint-accounts",
-                  "compressed-tokens/guides/merge-compressed-token-accounts",
-                  "compressed-tokens/guides/delegate"
-                ]
-              },
-              {
-                "group": "Implementation Guides",
-                "pages": [
+                  "pda/compressed-pdas/overview",
+                  "pda/compressed-pdas/guides/client-guide",
                   {
-                    "group": "Integration",
+                    "group": "Program Guides",
                     "expanded": true,
                     "pages": [
-                      "compressed-tokens/advanced-guides/how-to-combine-operations-in-one-transaction",
-                      "compressed-tokens/advanced-guides/add-wallet-support-for-compressed-tokens",
-                      "compressed-tokens/advanced-guides/use-token-2022-with-compression"
+                      "pda/compressed-pdas/guides",
+                      "pda/compressed-pdas/guides/how-to-create-compressed-accounts",
+                      "pda/compressed-pdas/guides/how-to-update-compressed-accounts",
+                      "pda/compressed-pdas/guides/how-to-close-compressed-accounts",
+                      "pda/compressed-pdas/guides/how-to-reinitialize-compressed-accounts",
+                      "pda/compressed-pdas/guides/how-to-burn-compressed-accounts"
                     ]
                   },
-                  {
-                    "group": "Examples",
-                    "expanded": true,
-                    "pages": [
-                      "compressed-tokens/advanced-guides/example-token-distribution"
-                    ]
-                  }
+                  "pda/compressed-pdas/program-examples"
                 ]
               }
             ]
           },
           {
-            "group": "JSON RPC Methods",
+            "group": "For DeFi",
             "pages": [
-              "api-reference/json-rpc-methods/overview",
+              "light-token/defi/routers",
+              "light-token/defi/programs",
+              "light-token/defi/programs-pinocchio"
+            ]
+          },
+          {
+            "group": "For Data Streaming",
+            "pages": [
+              "light-token/toolkits/for-streaming-mints",
+              "light-token/toolkits/for-streaming-tokens"
+            ]
+          },
+          {
+            "group": "For Stablecoin Payments",
+            "pages": [
+              "light-token/toolkits/for-payments",
+              "pda/compressed-pdas/guides/how-to-create-nullifier-pdas"
+            ]
+          },
+          {
+            "group": "For Wallets",
+            "pages": [
+              "light-token/toolkits/for-wallets",
+              "light-token/toolkits/for-privy"
+            ]
+          },
+          {
+            "group": "For Other Use Cases",
+            "pages": [
+              "compressed-tokens/airdrop",
+              "pda/compressed-pdas/solana-attestation-service",
               {
-                "group": "Methods",
+                "group": "ZK",
                 "pages": [
-                  "api-reference/json-rpc-methods/methods",
-                  "api-reference/json-rpc-methods/getcompressedaccount",
-                  "api-reference/json-rpc-methods/getcompressedaccountsbyowner",
-                  "api-reference/json-rpc-methods/getcompressedbalancebyowner",
-                  "api-reference/json-rpc-methods/getcompressedbalance",
-                  "api-reference/json-rpc-methods/getcompressedminttokenholders",
-                  "api-reference/json-rpc-methods/getcompressedtokenaccountbalance",
-                  "api-reference/json-rpc-methods/getcompressedtokenaccountbydelegate",
-                  "api-reference/json-rpc-methods/getcompressedtokenaccountsbyowner",
-                  "api-reference/json-rpc-methods/getcompressedtokenbalancesbyowner",
-                  "api-reference/json-rpc-methods/getcompressionsignaturesforaccount",
-                  "api-reference/json-rpc-methods/getcompressionsignaturesforaddress",
-                  "api-reference/json-rpc-methods/getcompressionsignaturesforowner",
-                  "api-reference/json-rpc-methods/getcompressionsignaturesfortokenowner",
-                  "api-reference/json-rpc-methods/getindexerhealth",
-                  "api-reference/json-rpc-methods/getindexerslot",
-                  "api-reference/json-rpc-methods/getlatestcompressionsignatures",
-                  "api-reference/json-rpc-methods/getlatestnonvotingsignatures",
-                  "api-reference/json-rpc-methods/getmultiplecompressedaccounts",
-                  "api-reference/json-rpc-methods/getmultiplenewaddressproofs",
-                  "api-reference/json-rpc-methods/gettransactionwithcompressioninfo",
-                  "api-reference/json-rpc-methods/getvalidityproof"
+                  "zk/overview",
+                  "zk/examples"
                 ]
               }
             ]
@@ -237,8 +135,10 @@
           {
             "group": "Learn",
             "pages": [
+              "learn/overview",
+              "learn/light-token-standard",
               {
-                "group": "Core Concepts",
+                "group": "Core Concepts ZK Compression",
                 "pages": [
                   "learn/core-concepts",
                   "learn/core-concepts/compressed-account-model",
@@ -246,14 +146,15 @@
                   "learn/core-concepts/transaction-lifecycle",
                   "learn/core-concepts/considerations"
                 ]
-              },
-              "ai-tools/guide"
+              }
             ]
           },
           {
             "group": "Resources",
             "pages": [
-              "resources/cli-installation",
+              "resources/cli",
+              "resources/migration-v1-to-v2",
+              "resources/addresses-and-urls",
               {
                 "group": "Error Cheatsheet",
                 "pages": [
@@ -261,35 +162,78 @@
                   "resources/error-cheatsheet/debug-0x179b-6043-proofverificationfailed"
                 ]
               },
-              {
-                "group": "SDKs",
-                "pages": [
-                  "resources/sdks/client-development",
-                  "resources/sdks/program-development"
-                ]
-              },
-              "resources/addresses-and-urls"
+              "compressed-tokens/overview",
+              "resources/security"
+            ]
+          }
+        ]
+      },
+      {
+        "anchor": "API Reference",
+        "icon": "code",
+        "groups": [
+          {
+            "group": "SDK",
+            "pages": [
+              "api-reference/sdk"
             ]
           },
           {
-            "group": "References",
+            "group": "Anchor",
             "pages": [
-              "references/whitepaper",
-              "references/node-operators",
-              "references/terminology",
-              "references/migration-v1-to-v2",
-              "support",
-              "references/security"
+              "resources/anchor-constraints"
             ]
           },
           {
-            "group": "SDK Reference",
+            "group": "JSON RPC Methods",
             "pages": [
-              "api-reference/libraries/stateless-js",
-              "api-reference/libraries/compressed-token",
-              "api-reference/libraries/light-client",
-              "api-reference/libraries/light-sdk",
-              "api-reference/libraries/light-program-test"
+              "api-reference/json-rpc-methods/overview",
+              "api-reference/json-rpc-methods/getcompressedaccount",
+              "api-reference/json-rpc-methods/getcompressedaccountsbyowner",
+              "api-reference/json-rpc-methods/getcompressedbalancebyowner",
+              "api-reference/json-rpc-methods/getcompressedtokenaccountsbyowner",
+              "api-reference/json-rpc-methods/getcompressedtokenbalancesbyowner",
+              "api-reference/json-rpc-methods/getvalidityproof",
+              "api-reference/json-rpc-methods/getcompressionsignaturesforaddress",
+              "api-reference/json-rpc-methods/getcompressionsignaturesforowner",
+              "api-reference/json-rpc-methods/gettransactionwithcompressioninfo",
+              "api-reference/json-rpc-methods/getindexerhealth",
+              "api-reference/json-rpc-methods/getindexerslot",
+              "api-reference/json-rpc-methods/getcompressedbalance",
+              "api-reference/json-rpc-methods/getcompressedminttokenholders",
+              "api-reference/json-rpc-methods/getcompressedtokenaccountbalance",
+              "api-reference/json-rpc-methods/getcompressedtokenaccountbydelegate",
+              "api-reference/json-rpc-methods/getcompressionsignaturesforaccount",
+              "api-reference/json-rpc-methods/getcompressionsignaturesfortokenowner",
+              "api-reference/json-rpc-methods/getlatestcompressionsignatures",
+              "api-reference/json-rpc-methods/getlatestnonvotingsignatures",
+              "api-reference/json-rpc-methods/getmultiplecompressedaccounts",
+              "api-reference/json-rpc-methods/getmultiplenewaddressproofs"
+            ]
+          }
+        ]
+      },
+      {
+        "anchor": "AI Tools",
+        "icon": "robot",
+        "groups": [
+          {
+            "group": "AI Tools",
+            "pages": [
+              "ai-tools/guide",
+              "ai-tools/prompts"
+            ]
+          }
+        ]
+      },
+      {
+        "anchor": "Support",
+        "icon": "headset",
+        "groups": [
+          {
+            "group": "Support",
+            "pages": [
+              "support"
             ]
           }
         ]
@@ -317,15 +261,14 @@
   "navbar": {
     "links": [
       {
-        "label": "Get Support",
-        "icon": "discord",
-        "href": "https://discord.gg/CYvjBgzRFP"
+        "label": "Changelog",
+        "icon": "megaphone",
+        "href": "https://github.com/Lightprotocol/light-protocol/releases"
       },
       {
-        "type": "button",
         "label": "GitHub",
         "icon": "github",
-        "href": "https://github.com/Lightprotocol/light-protocol"
+        "href": "https://github.com/Lightprotocol"
       }
     ]
   },
@@ -365,11 +308,55 @@
   "redirects": [
     {
       "source": "/landing",
-      "destination": "/welcome"
+      "destination": "https://zkcompression.com/home"
     },
     {
-      "source": "https://www.zkcompression.com/learn/ai-tools-guide",
-      "destination": "https://www.zkcompression.com/ai-tools/guide"
+      "source": "/welcome",
+      "destination": "https://zkcompression.com/home"
+    },
+    {
+      "source": "/learn/ai-tools-guide",
+      "destination": "https://zkcompression.com/ai-tools/guide"
+    },
+    {
+      "source": "/resources/sdks/client-development",
+      "destination": "https://zkcompression.com/api-reference/sdk"
+    },
+    {
+      "source": "/resources/sdks/program-development",
+      "destination": "https://zkcompression.com/api-reference/sdk"
+    },
+    {
+      "source": "/compressed-tokens/for-privy",
+      "destination": "https://zkcompression.com/light-token/toolkits/for-privy"
+    },
+    {
+      "source": "/client-library/client-guide",
+      "destination": "https://zkcompression.com/pda/compressed-pdas/guides/client-guide"
+    },
+    {
+      "source": "/light-token/faq",
+      "destination": "https://zkcompression.com/faq"
+    },
+    {
+      "source": "/references/migration-v1-to-v2",
+      "destination": "https://zkcompression.com/resources/migration-v1-to-v2"
+    },
+    {
+      "source": "/references/security",
+      "destination": "https://zkcompression.com/resources/security"
+    },
+    {
+      "source": "/references/addresses-and-urls",
+      "destination": "https://zkcompression.com/resources/addresses-and-urls"
+    },
+    {
+      "source": "/references/node-operators",
+      "destination": "https://zkcompression.com/resources/node-operators"
+    },
+    {
+      "source": "/references/anchor-constraints",
+      "destination": "https://zkcompression.com/resources/anchor-constraints"
     }
   ]
 }

@@ -1,12 +1,14 @@
 ---
-title: "Toolkit for Wallet Applications"
-sidebarTitle: "For Wallets"
+title: "Light Token Integration Guide for Wallet Applications"
+sidebarTitle: "Integration Guide"
 description: "Guide for Wallet Applications to add Light-token support."
 keywords: ["wallet infrastructure on solana", "scalable wallet infrastructure on solana", "token wallet for developers", "rent free tokens for wallets"]
 ---
 
 import { CodeCompare } from "/snippets/jsx/code-compare.jsx";
 import ToolkitsSetup from "/snippets/setup/toolkits-setup.mdx";
+import AgentSkillPayments from "/snippets/setup/agent-skill-payments.mdx";
+import WalletsAiPrompt from "/snippets/ai-prompts/toolkits/wallets.mdx";
 
 1. The Light-token API matches the SPL-token API almost entirely, and extends their functionality to include the light token program in addition to the SPL-token and Token-2022 programs.
 2. Your users hold and receive tokens of the same mints, just stored more efficiently.
@@ -63,6 +65,11 @@ import ToolkitsSetup from "/snippets/setup/toolkits-setup.mdx";
   Find full runnable code examples
   [here](https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/payments-and-wallets).
 </Note>
+
+<AgentSkillPayments />
+
+<Tabs>
+<Tab title="Guide">
 
 ## Setup
 
@@ -423,5 +430,11 @@ const splAta = getAssociatedTokenAddressSync(mint, owner.publicKey);
 await unwrap(rpc, payer, splAta, owner, mint, amount);
 ```
 
+</Tab>
+</Tabs>
+
+</Tab>
+<Tab title="AI Prompt">
+<WalletsAiPrompt />
 </Tab>
 </Tabs>

@@ -1,0 +1,27 @@
+<Tabs>
+<Tab title="Claude Code">
+Add the marketplace and install:
+
+```
+/plugin marketplace add Lightprotocol/skills
+/plugin install solana-rent-free-dev
+```
+</Tab>
+<Tab title="Cursor">
+1. Open Settings (**Cmd+Shift+J** / **Ctrl+Shift+J**)
+2. Navigate to **Rules & Commands** → **Project Rules** → **Add Rule** → **Remote Rule (GitHub)**
+3. Enter: `https://github.com/Lightprotocol/skills.git`
+
+</Tab>
+<Tab title="Any Agent">
+```
+npx skills add Lightprotocol/skills
+```
+</Tab>
+</Tabs>
+
+For orchestration, install the [general skill](https://zkcompression.com/skill.md):
+
+```bash
+npx skills add https://zkcompression.com
+```

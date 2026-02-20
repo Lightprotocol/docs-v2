@@ -21,6 +21,11 @@ import InstructionCode from "/snippets/code-snippets/light-token/transfer-interf
 import RustActionCode from "/snippets/code-snippets/light-token/transfer-interface/rust-client/action.mdx";
 import RustInstructionCode from "/snippets/code-snippets/light-token/transfer-interface/rust-client/instruction.mdx";
 import AnchorProgramCode from "/snippets/code-snippets/light-token/transfer-interface/anchor-program/full-example.mdx";
+import CreateAndTransferCode from "/snippets/code-snippets/light-token/transfer-interface/anchor-program/create-and-transfer-example.mdx";
+import AgentSkillGeneric from "/snippets/setup/agent-skill-generic.mdx";
+import TransferInterfaceAiPrompt from "/snippets/ai-prompts/ts-cookbook/transfer-interface.mdx";
+import RustTransferInterfaceAiPrompt from "/snippets/ai-prompts/rust-cookbook/transfer-interface.mdx";
+import ProgramTransferInterfaceAiPrompt from "/snippets/ai-prompts/program-cookbook/transfer-interface.mdx";
 
 
 <table>
@@ -55,6 +60,8 @@ import AnchorProgramCode from "/snippets/code-snippets/light-token/transfer-inte
   </tbody>
 </table>
 
+<AgentSkillGeneric />
+
 <Tabs>
 
 <Tab title="TypeScript Client">
@@ -75,6 +82,8 @@ Compare to SPL:
   [here](https://github.com/Lightprotocol/light-protocol/blob/main/js/compressed-token/src/v3/actions/transfer-interface.ts).
 </Info>
 
+<Tabs>
+<Tab title="Guide">
 <Steps>
 
 <Step>
@@ -93,6 +102,11 @@ Compare to SPL:
 
 </Step>
 </Steps>
+</Tab>
+<Tab title="AI Prompt">
+<TransferInterfaceAiPrompt />
+</Tab>
+</Tabs>
 
 </Tab>
 
@@ -108,6 +122,8 @@ Use the unified `TransferInterface` to transfer tokens between token accounts (S
   language="rust"
 />
 
+<Tabs>
+<Tab title="Guide">
 <Steps>
 <Step>
 ### Prerequisites
@@ -119,13 +135,13 @@ Use the unified `TransferInterface` to transfer tokens between token accounts (S
 <Step>
 ### Transfer Interface
 
-The example transfers 
+The example transfers
 1. SPL token -> Light Token,
 2. Light Token -> Light Token, and
 3. Light Token -> SPL token.
 
 <Info>
-  View the [source code](https://github.com/Lightprotocol/light-protocol/blob/main/sdk-libs/token-sdk/src/instruction/transfer_interface.rs) and [full example](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/instructions/transfer_interface.rs) with shared test utilities.
+  Find the source code [here](https://github.com/Lightprotocol/light-protocol/blob/main/sdk-libs/token-sdk/src/instruction/transfer_interface.rs).
 </Info>
 
 <Tabs>
@@ -139,10 +155,17 @@ The example transfers
 
 </Step>
 </Steps>
+</Tab>
+<Tab title="AI Prompt">
+<RustTransferInterfaceAiPrompt />
+</Tab>
+</Tabs>
 
 </Tab>
 
 <Tab title="Program">
+<Tabs>
+<Tab title="Guide">
 
 <Note>
 Find [a full code example at the end](#full-code-example).
@@ -200,7 +223,10 @@ TransferInterfaceCpi::new(
 </Step>
 </Steps>
 
-# Full Code Example
+# Full code example
+
+<Tabs>
+<Tab title="CPI">
 
 <Info>
   View the [source code](https://github.com/Lightprotocol/light-protocol/blob/main/sdk-libs/token-sdk/src/instruction/transfer_interface.rs) and [full example](https://github.com/Lightprotocol/examples-light-token/tree/main/programs/anchor/basic-instructions/transfer-interface) with shared test utilities.
@@ -208,6 +234,26 @@ TransferInterfaceCpi::new(
 
 <AnchorProgramCode />
 
+</Tab>
+
+<Tab title="Setup ATA with Macro and CPI">
+
+Uses the `#[light_account(init, associated_token::...)]` macro to create the destination ATA during the transfer.
+
+<Info>
+  View the [full example](https://github.com/Lightprotocol/examples-light-token/tree/main/programs/anchor/create-and-transfer) with test utilities.
+</Info>
+
+<CreateAndTransferCode />
+
+</Tab>
+</Tabs>
+
+</Tab>
+<Tab title="AI Prompt">
+<ProgramTransferInterfaceAiPrompt />
+</Tab>
+</Tabs>
 </Tab>
 
 </Tabs>

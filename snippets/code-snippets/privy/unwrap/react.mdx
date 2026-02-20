@@ -1,0 +1,78 @@
+```typescript
+import { useState } from 'react';
+import { PublicKey } from '@solana/web3.js';
+import { getAssociatedTokenAddressSync } from '@solana/spl-token';
+import {
+  createUnwrapInstructions,
+} from '@lightprotocol/compressed-token/unified';
+import { createRpc } from '@lightprotocol/stateless.js';
+import type { ConnectedStandardSolanaWallet } from '@privy-io/js-sdk-core';
+import { useSignTransaction } from '@privy-io/react-auth/solana';
+import { signAndSendBatches } from './signAndSendBatches';
+
+type SignTransactionFn = ReturnType<typeof useSignTransaction>['signTransaction'];
+
+export interface UnwrapParams {
+  ownerPublicKey: string;
+  mint: string;
+  amount: number;
+  decimals?: number;
+}
+
+export interface UnwrapArgs {
+  params: UnwrapParams;
+  wallet: ConnectedStandardSolanaWallet;
+  signTransaction: SignTransactionFn;
+}
+
+export function useUnwrap() {
+  const [isLoading, setIsLoading] = useState(false);
+
+  const unwrap = async (args: UnwrapArgs): Promise<string> => {
+    setIsLoading(true);
+
+    try {
+      const { params, wallet, signTransaction } = args;
+      const { ownerPublicKey, mint, amount, decimals = 9 } = params;
+
+      const rpc = createRpc(import.meta.env.VITE_HELIUS_RPC_URL);
+
+      const owner = new PublicKey(ownerPublicKey);
+      const mintPubkey = new PublicKey(mint);
+      const tokenAmount = BigInt(Math.floor(amount * Math.pow(10, decimals)));
+
+      // Auto-detect token program (SPL vs T22) from mint account owner
+      const mintAccountInfo = await rpc.getAccountInfo(mintPubkey);
+      if (!mintAccountInfo) throw new Error(`Mint account ${mint} not found`);
+      const tokenProgramId = mintAccountInfo.owner;
+
+      // Destination: SPL/T22 associated token account
+      const splAta = getAssociatedTokenAddressSync(mintPubkey, owner, false, tokenProgramId);
+
+      // Returns TransactionInstruction[][].
+      // Each inner array is one transaction.
+      // Handles loading + unwrapping together.
+      const instructions = await createUnwrapInstructions(
+        rpc, splAta, owner, mintPubkey, tokenAmount, owner,
+      );
+
+      const signature = await signAndSendBatches(instructions, {
+        rpc,
+        feePayer: owner,
+        wallet,
+        signTransaction,
+      });
+
+      if (!signature) {
+        throw new Error('Unwrap returned no instructions');
+      }
+
+      return signature;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return { unwrap, isLoading };
+}
+```

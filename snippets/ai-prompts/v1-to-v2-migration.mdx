@@ -1,3 +1,114 @@
+<Prompt description="Migrate Light Protocol program from v1 to v2 Merkle trees" actions={["copy", "cursor"]}>
+{`---
+argument-hint: <path_to_program>
+description: Migrate Light Protocol program from v1 to v2 Merkle trees
+allowed-tools: [Bash, Read, Glob, Grep, Task, WebFetch]
+---
+
+Migrate this Light Protocol program from v1 to v2 Merkle trees.
+
+## Goal
+
+Produce a **fully working migration** that builds and tests pass.
+
+## Available commands
+
+Via Bash tool:
+- **cargo build-sbf**, **cargo test-sbf**, **cargo fmt**, **cargo clippy**
+- **anchor build**, **anchor test**
+- **grep**, **sed**
+
+## Documentation
+
+- Migration Guide: https://zkcompression.com/references/migration-v1-to-v2
+- Reference PR: https://github.com/Lightprotocol/program-examples/commit/54f0e7f15c2972a078f776cfb40b238d83c7e486
+
+## Reference repos
+
+program-examples/counter/anchor/
+├── programs/counter/src/lib.rs    # v2 patterns: derive_address, CpiAccounts
+├── Cargo.toml                      # v2 feature flags
+└── tests/counter.ts                # v2 client patterns
+
+## Workflow
+
+### Phase 1: Index program
+
+Find all v1 patterns:
+
+    grep -r "::v1::" src/ tests/
+    grep -r "ADDRESS_TREE_V1" src/
+    grep -r "into_new_address_params_packed" src/
+    grep -r "get_address_tree_v1" tests/
+
+### Phase 2: Update dependencies
+
+Update Cargo.toml. V2 is the default - no feature flag needed:
+
+    # On-chain program
+    [dependencies]
+    light-sdk = { version = "0.17.1", features = ["anchor"] }
+    light-hasher = "5.0.0"
+
+    # Off-chain client
+    [dependencies]
+    light-client = "0.17.2"
+
+Note: V2 is now the default in all crates. Only specify \`features = ["v2"]\` if you disabled default features.
+
+### Phase 3: Rust SDK replacements
+
+| v1 Pattern | v2 Replacement |
+|------------|----------------|
+| address::v1::derive_address | address::v2::derive_address |
+| cpi::v1::CpiAccounts | cpi::v2::CpiAccounts |
+| cpi::v1::LightSystemProgramCpi | cpi::v2::LightSystemProgramCpi |
+| constants::ADDRESS_TREE_V1 | constants::ADDRESS_TREE_V2 |
+| .into_new_address_params_packed(seed) | .into_new_address_params_assigned_packed(seed, Some(0)) |
+| .add_system_accounts(config) | .add_system_accounts_v2(config) |
+
+### Phase 4: TypeScript SDK replacements
+
+| v1 Pattern | v2 Replacement |
+|------------|----------------|
+| deriveAddress( | deriveAddressV2( |
+| deriveAddressSeed( | deriveAddressSeedV2( |
+| defaultTestStateTreeAccounts().addressTree | batchAddressTree |
+| .newWithSystemAccounts( | .newWithSystemAccountsV2( |
+| get_address_tree_v1() | get_address_tree_v2() |
+| get_random_state_tree_info_v1() | get_random_state_tree_info() |
+
+### Phase 5: Build and test loop
+
+**Required commands (no shortcuts):**
+
+For Anchor programs: **anchor build && anchor test**
+
+For Native programs: **cargo build-sbf && cargo test-sbf**
+
+**NO shortcuts allowed:**
+
+- Do NOT use **cargo build** (must use **cargo build-sbf**)
+- Do NOT use **cargo test** (must use **cargo test-sbf**)
+- Tests MUST run against real BPF bytecode
+
+**On failure:** Spawn debugger agent with error context.
+
+**Loop rules:**
+
+1. Each debugger gets fresh context + previous debug reports
+2. Each attempt tries something DIFFERENT
+3. **NEVER GIVE UP** - keep spawning until fixed
+
+Do NOT proceed until all tests pass.
+
+## DeepWiki fallback
+
+If no matching pattern in reference repos:
+
+    mcp__deepwiki__ask_question("Lightprotocol/light-protocol", "How to migrate {pattern} from v1 to v2?")`}
+</Prompt>
+
 ~~~~text
 ---
 argument-hint: <path_to_program>

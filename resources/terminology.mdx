@@ -1,0 +1,526 @@
+---
+title: "Terminology"
+description: "Overview of terminology related to ZK Compression, Light Token, and Solana"
+---
+
+import CompressibleRentExplained from "/snippets/compressible-rent-explained.mdx";
+import CompressibleVsSolanaRent from "/snippets/compressible-vs-solana-rent.mdx";
+
+## Account
+
+An entry in the Solana ledger that holds data or executable program code, stored on chain.
+
+There are different kinds of accounts, including
+
+- Data Accounts: Store arbitrary data used by programs.
+- SPL Token Accounts: Manage token balances (similar to ERC-20 tokens on Ethereum).
+- Program Accounts: Contain the executable code of a Solana program.
+
+## Account Compression Program
+
+Light Protocol's program that implements state and address trees for ZK Compression. The Light System Program uses the Account Compression Program's Merkle tree infrastructure to store compressed account state transitions.
+
+> **Program ID**: `compr6CUsB5m2jS4Y3831ztGSTnDpnKJTKS95d64XVq` | [Source](https://github.com/Lightprotocol/light-protocol/tree/main/programs/account-compression)
+
+## Account Compression Authority
+
+A PDA that signs CPI calls from the Light System Program to the Account Compression Program. Derived from the Light System Program ID with seed `b'cpi_authority'`.
+
+> **Address**: `HZH7qSLcpAeDqCopVU4e5XkhT9j3JFsQiq8CmruY3aru`
+
+## Agent skills
+
+Folders of instructions, scripts, and resources that AI agents can discover and use to build on Light Protocol more accurately and efficiently.
+Light Protocol provides agent skills for rent-free Solana development: Light-PDA, token and mint accounts.
+Skills for compressed PDAs and more are in development.
+
+| Use case | Skill |
+|----------|-------|
+| Build rent-free Solana programs with Light SDK (Anchor or Pinocchio). Includes router integration. | [light-sdk](https://github.com/Lightprotocol/skills/tree/main/skills/light-sdk) |
+| Use Light Token client SDKs (TypeScript and Rust) for mints, ATAs, transfers | [light-token-client](https://github.com/Lightprotocol/skills/tree/main/skills/light-token-client) |
+| Stream account state via Laserstream gRPC | [data-streaming](https://github.com/Lightprotocol/skills/tree/main/skills/data-streaming) |
+| Wallets and payment flows with Light Token. Optional nullifier to prevent your on-chain instruction from being executed more than once. | [payments-and-wallets](https://github.com/Lightprotocol/skills/tree/main/skills/payments-and-wallets) |
+| Airdrops, DePIN, token distribution | [token-distribution](https://github.com/Lightprotocol/skills/tree/main/skills/token-distribution) |
+| Anti-double-spend nullifiers for privacy-preserving ZK programs | [zk-nullifier](https://github.com/Lightprotocol/skills/tree/main/skills/zk-nullifier) |
+| Testing programs and clients on localnet, devnet, mainnet | [testing](https://github.com/Lightprotocol/skills/tree/main/skills/testing) |
+| For per-user state, DePIN nodes, and infrequently accessed app state with compressed PDAs | [solana-compression](https://github.com/Lightprotocol/skills/tree/main/skills/solana-compression) |
+| Help with debugging and questions via DeepWiki MCP | [ask-mcp](https://github.com/Lightprotocol/skills/tree/main/skills/ask-mcp) |
+
+Built on [Anthropic's Skills](https://github.com/anthropics/skills) and the [Agent Skills Specification](https://agentskills.io).
+
+> [Source Code](https://github.com/Lightprotocol/skills) | [Claude plugin](https://github.com/Lightprotocol/skills/tree/main/.claude-plugin) | [OpenClaw plugin](https://github.com/Lightprotocol/skills/blob/main/openclaw.plugin.json)
+
+## Address tree
+
+A Merkle tree that stores derived addresses that serves as optional, persistent identifiers for compressed accounts. These addresses serve as persistent identifiers that don't change when account data updates.
+
+Address trees are separate from state trees. Unlike state trees that store account hashes, address trees store actual address values in an indexed structure with pointers to maintain sorted order.
+
+Two address tree versions are currently supported:
+
+- **V1 address trees**: Height 26 (~67 million addresses)
+- **V2 batched address trees**: Height 40 (~1 trillion addresses), optimizing compute unit consumption by up to 70%. V2 is currently on Devnet.
+
+| Version | Address Tree | Address Queue |
+|:--------|:-------------|:--------------|
+| V2 | `amt2kaJA14v3urZbZvnc5v2np8jqvc4Z8zDep5wbtzx` | — |
+| V1 (deprecated) | `amt1Ayt45jfbdw5YSo7iz6WZxUmnZsQTYXy82hVwyC2` | `aq1S9z4reTSQAdgWHGD2zDaS39sjGrAxbR31vxJ2F4F` |
+
+## Address queue
+
+A queue used in V1 address trees to buffer new addresses before Forester nodes insert them into the address tree. V2 address trees do not use a separate queue.
+
+> **Address (V1)**: `aq1S9z4reTSQAdgWHGD2zDaS39sjGrAxbR31vxJ2F4F`
+
+## [Client](https://solana.com/docs/core/transactions#client)
+
+A computer program that accesses the Solana server network [cluster](https://solana.com/docs/core/transactions#cluster).
+
+## [Cluster](https://solana.com/docs/references/terminology#cluster)
+
+A set of [validators](https://solana.com/docs/references/terminology#validator) maintaining a single [ledger](https://solana.com/docs/references/terminology#ledger).
+
+## Cold account
+
+A Light Token account, Light Token mint, or Light-PDA that has been compressed after extended inactivity. The account's state is cryptographically preserved on the Solana ledger as a compressed account. On-chain lookups return `is_initialized: false`. Clients call `create_load_instructions` to reinstate the account.
+
+## Compressible account
+
+A Solana account (Light Token account, Light Token mint, or Light-PDA) that automatically compresses when its rent balance drops below threshold. Forester nodes execute the compression. The account can be loaded back when accessed again.
+
+## Compressed account
+
+A data structure that holds arbitrary data, represented as a 32-byte hash stored in a leaf of a state Merkle tree. Compressed accounts do not require a rent exempt balance upon creation.
+
+## Compressed account hash
+
+A 32-byte identifier that uniquely represents a compressed account's state, stored in a state tree.
+
+## Compressed PDA
+
+Compressed accounts with an address stored in an address Merkle tree.
+Full Solana PDA functionality and composability without rent-exemption.
+
+> [Docs](/pda/compressed-pdas/overview)
+
+## Compressed token
+
+An SPL token stored as a compressed account hash in a state tree. Compressed tokens incur no rent and do not require a token account per holder.
+
+> [Docs](/compressed-tokens/overview)
+
+## Compressed token account
+
+A compressed account that stores a token balance for a specific mint.
+Compressed token accounts do not require a rent exempt balance upon creation.
+Compressed token accounts are compressed accounts that do not need an address.
+
+## [Compute unit budget](https://solana.com/docs/references/terminology#compute-budget)
+
+The maximum number of [compute units](https://solana.com/docs/references/terminology#compute-units) consumed per transaction.
+
+Developers set the compute unit budget via the`ComputeBudget`instruction, by default 200,000 CU, with a maximum of 1,400,000 CU.
+
+If the transaction exceeds its compute unit limit, it fails and no changes occur.
+
+## Compute unit limits per block
+
+The total amount of compute units that all transactions in a single Solana block - the _blockspace_ - can collectively consume is currently set at 48 million CU.
+
+The maximum compute units that can be used to modify a single account within a block - the _write lock limit -_ is currently set at 12 million CU.
+
+## [Compute units](https://solana.com/docs/references/terminology#compute-units)
+
+The smallest unit of measure for consumption of computational resources of the transactions on the Solana blockchain.
+
+## [Cross-program invocation (CPI)](https://solana.com/docs/core/transactions#cross-program-invocation-cpi)
+
+A call from one [program](https://solana.com/docs/core/transactions#onchain-program) to another.
+
+<Info>For more information, see [calling between programs](https://solana.com/docs/core/cpi).</Info>
+
+## CPI context account
+
+An account passed in transactions that stores intermediate CPI state for compressed account operations. Each state tree has a dedicated CPI context account.
+
+Addresses are listed under the state tree entry.
+
+## CPI signer
+
+A PDA that signs CPI calls from your program to the Light System Program. Verified by the Light System Program during CPI. Derived from your program ID using `derive_light_cpi_signer`.
+
+## Decompression
+
+The process of converting a compressed account to a regular Solana account. For token decompression, SPL tokens are released from the SPL interface PDA to an associated token account, and the compressed token account is invalidated.
+
+## Forester node / Forester
+
+A keeper node to incorporate state updates into state Merkle Trees for ZK Compression.
+
+## Groth16
+
+A zero-knowledge SNARK that produces constant-size proofs using bilinear pairings on elliptic curves.
+
+ZK Compression uses Groth16 to generate 128 byte validity proofs to verify compressed account state transitions against the on-chain root.
+
+## [Hash](https://solana.com/docs/references/terminology#hash)
+
+A hash is a digital fingerprint of a sequence of bytes representing arbitrary data, while requiring far less storage space than the original data.
+
+## Hot account
+
+A Light Token account, Light Token mint, or Light-PDA that is active on-chain with a rent-exempt balance. Programs interact only with hot accounts. Clients call `create_load_instructions` to reinstate cold accounts before use.
+
+## Indexer
+
+A service that tracks state changes of compressed accounts on the Solana ledger. The indexer exposes RPC APIs for querying compressed accounts and generating validity proofs.
+
+The ZK Compression indexer is named Photon and is maintained by Helius Labs.
+
+<Info>**Source**: https://github.com/helius-labs/photon</Info>
+
+## [Instruction](https://solana.com/docs/references/terminology#instruction)
+
+A call to invoke a specific [instruction handler](https://solana.com/docs/references/terminology#instruction-handler) in a [program](https://solana.com/docs/references/terminology#program).
+
+An instruction also specifies which accounts it wants to read or modify, and additional data that serves as auxiliary input to the [instruction handler](https://solana.com/docs/references/terminology#instruction-handler). A [client](https://solana.com/docs/references/terminology#client) must include at least one instruction in a [transaction](https://solana.com/docs/references/terminology#transaction), and all instructions must complete for the transaction to be considered successful.
+
+For example, compressed accounts are created or updated with the `InvokeCpiInstruction` to the Light System Program.
+
+## Leaf index
+
+The numerical position (u32) of a compressed account within a state tree, used for Merkle proof generation.
+
+## Ledger
+
+The ledger is an immutable historical record of all Solana transactions signed by clients since the genesis block.
+
+A helpful analogy to differentiate Solana ledger and state:
+
+- Ledger is the entire bank statement history.
+- State is the current account balance, derived from all transactions in the bank statement history.
+
+## Light-PDA
+
+A Solana PDA with sponsored rent-exemption. Programs create Light-PDAs using Anchor `#[account(init)]` with `#[light_account(init)]`. Compresses automatically after extended inactivity; clients load the account back when it's accessed again. Program logic does not change for reads, updates, or closes. Only the init instruction and state struct require additions.
+
+> [Docs](/pda/light-pda/overview) | [Overview](/pda/overview) | [Example](https://github.com/Lightprotocol/examples-light-token/tree/main/programs/anchor/basic-macros/counter)
+
+## Light System Program
+
+ZK Compression's core program that validates compressed account state transitions by verifying validity proofs and managing compressed state changes.
+
+The program enforces compressed account layout with ownership and sum checks, and is invoked to create and write to compressed accounts and PDAs.
+
+> **Program ID**: `SySTEM1eSU2p4BGQfQpimFEWWSC1XDFeun3Nqzz3rT7` | [Source](https://github.com/Lightprotocol/light-protocol/tree/main/programs/system)
+
+## Light Token
+
+A token standard that reduces the cost of mint and token accounts by 200x compared to SPL. Functionally equivalent to SPL but stores accounts more efficiently. The Light Token SDK API is a superset of the SPL-token API.
+
+Light Token accounts exist in two states: hot (active on-chain) and cold (compressed after inactivity). The Light Token Program sponsors rent-exemption for account creation.
+
+Different from ZK Compression, interactions with Light Token accounts do not require a validity proof for interactions.
+ZK Compression is used under the hood for inactive token accounts (cold state).
+
+> [Docs](/light-token/welcome) | [Example](https://github.com/Lightprotocol/examples-light-token)
+
+## Light Token account
+
+A Solana account that holds a token balance for a specific mint (SPL, Token 2022, or Light Token). The Light Token Program sponsors the rent-exemption cost. Follows the same layout as SPL token accounts. Compresses automatically after extended inactivity and can be loaded back when accessed.
+
+> [Docs](/light-token/cookbook/create-token-account) | [Example](https://github.com/Lightprotocol/examples-light-token/tree/main/programs/anchor/basic-instructions/create-token-account)
+
+## Light Token associated token account
+
+An associated token account created by the Light Token Program. The address is deterministically derived from the owner's address, Light Token Program ID, and mint address. Holds token balances of SPL, Token 2022, or Light Token mints with sponsored rent-exemption.
+
+> [Docs](/light-token/cookbook/create-ata) | [Example](https://github.com/Lightprotocol/examples-light-token/tree/main/programs/anchor/basic-instructions/create-associated-token-account)
+
+## Light Token mint
+
+An on-chain mint account owned by the Light Token Program. Functionally equivalent to an SPL mint but with sponsored rent-exemption. Stores a compressed address in an address Merkle tree at creation to preserve mint state when the account compresses.
+
+> [Docs](/light-token/cookbook/create-mint) | [Example](https://github.com/Lightprotocol/examples-light-token/tree/main/programs/anchor/basic-instructions/create-mint) | [Source Code](https://github.com/Lightprotocol/light-protocol/blob/main/sdk-libs/token-sdk/src/instruction/create_mint.rs)
+
+## Light Token Program
+
+Light Protocol's SPL-compatible token program. The Light Token Program compresses and decompresses token accounts, sponsors rent-exemption, and enforces SPL token layout standards.
+
+> **Program ID**: `cTokenmWW8bLPjZEBAUgYy3zKxQZW6VKi7bqNFEVv3m` | [Source](https://github.com/Lightprotocol/light-protocol/tree/main/programs/compressed-token)
+
+## Load associated token account
+
+Reinstates a compressed account back to active on-chain state. `loadAta` unifies token balances from compressed tokens, SPL, and Token 2022 into a single Light Token associated token account. Returns `null` if there's nothing to load (idempotent). Creates the associated token account if it doesn't exist.
+
+> [Docs](/light-token/cookbook/load-ata) | [Source Code](https://github.com/Lightprotocol/light-protocol/blob/0c4e2417b2df2d564721b89e18d1aad3665120e7/js/compressed-token/src/v3/actions/load-ata.ts)
+
+## Lookup table
+
+A Solana [address lookup table](https://solana.com/docs/advanced/lookup-tables) that reduces transaction size by referencing accounts by index instead of full public key. Light Protocol provides pre-initialized lookup tables covering program IDs and protocol accounts.
+
+| Network | Address |
+|:--------|:--------|
+| Mainnet | `9NYFyEqPkyXUhkerbGHXUXkvb4qpzeEdHuGpgbgpH1NJ` |
+| Devnet | `qAJZMgnQJ8G6vA3WRcjD9Jan1wtKkaCFWLWskxJrR5V` |
+
+## Merkle proof
+
+A cryptographic proof consisting of sibling node hashes required to verify that a specific leaf exists within a Merkle tree and calculate the root hash.
+
+ZK Compression encodes Merkle proofs into zero-knowledge proofs (validity proofs). These verify compressed account operations with a constant 128-byte size without exposing the underlying variable-size Merkle proof data.
+
+## Merkle tree
+
+A tree data structure to allow for cryptographic verification of the integrity of all leaves in a tree.
+
+Each leaf on a Merkle tree is a hash of that leaf's data. A Merkle tree compresses data by hashing pairs of data repeatedly into a single root hash, starting from the lowest level. Only this root hash is stored on chain. On Solana, this process is called state compression.
+
+## Merkle tree account
+
+The public key of the on-chain Merkle tree account used in ZK Compression. This identifier references the state tree that stores compressed account hashes.
+
+## Nullification
+
+The process of marking compressed accounts as spent to prevent double-spending.
+
+When compressed accounts are used as inputs in transactions, their previous states are invalidated by inserting their hashes into nullifier queues. Forester nodes process these queues to permanently update the corresponding Merkle tree leaves, ensuring each compressed account state can only be used once.
+
+## Nullifier
+
+A nullifier is a unique identifier used to prevent an event from being executed more than once. It acts as a one-way, irreversible proof that a specific resource (such as a payment, note, token, or vote) has already been consumed. To implement nullifiers we need a data structure that ensures every nullifier is only created once and never deleted. On Solana a straight forward way to implement nullifiers is to create a PDA account with the nullifier as seed.
+
+The documentation provides two implementations with rent-free PDA accounts:
+
+**Nullifier PDA** — For use cases such as sending payments, where you want to prevent your on-chain instruction from being executed more than once. The nullifier program utility creates a rent-free PDA derived from id. If the id has been used before, the PDA already exists, causing the instruction to fail.
+
+| | |
+|---|---|
+| **Program ID** | `NFLx5WGPrTHHvdRNsidcrNcLxRruMC92E4yv7zhZBoT` |
+| **Source code** | [github.com/Lightprotocol/nullifier-program](https://github.com/Lightprotocol/nullifier-program/) |
+| **Rust SDK** | [light-nullifier-program](https://crates.io/crates/light-nullifier-program) |
+| **TypeScript SDK** | [@lightprotocol/nullifier-program](https://www.npmjs.com/package/@lightprotocol/nullifier-program) |
+
+> [Docs](/pda/compressed-pdas/guides/how-to-create-nullifier-pdas) | [Skill](https://github.com/Lightprotocol/skills/tree/main/skills/payments-and-wallets) | [Example](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/actions/create_nullifier.rs)
+
+**ZK nullifier** — For ZK or privacy-preserving programs on Solana to prevent double-spending. Can be integrated with minimal code changes.
+
+> [Docs](/zk/overview) | [Skill](https://github.com/Lightprotocol/skills/tree/main/skills/zk-nullifier) | [Example](https://github.com/Lightprotocol/program-examples/tree/main/zk/zk-nullifier)
+
+## Nullifier queue
+
+A queue where compressed accounts hashes used as input for transactions are temporarily stored to prevent double spending. A Forester node empties the queue by inserting queue elements into a state Merkle tree.
+
+## Output queue
+
+A queue in V2 state trees that buffers compressed account state changes before Forester nodes incorporate them into the state tree. Replaces the nullifier queue used in V1 state trees.
+
+Addresses are listed under the state tree entry.
+
+## Parallelism
+
+The ability of the SVM to execute multiple transactions simultaneously, as long as they modify different regular and/or compressed accounts.
+
+## Poseidon hash
+
+A cryptographic hash function optimized for zero-knowledge proof systems that works natively with finite field arithmetic.
+
+The Poseidon hash is designed to minimize computational complexity in ZK circuits. ZK Compression uses Poseidon hashes to generate the account hashes stored as leaves in state trees.
+
+## [Prioritization fee](https://solana.com/docs/references/terminology#prioritization-fee)
+
+An additional fee user can specify in the compute budget [instruction](https://solana.com/docs/references/terminology#instruction) to prioritize their [transactions](https://solana.com/docs/references/terminology#transaction).
+
+The priority fee is derived from the compute unit limit and the compute unit price. The price per compute unit set by the user in micro-lamports (1 lamport = 1,000,000 micro-lamports), rounded up to the nearest lamport.
+
+## [Program](https://solana.com/docs/references/terminology#onchain-program)
+
+Programs run executable code similar to smart contracts on other blockchains with optimizations specific to Solana.
+
+Solana programs key characteristics include:
+
+- Solana programs are stateless and do not store state internally. Separate accounts store state for programs to execute on, such as program, user or token data. This makes Solana's account model [different from Ethereum's](https://solana.com/news/evm-to-svm).
+- Programs are typically written in Rust.
+- Programs interpret the [instructions](https://solana.com/docs/references/terminology#instruction) sent inside of each [transaction](https://solana.com/docs/references/terminology#transaction) to read and modify accounts over which it has control, hence update state.
+
+## [Program derived addresses (PDA)](https://solana.com/docs/references/terminology#program-derived-account-pda)
+
+PDAs are special account addresses derived deterministically using optional seeds, a bump seed, and a program ID.
+
+They are off the Ed25519 curve, meaning they have no private key. The PDA itself, once derived, is 32 bytes, matching a regular public key.
+
+## Proof verification
+
+The on-chain process of validating zero-knowledge proofs to confirm the correctness of compressed account state transitions.
+
+## Registered Program PDA
+
+A PDA that grants a program access control to the Account Compression Program. Required as an account in transactions that modify compressed state.
+
+## Rent
+
+A fee paid in SOL for the creation of [Accounts](https://solana.com/docs/references/terminology#account) to store data on the blockchain, tied to account size. When accounts do not have enough balance to pay rent, they may be Garbage Collected.
+
+## [Rent exempt](https://solana.com/docs/references/terminology#rent-exempt)
+
+An account that maintains a minimum lamport balance proportional to the amount of data stored on the account.
+
+All newly created accounts are stored on chain permanently until the account is closed. It is not possible to create an account that falls below the rent exemption threshold.
+
+The rent exemption balance remains locked while an account is active and can be fully recovered when the account is closed.
+
+The minimum balance is paid by the creator and is calculated as follows:
+
+```markdown
+Minimum Rent Balance = 2 × 0.00000348 SOL/byte/year × Account Size (Bytes)
+```
+
+## Rent sponsorship
+
+<CompressibleRentExplained />
+
+<Accordion title="Rent cost breakdown">
+  <CompressibleVsSolanaRent />
+</Accordion>
+
+## Remote Procedure Calls (RPC)
+
+A bridge between users (or applications) and the blockchain to facilitate interactions and data retrieval.
+
+The [ZK Compression RPC API](https://www.zkcompression.com/developers/json-rpc-methods) extends [Solana's JSON RPC API](https://solana.com/docs/rpc) with additional endpoints to interact with compressed accounts, provided by Helius Labs.
+
+<Info>
+  Find more information on [ZK Compression's JSON RPC Methods
+  here](/api-reference/json-rpc-methods/overview).
+</Info>
+
+## [Smart contract](https://solana.com/docs/references/terminology#smart-contract)
+
+Smart contracts on Solana are called programs with key characteristics and optimizations.
+
+## Solana account model
+
+The native framework to store and manage data on the Solana blockchain.
+
+Solana's account model separates program logic from state to optimize for parallel and faster transactions. Separate accounts store state for programs to execute on, such as program, user or token data. This makes Solana's account model [different from Ethereum's](https://solana.com/news/evm-to-svm).
+
+ZK Compression extends Solana's account model with compressed accounts.
+
+## [Solana Program Library (SPL)](https://solana.com/docs/references/terminology#solana-program-library-spl)
+
+A [library of programs](https://spl.solana.com/) on Solana such as spl-token that facilitates tasks such as creating and using tokens.
+
+## SPL interface PDA
+
+A PDA owned by the Light Token Program's CPI authority that holds SPL tokens corresponding to compressed tokens and Light Token balances in circulation. Each SPL interface PDA is associated with a specific mint.
+
+> **Address**: `GXtd2izAiMJPwMEjfgTRH3d7k9mjn4Jq3JrWFv9gySYy`
+
+## State
+
+A snapshot representing the current status of all accounts and programs on Solana.
+
+The state is derived from the ledger by sequentially applying every transaction. State is mutable and changes with every transaction to represent the latest state.
+
+State is kept in RAM by validators for transaction validation.
+
+## State compression
+
+A process to lower the amount of data stored on chain using Merkle trees.
+
+The process of state compression involves the following steps:
+
+1. Millions of accounts are compressed into a 'fingerprint' - the Merkle tree root hash
+2. This 'fingerprint' is stored in one Solana account
+3. The account history is stored on the Solana ledger
+4. The latest compressed data is fetched from an indexer
+5. To verify the data, recompute the hashes and compare the final hash to the on chain root hash
+
+<Info>
+  Learn more [on generalized state compression
+  here](https://solana.com/developers/courses/state-compression/generalized-state-compression).
+</Info>
+
+## State root
+
+The root hash of a Merkle tree that serves as a cryptographic fingerprint representing all compressed accounts in the tree.
+
+State roots are stored on-chain and used by the Light System Program to verify validity proofs during compressed account operations. Each state root represents the complete state of compressed accounts at a specific point in time.
+
+## State tree
+
+A Merkle tree that stores compressed account hashes as leaf nodes.
+
+State trees organize compressed account data into a binary tree structure where each parent node is the hash of its two children nodes. The tree's root hash is stored on-chain as a cryptographic fingerprint representing all accounts in the tree.
+
+Two state tree versions with different proof mechanisms are currently supported:
+
+- **V1 state trees**: Always require the full 128-byte validity proof. With a depth of 26, a single V1 state tree stores approximately 67 million compressed accounts.
+- **V2 batched state trees**: Support `prove_by_index` optimization that verifies account existence with one byte instead of 128 bytes, optimizing compute unit consumption by up to 70%.
+
+| Instance | State Tree | Output Queue | CPI Context |
+|:---------|:-----------|:-------------|:------------|
+| V2 #1 | `bmt1LryLZUMmF7ZtqESaw7wifBXLfXHQYoE4GAmrahU` | `oq1na8gojfdUhsfCpyjNt6h4JaDWtHf1yQj4koBWfto` | `cpi15BoVPKgEPw5o8wc2T816GE7b378nMXnhH3Xbq4y` |
+| V2 #2 | `bmt2UxoBxB9xWev4BkLvkGdapsz6sZGkzViPNph7VFi` | `oq2UkeMsJLfXt2QHzim242SUi3nvjJs8Pn7Eac9H9vg` | `cpi2yGapXUR3As5SjnHBAVvmApNiLsbeZpF3euWnW6B` |
+| V2 #3 | `bmt3ccLd4bqSVZVeCJnH1F6C8jNygAhaDfxDwePyyGb` | `oq3AxjekBWgo64gpauB6QtuZNesuv19xrhaC1ZM1THQ` | `cpi3mbwMpSX8FAGMZVP85AwxqCaQMfEk9Em1v8QK9Rf` |
+| V2 #4 | `bmt4d3p1a4YQgk9PeZv5s4DBUmbF5NxqYpk9HGjQsd8` | `oq4ypwvVGzCUMoiKKHWh4S1SgZJ9vCvKpcz6RT6A8dq` | `cpi4yyPDc4bCgHAnsenunGA8Y77j3XEDyjgfyCKgcoc` |
+| V2 #5 | `bmt5yU97jC88YXTuSukYHa8Z5Bi2ZDUtmzfkDTA2mG2` | `oq5oh5ZR3yGomuQgFduNDzjtGvVWfDRGLuDVjv9a96P` | `cpi5ZTjdgYpZ1Xr7B1cMLLUE81oTtJbNNAyKary2nV6` |
+| V1 | `smt2rJAFdyJJupwMKAqTNAJwvjhmiZ4JYGZmbVRw1Ho` | `nfq2hgS7NYemXsFaFUCe3EMXSDSfnZnAe27jC6aPP1X` | `cpi2cdhkH5roePvcudTgUL8ppEBfTay1desGh8G8QxK` |
+
+## Token account
+
+A token account is an account type in Solana's Token Programs that stores information about an individual's ownership of a specific token (mint). Each token account is associated with a single mint and tracks details like the token balance and owner.
+
+## [Token mint](https://solana.com/docs/references/terminology#token-mint)
+
+A [mint account](https://solana.com/docs/tokens/basics/create-mint) is an account type in Solana's Token Programs that can produce (or 'mint') tokens.
+
+Different tokens are distinguished by their unique token mint addresses. Token mints uniquely represent a token on the network and store global metadata about the token, including the `mint_authority`, supply, and decimals. SPL tokens can be compressed if the mint has an SPL interface PDA.
+
+## [Transaction](https://solana.com/docs/references/terminology#transaction)
+
+One or more [instructions](https://solana.com/docs/references/terminology#instruction) signed by a [client](https://solana.com/docs/references/terminology#client) using one or more [keypairs](https://solana.com/docs/references/terminology#keypair) and executed atomically with only two possible outcomes: success or failure.
+
+## Validity proof
+
+A zero-knowledge proof of compressed state included in a transaction to read or write compressed accounts.
+
+Developers don't need to generate _validity proofs_.
+
+The _validity proof_ is
+
+- constant 128 byte in size (other than Merkle proofs with varying proof size), fitting well in Solana's 1232 byte transaction limit
+- verified against the respective on chain fingerprint to ensure the provided data was previously emitted
+- provided and generated by indexers that support the [ZK Compression RPC API](https://www.zkcompression.com/developers/json-rpc-methods) which extend Solana's [JSON RPC API](https://solana.com/docs/rpc) to interact with compressed accounts.
+
+## Wrap and Unwrap SPL, Token-2022, and Light Token Accounts
+
+**Wrap** moves tokens from an SPL or Token 2022 account into a Light Token associated token account. **Unwrap** moves tokens from a Light Token associated token account back to an SPL or Token 2022 account. Use wrap/unwrap to interact with applications that only support SPL or Token 2022.
+
+> [Docs](/light-token/cookbook/wrap-unwrap) | [Source Code](https://github.com/Lightprotocol/light-protocol/blob/0c4e2417b2df2d564721b89e18d1aad3665120e7/js/compressed-token/src/v3/actions/wrap.ts)
+
+## Zero-knowledge proof (ZKP)
+
+A cryptographic proof to verify the validity of a statement without revealing the underlying data.
+
+ZK Compression uses a Groth16 SNARK zk proof
+
+- for its constant _validity_ proof size, to ensures the integrity of many compressed accounts, not for private or confidential transactions, and
+- to store data in zk friendly data structures. Applications on Solana can prove custom off chain computations over zk compressed state (native zk compute).
+
+## ZK Compression
+
+A generalized compression framework to compress and verify arbitrary data with zero-knowledge proofs, to
+
+- enable the Compressed Account Model, the rent-free equivalent to Solana's Account Model,
+- solve Solana's state growth problem, and
+- build a foundation for native zk compute.
+
+The Light Token program uses ZK Compression under the hood for inactive token accounts (cold state).
+A Light Token account, Light Token mint, or Light-PDA that has been compressed after extended inactivity. The account’s state is cryptographically preserved on the Solana ledger as a compressed account. On-chain lookups return is_initialized: false. Clients call create_load_instructions to reinstate the account.
+
+## ZK-SNARK
+
+Zero-Knowledge Succinct Non-Interactive Arguments of Knowledge. A cryptographic proof system where a prover demonstrates knowledge of information without revealing the information itself.
+
+zk-SNARKs produce constant-size proofs that can be verified efficiently without interaction between prover and verifier. ZK Compression uses the Groth16 zk-SNARK construction to generate validity proofs for compressed account state transitions.

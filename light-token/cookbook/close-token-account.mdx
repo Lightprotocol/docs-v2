@@ -17,6 +17,9 @@ import {
 } from "/snippets/code-samples/code-compare-snippets.jsx";
 import RustInstructionCode from "/snippets/code-snippets/light-token/close-token-account/rust-client/instruction.mdx";
 import AnchorProgramCode from "/snippets/code-snippets/light-token/close-token-account/anchor-program/full-example.mdx";
+import AgentSkillGeneric from "/snippets/setup/agent-skill-generic.mdx";
+import RustCloseTokenAccountAiPrompt from "/snippets/ai-prompts/rust-cookbook/close-token-account.mdx";
+import ProgramCloseTokenAccountAiPrompt from "/snippets/ai-prompts/program-cookbook/close-token-account.mdx";
 
 1. Closing a Light Token account transfers remaining lamports to a destination account and the rent sponsor can reclaim sponsored rent.
 2. Light token accounts can be closed by the owner.
@@ -26,6 +29,8 @@ The <Tooltip tip="The `compression_authority` is a PDA of the Light Registry pro
 closes the account and preserves the balance as compressed token account when the account becomes <Tooltip tip="An account is compressible when it has rent for less than 1 epoch (360 lamports for a 260-byte Light Token account).">compressible</Tooltip>. 
 The account is reinstated in flight with the same state the next time it is accessed.
 </Info>
+
+<AgentSkillGeneric />
 
 <Tabs>
 <Tab title="Rust Client">
@@ -42,6 +47,8 @@ Compare to SPL:
   language="rust"
 />
 
+<Tabs>
+<Tab title="Guide">
 <Steps>
 <Step>
 ### Prerequisites
@@ -54,7 +61,7 @@ Compare to SPL:
 ### Close Light Token Account
 
 <Info>
-  View the [source code](https://github.com/Lightprotocol/light-protocol/blob/main/sdk-libs/token-sdk/src/instruction/close.rs) and [full example](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/instructions/close.rs) with shared test utilities.
+  Find the source code [here](https://github.com/Lightprotocol/light-protocol/blob/main/sdk-libs/token-sdk/src/instruction/close.rs).
 </Info>
 
 <Tabs>
@@ -66,8 +73,15 @@ Compare to SPL:
 </Step>
 </Steps>
 </Tab>
+<Tab title="AI Prompt">
+<RustCloseTokenAccountAiPrompt />
+</Tab>
+</Tabs>
+</Tab>
 
 <Tab title="Program">
+<Tabs>
+<Tab title="Guide">
 
 <Note>
 Find [a full code example at the end](#full-code-example).
@@ -129,6 +143,11 @@ CloseAccountCpi {
 
 <AnchorProgramCode />
 
+</Tab>
+<Tab title="AI Prompt">
+<ProgramCloseTokenAccountAiPrompt />
+</Tab>
+</Tabs>
 </Tab>
 
 </Tabs>

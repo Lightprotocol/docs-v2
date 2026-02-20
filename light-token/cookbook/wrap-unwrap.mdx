@@ -15,20 +15,27 @@ import UnwrapInstructionCode from "/snippets/code-snippets/light-token/unwrap/in
 import WrapRustActionCode from "/snippets/code-snippets/light-token/wrap/rust-client/action.mdx";
 import UnwrapRustActionCode from "/snippets/code-snippets/light-token/unwrap/rust-client/action.mdx";
 import TokenClientPrerequisites from "/snippets/light-token-guides/light-token-client-prerequisites.mdx";
+import AgentSkillGeneric from "/snippets/setup/agent-skill-generic.mdx";
+import WrapUnwrapAiPrompt from "/snippets/ai-prompts/ts-cookbook/wrap-unwrap.mdx";
+import RustWrapUnwrapAiPrompt from "/snippets/ai-prompts/rust-cookbook/wrap-unwrap.mdx";
 
 - **Wrap**: Move tokens from SPL/T22 account → Light Token ATA (hot balance)
 - **Unwrap**: Move tokens from Light Token ATA (hot balance) → SPL/T22 account
 
 <Info>
   Find the source code:
-  [wrap.ts](https://github.com/Lightprotocol/light-protocol/blob/0c4e2417b2df2d564721b89e18d1aad3665120e7/js/compressed-token/src/v3/actions/wrap.ts)
+  [wrap.ts](https://github.com/Lightprotocol/light-protocol/blob/main/js/compressed-token/src/v3/actions/wrap.ts)
   |
-  [unwrap.ts](https://github.com/Lightprotocol/light-protocol/blob/0c4e2417b2df2d564721b89e18d1aad3665120e7/js/compressed-token/src/v3/actions/unwrap.ts)
+  [unwrap.ts](https://github.com/Lightprotocol/light-protocol/blob/main/js/compressed-token/src/v3/actions/unwrap.ts)
 </Info>
+
+<AgentSkillGeneric />
 
 <Tabs>
 <Tab title="TypeScript Client">
 
+<Tabs>
+<Tab title="Guide">
 <Tabs>
 <Tab title="Wrap">
 
@@ -72,10 +79,17 @@ import TokenClientPrerequisites from "/snippets/light-token-guides/light-token-c
 
 </Tab>
 </Tabs>
+</Tab>
+<Tab title="AI Prompt">
+<WrapUnwrapAiPrompt />
+</Tab>
+</Tabs>
 
 </Tab>
 <Tab title="Rust Client">
 
+<Tabs>
+<Tab title="Guide">
 <Tabs>
 <Tab title="Wrap">
 
@@ -91,7 +105,7 @@ import TokenClientPrerequisites from "/snippets/light-token-guides/light-token-c
 ### Wrap SPL tokens to Light Token ATA
 
 <Info>
-  View the [full example](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/actions/wrap.rs) with shared test utilities.
+  Find the full example [here](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/actions/wrap.rs).
 </Info>
 
 <Tabs>
@@ -117,7 +131,7 @@ import TokenClientPrerequisites from "/snippets/light-token-guides/light-token-c
 ### Unwrap Light Tokens to SPL account
 
 <Info>
-  View the [full example](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/actions/unwrap.rs) with shared test utilities.
+  Find the full example [here](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/actions/unwrap.rs).
 </Info>
 
 <Tabs>
@@ -128,6 +142,11 @@ import TokenClientPrerequisites from "/snippets/light-token-guides/light-token-c
 </Step>
 </Steps>
 
+</Tab>
+</Tabs>
+</Tab>
+<Tab title="AI Prompt">
+<RustWrapUnwrapAiPrompt />
 </Tab>
 </Tabs>
 

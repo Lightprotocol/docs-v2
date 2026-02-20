@@ -6,8 +6,11 @@ keywords: ["shielded pools", "mixer", "nullifiers on Solana", "zcash on solana",
 ---
 
 import ZkExamplesTable from "/snippets/overview-tables/zk-examples-table.mdx";
+import AgentSkillZkNullifier from "/snippets/setup/agent-skill-zk-nullifier.mdx";
 
 ---
+
+<AgentSkillZkNullifier />
 
 Building a ZK Solana program requires: 
 1. Nullifiers to prevent double spending
@@ -16,11 +19,11 @@ Building a ZK Solana program requires:
 4. An indexer to serve Merkle proofs
 5. Encrypted state
 
-## Nullifiers on Solana
+## Nullifiers for ZK on Solana
 
 A nullifier is a deterministically derived hash to ensure an action can only be performed once.
 The nullifier cannot be linked to the action or user.
-For example Zcash uses nullifiers to prevent double spending. 
+For example Zcash uses nullifiers to prevent double spending.
 
 To implement nullifiers we need a data structure that ensures every nullifier is only created once and never deleted.
 On Solana a straight forward way to implement nullifiers is to create a PDA account with the nullifier as seed.
@@ -120,7 +123,7 @@ ZK applications on Solana can use existing state Merkle trees to store state in 
 | 100-byte PDA  | 	~1,600,000 lamports          | 15,000 lamports     |
 
 <Note>
-Your circuit must include compressed accounts. Find [guides to compressed accounts in the documentation](/compressed-pdas/overview) and the [full example with zk implementation here](https://github.com/Lightprotocol/program-examples/blob/99d260f9f356743b8fe3501c684f7926930d6079/zk-id/circuits/compressed_account.circom).
+Your circuit must include compressed accounts. Find [guides to compressed accounts in the documentation](/pda/compressed-pdas/overview) and the [full example with zk implementation here](https://github.com/Lightprotocol/program-examples/blob/99d260f9f356743b8fe3501c684f7926930d6079/zk-id/circuits/compressed_account.circom).
 </Note>
 
 ## Get Started & Examples

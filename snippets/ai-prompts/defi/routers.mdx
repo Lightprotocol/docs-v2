@@ -1,0 +1,125 @@
+<Prompt description="Integrate rent-free AMM markets into a router or aggregator" actions={["copy", "cursor"]}>
+{`---
+description: Integrate rent-free AMM markets into a router or aggregator
+allowed-tools: Bash, Read, Write, Edit, Glob, Grep, WebFetch, AskUserQuestion, Task, TaskCreate, TaskGet, TaskList, TaskUpdate, TaskOutput, mcp__deepwiki, mcp__zkcompression
+---
+
+## Integrate rent-free AMM markets into a router or aggregator
+
+Context:
+- Guide: https://zkcompression.com/light-token/defi/routers
+- Skills and resources index: https://zkcompression.com/skill.md
+- Dedicated skill: https://github.com/Lightprotocol/skills/tree/main/skills/light-sdk
+- Crate: light-client (features: v2) — provides AccountInterface, LightProgramInterface, create_load_instructions
+- AMM reference: https://github.com/Lightprotocol/cp-swap-reference
+- Streaming guides: https://zkcompression.com/light-token/toolkits/for-streaming-tokens
+
+Key APIs: create_load_instructions(), LightProgramInterface trait, get_account_interface(), get_multiple_account_interfaces(), is_cold()
+
+### 1. Index project
+- Grep \`LightProgramInterface|create_load_instructions|AccountInterface|is_cold|get_account_interface|swap|amm|router|aggregator\` across src/
+- Glob \`**/*.rs\` and \`**/Cargo.toml\` for project structure
+- Identify: existing routing/quoting logic, account caching, swap instruction building, streaming setup
+- Read Cargo.toml — note existing dependencies and light-client version
+- Task subagent (Grep/Read/WebFetch) if project has multiple crates to scan in parallel
+
+### 2. Read references
+- WebFetch the guide above
+- WebFetch skill.md — check for a dedicated skill and resources matching this task
+- TaskCreate one todo per phase below to track progress
+
+### 3. Clarify intention
+- AskUserQuestion: what is the goal? (add cold market support to existing router, build new router with rent-free market support, integrate a specific AMM SDK)
+- AskUserQuestion: does the project already stream account updates, or does it fetch at swap time?
+- AskUserQuestion: does the project use Jito bundles for multi-transaction swaps?
+- Summarize findings and wait for user confirmation before implementing
+
+### 4. Create plan
+- Based on steps 1–3, draft an implementation plan
+- Follow the guide's progression: Cold Account Cache → Detecting Cold Accounts → Building Swap Transactions with Load Instructions
+- If streaming: add account + transaction subscriptions for the Light Token Program
+- If fetch-at-swap-time: add get_multiple_account_interfaces + is_cold() check before building swap tx
+- If anything is unclear or ambiguous, loop back to step 3 (AskUserQuestion)
+- Present the plan to the user for approval before proceeding
+
+### 5. Implement
+- Add deps if missing: Bash \`cargo add light-client@0.19 --features v2\`
+- Add AMM SDK dependency per the approved plan
+- Follow the guide and the approved plan
+- Write/Edit to create or modify files
+- TaskUpdate to mark each step done
+
+### 6. Verify
+- Bash \`cargo check\`
+- Bash \`cargo test\` if tests exist
+- TaskUpdate to mark complete
+
+### Tools
+- mcp__zkcompression__SearchLightProtocol("<query>") for API details
+- mcp__deepwiki__ask_question("Lightprotocol/light-protocol", "<q>") for architecture
+- Task subagent with Grep/Read/WebFetch for parallel lookups
+- TaskList to check remaining work`}
+</Prompt>
+
+```text
+---
+description: Integrate rent-free AMM markets into a router or aggregator
+allowed-tools: Bash, Read, Write, Edit, Glob, Grep, WebFetch, AskUserQuestion, Task, TaskCreate, TaskGet, TaskList, TaskUpdate, TaskOutput, mcp__deepwiki, mcp__zkcompression
+---
+
+## Integrate rent-free AMM markets into a router or aggregator
+
+Context:
+- Guide: https://zkcompression.com/light-token/defi/routers
+- Skills and resources index: https://zkcompression.com/skill.md
+- Dedicated skill: https://github.com/Lightprotocol/skills/tree/main/skills/light-sdk
+- Crate: light-client (features: v2) — provides AccountInterface, LightProgramInterface, create_load_instructions
+- AMM reference: https://github.com/Lightprotocol/cp-swap-reference
+- Streaming guides: https://zkcompression.com/light-token/toolkits/for-streaming-tokens
+
+Key APIs: create_load_instructions(), LightProgramInterface trait, get_account_interface(), get_multiple_account_interfaces(), is_cold()
+
+### 1. Index project
+- Grep `LightProgramInterface|create_load_instructions|AccountInterface|is_cold|get_account_interface|swap|amm|router|aggregator` across src/
+- Glob `**/*.rs` and `**/Cargo.toml` for project structure
+- Identify: existing routing/quoting logic, account caching, swap instruction building, streaming setup
+- Read Cargo.toml — note existing dependencies and light-client version
+- Task subagent (Grep/Read/WebFetch) if project has multiple crates to scan in parallel
+
+### 2. Read references
+- WebFetch the guide above
+- WebFetch skill.md — check for a dedicated skill and resources matching this task
+- TaskCreate one todo per phase below to track progress
+
+### 3. Clarify intention
+- AskUserQuestion: what is the goal? (add cold market support to existing router, build new router with rent-free market support, integrate a specific AMM SDK)
+- AskUserQuestion: does the project already stream account updates, or does it fetch at swap time?
+- AskUserQuestion: does the project use Jito bundles for multi-transaction swaps?
+- Summarize findings and wait for user confirmation before implementing
+
+### 4. Create plan
+- Based on steps 1–3, draft an implementation plan
+- Follow the guide's progression: Cold Account Cache → Detecting Cold Accounts → Building Swap Transactions with Load Instructions
+- If streaming: add account + transaction subscriptions for the Light Token Program
+- If fetch-at-swap-time: add get_multiple_account_interfaces + is_cold() check before building swap tx
+- If anything is unclear or ambiguous, loop back to step 3 (AskUserQuestion)
+- Present the plan to the user for approval before proceeding
+
+### 5. Implement
+- Add deps if missing: Bash `cargo add light-client@0.19 --features v2`
+- Add AMM SDK dependency per the approved plan
+- Follow the guide and the approved plan
+- Write/Edit to create or modify files
+- TaskUpdate to mark each step done
+
+### 6. Verify
+- Bash `cargo check`
+- Bash `cargo test` if tests exist
+- TaskUpdate to mark complete
+
+### Tools
+- mcp__zkcompression__SearchLightProtocol("<query>") for API details
+- mcp__deepwiki__ask_question("Lightprotocol/light-protocol", "<q>") for architecture
+- Task subagent with Grep/Read/WebFetch for parallel lookups
+- TaskList to check remaining work
+```

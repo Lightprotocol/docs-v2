@@ -1,21 +1,25 @@
 ```typescript
 import { useState, useCallback } from 'react';
 import { PublicKey, LAMPORTS_PER_SOL } from '@solana/web3.js';
-import { getAccount, getAssociatedTokenAddressSync } from '@solana/spl-token';
+import { TOKEN_PROGRAM_ID, TOKEN_2022_PROGRAM_ID } from '@solana/spl-token';
 import { createRpc } from '@lightprotocol/stateless.js';
-
-const USDC_MINT = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
-const TEST_MINT = '7cT3PeXyDLkyEcvr9YzsjGLuZneKsea4c8hPbJQEjMCZ';
+import {
+  getAssociatedTokenAddressInterface,
+  getAtaInterface,
+} from '@lightprotocol/compressed-token/unified';
 
 export interface TokenBalance {
   mint: string;
-  amount: string;
   decimals: number;
-  isCompressed: boolean;
   isNative: boolean;
+  hot: bigint;
+  cold: bigint;
+  spl: bigint;
+  t22: bigint;
+  unified: bigint;
 }
 
-export function useCompressedBalances() {
+export function useUnifiedBalance() {
   const [balances, setBalances] = useState<TokenBalance[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -26,141 +30,118 @@ export function useCompressedBalances() {
     try {
       const rpc = createRpc(import.meta.env.VITE_HELIUS_RPC_URL);
       const owner = new PublicKey(ownerAddress);
-      const allBalances: TokenBalance[] = [];
 
-      // Get compressed SOL balance
-      try {
-        const compressedSol = await rpc.getCompressedBalanceByOwner(owner);
-        if (compressedSol && BigInt(compressedSol.toString()) > 0n) {
-          allBalances.push({
-            mint: 'So11111111111111111111111111111111111111112',
-            amount: compressedSol.toString(),
-            decimals: 9,
-            isCompressed: true,
-            isNative: true,
-          });
+      // Per-mint accumulator
+      const mintMap = new Map<string, { spl: bigint; t22: bigint; hot: bigint; cold: bigint; decimals: number }>();
+
+      const getOrCreate = (mintStr: string) => {
+        let entry = mintMap.get(mintStr);
+        if (!entry) {
+          entry = { spl: 0n, t22: 0n, hot: 0n, cold: 0n, decimals: 9 };
+          mintMap.set(mintStr, entry);
         }
+        return entry;
+      };
+
+      // 1. SOL balance
+      let solLamports = 0;
+      try {
+        solLamports = await rpc.getBalance(owner);
       } catch {
-        // No compressed SOL
+        // Failed to fetch SOL balance
       }
 
-      // Get regular SOL balance
+      // 2. SPL accounts
       try {
-        const solBalance = await rpc.getBalance(owner);
-        allBalances.push({
-          mint: 'So11111111111111111111111111111111111111112',
-          amount: solBalance.toString(),
-          decimals: 9,
-          isCompressed: false,
-          isNative: true,
+        const splAccounts = await rpc.getTokenAccountsByOwner(owner, {
+          programId: TOKEN_PROGRAM_ID,
         });
+        for (const { account } of splAccounts.value) {
+          const buf = toBuffer(account.data);
+          if (!buf || buf.length < 72) continue;
+          const mint = new PublicKey(buf.subarray(0, 32));
+          const amount = buf.readBigUInt64LE(64);
+          const mintStr = mint.toBase58();
+          getOrCreate(mintStr).spl += amount;
+        }
       } catch {
-        // Failed to get SOL balance
+        // No SPL accounts
       }
 
-      // Get regular SPL token accounts
+      // 3. Token 2022 accounts
       try {
-        const tokenAccounts = await rpc.getTokenAccountsByOwner(owner, {
-          programId: new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'),
+        const t22Accounts = await rpc.getTokenAccountsByOwner(owner, {
+          programId: TOKEN_2022_PROGRAM_ID,
         });
-
-        for (const { account, pubkey } of tokenAccounts.value) {
-          const data = account.data;
-          if (data instanceof Buffer || (typeof data === 'object' && 'length' in data)) {
-            // Parse token account data
-            const dataBuffer = Buffer.from(data as Uint8Array);
-            if (dataBuffer.length >= 72) {
-              const mint = new PublicKey(dataBuffer.subarray(0, 32));
-              const amount = dataBuffer.readBigUInt64LE(64);
-
-              // Get mint info for decimals
-              try {
-                const mintInfo = await rpc.getAccountInfo(mint);
-                const decimals = mintInfo?.data ? (mintInfo.data as Buffer)[44] || 6 : 6;
-
-                allBalances.push({
-                  mint: mint.toBase58(),
-                  amount: amount.toString(),
-                  decimals,
-                  isCompressed: false,
-                  isNative: false,
-                });
-              } catch {
-                allBalances.push({
-                  mint: mint.toBase58(),
-                  amount: amount.toString(),
-                  decimals: 6,
-                  isCompressed: false,
-                  isNative: false,
-                });
-              }
-            }
-          }
+        for (const { account } of t22Accounts.value) {
+          const buf = toBuffer(account.data);
+          if (!buf || buf.length < 72) continue;
+          const mint = new PublicKey(buf.subarray(0, 32));
+          const amount = buf.readBigUInt64LE(64);
+          const mintStr = mint.toBase58();
+          getOrCreate(mintStr).t22 += amount;
         }
       } catch {
-        // Failed to get token accounts
+        // No Token 2022 accounts
       }
 
-      // Get compressed token accounts
+      // 4. Hot balance from Light Token associated token account
+      const mintKeys = [...mintMap.keys()];
+      await Promise.allSettled(
+        mintKeys.map(async (mintStr) => {
+          try {
+            const mint = new PublicKey(mintStr);
+            const ata = getAssociatedTokenAddressInterface(mint, owner);
+            const { parsed } = await getAtaInterface(rpc, ata, owner, mint);
+            const entry = getOrCreate(mintStr);
+            entry.hot = BigInt(parsed.amount.toString());
+          } catch {
+            // Associated token account does not exist for this mint — hot stays 0n
+          }
+        }),
+      );
+
+      // 5. Cold balance from compressed token accounts
       try {
-        const compressedAccounts = await rpc.getCompressedTokenAccountsByOwner(owner);
-
-        if (compressedAccounts?.items) {
-          const mintAmounts = new Map<string, bigint>();
-          const mintDecimals = new Map<string, number>();
-
-          for (const item of compressedAccounts.items) {
-            if (item?.parsed?.mint && item?.parsed?.amount) {
-              const mint = item.parsed.mint.toBase58();
-              const amount = BigInt(item.parsed.amount.toString());
-              const current = mintAmounts.get(mint) || 0n;
-              mintAmounts.set(mint, current + amount);
-
-              // Store decimals (assume 6 for now, could fetch from mint)
-              if (!mintDecimals.has(mint)) {
-                mintDecimals.set(mint, 6);
-              }
-            }
-          }
-
-          for (const [mint, amount] of mintAmounts) {
-            allBalances.push({
-              mint,
-              amount: amount.toString(),
-              decimals: mintDecimals.get(mint) || 6,
-              isCompressed: true,
-              isNative: false,
-            });
-          }
+        const compressed = await rpc.getCompressedTokenBalancesByOwnerV2(owner);
+        for (const item of compressed.value.items) {
+          const mintStr = item.mint.toBase58();
+          getOrCreate(mintStr).cold += BigInt(item.balance.toString());
         }
       } catch {
-        // Failed to get compressed accounts
+        // No compressed accounts
       }
 
-      // Add fallback tokens with 0 balance if not present
-      const hasMint = (mint: string) => allBalances.some(b => b.mint === mint);
+      // 6. Assemble TokenBalance[]
+      const result: TokenBalance[] = [];
 
-      if (!hasMint(USDC_MINT)) {
-        allBalances.push({
-          mint: USDC_MINT,
-          amount: '0',
-          decimals: 6,
-          isCompressed: false,
+      // SOL entry
+      result.push({
+        mint: 'So11111111111111111111111111111111111111112',
+        decimals: 9,
+        isNative: true,
+        hot: 0n,
+        cold: 0n,
+        spl: BigInt(solLamports),
+        t22: 0n,
+        unified: 0n,
+      });
+
+      // Token entries
+      for (const [mintStr, entry] of mintMap) {
+        result.push({
+          mint: mintStr,
+          decimals: entry.decimals,
           isNative: false,
+          hot: entry.hot,
+          cold: entry.cold,
+          spl: entry.spl,
+          t22: entry.t22,
+          unified: entry.hot + entry.cold,
         });
       }
 
-      if (!hasMint(TEST_MINT)) {
-        allBalances.push({
-          mint: TEST_MINT,
-          amount: '0',
-          decimals: 6,
-          isCompressed: false,
-          isNative: false,
-        });
-      }
-
-      setBalances(allBalances);
+      setBalances(result);
     } catch (error) {
       console.error('Failed to fetch balances:', error);
       setBalances([]);
@@ -170,5 +151,11 @@ export function useCompressedBalances() {
   }, []);
 
   return { balances, isLoading, fetchBalances };
+}
+
+function toBuffer(data: Buffer | Uint8Array | string | unknown): Buffer | null {
+  if (data instanceof Buffer) return data;
+  if (data instanceof Uint8Array) return Buffer.from(data);
+  return null;
 }
 ```

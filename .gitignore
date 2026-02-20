@@ -10,3 +10,6 @@ node_modules/
 stash
 docs-audit.md
 docs-audit.txt
+docs-anchor.json
+product-docs.json
+tabs-docs.json

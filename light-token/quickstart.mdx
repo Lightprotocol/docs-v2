@@ -1,12 +1,15 @@
 ---
 title: Quickstart
-description: Mint tokens to a Light-ATA in under 3 minutes.
+description: Mint SPL tokens, wrap to Light Token, and transfer in under 3 minutes.
 sidebarTitle: Quickstart
 keywords: ["create tokens on solana tutorial", "mint tokens on solana guide", "spl token quickstart for developers", "token sdk for solana apps"]
 ---
 
 import FullSetup from "/snippets/setup/full-setup.mdx";
-import MintToAction from "/snippets/code-snippets/light-token/mint-to/action.mdx";
+import MintSplAndWrapAction from "/snippets/code-snippets/light-token/mint-spl-and-wrap/action.mdx";
+import AgentSkillGeneric from "/snippets/setup/agent-skill-generic.mdx";
+
+<AgentSkillGeneric />
 
 <Steps>
 <Step>
@@ -18,29 +21,21 @@ import MintToAction from "/snippets/code-snippets/light-token/mint-to/action.mdx
 </Step>
 <Step>
 
-## Mint Tokens to Light-ATA
+## Mint SPL tokens, convert to Light Token and Transfer
 
-<MintToAction />
+<MintSplAndWrapAction />
 
 </Step>
 </Steps>
 
 # Next Steps
 
-<CardGroup cols={2}>
   <Card
-    title="Toolkits"
-    icon="toolbox"
-    href="/light-token/toolkits"
+    title="FAQ"
+    icon="question"
+    href="/faq"
   >
-    Guides for dedicated use cases
-  </Card>
-  <Card
-    title="Cookbook"
-    icon="book"
-    href="/light-token/cookbook"
-  >
-    Step-by-step recipes
+    Find answers to frequently answered questions.
   </Card>
 
-</CardGroup>
+

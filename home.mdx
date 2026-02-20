@@ -1,239 +1,101 @@
 ---
-title: "Home"
+title: "Welcome to ZK Compression"
+sidebarTitle: "Overview"
 mode: "custom"
-keywords: ["light protocol", "zk compression on solana", "scalable solana infrastructure", "rent free accounts on solana", "create tokens on solana", "scalable infrastructure for solana apps", "privacy on solana", "shielded transactions on solana"]
+keywords: ["solana tokens", "spl tokens", "light protocol", "helius", "zk compression on solana", "scalable solana infrastructure", "rent free accounts on solana", "create tokens on solana", "scalable infrastructure for solana apps", "privacy on solana", "shielded transactions on solana"]
 ---
 
 import { Footer } from "/snippets/jsx/footer.jsx";
 import { HeroCubeGrid } from "/snippets/jsx/hero-cube-grid.jsx";
 import { LiquidGlassPill } from "/snippets/jsx/liquid-glass-pill.jsx";
-import WelcomePageInstall from "/snippets/setup/welcome-page-install.mdx";
+import { PartnerLogos } from "/snippets/jsx/partner-logos.jsx";
 
 {/* Hero with animation - styles in style.css (no flash) */}
 
 <div className="relative text-center py-24 sm:py-32 md:py-40 px-4 w-full overflow-hidden border-b border-gray-200 dark:border-gray-800">
   <HeroCubeGrid />
-  <LiquidGlassPill title="Scale Anything on Solana." />
+  <LiquidGlassPill title="Scale Anything on Solana.">
+    <PartnerLogos />
+  </LiquidGlassPill>
 </div>
 
 {/* Content container - using Tailwind classes to avoid flash */}
 
 <div className="max-w-3xl mx-auto px-5 py-12 prose prose-gray dark:prose-invert">
 
-<CardGroup cols={2}>
-  <Card title="Light Token Program" icon="expand" href="/light-token/welcome">
-    High performance token standard for rent-free DeFi and Payments.
-  </Card>
-  <Card title="ZK Compression Core" icon="compress" href="/welcome">
-    Core primitives for rent-free tokens & accounts.
-  </Card>
-</CardGroup>
+ZK Compression is a Solana account primitive that lets you create tokens and PDAs
+without rent-exemption on Solana fully composable with existing programs.
 
-## Features
+## Light Token Program
 
-<CardGroup cols={3}>
-  <Card title="Rent-free Accounts">Create Solana accounts without paying upfront rent.</Card>
-  <Card title="L1 Performance & Security">Execution onchain on Solana.</Card>
-  <Card title="Fully Composable">Works with existing programs and accounts.</Card>
-</CardGroup>
+| Creation Cost | Light Token Program | SPL / Token 2022 |
+|:--------|:------|:---------------|
+| Mint Account | 0.00001 SOL | 0.0015 SOL |
+| Token Account | 0.00001 SOL | 0.002 SOL |
 
-## Quickstart
-
-<Steps>
-<Step>
-### Installation
-
-<WelcomePageInstall />
-</Step>
-<Step>
-### Get started
 <Card
-  title="Mint tokens in under 3 minutes."
-  icon="bolt"
+  title="Light Token Program"
+  icon="book"
   color="#0066ff"
-  href="/light-token/quickstart"
+  href="/light-token/welcome"
   horizontal
-/>
+>
+  High-performance token standard that is functionally equivalent to SPL 
+  while reducing account creation cost and increasing CU efficiency on hot paths.
+  The Light Token SDK keeps code changes minimal and is a superset of the SPL-token API.
+</Card>
 
-</Step>
-</Steps>
+## PDA Accounts 
 
-## DeFi Integration
+| Creation Cost | Light / Compressed | Solana default |
+|:--------|:------|:---------------|
+|  100-byte PDA | ~0.000015 SOL | 0.0016 SOL |
 
 <CardGroup cols={2}>
-  <Card title="Program Integration" icon="code" href="/light-token/defi/programs">
-    Build rent-free AMMs and DeFi programs with minimal code changes.
+  <Card title="Light PDA" icon="expand" href="/pda/light-pda/overview">
+    Solana PDAs with sponsored rent-exemption that can be implemented with minimal code changes.
+    Use like any other PDA, e.g. in your DeFi program.
   </Card>
-  <Card title="Router Integration" icon="route" href="/light-token/defi/routers">
-    Add support for rent-free AMMs to your aggregator or router.
+    <Card title="Advanced: Compressed PDA" icon="compress" href="/pda/compressed-pdas/overview">
+    Compressed PDAs to store user, app, or other infrequently accessed state without rent-exemption. Fully compatible with existing Solana programs, but requires custom logic.
   </Card>
 </CardGroup>
 
-## Toolkits
+## AI Native Development
 
 <Tabs>
-  <Tab title="Light Token">
-    <Card
-      title="Stablecoin Payments"
-      icon="credit-card"
-      color="#0066ff"
-      href="/light-token/toolkits/for-payments"
-      horizontal
-    >
-      Integrate light-token APIs with familiar SPL patterns.
-    </Card>
+<Tab title="Agent Skills">
+Install orchestrator agent skill or view [skill.md](https://www.zkcompression.com/skill.md):
 
-    <Card
-      title="Wallets"
-      icon="wallet"
-      color="#0066ff"
-      href="/light-token/toolkits/for-wallets"
-      horizontal
-    >
-      Allow users to display and swap light-tokens.
-    </Card>
-
-    {/* <Card
-      title="Streaming Mints"
-      icon="bolt"
-      color="#0066ff"
-      href="/light-token/toolkits/for-streaming-mints"
-      horizontal
-    >
-      Stream mint events from the network in real-time.
-    </Card> */}
-
-    {/* <Card
-      title="Streaming Tokens"
-      icon="stream"
-      color="#0066ff"
-      href="/light-token/toolkits/for-streaming-tokens"
-      horizontal
-    >
-      Stream token events from the network in real-time.
-    </Card> */}
-
-  </Tab>
-  <Tab title="Compressed Tokens">
-    <Card
-      title="Airdrop Guide"
-      icon="parachute-box"
-      color="#0066ff"
-      href="/compressed-tokens/advanced-guides/airdrop"
-      horizontal
-    >
-      ZK Compression is the most efficient way to distribute SPL tokens.
-    </Card>
-    <Card
-      title="Privy Guide"
-      icon="wallet"
-      color="#0066ff"
-      href="/compressed-tokens/for-privy"
-      horizontal
-    >
-      Add rent-free SPL token accounts and transfers to your Privy embedded wallet.
-    </Card>
-    <Card
-      title="Wallets"
-      icon="wallet"
-      color="#0066ff"
-      href="/compressed-tokens/advanced-guides/add-wallet-support-for-compressed-tokens"
-      horizontal
-    >
-      Allow users to display and swap compressed tokens.
-    </Card>
-
-    <Card
-      title="Token-2022"
-      icon="coins"
-      color="#0066ff"
-      href="/compressed-tokens/advanced-guides/use-token-2022-with-compression"
-      horizontal
-    >
-      Integrate Token-2022 extensions with compressed tokens.
-    </Card>
-
-    <Card
-      title="Example Token Distribution Flows"
-      icon="angles-right"
-      color="#0066ff"
-      href="https://github.com/Lightprotocol/example-token-distribution"
-      horizontal
-    >
-      Common token distribution flows (airdrops, payments, rewards).
-    </Card>
-
-  </Tab>
-  <Tab title="ZK">
-    <Card
-      title="Nullifiers"
-      icon="code-commit"
-      color="#0066ff"
-      href="/zk/overview#nullifiers-on-solana"
-      horizontal
-    >
-      Deterministically derived addresses to prevent double spending.
-    </Card>
-
-    <Card
-      title="Groth16 Proof Verification"
-      icon="square-check"
-      color="#0066ff"
-      href="/zk/overview#groth16-proof-verification-on-solana"
-      horizontal
-    >
-      Small proof size and fast verification.
-    </Card>
-
-    <Card
-      title="Merklelized State"
-      icon="hard-drive"
-      color="#0066ff"
-      href="/zk/overview#merklelized-state-with-indexer-support"
-      horizontal
-    >
-      Use existing state Merkle trees with RPC indexer support.
-    </Card>
-
-  </Tab>
-</Tabs>
-
-## Cookbooks
-
-<CardGroup cols={2}>
-  <Card title="Light Token Program" icon="coins" href="/light-token/cookbook/overview">
-    Program and client guides for mints, token accounts, and transfers.
-  </Card>
-  <Card title="Compressed Tokens" icon="wallet" iconType="solid" href="/compressed-tokens/overview">
-    Client guides for compressed token accounts.
-  </Card>
-  <Card
-    title="Compressed PDAs"
-    icon="users"
-    href="/compressed-pdas/overview"
-  >
-    Program and client guides for rent-free PDA accounts.
-  </Card>
-  <Card
-    title="Solana Attestation Service (Devnet)"
-    icon="stamp"
-    href="https://github.com/solana-foundation/solana-attestation-service/tree/a8fb187978ecea0b165e63767c7e6b1c036e7b52/examples/typescript/attestation-flow-guides"
-  >
-    Build with compressed attestations using Rust or Typescript.
-  </Card>
-</CardGroup>
-
-## Using AI in Development
-
-Download agent skill or view [skill.md](https://www.zkcompression.com/skill.md): 
 ```bash
 npx skills add https://zkcompression.com
 ```
 
-|          |                                                                              |
-| :------- | :--------------------------------------------------------------------------- |
-| MCP      | Connect AI tools to the Light Protocol repository via Model Context Protocol |
-| DeepWiki | Use Deepwiki for advanced AI assistance with your development.               |
+Install or view [dedicated agent skills](/ai-tools/guide#agent-skills).
+
+<Tabs>
+<Tab title="Claude Code">
+Add the marketplace and install:
+
+```
+/plugin marketplace add Lightprotocol/skills
+/plugin install solana-rent-free-dev
+```
+</Tab>
+<Tab title="Cursor">
+1. Open Settings (**Cmd+Shift+J** / **Ctrl+Shift+J**)
+2. Navigate to **Rules & Commands** → **Project Rules** → **Add Rule** → **Remote Rule (GitHub)**
+3. Enter: `https://github.com/Lightprotocol/skills.git`
+</Tab>
+<Tab title="Any Agent">
+```
+npx skills add Lightprotocol/skills
+```
+</Tab>
+</Tabs>
+</Tab>
+<Tab title="MCP and DeepWiki">
+Connect AI tools to the Light Protocol repository via MCP and DeepWiki.
 
 <Tabs>
 <Tab title="Claude Code">
@@ -268,69 +130,71 @@ codex mcp add deepwiki -- npx -y mcp-remote@latest https://mcp.deepwiki.com/mcp
 ```
 </Tab>
 </Tabs>
+</Tab>
+</Tabs>
 
-<Card
-  title="AI Tools Guide"
-  icon="chevron-right"
-  color="#0066ff"
-  href="/ai-tools/guide"
-  horizontal
-/>
+  <Card title="AI Prompts" icon="clipboard" href="/ai-tools/prompts">
+    Copy-paste prompts for common integration tasks.
+  </Card>
+
+## For DeFi
+
+<CardGroup cols={2}>
+  <Card title="Program Integration" icon="cube" href="/light-token/defi/programs">
+    Build rent-free AMMs and DeFi programs.
+  </Card>
+  <Card title="Router Integration" icon="route" href="/light-token/defi/routers">
+    Add support for rent-free AMMs to your aggregator.
+  </Card>
+  <Card title="Pinocchio Programs" icon="feather" href="/light-token/defi/programs-pinocchio">
+    High-performance DeFi programs with Pinocchio.
+  </Card>
+</CardGroup>
+
+## For Data Streaming
+
+<CardGroup cols={2}>
+  <Card title="Mint Accounts" icon="bolt" href="/light-token/toolkits/for-streaming-mints">
+    Stream mint events from the network in real-time.
+  </Card>
+  <Card title="Token Accounts" icon="stream" href="/light-token/toolkits/for-streaming-tokens">
+    Stream token events from the network in real-time.
+  </Card>
+</CardGroup>
+
+## For Stablecoin Payments
+
+<CardGroup cols={2}>
+  <Card title="Integration Guide" icon="credit-card" href="/light-token/toolkits/for-payments">
+    Guide to integrate light-token APIs with comparison to SPL.
+  </Card>
+  <Card title="Nullifier PDA" icon="code-commit" href="/pda/compressed-pdas/guides/how-to-create-nullifier-pdas">
+    Prevent onchain instructions from being executed more than once.
+  </Card>
+</CardGroup>
+
+## For Wallets
+
+<CardGroup cols={2}>
+  <Card title="Integration Guide" icon="wallet" href="/light-token/toolkits/for-wallets">
+    Guide for Wallet Applications to let users display and swap light-tokens.
+  </Card>
+  <Card title="Sign with Privy Wallets" icon="key" href="/light-token/toolkits/for-privy">
+    Add light-tokens to Privy embedded wallets.
+  </Card>
+</CardGroup>
 
 ## Resources
 
 <CardGroup cols={3}>
-  <Card
-    title="Security Audits"
-    icon="shield-check"
-    href="https://github.com/Lightprotocol/light-protocol/tree/main/audits"
-  >
+  <Card title="Learn Core Concepts" icon="graduation-cap" href="/learn/overview">
+    Learn about the Light Token program and ZK Compression Core.
+  </Card>
+  <Card title="API Reference" icon="code" href="/api-reference/overview">
+    Typescript and Rust SDK's, Anchor constraints and JSON RPC methods.
+  </Card>
+  <Card title="Security Audits" icon="shield-check" href="/resources/security">
     View security audits and formal verification.
-  </Card>
-  <Card title="Light Token Standard" icon="graduation-cap" href="/learn/light-token-standard">
-    Learn core concepts of the Light token program.
-  </Card>
-  <Card title="ZK Compression" icon="graduation-cap" iconType="solid" href="/learn/core-concepts">
-    Learn core concepts of ZK Compression.
-  </Card>
-</CardGroup>
-
-## SDK Reference
-
-### TypeScript
-
-<CardGroup cols={2}>
-  <Card
-    title="@lightprotocol/stateless.js"
-    icon="js"
-    href="https://lightprotocol.github.io/light-protocol/stateless.js/index.html"
-  >
-    Client SDK for Light Token and Compressed Accounts
-  </Card>
-  <Card
-    title="@lightprotocol/compressed-token"
-    icon="coins"
-    href="https://lightprotocol.github.io/light-protocol/compressed-token/index.html"
-  >
-    Client for Light Token and Compressed Tokens.
-  </Card>
-</CardGroup>
-
-### Rust
-
-<CardGroup cols={3}>
-  <Card title="light-client" icon="rust" href="https://docs.rs/light-client/latest/light_client/">
-    Rust client for Light Token and ZK Compression.
-  </Card>
-  <Card title="light-sdk" icon="cube" href="https://docs.rs/light-sdk/latest/light_sdk/">
-    Core SDK for on-chain programs.
-  </Card>
-  <Card
-    title="light-program-test"
-    icon="flask-vial"
-    href="https://docs.rs/crate/light-program-test/latest"
-  >
-    Testing framework for programs.
   </Card>
 </CardGroup>
 

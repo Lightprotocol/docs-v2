@@ -1,35 +1,42 @@
-### TypeScript
+### Toolkits
 
 | | | |
-|---------|--------|-------------|
-| **approve** | [Action](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/actions/delegate-approve.ts) | — |
-| **create-ata** | [Action](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/actions/create-ata.ts) | [Instruction](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/instructions/create-ata.ts) |
-| **create-mint** | [Action](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/actions/create-mint.ts) | [Instruction](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/instructions/create-mint.ts) |
-| **load-ata** | [Action](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/actions/load-ata.ts) | [Instruction](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/instructions/load-ata.ts) |
-| **mint-to** | [Action](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/actions/mint-to.ts) | [Instruction](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/instructions/mint-to.ts) |
-| **revoke** | [Action](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/actions/delegate-revoke.ts) | — |
-| **transfer-interface** | [Action](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/actions/transfer-interface.ts) | [Instruction](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/instructions/transfer-interface.ts) |
-| **unwrap** | [Action](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/actions/unwrap.ts) | [Instruction](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/instructions/unwrap.ts) |
-| **wrap** | [Action](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/actions/wrap.ts) | [Instruction](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/instructions/wrap.ts) |
+|---------|-------------|-------------|
+| **payments-and-wallets** | All you need for wallet integrations and payment flows. Minimal API differences to SPL. | [Example](https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/payments-and-wallets) \| [Docs](/light-token/toolkits/for-payments) |
+| **sign-with-privy** | Light-token operations signed with Privy wallets (Node.js + React) | [Example](https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/sign-with-privy) \| [Docs](/light-token/toolkits/for-privy) |
+| **spl-to-light** | Transfer from SPL to Light via TransferInterface | [Example](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/instructions/spl_to_light_transfer.rs) |
+
+### TypeScript
+
+| | | | |
+|---------|--------|-------------|------|
+| **approve** | [Action](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/actions/delegate-approve.ts) | — | [Docs](/light-token/cookbook/approve-revoke) |
+| **create-ata** | [Action](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/actions/create-ata.ts) | [Instruction](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/instructions/create-ata.ts) | [Docs](/light-token/cookbook/create-ata) |
+| **create-mint** | [Action](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/actions/create-mint.ts) | [Instruction](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/instructions/create-mint.ts) | [Docs](/light-token/cookbook/create-mint) |
+| **load-ata** | [Action](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/actions/load-ata.ts) | [Instruction](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/instructions/load-ata.ts) | [Docs](/light-token/cookbook/load-ata) |
+| **mint-to** | [Action](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/actions/mint-to.ts) | [Instruction](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/instructions/mint-to.ts) | [Docs](/light-token/cookbook/mint-to) |
+| **revoke** | [Action](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/actions/delegate-revoke.ts) | — | [Docs](/light-token/cookbook/approve-revoke) |
+| **transfer-interface** | [Action](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/actions/transfer-interface.ts) | [Instruction](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/instructions/transfer-interface.ts) | [Docs](/light-token/cookbook/transfer-interface) |
+| **unwrap** | [Action](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/actions/unwrap.ts) | [Instruction](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/instructions/unwrap.ts) | [Docs](/light-token/cookbook/wrap-unwrap) |
+| **wrap** | [Action](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/actions/wrap.ts) | [Instruction](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/instructions/wrap.ts) | [Docs](/light-token/cookbook/wrap-unwrap) |
 
 ### Rust
 
-| | | |
-|---------|--------|-------------|
-| **approve** | [Action](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/actions/approve.rs) | [Instruction](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/instructions/approve.rs) |
-| **burn** | — | [Instruction](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/instructions/burn.rs) |
-| **burn-checked** | — | [Instruction](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/instructions/burn_checked.rs) |
-| **close** | — | [Instruction](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/instructions/close.rs) |
-| **create-ata** | [Action](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/actions/create_associated_token_account.rs) | [Instruction](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/instructions/create_associated_token_account.rs) |
-| **create-mint** | [Action](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/actions/create_mint.rs) | [Instruction](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/instructions/create_mint.rs) |
-| **create-token-account** | — | [Instruction](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/instructions/create_token_account.rs) |
-| **freeze** | — | [Instruction](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/instructions/freeze.rs) |
-| **mint-to** | [Action](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/actions/mint_to.rs) | [Instruction](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/instructions/mint_to.rs) |
-| **mint-to-checked** | — | [Instruction](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/instructions/mint_to_checked.rs) |
-| **revoke** | [Action](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/actions/revoke.rs) | [Instruction](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/instructions/revoke.rs) |
-| **spl-to-light** | — | [Instruction](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/instructions/spl_to_light_transfer.rs) |
-| **thaw** | — | [Instruction](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/instructions/thaw.rs) |
-| **transfer-checked** | [Action](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/actions/transfer_checked.rs) | [Instruction](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/instructions/transfer_checked.rs) |
-| **transfer-interface** | [Action](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/actions/transfer_interface.rs) | [Instruction](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/instructions/transfer_interface.rs) |
-| **unwrap** | [Action](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/actions/unwrap.rs) | — |
-| **wrap** | [Action](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/actions/wrap.rs) | — |
+| | | | |
+|---------|--------|-------------|------|
+| **approve** | [Action](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/actions/approve.rs) | [Instruction](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/instructions/approve.rs) | [Docs](/light-token/cookbook/approve-revoke) |
+| **burn** | — | [Instruction](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/instructions/burn.rs) | [Docs](/light-token/cookbook/burn) |
+| **burn-checked** | — | [Instruction](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/instructions/burn_checked.rs) | [Docs](/light-token/cookbook/burn) |
+| **close** | — | [Instruction](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/instructions/close.rs) | [Docs](/light-token/cookbook/close-token-account) |
+| **create-ata** | [Action](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/actions/create_associated_token_account.rs) | [Instruction](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/instructions/create_associated_token_account.rs) | [Docs](/light-token/cookbook/create-ata) |
+| **create-mint** | [Action](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/actions/create_mint.rs) | [Instruction](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/instructions/create_mint.rs) | [Docs](/light-token/cookbook/create-mint) |
+| **create-token-account** | — | [Instruction](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/instructions/create_token_account.rs) | [Docs](/light-token/cookbook/create-token-account) |
+| **freeze** | — | [Instruction](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/instructions/freeze.rs) | [Docs](/light-token/cookbook/freeze-thaw) |
+| **mint-to** | [Action](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/actions/mint_to.rs) | [Instruction](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/instructions/mint_to.rs) | [Docs](/light-token/cookbook/mint-to) |
+| **mint-to-checked** | — | [Instruction](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/instructions/mint_to_checked.rs) | [Docs](/light-token/cookbook/mint-to) |
+| **revoke** | [Action](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/actions/revoke.rs) | [Instruction](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/instructions/revoke.rs) | [Docs](/light-token/cookbook/approve-revoke) |
+| **thaw** | — | [Instruction](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/instructions/thaw.rs) | [Docs](/light-token/cookbook/freeze-thaw) |
+| **transfer-checked** | [Action](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/actions/transfer_checked.rs) | [Instruction](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/instructions/transfer_checked.rs) | [Docs](/light-token/cookbook/transfer-checked) |
+| **transfer-interface** | [Action](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/actions/transfer_interface.rs) | [Instruction](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/instructions/transfer_interface.rs) | [Docs](/light-token/cookbook/transfer-interface) |
+| **unwrap** | [Action](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/actions/unwrap.rs) | — | [Docs](/light-token/cookbook/wrap-unwrap) |
+| **wrap** | [Action](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/actions/wrap.rs) | — | [Docs](/light-token/cookbook/wrap-unwrap) |

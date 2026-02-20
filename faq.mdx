@@ -1,0 +1,234 @@
+---
+title: FAQ
+description: Frequently asked questions about light token, PDA accounts, and use cases.
+keywords: ["spl token vs light token comparison", "token 2022 vs light token differences", "rent exemption on solana explained", "token account cost on solana", "light pda vs compressed pda", "rent free pda solana", "solana pda cost", "compressed accounts solana"]
+---
+
+import { CodeCompare } from "/snippets/jsx/code-compare.jsx";
+import CompressibleRentExplained from "/snippets/compressible-rent-explained.mdx";
+import { RentLifecycleVisualizer } from "/snippets/jsx/rent-lifecycle-visualizer.jsx";
+import {
+  splCreateAtaCode,
+  lightCreateAtaCode,
+} from "/snippets/code-samples/code-compare-snippets.jsx";
+
+## Tokens
+
+<Accordion title="What is light-token?">
+
+Light token is a high-performance token standard that is functionally equivalent to SPL, but stores mint and token accounts more efficiently. This reduces account creation cost while being more CU efficient than SPL on hot paths.
+
+**Creation Cost**
+
+|                   |      Light-Token |   SPL-Token |
+| :---------------- | ---------------: | ----------: |
+| **Mint Account**  | **0.00001 SOL** | 0.0015 SOL |
+| **Token Account** | **0.00001 SOL** | 0.002 SOL |
+
+**CU Performance**
+
+|                          | Light-Token | SPL-Token |
+| :----------------------- | ----------: | --------: |
+| **ATA Creation**         |   **4,348** |    14,194 |
+| **Transfer**             |     **312** |     4,645 |
+| **Transfer** (rent-free) |   **1,885** |     4,645 |
+
+</Accordion>
+
+<Accordion title="Can I start using the Light Token Standard?">
+
+Yes! Light Token is deployed on devnet — start integrating today with our [Quickstart](/light-token/quickstart) and [Toolkits](/light-token/toolkits/overview).
+
+For production on mainnet, use [Compressed Tokens V1](/compressed-tokens/overview), which are live and supported by leading wallets such as Phantom and Backpack.
+
+</Accordion>
+
+<Accordion title="Do I need to change my client code significantly?">
+
+No. The `light-token-sdk` methods are a superset of the SPL-token API.
+Find examples below.
+
+<CodeCompare
+  firstCode={splCreateAtaCode}
+  secondCode={lightCreateAtaCode}
+  firstLabel="SPL"
+  secondLabel="light-token"
+/>
+
+<table>
+  <thead>
+    <tr>
+      <th style={{ width: "15%" }}></th>
+      <th>Light</th>
+      <th>SPL</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>**Get/Create ATA**</td>
+      <td>getOrCreateAtaInterface()</td>
+      <td>getOrCreateAssociatedTokenAccount()</td>
+    </tr>
+    <tr>
+      <td>**Derive ATA**</td>
+      <td>getAssociatedTokenAddressInterface()</td>
+      <td>getAssociatedTokenAddress()</td>
+    </tr>
+    <tr>
+      <td>**Transfer**</td>
+      <td>transferInterface()</td>
+      <td>transferChecked()</td>
+    </tr>
+    <tr>
+      <td>**Get Balance**</td>
+      <td>getAtaInterface()</td>
+      <td>getAccount()</td>
+    </tr>
+  </tbody>
+</table>
+
+</Accordion>
+
+<Accordion title="Can light-token accounts hold SPL tokens?">
+
+Yes, light-token accounts can hold tokens from light, SPL, or Token 2022 mints.
+
+SPL tokens can be deposited into light-token accounts and withdrawn back to SPL token accounts via the `transferInterface` method.
+
+</Accordion>
+
+<Accordion title="Do light-token accounts require rent?">
+
+The token standard pays rent-exemption cost for you. To prevent griefing, "rent" is paid over time to keep an account in memory. This is dealt with under the hood in a way that doesn't disrupt the UX of what your users are used to with SPL-token.
+
+<CompressibleRentExplained />
+
+<RentLifecycleVisualizer />
+
+</Accordion>
+
+<Accordion title="What happens if my light-token account runs out of rent?">
+
+The account is automatically compressed.
+Your tokens are cryptographically preserved as a compressed token account (rent-free).
+The account is loaded into hot account state in-flight when someone interacts with it again.
+
+</Accordion>
+
+<Accordion title="Does light-token support extensions?">
+
+Extensions are under development. Additional extensions can be requested.
+
+Coming soon:
+
+- MetadataPointer
+- TokenMetadata
+- InterestBearingConfig
+- GroupPointer
+- GroupMemberPointer
+- TokenGroup
+- TokenGroupMember
+- MintCloseAuthority
+- TransferFeeConfig
+- DefaultAccountState
+- PermanentDelegate
+- TransferHook
+- Pausable
+- ConfidentialTransferMint
+- ConfidentialTransferFeeConfig
+- ConfidentialMintBurn
+
+</Accordion>
+
+<Accordion title="What is the difference between light-token and compressed token?">
+
+- **light-token**: Solana account that holds token balances of light-mints, SPL or Token 22 mints.
+- **Compressed token**: Compressed account storing token data. Rent-free, for storage and distribution.
+
+</Accordion>
+
+---
+
+## PDA Accounts
+
+<Accordion title="What is a Light-PDA?">
+
+A standard Solana PDA with sponsored rent-exemption. Seeds, bump derivation, and `invoke_signed` work the same way. Your instruction handlers for reads, updates, and closes don't change.
+
+|                    |   Regular PDA |     Light-PDA |
+| :----------------- | ------------: | ------------: |
+| **100-byte account** | ~0.0016 SOL | ~0.0000115 SOL |
+
+</Accordion>
+
+<Accordion title="What is a compressed PDA?">
+
+A compressed account with a derived address. Programs invoke the Light System program instead of the System program to create and update compressed accounts. Compressed PDAs are always compressed and require a validity proof for every read and write.
+
+|                    |   Regular PDA | Compressed PDA |
+| :----------------- | ------------: | -------------: |
+| **100-byte account** | ~0.0016 SOL |  ~0.000015 SOL |
+
+</Accordion>
+
+<Accordion title="When should I use Light-PDA vs compressed PDA?">
+
+|                    | Light-PDA                                                        | Compressed PDA                                                        |
+| :----------------- | :--------------------------------------------------------------- | :-------------------------------------------------------------------- |
+| **Storage**        | On-chain; auto-compresses when inactive                          | Always compressed                                                     |
+| **Validity proof** | Not required                                                     | Required for every read and write                                     |
+| **Program changes**| Minimal changes. Leaves program logic mostly untouched.      | Custom Logic                                    |
+| **Best for**       | Shared state: DeFi pools, vaults, config, program-owned accounts | Per-user state: profiles, credentials, DePIN nodes, nullifiers        |
+
+<Card
+  title="PDA accounts overview"
+  icon="chevron-right"
+  color="#0066ff"
+  href="/pda/overview"
+  horizontal
+>
+</Card>
+
+</Accordion>
+
+<Accordion title="Do I need to rewrite my Anchor program to use Light-PDA?">
+
+No. Add `compression_info: CompressionInfo` to your state struct, derive `LightAccount` and `LightAccounts`, and add `#[light_program]` above `#[program]`. Your instruction logic for reads, updates, and closes stays the same. The client prepends a load instruction if the account is cold.
+
+<Card
+  title="Light-PDA guide"
+  icon="chevron-right"
+  color="#0066ff"
+  href="/pda/light-pda/overview"
+  horizontal
+>
+</Card>
+
+</Accordion>
+
+<Accordion title="Do Light-PDAs require rent?">
+
+The SDK sponsors rent-exemption for your Light-PDAs. After extended inactivity, the account compresses to cold state and the rent-exempt lamports return to the rent sponsor. The common path (hot accounts) has no extra overhead.
+
+<CompressibleRentExplained />
+
+</Accordion>
+
+<Accordion title="What happens if my Light-PDA runs out of rent?">
+
+The account data is cryptographically preserved in compressed state. The client prepends a load instruction when someone interacts with it again — your program code doesn't change. Reads, updates, and closes work the same way regardless of whether the account is hot or cold.
+
+</Accordion>
+
+---
+
+## I don't see the question I want answered
+
+DM us [@lightprotocol on X (Twitter)](http://x.com/lightprotocol) or [Discord](https://discord.com/invite/rpddh53TeG).
+
+<Card
+  title="Learn Core Concepts"
+  icon="graduation-cap"
+  href="/learn/light-token-standard"
+>
+</Card>

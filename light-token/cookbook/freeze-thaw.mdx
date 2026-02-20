@@ -19,12 +19,17 @@ import FreezeInstructionCode from "/snippets/code-snippets/light-token/freeze-th
 import ThawInstructionCode from "/snippets/code-snippets/light-token/freeze-thaw/rust-client/thaw-instruction.mdx";
 import FreezeAnchorProgramCode from "/snippets/code-snippets/light-token/freeze/anchor-program/full-example.mdx";
 import ThawAnchorProgramCode from "/snippets/code-snippets/light-token/thaw/anchor-program/full-example.mdx";
+import AgentSkillGeneric from "/snippets/setup/agent-skill-generic.mdx";
+import RustFreezeThawAiPrompt from "/snippets/ai-prompts/rust-cookbook/freeze-thaw.mdx";
+import ProgramFreezeThawAiPrompt from "/snippets/ai-prompts/program-cookbook/freeze-thaw.mdx";
 
 1. Freeze prevents all transfers or token burns from a specific Light Token account.
 2. Once frozen, the account cannot send tokens, receive tokens, or be closed until it is thawed. 
 3. Thaw re-enables transfers on a frozen Light Token account.
 4. Only the freeze authority (set at mint creation) can freeze or thaw accounts.
 5. If the freeze authority is revoked (set to null) on the mint account, tokens can never be frozen.
+
+<AgentSkillGeneric />
 
 <Tabs>
 <Tab title="Rust Client">
@@ -54,6 +59,8 @@ import ThawAnchorProgramCode from "/snippets/code-snippets/light-token/thaw/anch
 </Tab>
 </Tabs>
 
+<Tabs>
+<Tab title="Guide">
 <Steps>
 <Step>
 ### Prerequisites
@@ -66,7 +73,7 @@ import ThawAnchorProgramCode from "/snippets/code-snippets/light-token/thaw/anch
 ### Freeze or thaw Light Token accounts
 
 <Info>
-  View the [source code](https://github.com/Lightprotocol/light-protocol/blob/main/sdk-libs/token-sdk/src/instruction/freeze.rs) and [full example](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/instructions/freeze.rs) with shared test utilities.
+  Find the source code [here](https://github.com/Lightprotocol/light-protocol/blob/main/sdk-libs/token-sdk/src/instruction/freeze.rs).
 </Info>
 
 <Tabs>
@@ -89,8 +96,15 @@ import ThawAnchorProgramCode from "/snippets/code-snippets/light-token/thaw/anch
 </Step>
 </Steps>
 </Tab>
+<Tab title="AI Prompt">
+<RustFreezeThawAiPrompt />
+</Tab>
+</Tabs>
+</Tab>
 
 <Tab title="Program">
+<Tabs>
+<Tab title="Guide">
 
 <Note>
 Find [a full code example at the end](#full-code-example).
@@ -212,6 +226,11 @@ ThawCpi {
 </Tab>
 </Tabs>
 
+</Tab>
+<Tab title="AI Prompt">
+<ProgramFreezeThawAiPrompt />
+</Tab>
+</Tabs>
 </Tab>
 
 </Tabs>

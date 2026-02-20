@@ -3,6 +3,9 @@ title: "Router Integration"
 description: "Add support for rent-free AMMs on Solana."
 ---
 
+import AgentSkillRouter from "/snippets/setup/agent-skill-router.mdx";
+import RoutersAiPrompt from "/snippets/ai-prompts/defi/routers.mdx";
+
 Your existing quoting, routing, and swap logic stays the same.
 The only addition: when a market has cold accounts, detect them, and prepend load instructions before the swap.
 
@@ -15,6 +18,11 @@ The only addition: when a market has cold accounts, detect them, and prepend loa
 | Transaction | No change | Prepend `create_load_instructions` |
 
 ---
+
+<AgentSkillRouter />
+
+<Tabs>
+<Tab title="Guide">
 
 ## Detecting cold accounts
 
@@ -137,7 +145,7 @@ pub trait LightProgramInterface {
 
 ```toml
 [dependencies]
-light-client = {version = "0.18.0", features = ["v2"]}
+light-client = { version = "0.19.0", features = ["v2"] }
 
 # AMM SDK that implements LightProgramInterface (provided by the AMM team)
 example-amm-sdk = "0.1"
@@ -305,3 +313,10 @@ API is in Beta and subject to change.
 
 Questions or need hands-on support? [Telegram](https://t.me/swen_light) | [email](mailto:support@lightprotocol.com) | [Discord](https://discord.com/invite/7cJ8BhAXhu)
 </Callout>
+
+</Tab>
+<Tab title="AI Prompt">
+<RoutersAiPrompt />
+</Tab>
+</Tabs>
+

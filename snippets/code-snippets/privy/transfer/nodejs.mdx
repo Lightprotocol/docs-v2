@@ -1,16 +1,18 @@
 ```typescript
 import 'dotenv/config';
 import {PrivyClient} from '@privy-io/node';
-import {createRpc, bn} from '@lightprotocol/stateless.js';
-import {PublicKey, Transaction, ComputeBudgetProgram} from '@solana/web3.js';
-import {LightTokenProgram, selectMinCompressedTokenAccountsForTransfer} from '@lightprotocol/compressed-token';
+import {createRpc} from '@lightprotocol/stateless.js';
+import {PublicKey, Transaction} from '@solana/web3.js';
+import {
+  createTransferInterfaceInstructions,
+} from '@lightprotocol/compressed-token/unified';
 
-const transferCompressedTokens = async (
+const transferLightTokens = async (
   fromAddress: string,
   toAddress: string,
   tokenMintAddress: string,
   amount: number,
-  decimals: number = 6
+  decimals: number = 9,
 ) => {
   const connection = createRpc(process.env.HELIUS_RPC_URL!);
 
@@ -19,69 +21,46 @@ const transferCompressedTokens = async (
     appSecret: process.env.PRIVY_APP_SECRET!,
   });
 
-  // Create public key objects
   const fromPubkey = new PublicKey(fromAddress);
   const toPubkey = new PublicKey(toAddress);
   const mintPubkey = new PublicKey(tokenMintAddress);
-  const tokenAmount = bn(amount * Math.pow(10, decimals));
+  const tokenAmount = Math.floor(amount * Math.pow(10, decimals));
 
-  // Get compressed token accounts (filter out null items from indexer)
-  const accounts = await connection.getCompressedTokenAccountsByOwner(fromPubkey, {mint: mintPubkey});
-  const validItems = (accounts.items || []).filter((item): item is NonNullable<typeof item> => item !== null);
-  if (validItems.length === 0) {
-    throw new Error('No compressed token accounts found');
+  // Loads cold (compressed), SPL, and Token 2022 balances into the Light Token associated token account before transfer.
+  // Returns TransactionInstruction[][] — send [0..n-2] in parallel, then [n-1] last.
+  const instructions = await createTransferInterfaceInstructions(
+    connection, fromPubkey, mintPubkey, tokenAmount, fromPubkey, toPubkey,
+  );
+
+  // Sign and send each batch via Privy
+  const walletId = process.env.TREASURY_WALLET_ID!;
+  const authorizationKey = process.env.TREASURY_AUTHORIZATION_KEY!;
+  const signatures: string[] = [];
+
+  for (const ixs of instructions) {
+    const tx = new Transaction().add(...ixs);
+    const {blockhash} = await connection.getLatestBlockhash();
+    tx.recentBlockhash = blockhash;
+    tx.feePayer = fromPubkey;
+
+    const {signed_transaction} = await privy.wallets().solana().signTransaction(
+      walletId, {
+        transaction: tx.serialize({requireAllSignatures: false}),
+        authorization_context: {authorization_private_keys: [authorizationKey]},
+      },
+    ) as any;
+
+    const sig = await connection.sendRawTransaction(
+      Buffer.from(signed_transaction, 'base64'),
+      {skipPreflight: false, preflightCommitment: 'confirmed'},
+    );
+    await connection.confirmTransaction(sig, 'confirmed');
+    signatures.push(sig);
   }
 
-  // Select minimum accounts needed for transfer
-  const [inputAccounts] = selectMinCompressedTokenAccountsForTransfer(validItems, tokenAmount);
-  if (inputAccounts.length === 0) {
-    throw new Error('Insufficient balance');
-  }
-
-  // Get validity proof to prove compressed token accounts exist in state tree.
-  const proof = await connection.getValidityProof(inputAccounts.map(account => bn(account.compressedAccount.hash)));
-
-  // Create transfer instruction
-  const instruction = await LightTokenProgram.transfer({
-    payer: fromPubkey,
-    inputCompressedTokenAccounts: inputAccounts,
-    toAddress: toPubkey,
-    amount: tokenAmount,
-    recentInputStateRootIndices: proof.rootIndices,
-    recentValidityProof: proof.compressedProof,
-  });
-
-  // Create transaction
-  const transaction = new Transaction();
-  transaction.add(ComputeBudgetProgram.setComputeUnitLimit({units: 300_000}));
-  transaction.add(instruction);
-
-  // Get recent blockhash
-  const {blockhash} = await connection.getLatestBlockhash();
-  transaction.recentBlockhash = blockhash;
-  transaction.feePayer = fromPubkey;
-
-  // Sign with Privy
-  const signResult = await privy.wallets().solana().signTransaction(process.env.TREASURY_WALLET_ID!, {
-    transaction: transaction.serialize({requireAllSignatures: false}),
-    authorization_context: {
-      authorization_private_keys: [process.env.TREASURY_AUTHORIZATION_KEY!]
-    }
-  });
-  const signedTx = (signResult as any).signed_transaction || signResult.signedTransaction;
-  if (!signedTx) {
-    throw new Error('Privy returned invalid response: ' + JSON.stringify(signResult));
-  }
-  const signedTransaction = Buffer.from(signedTx, 'base64');
-
-  // Send transaction
-  const signature = await connection.sendRawTransaction(signedTransaction, {
-    skipPreflight: false,
-    preflightCommitment: 'confirmed'
-  });
-  await connection.confirmTransaction(signature, 'confirmed');
-
-  return signature;
+  return signatures[signatures.length - 1];
 };
 
-export default transferCompressedTokens;```
+export default transferLightTokens;
+
+```

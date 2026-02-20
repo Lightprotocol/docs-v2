@@ -28,12 +28,18 @@ import RevokeActionCode from "/snippets/code-snippets/light-token/approve-revoke
 import RevokeInstructionCode from "/snippets/code-snippets/light-token/approve-revoke/rust-client/revoke-instruction.mdx";
 import ApproveAnchorProgramCode from "/snippets/code-snippets/light-token/approve/anchor-program/full-example.mdx";
 import RevokeAnchorProgramCode from "/snippets/code-snippets/light-token/revoke/anchor-program/full-example.mdx";
+import AgentSkillGeneric from "/snippets/setup/agent-skill-generic.mdx";
+import ApproveRevokeAiPrompt from "/snippets/ai-prompts/ts-cookbook/approve-revoke.mdx";
+import RustApproveRevokeAiPrompt from "/snippets/ai-prompts/rust-cookbook/approve-revoke.mdx";
+import ProgramApproveRevokeAiPrompt from "/snippets/ai-prompts/program-cookbook/approve-revoke.mdx";
 
 1. Approve grants a delegate permission to transfer up to a specified amount of tokens from your account.
     * Each token account can have only one delegate at a time. 
     * Any new approval overwrites the previous one.
 2. Revoke removes all delegate permissions from a Light Token account.
 3. Only the token account owner can approve or revoke delegates.
+
+<AgentSkillGeneric />
 
 <Tabs>
 
@@ -67,10 +73,14 @@ import RevokeAnchorProgramCode from "/snippets/code-snippets/light-token/revoke/
 </Tabs>
 
 <Info>
-  Find the source code
-  [here](https://github.com/Lightprotocol/examples-light-token/tree/main/typescript-client/actions).
+  Find the source code:
+  [delegate-approve.ts](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/actions/delegate-approve.ts)
+  |
+  [delegate-revoke.ts](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/actions/delegate-revoke.ts)
 </Info>
 
+<Tabs>
+<Tab title="Guide">
 <Steps>
 <Step>
 ### Approve a delegate
@@ -88,6 +98,11 @@ import RevokeAnchorProgramCode from "/snippets/code-snippets/light-token/revoke/
 
 </Step>
 </Steps>
+</Tab>
+<Tab title="AI Prompt">
+<ApproveRevokeAiPrompt />
+</Tab>
+</Tabs>
 
 </Tab>
 
@@ -118,6 +133,8 @@ import RevokeAnchorProgramCode from "/snippets/code-snippets/light-token/revoke/
 </Tab>
 </Tabs>
 
+<Tabs>
+<Tab title="Guide">
 <Steps>
 <Step>
 ### Prerequisites
@@ -130,7 +147,7 @@ import RevokeAnchorProgramCode from "/snippets/code-snippets/light-token/revoke/
 ### Approve or revoke delegates
 
 <Info>
-  View the [source code](https://github.com/Lightprotocol/light-protocol/blob/main/sdk-libs/token-sdk/src/instruction/approve.rs) and [full example](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/instructions/approve.rs) with shared test utilities.
+  Find the source code [here](https://github.com/Lightprotocol/light-protocol/blob/main/sdk-libs/token-sdk/src/instruction/approve.rs).
 </Info>
 
 <Tabs>
@@ -159,8 +176,15 @@ import RevokeAnchorProgramCode from "/snippets/code-snippets/light-token/revoke/
 </Step>
 </Steps>
 </Tab>
+<Tab title="AI Prompt">
+<RustApproveRevokeAiPrompt />
+</Tab>
+</Tabs>
+</Tab>
 
 <Tab title="Program">
+<Tabs>
+<Tab title="Guide">
 
 <Note>
 Find [a full code example at the end](#full-code-example).
@@ -286,6 +310,11 @@ revoke_cpi.invoke_signed(&[signer_seeds])?;
 </Tab>
 </Tabs>
 
+</Tab>
+<Tab title="AI Prompt">
+<ProgramApproveRevokeAiPrompt />
+</Tab>
+</Tabs>
 </Tab>
 
 </Tabs>

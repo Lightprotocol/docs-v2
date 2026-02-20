@@ -1,0 +1,117 @@
+<Prompt description="Build a program that permanently burns compressed accounts" actions={["copy", "cursor"]}>
+{`---
+description: Build a program that permanently burns compressed accounts
+allowed-tools: Bash, Read, Write, Edit, Glob, Grep, WebFetch, AskUserQuestion, Task, TaskCreate, TaskGet, TaskList, TaskUpdate, TaskOutput, mcp__deepwiki, mcp__zkcompression
+---
+
+## Build a program that permanently burns compressed accounts
+
+Context:
+- Guide: https://zkcompression.com/pda/compressed-pdas/guides/how-to-burn-compressed-accounts
+- Skills and resources index: https://zkcompression.com/skill.md
+- Crate: light-sdk (LightAccount, CpiAccounts, LightSystemProgramCpi, derive_light_cpi_signer!)
+- Anchor example: https://github.com/Lightprotocol/program-examples/tree/main/basic-operations/anchor/burn
+- Native Rust example: https://github.com/Lightprotocol/program-examples/tree/main/basic-operations/native/programs/burn
+
+Key SDK API: LightAccount::new_burn()
+
+### 1. Index project
+- Grep \`declare_id|#\[program\]|entrypoint!|Pubkey|AccountInfo|burn|destroy|permanent\` across src/
+- Glob \`**/*.rs\` and \`**/Cargo.toml\` for project structure
+- Identify: program ID, existing instructions, account structs, framework (Anchor or native)
+- Read Cargo.toml — note existing dependencies and Solana SDK version
+- Task subagent (Grep/Read/WebFetch) if project has multiple crates to scan in parallel
+
+### 2. Read references
+- WebFetch the guide above — review both Anchor and Native Rust code samples
+- WebFetch skill.md — check for a dedicated skill and resources matching this task
+- TaskCreate one todo per phase below to track progress
+
+### 3. Clarify intention
+- AskUserQuestion: what is the goal? (new program from scratch, add account burn to existing program, migrate from regular accounts)
+- AskUserQuestion: Anchor or Native Rust framework?
+- AskUserQuestion: does the program already have compressed account instructions, or is this the first one?
+- Summarize findings and wait for user confirmation before implementing
+
+### 4. Create plan
+- Based on steps 1–3, draft an implementation plan: which files to modify, what code to add, dependency changes
+- Follow the guide's step order: Dependencies → Constants → Account Struct → Instruction Data → Burn Compressed Account → Light System Program CPI
+- If anything is unclear or ambiguous, loop back to step 3 (AskUserQuestion)
+- Present the plan to the user for approval before proceeding
+
+### 5. Implement
+- Add deps: Bash \`cargo add light-sdk@0.16\` (add \`anchor_lang@0.31\` for Anchor or \`solana-program@2.2\` + \`borsh@0.10\` for Native Rust)
+- Follow the guide and the approved plan
+- Write/Edit to create or modify files
+- TaskUpdate to mark each step done
+
+### 6. Verify
+- Bash \`cargo build-sbf\` or \`anchor build\`
+- Bash \`cargo test-sbf\` or \`anchor test\` if tests exist
+- TaskUpdate to mark complete
+
+### Tools
+- mcp__zkcompression__SearchLightProtocol("<query>") for API details
+- mcp__deepwiki__ask_question("Lightprotocol/light-protocol", "<q>") for architecture
+- Task subagent with Grep/Read/WebFetch for parallel lookups
+- TaskList to check remaining work`}
+</Prompt>
+
+```text
+---
+description: Build a program that permanently burns compressed accounts
+allowed-tools: Bash, Read, Write, Edit, Glob, Grep, WebFetch, AskUserQuestion, Task, TaskCreate, TaskGet, TaskList, TaskUpdate, TaskOutput, mcp__deepwiki, mcp__zkcompression
+---
+
+## Build a program that permanently burns compressed accounts
+
+Context:
+- Guide: https://zkcompression.com/pda/compressed-pdas/guides/how-to-burn-compressed-accounts
+- Skills and resources index: https://zkcompression.com/skill.md
+- Crate: light-sdk (LightAccount, CpiAccounts, LightSystemProgramCpi, derive_light_cpi_signer!)
+- Anchor example: https://github.com/Lightprotocol/program-examples/tree/main/basic-operations/anchor/burn
+- Native Rust example: https://github.com/Lightprotocol/program-examples/tree/main/basic-operations/native/programs/burn
+
+Key SDK API: LightAccount::new_burn()
+
+### 1. Index project
+- Grep `declare_id|#\[program\]|entrypoint!|Pubkey|AccountInfo|burn|destroy|permanent` across src/
+- Glob `**/*.rs` and `**/Cargo.toml` for project structure
+- Identify: program ID, existing instructions, account structs, framework (Anchor or native)
+- Read Cargo.toml — note existing dependencies and Solana SDK version
+- Task subagent (Grep/Read/WebFetch) if project has multiple crates to scan in parallel
+
+### 2. Read references
+- WebFetch the guide above — review both Anchor and Native Rust code samples
+- WebFetch skill.md — check for a dedicated skill and resources matching this task
+- TaskCreate one todo per phase below to track progress
+
+### 3. Clarify intention
+- AskUserQuestion: what is the goal? (new program from scratch, add account burn to existing program, migrate from regular accounts)
+- AskUserQuestion: Anchor or Native Rust framework?
+- AskUserQuestion: does the program already have compressed account instructions, or is this the first one?
+- Summarize findings and wait for user confirmation before implementing
+
+### 4. Create plan
+- Based on steps 1–3, draft an implementation plan: which files to modify, what code to add, dependency changes
+- Follow the guide's step order: Dependencies → Constants → Account Struct → Instruction Data → Burn Compressed Account → Light System Program CPI
+- If anything is unclear or ambiguous, loop back to step 3 (AskUserQuestion)
+- Present the plan to the user for approval before proceeding
+
+### 5. Implement
+- Add deps: Bash `cargo add light-sdk@0.16` (add `anchor_lang@0.31` for Anchor or `solana-program@2.2` + `borsh@0.10` for Native Rust)
+- Follow the guide and the approved plan
+- Write/Edit to create or modify files
+- TaskUpdate to mark each step done
+
+### 6. Verify
+- Bash `cargo build-sbf` or `anchor build`
+- Bash `cargo test-sbf` or `anchor test` if tests exist
+- TaskUpdate to mark complete
+
+### Tools
+- mcp__zkcompression__SearchLightProtocol("<query>") for API details
+- mcp__deepwiki__ask_question("Lightprotocol/light-protocol", "<q>") for architecture
+- Task subagent with Grep/Read/WebFetch for parallel lookups
+- TaskList to check remaining work
+```

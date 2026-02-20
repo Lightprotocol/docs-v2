@@ -1,38 +1,141 @@
 ```typescript
-import {PublicKey} from '@solana/web3.js';
+import 'dotenv/config';
+import {PublicKey, LAMPORTS_PER_SOL} from '@solana/web3.js';
+import {TOKEN_PROGRAM_ID, TOKEN_2022_PROGRAM_ID} from '@solana/spl-token';
 import {createRpc} from '@lightprotocol/stateless.js';
-import {HELIUS_RPC_URL} from './config.js';
+import {
+  getAtaInterface,
+  getAssociatedTokenAddressInterface,
+} from '@lightprotocol/compressed-token/unified';
 
-export async function getCompressedBalances(ownerAddress: string) {
-  const rpc = createRpc(HELIUS_RPC_URL);
+interface TokenBalance {
+  mint: string;
+  decimals: number;
+  hot: number;
+  cold: number;
+  spl: number;
+  t22: number;
+  unified: number;
+}
+
+interface BalanceBreakdown {
+  sol: number;
+  tokens: TokenBalance[];
+}
+
+export async function getBalances(
+  ownerAddress: string,
+): Promise<BalanceBreakdown> {
+  const rpc = createRpc(process.env.HELIUS_RPC_URL!);
   const owner = new PublicKey(ownerAddress);
 
-  // Get compressed SOL balance
-  const compressedSol = await rpc.getCompressedBalanceByOwner(owner);
-  const compressedSolLamports = compressedSol.value ? BigInt(compressedSol.value.toString()) : 0n;
-
-  // Get compressed token accounts (filter out null items from indexer)
-  const compressedAccounts = await rpc.getCompressedTokenAccountsByOwner(owner);
-  const validItems = (compressedAccounts.items || []).filter((item): item is NonNullable<typeof item> => item !== null);
-
-  // Aggregate balances by mint
-  const balances = new Map<string, bigint>();
-  for (const account of validItems) {
-    if (account.parsed) {
-      const mint = account.parsed.mint.toBase58();
-      const amount = BigInt(account.parsed.amount.toString());
-      const current = balances.get(mint) || 0n;
-      balances.set(mint, current + amount);
-    }
+  // SOL balance
+  let solLamports = 0;
+  try {
+    solLamports = await rpc.getBalance(owner);
+  } catch (e) {
+    console.error('Failed to fetch SOL balance:', e);
   }
 
-  return {
-    sol: compressedSolLamports.toString(),
-    tokens: Array.from(balances.entries()).map(([mint, amount]) => ({
-      mint,
-      amount: amount.toString(),
-      accounts: validItems.filter(a => a.parsed?.mint.toBase58() === mint).length
-    }))
+  // Per-mint accumulator
+  const mintMap = new Map<string, {spl: number; t22: number; hot: number; cold: number; decimals: number}>();
+
+  const getOrCreate = (mintStr: string) => {
+    let entry = mintMap.get(mintStr);
+    if (!entry) {
+      entry = {spl: 0, t22: 0, hot: 0, cold: 0, decimals: 9};
+      mintMap.set(mintStr, entry);
+    }
+    return entry;
   };
+
+  // 1. SPL accounts
+  try {
+    const splAccounts = await rpc.getTokenAccountsByOwner(owner, {
+      programId: TOKEN_PROGRAM_ID,
+    });
+    for (const {account} of splAccounts.value) {
+      const buf = toBuffer(account.data);
+      if (!buf || buf.length < 72) continue;
+      const mint = new PublicKey(buf.subarray(0, 32));
+      const amount = buf.readBigUInt64LE(64);
+      const mintStr = mint.toBase58();
+      getOrCreate(mintStr).spl += toUiAmount(amount, 9);
+    }
+  } catch {
+    // No SPL accounts
+  }
+
+  // 2. Token 2022 accounts
+  try {
+    const t22Accounts = await rpc.getTokenAccountsByOwner(owner, {
+      programId: TOKEN_2022_PROGRAM_ID,
+    });
+    for (const {account} of t22Accounts.value) {
+      const buf = toBuffer(account.data);
+      if (!buf || buf.length < 72) continue;
+      const mint = new PublicKey(buf.subarray(0, 32));
+      const amount = buf.readBigUInt64LE(64);
+      const mintStr = mint.toBase58();
+      getOrCreate(mintStr).t22 += toUiAmount(amount, 9);
+    }
+  } catch {
+    // No Token 2022 accounts
+  }
+
+  // 3. Hot balance from Light Token associated token account
+  const mintKeys = [...mintMap.keys()];
+  await Promise.allSettled(
+    mintKeys.map(async (mintStr) => {
+      try {
+        const mint = new PublicKey(mintStr);
+        const ata = getAssociatedTokenAddressInterface(mint, owner);
+        const {parsed} = await getAtaInterface(rpc, ata, owner, mint);
+        getOrCreate(mintStr).hot = toUiAmount(parsed.amount, 9);
+      } catch {
+        // Associated token account does not exist for this mint
+      }
+    }),
+  );
+
+  // 4. Cold balance from compressed token accounts
+  try {
+    const compressed = await rpc.getCompressedTokenBalancesByOwnerV2(owner);
+    for (const item of compressed.value.items) {
+      const mintStr = item.mint.toBase58();
+      getOrCreate(mintStr).cold += toUiAmount(BigInt(item.balance.toString()), 9);
+    }
+  } catch {
+    // No compressed accounts
+  }
+
+  // Assemble result
+  const tokens: TokenBalance[] = [];
+  for (const [mintStr, entry] of mintMap) {
+    tokens.push({
+      mint: mintStr,
+      decimals: entry.decimals,
+      hot: entry.hot,
+      cold: entry.cold,
+      spl: entry.spl,
+      t22: entry.t22,
+      unified: entry.hot + entry.cold,
+    });
+  }
+
+  return {sol: solLamports / LAMPORTS_PER_SOL, tokens};
 }
+
+function toBuffer(data: Buffer | Uint8Array | string | unknown): Buffer | null {
+  if (data instanceof Buffer) return data;
+  if (data instanceof Uint8Array) return Buffer.from(data);
+  return null;
+}
+
+function toUiAmount(raw: bigint | {toNumber: () => number}, decimals: number): number {
+  const value = typeof raw === 'bigint' ? Number(raw) : raw.toNumber();
+  return value / 10 ** decimals;
+}
+
+export default getBalances;
 ```

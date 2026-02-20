@@ -6,11 +6,18 @@ keywords: ["streaming token accounts solana", "laserstream light token", "grpc t
 ---
 
 import FindClosedAccounts from '/snippets/code-snippets/streaming/find-closed-accounts.mdx';
+import AgentSkillStreaming from "/snippets/setup/agent-skill-streaming.mdx";
+import StreamingTokensAiPrompt from "/snippets/ai-prompts/streaming/tokens.mdx";
 
 <Note>
 This guide is for teams building custom data pipelines (aggregators, market makers).
 If you just need account lookups, use [`get_account_interface`](/light-token/defi/routers) instead.
 </Note>
+
+<AgentSkillStreaming />
+
+<Tabs>
+<Tab title="Guide">
 
 ## Architecture
 
@@ -258,3 +265,9 @@ Source: [`light-token-interface`](https://github.com/Lightprotocol/light-protoco
   href="/light-token/toolkits/for-streaming-mints"
   horizontal
 />
+
+</Tab>
+<Tab title="AI Prompt">
+<StreamingTokensAiPrompt />
+</Tab>
+</Tabs>

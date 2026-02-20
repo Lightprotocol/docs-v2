@@ -1,0 +1,444 @@
+---
+title: Create Compressed Accounts
+description: Guide to create compressed accounts in Solana programs with full code examples.
+keywords: ["create compressed accounts", "rent free accounts on solana", "depin infrastructure on solana", "scalable reward distribution for depins"]
+---
+
+import CompressedPdasSystemAccountsList from '/snippets/accounts-list/compressed-pdas-system-accounts-list.mdx';
+import DevelopmentEnvironmentSetup from '/snippets/setup/development-environment-setup.mdx';
+import AnchorProgram from '/snippets/code-snippets/create/anchor-program.mdx';
+import NativeProgram from '/snippets/code-snippets/create/native-program.mdx';
+import CpiCreateAiPrompt from '/snippets/ai-prompts/cpi-programs/create.mdx';
+
+Compressed accounts and addresses are created via CPI to the Light System Program.
+
+* Compressed and regular Solana accounts share the same functionality and are fully composable.
+* A compressed account has two identifiers: the account hash and its address (optional). In comparison, regular Solana accounts are identified by their address.
+* The account hash is not persistent and changes with every write to the account.
+* For Solana PDA like behavior your compressed account needs an address as persistent identifier.
+<Note>
+Find [full code examples at the end](/pda/compressed-pdas/guides/how-to-create-compressed-accounts#full-code-example) for Anchor and native Rust.
+</Note>
+
+# Implementation Guide
+
+This guide will cover the components of a Solana program that creates compressed accounts.\
+Here is the complete flow:
+
+<div className="hidden dark:block">
+<Frame>
+  ![](/images/program-create-1.png)
+</Frame>
+</div>
+<div className="block dark:hidden">
+<Frame>
+  ![](/images/program-create.png)
+</Frame>
+</div>
+
+<Tabs>
+<Tab title="Guide">
+<Steps>
+<Step>
+
+### Dependencies
+
+Add dependencies to your program.
+
+<CodeGroup>
+```toml Anchor
+[dependencies]
+light-sdk = "0.16.0"
+anchor_lang = "0.31.1"
+```
+
+```toml Native Rust
+[dependencies]
+light-sdk = "0.16.0"
+borsh = "0.10.0"
+solana-program = "2.2"
+```
+</CodeGroup>
+
+* The `light-sdk` provides macros, wrappers and CPI interface to create and interact with compressed accounts.
+* Add the serialization library (`borsh` for native Rust, or use `AnchorSerialize`).
+</Step>
+
+<Step>
+
+### Constants
+
+Set program address and derive the CPI authority PDA to call the Light System program.
+
+<CodeGroup>
+```rust Anchor
+declare_id!("rent4o4eAiMbxpkAM1HeXzks9YeGuz18SEgXEizVvPq");
+
+pub const LIGHT_CPI_SIGNER: CpiSigner =
+    derive_light_cpi_signer!("rent4o4eAiMbxpkAM1HeXzks9YeGuz18SEgXEizVvPq");
+```
+
+```rust Native Rust
+pub const ID: Pubkey = pubkey!("rent4o4eAiMbxpkAM1HeXzks9YeGuz18SEgXEizVvPq");
+pub const LIGHT_CPI_SIGNER: CpiSigner =
+    derive_light_cpi_signer!("rent4o4eAiMbxpkAM1HeXzks9YeGuz18SEgXEizVvPq");
+```
+</CodeGroup>
+
+**`CPISigner`** is the configuration struct for CPIs to the Light System Program.
+
+* CPI to the Light System program must be signed with a PDA derived by your program with the seed `b"authority"`
+* `derive_light_cpi_signer!` derives the CPI signer PDA for you at compile time.
+</Step>
+
+<Step>
+
+### Compressed Account
+
+<CodeGroup>
+```rust Anchor
+#[event] // declared as event so that it is part of the idl.
+#[derive(
+    Clone,
+    Debug,
+    Default,
+    LightDiscriminator
+)]
+pub struct MyCompressedAccount {
+    pub owner: Pubkey,
+    pub message: String,
+}
+```
+```rust Native Rust
+#[derive(
+    Clone,
+    Debug,
+    Default,
+    BorshSerialize,
+    BorshDeserialize,
+    LightDiscriminator
+)]
+pub struct MyCompressedAccount {
+    pub owner: Pubkey,
+    pub message: String,
+}
+```
+</CodeGroup>
+
+Define your compressed account struct and derive
+
+* the standard traits (`Clone`, `Debug`, `Default`),
+* `borsh` or `AnchorSerialize` to serialize account data, and
+* `LightDiscriminator` to implements a unique type ID (8 bytes) to distinguish account types. The default compressed account layout enforces a discriminator in its _own field_, <Tooltip tip="The Anchor framework reserves the first 8 bytes of a *regular account's data field* for the discriminator." cta="Anchor" href="https://www.anchor-lang.com/">not the first 8 bytes of the data field</Tooltip>.
+
+<Info>
+The traits listed above are required for `LightAccount`. `LightAccount` wraps `my-compressed-account` in Step 7 to set the discriminator and create the compressed account's data.
+</Info>
+</Step>
+
+<Step>
+
+### Instruction Data
+
+Define the instruction data with the following parameters:
+
+<Tabs>
+<Tab title="Anchor">
+Anchor handles instruction deserialization automatically. Pass the parameters directly to the instruction function:
+
+```rust
+pub fn create_account<'info>(
+    ctx: Context<'_, '_, '_, 'info, GenericAnchorAccounts<'info>>,
+    proof: ValidityProof,
+    address_tree_info: PackedAddressTreeInfo,
+    output_state_tree_index: u8,
+    message: String,
+) -> Result<()>
+```
+</Tab>
+<Tab title="Native Rust">
+Define an instruction data struct that will be deserialized from the instruction data:
+
+```rust Native Rust
+pub struct CreateInstructionData {
+    pub proof: ValidityProof,
+    pub address_tree_info: PackedAddressTreeInfo,
+    pub output_state_tree_index: u8,
+    pub message: String,
+}
+```
+</Tab>
+</Tabs>
+
+1. **Validity Proof**
+
+* Define `proof` to include the proof that the address does not exist yet in the specified address tree.
+* Clients fetch a validity proof with `getValidityProof()` from an RPC provider that supports ZK Compression (Helius, Triton, ...).
+
+2. **Specify Merkle trees to store address and account hash**
+
+* Define `address_tree_info: PackedAddressTreeInfo` to reference the address tree account used to derive the address in the next step.
+* Define `output_state_tree_index` to reference the state tree account that stores the compressed account hash.
+
+<Info>
+Clients pack accounts into the accounts array to reduce transaction size. Packed structs like `PackedAddressTreeInfo` contain account indices (u8) instead of 32 byte pubkeys. The indices point to the account in the accounts array to retrieve the public key and other metadata.
+</Info>
+
+3. **Initial account data**
+
+* Define fields for your program logic. Clients pass the initial values.
+* This example includes the `message` field to define the initial state of the account.
+</Step>
+
+<Step>
+
+### Derive Address
+
+Derive the address as a persistent unique identifier for the compressed account.
+
+<CodeGroup>
+
+```rust Anchor
+let (address, address_seed) = derive_address(
+    &[b"message", ctx.accounts.signer.key().as_ref()],
+    &address_tree_info
+        .get_tree_pubkey(&light_cpi_accounts)
+    &crate::ID,
+);
+```
+```rust Native Rust
+let (address, address_seed) = derive_address(
+    &[b"message", signer.key.as_ref()],
+    &instruction_data
+        .address_tree_info
+        .get_tree_pubkey(&light_cpi_accounts)
+    &ID,
+);
+```
+</CodeGroup>
+
+**Pass these parameters to `derive_address()`:**
+
+* `&custom_seeds`: Predefined inputs, such as strings, numbers or other account addresses. This example uses `b"message"` and the signer's pubkey.
+* `&address_tree_pubkey`: The pubkey of the address tree where the address will be created.
+  * Retrieved by calling `get_tree_pubkey()` on `address_tree_info`, which unpacks the index from the accounts array.
+  * This parameter ensures an address is unique to an address tree. Different trees produce different addresses from identical seeds.
+* `&program_id`: Your program's ID.
+
+**The SDK returns:**
+
+* `address`: The derived address for the compressed account.
+* `address_seed`: Pass this to the Light System Program CPI in _Step 8_ to create the address.
+</Step>
+
+<Step>
+
+### Address Tree Check (optional)
+
+Ensure global uniqueness of an address by verifying that the address tree pubkey matches the program's tree constant.
+
+<Info>
+Every address is unique, but the same seeds can be used to create different addresses in different address trees. To enforce that a compressed PDA can only be created once with the same seed, you must check the address tree pubkey.
+</Info>
+
+
+```rust
+let address_tree = light_cpi_accounts.tree_pubkeys().unwrap()
+    [address_tree_info.address_merkle_tree_pubkey_index as usize];
+
+if address_tree != light_sdk::constants::ADDRESS_TREE_V2 {
+    return Err(ProgramError::InvalidAccountData.into());
+}
+```
+</Step>
+
+<Step>
+
+### Initialize Compressed Account
+
+Initialize the compressed account struct with `LightAccount::new_init()`.
+
+<Note>
+`new_init()` creates a `LightAccount` instance similar to anchor `Account` and lets your program define the initial account data.
+</Note>
+
+<CodeGroup>
+```rust Anchor
+let mut my_compressed_account = LightAccount::<MyCompressedAccount>::new_init(
+    &crate::ID,
+    Some(address),
+    output_state_tree_index,
+);
+
+my_compressed_account.owner = ctx.accounts.signer.key();
+my_compressed_account.message = message.clone();
+```
+```rust Native Rust
+let mut my_compressed_account = LightAccount::<MyCompressedAccount>::new_init(
+    &ID,
+    Some(address),
+    instruction_data.output_state_tree_index,
+);
+my_compressed_account.owner = *signer.key;
+my_compressed_account.message = instruction_data.message;
+```
+</CodeGroup>
+
+**Pass these parameters to `new_init()`:**
+
+* `&owner`: The program's ID that owns the compressed account.
+* `Some(address)`: The derived address from _Step 5_. Pass `None` for accounts without addresses.
+* `output_state_tree_index`: References the state tree account that will store the updated account hash, defined in instruction data (_Step 4_)
+
+**The SDK creates:**
+
+* A `LightAccount` wrapper similar to Anchor's `Account.`
+* `new_init()` lets the program set the initial data. This example sets:
+  * `owner` to the signer's pubkey
+  * `message` to an arbitrary string
+</Step>
+
+<Step>
+
+### Light System Program CPI
+
+Invoke the Light System Program to create the compressed account and its address.
+
+<Note>
+The Light System Program
+
+* verifies the validity proof against the address tree's Merkle root,
+* inserts the address into the address tree, and
+* appends the new account hash to the state tree.
+</Note>
+
+<Tabs>
+<Tab title="Anchor">
+```rust
+let light_cpi_accounts = CpiAccounts::new(
+    ctx.accounts.signer.as_ref(),
+    ctx.remaining_accounts,
+    crate::LIGHT_CPI_SIGNER,
+);
+
+let new_address_params = address_tree_info
+    .into_new_address_params_assigned_packed(address_seed, Some(0));
+
+LightSystemProgramCpi::new_cpi(LIGHT_CPI_SIGNER, proof)
+    .with_light_account(my_compressed_account)?
+    .with_new_addresses(&[new_address_params])
+    .invoke(light_cpi_accounts)?;
+```
+
+**Set up `CpiAccounts::new()`:**
+
+`CpiAccounts::new()` parses accounts for the CPI call to Light System Program.
+
+**Pass these parameters:**
+
+* `ctx.accounts.signer.as_ref()`: the transaction signer
+* `ctx.remaining_accounts`: Slice with `[system_accounts, ...packed_tree_accounts]`. The client builds this with `PackedAccounts` and passes it to the instruction.
+* `&LIGHT_CPI_SIGNER`: Your program's CPI signer PDA defined in Constants.
+</Tab>
+
+<Tab title="Native Rust">
+```rust
+let signer = accounts.first();
+
+let light_cpi_accounts = CpiAccounts::new(
+    signer,
+    &accounts[1..],
+    LIGHT_CPI_SIGNER
+);
+
+let new_address_params = instruction_data
+    .address_tree_info
+    .into_new_address_params_assigned_packed(address_seed, Some(0));
+
+LightSystemProgramCpi::new_cpi(LIGHT_CPI_SIGNER, instruction_data.proof)
+    .with_light_account(my_compressed_account)?
+    .with_new_addresses(&[new_address_params])
+    .invoke(light_cpi_accounts)?;
+```
+
+**Set up `CpiAccounts::new()`:**
+
+`CpiAccounts::new()` parses accounts for the CPI call to Light System Program.
+
+**Pass these parameters:**
+
+* `signer`: account that signs and pays for the transaction
+* `&accounts[1..]`: Slice with `[system_accounts, ...packed_tree_accounts]`. The client builds this with `PackedAccounts`.
+* `&LIGHT_CPI_SIGNER`: Your program's CPI signer PDA defined in Constants.
+</Tab>
+</Tabs>
+
+<Accordion title="System Accounts List">
+
+<CompressedPdasSystemAccountsList />
+
+</Accordion>
+
+**Build the CPI instruction**:
+
+`new_cpi()` initializes the CPI instruction with the `proof` to prove that an address does not exist yet in the specified address tree _- defined in the Instruction Data (Step 4)._
+
+* `with_light_account` adds the `LightAccount` with the initial compressed account data to the CPI instruction _- defined in Step 7_.
+* `with_new_addresses` adds the `address_seed` and metadata to the CPI instruction data - returned by `derive_address` _in Step 5_.
+* `invoke(light_cpi_accounts)` calls the Light System Program with `CpiAccounts.`
+</Step>
+</Steps>
+</Tab>
+<Tab title="AI Prompt">
+<CpiCreateAiPrompt />
+</Tab>
+</Tabs>
+
+# Full Code Example
+
+The example programs below implement all steps from this guide.
+
+<Accordion title="Setup">
+<DevelopmentEnvironmentSetup />
+</Accordion>
+
+<Warning>
+For help with debugging, see the [Error Cheatsheet](/resources/error-cheatsheet).
+</Warning>
+
+<Tabs>
+<Tab title="Anchor">
+<Info>
+Find the source code [here](https://github.com/Lightprotocol/program-examples/tree/main/basic-operations/anchor/create).
+</Info>
+
+<AnchorProgram />
+</Tab>
+
+<Tab title="Native Rust">
+<Info>
+Find the source code [here](https://github.com/Lightprotocol/program-examples/tree/main/basic-operations/native/programs/create).
+</Info>
+
+<NativeProgram />
+</Tab>
+</Tabs>
+
+# Next Steps
+
+<CardGroup>
+<Card
+  title="Build a client for your program"
+  icon="chevron-right"
+  color="#0066ff"
+  href="/pda/compressed-pdas/guides/client-guide"
+  horizontal
+/>
+<Card
+  title="Learn how to update compressed accounts"
+  icon="chevron-right"
+  color="#0066ff"
+  href="/pda/compressed-pdas/guides/how-to-update-compressed-accounts"
+  horizontal
+/>
+</CardGroup>

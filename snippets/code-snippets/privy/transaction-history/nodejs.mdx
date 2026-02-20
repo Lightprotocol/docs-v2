@@ -6,63 +6,36 @@ import {PublicKey} from '@solana/web3.js';
 const getTransactionHistory = async (
   ownerAddress: string,
   limit: number = 10,
-  includeDetails: boolean = false
 ) => {
   const connection = createRpc(process.env.HELIUS_RPC_URL!);
 
   const owner = new PublicKey(ownerAddress);
 
-  // Get compression signatures for token owner
-  const signatures = await connection.getCompressionSignaturesForTokenOwner(owner);
+  // Get Light Token interface signatures
+  const result = await connection.getSignaturesForOwnerInterface(owner);
 
-  if (signatures.items.length === 0) {
+  if (!result.signatures || result.signatures.length === 0) {
     return {
       count: 0,
       transactions: [],
     };
   }
 
-  // Limit results
-  const limitedSignatures = signatures.items.slice(0, limit);
+  const limitedSignatures = result.signatures.slice(0, limit);
 
-  // Get detailed info if requested
-  if (includeDetails && limitedSignatures.length > 0) {
-    const transactions = await Promise.all(
-      limitedSignatures.map(async (sig) => {
-        const txInfo = await connection.getTransactionWithCompressionInfo(sig.signature);
-
-        return {
-          signature: sig.signature,
-          slot: sig.slot,
-          blockTime: sig.blockTime,
-          timestamp: new Date(sig.blockTime * 1000).toISOString(),
-          compressionInfo: txInfo?.compressionInfo ? {
-            closedAccounts: txInfo.compressionInfo.closedAccounts.length,
-            openedAccounts: txInfo.compressionInfo.openedAccounts.length,
-          } : null,
-        };
-      })
-    );
-
-    return {
-      count: signatures.items.length,
-      transactions,
-    };
-  }
-
-  // Return basic signature info
   const transactions = limitedSignatures.map((sig) => ({
     signature: sig.signature,
     slot: sig.slot,
-    blockTime: sig.blockTime,
-    timestamp: new Date(sig.blockTime * 1000).toISOString(),
+    blockTime: sig.blockTime ?? 0,
+    timestamp: sig.blockTime ? new Date(sig.blockTime * 1000).toISOString() : '',
   }));
 
   return {
-    count: signatures.items.length,
+    count: result.signatures.length,
     transactions,
   };
 };
 
 export default getTransactionHistory;
+
 ```

@@ -1,27 +1,31 @@
 ---
 title: JSON RPC Methods
-description: Overview JSON RPC endpoints on Solana, best practices, and error codes.
+description: Photon indexer methods for querying compressed state on Solana.
 sidebarTitle: "Overview"
 ---
 
-The API exposed by the indexer closely mirrors existing RPC calls, with one-to-one mapping:
+<Note>
+The Light Token SDK calls these methods internally via interface functions
+like `transferInterface` and `getAtaInterface`. You rarely need to call
+them directly.
 
-| Solana RPC              | Photon RPC Calls                  |
-| :---------------------- | :------------------------------- |
+Call these methods directly if you are building a block explorer,
+custom indexer, or working with
+[legacy compressed tokens](/compressed-tokens/overview).
+</Note>
+
+| Solana RPC              | Photon RPC                        |
+| :---------------------- | :-------------------------------- |
 | getAccountInfo          | getCompressedAccount              |
-| getBalance              | getCompressedBalance              |
-| getTokenAccountsByOwner | getCompressedTokenAccountsByOwner |
-| getProgramAccounts      | getCompressedAccountsByOwner      |
+| getBalance              | getCompressedBalanceByOwner       |
+| getAccountInfo          | getCompressedTokenAccountsByOwner |
+| getTokenAccountBalance  | getCompressedTokenBalancesByOwner |
+| getSignaturesForAddress | getCompressionSignaturesForAddress|
+| getSignaturesForAddress | getCompressionSignaturesForOwner  |
 
-<Card
-  title="View all RPC endpoints for ZK Compression"
-  icon="chevron-right"
-  color="#0066ff"
-  href="/api-reference/json-rpc-methods/methods"
-  horizontal
-/>
 
-## Create an RPC Connection
+
+## Create an RPC connection
 
 <Tabs>
 <Tab title="Mainnet">
@@ -29,7 +33,7 @@ The API exposed by the indexer closely mirrors existing RPC calls, with one-to-o
 // Helius exposes Solana and Photon RPC endpoints through a single URL
 import { createRpc, Rpc } from '@lightprotocol/stateless.js';
 
-const RPC_ENDPOINT = '<https://mainnet.helius-rpc.com?api-key=YOUR_KEY>';
+const RPC_ENDPOINT = 'https://mainnet.helius-rpc.com?api-key=YOUR_KEY';
 const connection: Rpc = createRpc(RPC_ENDPOINT, RPC_ENDPOINT);
 ```
 </Tab>
@@ -45,41 +49,138 @@ const connection: Rpc = createRpc(RPC_ENDPOINT, RPC_ENDPOINT);
 </Tab>
 </Tabs>
 
-## Best Practices
+## Best practices
 
-| Best Practice         | Description                                                                                                    |
-|:----------------------|:----------------------------------------------------------------------------------------------------------------|
-| **Commitment Levels**| Use appropriate commitment levels: `processed` (fastest), `confirmed` (balanced), `finalized` (most reliable)  |
-| **Rate Limiting**    | Implement retry logic and respect rate limits. Public endpoints: 100 req/s, Private: 1000+ req/s               |
-| **Batch Requests**   | Use batch requests when possible to improve efficiency and reduce API calls                                     |
-| **Caching**          | Cache frequently accessed data to reduce API calls and improve performance                                      |
+| Best practice          | Description                                                                                                    |
+|:-----------------------|:---------------------------------------------------------------------------------------------------------------|
+| **Commitment levels**  | Use appropriate commitment levels: `processed` (fastest), `confirmed` (balanced), `finalized` (most reliable). |
+| **Rate limiting**      | Implement retry logic and respect rate limits. Public endpoints: 100 req/s, Private: 1000+ req/s.              |
+| **Batch requests**     | Use batch requests when possible to reduce API calls.                                                          |
+| **Caching**            | Cache frequently accessed data to reduce API calls.                                                            |
 
-## Error Codes
-
-<Tip>
-<div style={{display: "flex", alignItems: "center", padding: 0, margin: 0}}>
-  <span style={{margin: 0, padding: 0, marginLeft: "8px"}}>For help with debugging use</span>
-  <a href="https://deepwiki.com/Lightprotocol/light-protocol/3.3-rpc-and-indexer-integration" style={{padding: 0, margin: 0, display: "inline-block"}}>
-    <img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki" style={{padding:0, margin:0, verticalAlign: "middle"}} />
-  </a>
-</div>
-</Tip>
+## Error codes
 
 | Code   | Message              | Description                                  |
-| :------ | :-------------------- | :-------------------------------------------- |
-| -32600 | Invalid Request      | The JSON sent is not a valid Request object  |
-| -32601 | Method not found     | The method does not exist / is not available |
-| -32602 | Invalid params       | Invalid method parameter(s)                  |
-| -32603 | Internal error       | Internal JSON-RPC error                      |
-| -32000 | Account not found    | The compressed account was not found         |
-| -32001 | Invalid account hash | The provided account hash is invalid         |
+| :----- | :------------------- | :------------------------------------------- |
+| -32600 | Invalid Request      | The JSON sent is not a valid Request object. |
+| -32601 | Method not found     | The method does not exist / is not available. |
+| -32602 | Invalid params       | Invalid method parameter(s).                 |
+| -32603 | Internal error       | Internal JSON-RPC error.                     |
+| -32000 | Account not found    | The compressed account was not found.        |
+| -32001 | Invalid account hash | The provided account hash is invalid.        |
 
-# Next Steps
+## Methods
 
-<Card
-  title="View all RPC endpoints for ZK Compression"
-  icon="chevron-right"
-  color="#0066ff"
-  href="/api-reference/json-rpc-methods/methods"
-  horizontal
-/>
+These methods are called internally by the Light Token SDK. Call them
+directly for custom indexing, block explorers, or debugging.
+
+<table>
+  <thead>
+    <tr>
+      <th width="30%"></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>[GetCompressedAccount](/api-reference/json-rpc-methods/getcompressedaccount)</td>
+      <td>Returns a compressed account by address or hash.</td>
+    </tr>
+    <tr>
+      <td>[GetCompressedAccountsByOwner](/api-reference/json-rpc-methods/getcompressedaccountsbyowner)</td>
+      <td>Returns all compressed accounts for an owner.</td>
+    </tr>
+    <tr>
+      <td>[GetCompressedBalanceByOwner](/api-reference/json-rpc-methods/getcompressedbalancebyowner)</td>
+      <td>Returns the total compressed balance for an owner.</td>
+    </tr>
+    <tr>
+      <td>[GetCompressedTokenAccountsByOwner](/api-reference/json-rpc-methods/getcompressedtokenaccountsbyowner)</td>
+      <td>Returns all compressed token accounts for an owner.</td>
+    </tr>
+    <tr>
+      <td>[GetCompressedTokenBalancesByOwner](/api-reference/json-rpc-methods/getcompressedtokenbalancesbyowner)</td>
+      <td>Returns all token balances for compressed accounts owned by an address.</td>
+    </tr>
+    <tr>
+      <td>[GetValidityProof](/api-reference/json-rpc-methods/getvalidityproof)</td>
+      <td>Returns a validity proof for compressed state transitions.</td>
+    </tr>
+    <tr>
+      <td>[GetCompressionSignaturesForAddress](/api-reference/json-rpc-methods/getcompressionsignaturesforaddress)</td>
+      <td>Returns signatures for transactions involving an address.</td>
+    </tr>
+    <tr>
+      <td>[GetCompressionSignaturesForOwner](/api-reference/json-rpc-methods/getcompressionsignaturesforowner)</td>
+      <td>Returns signatures for transactions where an address is the owner.</td>
+    </tr>
+    <tr>
+      <td>[GetTransactionWithCompressionInfo](/api-reference/json-rpc-methods/gettransactionwithcompressioninfo)</td>
+      <td>Returns transaction details with compression context.</td>
+    </tr>
+    <tr>
+      <td>[GetIndexerHealth](/api-reference/json-rpc-methods/getindexerhealth)</td>
+      <td>Returns the health status of the Photon indexer.</td>
+    </tr>
+    <tr>
+      <td>[GetIndexerSlot](/api-reference/json-rpc-methods/getindexerslot)</td>
+      <td>Returns the current slot of the Photon indexer.</td>
+    </tr>
+  </tbody>
+</table>
+
+## Legacy
+
+Methods for direct compressed-token workflows. Not called by the Light
+Token SDK interface functions.
+
+<table>
+  <thead>
+    <tr>
+      <th width="30%"></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>[GetCompressedBalance](/api-reference/json-rpc-methods/getcompressedbalance)</td>
+      <td>Returns the balance of a single compressed account.</td>
+    </tr>
+    <tr>
+      <td>[GetCompressedMintTokenHolders](/api-reference/json-rpc-methods/getcompressedminttokenholders)</td>
+      <td>Lists all holders of a compressed token mint.</td>
+    </tr>
+    <tr>
+      <td>[GetCompressedTokenAccountBalance](/api-reference/json-rpc-methods/getcompressedtokenaccountbalance)</td>
+      <td>Returns the token balance of a single compressed token account.</td>
+    </tr>
+    <tr>
+      <td>[GetCompressedTokenAccountsByDelegate](/api-reference/json-rpc-methods/getcompressedtokenaccountbydelegate)</td>
+      <td>Returns all compressed token accounts delegated to an address.</td>
+    </tr>
+    <tr>
+      <td>[GetCompressionSignaturesForAccount](/api-reference/json-rpc-methods/getcompressionsignaturesforaccount)</td>
+      <td>Returns signatures for transactions involving a compressed account.</td>
+    </tr>
+    <tr>
+      <td>[GetCompressionSignaturesForTokenOwner](/api-reference/json-rpc-methods/getcompressionsignaturesfortokenowner)</td>
+      <td>Returns signatures for token transactions by owner.</td>
+    </tr>
+    <tr>
+      <td>[GetLatestCompressionSignatures](/api-reference/json-rpc-methods/getlatestcompressionsignatures)</td>
+      <td>Returns the most recent compression-related signatures.</td>
+    </tr>
+    <tr>
+      <td>[GetLatestNonVotingSignatures](/api-reference/json-rpc-methods/getlatestnonvotingsignatures)</td>
+      <td>Returns recent non-voting transaction signatures.</td>
+    </tr>
+    <tr>
+      <td>[GetMultipleCompressedAccounts](/api-reference/json-rpc-methods/getmultiplecompressedaccounts)</td>
+      <td>Returns multiple compressed accounts in a single request.</td>
+    </tr>
+    <tr>
+      <td>[GetMultipleNewAddressProofs](/api-reference/json-rpc-methods/getmultiplenewaddressproofs)</td>
+      <td>Returns proofs that new addresses can be created.</td>
+    </tr>
+  </tbody>
+</table>

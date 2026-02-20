@@ -105,7 +105,7 @@ Two **state tree versions** with different proof mechanisms are currently suppor
 - **V1 state trees**: Always require the full 128-byte ZK proof
 - **V2 batched state trees**: Can use `prove_by_index` optimization that verifies the account exists with only one byte instead of 128-bytes.
 
-**V2** optimizes optimize compute unit consumption by up to 70% and is **currently on Devnet**.
+**V2** optimizes compute unit consumption by up to 70%.
 
 When using V2 trees, RPC requests automatically choose the proof mechanism.
 </Info>
@@ -149,7 +149,7 @@ Two **address tree versions** are currently supported:
 - **V1 address trees** height 26 (\~67 million addresses).
 - **V2 batched address trees** with height 40 (\~1 trillion addresses).
 
-**V2** optimizes optimize compute unit consumption by up to 70% and is **currently on Devnet**.
+**V2** optimizes compute unit consumption by up to 70%.
 
 When using V2 trees, RPC requests automatically choose the proof mechanism.
 </Info>

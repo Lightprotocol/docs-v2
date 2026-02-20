@@ -1,0 +1,224 @@
+---
+title: "Light-Token with Privy Wallets"
+sidebarTitle: "Sign with Privy Wallet"
+description: "Integrate light-token with Privy embedded wallets for rent-free token accounts and transfers."
+keywords: ["privy solana", "privy light token", "embedded wallet light token", "rent-free tokens privy"]
+---
+import ToolkitsSetup from "/snippets/setup/toolkits-setup.mdx";
+import RegisterSplMint from "/snippets/setup/register-spl-mint.mdx";
+import AgentSkillPayments from "/snippets/setup/agent-skill-payments.mdx";
+import TransferNodejs from "/snippets/code-snippets/privy/transfer/nodejs.mdx";
+import TransferReact from "/snippets/code-snippets/privy/transfer/react.mdx";
+import WrapNodejs from "/snippets/code-snippets/privy/wrap/nodejs.mdx";
+import WrapReact from "/snippets/code-snippets/privy/wrap/react.mdx";
+import UnwrapNodejs from "/snippets/code-snippets/privy/unwrap/nodejs.mdx";
+import UnwrapReact from "/snippets/code-snippets/privy/unwrap/react.mdx";
+import BalancesNodejs from "/snippets/code-snippets/privy/balances/nodejs.mdx";
+import BalancesReact from "/snippets/code-snippets/privy/balances/react.mdx";
+import TransactionHistoryNodejs from "/snippets/code-snippets/privy/transaction-history/nodejs.mdx";
+import TransactionHistoryReact from "/snippets/code-snippets/privy/transaction-history/react.mdx";
+import PrivyAiPrompt from "/snippets/ai-prompts/wallets/privy.mdx";
+
+| Creation Cost     | SPL                 | light-token          |
+| :---------------- | :------------------ | :------------------- |
+| **Token Account** | ~2,000,000 lamports | ~**11,000** lamports |
+
+Privy handles user authentication and wallet management. You build transactions with light-token and Privy signs them:
+
+1. Authenticate with Privy
+2. Build unsigned transaction
+3. Sign transaction using Privy's wallet provider
+4. Send signed transaction to RPC
+
+## What you will implement
+<table>
+  <thead>
+    <tr>
+      <th style={{ width: "20%" }}></th>
+      <th>SPL</th>
+      <th>Light</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>[**Transfer**](#full-code-examples)</td>
+      <td>createTransferInstruction()</td>
+      <td>createTransferInterfaceInstructions()</td>
+    </tr>
+    <tr>
+      <td>[**Wrap from SPL**](#full-code-examples)</td>
+      <td>N/A</td>
+      <td>createWrapInstruction()</td>
+    </tr>
+    <tr>
+      <td>[**Unwrap to SPL**](#full-code-examples)</td>
+      <td>N/A</td>
+      <td>createUnwrapInstructions()</td>
+    </tr>
+<tr>
+      <td>[**Get Balance**](#get-balances)</td>
+      <td>getAccount()</td>
+      <td>getAtaInterface()</td>
+    </tr>
+    <tr>
+      <td>[**Tx History**](#get-transaction-history)</td>
+      <td>getSignaturesForAddress()</td>
+      <td>getSignaturesForOwnerInterface()</td>
+    </tr>
+  </tbody>
+</table>
+
+<AgentSkillPayments />
+
+<Tabs>
+<Tab title="Guide">
+<Steps>
+<Step>
+### Prerequisites
+
+<ToolkitsSetup />
+
+Connect to an RPC endpoint that supports ZK Compression (Helius, Triton):
+
+```typescript
+import { createRpc } from "@lightprotocol/stateless.js";
+
+import {
+  createTransferInterfaceInstructions,
+  createWrapInstruction,
+  createUnwrapInstructions,
+  getAssociatedTokenAddressInterface,
+  getAtaInterface,
+} from "@lightprotocol/compressed-token/unified";
+
+const rpc = createRpc(RPC_ENDPOINT);
+```
+
+</Step>
+<Step>
+
+## Sign with Privy
+
+<Note>
+Find complete examples on GitHub: [Node.js](https://github.com/Lightprotocol/examples-light-token/tree/main/privy/nodejs) and [React](https://github.com/Lightprotocol/examples-light-token/tree/main/privy/react).
+</Note>
+
+<Tabs>
+<Tab title="Transfer">
+
+Transfer light-tokens between wallets. Auto-loads cold (compressed) light-token, SPL or 
+Token-2022 balance before sending.
+
+<Info>
+**About loading:** Light tokens reduce account rent ~200x by auto-compressing inactive accounts. 
+Before any action, the SDK detects compressed state and adds instructions to load it back on-chain. 
+This almost always fits in a single atomic transaction with your regular transfer. 
+APIs return `TransactionInstruction[][]` so the same loop handles the rare multi-transaction case
+automatically.
+</Info>
+
+<Tabs>
+<Tab title="Node.js">
+<TransferNodejs />
+</Tab>
+<Tab title="React">
+<TransferReact />
+</Tab>
+</Tabs>
+
+</Tab>
+
+<Tab title="Wrap (SPL → Light)">
+
+Wrap SPL or Token-2022 tokens into a light-token associated token account.
+
+<Tabs>
+<Tab title="Node.js">
+<WrapNodejs />
+</Tab>
+<Tab title="React">
+<WrapReact />
+</Tab>
+</Tabs>
+
+</Tab>
+
+<Tab title="Unwrap (Light → SPL)">
+
+Unwrap light-token balance to SPL or Token-2022. Use unwrap to interact with applications that only support SPL/Token-2022.
+
+<Tabs>
+<Tab title="Node.js">
+<UnwrapNodejs />
+</Tab>
+<Tab title="React">
+<UnwrapReact />
+</Tab>
+</Tabs>
+
+</Tab>
+
+</Tabs>
+
+</Step>
+</Steps>
+
+## Show Balance
+
+Query token balances to show a unified balance of SOL, 
+Light, SPL, and Token-2022.
+
+```typescript
+import {
+  getAssociatedTokenAddressInterface,
+  getAtaInterface,
+} from "@lightprotocol/compressed-token/unified";
+
+const ata = getAssociatedTokenAddressInterface(mint, owner);
+const account = await getAtaInterface(rpc, ata, owner, mint);
+console.log(account.parsed.amount);
+```
+
+<Accordion title="Unified Balance Example (Node.js and React)">
+<Tabs>
+<Tab title="Node.js">
+<BalancesNodejs />
+</Tab>
+<Tab title="React">
+<BalancesReact />
+</Tab>
+</Tabs>
+</Accordion>
+
+## Get Transaction History
+
+Fetch light-token transaction history for an owner.
+
+```typescript
+import { createRpc } from "@lightprotocol/stateless.js";
+
+const result = await rpc.getSignaturesForOwnerInterface(owner);
+console.log(result.signatures); // Merged + deduplicated
+console.log(result.solana);     // On-chain txs only
+console.log(result.compressed); // Compressed txs only
+```
+
+<Accordion title="Example (Node.js and React)">
+<Tabs>
+<Tab title="Node.js">
+<TransactionHistoryNodejs />
+</Tab>
+<Tab title="React">
+<TransactionHistoryReact />
+</Tab>
+</Tabs>
+</Accordion>
+
+<RegisterSplMint />
+
+</Tab>
+<Tab title="AI Prompt">
+<PrivyAiPrompt />
+</Tab>
+</Tabs>
+

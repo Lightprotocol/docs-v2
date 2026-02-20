@@ -1,0 +1,304 @@
+---
+title: "CLI installation & commands"
+description: "Steps to set up your local environment for Light Protocol development. CLI to interact with Light Tokens and compressed accounts on Solana."
+keywords: ["light protocol cli", "zk compression cli"]
+---
+
+<Info>
+Make sure you have a wallet set up at `~/.config/solana/id.json`. [Get one here](https://docs.solanalabs.com/cli/wallets/file-system), if you don't have one.\
+The CLI will use this wallet as the default fee payer and mint authority.
+</Info>
+
+# Installation
+
+<Steps>
+<Step>
+
+### Install the CLI
+
+<Info>
+Ensure you have Node >= v20.9.0 installed on your machine. Windows users do not require WSL.
+</Info>
+
+Run this single command to install the CLI.
+
+```bash
+npm i -g @lightprotocol/zk-compression-cli
+```
+
+<Accordion title="Building from source">
+
+
+If you prefer to build the CLI from source, follow the steps below to install the necessary prerequisites.
+
+**1. Activate the Development Environment**
+
+Ensure you are at the root of the monorepo.
+
+```bash
+. ./scripts/devenv
+```
+
+**2. Install and build the monorepo from source. This also builds the CLI.**
+
+```bash
+./scripts/install.sh
+```
+
+```bash
+./scripts/build.sh
+```
+
+**3. Make your CLI available globally**
+
+```bash
+pnpm link --global
+```
+
+```bash
+# Verify the CLI was correctly installed
+which light
+```
+
+</Accordion>
+</Step>
+
+<Step>
+
+### Set up your environment
+
+By default, the CLI interacts with localnet. You can view the current config by running:
+
+```bash
+light config --get
+```
+
+**1. Once globally installed, start the Light test validator**
+
+```bash
+light test-validator
+```
+
+This starts a Solana test-validator with the Light System programs and accounts, a prover server, and the Photon indexer as background processes against a clean ledger.
+
+```bash
+# Pass --skip-indexer to start without the indexer
+light test-validator --skip-indexer
+
+# Pass --skip-prover to start without the prover
+light test-validator --skip-prover
+
+```
+<Note>
+**Note:**
+
+The CLI currently runs the photon indexer and light-prover as background processes at port: `8784` and `3001` respectively.
+</Note>
+
+**2. Ensure you have sufficient localnet funds**
+
+```bash
+# Airdrop 1 SOL
+solana airdrop 1
+
+# Print your address
+solana address
+
+# Print your balance
+solana balance
+```
+
+Now you're all set up to run CLI commands!
+
+<Accordion title="Alternative: Using Devnet">
+
+To switch to Devnet, point the URLs to an RPC supporting ZK Compression. For example, run:
+
+```bash
+  light config --indexerUrl "https://devnet.helius-rpc.com/?api-key=<api-key>" \
+    --proverUrl "https://devnet.helius-rpc.com/?api-key=<api-key>" \
+    --solanaRpcUrl "https://devnet.helius-rpc.com/?api-key=<api-key>"
+```
+
+Also adjust your solana config:
+
+```bash
+# Set config
+solana config set --url "https://devnet.helius-rpc.com/?api-key=<api-key>"
+
+# Airdrop 1 SOL
+solana airdrop 1
+
+# Print your address
+solana address
+```
+
+</Accordion>
+</Step>
+</Steps>
+
+# Commands
+
+### Create a Light Token mint
+
+```bash
+light create-mint
+```
+
+```bash
+USAGE
+  $ light create-mint [--mint-keypair <value>] [--mint-authority <value>]
+    [--mint-decimals <value>]
+
+FLAGS
+  --mint-authority=<value>  Path to the mint authority keypair file.
+                            Defaults to the fee payer.
+  --mint-decimals=<value>   Number of base 10 digits to the right
+                            of the decimal place [default: 9].
+  --mint-keypair=<value>    Path to a mint keypair file. Defaults to a
+                            random keypair.
+```
+
+### Mint Light Tokens to a Solana wallet
+
+```bash
+light mint-to --mint "YOUR_MINT_ADDRESS" --to "YOUR_WALLET_ADDRESS" --amount 4200000000
+```
+
+```bash
+USAGE
+  $ light mint-to --mint <value> --to <value> --amount <value>
+    [--mint-authority <value>]
+
+FLAGS
+  --amount=<value>          (required) Amount to mint.
+  --mint=<value>            (required) Mint address.
+  --mint-authority=<value>  File path of the mint authority keypair.
+                            Defaults to local Solana wallet.
+  --to=<value>              (required) Recipient address.
+```
+
+### Transfer Light Tokens from one wallet to another
+
+```bash
+light transfer --mint "YOUR_MINT_ADDRESS" --to "RECIPIENT_WALLET_ADDRESS" --amount 4200000000
+```
+
+```bash
+USAGE
+  $ light transfer --mint <value> --to <value> --amount <value>
+    [--fee-payer <value>]
+
+FLAGS
+  --amount=<value>     (required) Amount to send.
+  --fee-payer=<value>  Fee payer account. Defaults to the client
+                       keypair.
+  --mint=<value>       (required) Mint to transfer
+  --to=<value>         (required) Recipient address
+
+```
+
+### Enable Light Token Interoperability for existing SPL mint
+
+```bash
+light create-interface-pda --mint "YOUR_MINT_ADDRESS"
+```
+
+```bash
+USAGE
+  $ light create-interface-pda --mint <value>
+
+FLAGS
+  --mint=<value>  (required) Base58 encoded mint address to register.
+```
+
+### Create a Light Token associated token account
+
+```bash
+light create-token-account "YOUR_MINT_ADDRESS"
+```
+
+```bash
+USAGE
+  $ light create-token-account MINT [--owner <value>]
+
+ARGUMENTS
+  MINT  (required) Base58 encoded mint address.
+
+FLAGS
+  --owner=<value>  Owner of the token account. Defaults to the fee
+                   payer's public key.
+```
+
+### Wrap SPL tokens into a Light Token account
+
+```bash
+light wrap-spl --mint "YOUR_MINT_ADDRESS" --to "RECIPIENT_ADDRESS" --amount 1000
+```
+
+```bash
+USAGE
+  $ light wrap-spl --mint <value> --to <value> --amount <value>
+
+FLAGS
+  --amount=<value>  (required) Amount to wrap, in tokens.
+  --mint=<value>    (required) Mint address.
+  --to=<value>      (required) Recipient address (owner of destination
+                    Light Token account).
+```
+
+### Unwrap Light Tokens into an SPL token account
+
+```bash
+light unwrap-spl --mint "YOUR_MINT_ADDRESS" --to "RECIPIENT_ADDRESS" --amount 1000
+```
+
+```bash
+USAGE
+  $ light unwrap-spl --mint <value> --to <value> --amount <value>
+
+FLAGS
+  --amount=<value>  (required) Amount to unwrap, in tokens.
+  --mint=<value>    (required) Mint address.
+  --to=<value>      (required) Recipient address (owner of destination
+                    SPL token account).
+```
+
+### Check Light Token balance
+
+```bash
+light token-balance --mint "YOUR_MINT_ADDRESS" --owner "YOUR_WALLET_ADDRESS"
+```
+
+```bash
+USAGE
+  $ light token-balance --mint <value> --owner <value>
+
+FLAGS
+  --mint=<value>   (required) Mint address of the token account.
+  --owner=<value>  (required) Address of the token owner.
+```
+
+### Check wrapped SOL balance
+
+```bash
+light balance --owner "YOUR_WALLET_ADDRESS"
+```
+
+```bash
+USAGE
+  $ light balance --owner <value>
+
+FLAGS
+  --owner=<value>  (required) Address of the owner.
+```
+
+# Next Steps
+
+<Card
+  title="Build with Light Tokens"
+  icon="chevron-right"
+  color="#0066ff"
+  href="/light-token/welcome"
+  horizontal
+/>

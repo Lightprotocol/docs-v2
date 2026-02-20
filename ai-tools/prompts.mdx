@@ -1,0 +1,334 @@
+---
+title: "AI Prompts"
+description: "Ready-to-use AI prompts for Light Protocol. Copy a prompt, paste into your AI coding agent, and let it implement the recipe in your project."
+---
+
+{/* ts-cookbook */}
+import TsCreateMint from "/snippets/ai-prompts/ts-cookbook/create-mint.mdx";
+import TsCreateAta from "/snippets/ai-prompts/ts-cookbook/create-ata.mdx";
+import TsMintTo from "/snippets/ai-prompts/ts-cookbook/mint-to.mdx";
+import TsTransferInterface from "/snippets/ai-prompts/ts-cookbook/transfer-interface.mdx";
+import TsApproveRevoke from "/snippets/ai-prompts/ts-cookbook/approve-revoke.mdx";
+import TsWrapUnwrap from "/snippets/ai-prompts/ts-cookbook/wrap-unwrap.mdx";
+
+{/* rust-cookbook */}
+import RustCreateMint from "/snippets/ai-prompts/rust-cookbook/create-mint.mdx";
+import RustCreateAta from "/snippets/ai-prompts/rust-cookbook/create-ata.mdx";
+import RustCreateTokenAccount from "/snippets/ai-prompts/rust-cookbook/create-token-account.mdx";
+import RustMintTo from "/snippets/ai-prompts/rust-cookbook/mint-to.mdx";
+import RustTransferInterface from "/snippets/ai-prompts/rust-cookbook/transfer-interface.mdx";
+import RustTransferChecked from "/snippets/ai-prompts/rust-cookbook/transfer-checked.mdx";
+import RustApproveRevoke from "/snippets/ai-prompts/rust-cookbook/approve-revoke.mdx";
+import RustFreezeThaw from "/snippets/ai-prompts/rust-cookbook/freeze-thaw.mdx";
+import RustWrapUnwrap from "/snippets/ai-prompts/rust-cookbook/wrap-unwrap.mdx";
+import RustCloseTokenAccount from "/snippets/ai-prompts/rust-cookbook/close-token-account.mdx";
+import RustBurn from "/snippets/ai-prompts/rust-cookbook/burn.mdx";
+
+{/* program-cookbook */}
+import ProgCreateMintCpi from "/snippets/ai-prompts/program-cookbook/create-mint-cpi.mdx";
+import ProgCreateMintMacros from "/snippets/ai-prompts/program-cookbook/create-mint-macros.mdx";
+import ProgCreateAtaCpi from "/snippets/ai-prompts/program-cookbook/create-ata-cpi.mdx";
+import ProgCreateAtaMacros from "/snippets/ai-prompts/program-cookbook/create-ata-macros.mdx";
+import ProgCreateTokenAccountCpi from "/snippets/ai-prompts/program-cookbook/create-token-account-cpi.mdx";
+import ProgCreateTokenAccountMacros from "/snippets/ai-prompts/program-cookbook/create-token-account-macros.mdx";
+import ProgMintTo from "/snippets/ai-prompts/program-cookbook/mint-to.mdx";
+import ProgTransferInterface from "/snippets/ai-prompts/program-cookbook/transfer-interface.mdx";
+import ProgTransferChecked from "/snippets/ai-prompts/program-cookbook/transfer-checked.mdx";
+import ProgApproveRevoke from "/snippets/ai-prompts/program-cookbook/approve-revoke.mdx";
+import ProgFreezeThaw from "/snippets/ai-prompts/program-cookbook/freeze-thaw.mdx";
+import ProgCloseTokenAccount from "/snippets/ai-prompts/program-cookbook/close-token-account.mdx";
+import ProgBurn from "/snippets/ai-prompts/program-cookbook/burn.mdx";
+
+{/* anchor-programs */}
+import DefiAnchor from "/snippets/ai-prompts/anchor-programs/defi-anchor.mdx";
+import DefiPinocchio from "/snippets/ai-prompts/anchor-programs/defi-pinocchio.mdx";
+import LightPda from "/snippets/ai-prompts/anchor-programs/light-pda.mdx";
+
+{/* cpi-programs */}
+import CpiCreate from "/snippets/ai-prompts/cpi-programs/create.mdx";
+import CpiUpdate from "/snippets/ai-prompts/cpi-programs/update.mdx";
+import CpiClose from "/snippets/ai-prompts/cpi-programs/close.mdx";
+import CpiReinitialize from "/snippets/ai-prompts/cpi-programs/reinitialize.mdx";
+import CpiBurn from "/snippets/ai-prompts/cpi-programs/burn.mdx";
+import CpiClientGuide from "/snippets/ai-prompts/cpi-programs/client-guide.mdx";
+
+{/* defi - routers */}
+import Routers from "/snippets/ai-prompts/defi/routers.mdx";
+
+{/* streaming */}
+import StreamingMints from "/snippets/ai-prompts/streaming/mints.mdx";
+import StreamingTokens from "/snippets/ai-prompts/streaming/tokens.mdx";
+
+{/* toolkits */}
+import Payments from "/snippets/ai-prompts/toolkits/payments.mdx";
+import WalletsIntegration from "/snippets/ai-prompts/toolkits/wallets.mdx";
+import Nullifiers from "/snippets/ai-prompts/toolkits/nullifiers.mdx";
+import Airdrop from "/snippets/ai-prompts/toolkits/airdrop.mdx";
+
+{/* wallets */}
+import Privy from "/snippets/ai-prompts/wallets/privy.mdx";
+
+{/* migration */}
+import V1ToV2Migration from "/snippets/ai-prompts/v1-to-v2-migration.mdx";
+
+## Light Token Recipes
+
+<Accordion title="Create mint">
+Copy the prompt below or view the [guide](/light-token/cookbook/create-mint).
+<Tabs>
+<Tab title="TypeScript Client">
+<TsCreateMint />
+</Tab>
+<Tab title="Rust Client">
+<RustCreateMint />
+</Tab>
+<Tab title="Program CPI">
+<ProgCreateMintCpi />
+</Tab>
+<Tab title="Anchor Macros">
+<ProgCreateMintMacros />
+</Tab>
+</Tabs>
+</Accordion>
+
+<Accordion title="Create associated token account">
+Copy the prompt below or view the [guide](/light-token/cookbook/create-ata).
+<Tabs>
+<Tab title="TypeScript Client">
+<TsCreateAta />
+</Tab>
+<Tab title="Rust Client">
+<RustCreateAta />
+</Tab>
+<Tab title="Program CPI">
+<ProgCreateAtaCpi />
+</Tab>
+<Tab title="Anchor Macros">
+<ProgCreateAtaMacros />
+</Tab>
+</Tabs>
+</Accordion>
+
+<Accordion title="Create token account">
+Copy the prompt below or view the [guide](/light-token/cookbook/create-token-account).
+<Tabs>
+<Tab title="Rust Client">
+<RustCreateTokenAccount />
+</Tab>
+<Tab title="Program CPI">
+<ProgCreateTokenAccountCpi />
+</Tab>
+<Tab title="Anchor Macros">
+<ProgCreateTokenAccountMacros />
+</Tab>
+</Tabs>
+</Accordion>
+
+<Accordion title="Mint tokens">
+Copy the prompt below or view the [guide](/light-token/cookbook/mint-to).
+<Tabs>
+<Tab title="TypeScript Client">
+<TsMintTo />
+</Tab>
+<Tab title="Rust Client">
+<RustMintTo />
+</Tab>
+<Tab title="Program CPI">
+<ProgMintTo />
+</Tab>
+</Tabs>
+</Accordion>
+
+<Accordion title="Transfer (interface)">
+Copy the prompt below or view the [guide](/light-token/cookbook/transfer-interface).
+<Tabs>
+<Tab title="TypeScript Client">
+<TsTransferInterface />
+</Tab>
+<Tab title="Rust Client">
+<RustTransferInterface />
+</Tab>
+<Tab title="Program CPI">
+<ProgTransferInterface />
+</Tab>
+</Tabs>
+</Accordion>
+
+<Accordion title="Transfer (checked)">
+Copy the prompt below or view the [guide](/light-token/cookbook/transfer-checked).
+<Tabs>
+<Tab title="Rust Client">
+<RustTransferChecked />
+</Tab>
+<Tab title="Program CPI">
+<ProgTransferChecked />
+</Tab>
+</Tabs>
+</Accordion>
+
+<Accordion title="Approve and revoke">
+Copy the prompt below or view the [guide](/light-token/cookbook/approve-revoke).
+<Tabs>
+<Tab title="TypeScript Client">
+<TsApproveRevoke />
+</Tab>
+<Tab title="Rust Client">
+<RustApproveRevoke />
+</Tab>
+<Tab title="Program CPI">
+<ProgApproveRevoke />
+</Tab>
+</Tabs>
+</Accordion>
+
+<Accordion title="Freeze and thaw">
+Copy the prompt below or view the [guide](/light-token/cookbook/freeze-thaw).
+<Tabs>
+<Tab title="Rust Client">
+<RustFreezeThaw />
+</Tab>
+<Tab title="Program CPI">
+<ProgFreezeThaw />
+</Tab>
+</Tabs>
+</Accordion>
+
+<Accordion title="Wrap and unwrap">
+Copy the prompt below or view the [guide](/light-token/cookbook/wrap-unwrap).
+<Tabs>
+<Tab title="TypeScript Client">
+<TsWrapUnwrap />
+</Tab>
+<Tab title="Rust Client">
+<RustWrapUnwrap />
+</Tab>
+</Tabs>
+</Accordion>
+
+<Accordion title="Close token account">
+Copy the prompt below or view the [guide](/light-token/cookbook/close-token-account).
+<Tabs>
+<Tab title="Rust Client">
+<RustCloseTokenAccount />
+</Tab>
+<Tab title="Program CPI">
+<ProgCloseTokenAccount />
+</Tab>
+</Tabs>
+</Accordion>
+
+<Accordion title="Burn">
+Copy the prompt below or view the [guide](/light-token/cookbook/burn).
+<Tabs>
+<Tab title="Rust Client">
+<RustBurn />
+</Tab>
+<Tab title="Program CPI">
+<ProgBurn />
+</Tab>
+</Tabs>
+</Accordion>
+
+## DeFi
+
+<Accordion title="Anchor DeFi program">
+Copy the prompt below or view the [guide](/light-token/defi/programs).
+<DefiAnchor />
+</Accordion>
+
+<Accordion title="Pinocchio DeFi program">
+Copy the prompt below or view the [guide](/light-token/defi/programs-pinocchio).
+<DefiPinocchio />
+</Accordion>
+
+<Accordion title="Router integration">
+Copy the prompt below or view the [guide](/light-token/defi/routers).
+<Routers />
+</Accordion>
+
+## Data Streaming
+
+<Accordion title="Streaming mint accounts">
+Copy the prompt below or view the [guide](/light-token/toolkits/for-streaming-mints).
+<StreamingMints />
+</Accordion>
+
+<Accordion title="Streaming token accounts">
+Copy the prompt below or view the [guide](/light-token/toolkits/for-streaming-tokens).
+<StreamingTokens />
+</Accordion>
+
+## Stablecoin Payments
+
+<Accordion title="Stablecoin payments integration">
+Copy the prompt below or view the [guide](/light-token/toolkits/for-payments).
+<Payments />
+</Accordion>
+
+<Accordion title="Nullifier PDAs">
+Copy the prompt below or view the [guide](/pda/compressed-pdas/guides/how-to-create-nullifier-pdas).
+<Nullifiers />
+</Accordion>
+
+## Wallets
+
+<Accordion title="Wallet integration">
+Copy the prompt below or view the [guide](/light-token/toolkits/for-wallets).
+<WalletsIntegration />
+</Accordion>
+
+<Accordion title="Sign Light token transfers with Privy wallets">
+Copy the prompt below or view the [guide](/light-token/toolkits/for-privy).
+<Privy />
+</Accordion>
+
+## Light-PDA
+
+<Accordion title="Light-PDA program">
+Copy the prompt below or view the [guide](/pda/light-pda/overview).
+<LightPda />
+</Accordion>
+
+## Compressed PDA
+
+<Accordion title="Client guide (TypeScript & Rust)">
+Copy the prompt below or view the [guide](/pda/compressed-pdas/guides/client-guide).
+<CpiClientGuide />
+</Accordion>
+
+<Accordion title="Create compressed accounts">
+Copy the prompt below or view the [guide](/pda/compressed-pdas/guides/how-to-create-compressed-accounts).
+<CpiCreate />
+</Accordion>
+
+<Accordion title="Update compressed accounts">
+Copy the prompt below or view the [guide](/pda/compressed-pdas/guides/how-to-update-compressed-accounts).
+<CpiUpdate />
+</Accordion>
+
+<Accordion title="Close compressed accounts">
+Copy the prompt below or view the [guide](/pda/compressed-pdas/guides/how-to-close-compressed-accounts).
+<CpiClose />
+</Accordion>
+
+<Accordion title="Reinitialize compressed accounts">
+Copy the prompt below or view the [guide](/pda/compressed-pdas/guides/how-to-reinitialize-compressed-accounts).
+<CpiReinitialize />
+</Accordion>
+
+<Accordion title="Burn compressed accounts">
+Copy the prompt below or view the [guide](/pda/compressed-pdas/guides/how-to-burn-compressed-accounts).
+<CpiBurn />
+</Accordion>
+
+<Accordion title="v1 to v2 Merkle tree migration">
+Copy the prompt below or view the [guide](/resources/migration-v1-to-v2).
+<V1ToV2Migration />
+</Accordion>
+
+## Token Distribution
+
+<Accordion title="Token distribution">
+Copy the prompt below or view the [guide](/compressed-tokens/airdrop).
+<Airdrop />
+</Accordion>

@@ -3,17 +3,11 @@ import { useState, useCallback } from 'react';
 import { PublicKey } from '@solana/web3.js';
 import { createRpc } from '@lightprotocol/stateless.js';
 
-export interface TransactionCompressionInfo {
-  closedAccounts: number;
-  openedAccounts: number;
-}
-
 export interface Transaction {
   signature: string;
   slot: number;
   blockTime: number;
   timestamp: string;
-  compressionInfo?: TransactionCompressionInfo | null;
 }
 
 export function useTransactionHistory() {
@@ -25,7 +19,6 @@ export function useTransactionHistory() {
     async (
       ownerAddress: string,
       limit: number = 10,
-      includeDetails: boolean = false
     ) => {
       if (!ownerAddress) {
         setTransactions([]);
@@ -39,44 +32,20 @@ export function useTransactionHistory() {
         const rpc = createRpc(import.meta.env.VITE_HELIUS_RPC_URL);
         const owner = new PublicKey(ownerAddress);
 
-        const signatures = await rpc.getCompressionSignaturesForTokenOwner(owner);
+        const result = await rpc.getSignaturesForOwnerInterface(owner);
 
-        if (signatures.items.length === 0) {
+        if (!result.signatures || result.signatures.length === 0) {
           setTransactions([]);
           return;
         }
 
-        const limitedSignatures = signatures.items.slice(0, limit);
-
-        if (includeDetails && limitedSignatures.length > 0) {
-          const transactionsWithDetails = await Promise.all(
-            limitedSignatures.map(async (sig) => {
-              const txInfo = await rpc.getTransactionWithCompressionInfo(sig.signature);
-
-              return {
-                signature: sig.signature,
-                slot: sig.slot,
-                blockTime: sig.blockTime,
-                timestamp: new Date(sig.blockTime * 1000).toISOString(),
-                compressionInfo: txInfo?.compressionInfo
-                  ? {
-                      closedAccounts: txInfo.compressionInfo.closedAccounts.length,
-                      openedAccounts: txInfo.compressionInfo.openedAccounts.length,
-                    }
-                  : null,
-              };
-            })
-          );
-
-          setTransactions(transactionsWithDetails);
-          return;
-        }
+        const limitedSignatures = result.signatures.slice(0, limit);
 
         const basicTransactions = limitedSignatures.map((sig) => ({
           signature: sig.signature,
           slot: sig.slot,
-          blockTime: sig.blockTime,
-          timestamp: new Date(sig.blockTime * 1000).toISOString(),
+          blockTime: sig.blockTime ?? 0,
+          timestamp: sig.blockTime ? new Date(sig.blockTime * 1000).toISOString() : '',
         }));
 
         setTransactions(basicTransactions);

@@ -40,6 +40,11 @@ import RustInstructionCode from "/snippets/code-snippets/light-token/create-mint
 import AnchorProgramCode from "/snippets/code-snippets/light-token/create-mint/anchor-program/full-example.mdx";
 import AnchorMacroCode from "/snippets/code-snippets/light-token/create-mint/anchor-macro/full-example.mdx";
 import CompressibleRentExplained from "/snippets/compressible-rent-explained.mdx";
+import AgentSkillGeneric from "/snippets/setup/agent-skill-generic.mdx";
+import CreateMintAiPrompt from "/snippets/ai-prompts/ts-cookbook/create-mint.mdx";
+import RustCreateMintAiPrompt from "/snippets/ai-prompts/rust-cookbook/create-mint.mdx";
+import ProgramCreateMintCpiAiPrompt from "/snippets/ai-prompts/program-cookbook/create-mint-cpi.mdx";
+import ProgramCreateMintMacrosAiPrompt from "/snippets/ai-prompts/program-cookbook/create-mint-macros.mdx";
 
 1. Mint accounts uniquely represent a token on Solana and store its global metadata.
 2. Light mints are on-chain accounts like SPL mints, but the light token program sponsors the rent-exemption cost for you.
@@ -49,6 +54,8 @@ import CompressibleRentExplained from "/snippets/compressible-rent-explained.mdx
   <CompressibleRentExplained />
 
 </Accordion>
+
+<AgentSkillGeneric />
 
 <Tabs>
 
@@ -72,9 +79,11 @@ Compare to SPL:
 
 <Info>
   Find the source code
-  [here](https://github.com/Lightprotocol/light-protocol/blob/0c4e2417b2df2d564721b89e18d1aad3665120e7/js/compressed-token/src/v3/actions/create-mint-interface.ts).
+  [here](https://github.com/Lightprotocol/light-protocol/blob/main/js/compressed-token/src/v3/actions/create-mint-interface.ts).
 </Info>
 
+<Tabs>
+<Tab title="Guide">
 <Steps>
 
 <Step>
@@ -98,6 +107,11 @@ Compare to SPL:
 
 </Step>
 </Steps>
+</Tab>
+<Tab title="AI Prompt">
+<CreateMintAiPrompt />
+</Tab>
+</Tabs>
 
 ### Add Interface PDA to SPL / Token 2022 mints
 
@@ -153,7 +167,7 @@ Pass `TOKEN_2022_PROGRAM_ID` to create a Token-2022 mint with an interface PDA i
 `CreateMint` creates an on-chain mint account that can optionally include token metadata.
 The instruction also writes a compressed mint address to the address Merkle tree, which preserves the mint state when the on-chain account is compressed.
 
-Compare to SPL: 
+Compare to SPL:
 
 <CodeCompare
   firstCode={lightCreateMintRustCode}
@@ -163,6 +177,8 @@ Compare to SPL:
   language="rust"
 />
 
+<Tabs>
+<Tab title="Guide">
 <Steps>
 <Step>
 ### Prerequisites
@@ -175,7 +191,7 @@ Compare to SPL:
 ### Create Light Token Mint with Token Metadata
 
 <Info>
-  View the [source code](https://github.com/Lightprotocol/light-protocol/blob/main/sdk-libs/token-sdk/src/instruction/create_mint.rs) and [full example](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/instructions/create_mint.rs) with shared test utilities.
+  Find the source code [here](https://github.com/Lightprotocol/light-protocol/blob/main/sdk-libs/token-sdk/src/instruction/create_mint.rs).
 </Info>
 
 <Tabs>
@@ -190,12 +206,19 @@ Compare to SPL:
 </Step>
 </Steps>
 </Tab>
+<Tab title="AI Prompt">
+<RustCreateMintAiPrompt />
+</Tab>
+</Tabs>
+</Tab>
 
 <Tab title="Program">
 
 <Tabs>
 
 <Tab title="CPI">
+<Tabs>
+<Tab title="Guide">
 
 Compare to SPL:
 
@@ -278,9 +301,9 @@ let params = CreateMintParams {
 
 <Info>
   The address of the mint account is stored in an address Merkle tree
-  , which is maintained by the protocol. 
+  , which is maintained by the protocol.
   The client passes a validity proof that proves the mint address does not
-  exist yet. 
+  exist yet.
 </Info>
 
 </Step>
@@ -288,7 +311,7 @@ let params = CreateMintParams {
 <Step>
 ### System Accounts
 
-Include system accounts such as the Light System Program 
+Include system accounts such as the Light System Program
  to verify the proof and write the mint address to the address tree.
 
 <Accordion title="System Accounts List">
@@ -412,7 +435,14 @@ CreateMintCpi::new(
 
 </Tabs>
 </Tab>
+<Tab title="AI Prompt">
+<ProgramCreateMintCpiAiPrompt />
+</Tab>
+</Tabs>
+</Tab>
 <Tab title="Anchor Macros">
+<Tabs>
+<Tab title="Guide">
 
 Compare to SPL:
 
@@ -537,6 +567,11 @@ pub mint: UncheckedAccount<'info>,
 
 <AnchorMacroCode />
 
+</Tab>
+<Tab title="AI Prompt">
+<ProgramCreateMintMacrosAiPrompt />
+</Tab>
+</Tabs>
 </Tab>
 </Tabs>
 </Tab>

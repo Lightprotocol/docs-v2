@@ -1,22 +1,36 @@
 ---
 title: The Light Token Program
-sidebarTitle: Introduction
+sidebarTitle: Overview
 description: Light token is a high-performance token standard that reduces the cost of mint and token accounts by 200x.
 keywords: ["rent free tokens on solana", "rent free solana accounts", "spl token alternative for developers", "token 2022 alternative for solana", "infrastructure for stablecoin payments on solana", "scalable solana infrastructure", "token infrastructure for fintechs", "scalable infrastructure for solana apps"]
 ---
 
-import GuidesTable from "/snippets/overview-tables/compressed-tokens-guides-table.mdx";
-import AdvancedGuidesTable from "/snippets/overview-tables/compressed-tokens-advanced-guides-table.mdx";
-import SetupEnvironment from "/snippets/setup/setup-environment-tabs.mdx";
-import InstallDependencies from "/snippets/setup/install-dependencies-codegroup.mdx";
-import { LightTokenVsSplCalculator } from "/snippets/jsx/light-token-vs-spl-calculator.jsx";
-import { CompressibleRentCalculator } from "/snippets/jsx/compressible-rent-calculator.jsx";
-import { RentLifecycleVisualizer } from "/snippets/jsx/rent-lifecycle-visualizer.jsx";
-import CompressibleRentExplained from "/snippets/compressible-rent-explained.mdx";
-import CompressibleDefaultRentConfig from "/snippets/compressible-default-rent-config.mdx";
-import IntegrateLightTokenGuidesTable from "/snippets/overview-tables/integrate-light-token-guides-table.mdx";
 import CookbookGuidesTable from "/snippets/overview-tables/cookbook-guides-table.mdx";
 import WelcomePageInstall from "/snippets/setup/welcome-page-install.mdx";
+import SdkReference from "/snippets/overview-tables/sdk-reference.mdx";
+import { CodeCompare } from "/snippets/jsx/code-compare.jsx";
+import {
+  splCreateMintCode,
+  lightCreateMintCode,
+  splCreateMintRustCode,
+  lightCreateMintRustCode,
+  splCreateMintCpiCode,
+  lightCreateMintCpiCode,
+  splCreateMintMacroCode,
+  lightCreateMintMacroCode,
+  splCreateMintMetadataCpiCode,
+  lightCreateMintMetadataCpiCode,
+  splCreateMintMetadataMacroCode,
+  lightCreateMintMetadataMacroCode,
+  splCreateAtaCode,
+  lightCreateAtaCode,
+  splCreateAtaRustCode,
+  lightCreateAtaRustCode,
+  splCreateAtaCpiCode,
+  lightCreateAtaCpiCode,
+  splCreateAtaMacroCode,
+  lightCreateAtaMacroCode,
+} from "/snippets/code-samples/code-compare-snippets.jsx";
 
 <Info>
   **Note: This page is for the new Light Token Program Beta.** For production use today, use
@@ -24,31 +38,136 @@ import WelcomePageInstall from "/snippets/setup/welcome-page-install.mdx";
   by leading wallets such as Phantom & Backpack.
 </Info>
 
-### Creation Cost
+### Mint Accounts
 
-|                   |     Light-Token |  SPL-Token |
+Light-mint accounts represent a unique mint and optionally can store token-metadata.
+Functionally equivalent to SPL mints.
+
+|  Creation Cost                 |     Light-Token |  SPL-Token |
 | :---------------- | --------------: | ---------: |
 | **Mint Account**  | **0.00001 SOL** | 0.0015 SOL |
+
+<Accordion title="Compare to SPL">
+<Tabs>
+<Tab title="TypeScript Client">
+<CodeCompare
+  firstCode={lightCreateMintCode}
+  secondCode={splCreateMintCode}
+  firstLabel="light-token"
+  secondLabel="SPL"
+/>
+</Tab>
+<Tab title="Rust Client">
+<CodeCompare
+  firstCode={lightCreateMintRustCode}
+  secondCode={splCreateMintRustCode}
+  firstLabel="light-token"
+  secondLabel="SPL"
+  language="rust"
+/>
+</Tab>
+<Tab title="CPI">
+<CodeCompare
+  firstCode={lightCreateMintCpiCode}
+  secondCode={splCreateMintCpiCode}
+  firstLabel="light-token"
+  secondLabel="SPL"
+  language="rust"
+/>
+</Tab>
+<Tab title="Anchor Macros">
+<CodeCompare
+  firstCode={lightCreateMintMacroCode}
+  secondCode={splCreateMintMacroCode}
+  firstLabel="light-token"
+  secondLabel="SPL"
+  language="rust"
+/>
+</Tab>
+<Tab title="CPI (metadata)">
+<CodeCompare
+  firstCode={lightCreateMintMetadataCpiCode}
+  secondCode={splCreateMintMetadataCpiCode}
+  firstLabel="light-token"
+  secondLabel="SPL"
+  language="rust"
+/>
+</Tab>
+<Tab title="Macros (metadata)">
+<CodeCompare
+  firstCode={lightCreateMintMetadataMacroCode}
+  secondCode={splCreateMintMetadataMacroCode}
+  firstLabel="light-token"
+  secondLabel="SPL"
+  language="rust"
+/>
+</Tab>
+</Tabs>
+View the [guide](/light-token/cookbook/create-mint) to create Light Token mints, or enable interoperability for existing SPL and Token 2022 mints.
+</Accordion>
+
+### Token Accounts
+Light-token accounts can hold balances from any light, SPL, or Token-2022 mint, without the need
+to pay rent-exemption.
+
+|  Creation Cost                 |     Light-Token |  SPL-Token |
+| :---------------- | --------------: | ---------: |
 | **Token Account** | **0.00001 SOL** |  0.002 SOL |
 
-### CU Performance
+<Accordion title="Compare to SPL">
+<Tabs>
+<Tab title="TypeScript Client">
+<CodeCompare
+  firstCode={lightCreateAtaCode}
+  secondCode={splCreateAtaCode}
+  firstLabel="light-token"
+  secondLabel="SPL"
+/>
+</Tab>
+<Tab title="Rust Client">
+<CodeCompare
+  firstCode={lightCreateAtaRustCode}
+  secondCode={splCreateAtaRustCode}
+  firstLabel="light-token"
+  secondLabel="SPL"
+  language="rust"
+/>
+</Tab>
+<Tab title="CPI">
+<CodeCompare
+  firstCode={lightCreateAtaCpiCode}
+  secondCode={splCreateAtaCpiCode}
+  firstLabel="light-token"
+  secondLabel="SPL"
+  language="rust"
+/>
+</Tab>
+<Tab title="Anchor Macros">
+<CodeCompare
+  firstCode={lightCreateAtaMacroCode}
+  secondCode={splCreateAtaMacroCode}
+  firstLabel="light-token"
+  secondLabel="SPL"
+  language="rust"
+/>
+</Tab>
+</Tabs>
+View the [guide](/light-token/cookbook/create-ata) to create associated token accounts.
+</Accordion>
 
-|                          | Light-Token | SPL-Token |
+|   CU Performance                       | Light-Token | SPL-Token |
 | :----------------------- | ----------: | --------: |
 | **ATA Creation**         |   **4,348** |    14,194 |
 | **Transfer**             |     **312** |     4,645 |
 | **Transfer** (rent-free) |   **1,885** |     4,645 |
 
-<CardGroup cols={2}>
-  <Card title="Mint Accounts" icon="coins">
-    Light-mint accounts represent a unique mint and optionally can store token-metadata.
-    Functionally equivalent to SPL mints.
-  </Card>
-  <Card title="Token Accounts" icon="wallet">
-    Light-token accounts can hold balances from any light, SPL, or Token-2022 mint, without the need
-    to pay rent-exemption.
-  </Card>
-</CardGroup>
+<Card
+  title="Learn how the Light Token Program works"
+  icon="chevron-right"
+  color="#0066ff"
+  href="/faq"
+  horizontal
+/>
 
 # Quickstart
 
@@ -60,40 +179,93 @@ import WelcomePageInstall from "/snippets/setup/welcome-page-install.mdx";
 <WelcomePageInstall />
 
 </Step>
-
   <Step>
-
 ### Get Started
+</Step>
 
-<Card
-  title="Mint tokens in under 3 minutes."
-  icon="bolt"
-  color="#0066ff"
-  href="/light-token/quickstart"
-  horizontal
-/>
-
-  </Step>
 </Steps>
 
-## DeFi Integration
-
-<CardGroup cols={2}>
-  <Card title="Program Integration" icon="code" href="/light-token/defi/programs">
-    Build rent-free AMMs and DeFi programs with minimal code changes.
-  </Card>
-  <Card title="Router Integration" icon="route" href="/light-token/defi/routers">
-    Add support for rent-free AMMs to your aggregator or router.
-  </Card>
-</CardGroup>
-
-## Integration Toolkits
-
-<IntegrateLightTokenGuidesTable />
+<Tabs>
+<Tab title="Basics and Examples">
 
 ## Cookbook
 
 <CookbookGuidesTable />
+
+## Examples
+
+### Client
+
+| | |
+| :--- | :--- |
+| [**Toolkits**](/light-token/examples/client#toolkits) | Payments, wallets, Privy integration, SPL-to-Light transfer |
+| [**TypeScript**](/light-token/examples/client#typescript) | Actions and instructions for all token operations |
+| [**Rust**](/light-token/examples/client#rust) | Actions and instructions for all token operations |
+
+### Program
+
+| | |
+| :--- | :--- |
+| [**Examples**](/light-token/examples/program#examples) | AMM reference, CPI create-and-transfer, Pinocchio swap |
+| [**Macros**](/light-token/examples/program#macros) | Counter PDA, ATA, mint, and token account creation |
+| [**Instructions**](/light-token/examples/program#instructions) | All CPI instructions: approve, burn, close, freeze, mint-to, transfer, and more |
+
+</Tab>
+<Tab title="Use Cases">
+
+## DeFi Integration
+
+<CardGroup cols={2}>
+  <Card title="Program Integration" icon="cube" href="/light-token/defi/programs">
+    Build rent-free AMMs and DeFi programs.
+  </Card>
+  <Card title="Router Integration" icon="route" href="/light-token/defi/routers">
+    Add support for rent-free AMMs to your aggregator.
+  </Card>
+  <Card title="Pinocchio Programs" icon="feather" href="/light-token/defi/programs-pinocchio">
+    High-performance DeFi programs with Pinocchio.
+  </Card>
+</CardGroup>
+
+## Stablecoin Payments
+
+<CardGroup cols={2}>
+  <Card title="Integration Guide" icon="credit-card" href="/light-token/toolkits/for-payments">
+    Guide to integrate light-token APIs with comparison to SPL.
+  </Card>
+  <Card title="Nullifier PDA" icon="code-commit" href="/pda/compressed-pdas/guides/how-to-create-nullifier-pdas">
+    Prevent onchain instructions from being executed more than once.
+  </Card>
+</CardGroup>
+
+## Wallets
+
+<CardGroup cols={2}>
+  <Card title="Integration Guide" icon="wallet" href="/light-token/toolkits/for-wallets">
+    Guide for Wallet Applications to let users display and swap light-tokens.
+  </Card>
+  <Card title="Sign with Privy Wallets" icon="key" href="/light-token/toolkits/for-privy">
+    Add light-tokens to Privy embedded wallets.
+  </Card>
+</CardGroup>
+
+## Data Streaming
+
+<CardGroup cols={2}>
+  <Card title="Mint Accounts" icon="bolt" href="/light-token/toolkits/for-streaming-mints">
+    Stream mint events from the network in real-time.
+  </Card>
+  <Card title="Token Accounts" icon="stream" href="/light-token/toolkits/for-streaming-tokens">
+    Stream token events from the network in real-time.
+  </Card>
+</CardGroup>
+
+</Tab>
+</Tabs>
+
+## SDK Reference
+
+<SdkReference />
 
 # Next Steps
 
@@ -101,6 +273,6 @@ import WelcomePageInstall from "/snippets/setup/welcome-page-install.mdx";
   title="Explore Frequently Answered Questions"
   icon="chevron-right"
   color="#0066ff"
-  href="/light-token/faq"
+  href="/faq"
   horizontal
 />

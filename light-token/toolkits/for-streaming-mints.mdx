@@ -6,6 +6,8 @@ keywords: ["streaming mint accounts solana", "laserstream light mint", "grpc min
 ---
 
 import FindClosedAccounts from '/snippets/code-snippets/streaming/find-closed-accounts.mdx';
+import AgentSkillStreaming from "/snippets/setup/agent-skill-streaming.mdx";
+import StreamingMintsAiPrompt from "/snippets/ai-prompts/streaming/mints.mdx";
 
 | Event | Description |
 |:------|:------------|
@@ -18,6 +20,11 @@ import FindClosedAccounts from '/snippets/code-snippets/streaming/find-closed-ac
 This guide is for teams building custom data pipelines (aggregators, market makers).
 If you just need account lookups, use [`get_account_interface`](/light-token/defi/routers) instead.
 </Note>
+
+<AgentSkillStreaming />
+
+<Tabs>
+<Tab title="Guide">
 
 ## Architecture
 
@@ -251,3 +258,9 @@ pub struct AdditionalMetadata {
   href="/light-token/toolkits/for-streaming-tokens"
   horizontal
 />
+
+</Tab>
+<Tab title="AI Prompt">
+<StreamingMintsAiPrompt />
+</Tab>
+</Tabs>

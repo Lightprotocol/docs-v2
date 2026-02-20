@@ -11,14 +11,21 @@ import TokenClientPrerequisites from "/snippets/light-token-guides/light-token-c
 import RustActionCode from "/snippets/code-snippets/light-token/transfer-checked/rust-client/action.mdx";
 import RustInstructionCode from "/snippets/code-snippets/light-token/transfer-checked/rust-client/instruction.mdx";
 import AnchorProgramCode from "/snippets/code-snippets/light-token/transfer-checked/anchor-program/full-example.mdx";
+import AgentSkillGeneric from "/snippets/setup/agent-skill-generic.mdx";
+import RustTransferCheckedAiPrompt from "/snippets/ai-prompts/rust-cookbook/transfer-checked.mdx";
+import ProgramTransferCheckedAiPrompt from "/snippets/ai-prompts/program-cookbook/transfer-checked.mdx";
 
 1. TransferChecked validates that the decimals parameter matches the mint's decimals.
 2. Use for Light→Light transfers when you need decimal verification.
 3. For transfers involving SPL or Token 2022 accounts, use [Transfer Interface](/light-token/cookbook/transfer-interface) instead.
 
+<AgentSkillGeneric />
+
 <Tabs>
 <Tab title="Rust Client">
 
+<Tabs>
+<Tab title="Guide">
 <Steps>
 <Step>
 ### Prerequisites
@@ -31,7 +38,7 @@ import AnchorProgramCode from "/snippets/code-snippets/light-token/transfer-chec
 ### Transfer with Decimal Check
 
 <Info>
-  View the [source code](https://github.com/Lightprotocol/light-protocol/blob/main/sdk-libs/token-sdk/src/instruction/transfer_checked.rs) and [full example](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/instructions/transfer_checked.rs) with shared test utilities.
+  Find the source code [here](https://github.com/Lightprotocol/light-protocol/blob/main/sdk-libs/token-sdk/src/instruction/transfer_checked.rs).
 </Info>
 
 <Tabs>
@@ -46,8 +53,15 @@ import AnchorProgramCode from "/snippets/code-snippets/light-token/transfer-chec
 </Step>
 </Steps>
 </Tab>
+<Tab title="AI Prompt">
+<RustTransferCheckedAiPrompt />
+</Tab>
+</Tabs>
+</Tab>
 
 <Tab title="Program">
+<Tabs>
+<Tab title="Guide">
 
 <Note>
 Find [a full code example at the end](#full-code-example).
@@ -113,6 +127,11 @@ TransferCheckedCpi {
 
 <AnchorProgramCode />
 
+</Tab>
+<Tab title="AI Prompt">
+<ProgramTransferCheckedAiPrompt />
+</Tab>
+</Tabs>
 </Tab>
 
 </Tabs>

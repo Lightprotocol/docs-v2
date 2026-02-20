@@ -22,13 +22,19 @@ import {
 import RustInstructionCode from "/snippets/code-snippets/light-token/create-token-account/rust-client/instruction.mdx";
 import AnchorProgramCode from "/snippets/code-snippets/light-token/create-token-account/anchor-program/full-example.mdx";
 import AnchorMacroCode from "/snippets/code-snippets/light-token/create-token-account/anchor-macro/full-example.mdx";
+import AgentSkillGeneric from "/snippets/setup/agent-skill-generic.mdx";
+import RustCreateTokenAccountAiPrompt from "/snippets/ai-prompts/rust-cookbook/create-token-account.mdx";
+import ProgramCreateTokenAccountCpiAiPrompt from "/snippets/ai-prompts/program-cookbook/create-token-account-cpi.mdx";
+import ProgramCreateTokenAccountMacrosAiPrompt from "/snippets/ai-prompts/program-cookbook/create-token-account-macros.mdx";
 
 1. Light token accounts are Solana accounts that hold token balances of light, SPL, or Token 2022 mints.
-2. Light token accounts are on-chain accounts like SPL ATA’s, but the light token program sponsors the rent-exemption cost for you.
+2. Light token accounts are on-chain accounts like SPL ATA's, but the light token program sponsors the rent-exemption cost for you.
 
 <Accordion title="Light Rent Config Explained">
   <CompressibleRentExplained />
 </Accordion>
+
+<AgentSkillGeneric />
 
 <Tabs>
 
@@ -45,6 +51,8 @@ Compare to SPL:
   language="rust"
 />
 
+<Tabs>
+<Tab title="Guide">
 <Steps>
 <Step>
 ### Prerequisites
@@ -57,7 +65,7 @@ Compare to SPL:
 ### Create Token Account
 
 <Info>
-  View the [source code](https://github.com/Lightprotocol/light-protocol/blob/main/sdk-libs/token-sdk/src/instruction/create_associated_token_account.rs) and [full example](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/instructions/create_token_account.rs) with shared test utilities.
+  Find the source code [here](https://github.com/Lightprotocol/light-protocol/blob/main/sdk-libs/token-sdk/src/instruction/create_associated_token_account.rs).
 </Info>
 
 <Tabs>
@@ -68,12 +76,19 @@ Compare to SPL:
 
 </Step>
 </Steps>
+</Tab>
+<Tab title="AI Prompt">
+<RustCreateTokenAccountAiPrompt />
+</Tab>
+</Tabs>
 
 </Tab>
 
 <Tab title="Program">
 <Tabs>
 <Tab title="CPI">
+<Tabs>
+<Tab title="Guide">
 
 Compare to SPL:
 
@@ -156,7 +171,14 @@ CreateTokenAccountCpi {
 <AnchorProgramCode />
 
 </Tab>
+<Tab title="AI Prompt">
+<ProgramCreateTokenAccountCpiAiPrompt />
+</Tab>
+</Tabs>
+</Tab>
 <Tab title="Anchor Macros">
+<Tabs>
+<Tab title="Guide">
 
 Compare to SPL:
 
@@ -244,6 +266,11 @@ pub vault: UncheckedAccount<'info>,
 
 <AnchorMacroCode />
 
+</Tab>
+<Tab title="AI Prompt">
+<ProgramCreateTokenAccountMacrosAiPrompt />
+</Tab>
+</Tabs>
 </Tab>
 </Tabs>
 </Tab>
