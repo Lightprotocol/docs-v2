@@ -19,10 +19,6 @@ import {
   lightCreateMintCpiCode,
   splCreateMintMacroCode,
   lightCreateMintMacroCode,
-  splCreateMintMetadataCpiCode,
-  lightCreateMintMetadataCpiCode,
-  splCreateMintMetadataMacroCode,
-  lightCreateMintMetadataMacroCode,
   splCreateAtaCode,
   lightCreateAtaCode,
   splCreateAtaRustCode,
@@ -48,7 +44,6 @@ Functionally equivalent to SPL mints.
 | :---------------- | --------------: | ---------: |
 | **Mint Account**  | **0.00001 SOL** | 0.0015 SOL |
 
-<Accordion title="Compare to SPL">
 <Tabs>
 <Tab title="TypeScript Client">
 <CodeCompare
@@ -85,27 +80,9 @@ Functionally equivalent to SPL mints.
   language="rust"
 />
 </Tab>
-<Tab title="CPI (metadata)">
-<CodeCompare
-  firstCode={lightCreateMintMetadataCpiCode}
-  secondCode={splCreateMintMetadataCpiCode}
-  firstLabel="light-token"
-  secondLabel="SPL"
-  language="rust"
-/>
-</Tab>
-<Tab title="Macros (metadata)">
-<CodeCompare
-  firstCode={lightCreateMintMetadataMacroCode}
-  secondCode={splCreateMintMetadataMacroCode}
-  firstLabel="light-token"
-  secondLabel="SPL"
-  language="rust"
-/>
-</Tab>
 </Tabs>
+
 View the [guide](/light-token/cookbook/create-mint) to create Light Token mints, or enable interoperability for existing SPL and Token 2022 mints.
-</Accordion>
 
 ### Token Accounts
 Light-token accounts can hold balances from any light, SPL, or Token-2022 mint, without the need
@@ -115,7 +92,6 @@ to pay rent-exemption.
 | :---------------- | --------------: | ---------: |
 | **Token Account** | **0.00001 SOL** |  0.002 SOL |
 
-<Accordion title="Compare to SPL">
 <Tabs>
 <Tab title="TypeScript Client">
 <CodeCompare
@@ -153,8 +129,8 @@ to pay rent-exemption.
 />
 </Tab>
 </Tabs>
+
 View the [guide](/light-token/cookbook/create-ata) to create associated token accounts.
-</Accordion>
 
 |   CU Performance                       | Light-Token | SPL-Token |
 | :----------------------- | ----------: | --------: |
