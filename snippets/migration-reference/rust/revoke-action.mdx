@@ -1,0 +1,10 @@
+```rust
+use light_token_client::actions::Revoke;
+
+let sig = Revoke {
+    token_account: ata,
+    owner: None,
+}
+.execute(&mut rpc, &payer)
+.await?;
+```

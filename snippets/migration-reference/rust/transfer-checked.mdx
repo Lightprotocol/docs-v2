@@ -1,0 +1,13 @@
+```rust
+use light_token::instruction::TransferChecked;
+
+let ix = TransferChecked {
+    source,
+    destination,
+    mint,
+    amount,
+    decimals,
+    authority: payer.pubkey(),
+}
+.instruction()?;
+```

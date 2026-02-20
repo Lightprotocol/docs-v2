@@ -1,0 +1,11 @@
+```typescript
+import {
+  getAssociatedTokenAddressInterface,
+  getAtaInterface,
+} from "@lightprotocol/compressed-token/unified";
+
+const ata = getAssociatedTokenAddressInterface(mint, owner);
+const account = await getAtaInterface(rpc, ata, owner, mint);
+
+console.log(account.parsed.amount);
+```

@@ -1,0 +1,29 @@
+```rust
+use light_account::{
+    CompressionInfo, LightAccount, LightAccounts,
+    CreateAccountsProof, derive_light_cpi_signer,
+    light_program, CpiSigner, LightDiscriminator,
+};
+
+#[light_program]
+#[program]
+pub mod my_program {
+    // instruction logic unchanged
+}
+
+#[derive(LightAccount, LightDiscriminator)]
+pub struct MyState {
+    pub compression_info: CompressionInfo,
+    pub authority: Pubkey,
+    pub data: u64,
+}
+
+#[derive(LightAccounts)]
+pub struct Initialize<'info> {
+    #[light_account(init)]
+    pub state: UncheckedAccount<'info>,
+    #[account(mut)]
+    pub pda_rent_sponsor: AccountInfo<'info>,
+    // ...
+}
+```

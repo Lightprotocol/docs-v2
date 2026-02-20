@@ -1,0 +1,10 @@
+```rust
+use light_token::instruction::CreateAssociatedTokenAccount;
+
+let ix = CreateAssociatedTokenAccount::new(
+    payer.pubkey(),
+    owner.pubkey(),
+    mint,
+)
+.instruction()?;
+```

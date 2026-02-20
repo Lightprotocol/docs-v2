@@ -1,0 +1,14 @@
+```rust
+use light_token_client::actions::unwrap::Unwrap;
+
+Unwrap {
+    rpc: &mut rpc,
+    payer: &payer,
+    spl_ata,
+    owner: &owner,
+    mint,
+    amount,
+}
+.execute()
+.await?;
+```

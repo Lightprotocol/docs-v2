@@ -1,0 +1,194 @@
+---
+title: "Anchor Constraints LightAccount"
+description: "Syntax reference for #[light_account] constraints with sponsored rent-exemption."
+---
+
+- [`#[light_account(init)]`](#light_accountinit) creates a PDA
+- [`#[light_account(init, token::...)]`](#light_accountinit-token) creates a token account via CPI
+- [`#[light_account(init, associated_token::...)]`](#light_accountinit-associated_token) creates an ATA via CPI
+- [`#[light_account(init, mint::...)]`](#light_accountinit-mint) creates a mint via CPI
+- [Required accounts](#required-accounts) per account type
+
+Place `#[light_account]` below standard Anchor `#[account]` on the same field.
+Anchor handles seeds, space, and payer; LightAccount handles rent-free creation.
+
+---
+
+### `#[light_account(init)]`
+
+Creates a rent-free PDA. No additional parameters — uses Anchor `#[account]` seeds and space.
+
+**attribute**
+
+```
+#[light_account(init)]
+```
+
+```rust
+#[account(                                          // ← Anchor: seeds, space, payer
+    init,
+    payer = fee_payer,
+    space = 8 + <Counter as anchor_lang::Space>::INIT_SPACE,
+    seeds = [COUNTER_SEED, owner.key().as_ref()],
+    bump,
+)]
+#[light_account(init)]                              // ← Light: register for rent-free creation
+pub counter: Account<'info, Counter>,
+```
+
+Examples: [Github](https://github.com/Lightprotocol/examples-light-token/tree/main/programs/anchor/basic-macros/counter)
+
+---
+
+### `#[light_account(init, token::...)]`
+
+Creates a rent-free token account via CPI to the Light Token program. The account type is `UncheckedAccount` because Light Token program initializes it via CPI.
+
+**attribute**
+
+```
+#[light_account(init,
+    token::authority = <seeds>,
+    token::mint = <account>,
+    token::owner = <account>,
+    token::bump = <expr>
+)]
+```
+
+```rust
+#[account(
+    mut,
+    seeds = [VAULT_SEED, mint.key().as_ref()],
+    bump,
+)]
+#[light_account(init,
+    token::authority = [VAULT_SEED, self.mint.key()],
+    token::mint = mint,
+    token::owner = vault_authority,
+    token::bump = params.vault_bump
+)]
+pub vault: UncheckedAccount<'info>,
+```
+
+Examples: [Github](https://github.com/Lightprotocol/examples-light-token/tree/main/programs/anchor/basic-macros/create-token-account)
+
+---
+
+### `#[light_account(init, associated_token::...)]`
+
+Creates a rent-free associated token account via CPI.
+
+**attribute**
+
+```
+#[light_account(init,
+    associated_token::authority = <account>,
+    associated_token::mint = <account>,
+    associated_token::bump = <expr>
+)]
+```
+
+```rust
+#[account(mut)]
+#[light_account(init,
+    associated_token::authority = associated_token_account_owner,
+    associated_token::mint = associated_token_account_mint,
+    associated_token::bump = params.associated_token_account_bump
+)]
+pub associated_token_account: UncheckedAccount<'info>,
+```
+
+Examples: [Github](https://github.com/Lightprotocol/examples-light-token/tree/main/programs/anchor/basic-macros/create-associated-token-account)
+
+---
+
+### `#[light_account(init, mint::...)]`
+
+Creates a rent-free mint via CPI.
+
+**attribute (required)**
+
+```
+#[light_account(init, mint,
+    mint::signer = <account>,
+    mint::authority = <account>,
+    mint::decimals = <expr>,
+    mint::seeds = <seeds>,
+)]
+```
+
+**attribute (optional)**
+
+```
+mint::bump = <expr>
+mint::freeze_authority = <ident>
+mint::authority_seeds = <seeds>
+mint::name = <expr>                 // requires symbol + uri
+mint::symbol = <expr>               // requires name + uri
+mint::uri = <expr>                  // requires name + symbol
+mint::update_authority = <ident>    // requires name, symbol, uri
+mint::additional_metadata = <expr>  // requires name, symbol, uri
+```
+
+```rust
+#[account(mut)]
+#[light_account(init, mint,
+    mint::signer = mint_signer,
+    mint::authority = fee_payer,
+    mint::decimals = 9,
+    mint::seeds = &[MINT_SIGNER_SEED, self.authority.to_account_info().key.as_ref()],
+)]
+pub mint: UncheckedAccount<'info>,
+```
+
+<Accordion title="Mint with metadata">
+
+```rust
+#[account(mut)]
+#[light_account(init, mint,
+    mint::signer = mint_signer,
+    mint::authority = fee_payer,
+    mint::decimals = 9,
+    mint::seeds = &[MINT_SIGNER_SEED, self.authority.to_account_info().key.as_ref()],
+    mint::bump = params.mint_signer_bump,
+    mint::name = params.name.clone(),
+    mint::symbol = params.symbol.clone(),
+    mint::uri = params.uri.clone(),
+    mint::update_authority = authority,
+    mint::additional_metadata = params.additional_metadata.clone()
+)]
+pub mint: UncheckedAccount<'info>,
+```
+
+</Accordion>
+
+Examples: [Github](https://github.com/Lightprotocol/examples-light-token/tree/main/programs/anchor/basic-macros/create-mint)
+
+---
+
+## Required accounts
+
+Add these to your `init` struct alongside the fields above. The `LightAccounts` derive macro appends additional protocol accounts to the instruction at runtime — you don't add those manually.
+
+<Tabs>
+<Tab title="PDA">
+
+| Account | Description |
+|:-|:-|
+| `compression_config` | Per-program PDA. Stores rent sponsor address and compression settings. Initialize once via `InitializeRentFreeConfig`. |
+| `pda_rent_sponsor` | Per-program PDA. Receives rent-exemption lamports when accounts compress. Must be mutable. |
+| `system_program` | Solana System Program. Transfers lamports for rent-exemption. |
+
+</Tab>
+<Tab title="Token / ATA / Mint">
+
+| Account | Description |
+|:-|:-|
+| `light_token_compressible_config` | Protocol PDA. Stores rent-config for Light Token accounts. |
+| `light_token_rent_sponsor` | Protocol PDA. Holds the lamport pool that sponsors rent-exemption. Reclaims lamports when accounts compress. |
+| `light_token_program` | Light Token program. CPI target for token, ATA, and mint creation. |
+| `light_token_cpi_authority` | Signer PDA. Authorizes CPI calls from your program to the Light Token program. |
+| `system_program` | Solana System Program. Transfers lamports for rent-exemption. |
+
+</Tab>
+</Tabs>

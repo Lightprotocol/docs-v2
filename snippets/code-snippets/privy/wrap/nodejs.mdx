@@ -1,0 +1,87 @@
+```typescript
+import 'dotenv/config';
+import {PrivyClient} from '@privy-io/node';
+import {createRpc, CTOKEN_PROGRAM_ID} from '@lightprotocol/stateless.js';
+import {PublicKey, Transaction, ComputeBudgetProgram} from '@solana/web3.js';
+import {getAssociatedTokenAddressSync, getAccount} from '@solana/spl-token';
+import {getSplInterfaceInfos} from '@lightprotocol/compressed-token';
+import {
+  createWrapInstruction,
+  getAssociatedTokenAddressInterface,
+  createAssociatedTokenAccountInterfaceIdempotentInstruction,
+} from '@lightprotocol/compressed-token/unified';
+
+const wrapTokens = async (
+  fromAddress: string,
+  tokenMintAddress: string,
+  amount: number,
+  decimals: number = 9,
+) => {
+  const connection = createRpc(process.env.HELIUS_RPC_URL!);
+
+  const privy = new PrivyClient({
+    appId: process.env.PRIVY_APP_ID!,
+    appSecret: process.env.PRIVY_APP_SECRET!,
+  });
+
+  const fromPubkey = new PublicKey(fromAddress);
+  const mintPubkey = new PublicKey(tokenMintAddress);
+  const tokenAmount = BigInt(Math.floor(amount * Math.pow(10, decimals)));
+
+  // Get SPL interface info — determines whether mint uses SPL or Token 2022
+  const splInterfaceInfos = await getSplInterfaceInfos(connection, mintPubkey);
+  const splInterfaceInfo = splInterfaceInfos.find(
+    (info) => info.isInitialized,
+  );
+  if (!splInterfaceInfo) throw new Error('No SPL interface found for this mint');
+
+  // Derive source associated token account using the mint's token program (SPL or Token 2022)
+  const {tokenProgram} = splInterfaceInfo;
+  const splAta = getAssociatedTokenAddressSync(mintPubkey, fromPubkey, false, tokenProgram);
+  const ataAccount = await getAccount(connection, splAta, undefined, tokenProgram);
+  if (ataAccount.amount < BigInt(tokenAmount)) {
+    throw new Error('Insufficient SPL balance');
+  }
+
+  // Derive Light Token associated token account
+  const lightTokenAta = getAssociatedTokenAddressInterface(mintPubkey, fromPubkey);
+
+  // Build instructions
+  const tx = new Transaction().add(
+    ComputeBudgetProgram.setComputeUnitLimit({units: 200_000}),
+    createAssociatedTokenAccountInterfaceIdempotentInstruction(
+      fromPubkey, lightTokenAta, fromPubkey, mintPubkey, CTOKEN_PROGRAM_ID,
+    ),
+    createWrapInstruction(
+      splAta, lightTokenAta, fromPubkey, mintPubkey,
+      tokenAmount, splInterfaceInfo, decimals, fromPubkey,
+    ),
+  );
+
+  // Sign and send via Privy
+  const {blockhash} = await connection.getLatestBlockhash();
+  tx.recentBlockhash = blockhash;
+  tx.feePayer = fromPubkey;
+
+  const walletId = process.env.TREASURY_WALLET_ID!;
+  const authorizationKey = process.env.TREASURY_AUTHORIZATION_KEY!;
+
+  const {signed_transaction} = await privy.wallets().solana().signTransaction(
+    walletId, {
+      transaction: tx.serialize({requireAllSignatures: false}),
+      authorization_context: {authorization_private_keys: [authorizationKey]},
+    },
+  ) as any;
+
+  const signature = await connection.sendRawTransaction(
+    Buffer.from(signed_transaction, 'base64'),
+    {skipPreflight: false, preflightCommitment: 'confirmed'},
+  );
+  await connection.confirmTransaction(signature, 'confirmed');
+
+  return signature;
+};
+
+export default wrapTokens;
+
+```

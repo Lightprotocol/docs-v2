@@ -1,0 +1,12 @@
+```rust
+use light_token::instruction::CreateMint;
+
+let ix = CreateMint::new(
+    params,
+    mint_seed.pubkey(),
+    payer.pubkey(),
+    address_tree.tree,
+    output_queue,
+)
+.instruction()?;
+```

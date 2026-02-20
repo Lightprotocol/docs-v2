@@ -1,0 +1,12 @@
+```rust
+use light_token_client::actions::CreateMint;
+
+let (sig, mint) = CreateMint {
+    decimals: 9,
+    freeze_authority: Some(payer.pubkey()),
+    token_metadata: None,
+    seed: None,
+}
+.execute(&mut rpc, &payer, &mint_authority)
+.await?;
+```

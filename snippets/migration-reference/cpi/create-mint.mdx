@@ -1,0 +1,19 @@
+```rust
+use light_token::instruction::CreateMintCpi;
+
+CreateMintCpi {
+    mint_seed: mint_seed.clone(),
+    authority: authority.clone(),
+    payer: payer.clone(),
+    address_tree: address_tree.clone(),
+    output_queue: output_queue.clone(),
+    compressible_config: compressible_config.clone(),
+    mint: mint.clone(),
+    rent_sponsor: rent_sponsor.clone(),
+    system_accounts,
+    cpi_context: None,
+    cpi_context_account: None,
+    params,
+}
+.invoke()?
+```

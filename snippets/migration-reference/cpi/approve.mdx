@@ -1,0 +1,11 @@
+```rust
+use light_token::instruction::ApproveCpi;
+
+ApproveCpi {
+    token_account: token_account.clone(),
+    delegate: delegate.clone(),
+    owner: owner.clone(),
+    amount,
+}
+.invoke()?
+```

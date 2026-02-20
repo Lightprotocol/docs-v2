@@ -1,0 +1,10 @@
+```rust
+use light_token::instruction::ThawCpi;
+
+ThawCpi {
+    token_account: token_account.clone(),
+    mint: mint.clone(),
+    freeze_authority: freeze_authority.clone(),
+}
+.invoke()?
+```

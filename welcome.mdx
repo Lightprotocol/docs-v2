@@ -9,51 +9,6 @@ import WelcomePageInstall from "/snippets/setup/welcome-page-install.mdx";
 
 <Frame>![](/images/banner-image.png)</Frame>
 
-| **Creation Cost** | Solana              | ZK Compression       |
-| :---------------- | :------------------ | :------------------- |
-| **Token Account** | ~2,000,000 lamports | ~**5,000** lamports  |
-| **100-byte PDA**  | ~1,600,000 lamports | ~**15,000** lamports |
-
-## Features
-
-<Card title="Light Token Program" href="/light-token/welcome" icon="coins" iconType="solid">
-  High performance token standard for rent-free DeFi and Payments.
-</Card>
-
-<CardGroup cols={2}>
-
-  <Card
-    title="Compressed PDAs"
-    href="/compressed-pdas/overview"
-    icon="user"
-  >
-    For App State.
-  </Card>
-  <Card
-    title="Compressed Tokens"
-    href="/compressed-tokens"
-    icon="wallet"
-    iconType="solid"
-  >
-    For Token Distribution.
-  </Card>
-</CardGroup>
-
-## Quickstart
-
-<Steps>
-  <Step title="Installation">
-    <WelcomePageInstall />
-  </Step>
-  <Step title="Get started">
-    <Card
-      title="Mint Compressed Tokens in less than 5 minutes"
-      href="/quickstart"
-      icon="bolt"
-    ></Card>
-  </Step>
-</Steps>
-
 ## What is ZK Compression?
 
 ZK Compression is a framework that reduces the storage cost of Solana accounts by combining generalized state compression and <Tooltip tip="A cryptographic proof to verify the validity of a statement without revealing the underlying data. ZK Compression uses a Groth16 SNARK zk proof with a constant 128 bytes size">zero-knowledge proofs</Tooltip>.
@@ -69,56 +24,3 @@ ZK Compression is a framework that reduces the storage cost of Solana accounts b
     proofs from RPC providers that support ZK Compression.
   </Step>
 </Steps>
-
-## Resources
-
-<CardGroup cols={3}>
-  <Card
-    title="RPC Methods"
-    href="/api-reference/json-rpc-methods/overview"
-    icon="tower-broadcast"
-    iconType="solid"
-  >
-    Browse ZK Compression's JSON RPC methods.
-  </Card>
-  <Card title="SDKs" href="/resources/sdks" icon="code" iconType="solid">
-    Explore our TypeScript and Rust SDKs.
-  </Card>
-  <Card
-    title="CLI Installation"
-    href="/resources/cli-installation"
-    icon="terminal"
-    iconType="solid"
-  >
-    Install the ZK Compression CLI for local development.
-  </Card>
-</CardGroup>
-
-## Learn & Community
-
-<CardGroup cols={3}>
-  <Card title="Start Learning" href="/learn/core-concepts" icon="graduation-cap" iconType="solid">
-    Learn about ZK Compression's core concepts.
-  </Card>
-  <Card title="Security" href="/references/security" icon="shield-halved" iconType="solid">
-    Read our external audit and formal verification reports.
-  </Card>
-  <Card
-    title="Discord"
-    href="https://discord.com/invite/CYvjBgzRFP"
-    icon="discord"
-    iconType="solid"
-  >
-    Join our Discord for support and discussions.
-  </Card>
-</CardGroup>
-
-## Next Steps
-
-<Card
-  title="Quickstart: Mint Compressed Tokens in less than 5 minutes"
-  icon="chevron-right"
-  color="#0066ff"
-  href="/quickstart"
-  horizontal
-></Card>

@@ -1,0 +1,9 @@
+```rust
+#[light_account(
+    init,
+    associated_token::authority = ata_owner,
+    associated_token::mint = ata_mint,
+    associated_token::bump = params.ata_bump
+)]
+pub ata: UncheckedAccount<'info>,
+```

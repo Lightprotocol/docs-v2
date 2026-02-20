@@ -1,6 +1,6 @@
 ---
-title: Overview
-description: "Overview to compressed tokens and guides with full code examples. Use for distributing tokens (eg rewards, airdrops) or creating associated token accounts for users."
+title: "Legacy Compressed Tokens"
+description: "Compressed tokens are the most efficient way to distribute SPL tokens (eg rewards, airdrops). For other token purposes use Light Token."
 keywords: ["compressed tokens on solana", "scalable token distribution on solana", "infrastructure for token distribution", "airdrop infrastructure on solana", "launchpad infrastructure on solana"]
 ---
 
@@ -8,11 +8,18 @@ import GuidesTable from "/snippets/overview-tables/compressed-tokens-guides-tabl
 import AdvancedGuidesTable from "/snippets/overview-tables/compressed-tokens-advanced-guides-table.mdx";
 import SetupEnvironment from "/snippets/setup/setup-environment-tabs.mdx";
 import InstallDependencies from "/snippets/setup/install-dependencies-codegroup.mdx";
+import SupportFooter from "/snippets/support-footer.mdx";
 import { TokenAccountCompressedVsSpl } from "/snippets/jsx/token-account-compressed-vs-spl.jsx";
+import AgentSkillAirdrop from "/snippets/setup/agent-skill-airdrop.mdx";
 
-<Check>
-  **Compressed Tokens are supported by leading Solana wallets such as Phantom and Backpack.**
-</Check>
+<AgentSkillAirdrop />
+
+<Info>
+**Note: The new [Light Token Program Beta](/light-token/welcome)** is live on Solana Devnet with mainnet expected in Q1 2026.
+We recommend to use Light Token for most purposes except airdrops and other forms of token distribution.
+The SDK for compressed tokens can still be used once Light Token is on Solana Mainnet.
+For production use today, use Compressed Tokens, which are on Solana Mainnet.
+</Info>
 
 | Creation          | Solana              | Compressed         |
 | :---------------- | :------------------ | :----------------- |
@@ -22,16 +29,20 @@ import { TokenAccountCompressedVsSpl } from "/snippets/jsx/token-account-compres
 2. Compressed token accounts are rent-free.
 3. Any light-token or SPL token can be compressed/decompressed at will.
 
+<Check>
+  **Compressed Tokens are supported by leading Solana wallets such as Phantom and Backpack.**
+</Check>
+
 ## Recommended Usage of Compressed Tokens
 
 <Card title="Token Distribution">
   Distribute tokens without paying upfront rent per recipient.
 
   <Card
-    title="Create an Airdrop"
+    title="Guide"
     icon="chevron-right"
     color="#0066ff"
-    href="/compressed-tokens/advanced-guides/airdrop"
+    href="/compressed-tokens/airdrop"
     horizontal
   />
 </Card>
@@ -43,44 +54,32 @@ import { TokenAccountCompressedVsSpl } from "/snippets/jsx/token-account-compres
     title="Compress SPL Token Accounts"
     icon="chevron-right"
     color="#0066ff"
-    href="/compressed-tokens/guides/compress-spl-token-account"
+    href="https://github.com/Lightprotocol/examples-zk-compression/blob/main/compressed-token-cookbook/actions/compress.ts"
     horizontal
   />
 </Card>
 
-# Get Started
+## RPC methods
 
-<Accordion title="Installation & Setup">
-<Steps>
-  <Step>
+The Photon API provides ZK Compression methods that extend the default Solana JSON RPC API.
 
-### Install dependencies
+<Card
+  title="JSON RPC methods"
+  icon="chevron-right"
+  color="#0066ff"
+  href="/api-reference/json-rpc-methods/overview"
+  horizontal
+/>
 
-<InstallDependencies />
-</Step>
+## Guides
 
-<Step>
+The SDK for compressed tokens can be used but is not maintained.
+Use [Light Token](/light-token/welcome) for other purposes than token distribution or storage of inactive tokens.
 
-### Set up your developer environment
+|  |  |
+|---------|------|
+| Compressed token cookbook | [GitHub](https://github.com/Lightprotocol/examples-zk-compression/tree/main/compressed-token-cookbook) |
+| Token distribution | [GitHub](https://github.com/Lightprotocol/examples-zk-compression/tree/main/example-token-distribution) |
+| Web client | [GitHub](https://github.com/Lightprotocol/examples-zk-compression/tree/main/example-web-client) |
 
-<SetupEnvironment />
-
-</Step>
-
-</Steps>
-
-</Accordion>
-
-<Steps>
-
-<Step>
-  ### Basic Guides
-  <GuidesTable />
-</Step>
-
-<Step>
-  ### Advanced Guides
-  <AdvancedGuidesTable />
-</Step>
-
-</Steps>
+<SupportFooter />

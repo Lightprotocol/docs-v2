@@ -1,0 +1,44 @@
+---
+title: "PDA accounts"
+sidebarTitle: "Overview"
+description: "Overview to Light-PDAs (Solana accounts with sponsored rent-exemption) and compressed PDAs (compressed accounts without rent-exemption)."
+---
+import CompressibleRentExplained from "/snippets/compressible-rent-explained.mdx";
+
+## Light-PDA
+
+Light-PDAs are Solana PDAs with sponsored rent-exemption and can be implemented with minimal code changes to your existing Solana program.
+Your program logic stays mostly untouched, which keeps audit overhead minimal.
+
+|                  | Regular PDA          | Light-PDA       |
+|------------------|----------------------|-----------------|
+| 100-byte account | ~1,600,000 lamports  | ~11,500 lamports |
+
+> Use Light-PDA's like any Solana PDA, e.g. for DeFi pools, vaults, pool accounts, or other shared state.
+
+<Accordion title="Light Rent Config Explained">
+  <CompressibleRentExplained />
+</Accordion>
+
+<Card title="Light-PDA integration guide" icon="chevron-right" href="/pda/light-pda/overview" horizontal />
+
+---
+
+## Advanced: Compressed PDA
+
+Compressed PDAs are compressed accounts with an address.
+Programs invoke the Light System program to create and update compressed accounts, instead of the System program.
+Fully compatible with existing Solana programs, but requires custom logic.
+
+|                  | Regular PDA          | Compressed PDA  |
+|------------------|----------------------|-----------------|
+| 100-byte account | ~1,600,000 lamports  | 15,000 lamports |
+
+> Use for accounts where each user or entity gets their own PDA and state is infrequently accessed:
+> - Per-user state (profiles, preferences, credentials)
+> - DePIN node accounts and stake accounts
+> - Nullifiers to prevent an on-chain instruction from 
+> being executed twice (little implementation overhead and useful e.g. for [payments](/pda/compressed-pdas/guides/how-to-create-nullifier-pdas) or [ZK programs](zk/overview))
+> - App state that is written to and read from infrequently
+
+<Card title="Compressed PDA program template" icon="chevron-right" href="/pda/compressed-pdas/overview" horizontal />

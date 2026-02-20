@@ -1,0 +1,303 @@
+---
+title: Close Compressed Accounts
+description: Guide to close compressed accounts in Solana programs with full code examples.
+keywords: ["close compressed accounts", "reclaim compressed account"]
+---
+
+import CompressedPdasProgramSetup from '/snippets/setup/compressed-pdas-program-setup.mdx';
+import CompressedPdasSystemAccountsList from '/snippets/accounts-list/compressed-pdas-system-accounts-list.mdx';
+import DevelopmentEnvironmentSetup from '/snippets/setup/development-environment-setup.mdx';
+import AnchorProgram from '/snippets/code-snippets/close/anchor-program.mdx';
+import NativeProgram from '/snippets/code-snippets/close/native-program.mdx';
+import CpiCloseAiPrompt from '/snippets/ai-prompts/cpi-programs/close.mdx';
+
+Compressed accounts are closed via CPI to the Light System Program.
+
+Closing a compressed account
+
+* consumes the existing account hash, and
+* produces a new account hash with zero values to mark it as closed.
+* A closed compressed account [can be reinitialized](/pda/compressed-pdas/guides/how-to-reinitialize-compressed-accounts).
+
+<Note>
+Find [full code examples at the end](/pda/compressed-pdas/guides/how-to-close-compressed-accounts#full-code-example) for Anchor and native Rust.
+</Note>
+
+# Implementation Guide
+
+This guide will cover the components of a Solana program that closes compressed accounts.
+Here is the complete flow to close compressed accounts:
+
+<div className="hidden dark:block">
+<Frame>
+  ![](/images/program-closes.png)
+</Frame>
+</div>
+<div className="block dark:hidden">
+<Frame>
+  ![](/images/program-close.png)
+</Frame>
+</div>
+
+<Tabs>
+<Tab title="Guide">
+<Steps>
+<Step>
+
+### Program Setup
+
+<Accordion title="Dependencies, Constants, Compressed Account">
+
+<CompressedPdasProgramSetup />
+
+</Accordion>
+</Step>
+
+<Step>
+
+### Instruction Data
+
+Define the instruction data with the following parameters:
+
+<Tabs>
+<Tab title="Anchor">
+```rust
+pub fn close_account<'info>(
+    ctx: Context<'_, '_, '_, 'info, GenericAnchorAccounts<'info>>,
+    proof: ValidityProof,
+    account_meta: CompressedAccountMeta,
+    current_message: String,
+) -> Result<()>
+```
+</Tab>
+
+<Tab title="Native Rust">
+```rust
+pub struct CloseInstructionData {
+    pub proof: ValidityProof,
+    pub account_meta: CompressedAccountMeta,
+    pub current_message: String,
+}
+```
+</Tab>
+</Tabs>
+
+1. **Validity Proof**
+
+* Define `proof` to include the proof that the account exists in the state tree.
+* Clients fetch a validity proof with `getValidityProof()` from an RPC provider that supports ZK Compression (Helius, Triton, ...).
+
+2. **Specify input state and output state tree (stores closed account hash)**
+
+* Define `account_meta: CompressedAccountMeta` to reference the existing account and specify the state tree to store the new hash with zero values:
+  * `tree_info: PackedStateTreeInfo`: References the existing account hash in the state tree.
+  * `address`: The account's derived address.
+  * `output_state_tree_index` points to the state tree that will store the updated hash with a zero-byte hash to mark the account as closed.
+
+<Info>
+Clients fetch the current account with `getCompressedAccount()` and populate `CompressedAccountMeta` with the account's metadata.
+</Info>
+
+3. **Current data**
+
+* Define fields to include the current account data passed by the client.
+* This depends on your program logic. This example includes the `current_message` field.
+</Step>
+
+<Step>
+
+### Close Compressed Account
+
+Load the compressed account and mark it as closed with `LightAccount::new_close()`.
+
+<Note>
+`new_close()`
+
+1. hashes the current account data as input state and
+2. marks the account for closure for the Light System Program.
+</Note>
+
+<Tabs>
+<Tab title="Anchor">
+```rust
+let my_compressed_account = LightAccount::<MyCompressedAccount>::new_close(
+    &crate::ID,
+    &account_meta,
+    MyCompressedAccount {
+        owner: ctx.accounts.signer.key(),
+        message: current_message,
+    },
+)?;
+```
+</Tab>
+
+<Tab title="Native Rust">
+```rust
+let my_compressed_account = LightAccount::<MyCompressedAccount>::new_close(
+    &ID,
+    &instruction_data.account_meta,
+    MyCompressedAccount {
+        owner: *signer.key,
+        message: instruction_data.current_message,
+    },
+)?;
+```
+</Tab>
+</Tabs>
+
+**Pass these parameters to `new_close()`:**
+
+* `&program_id`: The program's ID that owns the compressed account.
+* `&account_meta`: The `CompressedAccountMeta` from instruction data (_Step 2_) that identifies the existing account and specifies the output state tree.
+* Current account data: The existing account data. The SDK hashes this input state for verification by the Light System Program.
+  * Anchor: Construct `MyCompressedAccount` with `ctx.accounts.signer.key()` and `current_message`
+  * Native: Construct `MyCompressedAccount` with data from `instruction_data`
+
+**The SDK creates:**
+
+* A `LightAccount` wrapper similar to Anchor's `Account` that marks the account for closure.
+
+<Info>
+`new_close()` hashes the input state and marks the account for closure. The Light System Program creates output state with zero values:
+
+* a zero discriminator (`0u8; 8`) removes type identification of the account,
+* the output contains zeroes as data hash that indicates no data content, and
+* the data field contains an empty vector, instead of serialized account fields.
+</Info>
+</Step>
+
+<Step>
+
+### Light System Program CPI
+
+Invoke the Light System Program to close the compressed account. This empty account can be reinitialized with `LightAccount::new_empty()`.
+
+<Note>
+The Light System Program
+
+* validates the account exists in state tree,
+* nullifies the existing account hash, and
+* appends the new account hash with zero values to the state tree to mark it as closed.
+</Note>
+
+<Tabs>
+<Tab title="Anchor">
+```rust
+let light_cpi_accounts = CpiAccounts::new(
+    ctx.accounts.signer.as_ref(),
+    ctx.remaining_accounts,
+    crate::LIGHT_CPI_SIGNER,
+);
+
+LightSystemProgramCpi::new_cpi(LIGHT_CPI_SIGNER, proof)
+    .with_light_account(my_compressed_account)?
+    .invoke(light_cpi_accounts)?;
+```
+
+**Set up `CpiAccounts::new()`:**
+
+`CpiAccounts::new()` parses accounts for the CPI call to Light System Program.
+
+**Pass these parameters:**
+
+* `ctx.accounts.signer.as_ref()`: the transaction signer
+* `ctx.remaining_accounts`: Slice with `[system_accounts, ...packed_tree_accounts]`. The client builds this with `PackedAccounts` and passes it to the instruction.
+* `&LIGHT_CPI_SIGNER`: Your program's CPI signer PDA defined in Constants.
+</Tab>
+
+<Tab title="Native Rust">
+```rust
+let (signer, remaining_accounts) = accounts
+    .split_first();
+
+let cpi_accounts = CpiAccounts::new(
+    signer,
+    remaining_accounts,
+    LIGHT_CPI_SIGNER
+);
+
+LightSystemProgramCpi::new_cpi(LIGHT_CPI_SIGNER, instruction_data.proof)
+    .with_light_account(my_compressed_account)?
+    .invoke(cpi_accounts)?;
+```
+
+**Set up `CpiAccounts::new()`:**
+
+`CpiAccounts::new()` parses accounts for the CPI call to Light System Program.
+
+**Pass these parameters:**
+
+* `signer`: account that signs and pays for the transaction
+* `remaining_accounts`: Slice with `[system_accounts, ...packed_tree_accounts]`. The client builds this with `PackedAccounts`.
+  * `split_first()` extracts the fee payer from the accounts array to separate it from the Light System Program accounts needed for the CPI.
+* `&LIGHT_CPI_SIGNER`: Your program's CPI signer PDA defined in Constants.
+</Tab>
+</Tabs>
+<Accordion title="System Accounts List">
+
+<CompressedPdasSystemAccountsList />
+
+</Accordion>
+
+**Build the CPI instruction**:
+
+* `new_cpi()` initializes the CPI instruction with the `proof` to prove the compressed account exists in the state tree _- defined in the Instruction Data (Step 2)._
+* `with_light_account` adds the `LightAccount` wrapper configured to close the account with the zero values _- defined in Step 3_.
+* `invoke()` calls the Light System Program with `CpiAccounts`.
+</Step>
+</Steps>
+</Tab>
+<Tab title="AI Prompt">
+<CpiCloseAiPrompt />
+</Tab>
+</Tabs>
+
+# Full Code Example
+
+The example programs below implement all steps from this guide.
+Make sure you have your developer environment set up first.
+
+<Accordion title="Setup">
+<DevelopmentEnvironmentSetup />
+</Accordion>
+
+<Warning>
+For help with debugging, see the [Error Cheatsheet](/resources/error-cheatsheet).
+</Warning>
+
+<Tabs>
+<Tab title="Anchor">
+<Info>
+Find the source code [here](https://github.com/Lightprotocol/program-examples/tree/main/basic-operations/anchor/close).
+</Info>
+
+<AnchorProgram />
+</Tab>
+
+<Tab title="Native Rust">
+<Info>
+Find the source code [here](https://github.com/Lightprotocol/program-examples/tree/main/basic-operations/native/programs/close).
+</Info>
+
+<NativeProgram />
+</Tab>
+</Tabs>
+
+# Next Steps
+
+<CardGroup>
+<Card
+  title="Build a client for your program"
+  icon="chevron-right"
+  color="#0066ff"
+  href="/pda/compressed-pdas/guides/client-guide"
+  horizontal
+/>
+<Card
+  title="Learn how to reinitialize compressed accounts"
+  icon="chevron-right"
+  color="#0066ff"
+  href="/pda/compressed-pdas/guides/how-to-reinitialize-compressed-accounts"
+  horizontal
+/>
+</CardGroup>

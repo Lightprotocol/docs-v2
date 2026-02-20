@@ -1,0 +1,35 @@
+**Rent-exemption: sponsored by a rent sponsor PDA.**
+
+Every Solana account requires a rent-exempt balance in SOL upon creation. 
+A rent sponsor PDA by Light Protocol pays the rent-exemption cost for the account so account creators never lock up SOL for rent.
+
+**Top-ups: paid by the fee payer.**
+
+The `feePayer` on the transaction bumps a small virtual rent balance (766 lamports by default)
+ on each write to keep the account active (hot balance).
+ If you're building a wallet or dApp, set your application as the fee payer and your users never pay rent or top-ups.
+
+<Info>
+ "Cold" accounts virtual rent balance below threshold (eg 24h without write bump) get auto-compressed.
+The cold account's state is cryptographically preserved on the Solana ledger.
+ Users can load a cold account into hot state in-flight when using the account again.
+</Info>
+
+```text
+    Rent sponsor PDA              Fee payer bumps
+    pays rent-exemption           virtual rent on write
+         │                              │
+         ▼                              │
+    ┌─────────┐                    ┌────┴────┐
+    │ CREATE  │ ──────────────────►│   HOT   │◄───┐
+    └─────────┘                    └────┬────┘    │
+                                        │         │
+                                  no writes for   │ client loads
+                                  threshold       │ cold → hot
+                                  (e.g. 24h)      │
+                                        │         │
+                                        ▼         │
+                                   ┌─────────┐    │
+                                   │  COLD   │────┘
+                                   └─────────┘
+```

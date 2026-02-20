@@ -1,0 +1,46 @@
+```typescript
+import { Transaction, TransactionInstruction, PublicKey } from '@solana/web3.js';
+import type { ConnectedStandardSolanaWallet } from '@privy-io/js-sdk-core';
+import { useSignTransaction } from '@privy-io/react-auth/solana';
+
+type SignTransactionFn = ReturnType<typeof useSignTransaction>['signTransaction'];
+
+interface SignAndSendOptions {
+  rpc: any;
+  feePayer: PublicKey;
+  wallet: ConnectedStandardSolanaWallet;
+  signTransaction: SignTransactionFn;
+}
+
+export async function signAndSendBatches(
+  instructionBatches: TransactionInstruction[][],
+  options: SignAndSendOptions,
+): Promise<string | null> {
+  const { rpc, feePayer, wallet, signTransaction } = options;
+  const signatures: string[] = [];
+
+  for (const ixs of instructionBatches) {
+    const tx = new Transaction().add(...ixs);
+    const { blockhash } = await rpc.getLatestBlockhash();
+    tx.recentBlockhash = blockhash;
+    tx.feePayer = feePayer;
+
+    const unsignedTxBuffer = tx.serialize({ requireAllSignatures: false });
+    const signedTx = await signTransaction({
+      transaction: unsignedTxBuffer,
+      wallet,
+      chain: 'solana:devnet',
+    });
+
+    const signedTxBuffer = Buffer.from(signedTx.signedTransaction);
+    const sig = await rpc.sendRawTransaction(signedTxBuffer, {
+      skipPreflight: false,
+      preflightCommitment: 'confirmed',
+    });
+    await rpc.confirmTransaction(sig, 'confirmed');
+    signatures.push(sig);
+  }
+
+  return signatures.length > 0 ? signatures[signatures.length - 1] : null;
+}
+```

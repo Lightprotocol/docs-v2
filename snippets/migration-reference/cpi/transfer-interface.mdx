@@ -1,0 +1,15 @@
+```rust title="Light"
+use light_token::instruction::TransferInterfaceCpi;
+
+TransferInterfaceCpi::new(
+    amount,
+    decimals,
+    source.clone(),
+    destination.clone(),
+    authority.clone(),
+    payer.clone(),
+    light_token_authority.clone(),
+    system_program.clone(),
+)
+.invoke()?;
+```

@@ -1,0 +1,9 @@
+```rust
+use light_token::instruction::RevokeCpi;
+
+RevokeCpi {
+    token_account: token_account.clone(),
+    owner: owner.clone(),
+}
+.invoke()?
+```

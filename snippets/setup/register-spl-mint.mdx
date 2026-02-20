@@ -1,0 +1,68 @@
+## One-time: Create interface PDA to existing SPL Mint
+
+For existing SPL mints (e.g. USDC), register the SPL interface once. This creates the omnibus PDA that holds SPL tokens when wrapped to light-token.
+
+<Note>
+Find a full code example [here](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments-and-wallets/register-spl-mint.ts).
+</Note>
+
+Check if the interface already exists:
+
+```typescript
+import { getSplInterfaceInfos } from "@lightprotocol/compressed-token";
+
+try {
+  const infos = await getSplInterfaceInfos(rpc, mint);
+  const exists = infos.some((i) => i.isInitialized);
+  console.log("Interface exists:", exists);
+} catch {
+  console.log("No interface registered for this mint.");
+}
+```
+
+Register:
+
+<Tabs>
+<Tab title="Instruction">
+
+```typescript
+import { Transaction, sendAndConfirmTransaction } from "@solana/web3.js";
+import { LightTokenProgram } from "@lightprotocol/compressed-token";
+import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
+
+const ix = await LightTokenProgram.createSplInterface({
+  feePayer: payer.publicKey,
+  mint,
+  tokenProgramId: TOKEN_PROGRAM_ID,
+});
+
+const tx = new Transaction().add(ix);
+await sendAndConfirmTransaction(rpc, tx, [payer]);
+```
+
+</Tab>
+<Tab title="Action">
+
+```typescript
+import { createSplInterface } from "@lightprotocol/compressed-token";
+
+await createSplInterface(rpc, payer, mint);
+```
+
+</Tab>
+</Tabs>
+
+<Accordion title="Or: Create a new SPL mint with interface">
+
+Use `createMintInterface` with `TOKEN_PROGRAM_ID` to create a new SPL mint and register the interface in one transaction:
+
+```typescript
+import { createMintInterface } from "@lightprotocol/compressed-token/unified";
+import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
+
+const { mint } = await createMintInterface(
+  rpc, payer, payer, null, 9, undefined, undefined, TOKEN_PROGRAM_ID
+);
+```
+
+</Accordion>

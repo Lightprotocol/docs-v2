@@ -1,0 +1,8 @@
+```typescript
+import { getAssociatedTokenAddressSync } from "@solana/spl-token";
+import { unwrap } from "@lightprotocol/compressed-token/unified";
+
+const splAta = getAssociatedTokenAddressSync(mint, owner.publicKey);
+
+await unwrap(rpc, payer, splAta, owner, mint, amount);
+```

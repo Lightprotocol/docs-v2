@@ -1,0 +1,99 @@
+```typescript
+import { useState } from 'react';
+import { PublicKey, Transaction, ComputeBudgetProgram } from '@solana/web3.js';
+import { getAssociatedTokenAddressSync, getAccount } from '@solana/spl-token';
+import { getSplInterfaceInfos } from '@lightprotocol/compressed-token';
+import {
+  createWrapInstruction,
+  getAssociatedTokenAddressInterface,
+  createAssociatedTokenAccountInterfaceIdempotentInstruction,
+} from '@lightprotocol/compressed-token/unified';
+import { createRpc, CTOKEN_PROGRAM_ID } from '@lightprotocol/stateless.js';
+import type { ConnectedStandardSolanaWallet } from '@privy-io/js-sdk-core';
+import { useSignTransaction } from '@privy-io/react-auth/solana';
+
+type SignTransactionFn = ReturnType<typeof useSignTransaction>['signTransaction'];
+
+export interface WrapParams {
+  ownerPublicKey: string;
+  mint: string;
+  amount: number;
+  decimals?: number;
+}
+
+export interface WrapArgs {
+  params: WrapParams;
+  wallet: ConnectedStandardSolanaWallet;
+  signTransaction: SignTransactionFn;
+}
+
+export function useWrap() {
+  const [isLoading, setIsLoading] = useState(false);
+
+  const wrap = async (args: WrapArgs): Promise<string> => {
+    setIsLoading(true);
+
+    try {
+      const { params, wallet, signTransaction } = args;
+      const { ownerPublicKey, mint, amount, decimals = 9 } = params;
+
+      const rpc = createRpc(import.meta.env.VITE_HELIUS_RPC_URL);
+
+      const owner = new PublicKey(ownerPublicKey);
+      const mintPubkey = new PublicKey(mint);
+      const tokenAmount = BigInt(Math.floor(amount * Math.pow(10, decimals)));
+
+      // Get SPL interface info — determines whether mint uses SPL or T22
+      const splInterfaceInfos = await getSplInterfaceInfos(rpc, mintPubkey);
+      const splInterfaceInfo = splInterfaceInfos.find(
+        (info) => info.isInitialized,
+      );
+      if (!splInterfaceInfo) throw new Error('No SPL interface found for this mint');
+      const { tokenProgram } = splInterfaceInfo;
+
+      // Derive source associated token account using the mint's token program (SPL or T22)
+      const splAta = getAssociatedTokenAddressSync(mintPubkey, owner, false, tokenProgram);
+      const ataAccount = await getAccount(rpc, splAta, undefined, tokenProgram);
+      if (ataAccount.amount < BigInt(tokenAmount)) {
+        throw new Error('Insufficient SPL balance');
+      }
+
+      // Derive light-token associated token account
+      const lightTokenAta = getAssociatedTokenAddressInterface(mintPubkey, owner);
+
+      // Build transaction
+      const tx = new Transaction().add(
+        ComputeBudgetProgram.setComputeUnitLimit({ units: 200_000 }),
+        createAssociatedTokenAccountInterfaceIdempotentInstruction(
+          owner, lightTokenAta, owner, mintPubkey, CTOKEN_PROGRAM_ID,
+        ),
+        createWrapInstruction(
+          splAta, lightTokenAta, owner, mintPubkey,
+          tokenAmount, splInterfaceInfo, decimals, owner,
+        ),
+      );
+
+      const { blockhash } = await rpc.getLatestBlockhash();
+      tx.recentBlockhash = blockhash;
+      tx.feePayer = owner;
+
+      const unsignedTxBuffer = tx.serialize({ requireAllSignatures: false });
+      const signedTx = await signTransaction({
+        transaction: unsignedTxBuffer,
+        wallet,
+        chain: 'solana:devnet',
+      });
+
+      const signedTxBuffer = Buffer.from(signedTx.signedTransaction);
+      return rpc.sendRawTransaction(signedTxBuffer, {
+        skipPreflight: false,
+        preflightCommitment: 'confirmed',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return { wrap, isLoading };
+}
+```

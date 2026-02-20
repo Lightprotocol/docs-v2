@@ -3,6 +3,9 @@ title: "Program Integration"
 description: "Build high-performance DeFi programs with rent-free accounts"
 ---
 
+import AgentSkillDefi from "/snippets/setup/agent-skill-defi.mdx";
+import DefiAnchorAiPrompt from "/snippets/ai-prompts/anchor-programs/defi-anchor.mdx";
+
 The Light-SDK sponsors rent-exemption for your PDAs, token accounts, and mints. Your program logic stays the same.
 
 |                        | Before | After |
@@ -25,20 +28,25 @@ macro-generated.
 If you don't use Anchor, see the [Pinocchio Programs](./programs-pinocchio) guide.
 
 ---
+
+<AgentSkillDefi />
+
 <Callout type="info">
 You can find a complete rent-free AMM reference implementation [here](https://github.com/Lightprotocol/cp-swap-reference).
 </Callout>
+
+<Tabs>
+<Tab title="Guide">
 
 ## Step 1: Dependencies
 
 ```toml
 [dependencies]
 
-light-sdk = { version = "0.18.0", features = ["anchor", "v2", "cpi-context"] }
-light-sdk-macros = { version = "0.18.0" }
-light-token = { version = "0.3.0", features = ["anchor"] }
-
-light-anchor-spl = { version = "0.31" }    # TokenInterface uses light_token::ID
+light-sdk = { version = "0.19.0", features = ["anchor", "v2", "cpi-context"] }
+light-sdk-macros = "0.19.0"
+light-token = { version = "0.4.0", features = ["anchor"] }
+light-anchor-spl = "0.31"    # TokenInterface uses light_token::ID
 anchor-lang = "0.31"
 ```
 
@@ -344,6 +352,11 @@ pub fn process_initialize_pool(ctx: Context<InitializePool>, params: InitializeP
 
 </Accordion>
 
+</Tab>
+<Tab title="AI Prompt">
+<DefiAnchorAiPrompt />
+</Tab>
+</Tabs>
 
 ---
 

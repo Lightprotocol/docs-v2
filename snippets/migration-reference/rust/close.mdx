@@ -1,0 +1,11 @@
+```rust
+use light_token::instruction::{CloseAccount, LIGHT_TOKEN_PROGRAM_ID};
+
+let ix = CloseAccount::new(
+    LIGHT_TOKEN_PROGRAM_ID,
+    account,
+    destination,
+    owner,
+)
+.instruction()?;
+```

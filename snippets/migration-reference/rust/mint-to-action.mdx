@@ -1,0 +1,11 @@
+```rust
+use light_token_client::actions::MintTo;
+
+let sig = MintTo {
+    mint,
+    destination,
+    amount,
+}
+.execute(&mut rpc, &payer, &authority)
+.await?;
+```

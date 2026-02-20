@@ -1,0 +1,7 @@
+```typescript
+const result = await rpc.getSignaturesForOwnerInterface(owner);
+
+console.log(result.signatures); // Merged + deduplicated
+console.log(result.solana);     // On-chain txs only
+console.log(result.compressed); // Compressed txs only
+```

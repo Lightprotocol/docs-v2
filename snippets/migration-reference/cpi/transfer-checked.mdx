@@ -1,0 +1,13 @@
+```rust
+use light_token::instruction::TransferCheckedCpi;
+
+TransferCheckedCpi {
+    source: source.clone(),
+    destination: destination.clone(),
+    mint: mint.clone(),
+    authority: authority.clone(),
+    amount,
+    decimals,
+}
+.invoke()?
+```

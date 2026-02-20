@@ -1,0 +1,15 @@
+```rust
+use light_token_client::actions::wrap::Wrap;
+
+Wrap {
+    rpc: &mut rpc,
+    payer: &payer,
+    spl_ata,
+    light_ata,
+    owner: &owner,
+    mint,
+    amount,
+}
+.execute()
+.await?;
+```

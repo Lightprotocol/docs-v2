@@ -24,10 +24,16 @@ import InstructionCode from "/snippets/code-snippets/light-token/mint-to/instruc
 import RustActionCode from "/snippets/code-snippets/light-token/mint-to/rust-client/action.mdx";
 import RustInstructionCode from "/snippets/code-snippets/light-token/mint-to/rust-client/instruction.mdx";
 import AnchorProgramCode from "/snippets/code-snippets/light-token/mint-to/anchor-program/full-example.mdx";
+import AgentSkillGeneric from "/snippets/setup/agent-skill-generic.mdx";
+import MintToAiPrompt from "/snippets/ai-prompts/ts-cookbook/mint-to.mdx";
+import RustMintToAiPrompt from "/snippets/ai-prompts/rust-cookbook/mint-to.mdx";
+import ProgramMintToAiPrompt from "/snippets/ai-prompts/program-cookbook/mint-to.mdx";
 
 
 1. Mint To creates new tokens of a mint and deposits them to a specified token account.
 2. Before we can mint any tokens, we need an initialized mint account (SPL, Token 2022 or Light) for which we hold the mint authority.
+
+<AgentSkillGeneric />
 
 <Tabs>
 
@@ -48,9 +54,11 @@ Compare to SPL:
 
 <Info>
   Find the source code
-  [here](https://github.com/Lightprotocol/light-protocol/blob/0c4e2417b2df2d564721b89e18d1aad3665120e7/js/compressed-token/src/v3/actions/mint-to-interface.ts).
+  [here](https://github.com/Lightprotocol/light-protocol/blob/main/js/compressed-token/src/v3/actions/mint-to-interface.ts).
 </Info>
 
+<Tabs>
+<Tab title="Guide">
 <Steps>
 <Step>
 ### Mint Tokens to Light Token Account
@@ -68,6 +76,11 @@ Compare to SPL:
 
 </Step>
 </Steps>
+</Tab>
+<Tab title="AI Prompt">
+<MintToAiPrompt />
+</Tab>
+</Tabs>
 
 </Tab>
 
@@ -85,6 +98,8 @@ Compare to SPL:
   language="rust"
 />
 
+<Tabs>
+<Tab title="Guide">
 <Steps>
 <Step>
 ### Prerequisites
@@ -97,7 +112,7 @@ Compare to SPL:
 ### Mint to Light Token Accounts
 
 <Info>
-  View the [source code](https://github.com/Lightprotocol/light-protocol/blob/main/sdk-libs/token-sdk/src/instruction/mint_to.rs) and [full example](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/instructions/mint_to.rs) with shared test utilities.
+  Find the source code [here](https://github.com/Lightprotocol/light-protocol/blob/main/sdk-libs/token-sdk/src/instruction/mint_to.rs).
 </Info>
 
 <Tabs>
@@ -112,8 +127,15 @@ Compare to SPL:
 </Step>
 </Steps>
 </Tab>
+<Tab title="AI Prompt">
+<RustMintToAiPrompt />
+</Tab>
+</Tabs>
+</Tab>
 
 <Tab title="Program">
+<Tabs>
+<Tab title="Guide">
 
 <Note>Find [a full code example at the end](#full-code-example).</Note>
 
@@ -182,6 +204,11 @@ MintToCpi {
 
 <AnchorProgramCode />
 
+</Tab>
+<Tab title="AI Prompt">
+<ProgramMintToAiPrompt />
+</Tab>
+</Tabs>
 </Tab>
 </Tabs>
 

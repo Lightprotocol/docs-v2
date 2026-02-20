@@ -1,0 +1,10 @@
+```rust
+use light_token::instruction::Thaw;
+
+let ix = Thaw {
+    token_account: ata,
+    mint,
+    freeze_authority: payer.pubkey(),
+}
+.instruction()?;
+```

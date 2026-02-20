@@ -6,11 +6,15 @@ keywords: ["streaming compressible pdas solana", "laserstream pda indexing", "gr
 visibility: "hidden"
 ---
 
+import AgentSkillStreaming from "/snippets/setup/agent-skill-streaming.mdx";
+
 <Note>
 Programs using the Light SDK expose standardized instruction discriminators for
 `compress_accounts_idempotent` and `decompress_accounts_idempotent`.
 Programs that don't implement these discriminators are not indexable with this approach.
 </Note>
+
+<AgentSkillStreaming />
 
 ## Architecture
 

@@ -1,0 +1,11 @@
+```rust
+use light_token_client::actions::CreateAta;
+
+let (sig, ata) = CreateAta {
+    mint,
+    owner: owner.pubkey(),
+    idempotent: false,
+}
+.execute(&mut rpc, &payer)
+.await?;
+```

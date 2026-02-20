@@ -1,0 +1,10 @@
+```typescript
+import {
+  loadAta,
+  getAssociatedTokenAddressInterface,
+} from "@lightprotocol/compressed-token/unified";
+
+const ata = getAssociatedTokenAddressInterface(mint, recipient);
+
+const sig = await loadAta(rpc, ata, recipient, mint, payer);
+```

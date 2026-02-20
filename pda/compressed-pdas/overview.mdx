@@ -1,0 +1,260 @@
+---
+title: Overview & Program Template
+description: Compressed PDAs provide full composability and functionality of accounts at PDAs, without rent-exemption per account. Suited for accounts where each user or entity gets their own PDA and state is infrequently accessed.
+keywords: ["user state", "app state", "node acounts", "depin accounts", "stake accounts", "not shared state or config or pool accounts", "rent free program derived addresses", "rent free pda accounts", "compressed pda on solana", "infrastructure for depins on solana", "scalable solana infrastructure", "stake accounts for depins", "cost efficient stake accounts", "scalable reward distribution on solana"]
+---
+
+import ProgramExamplesTable from '/snippets/overview-tables/program-examples-table.mdx';
+import DevelopmentEnvironmentSetup from '/snippets/setup/development-environment-setup.mdx';
+import CompressedPdasGuidesTable from '/snippets/overview-tables/compressed-pdas-guides-table.mdx';
+import SdkReferenceCompressedPdas from '/snippets/overview-tables/sdk-reference-compressed-pdas.mdx';
+
+
+| Creation      | Regular PDA Account    | Compressed PDA         |
+| :------------- | :--------------------- | :---------------------- |
+| 100-byte PDA  | 	~1,600,000 lamports          | 15,000 lamports     |
+
+Compressed PDAs are derived using a specific program address and seed, like regular PDAs. 
+Custom programs invoke the <Tooltip tip="The program enforces compressed account layout with ownership and sum checks. It is invoked to create and interact with compressed accounts and tokens.">Light System program</Tooltip>
+to create and update compressed accounts, instead of the System program.
+Compressed PDAs are compressed accounts with an address.
+
+<Info>
+Compressed PDAs are suited for:
+- Per-user state (profiles, preferences, credentials)
+- DePIN node accounts and stake accounts
+- Nullifiers to prevent an on-chain instruction from 
+being executed twice (little implementation overhead and useful e.g. for [payments](/pda/compressed-pdas/guides/how-to-create-nullifier-pdas) or [ZK programs](zk/overview))
+- App state that is written to and read from infrequently
+
+For DeFi pools, vaults, shared state, pool accounts, or config accounts, use [Light-PDA](/pda/light-pda/overview) with minimal code changes.
+</Info>
+
+<Tabs>
+  <Tab title="Create">
+    <div className="hidden dark:block">
+    <Frame>
+      ![](/images/Untitled.png)
+    </Frame>
+    </div>
+    <div className="block dark:hidden">
+      <Frame>
+        ![](/images/image-22.png)
+      </Frame>
+    </div>
+  </Tab>
+  <Tab title="Update">
+    <div className="hidden dark:block">
+    <Frame>
+      ![](/images/Untitled-1.png)
+    </Frame>
+    </div>
+    <div className="block dark:hidden">
+      <Frame>
+      ![](/images/image-20.png)
+    </Frame>
+      </div>
+  </Tab>
+  <Tab title="Close">
+    <div className="hidden dark:block">
+    <Frame>
+      ![](/images/Untitled-4.png)
+    </Frame>
+    </div>
+    <div className="block dark:hidden">
+      <Frame>
+      ![](/images/image-23.png)
+    </Frame>
+    </div>
+  </Tab>
+  <Tab title="Reinitialize">
+    <div className="hidden dark:block">
+    <Frame>
+      ![](/images/program-reinit-1.png)
+    </Frame>
+    </div>
+    <div className="block dark:hidden">
+      <Frame>
+      ![](/images/program-reinit.png)
+    </Frame>
+    </div>
+  </Tab>
+  <Tab title="Burn">
+    <div className="hidden dark:block">
+    <Frame>
+      ![](/images/program-burn-1.png)
+    </Frame>
+    </div>
+    <div className="block dark:hidden">
+      <Frame>
+      ![](/images/program-burn.png)
+    </Frame>
+    </div>
+  </Tab>
+</Tabs>
+
+# Start Building with the Program Template
+
+<Steps>
+<Step>
+
+### Prerequisites
+<Info>
+Required versions:
+
+* **Rust**: 1.86.0 or later
+* **Solana CLI**: 2.2.15
+* **Anchor CLI**: 0.31.1
+* **Zk compression CLI**: 0.27.0 or later
+* **Node.js**: 23.5.0 or later
+</Info>
+<DevelopmentEnvironmentSetup />
+
+</Step>
+<Step>
+
+### Initialize your Program
+
+Instantiate a template Solana program with compressed accounts with all required dependencies.
+
+```bash
+light init testprogram
+```
+
+<Info>
+The `light init` command creates only Anchor-based projects . For Pinocchio programs, manually configure dependencies using `light-sdk-pinocchio`.
+</Info>
+
+<Accordion title="Dependencies">
+
+**Rust Crates**
+
+* `light-sdk` - Core SDK for compressed accounts in native and anchor programs
+* `light-sdk-pinocchio` Core SDK for compressed accounts in pinocchio programs
+* `light-client` - RPC client and indexer for interacting with compressed accounts
+* `light-program-test` - Testing utilities for compressed programs.
+
+**TypeScript/JavaScript Packages**
+
+* `@lightprotocol/stateless.js` - Client library for interacting with compressed accounts
+* `@lightprotocol/zk-compression-cli` - Command-line tools for ZK compression development
+
+</Accordion>
+</Step>
+<Step>
+
+### Build and Test
+
+Now `cd testprogram` and run:
+
+```bash
+anchor build
+# Success: Finished `release` profile [optimized] target(s), after compiling.
+# Note: Stack offset warnings are expected and don't prevent compilation
+```
+
+```bash
+cargo test-sbf
+
+# Success: test result: ok. 1 passed; 0 failed; 0 ignored
+```
+</Step>
+</Steps>
+
+
+## Common Errors
+
+<Accordion title="assert.h file not found - during compilation.">
+
+```shellscript
+Fix:
+In your terminal, run:
+1. export CC=$(xcrun -find clang)
+2. export SDKROOT=$(xcrun --show-sdk-path)
+3. cargo clean
+4. anchor build
+
+
+Example log:
+The following warnings were emitted during compilation:
+
+warning: blake3@1.5.1: In file included from c/blake3_neon.c:1:
+warning: blake3@1.5.1: c/blake3_impl.h:4:10: fatal error: 'assert.h' file not found
+warning: blake3@1.5.1:     4 | #include <assert.h>
+warning: blake3@1.5.1:       |          ^~~~~~~~~~
+warning: blake3@1.5.1: 1 error generated.
+
+error: failed to run custom build command for `blake3 v1.5.1`
+
+Caused by:
+  process didn't exit successfully: `/Users/you/testprogram/target/release/build/blake3-ac41d29c2eabe052/build-script-build` (exit status: 1)
+  --- stdout
+  cargo:rerun-if-env-changed=CARGO_FEATURE_PURE
+  cargo:rerun-if-env-changed=CARGO_FEATURE_NO_NEON
+  cargo:rerun-if-env-changed=CARGO_FEATURE_NEON
+  cargo:rerun-if-env-changed=CARGO_FEATURE_NEON
+  cargo:rerun-if-env-changed=CARGO_FEATURE_NO_NEON
+  cargo:rerun-if-env-changed=CARGO_FEATURE_PURE
+  cargo:rustc-cfg=blake3_neon
+  OUT_DIR = Some(/Users/you/testprogram/target/release/build/blake3-735a4c71d985df30/out)
+  TARGET = Some(aarch64-apple-darwin)
+  OPT_LEVEL = Some(3)
+  HOST = Some(aarch64-apple-darwin)
+  cargo:rerun-if-env-changed=CC_aarch64-apple-darwin
+  CC_aarch64-apple-darwin = None
+  cargo:rerun-if-env-changed=CC_aarch64_apple_darwin
+  CC_aarch64_apple_darwin = None
+  cargo:rerun-if-env-changed=HOST_CC
+  HOST_CC = None
+  cargo:rerun-if-env-changed=CC
+  CC = Some(/Users/you/.local/share/solana/install/releases/1.18.22/solana-release/bin/sdk/sbf/dependencies/platform-tools/llvm/bin/clang)
+  RUSTC_WRAPPER = None
+  cargo:rerun-if-env-changed=CC_ENABLE_DEBUG_OUTPUT
+  cargo:rerun-if-env-changed=CRATE_CC_NO_DEFAULTS
+  CRATE_CC_NO_DEFAULTS = None
+  DEBUG = Some(false)
+  cargo:rerun-if-env-changed=MACOSX_DEPLOYMENT_TARGET
+  MACOSX_DEPLOYMENT_TARGET = None
+  cargo:rerun-if-env-changed=CFLAGS_aarch64-apple-darwin
+  CFLAGS_aarch64-apple-darwin = None
+  cargo:rerun-if-env-changed=CFLAGS_aarch64_apple_darwin
+  CFLAGS_aarch64_apple_darwin = None
+  cargo:rerun-if-env-changed=HOST_CFLAGS
+  HOST_CFLAGS = None
+  cargo:rerun-if-env-changed=CFLAGS
+  CFLAGS = None
+  cargo:warning=In file included from c/blake3_neon.c:1:
+  cargo:warning=c/blake3_impl.h:4:10: fatal error: 'assert.h' file not found
+  cargo:warning=    4 | #include <assert.h>
+  cargo:warning=      |          ^~~~~~~~~~
+  cargo:warning=1 error generated.
+
+  --- stderr
+
+
+  error occurred: Command env -u IPHONEOS_DEPLOYMENT_TARGET "/Users/you/.local/share/solana/install/releases/1.18.22/solana-release/bin/sdk/sbf/dependencies/platform-tools/llvm/bin/clang" "-O3" "-ffunction-sections" "-fdata-sections" "-fPIC" "--target=arm64-apple-darwin" "-mmacosx-version-min=14.4" "-Wall" "-Wextra" "-std=c11" "-o" "/Users/you/testprogram/target/release/build/blake3-735a4c71d985df30/out/db3b6bfb95261072-blake3_neon.o" "-c" "c/blake3_neon.c" with args clang did not execute successfully (status code exit status: 1).
+```
+
+</Accordion>
+
+## Guides
+
+<CompressedPdasGuidesTable />
+
+## Program Examples
+
+<ProgramExamplesTable />
+
+## SDK Reference
+
+<SdkReferenceCompressedPdas />
+
+# Next Steps
+
+<Card
+  title="Build a client for your program."
+  icon="chevron-right"
+  color="#0066ff"
+  href="/pda/compressed-pdas/guides/client-guide"
+  horizontal
+/>

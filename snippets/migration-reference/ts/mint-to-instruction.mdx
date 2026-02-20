@@ -1,0 +1,11 @@
+```typescript
+import { createMintToInterfaceInstruction } from "@lightprotocol/compressed-token";
+
+const ix = createMintToInterfaceInstruction(
+  mintInterface,
+  destination,
+  authority.publicKey,
+  payer.publicKey,
+  amount
+);
+```

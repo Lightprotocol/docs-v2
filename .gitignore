@@ -3,10 +3,15 @@ mintlify-docs/
 /CLAUDE.md
 .windsurf.context/
 .claude/
+.entire/
 
 # Dependencies
 node_modules/
 
 stash
+.reapply-stash/
 docs-audit.md
 docs-audit.txt
+docs-anchor.json
+product-docs.json
+tabs-docs.json

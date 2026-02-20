@@ -1,0 +1,13 @@
+```rust
+use light_token::instruction::MintToCpi;
+
+MintToCpi {
+    mint: mint.clone(),
+    destination: destination.clone(),
+    authority: authority.clone(),
+    amount,
+    fee_payer: None,
+    max_top_up: None,
+}
+.invoke()?
+```

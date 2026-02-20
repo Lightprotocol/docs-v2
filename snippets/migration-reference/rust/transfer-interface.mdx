@@ -1,0 +1,17 @@
+```rust
+use light_token::instruction::TransferInterface;
+
+let ix = TransferInterface {
+    source,
+    destination,
+    amount,
+    decimals,
+    authority: payer.pubkey(),
+    payer: payer.pubkey(),
+    spl_interface: None,
+    max_top_up: None,
+    source_owner: LIGHT_TOKEN_PROGRAM_ID,
+    destination_owner: LIGHT_TOKEN_PROGRAM_ID,
+}
+.instruction()?;
+```

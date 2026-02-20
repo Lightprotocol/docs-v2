@@ -1,0 +1,9 @@
+```rust
+use light_token::instruction::Revoke;
+
+let ix = Revoke {
+    token_account: ata,
+    owner: payer.pubkey(),
+}
+.instruction()?;
+```

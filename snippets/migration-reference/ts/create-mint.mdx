@@ -1,0 +1,12 @@
+```typescript
+import { createMintInterface } from "@lightprotocol/compressed-token";
+
+const { mint } = await createMintInterface(
+  rpc,
+  payer,
+  mintAuthority,
+  freezeAuthority,
+  decimals,
+  mintKeypair
+);
+```

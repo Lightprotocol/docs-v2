@@ -1,10 +1,15 @@
 ```typescript
 import { useState } from 'react';
-import { PublicKey, Transaction, ComputeBudgetProgram } from '@solana/web3.js';
-import { LightTokenProgram, selectMinCompressedTokenAccountsForTransfer } from '@lightprotocol/compressed-token';
-import { bn, createRpc } from '@lightprotocol/stateless.js';
+import { PublicKey } from '@solana/web3.js';
+import {
+  createTransferInterfaceInstructions,
+} from '@lightprotocol/compressed-token/unified';
+import { createRpc } from '@lightprotocol/stateless.js';
 import type { ConnectedStandardSolanaWallet } from '@privy-io/js-sdk-core';
-import type { SignTransactionResult } from '@privy-io/react-auth/solana';
+import { useSignTransaction } from '@privy-io/react-auth/solana';
+import { signAndSendBatches } from './signAndSendBatches';
+
+type SignTransactionFn = ReturnType<typeof useSignTransaction>['signTransaction'];
 
 export interface TransferParams {
   ownerPublicKey: string;
@@ -17,11 +22,7 @@ export interface TransferParams {
 export interface TransferArgs {
   params: TransferParams;
   wallet: ConnectedStandardSolanaWallet;
-  signTransaction: (args: {
-    transaction: Buffer;
-    wallet: ConnectedStandardSolanaWallet;
-    chain: string;
-  }) => Promise<SignTransactionResult>;
+  signTransaction: SignTransactionFn;
 }
 
 export function useTransfer() {
@@ -32,67 +33,32 @@ export function useTransfer() {
 
     try {
       const { params, wallet, signTransaction } = args;
-      const { ownerPublicKey, mint, toAddress, amount, decimals = 6 } = params;
+      const { ownerPublicKey, mint, toAddress, amount, decimals = 9 } = params;
 
-      // Create RPC connection
       const rpc = createRpc(import.meta.env.VITE_HELIUS_RPC_URL);
 
       const owner = new PublicKey(ownerPublicKey);
       const mintPubkey = new PublicKey(mint);
       const recipient = new PublicKey(toAddress);
-      const tokenAmount = bn(Math.floor(amount * Math.pow(10, decimals)));
+      const tokenAmount = Math.floor(amount * Math.pow(10, decimals));
 
-      // Get compressed token accounts
-      const accounts = await rpc.getCompressedTokenAccountsByOwner(owner, { mint: mintPubkey });
-      if (!accounts.items || accounts.items.length === 0) {
-        throw new Error('No compressed token accounts found');
-      }
-
-      // Select minimum accounts needed
-      const [inputAccounts] = selectMinCompressedTokenAccountsForTransfer(accounts.items, tokenAmount);
-      if (inputAccounts.length === 0) {
-        throw new Error('Insufficient balance');
-      }
-
-      // Get validity proof
-      const proof = await rpc.getValidityProof(
-        inputAccounts.map((account) => bn(account.compressedAccount.hash))
+      // Returns TransactionInstruction[][].
+      // Each inner array is one transaction.
+      // Almost always returns just one.
+      const instructions = await createTransferInterfaceInstructions(
+        rpc, owner, mintPubkey, tokenAmount, owner, recipient,
       );
 
-      // Build transfer instruction
-      const transferIx = await LightTokenProgram.transfer({
-        payer: owner,
-        inputCompressedTokenAccounts: inputAccounts,
-        toAddress: recipient,
-        amount: tokenAmount,
-        recentInputStateRootIndices: proof.rootIndices,
-        recentValidityProof: proof.compressedProof,
-      });
-
-      // Build transaction
-      const { blockhash } = await rpc.getLatestBlockhash();
-      const transaction = new Transaction();
-      transaction.add(ComputeBudgetProgram.setComputeUnitLimit({ units: 300_000 }));
-      transaction.add(transferIx);
-      transaction.recentBlockhash = blockhash;
-      transaction.feePayer = owner;
-
-      // Serialize unsigned transaction
-      const unsignedTxBuffer = transaction.serialize({ requireAllSignatures: false });
-
-      // Sign with Privy
-      const signedTx = await signTransaction({
-        transaction: unsignedTxBuffer,
+      const signature = await signAndSendBatches(instructions, {
+        rpc,
+        feePayer: owner,
         wallet,
-        chain: 'solana:devnet',
+        signTransaction,
       });
 
-      // Send transaction
-      const signedTxBuffer = Buffer.from(signedTx.signedTransaction);
-      const signature = await rpc.sendRawTransaction(signedTxBuffer, {
-        skipPreflight: false,
-        preflightCommitment: 'confirmed',
-      });
+      if (!signature) {
+        throw new Error('Transfer returned no instructions');
+      }
 
       return signature;
     } finally {

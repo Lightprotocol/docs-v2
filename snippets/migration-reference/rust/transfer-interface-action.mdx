@@ -1,0 +1,15 @@
+```rust
+use light_token_client::actions::TransferInterface;
+
+let sig = TransferInterface {
+    source,
+    mint,
+    destination,
+    amount,
+    decimals,
+    spl_token_program: None,
+    restricted: false,
+}
+.execute(&mut rpc, &payer, &authority)
+.await?;
+```

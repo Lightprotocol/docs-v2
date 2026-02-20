@@ -1,0 +1,10 @@
+```rust
+use light_token::instruction::CloseAccountCpi;
+
+CloseAccountCpi {
+    account: account.clone(),
+    destination: destination.clone(),
+    authority: authority.clone(),
+}
+.invoke()?
+```

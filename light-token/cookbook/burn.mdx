@@ -16,11 +16,16 @@ import {
 import RustInstructionCode from "/snippets/code-snippets/light-token/burn/rust-client/instruction.mdx";
 import BurnCheckedRustInstructionCode from "/snippets/code-snippets/light-token/burn-checked/rust-client/instruction.mdx";
 import AnchorProgramCode from "/snippets/code-snippets/light-token/burn/anchor-program/full-example.mdx";
+import AgentSkillGeneric from "/snippets/setup/agent-skill-generic.mdx";
+import RustBurnAiPrompt from "/snippets/ai-prompts/rust-cookbook/burn.mdx";
+import ProgramBurnAiPrompt from "/snippets/ai-prompts/program-cookbook/burn.mdx";
 
 
 1. Burn permanently destroys tokens by reducing the balance in a token account. 
 2. Burned tokens are removed from circulation and decreases the supply tracked on the mint account.
 3. Only the token account owner (or approved delegate) can burn tokens.
+
+<AgentSkillGeneric />
 
 <Tabs>
 <Tab title="Rust Client">
@@ -35,6 +40,8 @@ Compare to SPL:
   language="rust"
 />
 
+<Tabs>
+<Tab title="Guide">
 <Steps>
 <Step>
 ### Prerequisites
@@ -47,7 +54,7 @@ Compare to SPL:
 ### Burn Light Tokens
 
 <Info>
-  View the [source code](https://github.com/Lightprotocol/light-protocol/blob/main/sdk-libs/token-sdk/src/instruction/burn.rs) and [full example](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/instructions/burn.rs) with shared test utilities.
+  Find the source code [here](https://github.com/Lightprotocol/light-protocol/blob/main/sdk-libs/token-sdk/src/instruction/burn.rs).
 </Info>
 
 <Tabs>
@@ -58,8 +65,15 @@ Compare to SPL:
 </Step>
 </Steps>
 </Tab>
+<Tab title="AI Prompt">
+<RustBurnAiPrompt />
+</Tab>
+</Tabs>
+</Tab>
 
 <Tab title="Program">
+<Tabs>
+<Tab title="Guide">
 
 <Note>
 Find [a full code example at the end](#full-code-example).
@@ -122,6 +136,11 @@ BurnCpi {
 
 <AnchorProgramCode />
 
+</Tab>
+<Tab title="AI Prompt">
+<ProgramBurnAiPrompt />
+</Tab>
+</Tabs>
 </Tab>
 
 </Tabs>

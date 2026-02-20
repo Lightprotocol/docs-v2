@@ -1,0 +1,11 @@
+```rust
+use light_token::instruction::Approve;
+
+let ix = Approve {
+    token_account: ata,
+    delegate: delegate.pubkey(),
+    owner: payer.pubkey(),
+    amount,
+}
+.instruction()?;
+```

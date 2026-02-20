@@ -1,0 +1,12 @@
+```typescript
+import { getAssociatedTokenAddressSync } from "@solana/spl-token";
+import {
+  wrap,
+  getAssociatedTokenAddressInterface,
+} from "@lightprotocol/compressed-token/unified";
+
+const splAta = getAssociatedTokenAddressSync(mint, owner.publicKey);
+const tokenAta = getAssociatedTokenAddressInterface(mint, owner.publicKey);
+
+await wrap(rpc, payer, splAta, tokenAta, owner, mint, amount);
+```

@@ -1,0 +1,13 @@
+```typescript
+import { createUnwrapInstruction } from "@lightprotocol/compressed-token";
+
+const ix = createUnwrapInstruction(
+  source,
+  destination,
+  owner.publicKey,
+  mint,
+  amount,
+  splInterfaceInfo,
+  decimals
+);
+```

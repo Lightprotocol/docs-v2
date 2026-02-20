@@ -17,23 +17,36 @@ export const Footer = () => {
           maxWidth: "48rem",
           margin: "0 auto",
           display: "flex",
-          justifyContent: "flex-end",
+          justifyContent: "space-between",
           alignItems: "center",
+          flexWrap: "wrap",
+          gap: "12px",
           fontSize: "0.875rem",
+          color: "#6b7280",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+        <span>
+          ZK Compression is built and maintained by{" "}
           <a
-            href="https://x.com/lightprotocol"
+            href="https://lightprotocol.com"
             target="_blank"
             rel="noopener noreferrer"
-            style={iconStyle}
-            aria-label="X (Twitter)"
+            style={{ color: "inherit", textDecoration: "underline" }}
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-            </svg>
+            Light
+          </a>{" "}
+          and{" "}
+          <a
+            href="https://helius.dev"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: "inherit", textDecoration: "underline" }}
+          >
+            Helius
           </a>
+          .
+        </span>
+        <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
           <a
             href="https://github.com/Lightprotocol/light-protocol"
             target="_blank"

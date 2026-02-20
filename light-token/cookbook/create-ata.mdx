@@ -27,6 +27,11 @@ import RustActionCode from "/snippets/code-snippets/light-token/create-ata/rust-
 import RustInstructionCode from "/snippets/code-snippets/light-token/create-ata/rust-client/instruction.mdx";
 import AnchorProgramCode from "/snippets/code-snippets/light-token/create-ata/anchor-program/full-example.mdx";
 import AnchorMacroCode from "/snippets/code-snippets/light-token/create-ata/anchor-macro/full-example.mdx";
+import AgentSkillGeneric from "/snippets/setup/agent-skill-generic.mdx";
+import CreateAtaAiPrompt from "/snippets/ai-prompts/ts-cookbook/create-ata.mdx";
+import RustCreateAtaAiPrompt from "/snippets/ai-prompts/rust-cookbook/create-ata.mdx";
+import ProgramCreateAtaCpiAiPrompt from "/snippets/ai-prompts/program-cookbook/create-ata-cpi.mdx";
+import ProgramCreateAtaMacrosAiPrompt from "/snippets/ai-prompts/program-cookbook/create-ata-macros.mdx";
 
 1. Associated Light Token accounts can hold token balances of light, SPL, or Token 2022 mints.
 2. Light-ATAs are on-chain accounts like SPL ATA's, but the light token program sponsors the rent-exemption cost for you.
@@ -34,6 +39,8 @@ import AnchorMacroCode from "/snippets/code-snippets/light-token/create-ata/anch
 <Accordion title="Light Rent Config Explained">
   <CompressibleRentExplained />
 </Accordion>
+
+<AgentSkillGeneric />
 
 <Tabs>
 
@@ -55,6 +62,8 @@ Compare to SPL:
   [here](https://github.com/Lightprotocol/light-protocol/blob/main/js/compressed-token/src/v3/actions/create-ata-interface.ts).
 </Info>
 
+<Tabs>
+<Tab title="Guide">
 <Steps>
 
 <Step>
@@ -73,6 +82,11 @@ Compare to SPL:
 
 </Step>
 </Steps>
+</Tab>
+<Tab title="AI Prompt">
+<CreateAtaAiPrompt />
+</Tab>
+</Tabs>
 
 </Tab>
 
@@ -90,6 +104,8 @@ Compare to SPL:
   language="rust"
 />
 
+<Tabs>
+<Tab title="Guide">
 <Steps>
 <Step>
 
@@ -104,7 +120,7 @@ Compare to SPL:
 ### Create ATA
 
 <Info>
-  View the [source code](https://github.com/Lightprotocol/light-protocol/blob/main/sdk-libs/token-sdk/src/instruction/create_ata.rs) and [full example](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/instructions/create_associated_token_account.rs) with shared test utilities.
+  Find the source code [here](https://github.com/Lightprotocol/light-protocol/blob/main/sdk-libs/token-sdk/src/instruction/create_ata.rs).
 </Info>
 
 <Tabs>
@@ -118,11 +134,18 @@ Compare to SPL:
 
 </Step>
 </Steps>
+</Tab>
+<Tab title="AI Prompt">
+<RustCreateAtaAiPrompt />
+</Tab>
+</Tabs>
 
 </Tab>
 <Tab title="Program">
 <Tabs>
 <Tab title="CPI">
+<Tabs>
+<Tab title="Guide">
 
 Compare to SPL:
 
@@ -213,7 +236,14 @@ CreateAssociatedAccountCpi {
 <AnchorProgramCode />
 
 </Tab>
+<Tab title="AI Prompt">
+<ProgramCreateAtaCpiAiPrompt />
+</Tab>
+</Tabs>
+</Tab>
 <Tab title="Anchor Macros">
+<Tabs>
+<Tab title="Guide">
 
 Compare to SPL:
 
@@ -297,6 +327,11 @@ pub ata: UncheckedAccount<'info>,
 
 <AnchorMacroCode />
 
+</Tab>
+<Tab title="AI Prompt">
+<ProgramCreateAtaMacrosAiPrompt />
+</Tab>
+</Tabs>
 </Tab>
 </Tabs>
 </Tab>

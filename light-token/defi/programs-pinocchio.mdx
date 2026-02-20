@@ -3,6 +3,9 @@ title: "Pinocchio Programs"
 description: "Build high-performance DeFi programs with rent-free accounts using Pinocchio"
 ---
 
+import AgentSkillDefi from "/snippets/setup/agent-skill-defi.mdx";
+import DefiPinocchioAiPrompt from "/snippets/ai-prompts/anchor-programs/defi-pinocchio.mdx";
+
 The Light-SDK sponsors rent-exemption for your PDAs, token accounts, and mints. Your program logic stays the same.
 
 |                        | Before | After |
@@ -22,9 +25,15 @@ The Light-SDK sponsors rent-exemption for your PDAs, token accounts, and mints. 
 If you use Anchor instead of Pinocchio, see [Program Integration](./programs).
 
 ---
+
+<AgentSkillDefi />
+
 <Callout type="info">
 Complete pinocchio Swap reference implementation: [pinocchio-swap](https://github.com/Lightprotocol/examples-light-token/tree/simplify-trait/pinocchio/swap)
 </Callout>
+
+<Tabs>
+<Tab title="Guide">
 
 ## Step 1: Dependencies
 
@@ -285,6 +294,12 @@ pub fn process(
 }
 ```
 </Accordion>
+
+</Tab>
+<Tab title="AI Prompt">
+<DefiPinocchioAiPrompt />
+</Tab>
+</Tabs>
 
 ---
 

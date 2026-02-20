@@ -1,0 +1,12 @@
+```rust
+use light_token_client::actions::Approve;
+
+let sig = Approve {
+    token_account: ata,
+    delegate: delegate.pubkey(),
+    amount,
+    owner: None,
+}
+.execute(&mut rpc, &payer)
+.await?;
+```

@@ -1,0 +1,10 @@
+```typescript
+import { createAssociatedTokenAccountInterfaceInstruction } from "@lightprotocol/compressed-token";
+
+const ix = createAssociatedTokenAccountInterfaceInstruction(
+  payer.publicKey,
+  ata,
+  owner.publicKey,
+  mint
+);
+```

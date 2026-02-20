@@ -1,4 +1,5 @@
 node_modules/
+.entire/
 ai-tools/skills/
 ai-tools/prompts/
 ai-tools/.claude-plugin/

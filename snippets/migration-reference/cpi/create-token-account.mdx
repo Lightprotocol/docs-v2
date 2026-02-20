@@ -1,0 +1,17 @@
+```rust
+use light_token::instruction::CreateTokenAccountCpi;
+
+CreateTokenAccountCpi {
+    payer: payer.clone(),
+    account: account.clone(),
+    mint: mint.clone(),
+    owner,
+}
+.rent_free(
+    compressible_config.clone(),
+    rent_sponsor.clone(),
+    system_program.clone(),
+    token_program.key,
+)
+.invoke()?
+```

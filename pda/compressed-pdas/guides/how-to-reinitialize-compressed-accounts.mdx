@@ -1,0 +1,288 @@
+---
+title: Reinitialize Compressed Accounts
+description: Guide to reinitialize compressed accounts in Solana programs with full code examples.
+keywords: ["reinitialize compressed accounts", "reset compressed pda"]
+---
+
+import CompressedPdasProgramSetup from '/snippets/setup/compressed-pdas-program-setup.mdx';
+import CompressedPdasSystemAccountsList from '/snippets/accounts-list/compressed-pdas-system-accounts-list.mdx';
+import DevelopmentEnvironmentSetup from '/snippets/setup/development-environment-setup.mdx';
+import AnchorProgram from '/snippets/code-snippets/reinit/anchor-program.mdx';
+import NativeProgram from '/snippets/code-snippets/reinit/native-program.mdx';
+import CpiReinitAiPrompt from '/snippets/ai-prompts/cpi-programs/reinitialize.mdx';
+
+Compressed accounts are reinitialized via CPI to the Light System Program.
+
+An empty compressed account can be reinitialized
+
+* with an account hash marked as empty with zero values and zero discriminator
+* to create a new account hash at the same address with new values.
+
+<Note>
+Find [full code examples at the end](/pda/compressed-pdas/guides/how-to-reinitialize-compressed-accounts#full-code-example) for Anchor and native Rust.
+</Note>
+
+# Implementation Guide
+
+This guide will cover the components of a Solana program that reinitializes compressed accounts.
+Here is the complete flow to reinitialize compressed accounts:
+
+<div className="hidden dark:block">
+<Frame>
+  ![](/images/program-reinit-1.png)
+</Frame>
+</div>
+<div className="block dark:hidden">
+<Frame>
+  ![](/images/program-reinit.png)
+</Frame>
+</div>
+
+<Tabs>
+<Tab title="Guide">
+<Steps>
+<Step>
+
+### Program Setup
+
+<Accordion title="Dependencies, Constants, Compressed Account">
+
+<CompressedPdasProgramSetup />
+
+</Accordion>
+</Step>
+
+<Step>
+
+### Instruction Data
+
+Define the instruction data with the following parameters:
+
+<Tabs>
+<Tab title="Anchor">
+```rust
+pub fn reinit_account<'info>(
+    ctx: Context<'_, '_, '_, 'info, GenericAnchorAccounts<'info>>,
+    proof: ValidityProof,
+    account_meta: CompressedAccountMeta,
+) -> Result<()>
+```
+</Tab>
+
+<Tab title="Native Rust">
+```rust
+pub struct ReinitInstructionData {
+    pub proof: ValidityProof,
+    pub account_meta: CompressedAccountMeta,
+}
+```
+</Tab>
+</Tabs>
+
+1. **Validity Proof**
+
+* Define `proof` to include the proof that the closed account with zero values exists in the state tree.
+* Clients fetch a validity proof with `getValidityProof()` from an RPC provider that supports ZK Compression (Helius, Triton, ...).
+
+2. **Specify input state and output state tree (stores new account hash)**
+
+* Define `account_meta: CompressedAccountMeta` to reference the closed account and specify the state tree to store the new account hash:
+  * `tree_info: PackedStateTreeInfo`: References the existing account hash in the state tree.
+  * `address`: The account's derived address.
+  * `output_state_tree_index`: References the state tree account that will store the new compressed account hash.
+
+<Info>
+Reinitialization does not require `current_value` parameters. `new_empty()` automatically uses the closed account as input.
+</Info>
+</Step>
+
+<Step>
+
+### Reinitialize Closed Account
+
+Reinitialize the closed account with `LightAccount::new_empty()`.
+
+<Note>
+`new_empty()`
+
+1. reconstructs the closed account hash with zero values as input, and
+2. creates output state with default-initialized values.
+
+You can set custom values in the same transaction:
+
+1. Reinitialize with `new_empty()`, and
+2. Update with `new_mut()` to set custom values.
+</Note>
+
+<Tabs>
+<Tab title="Anchor">
+```rust
+let my_compressed_account = LightAccount::<MyCompressedAccount>::new_empty(
+    &crate::ID,
+    &account_meta,
+)?;
+```
+</Tab>
+
+<Tab title="Native Rust">
+```rust
+let my_compressed_account = LightAccount::<MyCompressedAccount>::new_empty(
+    &ID,
+    &instruction_data.account_meta,
+)?;
+```
+</Tab>
+</Tabs>
+
+**Pass these parameters to `new_empty()`:**
+
+* `&program_id`: The program's ID that owns the compressed account.
+* `&account_meta`: The `CompressedAccountMeta` from instruction data (_Step 2_) that identifies the existing account and specifies the output state tree.
+  * Anchor: Pass `account_meta` by reference. It is automatically deserialized as a function parameter.
+  * Native Rust: Manually deserialize the instruction data struct, then pass the field by reference `&instruction_data.account_meta`.
+
+**The SDK creates:**
+
+* A `LightAccount` wrapper with account data automatically initialized to default values using the `Default` trait.
+* This creates a zero-initialized instance: `Pubkey` as all zeros, `u64` as `0`, `String` as empty.
+
+<Info>
+`new_empty()` reconstructs the closed account hash with zero values. The Light System Program verifies the closed account hash and creates the output hash in _Step 4_.
+</Info>
+</Step>
+
+<Step>
+
+### Light System Program CPI
+
+Invoke the Light System Program to reinitialize the compressed account.
+
+<Note>
+The Light System Program
+
+* validates the closed account hash exists in state tree,
+* nullifies the closed account hash, and
+* appends the new account hash with provided values to the state tree.
+</Note>
+
+<Tabs>
+<Tab title="Anchor">
+```rust
+let light_cpi_accounts = CpiAccounts::new(
+    ctx.accounts.signer.as_ref(),
+    ctx.remaining_accounts,
+    crate::LIGHT_CPI_SIGNER,
+);
+
+LightSystemProgramCpi::new_cpi(LIGHT_CPI_SIGNER, proof)
+    .with_light_account(my_compressed_account)?
+    .invoke(light_cpi_accounts)?;
+```
+
+**Set up `CpiAccounts::new()`:**
+
+`CpiAccounts::new()` parses accounts for the CPI call to Light System Program.
+
+**Pass these parameters:**
+
+* `ctx.accounts.signer.as_ref()`: the transaction signer
+* `ctx.remaining_accounts`: Slice with `[system_accounts, ...packed_tree_accounts]`. The client builds this with `PackedAccounts` and passes it to the instruction.
+* `&LIGHT_CPI_SIGNER`: Your program's CPI signer PDA defined in Constants.
+</Tab>
+
+<Tab title="Native Rust">
+```rust
+let (signer, remaining_accounts) = accounts
+    .split_first();
+
+let cpi_accounts = CpiAccounts::new(
+    signer,
+    remaining_accounts,
+    LIGHT_CPI_SIGNER
+);
+
+LightSystemProgramCpi::new_cpi(LIGHT_CPI_SIGNER, instruction_data.proof)
+    .with_light_account(my_compressed_account)?
+    .invoke(cpi_accounts)?;
+```
+
+**Set up `CpiAccounts::new()`:**
+
+`CpiAccounts::new()` parses accounts for the CPI call to Light System Program.
+
+**Pass these parameters:**
+
+* `signer`: account that signs and pays for the transaction
+* `remaining_accounts`: Slice with `[system_accounts, ...packed_tree_accounts]`. The client builds this with `PackedAccounts`.
+  * `split_first()` extracts the fee payer from the accounts array to separate it from the Light System Program accounts needed for the CPI.
+* `&LIGHT_CPI_SIGNER`: Your program's CPI signer PDA defined in Constants.
+</Tab>
+</Tabs>
+
+<Accordion title="System Accounts List">
+
+<CompressedPdasSystemAccountsList />
+
+</Accordion>
+
+**Build the CPI instruction**:
+
+* `new_cpi()` initializes the CPI instruction with the `proof` to prove the closed account hash exists in the state tree _- defined in the Instruction Data (Step 2)._
+* `with_light_account` adds the `LightAccount` configured with the closed account hash as input and provided values as output _- defined in Step 3_.
+* `invoke(light_cpi_accounts)` calls the Light System Program with `CpiAccounts`.
+</Step>
+</Steps>
+</Tab>
+<Tab title="AI Prompt">
+<CpiReinitAiPrompt />
+</Tab>
+</Tabs>
+
+# Full Code Example
+
+The counter programs below implement all steps from this guide.
+
+<Accordion title="Setup">
+<DevelopmentEnvironmentSetup />
+</Accordion>
+
+<Warning>
+For help with debugging, see the [Error Cheatsheet](/resources/error-cheatsheet).
+</Warning>
+
+<Tabs>
+<Tab title="Anchor">
+<Info>
+Find the source code [here](https://github.com/Lightprotocol/program-examples/tree/main/basic-operations/anchor/reinit).
+</Info>
+
+<AnchorProgram />
+</Tab>
+
+<Tab title="Native Rust">
+<Info>
+Find the source code [here](https://github.com/Lightprotocol/program-examples/tree/main/basic-operations/native/programs/reinit).
+</Info>
+
+<NativeProgram />
+</Tab>
+</Tabs>
+
+# Next Steps
+
+<CardGroup>
+<Card
+  title="Build a client for your program"
+  icon="chevron-right"
+  color="#0066ff"
+  href="/pda/compressed-pdas/guides/client-guide"
+  horizontal
+/>
+<Card
+  title="Learn how to burn compressed accounts"
+  icon="chevron-right"
+  color="#0066ff"
+  href="/pda/compressed-pdas/guides/how-to-burn-compressed-accounts"
+  horizontal
+/>
+</CardGroup>

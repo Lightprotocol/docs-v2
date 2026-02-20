@@ -1,0 +1,11 @@
+```rust
+use light_token::instruction::CreateTokenAccount;
+
+let ix = CreateTokenAccount::new(
+    payer.pubkey(),
+    account.pubkey(),
+    mint,
+    owner,
+)
+.instruction()?;
+```

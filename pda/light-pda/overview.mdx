@@ -1,0 +1,212 @@
+---
+title: "Light PDA"
+description: "Create Solana PDA accounts with sponsored rent-exemption and minimal code changes. Use like any Solana PDA, e.g. for DeFi pools, vaults, pool accounts, or other shared state."
+---
+
+import FullCounterExample from '/snippets/code-snippets/light-token/counter/anchor-macro/full-example.mdx';
+import AgentSkillGeneric from "/snippets/setup/agent-skill-generic.mdx";
+import LightPdaAiPrompt from "/snippets/ai-prompts/anchor-programs/light-pda.mdx";
+
+| Creation Cost    | Regular PDA          | Light-PDA       |
+|------------------|----------------------|-----------------|
+| 100-byte account | ~1,600,000 lamports  | ~11,500 lamports |
+
+A Light-PDA is a standard Solana PDA. Seeds, bump derivation, and
+`invoke_signed` work the same way. Your instruction handlers for reads,
+updates, and closes don't change. 
+
+## What changes
+
+Audit overhead is minimal as your program logic is mostly untouched. The rest is macro-generated.
+
+| Area | Change |
+|------|--------|
+| State struct | Derive `LightAccount`, add `compression_info: CompressionInfo` |
+| Accounts struct | Derive `LightAccounts`, add `#[light_account]` on init accounts |
+| Program module | Add `#[light_program]` above `#[program]` |
+| Instructions (reads, updates, closes) | No program changes. Client prepends a load instruction if account is cold. |
+
+---
+
+<AgentSkillGeneric />
+
+<Tabs>
+<Tab title="Guide">
+
+## Step 1: Dependencies
+
+```toml
+[dependencies]
+light-account = { version = "0.20.0", features = ["anchor"] }
+light-sdk = { version = "0.20.0", features = ["anchor", "v2", "cpi-context"] }
+anchor-lang = "0.31"
+```
+
+## Step 2: State struct
+
+Add `compression_info` field and derive `LightAccount`:
+
+```rust
+use light_account::{CompressionInfo, LightAccount};
+
+#[derive(Default, Debug, InitSpace, LightAccount)]
+#[account]
+pub struct Counter {
+    /// Add this:
+    pub compression_info: CompressionInfo,
+
+    pub owner: Pubkey,
+    pub count: u64,
+}
+```
+
+## Step 3: Program module
+
+Add `#[light_program]` above `#[program]`. Define the CPI signer constant with your program ID:
+
+```rust
+use light_account::{derive_light_cpi_signer, light_program, CpiSigner};
+
+pub const LIGHT_CPI_SIGNER: CpiSigner =
+    derive_light_cpi_signer!("YourProgramId11111111111111111111111111111111");
+
+#[light_program]
+#[program]
+pub mod counter {
+    use super::*;
+
+    pub fn create_counter<'info>(
+        ctx: Context<'_, '_, '_, 'info, CreateCounter<'info>>,
+        params: CreateCounterParams,
+    ) -> Result<()> {
+        ctx.accounts.counter.owner = ctx.accounts.owner.key();
+        ctx.accounts.counter.count = params.count;
+        Ok(())
+    }
+
+    /// Standard Anchor — no Light-specific changes.
+    pub fn increment(ctx: Context<Increment>) -> Result<()> {
+        ctx.accounts.counter.count = ctx.accounts.counter.count.checked_add(1).unwrap();
+        Ok(())
+    }
+
+    /// Standard Anchor — no Light-specific changes.
+    pub fn close_counter(_ctx: Context<CloseCounter>) -> Result<()> {
+        Ok(())
+    }
+}
+```
+
+## Step 4: Accounts struct
+
+Derive `LightAccounts` on your `Accounts` struct and add `#[light_account(...)]` next to `#[account(...)]`.
+
+Only the `init` struct derives `LightAccounts`. The increment and close structs
+are standard Anchor:
+
+```rust
+use light_account::{CreateAccountsProof, LightAccounts};
+
+#[derive(AnchorSerialize, AnchorDeserialize, Clone)]
+pub struct CreateCounterParams {
+    pub create_accounts_proof: CreateAccountsProof,
+    pub count: u64,
+}
+
+#[derive(Accounts, LightAccounts)]
+#[instruction(params: CreateCounterParams)]
+pub struct CreateCounter<'info> {
+    #[account(mut)]
+    pub fee_payer: Signer<'info>,
+
+    /// CHECK: Read-only, used for PDA derivation.
+    pub owner: AccountInfo<'info>,
+
+    /// CHECK: Validated by Light Protocol CPI.
+    pub compression_config: AccountInfo<'info>,
+
+    /// CHECK: PDA rent sponsor for compression rent reimbursement.
+    #[account(mut)]
+    pub pda_rent_sponsor: AccountInfo<'info>,
+
+    #[account(
+        init,
+        payer = fee_payer,
+        space = 8 + <Counter as anchor_lang::Space>::INIT_SPACE,
+        seeds = [COUNTER_SEED, owner.key().as_ref()],
+        bump,
+    )]
+    #[light_account(init)]
+    pub counter: Account<'info, Counter>,
+
+    pub system_program: Program<'info, System>,
+}
+```
+
+## Full Example
+
+<FullCounterExample />
+
+<Callout type="info">
+View counter example on Github: [counter](https://github.com/Lightprotocol/examples-light-token/tree/main/programs/anchor/basic-macros/counter)
+</Callout>
+
+</Tab>
+<Tab title="AI Prompt">
+<LightPdaAiPrompt />
+</Tab>
+</Tabs>
+
+---
+
+## How it works
+
+The SDK sponsors rent-exemption so you
+don't pay the full rent-exempt balance upfront. After extended inactivity, the account
+compresses to cold state and returns the rent-exempt balance to the rent
+sponsor. Clients call `create_load_instructions` to load a cold account back
+on-chain when it's needed again. Your program only ever interacts with hot accounts.
+
+| | Hot (active) | Cold (inactive) |
+|---|---|---|
+| Storage | On-chain | Compressed |
+| Latency/CU | No change | +load instruction |
+| Your program code | No change | No change |
+
+## FAQ
+
+<Accordion title="How does it prevent re-init attacks?"> When creating an
+account for the first time, the SDK provides a proof that the account doesn't
+exist in the cold address space. The SVM already verifies this for the onchain
+space. Both address spaces are checked before creation, preventing re-init
+attacks, even if the account is currently cold. </Accordion>
+
+<Accordion title="Who triggers compression?">
+Miners (Forester nodes) compress accounts that have been inactive for an extended period of time (when their virtual rent balance drops below threshold).
+In practice, having to load cold accounts should be rare. The common path (hot) has no extra overhead and does not increase CU or txn size.
+</Accordion>
+
+<Accordion title="How is the SDK able to sponsor rent exemption?">
+When accounts compress after extended inactivity, the on-chain rent-exemption is released back
+to the rent sponsor. This creates a revolving lifecycle: active "hot" accounts hold a
+rent-exempt lamports balance, inactive "cold" accounts release it back. The
+rent sponsor must be derived from the program owner. For all mint, ATA, and
+token accounts, the Light Token Program is the rent sponsor. For your own program-owned PDAs, the SDK derives a rent sponsor address automatically.
+</Accordion>
+
+<Accordion title="Do rent-free accounts increase CU?">
+**Hot path (e.g. reads, updates, closes):** No. Active accounts do not add CU overhead to your instructions.
+
+**First time init + loading cold accounts:** Yes, adds up to 15k-400k CU,
+depending on number and type of accounts being initialized or loaded.
+</Accordion>
+
+---
+
+<Callout type="info">
+API is in Beta and subject to change.
+
+Questions or need hands-on support? [Telegram](https://t.me/swen_light) | [email](mailto:support@lightprotocol.com) | [Discord](https://discord.com/invite/7cJ8BhAXhu)
+</Callout>
+
+

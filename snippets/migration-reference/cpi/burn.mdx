@@ -1,0 +1,11 @@
+```rust
+use light_token::instruction::BurnCpi;
+
+BurnCpi {
+    source: source.clone(),
+    mint: mint.clone(),
+    authority: authority.clone(),
+    amount,
+}
+.invoke()?
+```

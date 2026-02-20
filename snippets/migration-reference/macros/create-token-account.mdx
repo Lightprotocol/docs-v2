@@ -1,0 +1,14 @@
+```rust
+#[account(
+    mut,
+    seeds = [VAULT_SEED, mint.key().as_ref()],
+    bump,
+)]
+#[light_account(init,
+    token::authority = [VAULT_SEED, self.mint.key()],
+    token::mint = mint,
+    token::owner = vault_authority,
+    token::bump = params.vault_bump
+)]
+pub vault: UncheckedAccount<'info>,
+```

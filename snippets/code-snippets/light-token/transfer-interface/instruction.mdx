@@ -47,12 +47,14 @@ const payer = Keypair.fromSecretKey(
         recipient.publicKey,
     );
 
-    // Transfer tokens between light-token associated token accounts
+    // Transfer tokens. Optional feePayer lets an application cover top-ups
+    // so the sender only signs to authorize the transfer.
     const ix = createLightTokenTransferInstruction(
         senderAta,
         recipientAta,
-        sender.publicKey,
+        sender.publicKey,     // owner (signs the transfer)
         500_000_000,
+        payer.publicKey,      // optional: separate feePayer covers top-up
     );
 
     const tx = new Transaction().add(ix);

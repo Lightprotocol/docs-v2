@@ -1,0 +1,7 @@
+```rust
+use light_client::rpc::{LightClient, LightClientConfig, Rpc};
+
+let rpc = LightClient::new(
+    LightClientConfig::new(rpc_url.to_string(), None, None)
+).await?;
+```
