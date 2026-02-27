@@ -5,6 +5,211 @@ description: "Latest Releases"
 rss: true
 ---
 
+<Update label="SDK v0.23.0" description="February 2026">
+
+### light-token v0.23.0
+
+<Warning>
+Breaking changes in this release. See the CHANGELOG for migration steps.
+</Warning>
+
+`max_top_up` removed from all instruction structs (`Transfer`, `Burn`, `MintTo`, etc.). The on-chain program defaults to `u16::MAX`. `fee_payer` is now required in instruction and CPI APIs. `get_token_account_balance()` returns `ProgramError` instead of SDK-specific errors. (#2301)
+
+```toml
+[dependencies]
+light-token = "0.23.0"
+```
+
+### light-sdk-macros v0.23.0
+
+1-byte discriminator support via `#[light_pinocchio(discriminator = [...])]`. Unified `create_accounts()` replaces multiple code generation paths for PDAs, mints, tokens, and ATAs. (#2302, #2287)
+
+```toml
+[dependencies]
+light-sdk-macros = "0.23.0"
+```
+
+### light-account v0.23.0
+
+`create_accounts()` generic function for unified PDA, mint, token, and ATA creation. (#2287)
+
+```toml
+[dependencies]
+light-account = "0.23.0"
+```
+
+### light-client v0.23.0
+
+Forester dashboard with compression improvements, pending state tracking, and eligibility checks. (#2310)
+
+```toml
+[dependencies]
+light-client = "0.23.0"
+```
+
+### Other SDK crate updates
+
+- `light-token-pinocchio` v0.23.0 - authority mutability aligned, `TransferInterfaceCpi` `fee_payer` fix. (#2301, #2294)
+- `light-token-client` v0.23.0 - authority mutability aligned. (#2301)
+- `light-compressed-token-sdk` v0.23.0 - authority mutability aligned. (#2301)
+- `light-account-pinocchio` v0.23.0 - `create_accounts()` generic function. (#2287)
+
+Version-only bumps: `light-token-types` v0.23.0, `light-sdk` v0.23.0, `light-sdk-types` v0.23.0, `light-sdk-pinocchio` v0.23.0, `light-program-test` v0.23.0, `photon-api` v0.56.0, `light-instruction-decoder` v0.23.0, `light-instruction-decoder-derive` v0.4.0, `light-event` v0.23.0.
+
+</Update>
+
+<Update label="Devnet Program v2.2.0" description="February 2026">
+
+### light-registry v2.2.0
+
+`light-registry` v2.2.0 deployed to devnet. Adds `init_compressible_config` xtask, fixes registry program errors, refactors forester default tree/epoch handling. (#2117, #2122, #2127, #2279)
+
+```toml
+[dependencies]
+light-registry = "2.2.0"
+```
+
+</Update>
+
+<Update label="SDK v0.22.1 Hotfix" description="February 2026">
+
+### light-token v0.22.1
+
+Fixes `TransferInterfaceCpi` in the LightToLight transfer path - `fee_payer` was hardcoded to `None`, causing PrivilegeEscalation errors. (#2294)
+
+```toml
+[dependencies]
+light-token = "0.22.1"
+```
+
+</Update>
+
+<Update label="SDK v0.22.0" description="February 2026">
+
+### photon-api v0.55.0
+
+<Warning>
+Breaking changes in this release. See the CHANGELOG for migration steps.
+</Warning>
+
+`photon-api` replaces hand-written client code with progenitor-generated types from the Photon OpenAPI spec. `Configuration::new()` takes a single URL parameter now (embed API key as query param). `AccountInterface` uses photon v2 types, `ColdContext` simplified. (#2219, #2274, #2198, #2226)
+
+```toml
+[dependencies]
+photon-api = "0.55.0"
+```
+
+### light-client v0.22.0
+
+`validate_mint()` validates mint for all token accounts, not just compressible. Enforces canonical bump in ATA verification. `AccountInterface` uses photon v2 types. (#2251, #2249, #2274)
+
+```toml
+[dependencies]
+light-client = "0.22.0"
+```
+
+### light-token v0.22.0
+
+`max_top_up` defaults to `u16::MAX` instead of `0` in instruction builders. Enforces canonical bump in ATA verification. (#2279, #2249)
+
+```toml
+[dependencies]
+light-token = "0.22.0"
+```
+
+### light-token-pinocchio v0.22.0
+
+Same fixes as `light-token` v0.22.0: `max_top_up` defaults to `u16::MAX`, enforces canonical bump. (#2279, #2249)
+
+```toml
+[dependencies]
+light-token-pinocchio = "0.22.0"
+```
+
+### light-sdk-macros v0.22.0
+
+`light_program` pinocchio macro refactored. Enforces canonical bump in ATA verification. (#2247, #2249)
+
+```toml
+[dependencies]
+light-sdk-macros = "0.22.0"
+```
+
+### Other SDK crate updates
+
+The following crates are updated to v0.22.0 with `max_top_up` fix and dependency bumps:
+
+- `light-account` v0.22.0 (#2249)
+- `light-account-pinocchio` v0.22.0 (#2249)
+- `light-compressed-token-sdk` v0.22.0 (#2279)
+- `light-event` v0.22.0 (#2279)
+- `light-instruction-decoder` v0.22.0 (#2279)
+- `light-program-test` v0.22.0 (#2249)
+
+Version-only bumps (no API changes): `light-token-types` v0.22.0, `light-token-client` v0.22.0, `light-sdk` v0.22.0, `light-sdk-types` v0.22.0, `light-sdk-pinocchio` v0.22.0, `light-prover-client` v8.0.0, `light-verifier` v10.0.0.
+
+</Update>
+
+<Update label="Devnet Program v2.3.0" description="February 2026">
+
+### light-compressed-token v2.3.0
+
+Program hash: `09ea6d03fbef7f40c9a27a2c4c6aa8358662cc8f91e2e86cb2a801683c518027`
+
+<Warning>
+Security release with multiple audit fixes.
+</Warning>
+
+`light-compressed-token` v2.3.0 deployed to devnet with security and correctness fixes:
+
+- `max_top_up` interprets values as units of 1,000 lamports. (#2265)
+- Account-level delegates can compress CTokens. (#2262)
+- `MintCloseAuthority` added as restricted extension. (#2263)
+- Enforces canonical bump in ATA verification. (#2249)
+- `validate_mint()` validates mint for all token accounts. (#2251)
+- Zeros base token bytes before init to prevent IDL buffer attack. (#2248)
+- Rejects rent sponsor self-referencing the token account. (#2257)
+- Rejects duplicate accounts in `convert_account_infos()`. (#2258)
+- Allows closing frozen light token accounts. (#2243)
+- Processes metadata add/remove actions in sequential order. (#2256)
+- Validates authority on self-transfer early return. (#2252)
+- Enforces mint extension checks in CToken-to-CToken decompress. (#2246)
+- Accumulates delegated amount at decompression. (#2242)
+- Rejects `rent_payment < 2` for CMint decompression. (#2267)
+- Fixes `compress_only` amount check. (#2235)
+- Fixes SPL compress transfer fee check. (#2281)
+
+```toml
+[dependencies]
+light-compressed-token = "2.3.0"
+```
+
+</Update>
+
+<Update label="SDK v0.21.0" description="February 2026">
+
+### light-client v0.21.0
+
+<Warning>
+Breaking changes in this release. See the CHANGELOG for migration steps.
+</Warning>
+
+`LightClientConfig::new()` takes 2 parameters instead of 3. The API key is now embedded in `photon_url`. Replaces photon-api with progenitor-generated client. Adds `compressed_mint` photon API support. (#2219, #2198, #2244)
+
+```toml
+[dependencies]
+light-client = "0.21.0"
+```
+
+### Other SDK updates
+
+- `light-event` v0.21.0 - `compressed_mint` photon API support. (#2198)
+- `light-program-test` v0.21.0 - `compressed_mint` photon API support. (#2198)
+- `light-compressed-account` v0.10.1 - `compressed_mint` photon API support. (#2198)
+- `light-token-client` v0.21.0
+
+</Update>
+
 <Update label="Beta Releases" description="January 2026">
 
 ### ZK Compression CLI
