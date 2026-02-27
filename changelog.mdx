@@ -5,6 +5,59 @@ description: "Latest Releases"
 rss: true
 ---
 
+<Update label="SDK v0.23.0" description="February 2026">
+
+### light-token v0.23.0
+
+<Warning>
+Breaking changes in this release. See the CHANGELOG for migration steps.
+</Warning>
+
+`max_top_up` removed from all instruction structs (`Transfer`, `Burn`, `MintTo`, etc.). The on-chain program defaults to `u16::MAX`. `fee_payer` is now required in instruction and CPI APIs. `get_token_account_balance()` returns `ProgramError` instead of SDK-specific errors. (#2301)
+
+```toml
+[dependencies]
+light-token = "0.23.0"
+```
+
+### light-sdk-macros v0.23.0
+
+1-byte discriminator support via `#[light_pinocchio(discriminator = [...])]`. Unified `create_accounts()` replaces multiple code generation paths for PDAs, mints, tokens, and ATAs. (#2302, #2287)
+
+```toml
+[dependencies]
+light-sdk-macros = "0.23.0"
+```
+
+### light-account v0.23.0
+
+`create_accounts()` generic function for unified PDA, mint, token, and ATA creation. (#2287)
+
+```toml
+[dependencies]
+light-account = "0.23.0"
+```
+
+### light-client v0.23.0
+
+Forester dashboard with compression improvements, pending state tracking, and eligibility checks. (#2310)
+
+```toml
+[dependencies]
+light-client = "0.23.0"
+```
+
+### Other SDK crate updates
+
+- `light-token-pinocchio` v0.23.0 - authority mutability aligned, `TransferInterfaceCpi` `fee_payer` fix. (#2301, #2294)
+- `light-token-client` v0.23.0 - authority mutability aligned. (#2301)
+- `light-compressed-token-sdk` v0.23.0 - authority mutability aligned. (#2301)
+- `light-account-pinocchio` v0.23.0 - `create_accounts()` generic function. (#2287)
+
+Version-only bumps: `light-token-types` v0.23.0, `light-sdk` v0.23.0, `light-sdk-types` v0.23.0, `light-sdk-pinocchio` v0.23.0, `light-program-test` v0.23.0, `photon-api` v0.56.0, `light-instruction-decoder` v0.23.0, `light-instruction-decoder-derive` v0.4.0, `light-event` v0.23.0.
+
+</Update>
+
 <Update label="Devnet Program v2.2.0" description="February 2026">
 
 ### light-registry v2.2.0
