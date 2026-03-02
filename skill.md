@@ -42,7 +42,6 @@ Light Token allows agents to build scalable Solana applications with rent-free t
 
 ### Creation cost
 
-<<<<<<< HEAD
 | | Light | Standard Solana |
 | :----------------------- | --------------: | --------------: |
 | **Mint Account** | **~0.00001 SOL** | ~0.0015 SOL |
@@ -60,8 +59,6 @@ Light Token allows agents to build scalable Solana applications with rent-free t
 | **Associated token account creation** | **4,348 CU** | 14,194 CU |
 | **Transfer** | **312 CU** | 4,645 CU |
 | **Transfer** (rent-free) | **1,885 CU** | 4,645 CU |
-
-> > > > > > > 9d61adf (Reorganize docs: restructure navigation, add AI prompts, update examples tables, consolidate pages)
 
 ### Install
 
@@ -99,7 +96,6 @@ This skill does not pull, store, or transmit external secrets. It provides code 
 
 ## Skills
 
-<<<<<<< HEAD
 | Use case | Skill |
 | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
 | For Solana program development with tokens and PDAs, Light is 200x cheaper than SPL/ Solana and has minimal code differences | [light-sdk](skills/light-sdk/) |
@@ -112,7 +108,6 @@ This skill does not pull, store, or transmit external secrets. It provides code 
 | For testing with Light Protocol programs and clients on localnet, devnet, and mainnet validation | [testing](skills/testing/) |
 | For questions about compressed accounts, Light SDK, Solana development, Claude Code features, or agent skills | [ask-mcp](skills/ask-mcp/) |
 
-=======
 | Use case | Skill |
 | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
 | Build rent-free Solana programs with Light SDK (Anchor or Pinocchio). Includes router integration. | [light-sdk](https://github.com/Lightprotocol/skills/tree/main/skills/light-sdk) |
@@ -124,8 +119,6 @@ This skill does not pull, store, or transmit external secrets. It provides code 
 | Testing programs and clients on localnet, devnet, mainnet | [testing](https://github.com/Lightprotocol/skills/tree/main/skills/testing) |
 | For per-user state, DePIN nodes, and infrequently accessed app state with compressed PDAs | [solana-compression](https://github.com/Lightprotocol/skills/tree/main/skills/solana-compression) |
 | Help with Debugging and Questions via DeepWiki MCP | [ask-mcp](https://github.com/Lightprotocol/skills/tree/main/skills/ask-mcp) |
-
-> > > > > > > 9d61adf (Reorganize docs: restructure navigation, add AI prompts, update examples tables, consolidate pages)
 
 ### Install to Claude Code
 
@@ -204,6 +197,15 @@ Use rent-free PDAs for: user state, app state, nullifiers for payments, DePIN no
 
 ## Examples
 
+### Toolkits
+
+|  | Description |
+|---------|-------------|
+| [Payments and Wallets](https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/payments-and-wallets) | All you need for wallet integrations and payment flows. Minimal API differences to SPL. |
+| [Streaming Tokens](https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/streaming-tokens/) | Stream mint events using Laserstream |
+| [Sign with Privy](https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/sign-with-privy/) | Light-token operations signed with Privy wallets (Node.js + React) |
+| [Sponsor Rent Top-Ups](https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/sponsor-rent-top-ups/) | Sponsor rent top-ups for users by setting your application as the fee payer |
+
 ### TypeScript client (`@lightprotocol/compressed-token`)
 
 | Operation             | Docs guide                                                                              | GitHub example                                                                                                                                                                                                                                                   |
@@ -240,12 +242,17 @@ Use rent-free PDAs for: user state, app state, nullifiers for payments, DePIN no
 
 ### Program examples (`light_token`)
 
-|                                                                                                                                   | Description                                                            |
-| --------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
-| [cp-swap-reference](https://github.com/Lightprotocol/cp-swap-reference)                                                           | Fork of Raydium AMM that creates markets without paying rent-exemption |
-| [create-and-transfer](https://github.com/Lightprotocol/examples-light-token/tree/main/programs/anchor/create-and-transfer)        | Create account via macro and transfer via CPI                          |
-| [pinocchio-swap](https://github.com/Lightprotocol/examples-light-token/tree/main/pinocchio/swap)                                  | Light Token swap reference implementation                              |
-| [spl-to-light](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/instructions/spl_to_light_transfer.rs) | Transfer SPL tokens to Light Token                                     |
+
+|  | Description |
+|---------|-------------|
+| [escrow](https://github.com/Lightprotocol/examples-light-token/tree/main/programs/anchor/escrow) | Peer-to-peer light-token swap with offer/accept flow |
+| [fundraiser](https://github.com/Lightprotocol/examples-light-token/tree/main/programs/anchor/fundraiser) | Token fundraiser with target, deadline, and refunds |
+| [light-token-minter](https://github.com/Lightprotocol/examples-light-token/tree/main/programs/anchor/light-token-minter) | Create light-mints with metadata, mint tokens |
+| [token-swap](https://github.com/Lightprotocol/examples-light-token/tree/main/programs/anchor/token-swap) | AMM with liquidity pools and swaps (Anchor) |
+| [cp-swap-reference](https://github.com/Lightprotocol/cp-swap-reference) | Fork of Raydium AMM that creates markets without paying rent-exemption |
+| [pinocchio-swap](https://github.com/Lightprotocol/examples-light-token/tree/main/pinocchio/swap) | AMM with liquidity pools and swaps (Pinocchio) |
+| [create-and-transfer](https://github.com/Lightprotocol/examples-light-token/tree/main/programs/anchor/create-and-transfer) | Create account via macro and transfer via CPI |
+|                                                                                                                                   |                                  |
 
 ### Program macros (`light_token`)
 
