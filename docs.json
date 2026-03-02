@@ -659,7 +659,7 @@
     },
     {
       "source": "/blog/c-token",
-      "destination": "https://zkcompression.com/blog/light-token"
+      "destination": "https://zkcompression.com/light-token/welcome"
     },
     {
       "source": "/learn/migration-v1-to-v2",
@@ -840,6 +840,62 @@
     {
       "source": "/compressed-token-program/ctoken/transfer-interface",
       "destination": "https://zkcompression.com/light-token/cookbook/transfer-interface"
+    },
+    {
+      "source": "/api-reference/index",
+      "destination": "https://zkcompression.com/api-reference/sdk"
+    },
+    {
+      "source": "/api-reference/libraries/compressed-token",
+      "destination": "https://zkcompression.com/api-reference/sdk"
+    },
+    {
+      "source": "/api-reference/libraries/light-client",
+      "destination": "https://zkcompression.com/api-reference/sdk"
+    },
+    {
+      "source": "/api-reference/libraries/light-program-test",
+      "destination": "https://zkcompression.com/api-reference/sdk"
+    },
+    {
+      "source": "/api-reference/libraries/light-sdk",
+      "destination": "https://zkcompression.com/api-reference/sdk"
+    },
+    {
+      "source": "/api-reference/libraries/light-token",
+      "destination": "https://zkcompression.com/api-reference/sdk"
+    },
+    {
+      "source": "/api-reference/libraries/stateless-js",
+      "destination": "https://zkcompression.com/api-reference/sdk"
+    },
+    {
+      "source": "/blog/overview",
+      "destination": "https://zkcompression.com/home"
+    },
+    {
+      "source": "/blog/light-token",
+      "destination": "https://zkcompression.com/light-token/welcome"
+    },
+    {
+      "source": "/changelog",
+      "destination": "https://github.com/Lightprotocol/light-protocol/releases"
+    },
+    {
+      "source": "/compressed-tokens/advanced-guides/how-to-combine-operations-in-one-transaction",
+      "destination": "https://zkcompression.com/compressed-tokens/overview"
+    },
+    {
+      "source": "/learn/ask-deepwiki-public",
+      "destination": "https://zkcompression.com/ai-tools/guide"
+    },
+    {
+      "source": "/light-token/cookbook/overview",
+      "destination": "https://zkcompression.com/light-token/cookbook/create-mint"
+    },
+    {
+      "source": "/rent",
+      "destination": "https://zkcompression.com/faq"
     }
   ]
 }
