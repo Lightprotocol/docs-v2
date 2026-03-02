@@ -213,19 +213,6 @@ const ix = createInitializeMint2Instruction(
 <Tab title="Rust">
 <Columns cols={2}>
 <CodeGroup>
-```rust Light Action
-use light_token_client::actions::CreateMint;
-
-let (sig, mint) = CreateMint {
-    decimals: 9,
-    freeze_authority: Some(payer.pubkey()),
-    token_metadata: None,
-    seed: None,
-}
-.execute(&mut rpc, &payer, &mint_authority)
-.await?;
-```
-
 ```rust Light Instruction
 use light_token::instruction::CreateMint;
 
@@ -237,6 +224,19 @@ let ix = CreateMint::new(
     output_queue,
 )
 .instruction()?;
+```
+
+```rust Light Action
+use light_token_client::actions::CreateMint;
+
+let (sig, mint) = CreateMint {
+    decimals: 9,
+    freeze_authority: Some(payer.pubkey()),
+    token_metadata: None,
+    seed: None,
+}
+.execute(&mut rpc, &payer, &mint_authority)
+.await?;
 ```
 </CodeGroup>
 ```rust title="SPL"
@@ -327,6 +327,17 @@ const ix = createAssociatedTokenAccountInstruction(
 <Tab title="Rust">
 <Columns cols={2}>
 <CodeGroup>
+```rust Light Instruction
+use light_token::instruction::CreateAssociatedTokenAccount;
+
+let ix = CreateAssociatedTokenAccount::new(
+    payer.pubkey(),
+    owner.pubkey(),
+    mint,
+)
+.instruction()?;
+```
+
 ```rust Light Action
 use light_token_client::actions::CreateAta;
 
@@ -337,17 +348,6 @@ let (sig, ata) = CreateAta {
 }
 .execute(&mut rpc, &payer)
 .await?;
-```
-
-```rust Light Instruction
-use light_token::instruction::CreateAssociatedTokenAccount;
-
-let ix = CreateAssociatedTokenAccount::new(
-    payer.pubkey(),
-    owner.pubkey(),
-    mint,
-)
-.instruction()?;
 ```
 </CodeGroup>
 ```rust title="SPL"
@@ -444,18 +444,6 @@ const ix = createMintToInstruction(
 <Tab title="Rust">
 <Columns cols={2}>
 <CodeGroup>
-```rust Light Action
-use light_token_client::actions::MintTo;
-
-let sig = MintTo {
-    mint,
-    destination,
-    amount,
-}
-.execute(&mut rpc, &payer, &authority)
-.await?;
-```
-
 ```rust Light Instruction
 use light_token::instruction::MintTo;
 
@@ -467,6 +455,18 @@ let ix = MintTo {
     fee_payer: payer.pubkey(),
 }
 .instruction()?;
+```
+
+```rust Light Action
+use light_token_client::actions::MintTo;
+
+let sig = MintTo {
+    mint,
+    destination,
+    amount,
+}
+.execute(&mut rpc, &payer, &authority)
+.await?;
 ```
 </CodeGroup>
 ```rust title="SPL"
@@ -595,22 +595,6 @@ const ix = createTransferInstruction(
 <Tab title="Rust">
 <Columns cols={2}>
 <CodeGroup>
-```rust Light Action
-use light_token_client::actions::TransferInterface;
-
-let sig = TransferInterface {
-    source,
-    mint,
-    destination,
-    amount,
-    decimals,
-    spl_token_program: None,
-    restricted: false,
-}
-.execute(&mut rpc, &payer, &authority)
-.await?;
-```
-
 ```rust Light Instruction
 use light_token::instruction::TransferInterface;
 
@@ -627,6 +611,22 @@ let ix = TransferInterface {
     destination_owner: LIGHT_TOKEN_PROGRAM_ID,
 }
 .instruction()?;
+```
+
+```rust Light Action
+use light_token_client::actions::TransferInterface;
+
+let sig = TransferInterface {
+    source,
+    mint,
+    destination,
+    amount,
+    decimals,
+    spl_token_program: None,
+    restricted: false,
+}
+.execute(&mut rpc, &payer, &authority)
+.await?;
 ```
 </CodeGroup>
 ```rust title="SPL"
@@ -842,19 +842,6 @@ const tx = await approve(
 <Tab title="Rust">
 <Columns cols={2}>
 <CodeGroup>
-```rust Light Action
-use light_token_client::actions::Approve;
-
-let sig = Approve {
-    token_account: ata,
-    delegate: delegate.pubkey(),
-    amount,
-    owner: None,
-}
-.execute(&mut rpc, &payer)
-.await?;
-```
-
 ```rust Light Instruction
 use light_token::instruction::Approve;
 
@@ -866,6 +853,19 @@ let ix = Approve {
     fee_payer: payer.pubkey(),
 }
 .instruction()?;
+```
+
+```rust Light Action
+use light_token_client::actions::Approve;
+
+let sig = Approve {
+    token_account: ata,
+    delegate: delegate.pubkey(),
+    amount,
+    owner: None,
+}
+.execute(&mut rpc, &payer)
+.await?;
 ```
 </CodeGroup>
 ```rust title="SPL"
@@ -922,17 +922,6 @@ const tx = await revoke(
 <Tab title="Rust">
 <Columns cols={2}>
 <CodeGroup>
-```rust Light Action
-use light_token_client::actions::Revoke;
-
-let sig = Revoke {
-    token_account: ata,
-    owner: None,
-}
-.execute(&mut rpc, &payer)
-.await?;
-```
-
 ```rust Light Instruction
 use light_token::instruction::Revoke;
 
@@ -942,6 +931,17 @@ let ix = Revoke {
     fee_payer: payer.pubkey(),
 }
 .instruction()?;
+```
+
+```rust Light Action
+use light_token_client::actions::Revoke;
+
+let sig = Revoke {
+    token_account: ata,
+    owner: None,
+}
+.execute(&mut rpc, &payer)
+.await?;
 ```
 </CodeGroup>
 ```rust title="SPL"
