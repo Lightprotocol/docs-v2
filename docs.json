@@ -676,6 +676,170 @@
     {
       "source": "/compressed-token-program/overview",
       "destination": "https://zkcompression.com/light-token/welcome"
+    },
+    {
+      "source": "/api-reference/api-reference-overview",
+      "destination": "https://zkcompression.com/api-reference/overview"
+    },
+    {
+      "source": "/api-reference/links",
+      "destination": "https://zkcompression.com/api-reference/overview"
+    },
+    {
+      "source": "/c-token-program/c-token-toolkits/for-aggregators",
+      "destination": "https://zkcompression.com/light-token/toolkits/overview"
+    },
+    {
+      "source": "/c-token-program/c-token-toolkits/for-defi-markets",
+      "destination": "https://zkcompression.com/light-token/defi/routers"
+    },
+    {
+      "source": "/c-token-program/cmint/README",
+      "destination": "https://zkcompression.com/light-token/cookbook/create-mint"
+    },
+    {
+      "source": "/c-token-program/faq",
+      "destination": "https://zkcompression.com/faq"
+    },
+    {
+      "source": "/client-library",
+      "destination": "https://zkcompression.com/pda/compressed-pdas/guides/client-guide"
+    },
+    {
+      "source": "/client-library/README",
+      "destination": "https://zkcompression.com/pda/compressed-pdas/guides/client-guide"
+    },
+    {
+      "source": "/compressed-pdas/client-library",
+      "destination": "https://zkcompression.com/pda/compressed-pdas/guides/client-guide"
+    },
+    {
+      "source": "/resources/sdks",
+      "destination": "https://zkcompression.com/api-reference/sdk"
+    },
+    {
+      "source": "/compressed-tokens/advanced-guides/create-an-airdrop-with-claim",
+      "destination": "https://zkcompression.com/compressed-tokens/airdrop"
+    },
+    {
+      "source": "/compressed-tokens/advanced-guides/example-node-js",
+      "destination": "https://zkcompression.com/compressed-tokens/overview"
+    },
+    {
+      "source": "/compressed-tokens/advanced-guides/example-web-client",
+      "destination": "https://zkcompression.com/compressed-tokens/overview"
+    },
+    {
+      "source": "/compressed-tokens/guides/how-to-approve-and-revoke-delegate-authority",
+      "destination": "https://zkcompression.com/light-token/cookbook/approve-revoke"
+    },
+    {
+      "source": "/compressed-tokens/guides/how-to-compress-and-decompress-spl-tokens",
+      "destination": "https://zkcompression.com/compressed-tokens/overview"
+    },
+    {
+      "source": "/compressed-tokens/guides/how-to-compress-complete-spl-token-accounts",
+      "destination": "https://zkcompression.com/compressed-tokens/overview"
+    },
+    {
+      "source": "/compressed-tokens/guides/how-to-create-and-register-a-mint-account-for-compression",
+      "destination": "https://zkcompression.com/light-token/cookbook/create-mint"
+    },
+    {
+      "source": "/compressed-tokens/guides/how-to-create-compressed-token-pools-for-mint-accounts",
+      "destination": "https://zkcompression.com/light-token/cookbook/create-mint"
+    },
+    {
+      "source": "/compressed-tokens/guides/how-to-merge-compressed-token-accounts",
+      "destination": "https://zkcompression.com/compressed-tokens/overview"
+    },
+    {
+      "source": "/compressed-tokens/guides/how-to-mint-compressed-tokens",
+      "destination": "https://zkcompression.com/compressed-tokens/overview"
+    },
+    {
+      "source": "/integration-guides/privy",
+      "destination": "https://zkcompression.com/light-token/toolkits/for-privy"
+    },
+    {
+      "source": "/light-token/cookbook/compress",
+      "destination": "https://zkcompression.com/light-token/cookbook/wrap-unwrap"
+    },
+    {
+      "source": "/light-token/cookbook/compress-decompress",
+      "destination": "https://zkcompression.com/light-token/cookbook/wrap-unwrap"
+    },
+    {
+      "source": "/light-token/cookbook/decompress",
+      "destination": "https://zkcompression.com/light-token/cookbook/wrap-unwrap"
+    },
+    {
+      "source": "/light-token/cookbook/delegate",
+      "destination": "https://zkcompression.com/light-token/cookbook/approve-revoke"
+    },
+    {
+      "source": "/light-token/cookbook/merge-token-accounts",
+      "destination": "https://zkcompression.com/compressed-tokens/overview"
+    },
+    {
+      "source": "/light-token/cookbook/unwrap",
+      "destination": "https://zkcompression.com/light-token/cookbook/wrap-unwrap"
+    },
+    {
+      "source": "/light-token/cookbook/wrap",
+      "destination": "https://zkcompression.com/light-token/cookbook/wrap-unwrap"
+    },
+    {
+      "source": "/light-token/interface-methods",
+      "destination": "https://zkcompression.com/light-token/cookbook/transfer-interface"
+    },
+    {
+      "source": "/light-token/toolkits/for-dexs",
+      "destination": "https://zkcompression.com/light-token/defi/routers"
+    },
+    {
+      "source": "/light-token/toolkits/for-launchpads",
+      "destination": "https://zkcompression.com/light-token/toolkits/overview"
+    },
+    {
+      "source": "/light-token/toolkits/for-trading-apps",
+      "destination": "https://zkcompression.com/light-token/toolkits/overview"
+    },
+    {
+      "source": "/compressed-token-program/c-token-program",
+      "destination": "https://zkcompression.com/light-token/welcome"
+    },
+    {
+      "source": "/compressed-token-program/integrate/for-payment-companies",
+      "destination": "https://zkcompression.com/light-token/toolkits/for-payments"
+    },
+    {
+      "source": "/compressed-token-program/integrate/for-wallet-applications",
+      "destination": "https://zkcompression.com/light-token/toolkits/for-wallets"
+    },
+    {
+      "source": "/compressed-token-program/ctoken/README",
+      "destination": "https://zkcompression.com/light-token/welcome"
+    },
+    {
+      "source": "/compressed-token-program/ctoken/close-ctoken",
+      "destination": "https://zkcompression.com/light-token/cookbook/close-token-account"
+    },
+    {
+      "source": "/compressed-token-program/ctoken/create-ata",
+      "destination": "https://zkcompression.com/light-token/cookbook/create-ata"
+    },
+    {
+      "source": "/compressed-token-program/ctoken/create-ctoken",
+      "destination": "https://zkcompression.com/light-token/cookbook/create-token-account"
+    },
+    {
+      "source": "/compressed-token-program/ctoken/mint-ctokens",
+      "destination": "https://zkcompression.com/light-token/cookbook/mint-to"
+    },
+    {
+      "source": "/compressed-token-program/ctoken/transfer-interface",
+      "destination": "https://zkcompression.com/light-token/cookbook/transfer-interface"
     }
   ]
 }
