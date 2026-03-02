@@ -9,16 +9,8 @@ export const PartnerLogos = () => {
         className="partner-logo light-wordmark"
       />
       <span className="partner-divider">×</span>
-      <img
-        src="/images/helius-black.png"
-        alt="Helius"
-        className="partner-logo logo-light"
-      />
-      <img
-        src="/images/helius-white.png"
-        alt="Helius"
-        className="partner-logo logo-dark"
-      />
+      <img src="/images/helius-black.png" alt="Helius" className="partner-logo logo-light" />
+      <img src="/images/helius-white.png" alt="Helius" className="partner-logo logo-dark" />
     </div>
   );
 };
