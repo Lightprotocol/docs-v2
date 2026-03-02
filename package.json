@@ -4,6 +4,7 @@
   "private": true,
   "description": "ZK Compression Documentation",
   "scripts": {
+    "dev": "mintlify dev",
     "lint": "eslint 'snippets/**/*.{js,jsx}'",
     "lint:fix": "eslint 'snippets/**/*.{js,jsx}' --fix",
     "format": "prettier --write 'snippets/**/*.{js,jsx}'",

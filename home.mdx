@@ -29,7 +29,6 @@ Whether you're pioneering the next DeFi protocol, or building for
 enterprise-grade stablecoin payments, our APIs and SDKs help you scale on
 Solana.
 
-
 ## Token APIs
 
 | Creation Cost | Light Token Program | SPL / Token 2022 |
@@ -48,7 +47,38 @@ Solana.
   The Light Token APIs are a superset of - and fully compatible with - SPL-Tokens.
 </Card>
 
-## PDA Accounts 
+### Integration Guides
+
+<CardGroup cols={2}>
+  <Card title="Stablecoin Payments" icon="credit-card" href="/light-token/toolkits/for-payments">
+    Integrate light-token APIs for payment flows, with comparison to SPL.
+  </Card>
+  <Card title="Wallets" icon="wallet" href="/light-token/toolkits/for-wallets">
+    Let users display and swap light-tokens in your wallet application.
+  </Card>
+  <Card title="DeFi Programs" icon="cube" href="/light-token/defi/programs">
+    Build rent-free AMMs and DeFi programs with light-tokens.
+  </Card>
+  <Card title="Data Streaming" icon="stream" href="/light-token/toolkits/for-streaming-tokens">
+    Stream token and mint events from the network in real-time.
+  </Card>
+</CardGroup>
+
+### Cookbook & Reference
+
+<CardGroup cols={2}>
+  <Card title="Cookbook" icon="utensils" href="/light-token/cookbook/create-mint">
+    Step-by-step recipes for every token operation.
+  </Card>
+  <Card title="API Reference" icon="code" href="/api-reference/overview">
+    TypeScript and Rust SDKs, Anchor constraints and JSON RPC methods.
+  </Card>
+  <Card title="Solana to Light" icon="code-compare" href="/api-reference/solana-to-light-comparison">
+    Side-by-side mapping of every Light Token instruction against its SPL/Solana equivalent.
+  </Card>
+</CardGroup>
+
+## PDA Accounts
 
 | Creation Cost | Light / Compressed | Solana default |
 |:--------|:------|:---------------|
@@ -140,67 +170,11 @@ codex mcp add deepwiki -- npx -y mcp-remote@latest https://mcp.deepwiki.com/mcp
     Copy-paste prompts for common integration tasks.
   </Card>
 
-## For DeFi
-
-<CardGroup cols={2}>
-  <Card title="Program Integration" icon="cube" href="/light-token/defi/programs">
-    Build rent-free AMMs and DeFi programs.
-  </Card>
-  <Card title="Router Integration" icon="route" href="/light-token/defi/routers">
-    Add support for rent-free AMMs to your aggregator.
-  </Card>
-  <Card title="Pinocchio Programs" icon="feather" href="/light-token/defi/programs-pinocchio">
-    High-performance DeFi programs with Pinocchio.
-  </Card>
-</CardGroup>
-
-## For Data Streaming
-
-<CardGroup cols={2}>
-  <Card title="Mint Accounts" icon="bolt" href="/light-token/toolkits/for-streaming-mints">
-    Stream mint events from the network in real-time.
-  </Card>
-  <Card title="Token Accounts" icon="stream" href="/light-token/toolkits/for-streaming-tokens">
-    Stream token events from the network in real-time.
-  </Card>
-</CardGroup>
-
-## For Stablecoin Payments
-
-<CardGroup cols={2}>
-  <Card title="Integration Guide" icon="credit-card" href="/light-token/toolkits/for-payments">
-    Guide to integrate light-token APIs with comparison to SPL.
-  </Card>
-  <Card title="Nullifier PDA" icon="code-commit" href="/pda/compressed-pdas/guides/how-to-create-nullifier-pdas">
-    Prevent onchain instructions from being executed more than once.
-  </Card>
-</CardGroup>
-
-## For Wallets
-
-<CardGroup cols={2}>
-  <Card title="Integration Guide" icon="wallet" href="/light-token/toolkits/for-wallets">
-    Guide for Wallet Applications to let users display and swap light-tokens.
-  </Card>
-  <Card title="Sign with Privy Wallets" icon="key" href="/light-token/toolkits/for-privy">
-    Add light-tokens to Privy embedded wallets.
-  </Card>
-  <Card title="Sponsor Rent Top-Ups" icon="hand-holding-dollar" href="/light-token/toolkits/sponsor-top-ups">
-    Sponsor all gas costs with rent-free accounts for your users, and provide delightful UX.
-  </Card> 
-</CardGroup>
-
 ## Resources
 
 <CardGroup cols={2}>
   <Card title="Learn Core Concepts" icon="graduation-cap" href="/learn/overview">
     Learn about the Light Token program and ZK Compression Core.
-  </Card>
-  <Card title="API Reference" icon="code" href="/api-reference/overview">
-    TypeScript and Rust SDKs, Anchor constraints and JSON RPC methods.
-  </Card>
-   <Card title="Solana to Light Reference" icon="code-compare" href="/api-reference/solana-to-light-comparison">
-    Side-by-side mapping of every Light Token instruction against its SPL/Solana equivalent.
   </Card>
   <Card title="Security Audits" icon="shield-check" href="/resources/security">
     View security audits and formal verification.

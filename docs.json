@@ -54,6 +54,35 @@
                 ]
               },
               {
+                "group": "For Stablecoin Payments",
+                "pages": [
+                  "light-token/toolkits/for-payments"
+                ]
+              },
+              {
+                "group": "For Wallets",
+                "pages": [
+                  "light-token/toolkits/for-wallets",
+                  "light-token/toolkits/for-privy",
+                  "light-token/toolkits/sponsor-top-ups"
+                ]
+              },
+              {
+                "group": "For DeFi",
+                "pages": [
+                  "light-token/defi/routers",
+                  "light-token/defi/programs",
+                  "light-token/defi/programs-pinocchio"
+                ]
+              },
+              {
+                "group": "For Data Streaming",
+                "pages": [
+                  "light-token/toolkits/for-streaming-mints",
+                  "light-token/toolkits/for-streaming-tokens"
+                ]
+              },
+              {
                 "group": "Examples",
                 "pages": [
                   "light-token/examples/client",
@@ -81,42 +110,13 @@
                       "pda/compressed-pdas/guides/how-to-update-compressed-accounts",
                       "pda/compressed-pdas/guides/how-to-close-compressed-accounts",
                       "pda/compressed-pdas/guides/how-to-reinitialize-compressed-accounts",
-                      "pda/compressed-pdas/guides/how-to-burn-compressed-accounts"
+                      "pda/compressed-pdas/guides/how-to-burn-compressed-accounts",
+                      "pda/compressed-pdas/guides/how-to-create-nullifier-pdas"
                     ]
                   },
                   "pda/compressed-pdas/program-examples"
                 ]
               }
-            ]
-          },
-          {
-            "group": "For DeFi",
-            "pages": [
-              "light-token/defi/routers",
-              "light-token/defi/programs",
-              "light-token/defi/programs-pinocchio"
-            ]
-          },
-          {
-            "group": "For Data Streaming",
-            "pages": [
-              "light-token/toolkits/for-streaming-mints",
-              "light-token/toolkits/for-streaming-tokens"
-            ]
-          },
-          {
-            "group": "For Stablecoin Payments",
-            "pages": [
-              "light-token/toolkits/for-payments",
-              "pda/compressed-pdas/guides/how-to-create-nullifier-pdas"
-            ]
-          },
-          {
-            "group": "For Wallets",
-            "pages": [
-              "light-token/toolkits/for-wallets",
-              "light-token/toolkits/for-privy",
-              "light-token/toolkits/sponsor-top-ups"
             ]
           },
           {
