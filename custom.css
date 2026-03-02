@@ -41,3 +41,11 @@ footer img[src*="logo"] {
   width: auto !important;
 }
 
+/* Footer top border: subtle in light, dark in dark theme (no white line) */
+footer.docs-footer {
+  border-top: 1px solid #e5e7eb;
+}
+html.dark footer.docs-footer {
+  border-top-color: #1f2937;
+}
+

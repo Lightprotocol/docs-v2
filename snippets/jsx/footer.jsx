@@ -7,8 +7,8 @@ export const Footer = () => {
 
   return (
     <footer
+      className="docs-footer"
       style={{
-        borderTop: "1px solid #e5e7eb",
         padding: "32px 1.25rem",
       }}
     >
