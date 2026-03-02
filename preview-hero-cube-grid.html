@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>HeroCubeGrid Preview</title>
+<style>
+  body { margin: 0; background: #fff; transition: background 0.3s; }
+  html.dark body { background: #0f172a; }
+  html.dark .hero-cube-grid {
+    --grid-bg-start: #0f172a;
+    --grid-bg-end: #1e293b;
+    --tile-fill: #334155;
+    --tile-stroke: #3b82f6;
+  }
+  #toggle-dark {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    z-index: 10;
+    padding: 8px 16px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background: #fff;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  html.dark #toggle-dark {
+    background: #1e293b;
+    color: #f1f5f9;
+    border-color: #475569;
+  }
+  .hero-cube-grid {
+    position: relative;
+    width: 100%;
+    height: 700px;
+    --grid-bg-start: #f8fafc;
+    --grid-bg-end: #f1f5f9;
+    --tile-fill: #e2e8f0;
+    --tile-stroke: #0066ff;
+  }
+  .hero-cube-grid svg {
+    width: 100%;
+    height: 100%;
+  }
+  .hero-cube-grid .grid-bg-start {
+    stop-color: var(--grid-bg-start);
+  }
+  .hero-cube-grid .grid-bg-end {
+    stop-color: var(--grid-bg-end);
+  }
+  .hero-cube-grid .tile-fill {
+    fill: var(--tile-fill);
+  }
+  .hero-cube-grid .tile-stroke {
+    stroke: var(--tile-stroke);
+  }
+  @keyframes cubePulse {
+    0% { transform: scale(0.85); opacity: 0.2; }
+    20% { transform: scale(1); opacity: 0.6; }
+    80% { transform: scale(1); opacity: 0.6; }
+    100% { transform: scale(0.85); opacity: 0.2; }
+  }
+  .cube-tile {
+    transform-box: fill-box;
+    transform-origin: center;
+    transform: scale(0.85);
+    opacity: 0.2;
+    animation: cubePulse 5s ease-in-out infinite backwards;
+  }
+</style>
+</head>
+<body>
+<button id="toggle-dark" onclick="document.documentElement.classList.toggle('dark'); this.textContent = document.documentElement.classList.contains('dark') ? 'Light mode' : 'Dark mode'">Dark mode</button>
+<div class="hero-cube-grid" id="grid"></div>
+<script>
+  const tileSize = 72;
+  const gap = 6;
+  const cellSize = tileSize + gap;
+  const cols = Math.ceil(2048 / cellSize);
+  const rows = Math.ceil(700 / cellSize);
+  const centerX = (cols - 1) / 2;
+  const centerY = (rows - 1) / 2;
+  const maxDistance = Math.sqrt(centerX * centerX + centerY * centerY);
+
+  const ns = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(ns, "svg");
+  svg.setAttribute("viewBox", "0 0 2048 700");
+  svg.setAttribute("preserveAspectRatio", "xMidYMid slice");
+
+  const defs = document.createElementNS(ns, "defs");
+  const grad = document.createElementNS(ns, "linearGradient");
+  grad.id = "gridGradient";
+  grad.setAttribute("x1", "0%");
+  grad.setAttribute("y1", "0%");
+  grad.setAttribute("x2", "100%");
+  grad.setAttribute("y2", "100%");
+  const stop1 = document.createElementNS(ns, "stop");
+  stop1.setAttribute("offset", "0%");
+  stop1.setAttribute("class", "grid-bg-start");
+  const stop2 = document.createElementNS(ns, "stop");
+  stop2.setAttribute("offset", "100%");
+  stop2.setAttribute("class", "grid-bg-end");
+  grad.appendChild(stop1);
+  grad.appendChild(stop2);
+  defs.appendChild(grad);
+  svg.appendChild(defs);
+
+  const bg = document.createElementNS(ns, "rect");
+  bg.setAttribute("width", "100%");
+  bg.setAttribute("height", "100%");
+  bg.setAttribute("fill", "url(#gridGradient)");
+  svg.appendChild(bg);
+
+  for (let row = 0; row < rows; row++) {
+    for (let col = 0; col < cols; col++) {
+      const dx = col - centerX;
+      const dy = row - centerY;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      const normalizedDistance = distance / maxDistance;
+      const delay = normalizedDistance * 2.5;
+
+      const x = col * cellSize;
+      const y = row * cellSize;
+
+      const g = document.createElementNS(ns, "g");
+      g.setAttribute("class", "cube-tile");
+      g.style.animationDelay = delay + "s";
+
+      const fill = document.createElementNS(ns, "rect");
+      fill.setAttribute("x", x + gap / 2);
+      fill.setAttribute("y", y + gap / 2);
+      fill.setAttribute("width", tileSize);
+      fill.setAttribute("height", tileSize);
+      fill.setAttribute("class", "tile-fill");
+      fill.setAttribute("fill-opacity", "0.5");
+      fill.setAttribute("rx", "4");
+
+      const stroke = document.createElementNS(ns, "rect");
+      stroke.setAttribute("x", x + gap / 2);
+      stroke.setAttribute("y", y + gap / 2);
+      stroke.setAttribute("width", tileSize);
+      stroke.setAttribute("height", tileSize);
+      stroke.setAttribute("fill", "none");
+      stroke.setAttribute("class", "tile-stroke");
+      stroke.setAttribute("stroke-width", "1.5");
+      stroke.setAttribute("stroke-opacity", "0.25");
+      stroke.setAttribute("rx", "4");
+
+      g.appendChild(fill);
+      g.appendChild(stroke);
+      svg.appendChild(g);
+    }
+  }
+
+  document.getElementById("grid").appendChild(svg);
+</script>
+</body>
+</html>

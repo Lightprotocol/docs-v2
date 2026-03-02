@@ -40,6 +40,8 @@ Light Token allows agents to build scalable Solana applications with rent-free t
 | Compressed Token | Only for Airdrops and token distribution. Prefer Light Token for other purposes. Used by Light Token under the hood for rent-free storage of inactive Light Tokens. Supported by Phantom and Backpack. | Do not use for general-purpose token features. Use Light Token instead.        |
 | Compressed PDA   | User state and app state, nullifiers (payments and ZK applications), DePIN nodes, and stake accounts. Similar to program-derived addresses without a rent-exempt balance.                              | Not for shared state, pool accounts, or config accounts. Use Light-PDA instead |
 
+View a complete API comparison to SPL and Solana: https://www.zkcompression.com/api-reference/solana-to-light-comparison.
+
 ### Creation cost
 
 | | Light | Standard Solana |
@@ -147,6 +149,8 @@ npx skills add Lightprotocol/skills
 
 ## Context
 
+- SPL to Light reference: https://zkcompression.com/api-reference/solana-to-light-comparison
+
 ### light-token
 
 A token standard functionally equivalent to SPL that stores mint and token accounts more efficiently.
@@ -219,6 +223,11 @@ Use rent-free PDAs for: user state, app state, nullifiers for payments, DePIN no
 | `wrap`                | [wrap-unwrap](https://zkcompression.com/light-token/cookbook/wrap-unwrap)               | [action](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/actions/wrap.ts) \| [instruction](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/instructions/wrap.ts)                             |
 | `unwrap`              | [wrap-unwrap](https://zkcompression.com/light-token/cookbook/wrap-unwrap)               | [action](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/actions/unwrap.ts) \| [instruction](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/instructions/unwrap.ts)                         |
 | `loadAta`             | [load-ata](https://zkcompression.com/light-token/cookbook/load-ata)                     | [action](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/actions/load-ata.ts) \| [instruction](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/instructions/load-ata.ts)                     |
+| `createAtaExplicitRentSponsor` | —                                                                               | [action](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/actions/create-ata-explicit-rent-sponsor.ts)                                                                                                                          |
+| `createSplInterface`  | —                                                                                       | [action](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/actions/create-spl-interface.ts) \| [instruction](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/instructions/create-spl-interface.ts) |
+| `createSplMint`       | —                                                                                       | [action](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/actions/create-spl-mint.ts) \| [instruction](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/instructions/create-spl-mint.ts)         |
+| `createT22Mint`       | —                                                                                       | [action](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/actions/create-t22-mint.ts) \| [instruction](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/instructions/create-t22-mint.ts)         |
+| `createTokenPool`     | —                                                                                       | [instruction](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/instructions/create-token-pool.ts)                                                                                                                                |
 
 ### Rust client (`light-token-client`)
 
@@ -239,6 +248,8 @@ Use rent-free PDAs for: user state, app state, nullifiers for payments, DePIN no
 | `Close`              | [close-token-account](https://zkcompression.com/light-token/cookbook/close-token-account)   | [instruction](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/instructions/close.rs)                                                                                                                                                               |
 | `Wrap`               | [wrap-unwrap](https://zkcompression.com/light-token/cookbook/wrap-unwrap)                   | [action](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/actions/wrap.rs)                                                                                                                                                                          |
 | `Unwrap`             | [wrap-unwrap](https://zkcompression.com/light-token/cookbook/wrap-unwrap)                   | [action](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/actions/unwrap.rs)                                                                                                                                                                        |
+| `MintToChecked`      | [mint-to](https://zkcompression.com/light-token/cookbook/mint-to)                           | [instruction](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/instructions/mint_to_checked.rs)                                                                                                                                                     |
+| `SplToLightTransfer` | —                                                                                           | [instruction](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/instructions/spl_to_light_transfer.rs)                                                                                                                                               |
 
 ### Program examples (`light_token`)
 
@@ -273,7 +284,7 @@ CPI calls can be combined with existing and/or light macros. The API is a supers
 | `CreateTokenAccountCpi`      | [create-token-account](https://zkcompression.com/light-token/cookbook/create-token-account) | [src](https://github.com/Lightprotocol/examples-light-token/blob/main/programs/anchor/basic-instructions/create-token-account/src/lib.rs) |
 | `CreateMintCpi`              | [create-mint](https://zkcompression.com/light-token/cookbook/create-mint)                   | [src](https://github.com/Lightprotocol/examples-light-token/blob/main/programs/anchor/basic-instructions/create-mint/src/lib.rs)          |
 | `MintToCpi`                  | [mint-to](https://zkcompression.com/light-token/cookbook/mint-to)                           | [src](https://github.com/Lightprotocol/examples-light-token/blob/main/programs/anchor/basic-instructions/mint-to/src/lib.rs)              |
-| `MintToCheckedCpi`           | [mint-to](https://zkcompression.com/light-token/cookbook/mint-to)                           | [src](https://github.com/Lightprotocol/examples-light-token/tree/main/program-examples/anchor/basic-instructions/mint-to-checked)         |
+| `MintToCheckedCpi`           | [mint-to](https://zkcompression.com/light-token/cookbook/mint-to)                           | [src](https://github.com/Lightprotocol/examples-light-token/tree/main/programs/anchor/basic-instructions/mint-to-checked)         |
 | `BurnCpi`                    | [burn](https://zkcompression.com/light-token/cookbook/burn)                                 | [src](https://github.com/Lightprotocol/examples-light-token/blob/main/programs/anchor/basic-instructions/burn/src/lib.rs)                 |
 | `TransferCheckedCpi`         | [transfer-checked](https://zkcompression.com/light-token/cookbook/transfer-checked)         | [src](https://github.com/Lightprotocol/examples-light-token/blob/main/programs/anchor/basic-instructions/transfer-checked/src/lib.rs)     |
 | `TransferInterfaceCpi`       | [transfer-interface](https://zkcompression.com/light-token/cookbook/transfer-interface)     | [src](https://github.com/Lightprotocol/examples-light-token/blob/main/programs/anchor/basic-instructions/transfer-interface/src/lib.rs)   |
