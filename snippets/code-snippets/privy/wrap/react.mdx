@@ -41,7 +41,7 @@ export function useWrap() {
 
       const owner = new PublicKey(ownerPublicKey);
       const mintPubkey = new PublicKey(mint);
-      const tokenAmount = BigInt(Math.floor(amount * Math.pow(10, decimals)));
+      const tokenAmount = BigInt(Math.round(amount * Math.pow(10, decimals)));
 
       // Get SPL interface info — determines whether mint uses SPL or T22
       const splInterfaceInfos = await getSplInterfaceInfos(rpc, mintPubkey);

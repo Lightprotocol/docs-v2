@@ -41,7 +41,7 @@ export function useTransfer() {
       const owner = new PublicKey(ownerPublicKey);
       const mintPubkey = new PublicKey(mint);
       const recipient = new PublicKey(toAddress);
-      const tokenAmount = Math.floor(amount * Math.pow(10, decimals));
+      const tokenAmount = Math.round(amount * Math.pow(10, decimals));
 
       const instructions: TransactionInstruction[][] =
         await createTransferInterfaceInstructions(

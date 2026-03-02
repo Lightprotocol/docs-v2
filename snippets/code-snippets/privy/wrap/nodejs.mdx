@@ -26,7 +26,7 @@ const wrapTokens = async (
 
   const fromPubkey = new PublicKey(fromAddress);
   const mintPubkey = new PublicKey(tokenMintAddress);
-  const tokenAmount = BigInt(Math.floor(amount * Math.pow(10, decimals)));
+  const tokenAmount = BigInt(Math.round(amount * Math.pow(10, decimals)));
 
   // Get SPL interface info — determines whether mint uses SPL or Token 2022
   const splInterfaceInfos = await getSplInterfaceInfos(connection, mintPubkey);

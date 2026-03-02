@@ -105,7 +105,7 @@ atomic transaction with your regular transfer. APIs return `TransactionInstructi
 loop handles the rare multi-transaction case automatically.
 </Info>
 
-### Receive Payments
+## Receive Payments
 
 <Note>
 Find a full code example [here](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments-and-wallets/receive.ts).
@@ -117,7 +117,7 @@ Load creates the associated token account (ATA) if needed and loads any compress
 <Tab title="Instruction">
 
 ```typescript
-import { Transaction } from "@solana/web3.js";
+import { Transaction, sendAndConfirmTransaction } from "@solana/web3.js";
 import {
   createLoadAtaInstructions,
   getAssociatedTokenAddressInterface,
@@ -125,8 +125,8 @@ import {
 
 const ata = getAssociatedTokenAddressInterface(mint, recipient);
 
-// Returns TransactionInstruction[][]. 
-// Each inner array is one transaction. 
+// Returns TransactionInstruction[][].
+// Each inner array is one transaction.
 // Almost always returns just one.
 const instructions = await createLoadAtaInstructions(
   rpc,
@@ -184,7 +184,7 @@ const ata = await getOrCreateAssociatedTokenAccount(
 
 </Accordion>
 
-### Send Payments
+## Send Payments
 
 <Note>
 Find a full code example: [instruction](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments-and-wallets/send-instruction.ts) | [action](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments-and-wallets/send-action.ts).
@@ -194,10 +194,12 @@ Find a full code example: [instruction](https://github.com/Lightprotocol/example
 <Tab title="Instruction">
 
 ```typescript
-import { Transaction } from "@solana/web3.js";
+import { Transaction, sendAndConfirmTransaction } from "@solana/web3.js";
 import { createTransferInterfaceInstructions } from "@lightprotocol/compressed-token/unified";
 
-// Each inner array = one transaction. Usually just one.
+// Returns TransactionInstruction[][].
+// Each inner array is one transaction.
+// Almost always returns just one.
 const instructions = await createTransferInterfaceInstructions(
   rpc,
   payer.publicKey,
@@ -271,7 +273,7 @@ await transfer(connection, payer, sourceAta, destinationAta, owner, amount);
 </Tab>
 </Tabs>
 
-### Show Balance
+## Show Balance
 
 <Note>
 Find a full code example [here](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments-and-wallets/get-balance.ts).
@@ -301,7 +303,7 @@ console.log(account.amount);
 
 </Accordion>
 
-### Transaction History
+## Transaction History
 
 <Note>
 Find a full code example [here](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments-and-wallets/get-history.ts).
@@ -325,7 +327,7 @@ const signatures = await connection.getSignaturesForAddress(ata);
 
 </Accordion>
 
-### Wrap from SPL
+## Wrap from SPL
 
 Wrap tokens from SPL/Token-2022 accounts to light-token ATA.
 
@@ -384,7 +386,7 @@ await wrap(rpc, payer, splAta, tokenAta, owner, mint, amount);
 </Tab>
 </Tabs>
 
-### Unwrap to SPL
+## Unwrap to SPL
 
 Unwrap moves the token balance from a light-token account to a SPL-token account.
 Use this to compose with applications that do not yet support light-token.

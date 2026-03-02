@@ -139,7 +139,7 @@ const instructions = await createLoadAtaInstructions(
 
 for (const ixs of instructions) {
   const tx = new Transaction().add(...ixs);
-  await sendAndConfirmTransaction(rpc, tx, [payer, owner]);
+  await sendAndConfirmTransaction(rpc, tx, [payer]);
 }
 ```
 
@@ -499,5 +499,11 @@ await unwrap(rpc, payer, splAta, owner, mint, amount);
 <PaymentsAiPrompt />
 </Tab>
 </Tabs>
+
+## Sponsor Rent-Top Ups for Users
+
+<Card title="Sponsor rent top-ups for users" icon="hand-holding-dollar" href="/light-token/toolkits/sponsor-top-ups">
+  Abstract away SOL costs by sponsoring rent top-ups on behalf of your users.
+</Card>
 
 <SupportFooter />
