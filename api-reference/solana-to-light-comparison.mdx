@@ -72,6 +72,9 @@ import AgentSkillGeneric from "/snippets/setup/agent-skill-generic.mdx";
 
 ### Create an RPC connection
 
+Helius exposes Solana and Photon RPC endpoints through a single URL.
+It's a thin wrapper extending Solana's `Connection` class that allows you to query cold Light Token balances.
+
 <Tabs>
 <Tab title="TypeScript">
 <Columns cols={2}>
