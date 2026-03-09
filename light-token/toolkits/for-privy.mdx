@@ -169,11 +169,16 @@ after.
 ```typescript
 import {
   createTransferInterfaceInstructions,
+  getOrCreateAtaInterface,
+  getAssociatedTokenAddressInterface,
   sliceLast,
 } from "@lightprotocol/compressed-token/unified";
 
+await getOrCreateAtaInterface(connection, fromPubkey, mint, recipient);
+const destination = getAssociatedTokenAddressInterface(mint, recipient);
+
 const instructions = await createTransferInterfaceInstructions(
-  connection, fromPubkey, mint, amount, fromPubkey, recipient
+  connection, fromPubkey, mint, amount, fromPubkey, destination
 );
 const { rest: loadInstructions, last: transferInstructions } = sliceLast(instructions);
 // empty = nothing to load, will no-op.
@@ -262,11 +267,16 @@ after.
 ```typescript
 import {
   createTransferInterfaceInstructions,
+  getOrCreateAtaInterface,
+  getAssociatedTokenAddressInterface,
   sliceLast,
 } from "@lightprotocol/compressed-token/unified";
 
+await getOrCreateAtaInterface(rpc, owner, mint, recipient);
+const destination = getAssociatedTokenAddressInterface(mint, recipient);
+
 const instructions = await createTransferInterfaceInstructions(
-  rpc, owner, mint, amount, owner, recipient
+  rpc, owner, mint, amount, owner, destination
 );
 const { rest: loadInstructions, last: transferInstructions } = sliceLast(instructions);
 // empty = nothing to load, will no-op.

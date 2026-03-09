@@ -196,18 +196,22 @@ Find a full code example: [instruction](https://github.com/Lightprotocol/example
 
 ```typescript
 import { Transaction, sendAndConfirmTransaction } from "@solana/web3.js";
-import { createTransferInterfaceInstructions } from "@lightprotocol/compressed-token/unified";
+import {
+  createTransferInterfaceInstructions,
+  getOrCreateAtaInterface,
+  getAssociatedTokenAddressInterface,
+} from "@lightprotocol/compressed-token/unified";
 
-// Returns TransactionInstruction[][].
-// Each inner array is one transaction.
-// Almost always returns just one.
+await getOrCreateAtaInterface(rpc, payer, mint, recipient);
+const destination = getAssociatedTokenAddressInterface(mint, recipient);
+
 const instructions = await createTransferInterfaceInstructions(
   rpc,
   payer.publicKey,
   mint,
   amount,
   owner.publicKey,
-  recipient
+  destination
 );
 
 for (const ixs of instructions) {
@@ -243,8 +247,13 @@ after.
 ```typescript
 import {
   createTransferInterfaceInstructions,
+  getOrCreateAtaInterface,
+  getAssociatedTokenAddressInterface,
   sliceLast,
 } from "@lightprotocol/compressed-token/unified";
+
+await getOrCreateAtaInterface(rpc, payer, mint, recipient);
+const destination = getAssociatedTokenAddressInterface(mint, recipient);
 
 const instructions = await createTransferInterfaceInstructions(
   rpc,
@@ -252,7 +261,7 @@ const instructions = await createTransferInterfaceInstructions(
   mint,
   amount,
   owner.publicKey,
-  recipient
+  destination
 );
 const { rest: loadInstructions, last: transferInstructions } = sliceLast(instructions);
 // empty = nothing to load, will no-op.
@@ -299,13 +308,15 @@ const tx = new Transaction().add(
 ```typescript
 import {
   getAssociatedTokenAddressInterface,
+  getOrCreateAtaInterface,
   transferInterface,
 } from "@lightprotocol/compressed-token/unified";
 
 const sourceAta = getAssociatedTokenAddressInterface(mint, owner.publicKey);
+await getOrCreateAtaInterface(rpc, payer, mint, recipient);
+const destination = getAssociatedTokenAddressInterface(mint, recipient);
 
-// Handles loading, creates recipient ATA, transfers.
-await transferInterface(rpc, payer, sourceAta, mint, recipient, owner, amount);
+await transferInterface(rpc, payer, sourceAta, mint, destination, owner, amount);
 ```
 
 <Accordion title="Compare to SPL">

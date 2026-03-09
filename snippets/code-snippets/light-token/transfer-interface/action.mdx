@@ -7,6 +7,7 @@ import {
     createAtaInterface,
     mintToInterface,
     transferInterface,
+    getOrCreateAtaInterface,
     getAssociatedTokenAddressInterface,
 } from "@lightprotocol/compressed-token";
 import { homedir } from "os";
@@ -33,9 +34,10 @@ const payer = Keypair.fromSecretKey(
     await mintToInterface(rpc, payer, mint, senderAta, payer, 1_000_000_000);
 
     const recipient = Keypair.generate();
+    await getOrCreateAtaInterface(rpc, payer, mint, recipient.publicKey);
+    const destination = getAssociatedTokenAddressInterface(mint, recipient.publicKey);
 
-    // destination is a wallet pubkey; the action creates the recipient ATA.
-    const tx = await transferInterface(rpc, payer, senderAta, mint, recipient.publicKey, sender, 500_000_000);
+    const tx = await transferInterface(rpc, payer, senderAta, mint, destination, sender, 500_000_000);
 
     console.log("Tx:", tx);
 })();

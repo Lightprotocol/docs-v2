@@ -92,14 +92,21 @@ export const splTransferCode = [
 ].join("\n");
 
 export const lightTransferCode = [
-  'import { transferInterface } from "@lightprotocol/compressed-token/unified";',
+  'import {',
+  '  transferInterface,',
+  '  getOrCreateAtaInterface,',
+  '  getAssociatedTokenAddressInterface,',
+  '} from "@lightprotocol/compressed-token/unified";',
+  "",
+  "await getOrCreateAtaInterface(rpc, payer, mint, recipient);",
+  "const destination = getAssociatedTokenAddressInterface(mint, recipient);",
   "",
   "const tx = await transferInterface(",
   "  rpc,",
   "  payer,",
   "  sourceAta,",
   "  mint,",
-  "  recipient,",
+  "  destination,",
   "  owner,",
   "  amount",
   ");",
