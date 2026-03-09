@@ -541,14 +541,21 @@ The interface detects account types and invokes the right programs.
 <Columns cols={2}>
 <CodeGroup>
 ```typescript Light Action
-import { transferInterface } from "@lightprotocol/compressed-token/unified";
+import {
+  transferInterface,
+  getOrCreateAtaInterface,
+  getAssociatedTokenAddressInterface,
+} from "@lightprotocol/compressed-token/unified";
+
+await getOrCreateAtaInterface(rpc, payer, mint, recipient);
+const destination = getAssociatedTokenAddressInterface(mint, recipient);
 
 const tx = await transferInterface(
   rpc,
   payer,
   sourceAta,
   mint,
-  recipient,
+  destination,
   owner,
   amount
 );
@@ -655,18 +662,22 @@ transferring in one call:
 
 ```typescript
 import { Transaction } from "@solana/web3.js";
-import { createTransferInterfaceInstructions } from "@lightprotocol/compressed-token/unified";
+import {
+  createTransferInterfaceInstructions,
+  getOrCreateAtaInterface,
+  getAssociatedTokenAddressInterface,
+} from "@lightprotocol/compressed-token/unified";
 
-// Returns TransactionInstruction[][].
-// Each inner array is one transaction.
-// Almost always returns just one.
+await getOrCreateAtaInterface(rpc, payer, mint, recipient);
+const destination = getAssociatedTokenAddressInterface(mint, recipient);
+
 const instructions = await createTransferInterfaceInstructions(
   rpc,
   payer.publicKey,
   mint,
   amount,
   owner.publicKey,
-  recipient
+  destination
 );
 
 for (const ixs of instructions) {
@@ -704,8 +715,13 @@ after.
 ```typescript
 import {
   createTransferInterfaceInstructions,
+  getOrCreateAtaInterface,
+  getAssociatedTokenAddressInterface,
   sliceLast,
 } from "@lightprotocol/compressed-token/unified";
+
+await getOrCreateAtaInterface(rpc, payer, mint, recipient);
+const destination = getAssociatedTokenAddressInterface(mint, recipient);
 
 const instructions = await createTransferInterfaceInstructions(
   rpc,
@@ -713,7 +729,7 @@ const instructions = await createTransferInterfaceInstructions(
   mint,
   amount,
   owner.publicKey,
-  recipient
+  destination
 );
 const { rest: loadInstructions, last: transferInstructions } = sliceLast(instructions);
 // empty = nothing to load, will no-op.
