@@ -10,6 +10,7 @@
     "format": "prettier --write 'snippets/**/*.{js,jsx}'",
     "format:check": "prettier --check 'snippets/**/*.{js,jsx}'",
     "spellcheck": "cspell '**/*.mdx' --no-progress",
+    "generate:llms": "node scripts/generate-llms-txt.js",
     "ci": "npm run format:check && npm run lint && npm run spellcheck"
   },
   "devDependencies": {

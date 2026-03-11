@@ -29,7 +29,7 @@ allowed-tools:
 
 ## Capabilities
 
-Light Token allows agents to build scalable Solana applications with rent-free token and mint accounts and PDAs.
+ZK Compression is a framework on Solana for stablecoin payment rails, consumer apps and defi. The Light SDK and API's let you create mint, token and PDA accounts >99% cheaper with familiar Solana developer experience.
 
 ### Primitives
 
@@ -47,16 +47,13 @@ View a complete API comparison to SPL and Solana: https://www.zkcompression.com/
 | | Light | Standard Solana |
 | :----------------------- | --------------: | --------------: |
 | **Mint Account** | **~0.00001 SOL** | ~0.0015 SOL |
-| **Token Account** | **~0.00001 SOL** | ~0.002 SOL |
+| **Token Account** | **~0.00001 SOL** | ~0.0029 SOL |
 | **PDA (100-byte)** | **~0.0000115 SOL** | ~0.0016 SOL |
-| **Associated token account creation** | **4,348 CU** | 14,194 CU |
-| **Transfer** | **312 CU** | 4,645 CU |
-| **Transfer** (rent-free) | **1,885 CU** | 4,645 CU |
-=======
+
 | Metric | Light | Standard Solana |
 | ------------------------------------- | -----------------: | --------------: |
 | **Mint Account** | **~0.00001 SOL** | ~0.0015 SOL |
-| **Token Account** | **~0.00001 SOL** | ~0.002 SOL |
+| **Token Account** | **~0.00001 SOL** | ~0.0029 SOL |
 | **PDA (100-byte)** | **~0.0000115 SOL** | ~0.0016 SOL |
 | **Associated token account creation** | **4,348 CU** | 14,194 CU |
 | **Transfer** | **312 CU** | 4,645 CU |
@@ -67,15 +64,6 @@ View a complete API comparison to SPL and Solana: https://www.zkcompression.com/
 ```bash theme={null}
 npx skills add Lightprotocol/skills
 ```
-
-## Security
-
-This skill does not pull, store, or transmit external secrets. It provides code patterns, documentation references, and development guidance only.
-
-- **No credentials consumed.** The skill requires no API keys, private keys, or signing secrets. `env: []` is declared explicitly.
-- **User-provided configuration.** RPC endpoints, wallet keypairs, and authentication tokens (Privy, wallet adapters) are configured in the user's own application code — the skill only demonstrates how to use them.
-- **Install source.** `npx skills add Lightprotocol/skills` installs from the public GitHub repository ([Lightprotocol/skills](https://github.com/Lightprotocol/skills)). Verify the source before running.
-- **Audited protocol.** Light Protocol smart contracts are independently audited. Reports are published at [github.com/Lightprotocol/light-protocol/tree/main/audits](https://github.com/Lightprotocol/light-protocol/tree/main/audits).
 
 ## Workflow
 
@@ -109,18 +97,6 @@ This skill does not pull, store, or transmit external secrets. It provides code 
 | For program development on Solana with infrequently accessed state, such as per-user state, DePIN registrations, ... | [solana-compression](skills/solana-compression/) |
 | For testing with Light Protocol programs and clients on localnet, devnet, and mainnet validation | [testing](skills/testing/) |
 | For questions about compressed accounts, Light SDK, Solana development, Claude Code features, or agent skills | [ask-mcp](skills/ask-mcp/) |
-
-| Use case | Skill |
-| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| Build rent-free Solana programs with Light SDK (Anchor or Pinocchio). Includes router integration. | [light-sdk](https://github.com/Lightprotocol/skills/tree/main/skills/light-sdk) |
-| Use Light Token client SDKs (TypeScript and Rust) for mints, ATAs, transfers | [light-token-client](https://github.com/Lightprotocol/skills/tree/main/skills/light-token-client) |
-| Stream account state via Laserstream gRPC | [data-streaming](https://github.com/Lightprotocol/skills/tree/main/skills/data-streaming) |
-| Wallets and payment flows with light-token. Includes privy, wallet adapter, mobile wallet adapter signing. Optional nullifier to prevent your onchain instruction from being executed more than once. | [payments-and-wallets](https://github.com/Lightprotocol/skills/tree/main/skills/payments-and-wallets) |
-| Airdrops, DePIN, token distribution | [token-distribution](https://github.com/Lightprotocol/skills/tree/main/skills/token-distribution) |
-| Anti-double-spend nullifiers for Privacy-preserving ZK programs | [zk-nullifier](https://github.com/Lightprotocol/skills/tree/main/skills/zk-nullifier) |
-| Testing programs and clients on localnet, devnet, mainnet | [testing](https://github.com/Lightprotocol/skills/tree/main/skills/testing) |
-| For per-user state, DePIN nodes, and infrequently accessed app state with compressed PDAs | [solana-compression](https://github.com/Lightprotocol/skills/tree/main/skills/solana-compression) |
-| Help with Debugging and Questions via DeepWiki MCP | [ask-mcp](https://github.com/Lightprotocol/skills/tree/main/skills/ask-mcp) |
 
 ### Install to Claude Code
 

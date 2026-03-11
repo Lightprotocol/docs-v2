@@ -56,7 +56,8 @@
               {
                 "group": "For Stablecoin Payments",
                 "pages": [
-                  "light-token/toolkits/for-payments"
+                  "light-token/toolkits/for-payments",
+                  "pda/compressed-pdas/guides/how-to-create-nullifier-pdas"
                 ]
               },
               {
@@ -111,8 +112,7 @@
                       "pda/compressed-pdas/guides/how-to-update-compressed-accounts",
                       "pda/compressed-pdas/guides/how-to-close-compressed-accounts",
                       "pda/compressed-pdas/guides/how-to-reinitialize-compressed-accounts",
-                      "pda/compressed-pdas/guides/how-to-burn-compressed-accounts",
-                      "pda/compressed-pdas/guides/how-to-create-nullifier-pdas"
+                      "pda/compressed-pdas/guides/how-to-burn-compressed-accounts"
                     ]
                   },
                   "pda/compressed-pdas/program-examples"
@@ -123,7 +123,7 @@
           {
             "group": "For Other Use Cases",
             "pages": [
-              "compressed-tokens/airdrop",
+              "token-distribution",
               "pda/compressed-pdas/solana-attestation-service",
               {
                 "group": "Custom ZK Applications",
@@ -164,7 +164,7 @@
                   "resources/error-cheatsheet/debug-0x179b-6043-proofverificationfailed"
                 ]
               },
-              "compressed-tokens/overview",
+              "resources/legacy-compressed-tokens",
               "resources/security"
             ]
           }
@@ -317,6 +317,18 @@
   },
   "redirects": [
     {
+      "source": "/airdrop",
+      "destination": "https://zkcompression.com/token-distribution"
+    },
+    {
+      "source": "/compressed-tokens/airdrop",
+      "destination": "https://zkcompression.com/token-distribution"
+    },
+    {
+      "source": "/compressed-tokens/overview",
+      "destination": "https://zkcompression.com/resources/legacy-compressed-tokens"
+    },
+    {
       "source": "/landing",
       "destination": "https://zkcompression.com/home"
     },
@@ -426,7 +438,7 @@
     },
     {
       "source": "/compressed-tokens/advanced-guides/airdrop",
-      "destination": "https://zkcompression.com/compressed-tokens/airdrop"
+      "destination": "https://zkcompression.com/token-distribution"
     },
     {
       "source": "/quickstart",
@@ -442,7 +454,7 @@
     },
     {
       "source": "/compressed-tokens/advanced-guides",
-      "destination": "https://zkcompression.com/compressed-tokens/overview"
+      "destination": "https://zkcompression.com/resources/legacy-compressed-tokens"
     },
     {
       "source": "/compressed-tokens/advanced-guides/add-wallet-support-for-compressed-tokens",
@@ -450,31 +462,31 @@
     },
     {
       "source": "/compressed-tokens/advanced-guides/example-token-distribution",
-      "destination": "https://zkcompression.com/compressed-tokens/airdrop"
+      "destination": "https://zkcompression.com/token-distribution"
     },
     {
       "source": "/compressed-tokens/advanced-guides/use-token-2022-with-compression",
-      "destination": "https://zkcompression.com/compressed-tokens/overview"
+      "destination": "https://zkcompression.com/resources/legacy-compressed-tokens"
     },
     {
       "source": "/compressed-tokens/guides",
-      "destination": "https://zkcompression.com/compressed-tokens/overview"
+      "destination": "https://zkcompression.com/resources/legacy-compressed-tokens"
     },
     {
       "source": "/compressed-tokens/guides/add-token-pools-to-mint-accounts",
-      "destination": "https://zkcompression.com/compressed-tokens/overview"
+      "destination": "https://zkcompression.com/resources/legacy-compressed-tokens"
     },
     {
       "source": "/compressed-tokens/guides/compress-decompress",
-      "destination": "https://zkcompression.com/compressed-tokens/overview"
+      "destination": "https://zkcompression.com/resources/legacy-compressed-tokens"
     },
     {
       "source": "/compressed-tokens/guides/compress-spl-token-account",
-      "destination": "https://zkcompression.com/compressed-tokens/overview"
+      "destination": "https://zkcompression.com/resources/legacy-compressed-tokens"
     },
     {
       "source": "/compressed-tokens/guides/create-compressed-token-accounts",
-      "destination": "https://zkcompression.com/compressed-tokens/overview"
+      "destination": "https://zkcompression.com/resources/legacy-compressed-tokens"
     },
     {
       "source": "/compressed-tokens/guides/create-mint-with-token-pool",
@@ -482,19 +494,19 @@
     },
     {
       "source": "/compressed-tokens/guides/delegate",
-      "destination": "https://zkcompression.com/compressed-tokens/overview"
+      "destination": "https://zkcompression.com/resources/legacy-compressed-tokens"
     },
     {
       "source": "/compressed-tokens/guides/merge-compressed-token-accounts",
-      "destination": "https://zkcompression.com/compressed-tokens/overview"
+      "destination": "https://zkcompression.com/resources/legacy-compressed-tokens"
     },
     {
       "source": "/compressed-tokens/guides/mint-compressed-tokens",
-      "destination": "https://zkcompression.com/compressed-tokens/overview"
+      "destination": "https://zkcompression.com/resources/legacy-compressed-tokens"
     },
     {
       "source": "/compressed-tokens/guides/transfer-compressed-tokens",
-      "destination": "https://zkcompression.com/compressed-tokens/overview"
+      "destination": "https://zkcompression.com/resources/legacy-compressed-tokens"
     },
     {
       "source": "/references/light-token-terminology",
@@ -722,15 +734,15 @@
     },
     {
       "source": "/compressed-tokens/advanced-guides/create-an-airdrop-with-claim",
-      "destination": "https://zkcompression.com/compressed-tokens/airdrop"
+      "destination": "https://zkcompression.com/token-distribution"
     },
     {
       "source": "/compressed-tokens/advanced-guides/example-node-js",
-      "destination": "https://zkcompression.com/compressed-tokens/overview"
+      "destination": "https://zkcompression.com/resources/legacy-compressed-tokens"
     },
     {
       "source": "/compressed-tokens/advanced-guides/example-web-client",
-      "destination": "https://zkcompression.com/compressed-tokens/overview"
+      "destination": "https://zkcompression.com/resources/legacy-compressed-tokens"
     },
     {
       "source": "/compressed-tokens/guides/how-to-approve-and-revoke-delegate-authority",
@@ -738,11 +750,11 @@
     },
     {
       "source": "/compressed-tokens/guides/how-to-compress-and-decompress-spl-tokens",
-      "destination": "https://zkcompression.com/compressed-tokens/overview"
+      "destination": "https://zkcompression.com/resources/legacy-compressed-tokens"
     },
     {
       "source": "/compressed-tokens/guides/how-to-compress-complete-spl-token-accounts",
-      "destination": "https://zkcompression.com/compressed-tokens/overview"
+      "destination": "https://zkcompression.com/resources/legacy-compressed-tokens"
     },
     {
       "source": "/compressed-tokens/guides/how-to-create-and-register-a-mint-account-for-compression",
@@ -754,11 +766,11 @@
     },
     {
       "source": "/compressed-tokens/guides/how-to-merge-compressed-token-accounts",
-      "destination": "https://zkcompression.com/compressed-tokens/overview"
+      "destination": "https://zkcompression.com/resources/legacy-compressed-tokens"
     },
     {
       "source": "/compressed-tokens/guides/how-to-mint-compressed-tokens",
-      "destination": "https://zkcompression.com/compressed-tokens/overview"
+      "destination": "https://zkcompression.com/resources/legacy-compressed-tokens"
     },
     {
       "source": "/integration-guides/privy",
@@ -782,7 +794,7 @@
     },
     {
       "source": "/light-token/cookbook/merge-token-accounts",
-      "destination": "https://zkcompression.com/compressed-tokens/overview"
+      "destination": "https://zkcompression.com/resources/legacy-compressed-tokens"
     },
     {
       "source": "/light-token/cookbook/unwrap",
@@ -886,7 +898,7 @@
     },
     {
       "source": "/compressed-tokens/advanced-guides/how-to-combine-operations-in-one-transaction",
-      "destination": "https://zkcompression.com/compressed-tokens/overview"
+      "destination": "https://zkcompression.com/resources/legacy-compressed-tokens"
     },
     {
       "source": "/learn/ask-deepwiki-public",

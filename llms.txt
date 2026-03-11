@@ -1,0 +1,198 @@
+# ZK Compression by Light Protocol and Helius Labs
+
+> ZK Compression is a framework on Solana for stablecoin payment rails, consumer apps and defi. The Light SDK and API's let you create mint, token and PDA accounts >99% cheaper with familiar Solana developer experience.
+
+This documentation provides guides, reference and tutorials for developers building on Solana.
+
+## Table of contents
+- [Primitives](#primitives)
+- [AI Agent Resources](#ai-agent-resources)
+- [Getting Started](#getting-started)
+- [Light Token Basics](#light-token-basics)
+- [For Payments and Wallets](#for-payments-and-wallets)
+- [For DeFi](#for-defi)
+- [For Data Streaming](#for-data-streaming)
+- [PDA Account basics for Solana programs](#pda-account-basics-for-solana-programs)
+- [For Other Use Cases](#for-other-use-cases)
+- [Learn](#learn)
+- [Resources](#resources)
+- [SDK Reference](#sdk-reference)
+- [Solana to Light Reference](#solana-to-light-reference)
+- [Anchor Reference](#anchor-reference)
+- [JSON RPC Methods](#json-rpc-methods)
+- [Support](#support)
+- [Examples for DeFi](#examples-for-defi)
+- [Examples for Payments and Wallets](#examples-for-payments-and-wallets)
+- [OpenAPI Specs](#openapi-specs)
+
+## Primitives
+| Primitive        | Use case                                                                                                                                                                                               | Constraints                                                                    |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------ |
+| Light Token      | Most token use cases (Payment Rails, Consumer Apps, DeFi). Rent-free mint and token accounts. More compute-unit efficient on the hot path.                                         | Currently in Beta and on Solana Devnet with mainnet in Q1 2026                 |
+| Light-PDA        | DeFi program state such as AMM pools and vaults. Can be implemented with minimal code changes.                                                                             | Currently in Beta and on Solana Devnet with mainnet in Q1 2026                 |
+| Compressed Token | Only for Airdrops and token distribution. Prefer Light Token for other purposes. Used by Light Token under the hood for rent-free storage of inactive Light Tokens. Supported by Phantom and Backpack. | Do not use for general-purpose token features. Use Light Token instead.        |
+| Compressed PDA   | User state and app state, nullifiers (payments and ZK applications), DePIN nodes, and stake accounts. Similar to program-derived addresses without a rent-exempt balance.                              | Not for shared state, pool accounts, or config accounts. Use Light-PDA instead |
+
+View a complete API comparison to SPL and Solana: [https://www.zkcompression.com/api-reference/solana-to-light-comparison](https://www.zkcompression.com/api-reference/solana-to-light-comparison).
+
+Comparing creation cost and CU usage:
+
+|                          |     Light-Token |  SPL-Token |
+| :----------------------- | --------------: | ---------: |
+| **Mint Account**         | **0.00001 SOL** | 0.0015 SOL |
+| **Token Account**        | **0.00001 SOL** |  0.0029 SOL |
+| **Associated token account creation** |    **4,348 CU** |  14,194 CU |
+| **Transfer**             |      **312 CU** |   4,645 CU |
+| **Transfer** (rent-free) |    **1,885 CU** |   4,645 CU |
+
+## AI Agent Resources
+- [Agent skills](https://www.zkcompression.com/ai-tools/agent-skills.md): Install structured agent skill files for Token API's and PDA accounts. Skills tell AI coding agents what they can do with ZK Compression.
+- [MCP](https://www.zkcompression.com/ai-tools/mcp.md): Connect AI apps to Light Protocol data sources and tools via the Model Context Protocol (MCP). Includes installation for Claude Code, Codex, Cursor, and more.
+- [AI Prompts](https://www.zkcompression.com/ai-tools/prompts.md): Ready-to-use AI prompts for Light Protocol. Copy a prompt, paste into your AI coding agent, and let it implement the recipe in your project.
+- [Orchestration Skill](https://www.zkcompression.com/skill.md): Full agent skill for AI coding agents.
+- **Agent Skills:** [light-sdk](https://github.com/Lightprotocol/skills/tree/main/skills/light-sdk): For Solana program development with tokens and PDAs, Light is 200x cheaper than SPL/ Solana and has minimal code differences
+- **Agent Skills:** [light-token-client](https://github.com/Lightprotocol/skills/tree/main/skills/light-token-client): For client development with tokens on Solana, Light Token is 200x cheaper than SPL and has minimal changes
+- **Agent Skills:** [data-streaming](https://github.com/Lightprotocol/skills/tree/main/skills/data-streaming): For data pipelines, aggregators, or indexers, real-time account state streaming on Solana with light account hot/cold lifecycle tracking
+- **Agent Skills:** [payments-and-wallets](https://github.com/Lightprotocol/skills/tree/main/skills/payments-and-wallets): For stablecoin payment flows and wallet integrations on Solana.
+- **Agent Skills:** [token-distribution](https://github.com/Lightprotocol/skills/tree/main/skills/token-distribution): For token distribution on Solana 5000x cheaper than SPL (rewards, airdrops, depins, ...)
+- **Agent Skills:** [zk-nullifier](https://github.com/Lightprotocol/skills/tree/main/skills/zk-nullifier): For custom ZK Solana programs and privacy-preserving applications to prevent double spending.
+- **Agent Skills:** [testing](https://github.com/Lightprotocol/skills/tree/main/skills/testing): For testing with Light Protocol programs and clients on localnet, devnet, and mainnet validation
+- **Agent Skills:** [solana-compression](https://github.com/Lightprotocol/skills/tree/main/skills/solana-compression): For program development on Solana with infrequently accessed state, such as per-user state, DePIN registrations, ...
+- **Agent Skills:** [ask-mcp](https://github.com/Lightprotocol/skills/tree/main/skills/ask-mcp): For questions about compressed accounts, Light SDK, Solana development, Claude Code features, or agent skills
+
+## Getting Started
+- [Welcome to ZK Compression](https://www.zkcompression.com/home.md)
+- [FAQ](https://www.zkcompression.com/faq.md): Frequently asked questions about light token, PDA accounts, and use cases.
+
+## Light Token Basics
+- [The Light Token Program](https://www.zkcompression.com/light-token/welcome.md): High-performance token standard that is functionally equivalent to SPL while reducing account creation cost by 200x and being more CU efficient on hot paths. The Light Token SDK keeps code changes minimal and is a superset of the SPL-token API.
+- [Create Mint Account with Token Metadata](https://www.zkcompression.com/light-token/cookbook/create-mint.md): Program and client guides to create a mint with token metadata. For existing SPL or Token 2022 mints add an interface PDA for interoperability. Includes step-by-step implementation and full code examples.
+- [Create Associated Light Token Accounts](https://www.zkcompression.com/light-token/cookbook/create-ata.md): Client and program guide to create associated Light Token accounts. Includes step-by-step implementation and full code examples.
+- [Create Light Token Account](https://www.zkcompression.com/light-token/cookbook/create-token-account.md): Client and program guide to create Light Token accounts. Includes step-by-step implementation and full code examples.
+- [Mint to Light Token Accounts](https://www.zkcompression.com/light-token/cookbook/mint-to.md): Client and program guide to mint tokens to a account. Includes step-by-step implementation and full code examples.
+- [Transfer Interface](https://www.zkcompression.com/light-token/cookbook/transfer-interface.md): Program and client guide for transfers between Light Token and SPL token accounts. The interface detects account types and invokes the right programs.
+- [Transfer Checked](https://www.zkcompression.com/light-token/cookbook/transfer-checked.md): Rust client guide to transfer Light Tokens with decimal validation. Includes step-by-step implementation and full code examples.
+- [Approve and Revoke Delegates](https://www.zkcompression.com/light-token/cookbook/approve-revoke.md): Rust client guide to approve and revoke delegates for Light Token accounts. Includes step-by-step implementation and full code examples.
+- [Freeze and Thaw Light Token Accounts](https://www.zkcompression.com/light-token/cookbook/freeze-thaw.md): Rust client guide to freeze and thaw Light Token accounts. Includes step-by-step implementation and full code examples.
+- [Wrap & Unwrap SPL/Token 2022 <> Light Token](https://www.zkcompression.com/light-token/cookbook/wrap-unwrap.md): Move tokens between SPL/Token 2022 token and Light Token accounts. Use to interact with applications that only support SPL/Token 2022.
+- [Load Token Balances to Light Associated Token Account](https://www.zkcompression.com/light-token/cookbook/load-ata.md): Unify token balances from compressed tokens (cold Light Tokens), SPL, and Token 2022 to one light ATA.
+- [Close Light Token Account](https://www.zkcompression.com/light-token/cookbook/close-token-account.md): Program guide to close Light Token accounts via CPI. Includes step-by-step implementation and full code examples.
+- [Burn Light Tokens](https://www.zkcompression.com/light-token/cookbook/burn.md): Rust client guide to burn Light Tokens. Includes step-by-step implementation and full code examples.
+- [Client examples](https://www.zkcompression.com/light-token/examples/client.md): TypeScript and Rust client examples for light-token SDK.
+- [Program examples](https://www.zkcompression.com/light-token/examples/program.md): Anchor program examples for light-token CPI.
+
+## For Payments and Wallets
+- [Toolkit for Stablecoin Payments](https://www.zkcompression.com/light-token/toolkits/for-payments.md): Guide to integrate light-token APIs for stablecoin payments with comparison to SPL.
+- [Create Nullifier PDAs](https://www.zkcompression.com/pda/compressed-pdas/guides/how-to-create-nullifier-pdas.md): Create rent-free nullifier PDAs to prevent duplicate actions.
+- [Light Token Integration Guide for Wallet Applications](https://www.zkcompression.com/light-token/toolkits/for-wallets.md): Guide for Wallet Applications to add Light-token support.
+- [Light-Token with Privy Wallets](https://www.zkcompression.com/light-token/toolkits/for-privy.md): Integrate light-token with Privy embedded wallets for rent-free token accounts and transfers.
+- [Light-Token with Wallet Adapter](https://www.zkcompression.com/light-token/toolkits/for-wallet-adapter.md): Integrate light-token with Solana Wallet Adapter for rent-free token accounts and transfers.
+- [Sponsor Rent Top-Ups for Users](https://www.zkcompression.com/light-token/toolkits/sponsor-top-ups.md): The Light SDK sponsors rent-exemption for Solana accounts and keeps accounts active through periodic top-ups paid by the fee payer. Sponsor top-ups by setting your application as the fee payer to abstract away holding SOL from your users or provide a rent-free experience similar to transaction fee sponsorship.
+
+## For DeFi
+- [Router Integration](https://www.zkcompression.com/light-token/defi/routers.md): Add support for rent-free AMMs on Solana.
+- [Program Integration](https://www.zkcompression.com/light-token/defi/programs.md): Build high-performance DeFi programs with rent-free accounts
+- [Pinocchio Programs](https://www.zkcompression.com/light-token/defi/programs-pinocchio.md): Build high-performance DeFi programs with rent-free accounts using Pinocchio
+
+## For Data Streaming
+- [Streaming Mint Accounts](https://www.zkcompression.com/light-token/toolkits/for-streaming-mints.md): Stream light-mint accounts and metadata via Laserstream.
+- [Streaming Token Accounts](https://www.zkcompression.com/light-token/toolkits/for-streaming-tokens.md): Stream light-token accounts via Laserstream. Same base layout as SPL Token.
+
+## PDA Account basics for Solana programs
+- [PDA accounts](https://www.zkcompression.com/pda/overview.md): Overview to Light-PDAs (Solana accounts with sponsored rent-exemption) and compressed PDAs (compressed accounts without rent-exemption cost).
+- [Light PDA](https://www.zkcompression.com/pda/light-pda/overview.md): Create Solana PDA accounts with sponsored rent-exemption and minimal code changes. Use like any Solana PDA, e.g. for DeFi pools, vaults, pool accounts, or other shared state.
+- **Compressed PDA:** [Overview & Program Template](https://www.zkcompression.com/pda/compressed-pdas/overview.md): Compressed PDAs provide full composability and functionality of accounts at PDAs, without rent-exemption cost per account. Suited for accounts where each user or entity gets their own PDA and state is infrequently accessed.
+- **Compressed PDA:** [Client Guide](https://www.zkcompression.com/pda/compressed-pdas/guides/client-guide.md): Rust and Typescript client guides with step-by-step implementation and full code examples.
+- **Compressed PDA > Program Guides:** [Overview](https://www.zkcompression.com/pda/compressed-pdas/guides.md): Overview to guides for Solana programs to create, update, close, reinitialize, and burn permanently compressed accounts.
+- **Compressed PDA > Program Guides:** [Create Compressed Accounts](https://www.zkcompression.com/pda/compressed-pdas/guides/how-to-create-compressed-accounts.md): Guide to create compressed accounts in Solana programs with full code examples.
+- **Compressed PDA > Program Guides:** [Update Compressed Accounts](https://www.zkcompression.com/pda/compressed-pdas/guides/how-to-update-compressed-accounts.md): Guide to update compressed accounts in Solana programs with full code examples.
+- **Compressed PDA > Program Guides:** [Close Compressed Accounts](https://www.zkcompression.com/pda/compressed-pdas/guides/how-to-close-compressed-accounts.md): Guide to close compressed accounts in Solana programs with full code examples.
+- **Compressed PDA > Program Guides:** [Reinitialize Compressed Accounts](https://www.zkcompression.com/pda/compressed-pdas/guides/how-to-reinitialize-compressed-accounts.md): Guide to reinitialize compressed accounts in Solana programs with full code examples.
+- **Compressed PDA > Program Guides:** [Burn Compressed Accounts](https://www.zkcompression.com/pda/compressed-pdas/guides/how-to-burn-compressed-accounts.md): Guide to burn compressed accounts in Solana programs with full code examples.
+- **Compressed PDA:** [Program Examples](https://www.zkcompression.com/pda/compressed-pdas/program-examples.md): Program example repository for compressed accounts with tests.
+
+## For Other Use Cases
+- [Token Distribution](https://www.zkcompression.com/token-distribution.md): Complete client and program guides to create an airdrop – with or without code. ZK compression is the most efficient way to distribute SPL tokens.
+- [Solana Attestation Service (Devnet)](https://www.zkcompression.com/pda/compressed-pdas/solana-attestation-service.md):     Credential system for KYC verification, professional badges, and compliance credentials in minutes. Currently undergoing audit.
+- **Custom ZK Applications:** [Primitives for ZK on Solana](https://www.zkcompression.com/zk/overview.md): Overview how to build a ZK program on Solana.
+- **Custom ZK Applications:** [Examples](https://www.zkcompression.com/zk/examples.md): Example projects for building ZK programs on Solana.
+
+## Learn
+- [Overview of core concepts](https://www.zkcompression.com/learn/overview.md): Learn about Light Token and ZK Compression Core.
+- [Core concepts of the Light Token program (Beta)](https://www.zkcompression.com/learn/light-token-standard.md): The Light Token Program is a high performance token program that reduces the cost of account creations by 200x, while being more CU efficient than SPL on hot paths.
+- **Core Concepts (ZK Compression):** [High-level System Overview](https://www.zkcompression.com/learn/core-concepts.md): Overview to ZK Compression's Core Concepts. Get a high-level system overview and learn about the compressed account model, lifecycle of a transaction, and considerations.
+- **Core Concepts (ZK Compression):** [Compressed Account Model](https://www.zkcompression.com/learn/core-concepts/compressed-account-model.md): Overview to compressed accounts and comparison to Solana accounts.
+- **Core Concepts (ZK Compression):** [Merkle trees and Validity Proofs](https://www.zkcompression.com/learn/core-concepts/merkle-trees-validity-proofs.md): Learn the core concepts of state trees, address trees, and validity proofs for compressed accounts.
+- **Core Concepts (ZK Compression):** [Lifecycle of a Transaction](https://www.zkcompression.com/learn/core-concepts/transaction-lifecycle.md): Overview to the lifecycle of a transaction that interacts with compressed accounts.
+- **Core Concepts (ZK Compression):** [Considerations](https://www.zkcompression.com/learn/core-concepts/considerations.md): Overview to considerations of ZK Compression, namely larger transaction size, higher compute unit usage, and per-transaction state cost.
+
+## Resources
+- [CLI installation & commands](https://www.zkcompression.com/resources/cli.md): Steps to set up your local environment for Light Protocol development. CLI to interact with Light Tokens and compressed accounts on Solana.
+- [Guide to Migrate from v1 to v2 Merkle trees](https://www.zkcompression.com/resources/migration-v1-to-v2.md): V2 reduces CU consumption by up to 70%. V1 remains supported for existing deployments.
+- [Addresses and URLs](https://www.zkcompression.com/resources/addresses-and-urls.md): Overview to all of ZK Compression's RPC URLs, Program IDs & Accounts and Lookup Tables.
+- **Error Cheatsheet:** [Error Cheatsheet](https://www.zkcompression.com/resources/error-cheatsheet.md): Complete error code reference for ZK Compression. Search error codes with hex values and messages.
+- **Error Cheatsheet:** [Debug ProofVerificationFailed (0x179b)](https://www.zkcompression.com/resources/error-cheatsheet/debug-0x179b-6043-proofverificationfailed.md): Common cause and debug steps for ProofVerificationFailed (0x179B / 6043)
+- [Legacy Compressed Tokens](https://www.zkcompression.com/resources/legacy-compressed-tokens.md): Compressed tokens are the most efficient way to distribute SPL tokens (eg rewards, airdrops). For other token purposes use Light Token.
+- [Security](https://www.zkcompression.com/resources/security.md): Overview to Light Protocol's bug bounty program, third party security audits, and formal verification of circuits.
+
+## SDK Reference
+- [SDK Reference](https://www.zkcompression.com/api-reference/sdk.md): Client and program SDKs for Light Token and ZK Compression.
+
+## Solana to Light Reference
+- [Solana to Light Reference](https://www.zkcompression.com/api-reference/solana-to-light-comparison.md): Side-by-side mapping of every Light Token instruction against its SPL/Solana equivalent. Covers RPC, TypeScript client, Rust client, program CPI, and Anchor macros.
+
+## Anchor Reference
+- [Anchor Constraints LightAccount](https://www.zkcompression.com/api-reference/anchor.md): Syntax reference for #[light_account] constraints with sponsored rent-exemption.
+
+## JSON RPC Methods
+- [JSON RPC Methods](https://www.zkcompression.com/api-reference/json-rpc-methods/overview.md): Photon indexer methods for querying compressed state on Solana.
+
+## Support
+- [Support](https://www.zkcompression.com/support.md): Get expert help with Light-Token and ZK Compression. Discord community, Telegram, and Email support available.
+
+## Examples for DeFi
+- [cp-swap-reference](https://github.com/Lightprotocol/program-examples/tree/main/cp-swap-reference): Fork of Raydium AMM that creates markets without paying rent-exemption.
+- [pinocchio-swap](https://github.com/Lightprotocol/program-examples/tree/main/pinocchio-swap): Light Token swap reference implementation.
+- [token-swap](https://github.com/Lightprotocol/program-examples/tree/main/token-swap): AMM with liquidity pools and swaps.
+- [escrow](https://github.com/Lightprotocol/program-examples/tree/main/escrow): Peer-to-peer light-token swap with offer/accept flow.
+- [fundraiser](https://github.com/Lightprotocol/program-examples/tree/main/fundraiser): Token fundraiser with target, deadline, and refunds.
+- [create-and-transfer](https://github.com/Lightprotocol/program-examples/tree/main/create-and-transfer): Create account via macro and transfer via CPI.
+- [light-token-minter](https://github.com/Lightprotocol/program-examples/tree/main/light-token-minter): Create light-mints with metadata, mint tokens.
+
+## Examples for Payments and Wallets
+- [payments-and-wallets](https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/payments-and-wallets): Wallet integrations and payment flows.
+- [sign-with-privy](https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/sign-with-privy): Light-token operations signed with Privy wallets.
+- [sign-with-wallet-adapter](https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/sign-with-wallet-adapter): Light-token operations signed with Wallet Adapter.
+- [sponsor-rent-top-ups](https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/sponsor-rent-top-ups): Sponsor rent top-ups by setting your application as the fee payer.
+- [spl-to-light](https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/spl-to-light): Transfer from SPL to Light via TransferInterface.
+
+## OpenAPI Specs
+- [api](https://www.zkcompression.com/openapi/api.yaml)
+- [getColdMint](https://www.zkcompression.com/openapi/getColdMint.yaml)
+- [getColdMintsByAuthority](https://www.zkcompression.com/openapi/getColdMintsByAuthority.yaml)
+- [getCompressedAccount](https://www.zkcompression.com/openapi/getCompressedAccount.yaml)
+- [getCompressedAccountBalance](https://www.zkcompression.com/openapi/getCompressedAccountBalance.yaml)
+- [getCompressedAccountProof](https://www.zkcompression.com/openapi/getCompressedAccountProof.yaml)
+- [getCompressedAccountsByOwner](https://www.zkcompression.com/openapi/getCompressedAccountsByOwner.yaml)
+- [getCompressedBalanceByOwner](https://www.zkcompression.com/openapi/getCompressedBalanceByOwner.yaml)
+- [getCompressedMintTokenHolders](https://www.zkcompression.com/openapi/getCompressedMintTokenHolders.yaml)
+- [getCompressedTokenAccountBalance](https://www.zkcompression.com/openapi/getCompressedTokenAccountBalance.yaml)
+- [getCompressedTokenAccountsByDelegate](https://www.zkcompression.com/openapi/getCompressedTokenAccountsByDelegate.yaml)
+- [getCompressedTokenAccountsByOwner](https://www.zkcompression.com/openapi/getCompressedTokenAccountsByOwner.yaml)
+- [getCompressedTokenBalancesByOwner](https://www.zkcompression.com/openapi/getCompressedTokenBalancesByOwner.yaml)
+- [getCompressedTokenBalancesByOwnerV2](https://www.zkcompression.com/openapi/getCompressedTokenBalancesByOwnerV2.yaml)
+- [getCompressionSignaturesForAccount](https://www.zkcompression.com/openapi/getCompressionSignaturesForAccount.yaml)
+- [getCompressionSignaturesForAddress](https://www.zkcompression.com/openapi/getCompressionSignaturesForAddress.yaml)
+- [getCompressionSignaturesForOwner](https://www.zkcompression.com/openapi/getCompressionSignaturesForOwner.yaml)
+- [getCompressionSignaturesForTokenOwner](https://www.zkcompression.com/openapi/getCompressionSignaturesForTokenOwner.yaml)
+- [getIndexerHealth](https://www.zkcompression.com/openapi/getIndexerHealth.yaml)
+- [getIndexerSlot](https://www.zkcompression.com/openapi/getIndexerSlot.yaml)
+- [getLatestCompressionSignatures](https://www.zkcompression.com/openapi/getLatestCompressionSignatures.yaml)
+- [getLatestNonVotingSignatures](https://www.zkcompression.com/openapi/getLatestNonVotingSignatures.yaml)
+- [getMultipleCompressedAccountProofs](https://www.zkcompression.com/openapi/getMultipleCompressedAccountProofs.yaml)
+- [getMultipleCompressedAccounts](https://www.zkcompression.com/openapi/getMultipleCompressedAccounts.yaml)
+- [getMultipleNewAddressProofs](https://www.zkcompression.com/openapi/getMultipleNewAddressProofs.yaml)
+- [getMultipleNewAddressProofsV2](https://www.zkcompression.com/openapi/getMultipleNewAddressProofsV2.yaml)
+- [getQueueElements](https://www.zkcompression.com/openapi/getQueueElements.yaml)
+- [getTransactionWithCompressionInfo](https://www.zkcompression.com/openapi/getTransactionWithCompressionInfo.yaml)
+- [getValidityProof](https://www.zkcompression.com/openapi/getValidityProof.yaml)

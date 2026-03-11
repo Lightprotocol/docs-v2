@@ -32,6 +32,21 @@ jobs:
       - name: Spellcheck
         run: npm run spellcheck
 
+  check-llms-txt:
+    name: Check llms.txt
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Check llms.txt is up to date
+        run: node scripts/generate-llms-txt.js --check
+
   validate-mdx:
     name: Validate MDX
     runs-on: ubuntu-latest
