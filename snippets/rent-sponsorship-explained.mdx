@@ -1,19 +1,16 @@
-**Rent-exemption: sponsored by a rent sponsor PDA.**
-
-Every Solana account requires a rent-exempt balance in SOL upon creation. 
-A rent sponsor PDA by Light Protocol pays the rent-exemption cost for the account so account creators never lock up SOL for rent.
+**Rent-exemption: paid by a rent sponsor PDA.**
 
 **Top-ups: paid by the fee payer.**
 
 The `feePayer` on the transaction bumps a small virtual rent balance (766 lamports by default)
  on each write to keep the account active (hot balance).
- If you're building a wallet or dApp, set your application as the fee payer and your users never pay rent or top-ups.
+ Set your application as the fee payer so users never interact with SOL.
 
-<Info>
- "Cold" accounts virtual rent balance below threshold (eg 24h without write bump) get auto-compressed.
+**Hot-Cold Lifecycle of Accounts.**
+
+Accounts get auto-compressed (cold balance) when the virtual rent balance goes below a threshold (eg 24h without write bump).
 The cold account's state is cryptographically preserved on the Solana ledger.
- Users can load a cold account into hot state in-flight when using the account again.
-</Info>
+Users only interact with hot accounts and load the cold balance in-flight when using the account again.
 
 ```text
     Rent sponsor PDA              Fee payer bumps
@@ -26,9 +23,9 @@ The cold account's state is cryptographically preserved on the Solana ledger.
                                         │         │
                                   no writes for   │ client loads
                                   threshold       │ cold → hot
-                                  (e.g. 24h)      │
-                                        │         │
-                                        ▼         │
+                                  (e.g. 24h)      │ under the hood;
+                                        │         │ rent sponsor
+                                        ▼         │ funds rent again
                                    ┌─────────┐    │
                                    │  COLD   │────┘
                                    └─────────┘

@@ -67,13 +67,36 @@ export const splCreateAtaCode = [
 ].join("\n");
 
 export const lightCreateAtaCode = [
-  'import { createAtaInterface } from "@lightprotocol/compressed-token";',
+  'import { getOrCreateAtaInterface } from "@lightprotocol/compressed-token/unified";',
   "",
-  "const ata = await createAtaInterface(",
+  "const ata = await getOrCreateAtaInterface(",
   "  rpc,",
   "  payer,",
   "  mint,",
   "  owner",
+  ");",
+].join("\n");
+
+// === CREATE ATA INSTRUCTION (TYPESCRIPT) ===
+export const splCreateAtaIxCode = [
+  'import { createAssociatedTokenAccountInstruction } from "@solana/spl-token";',
+  "",
+  "const ix = createAssociatedTokenAccountInstruction(",
+  "  payer.publicKey,",
+  "  ata,",
+  "  owner.publicKey,",
+  "  mint",
+  ");",
+].join("\n");
+
+export const lightCreateAtaIxCode = [
+  'import { createAssociatedTokenAccountInterfaceInstruction } from "@lightprotocol/compressed-token";',
+  "",
+  "const ix = createAssociatedTokenAccountInterfaceInstruction(",
+  "  payer.publicKey,",
+  "  ata,",
+  "  owner.publicKey,",
+  "  mint",
   ");",
 ].join("\n");
 

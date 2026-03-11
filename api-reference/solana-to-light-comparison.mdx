@@ -107,7 +107,7 @@ See [JSON RPC Methods](/api-reference/json-rpc-methods/overview).
 <Accordion title="Get balance">
 Fetch the parsed state of a light token account, including hot and cold balances.
 
-> [Guide](/light-token/toolkits/for-payments) |
+> [Guide](/light-token/payments/integration-guide) |
 > [Example](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments-and-wallets/get-balance.ts)
 
 <Columns cols={2}>
@@ -125,7 +125,7 @@ console.log(account.amount);
 <Accordion title="Transaction history">
 Fetch merged and deduplicated transaction history across on-chain and compressed transactions.
 
-> [Guide](/light-token/toolkits/for-payments) |
+> [Guide](/light-token/payments/integration-guide) |
 > [Example](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments-and-wallets/get-history.ts)
 
 <Columns cols={2}>
@@ -278,9 +278,9 @@ Associated light token accounts can hold balances of light, SPL, or Token 2022 m
 <Columns cols={2}>
 <CodeGroup>
 ```typescript Light Action
-import { createAtaInterface } from "@lightprotocol/compressed-token";
+import { getOrCreateAtaInterface } from "@lightprotocol/compressed-token/unified";
 
-const ata = await createAtaInterface(
+const ata = await getOrCreateAtaInterface(
   rpc,
   payer,
   mint,
@@ -649,7 +649,7 @@ For payment flows, `createTransferInterfaceInstructions` returns
 `TransactionInstruction[][]` — handles loading cold state and
 transferring in one call:
 
-> [Guide](/light-token/toolkits/for-payments) |
+> [Guide](/light-token/payments/integration-guide) |
 > [Example (instruction)](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments-and-wallets/send-instruction.ts) |
 > [Example (action)](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments-and-wallets/send-action.ts)
 

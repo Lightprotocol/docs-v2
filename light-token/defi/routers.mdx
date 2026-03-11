@@ -61,7 +61,7 @@ Some(UpdateOneof::Transaction(tx_update)) => {
 ```
 
 `find_closed_accounts` checks `pre_balances[i] > 0 && post_balances[i] == 0` across all transaction
-keys (including ALT-loaded addresses). See [full implementation](/light-token/toolkits/for-streaming-tokens#detecting-transitions).
+keys (including ALT-loaded addresses). See [full implementation](/light-token/streaming/tokens#detecting-transitions).
 
 **Cold-to-hot** -- your existing account subscription picks up the hot account again. No cache changes needed because account state does not change while cold.
 
@@ -75,8 +75,8 @@ Some(UpdateOneof::Account(account_update)) => {
 }
 ```
 
-For the full streaming guide, see [Streaming Token Accounts](/light-token/toolkits/for-streaming-tokens)
-and [Streaming Mints](/light-token/toolkits/for-streaming-mints).
+For the full streaming guide, see [Streaming Token Accounts](/light-token/streaming/tokens)
+and [Streaming Mints](/light-token/streaming/mints).
 
 If you don't stream, call `get_multiple_account_interfaces` at swap time and check `is_cold()` to detect cold accounts.
 

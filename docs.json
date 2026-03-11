@@ -16,7 +16,7 @@
   },
   "seo": {
     "metatags": {
-      "keywords": "solana tokens, rent, spl token, token 2022, light protocol, zk compression, rent-free accounts on solana, scalable solana infrastructure, solana AI agent, cursor MCP, claude code solana, agent skills light protocol, AI coding agent solana"
+      "keywords": "payments, stablecoins, solana tokens, rent, spl token, token 2022, light protocol, zk compression, rent-free accounts on solana, scalable solana infrastructure, solana AI agent, cursor MCP, claude code solana, agent skills light protocol, AI coding agent solana"
     }
   },
   "navigation": {
@@ -56,17 +56,17 @@
               {
                 "group": "For Stablecoin Payments",
                 "pages": [
-                  "light-token/toolkits/for-payments",
-                  "pda/compressed-pdas/guides/how-to-create-nullifier-pdas"
+                  "light-token/payments/overview",
+                  "light-token/payments/integration-guide"
                 ]
               },
               {
                 "group": "For Wallets",
                 "pages": [
-                  "light-token/toolkits/for-wallets",
-                  "light-token/toolkits/for-privy",
-                  "light-token/toolkits/for-wallet-adapter",
-                  "light-token/toolkits/sponsor-top-ups"
+                  "light-token/wallets/overview",
+                  "light-token/wallets/privy",
+                  "light-token/wallets/wallet-adapter",
+                  "light-token/wallets/sponsor-top-ups"
                 ]
               },
               {
@@ -80,8 +80,8 @@
               {
                 "group": "For Data Streaming",
                 "pages": [
-                  "light-token/toolkits/for-streaming-mints",
-                  "light-token/toolkits/for-streaming-tokens"
+                  "light-token/streaming/mints",
+                  "light-token/streaming/tokens"
                 ]
               },
               {
@@ -103,6 +103,7 @@
                 "pages": [
                   "pda/compressed-pdas/overview",
                   "pda/compressed-pdas/guides/client-guide",
+                  "pda/compressed-pdas/how-to-create-nullifier-pdas",
                   {
                     "group": "Program Guides",
                     "expanded": true,
@@ -350,7 +351,7 @@
     },
     {
       "source": "/compressed-tokens/for-privy",
-      "destination": "https://zkcompression.com/light-token/toolkits/for-privy"
+      "destination": "https://zkcompression.com/light-token/wallets/privy"
     },
     {
       "source": "/client-library/client-guide",
@@ -418,7 +419,7 @@
     },
     {
       "source": "/compressed-pdas/guides/how-to-create-nullifier-pdas",
-      "destination": "https://zkcompression.com/pda/compressed-pdas/guides/how-to-create-nullifier-pdas"
+      "destination": "https://zkcompression.com/pda/compressed-pdas/how-to-create-nullifier-pdas"
     },
     {
       "source": "/compressed-pdas/guides/how-to-reinitialize-compressed-accounts",
@@ -458,7 +459,7 @@
     },
     {
       "source": "/compressed-tokens/advanced-guides/add-wallet-support-for-compressed-tokens",
-      "destination": "https://zkcompression.com/light-token/toolkits/for-wallets"
+      "destination": "https://zkcompression.com/light-token/wallets/overview"
     },
     {
       "source": "/compressed-tokens/advanced-guides/example-token-distribution",
@@ -558,19 +559,19 @@
     },
     {
       "source": "/c-token-program/c-token-toolkits/for-payments",
-      "destination": "https://zkcompression.com/light-token/toolkits/for-payments"
+      "destination": "https://zkcompression.com/light-token/payments/integration-guide"
     },
     {
       "source": "/c-token-program/c-token-toolkits/for-streaming-mints",
-      "destination": "https://zkcompression.com/light-token/toolkits/for-streaming-mints"
+      "destination": "https://zkcompression.com/light-token/streaming/mints"
     },
     {
       "source": "/c-token-program/c-token-toolkits/for-streaming-tokens",
-      "destination": "https://zkcompression.com/light-token/toolkits/for-streaming-tokens"
+      "destination": "https://zkcompression.com/light-token/streaming/tokens"
     },
     {
       "source": "/c-token-program/c-token-toolkits/for-wallets",
-      "destination": "https://zkcompression.com/light-token/toolkits/for-wallets"
+      "destination": "https://zkcompression.com/light-token/wallets/overview"
     },
     {
       "source": "/c-token-program/c-token-toolkits/for-dexs",
@@ -578,11 +579,11 @@
     },
     {
       "source": "/c-token-program/c-token-toolkits/for-launchpads",
-      "destination": "https://zkcompression.com/light-token/toolkits/overview"
+      "destination": "https://zkcompression.com/light-token/welcome"
     },
     {
       "source": "/c-token-program/c-token-toolkits/for-trading-apps",
-      "destination": "https://zkcompression.com/light-token/toolkits/overview"
+      "destination": "https://zkcompression.com/light-token/welcome"
     },
     {
       "source": "/resources/json-rpc-methods",
@@ -702,7 +703,7 @@
     },
     {
       "source": "/c-token-program/c-token-toolkits/for-aggregators",
-      "destination": "https://zkcompression.com/light-token/toolkits/overview"
+      "destination": "https://zkcompression.com/light-token/welcome"
     },
     {
       "source": "/c-token-program/c-token-toolkits/for-defi-markets",
@@ -774,7 +775,7 @@
     },
     {
       "source": "/integration-guides/privy",
-      "destination": "https://zkcompression.com/light-token/toolkits/for-privy"
+      "destination": "https://zkcompression.com/light-token/wallets/privy"
     },
     {
       "source": "/light-token/cookbook/compress",
@@ -814,11 +815,11 @@
     },
     {
       "source": "/light-token/toolkits/for-launchpads",
-      "destination": "https://zkcompression.com/light-token/toolkits/overview"
+      "destination": "https://zkcompression.com/light-token/welcome"
     },
     {
       "source": "/light-token/toolkits/for-trading-apps",
-      "destination": "https://zkcompression.com/light-token/toolkits/overview"
+      "destination": "https://zkcompression.com/light-token/welcome"
     },
     {
       "source": "/compressed-token-program/c-token-program",
@@ -826,11 +827,11 @@
     },
     {
       "source": "/compressed-token-program/integrate/for-payment-companies",
-      "destination": "https://zkcompression.com/light-token/toolkits/for-payments"
+      "destination": "https://zkcompression.com/light-token/payments/integration-guide"
     },
     {
       "source": "/compressed-token-program/integrate/for-wallet-applications",
-      "destination": "https://zkcompression.com/light-token/toolkits/for-wallets"
+      "destination": "https://zkcompression.com/light-token/wallets/overview"
     },
     {
       "source": "/compressed-token-program/ctoken/README",
@@ -915,6 +916,42 @@
     {
       "source": "/rent",
       "destination": "https://zkcompression.com/faq"
+    },
+    {
+      "source": "/light-token/toolkits/for-payments",
+      "destination": "https://zkcompression.com/light-token/payments/integration-guide"
+    },
+    {
+      "source": "/light-token/toolkits/for-wallets",
+      "destination": "https://zkcompression.com/light-token/wallets/overview"
+    },
+    {
+      "source": "/light-token/toolkits/for-privy",
+      "destination": "https://zkcompression.com/light-token/wallets/privy"
+    },
+    {
+      "source": "/light-token/toolkits/for-wallet-adapter",
+      "destination": "https://zkcompression.com/light-token/wallets/wallet-adapter"
+    },
+    {
+      "source": "/light-token/toolkits/sponsor-top-ups",
+      "destination": "https://zkcompression.com/light-token/wallets/sponsor-top-ups"
+    },
+    {
+      "source": "/light-token/toolkits/for-streaming-mints",
+      "destination": "https://zkcompression.com/light-token/streaming/mints"
+    },
+    {
+      "source": "/light-token/toolkits/for-streaming-tokens",
+      "destination": "https://zkcompression.com/light-token/streaming/tokens"
+    },
+    {
+      "source": "/light-token/toolkits/for-streaming-pdas",
+      "destination": "https://zkcompression.com/light-token/streaming/pdas"
+    },
+    {
+      "source": "/pda/compressed-pdas/guides/how-to-create-nullifier-pdas",
+      "destination": "https://zkcompression.com/pda/compressed-pdas/how-to-create-nullifier-pdas"
     }
   ]
 }

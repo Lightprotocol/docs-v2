@@ -75,9 +75,9 @@ export const splCreateAtaCode = [
 
 export const lightCreateAtaCode = [
   "// light-token create ATA",
-  'import { createAtaInterface } from "@lightprotocol/compressed-token";',
+  'import { getOrCreateAtaInterface } from "@lightprotocol/compressed-token/unified";',
   "",
-  "const ata = await createAtaInterface(",
+  "const ata = await getOrCreateAtaInterface(",
   "  rpc,",
   "  payer,",
   "  mint,",
