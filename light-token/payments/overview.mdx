@@ -29,7 +29,7 @@ Payment flows on Solana include five core concepts:
 4. fees for transactions and account creation
 5. transactions to execute the transfer
 
-Our token API's optimize the account creation cost component. Your users use the same stablecoins, just stored more efficiently.
+Our token API's optimize the account creation cost component. You'll need to create an account (1) when onboarding a new user, or (2) when the recipient of a transfer does not hold the token yet. 
 
 |      | Light | SPL / Token 2022 |
 | :--- | :--- | :--- |
@@ -38,10 +38,7 @@ Our token API's optimize the account creation cost component. Your users use the
 | **Transfer + Create Token Account** | **~\$0.001** (0.00001 SOL) | **~\$0.30** (0.0029 SOL) |
 
 While transfer cost is identical, you can expect ~\$0.30 total when creating a new token account using SPL/Token 2022.
-This is the case (1) when onboarding a new user, or (2) when the recipient of a transfer does not hold the token yet.
-
-With Light Token, the total cost will be around \$0.001, regardless of whether a new account is created.
-
+With Light Token, the total cost will be around \$0.001, regardless of whether a new account is created. Your users use the same stablecoins, just stored more efficiently.
 
 <Accordion title="How the cost reduction works">
 The token standard pays rent-exemption cost for you. To prevent griefing, “rent” is paid over time to keep an account in memory. This is dealt with under the hood in a way that doesn’t disrupt the UX of what your users are used to with SPL-token.
