@@ -1,0 +1,124 @@
+---
+title: Payment Flows on Solana with Light Token
+sidebarTitle: Overview
+description: Learn how the Light Token API's reduce account creation cost for stablecoin payment infrastructure by 99% with minimal code differences and similar developer experience to SPL / Token 2022.
+tags: ["stablecoin payments for enterprises", "infrastructure for stablecoin payments on solana", "payment rails for stablecoins on solana", "usdc payments for merchants on solana", "payment infrastructure for fintechs", "micropayments for apps on solana", "token extensions for payment companies", "rent free tokens for payment apps"]
+---
+
+---
+
+import { CodeCompare } from "/snippets/jsx/code-compare.jsx";
+import {
+  splCreateAtaIxCode,
+  lightCreateAtaIxCode,
+  splCreateAtaRustCode,
+  lightCreateAtaRustCode,
+  splCreateAtaMacroCode,
+  lightCreateAtaMacroCode,
+  splCreateAtaCpiCode,
+  lightCreateAtaCpiCode,
+} from "/snippets/code-samples/code-compare-snippets.jsx";
+import SupportFooter from "/snippets/support-footer.mdx";
+import RentSponsorship from "/snippets/rent-sponsorship-explained.mdx";
+
+
+Payment flows on Solana include five core concepts: 
+1. wallets for sender and recipient
+2. stablecoins as transferred asset type (USDC, USDG, ...) 
+3. token accounts to hold balances
+4. fees for transactions and account creation
+5. transactions to execute the transfer
+
+Our token API's optimize the account creation cost component.
+
+|      | Light | SPL / Token 2022 |
+| :--- | :--- | :--- |
+| **Transfer** | *~\$0.001*  | *~\$0.001* |
+| **Create Token Account** | **~\$0.001** (0.00001 SOL) | **~\$0.30** (0.0029 SOL) |
+| **Transfer + Create Token Account** | **~\$0.001** (0.00001 SOL) | **~\$0.30** (0.0029 SOL) |
+
+While transfer cost is identical, you can expect ~\$0.30 total when creating a new token account using SPL/Token 2022.
+This is the case (1) when onboarding a new user, or (2) when the recipient of a transfer does not hold the token yet.
+
+With Light Token, the total cost will be around \$0.001, regardless of whether a new account is created.
+
+
+<Accordion title="How the cost reduction works">
+The token standard pays rent-exemption cost for you. To prevent griefing, “rent” is paid over time to keep an account in memory. This is dealt with under the hood in a way that doesn’t disrupt the UX of what your users are used to with SPL-token.
+<RentSponsorship />
+</Accordion>
+
+<Info>
+You can abstract fees entirely so users never interact with SOL.
+- See [fee abstraction](https://solana.com/docs/payments/send-payments/payment-processing/fee-abstraction) for transaction fees.
+- See [sponsor rent top-ups](/light-token/wallets/sponsor-top-ups) for keeping accounts active.
+</Info>
+
+## API Comparison
+Transactions with Light Token API's mirror SPL / Token 2022, so you can build transactions with a similar developer experience. 
+For example, here is the creation of an associated token account: 
+
+<CodeCompare
+  firstCode={lightCreateAtaIxCode}
+  secondCode={splCreateAtaIxCode}
+  firstLabel="light-token"
+  secondLabel="SPL"
+/>
+
+## Token Extensions 
+
+Token extensions introduce optional features you can add to a token mint or token account through 
+extra instructions.
+
+<Accordion title="Supported Extensions by Light Token (with mainnet launch in Q1 2026)">
+
+| Extension | Description |
+|-----------|-------------|
+| MetadataPointer | Points a mint to the account that stores its metadata. |
+| TokenMetadata | Stores token name, symbol, and URI directly on the mint. |
+| InterestBearingConfig | Displays a UI-adjusted balance that accrues interest over time. |
+| GroupPointer | Points a mint to the account that stores group configuration. |
+| GroupMemberPointer | Points a mint to the account that stores group member configuration. |
+| TokenGroup | Stores group configuration directly on the mint (e.g., NFT collections). |
+| TokenGroupMember | Stores group member configuration directly on the mint. |
+| MintCloseAuthority | Allows a designated authority to close a mint account. |
+| TransferFeeConfig | Withholds a percentage of each transfer as a fee. |
+| DefaultAccountState | Sets the initial state (e.g., frozen) for newly created token accounts. |
+| PermanentDelegate | Grants an authority unrestricted transfer and burn rights over all accounts for the mint. |
+| TransferHook | Invokes a custom program on every transfer via CPI. |
+| Pausable | Allows an authority to pause all minting, burning, and transfers. |
+| ConfidentialTransferMint | Configures auditor keys for confidential (encrypted) transfers. |
+| ConfidentialTransferFeeConfig | Encrypts withheld transfer fees under an auditor's public key. |
+| ConfidentialMintBurn | Allows minting and burning of tokens with encrypted amounts. |
+
+<Info>
+Learn more on extensions here: [Extensions](https://solana.com/docs/tokens/extensions).
+</Info>
+</Accordion>
+
+## Start Integrating
+
+<Card
+  title="General Integration Guide"
+  icon="book-open"
+  color="#0066ff"
+  href="/light-token/payments/integration-guide"
+  horizontal
+/>
+<Card
+  title="When using Privy Wallets"
+  icon="key"
+  color="#0066ff"
+  href="/light-token/wallets/privy"
+  horizontal
+/>
+<Card
+  title="When using Wallet Adapter"
+  icon="wallet"
+  color="#0066ff"
+  href="/light-token/wallets/wallet-adapter"
+  horizontal
+/>
+
+
+<SupportFooter />
