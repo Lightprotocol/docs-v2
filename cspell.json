@@ -196,7 +196,8 @@
     "Tasktool",
     "clippy",
     "Raydium",
-    "raydium"
+    "raydium",
+    "USDG"
   ],
   "ignorePaths": [
     "node_modules",
