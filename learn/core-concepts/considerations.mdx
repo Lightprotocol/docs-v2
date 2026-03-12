@@ -52,18 +52,17 @@ Higher CU usage can:
 
 # State Cost per Transaction
 
-Each write operation incurs a small additional network cost. If you expect a single compressed account to amass a large amount of state updates, the lifetime cost of the compressed account may be higher than its uncompressed equivalent, which currently has a fixed per-byte rent cost at creation.
+Writing compressed account state costs a **network fee per state tree** plus **rollover per new leaf**. New addresses cost a one-time fee. All amounts are in addition to Solana's base fee.
 
-<Info>
-Whenever a transaction writes to a compressed account, it nullifies the previous compressed account state and appends the new compressed account as a leaf to the state tree. Both of these actions incur costs that add to Solana's base fee.
-</Info>
-
-| Type | Lamports | Notes |
+| What | Lamports | When |
 |:-|:-|:-|
-| **Solana base fee** | `5000` per signature | Compensates validators for processing transactions |
-| **Write new compressed account state** | ~`300` per leaf (default) | Depends on tree depth:<br/>( 2<sup>tree_depth</sup> × tree_account_rent_cost × rollover_threshold)<br/>≈ `300` for the default depth of `26` |
-| **Nullify old compressed account state** | `5000` per transaction | Reimburses the cost of running a Forester transaction. The current default Forester node implementation can be found here |
-| **Create addresses** | `5000` per transaction | Same as nullify |
+| Solana base fee | 5,000 per signature | Every transaction |
+| State tree (V2) | 5,000 per tree | Once per tree per instruction, whether you read, write, or both. |
+| State tree (V1) | 5,000 per tree | Charged separately for trees you **read from** (nullify) and trees you **write to** (create). So 1 read + 1 write on same tree = 10,000. |
+| New leaf (rollover) | ~300 per leaf | Each new state leaf (any tree; default depth 26). |
+| New address | 10,000 per address | One-time when creating an address (v2 address tree). |
+
+**In practice:** A transfer that updates one leaf on one tree is **5,000 + 300** lamports (V2) or **10,000 + 300** (V1). Creating 10 new outputs on one tree is **5,000 + 3,000** (same for both).
 
 # Next Steps
 
