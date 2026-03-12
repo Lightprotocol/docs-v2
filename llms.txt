@@ -82,6 +82,8 @@ Comparing creation cost and CU usage:
 - [Program examples](https://www.zkcompression.com/light-token/examples/program.md): Anchor program examples for light-token CPI.
 
 ## For Payments and Wallets
+- [Payment Flows on Solana with Light Token](https://www.zkcompression.com/light-token/payments/overview.md): Learn how the Light Token API's reduce account creation cost for stablecoin payment infrastructure by 99% with minimal code differences and similar developer experience to SPL / Token 2022.
+- [Integration Guide for Stablecoin Payments](https://www.zkcompression.com/light-token/payments/integration-guide.md): Guide to integrate light-token APIs for stablecoin payments with comparison to SPL.
 - [Integration Guide for Wallet Applications](https://www.zkcompression.com/light-token/wallets/overview.md): Guide for Wallet Applications to add Light-token support.
 - [Sign with Privy](https://www.zkcompression.com/light-token/wallets/privy.md): Integrate light-token with Privy embedded wallets for rent-free token accounts and transfers.
 - [Sign with Wallet Adapter](https://www.zkcompression.com/light-token/wallets/wallet-adapter.md): Integrate light-token with Solana Wallet Adapter for rent-free token accounts and transfers.
