@@ -12,21 +12,13 @@ Accounts get auto-compressed (cold balance) when the virtual rent balance goes b
 The cold account's state is cryptographically preserved on the Solana ledger.
 Users only interact with hot accounts and load the cold balance in-flight when using the account again.
 
-```text
-    Rent sponsor PDA              Fee payer bumps
-    pays rent-exemption           virtual rent on write
-         │                              │
-         ▼                              │
-    ┌─────────┐                    ┌────┴────┐
-    │ CREATE  │ ──────────────────►│   HOT   │◄───┐
-    └─────────┘                    └────┬────┘    │
-                                        │         │
-                                  no writes for   │ client loads
-                                  threshold       │ cold → hot
-                                  (e.g. 24h)      │ under the hood;
-                                        │         │ rent sponsor
-                                        ▼         │ funds rent again
-                                   ┌─────────┐    │
-                                   │  COLD   │────┘
-                                   └─────────┘
-```
+<div className="block dark:hidden">
+  <Frame>
+    ![Account lifecycle](/images/account-lifecycle.png)
+  </Frame>
+</div>
+<div className="hidden dark:block">
+  <Frame>
+    ![Account lifecycle](/images/account-lifecycle-dark.png)
+  </Frame>
+</div>
