@@ -6,7 +6,19 @@ keywords: ["zk compression tradeoffs", "compressed accounts limitations"]
 
 # Overview
 
-Before using ZK Compression to scale your application state, consider the following limitations of compressed accounts:
+The sections below describe **compressed account** tradeoffs: larger tx size, higher CU when reading/writing state trees, and per-transaction state cost. These apply when your transaction reads or writes compressed state (e.g. Compressed Tokens, Compressed PDAs, or loading cold Light Token / Light PDA accounts).
+
+**Light Token** and **Light PDA** have different tradeoffs on the hot path: Light Token is more CU efficient than SPL (e.g. ~312 CU transfer vs ~4,645 SPL); Light PDA hot path adds no extra CU versus a regular PDA. Cold path (loading from compressed) uses the same mechanics as below.
+
+| Primitive | Tx size / CU / State cost | More |
+|:-|:-|:-|
+| **Compressed Token / Compressed PDA** | The limits below apply to every operation. | [Legacy Compressed Tokens](/resources/legacy-compressed-tokens), [Compressed PDAs](/pda/compressed-pdas/overview) |
+| **Light Token** | Hot path: smaller tx, fewer CU than SPL. Cold path: same as compressed. Rent calculator for creation cost. | [Light Token Standard](/learn/light-token-standard) |
+| **Light PDA** | Hot path: same tx size and CU as regular PDA. Cold path: same as compressed. | [Light PDA](/pda/light-pda/overview) |
+
+# Limitations of compressed account operations
+
+When your transaction reads or writes compressed state, consider:
 
 - Larger Transaction Size
 - High Compute Unit Usage
@@ -28,21 +40,24 @@ It may be preferred for an account _not_ to be permanently compressed if:
 
 # Larger Transaction Size
 
-Solana's transaction size limit is 1232 Bytes. Transactions exceeding this limit will fail. ZK Compression increases your transaction size in two ways:
+Solana's transaction size limit is 1232 Bytes. When your transaction **reads or writes compressed state**, size increases in two ways:
 
 - 128 bytes must be reserved for the validity proof, which is a constant size per transaction, assuming the transaction reads from at least one compressed account.
+- For V2: The real byte overhead is 1 or 129 bytes, depending on how cold the account is. For V1: it's always 128 bytes.
 - You must send the account data you want to read/write on-chain.
 
 # High Compute Unit Usage
 
 <Info>
-System CU usage:
+System CU usage when reading/writing **compressed state**:
 
-- \~100,000 CU for validity proof verification, which is a constant size per transaction, assuming the transaction reads from at least one compressed account
+- \~100,000 CU for validity proof verification (constant per transaction that touches compressed state)
 - \~100,000 CU system use (state tree [Poseidon](https://eprint.iacr.org/2019/458.pdf) hashing et al.)
 - \~6,000 CU per compressed account read/write
 
 **Example**: a typical compressed token transfer uses around 292,000 CU.
+
+This does not apply to **Light Token** or **Light PDA** hot path: Light Token transfers use far fewer CU than SPL; Light PDA hot path adds no extra CU. See [Light Token Standard](/learn/light-token-standard) and [Light PDA](/pda/light-pda/overview).
 </Info>
 
 Higher CU usage can:
@@ -69,6 +84,22 @@ Writing compressed account state costs a **network fee per state tree** plus **r
 You're ready to take the next step and start building!
 
 <CardGroup>
+<Card
+  title="Light Token Standard"
+  icon="chevron-right"
+  color="#0066ff"
+  href="/learn/light-token-standard"
+  horizontal
+>
+  Rent calculator and CU comparison vs SPL.
+</Card>
+<Card
+  title="Light PDA"
+  icon="chevron-right"
+  color="#0066ff"
+  href="/pda/light-pda/overview"
+  horizontal
+/>
 <Card
   title="Compressed Tokens"
   icon="chevron-right"
