@@ -64,22 +64,14 @@ Comparing creation cost and CU usage:
 - [Welcome to ZK Compression](https://www.zkcompression.com/home.md)
 - [FAQ](https://www.zkcompression.com/faq.md): Frequently asked questions about light token, PDA accounts, and use cases.
 
-## Light Token Basics
-- [The Light Token Program](https://www.zkcompression.com/light-token/welcome.md): High-performance token standard that is functionally equivalent to SPL while reducing account creation cost by 200x and being more CU efficient on hot paths. The Light Token SDK keeps code changes minimal and is a superset of the SPL-token API.
-- [Create Mint Account with Token Metadata](https://www.zkcompression.com/light-token/cookbook/create-mint.md): Program and client guides to create a mint with token metadata. For existing SPL or Token 2022 mints add an interface PDA for interoperability. Includes step-by-step implementation and full code examples.
-- [Create Associated Light Token Accounts](https://www.zkcompression.com/light-token/cookbook/create-ata.md): Client and program guide to create associated Light Token accounts. Includes step-by-step implementation and full code examples.
-- [Create Light Token Account](https://www.zkcompression.com/light-token/cookbook/create-token-account.md): Client and program guide to create Light Token accounts. Includes step-by-step implementation and full code examples.
-- [Mint to Light Token Accounts](https://www.zkcompression.com/light-token/cookbook/mint-to.md): Client and program guide to mint tokens to a account. Includes step-by-step implementation and full code examples.
-- [Transfer Interface](https://www.zkcompression.com/light-token/cookbook/transfer-interface.md): Program and client guide for transfers between Light Token and SPL token accounts. The interface detects account types and invokes the right programs.
-- [Transfer Checked](https://www.zkcompression.com/light-token/cookbook/transfer-checked.md): Rust client guide to transfer Light Tokens with decimal validation. Includes step-by-step implementation and full code examples.
-- [Approve and Revoke Delegates](https://www.zkcompression.com/light-token/cookbook/approve-revoke.md): Rust client guide to approve and revoke delegates for Light Token accounts. Includes step-by-step implementation and full code examples.
-- [Freeze and Thaw Light Token Accounts](https://www.zkcompression.com/light-token/cookbook/freeze-thaw.md): Rust client guide to freeze and thaw Light Token accounts. Includes step-by-step implementation and full code examples.
-- [Wrap & Unwrap SPL/Token 2022 <> Light Token](https://www.zkcompression.com/light-token/cookbook/wrap-unwrap.md): Move tokens between SPL/Token 2022 token and Light Token accounts. Use to interact with applications that only support SPL/Token 2022.
-- [Load Token Balances to Light Associated Token Account](https://www.zkcompression.com/light-token/cookbook/load-ata.md): Unify token balances from compressed tokens (cold Light Tokens), SPL, and Token 2022 to one light ATA.
-- [Close Light Token Account](https://www.zkcompression.com/light-token/cookbook/close-token-account.md): Program guide to close Light Token accounts via CPI. Includes step-by-step implementation and full code examples.
-- [Burn Light Tokens](https://www.zkcompression.com/light-token/cookbook/burn.md): Rust client guide to burn Light Tokens. Includes step-by-step implementation and full code examples.
-- [Client examples](https://www.zkcompression.com/light-token/examples/client.md): TypeScript and Rust client examples for light-token SDK.
-- [Program examples](https://www.zkcompression.com/light-token/examples/program.md): Anchor program examples for light-token CPI.
+## SDK Reference
+- [SDK Reference](https://www.zkcompression.com/api-reference/sdk.md): Client and program SDKs for Light Token and ZK Compression.
+
+## Solana to Light Reference
+- [Solana to Light Reference](https://www.zkcompression.com/api-reference/solana-to-light-comparison.md): Side-by-side mapping of every Light Token instruction against its SPL/Solana equivalent. Covers RPC, TypeScript client, Rust client, program CPI, and Anchor macros.
+
+## Anchor Reference
+- [Anchor Constraints LightAccount](https://www.zkcompression.com/api-reference/anchor.md): Syntax reference for #[light_account] constraints with sponsored rent-exemption.
 
 ## For Payments and Wallets
 - [Payment Flows on Solana with Light Token](https://www.zkcompression.com/light-token/payments/overview.md): Learn how the Light Token API's reduce account creation cost for stablecoin payment infrastructure by 99% with minimal code differences and similar developer experience to SPL / Token 2022.
@@ -97,6 +89,23 @@ Comparing creation cost and CU usage:
 ## For Data Streaming
 - [Streaming Mint Accounts](https://www.zkcompression.com/light-token/streaming/mints.md): Stream light-mint accounts and metadata via Laserstream.
 - [Streaming Token Accounts](https://www.zkcompression.com/light-token/streaming/tokens.md): Stream light-token accounts via Laserstream. Same base layout as SPL Token.
+
+## Light Token Basics
+- [The Light Token Program](https://www.zkcompression.com/light-token/welcome.md): High-performance token standard that is functionally equivalent to SPL while reducing account creation cost by 200x and being more CU efficient on hot paths. The Light Token SDK keeps code changes minimal and is a superset of the SPL-token API.
+- [Create Mint Account with Token Metadata](https://www.zkcompression.com/light-token/cookbook/create-mint.md): Program and client guides to create a mint with token metadata. For existing SPL or Token 2022 mints add an interface PDA for interoperability. Includes step-by-step implementation and full code examples.
+- [Create Associated Light Token Accounts](https://www.zkcompression.com/light-token/cookbook/create-ata.md): Client and program guide to create associated Light Token accounts. Includes step-by-step implementation and full code examples.
+- [Create Light Token Account](https://www.zkcompression.com/light-token/cookbook/create-token-account.md): Client and program guide to create Light Token accounts. Includes step-by-step implementation and full code examples.
+- [Mint to Light Token Accounts](https://www.zkcompression.com/light-token/cookbook/mint-to.md): Client and program guide to mint tokens to a account. Includes step-by-step implementation and full code examples.
+- [Transfer Interface](https://www.zkcompression.com/light-token/cookbook/transfer-interface.md): Program and client guide for transfers between Light Token and SPL token accounts. The interface detects account types and invokes the right programs.
+- [Transfer Checked](https://www.zkcompression.com/light-token/cookbook/transfer-checked.md): Rust client guide to transfer Light Tokens with decimal validation. Includes step-by-step implementation and full code examples.
+- [Approve and Revoke Delegates](https://www.zkcompression.com/light-token/cookbook/approve-revoke.md): Rust client guide to approve and revoke delegates for Light Token accounts. Includes step-by-step implementation and full code examples.
+- [Freeze and Thaw Light Token Accounts](https://www.zkcompression.com/light-token/cookbook/freeze-thaw.md): Rust client guide to freeze and thaw Light Token accounts. Includes step-by-step implementation and full code examples.
+- [Wrap & Unwrap SPL/Token 2022 <> Light Token](https://www.zkcompression.com/light-token/cookbook/wrap-unwrap.md): Move tokens between SPL/Token 2022 token and Light Token accounts. Use to interact with applications that only support SPL/Token 2022.
+- [Load Token Balances to Light Associated Token Account](https://www.zkcompression.com/light-token/cookbook/load-ata.md): Unify token balances from compressed tokens (cold Light Tokens), SPL, and Token 2022 to one light ATA.
+- [Close Light Token Account](https://www.zkcompression.com/light-token/cookbook/close-token-account.md): Program guide to close Light Token accounts via CPI. Includes step-by-step implementation and full code examples.
+- [Burn Light Tokens](https://www.zkcompression.com/light-token/cookbook/burn.md): Rust client guide to burn Light Tokens. Includes step-by-step implementation and full code examples.
+- [Client examples](https://www.zkcompression.com/light-token/examples/client.md): TypeScript and Rust client examples for light-token SDK.
+- [Program examples](https://www.zkcompression.com/light-token/examples/program.md): Anchor program examples for light-token CPI.
 
 ## PDA Account basics for Solana programs
 - [PDA accounts](https://www.zkcompression.com/pda/overview.md): Overview to Light-PDAs (Solana accounts with sponsored rent-exemption) and compressed PDAs (compressed accounts without rent-exemption cost).
@@ -135,15 +144,6 @@ Comparing creation cost and CU usage:
 - **Error Cheatsheet:** [Debug ProofVerificationFailed (0x179b)](https://www.zkcompression.com/resources/error-cheatsheet/debug-0x179b-6043-proofverificationfailed.md): Common cause and debug steps for ProofVerificationFailed (0x179B / 6043)
 - [Legacy Compressed Tokens](https://www.zkcompression.com/resources/legacy-compressed-tokens.md): Compressed tokens are the most efficient way to distribute SPL tokens (eg rewards, airdrops). For other token purposes use Light Token.
 - [Security](https://www.zkcompression.com/resources/security.md): Overview to Light Protocol's bug bounty program, third party security audits, and formal verification of circuits.
-
-## SDK Reference
-- [SDK Reference](https://www.zkcompression.com/api-reference/sdk.md): Client and program SDKs for Light Token and ZK Compression.
-
-## Solana to Light Reference
-- [Solana to Light Reference](https://www.zkcompression.com/api-reference/solana-to-light-comparison.md): Side-by-side mapping of every Light Token instruction against its SPL/Solana equivalent. Covers RPC, TypeScript client, Rust client, program CPI, and Anchor macros.
-
-## Anchor Reference
-- [Anchor Constraints LightAccount](https://www.zkcompression.com/api-reference/anchor.md): Syntax reference for #[light_account] constraints with sponsored rent-exemption.
 
 ## JSON RPC Methods
 - [JSON RPC Methods](https://www.zkcompression.com/api-reference/json-rpc-methods/overview.md): Photon indexer methods for querying compressed state on Solana.
