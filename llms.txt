@@ -1,8 +1,9 @@
 # ZK Compression by Light Protocol and Helius Labs
 
-> ZK Compression is a framework on Solana for stablecoin payment rails, consumer apps and defi. The Light SDK and API's let you create mint, token and PDA accounts >99% cheaper with familiar Solana developer experience.
+> ZK Compression is a framework on Solana for stablecoin payment rails, agent commerce, consumer apps, defi protocols, depin, and more. 
+> The Light SDK and API's let you create mint, token and PDA accounts >99% cheaper with familiar Solana developer experience.
 
-This documentation provides guides, reference and tutorials for developers building on Solana.
+This documentation provides guides, references and tutorials for developers building on Solana.
 
 ## Table of contents
 - [Primitives](#primitives)
