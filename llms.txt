@@ -114,12 +114,7 @@ Comparing creation cost and CU usage:
 - **Compressed PDA:** [Overview & Program Template](https://www.zkcompression.com/pda/compressed-pdas/overview.md): Compressed PDAs provide full composability and functionality of accounts at PDAs, without rent-exemption cost per account. Suited for accounts where each user or entity gets their own PDA and state is infrequently accessed.
 - **Compressed PDA:** [Client Guide](https://www.zkcompression.com/pda/compressed-pdas/guides/client-guide.md): Rust and Typescript client guides with step-by-step implementation and full code examples.
 - **Compressed PDA:** [Create Nullifier PDAs](https://www.zkcompression.com/pda/compressed-pdas/how-to-create-nullifier-pdas.md): Create rent-free nullifier PDAs to prevent duplicate actions.
-- **Compressed PDA > Program Guides:** [Overview](https://www.zkcompression.com/pda/compressed-pdas/guides.md): Overview to guides for Solana programs to create, update, close, reinitialize, and burn permanently compressed accounts.
-- **Compressed PDA > Program Guides:** [Create Compressed Accounts](https://www.zkcompression.com/pda/compressed-pdas/guides/how-to-create-compressed-accounts.md): Guide to create compressed accounts in Solana programs with full code examples.
-- **Compressed PDA > Program Guides:** [Update Compressed Accounts](https://www.zkcompression.com/pda/compressed-pdas/guides/how-to-update-compressed-accounts.md): Guide to update compressed accounts in Solana programs with full code examples.
-- **Compressed PDA > Program Guides:** [Close Compressed Accounts](https://www.zkcompression.com/pda/compressed-pdas/guides/how-to-close-compressed-accounts.md): Guide to close compressed accounts in Solana programs with full code examples.
-- **Compressed PDA > Program Guides:** [Reinitialize Compressed Accounts](https://www.zkcompression.com/pda/compressed-pdas/guides/how-to-reinitialize-compressed-accounts.md): Guide to reinitialize compressed accounts in Solana programs with full code examples.
-- **Compressed PDA > Program Guides:** [Burn Compressed Accounts](https://www.zkcompression.com/pda/compressed-pdas/guides/how-to-burn-compressed-accounts.md): Guide to burn compressed accounts in Solana programs with full code examples.
+- **Compressed PDA > Program Guides:** [Overview](https://www.zkcompression.com/pda/compressed-pdas/guides.md): Overview to guides for Solana programs to create, update, close, reinitialize, and burn permanently
 - **Compressed PDA:** [Program Examples](https://www.zkcompression.com/pda/compressed-pdas/program-examples.md): Program example repository for compressed accounts with tests.
 
 ## For Other Use Cases
