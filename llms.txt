@@ -9,17 +9,17 @@ This documentation provides guides, references and tutorials for developers buil
 - [Primitives](#primitives)
 - [AI Agent Resources](#ai-agent-resources)
 - [Getting Started](#getting-started)
-- [Light Token Basics](#light-token-basics)
+- [SDK Reference](#sdk-reference)
+- [Solana to Light Reference](#solana-to-light-reference)
+- [Anchor Reference](#anchor-reference)
 - [For Payments and Wallets](#for-payments-and-wallets)
 - [For DeFi](#for-defi)
 - [For Data Streaming](#for-data-streaming)
+- [Light Token Basics](#light-token-basics)
 - [PDA Account basics for Solana programs](#pda-account-basics-for-solana-programs)
 - [For Other Use Cases](#for-other-use-cases)
 - [Learn](#learn)
 - [Resources](#resources)
-- [SDK Reference](#sdk-reference)
-- [Solana to Light Reference](#solana-to-light-reference)
-- [Anchor Reference](#anchor-reference)
 - [JSON RPC Methods](#json-rpc-methods)
 - [Support](#support)
 - [Examples for DeFi](#examples-for-defi)
@@ -75,7 +75,7 @@ Comparing creation cost and CU usage:
 - [Anchor Constraints LightAccount](https://www.zkcompression.com/api-reference/anchor.md): Syntax reference for #[light_account] constraints with sponsored rent-exemption.
 
 ## For Payments and Wallets
-- [Payment Flows on Solana with Light Token](https://www.zkcompression.com/light-token/payments/overview.md): Learn how the Light Token API's reduce account creation cost for stablecoin payment infrastructure by 99% with minimal code differences and similar developer experience to SPL / Token 2022.
+- [Payment Flows on Solana with Light Token](https://www.zkcompression.com/light-token/payments/overview.md): Learn how the Light Token API's reduce account creation cost for stablecoin payment infrastructure by 99% with similar developer experience to SPL / Token 2022.
 - [Integration Guide for Stablecoin Payments](https://www.zkcompression.com/light-token/payments/integration-guide.md): Guide to integrate light-token APIs for stablecoin payments with comparison to SPL.
 - [Integration Guide for Wallet Applications](https://www.zkcompression.com/light-token/wallets/overview.md): Guide for Wallet Applications to add Light-token support.
 - [Sign with Privy](https://www.zkcompression.com/light-token/wallets/privy.md): Integrate light-token with Privy embedded wallets for rent-free token accounts and transfers.
@@ -114,7 +114,7 @@ Comparing creation cost and CU usage:
 - **Compressed PDA:** [Overview & Program Template](https://www.zkcompression.com/pda/compressed-pdas/overview.md): Compressed PDAs provide full composability and functionality of accounts at PDAs, without rent-exemption cost per account. Suited for accounts where each user or entity gets their own PDA and state is infrequently accessed.
 - **Compressed PDA:** [Client Guide](https://www.zkcompression.com/pda/compressed-pdas/guides/client-guide.md): Rust and Typescript client guides with step-by-step implementation and full code examples.
 - **Compressed PDA:** [Create Nullifier PDAs](https://www.zkcompression.com/pda/compressed-pdas/how-to-create-nullifier-pdas.md): Create rent-free nullifier PDAs to prevent duplicate actions.
-- **Compressed PDA > Program Guides:** [Overview](https://www.zkcompression.com/pda/compressed-pdas/guides.md): Overview to guides for Solana programs to create, update, close, reinitialize, and burn permanently
+- **Compressed PDA > Program Guides:** [Overview](https://www.zkcompression.com/pda/compressed-pdas/guides.md): Overview to guides for Solana programs to create, update, close, reinitialize, and burn permanently compressed accounts.
 - **Compressed PDA:** [Program Examples](https://www.zkcompression.com/pda/compressed-pdas/program-examples.md): Program example repository for compressed accounts with tests.
 
 ## For Other Use Cases
