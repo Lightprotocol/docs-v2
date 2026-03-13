@@ -85,6 +85,12 @@ function collectPages(entry, prefix) {
   }
   if (entry && entry.group) {
     const newPrefix = prefix ? `${prefix} > ${entry.group}` : entry.group;
+    // Program Guides: only include overview, not individual how-to pages
+    if (entry.group === 'Program Guides') {
+      const overview = entry.pages[0];
+      if (typeof overview === 'string') return [formatPage(overview, newPrefix)];
+      return [];
+    }
     return entry.pages.flatMap((p) => collectPages(p, newPrefix));
   }
   return [];
@@ -177,7 +183,7 @@ function splitLightTokenProgram(group) {
       basics.push(formatPage(entry));
     } else if (entry.group === 'Cookbook' || entry.group === 'Examples') {
       basics.push(...collectFlatPages(entry.pages));
-    } else if (entry.group === 'For Payments') {
+    } else if (entry.group === 'For Stablecoin Payments') {
       paymentsWallets.push(...collectFlatPages(entry.pages));
     } else if (entry.group === 'For Wallets') {
       paymentsWallets.push(...collectFlatPages(entry.pages));
@@ -189,10 +195,10 @@ function splitLightTokenProgram(group) {
   }
 
   return [
-    { name: 'Light Token Basics', lines: basics },
     { name: 'For Payments and Wallets', lines: paymentsWallets },
     { name: 'For DeFi', lines: defi },
     { name: 'For Data Streaming', lines: streaming },
+    { name: 'Light Token Basics', lines: basics },
   ];
 }
 
@@ -297,26 +303,49 @@ function generate() {
   const aiAnchor = anchors.find((a) => a.anchor === 'AI Tools');
   sections.push({ name: 'AI Agent Resources', lines: buildAiTools(aiAnchor) });
 
-  // 2. Documentation anchor — each group becomes an H2
+  // 2. Documentation and API Reference — interleaved
   const docAnchor = anchors.find((a) => a.anchor === 'Documentation');
+  const apiAnchor = anchors.find((a) => a.anchor === 'API Reference');
+  const apiSections = buildApiReferenceSections(apiAnchor);
+
   const sectionRenames = {
     Introduction: 'Getting Started',
     'PDA Accounts': 'PDA Account basics for Solana programs',
   };
-  for (const group of docAnchor.groups) {
-    if (group.group === 'Light Token Program') {
-      sections.push(...splitLightTokenProgram(group));
-    } else {
-      sections.push({
-        name: sectionRenames[group.group] || group.group,
-        lines: group.pages.flatMap((p) => collectPages(p)),
-      });
-    }
+
+  // Getting Started
+  const introGroup = docAnchor.groups.find((g) => g.group === 'Introduction');
+  if (introGroup) {
+    sections.push({
+      name: 'Getting Started',
+      lines: introGroup.pages.flatMap((p) => collectPages(p)),
+    });
   }
 
-  // 3. API Reference anchor — each group becomes its own H2
-  const apiAnchor = anchors.find((a) => a.anchor === 'API Reference');
-  sections.push(...buildApiReferenceSections(apiAnchor));
+  // API Reference sections (SDK, Solana to Light, Anchor) — before Light Token
+  for (const s of apiSections) {
+    if (s.name !== 'JSON RPC Methods') sections.push(s);
+  }
+
+  // Light Token sections (payments, defi, streaming, then basics)
+  const ltGroup = docAnchor.groups.find(
+    (g) => g.group === 'Light Token Program',
+  );
+  if (ltGroup) sections.push(...splitLightTokenProgram(ltGroup));
+
+  // Remaining Documentation groups (PDA, Other Use Cases, Learn, Resources)
+  for (const group of docAnchor.groups) {
+    if (group.group === 'Introduction' || group.group === 'Light Token Program')
+      continue;
+    sections.push({
+      name: sectionRenames[group.group] || group.group,
+      lines: group.pages.flatMap((p) => collectPages(p)),
+    });
+  }
+
+  // JSON RPC Methods (after Resources)
+  const jsonRpc = apiSections.find((s) => s.name === 'JSON RPC Methods');
+  if (jsonRpc) sections.push(jsonRpc);
 
   // 4. Support anchor
   const supportAnchor = anchors.find((a) => a.anchor === 'Support');
@@ -344,11 +373,14 @@ function generate() {
   out.push('# ZK Compression by Light Protocol and Helius Labs');
   out.push('');
   out.push(
-    "> ZK Compression is a framework on Solana for stablecoin payment rails, consumer apps and defi. The Light SDK and API's let you create mint, token and PDA accounts >99% cheaper with familiar Solana developer experience.",
+    '> ZK Compression is a framework on Solana for stablecoin payment rails, agent commerce, consumer apps, defi protocols, depin, and more. ',
+  );
+  out.push(
+    "> The Light SDK and API's let you create mint, token and PDA accounts >99% cheaper with familiar Solana developer experience.",
   );
   out.push('');
   out.push(
-    'This documentation provides guides, reference and tutorials for developers building on Solana.',
+    'This documentation provides guides, references and tutorials for developers building on Solana.',
   );
   out.push('');
 
