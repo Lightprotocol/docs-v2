@@ -35,20 +35,14 @@ ZK Compression is a framework on Solana for stablecoin payment rails, consumer a
 
 | Primitive        | Use case                                                                                                                                                                                               | Constraints                                                                    |
 | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------ |
-| Light Token      | Most token use cases (launchpads, DeFi, payments). Rent-free mint and token accounts. \~200x cheaper than SPL and more compute-unit efficient on the hot path.                                         | Currently in Beta and on Solana Devnet with mainnet in Q1 2026                 |
-| Light-PDA        | DeFi program state such as AMM pools and vaults. \~98% cheaper than PDAs and can be implemented with minimal code changes.                                                                             | Currently in Beta and on Solana Devnet with mainnet in Q1 2026                 |
+| Light Token      | Most token use cases (launchpads, DeFi, payments). Rent-free mint and token accounts. \~200x cheaper than SPL and more compute-unit efficient on the hot path.                                         |                  |
+| Light-PDA        | DeFi program state such as AMM pools and vaults. \~98% cheaper than PDAs and can be implemented with minimal code changes.                                                                             |                  |
 | Compressed Token | Only for Airdrops and token distribution. Prefer Light Token for other purposes. Used by Light Token under the hood for rent-free storage of inactive Light Tokens. Supported by Phantom and Backpack. | Do not use for general-purpose token features. Use Light Token instead.        |
 | Compressed PDA   | User state and app state, nullifiers (payments and ZK applications), DePIN nodes, and stake accounts. Similar to program-derived addresses without a rent-exempt balance.                              | Not for shared state, pool accounts, or config accounts. Use Light-PDA instead |
 
 View a complete API comparison to SPL and Solana: https://www.zkcompression.com/api-reference/solana-to-light-comparison.
 
-### Creation cost
-
-| | Light | Standard Solana |
-| :----------------------- | --------------: | --------------: |
-| **Mint Account** | **~0.00001 SOL** | ~0.0015 SOL |
-| **Token Account** | **~0.00001 SOL** | ~0.0029 SOL |
-| **PDA (100-byte)** | **~0.0000115 SOL** | ~0.0016 SOL |
+### Creation cost and Compute Unit Consumption
 
 | Metric | Light | Standard Solana |
 | ------------------------------------- | -----------------: | --------------: |
