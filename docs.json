@@ -78,7 +78,6 @@
                   {
                     "group": "Advanced",
                     "pages": [
-                      "light-token/payments/advanced/spend-permissions",
                       "light-token/payments/advanced/deferred-execution"
                     ]
                   },
