@@ -1,0 +1,80 @@
+---
+title: "Deferred Execution"
+sidebarTitle: "Deferred execution"
+description: "Sign transactions now and execute later using durable nonces, with considerations for Light Token's cold account lifecycle."
+keywords: ["deferred execution solana", "durable nonce solana", "sign now execute later", "treasury operations solana"]
+---
+
+import SupportFooter from "/snippets/support-footer.mdx";
+
+Durable nonces let you sign a transaction now and execute it later.
+This is useful for treasury operations, multi-party approval workflows,
+and scheduled payments.
+
+## How durable nonces work
+
+Standard Solana transactions expire after ~90 seconds (the blockhash lifetime).
+Durable nonces replace the blockhash with a nonce value that does not expire,
+allowing the signed transaction to be stored and submitted at any future time.
+
+For the complete durable nonce pattern, see
+[Solana's deferred execution guide](https://solana.com/docs/payments/advanced-payments/deferred-execution).
+
+## Cold account considerations
+
+<Warning>
+Light Token accounts can transition between hot and cold states. This adds a constraint
+to deferred execution that does not exist with standard SPL tokens.
+</Warning>
+
+When you build a deferred transaction, the SDK may include load instructions for cold accounts.
+If the account's state changes between signing and execution, those instructions may become stale:
+
+- **Hot → cold**: The account compressed after signing. The pre-signed transfer instruction
+  expects a hot account but finds nothing on-chain.
+- **Cold → hot**: Another transaction loaded the account after signing. The pre-signed load
+  instructions try to load an already-hot account (may succeed as a no-op, but adds unnecessary cost).
+
+## When deferred execution works safely
+
+Deferred execution works well when:
+
+- **Accounts are actively used**: Regular writes keep the virtual rent balance topped up,
+  preventing accounts from going cold.
+- **Your app controls the fee payer**: Your application server pays rent top-ups on every
+  interaction, keeping accounts hot.
+- **Short deferral periods**: The shorter the delay between signing and execution, the less
+  likely account state changes.
+
+## When to be cautious
+
+Avoid deferred execution when:
+
+- **Accounts may go cold**: If no writes happen for ~24 hours, accounts auto-compress.
+  A transaction signed before compression will reference stale state.
+- **Long deferral periods**: Treasury operations that sit for days or weeks risk account
+  state changes.
+- **Unknown account activity**: If you cannot predict whether the accounts will remain
+  active, deferred execution is unreliable.
+
+## Alternative patterns
+
+For use cases that need delayed execution with Light Token:
+
+- **Spend permissions**: [Delegate spending](/light-token/payments/advanced/spend-permissions)
+  to a third party who can execute when ready, loading cold accounts in-flight at execution time.
+- **Scheduled execution**: Build and submit the transaction at execution time rather than
+  pre-signing. This ensures load instructions reflect current account state.
+
+## Related guides
+
+<CardGroup cols={2}>
+<Card title="Spend permissions" icon="key" href="/light-token/payments/advanced/spend-permissions">
+  Delegate token spending with amount caps.
+</Card>
+<Card title="Production readiness" icon="rocket" href="/light-token/payments/production-readiness">
+  Checklist for deploying Light Token in production.
+</Card>
+</CardGroup>
+
+<SupportFooter />

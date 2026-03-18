@@ -1,0 +1,80 @@
+---
+title: "Verify Address"
+sidebarTitle: "Verify address"
+description: "Validate recipient addresses before sending payments to prevent lost funds."
+keywords: ["verify address solana", "address validation light token", "solana address check", "payment safety"]
+---
+
+import ToolkitsSetup from "/snippets/setup/toolkits-setup.mdx";
+import SupportFooter from "/snippets/support-footer.mdx";
+
+Verify recipient addresses before sending payments.
+Address validation prevents sending tokens to invalid or unexpected account types.
+
+## Understanding Solana addresses
+
+Solana has two types of addresses:
+
+- **On-curve addresses** (wallets): derived from a keypair, can sign transactions.
+- **Off-curve addresses** (PDAs): program-derived addresses, cannot sign transactions.
+
+## Account types in payments
+
+When validating a recipient, check what type of account the address belongs to:
+
+| Type | Description | Safe to send? |
+|:-----|:------------|:--------------|
+| **Wallet** | Standard keypair address, no on-chain account or a system account | Yes |
+| **Light Token associated token account** | An associated token account for the target mint | Yes |
+| **Token account (wrong mint)** | An associated token account for a different mint | No |
+| **Program or PDA** | A program-owned account or program-derived address | Depends on use case |
+
+## Verification flow
+
+Before sending a payment:
+
+1. Check if the address is on-curve (wallet) or off-curve (PDA).
+2. If the address has an on-chain account, check the account owner and type.
+3. For Light Token, derive the associated token account to verify it matches the expected mint.
+
+```typescript
+import {
+  getAssociatedTokenAddressInterface,
+  getAtaInterface,
+} from "@lightprotocol/compressed-token/unified";
+
+// Derive the expected associated token account for this recipient and mint
+const expectedAta = getAssociatedTokenAddressInterface(mint, recipientWallet);
+
+// Check if the account exists and is active
+try {
+  const account = await getAtaInterface(rpc, expectedAta, recipientWallet, mint);
+  console.log("Account exists, balance:", account.parsed.amount);
+} catch {
+  console.log("Account does not exist yet — will be created on first transfer");
+}
+```
+
+<Info>
+Use `getAssociatedTokenAddressInterface()` instead of SPL's `getAssociatedTokenAddressSync()` to derive
+Light Token associated token account addresses. The derivation uses the Light Token Program ID.
+</Info>
+
+<Info>
+When you send a payment with `transferInterface()` or `createTransferInterfaceInstructions()`,
+the SDK automatically creates the recipient's associated token account if it doesn't exist.
+Address verification is a safety check, not a prerequisite.
+</Info>
+
+## Related guides
+
+<CardGroup cols={2}>
+<Card title="Basic payment" icon="arrow-right" href="/light-token/payments/send-payments/basic-payment">
+  Send a single token transfer.
+</Card>
+<Card title="Receive payments" icon="arrow-down" href="/light-token/payments/accept-payments/receive-payments">
+  Load cold accounts and prepare to receive.
+</Card>
+</CardGroup>
+
+<SupportFooter />

@@ -1,0 +1,120 @@
+---
+title: "Spend Permissions"
+sidebarTitle: "Spend permissions"
+description: "Delegate token spending to third parties with amount caps for subscriptions, recurring payments, and managed spending."
+keywords: ["delegate tokens solana", "token delegation light token", "spend permissions solana", "recurring payments solana"]
+---
+
+import ToolkitsSetup from "/snippets/setup/toolkits-setup.mdx";
+import SupportFooter from "/snippets/support-footer.mdx";
+
+Delegate token spending to a third party with an amount cap.
+The delegate can transfer tokens on behalf of the owner up to the approved amount,
+without the owner signing each transaction.
+
+## Use cases
+
+| Use case | How delegation helps |
+|:---------|:--------------------|
+| **Subscriptions** | Approve a monthly cap. The service provider transfers the fee each period. |
+| **Recurring payments** | Approve a spending limit. The payment processor draws funds as needed. |
+| **Managed spending** | A parent or admin approves a cap for a sub-account. |
+| **Agent wallets** | An AI agent operates within a delegated spending limit. |
+
+## Setup
+
+<ToolkitsSetup />
+
+```typescript
+import { createRpc } from "@lightprotocol/stateless.js";
+
+const rpc = createRpc(RPC_ENDPOINT);
+```
+
+## Approve a delegate
+
+Grant a delegate permission to spend up to a capped amount:
+
+```typescript
+import { approve } from "@lightprotocol/compressed-token";
+
+const tx = await approve(
+  rpc,
+  payer,
+  mint,
+  500,                    // amount cap
+  owner,                  // token owner (signs)
+  delegate.publicKey      // who gets permission
+);
+
+console.log("Approved:", tx);
+```
+
+## Query delegated accounts
+
+Check which accounts a delegate has permission to spend:
+
+```typescript
+const delegatedAccounts = await rpc.getCompressedTokenAccountsByDelegate(
+  delegate.publicKey,
+  { mint }
+);
+
+console.log("Delegated accounts:", delegatedAccounts.items.length);
+```
+
+## Revoke a delegate
+
+Remove spending permission:
+
+```typescript
+import { revoke } from "@lightprotocol/compressed-token";
+
+const delegatedAccounts = await rpc.getCompressedTokenAccountsByDelegate(
+  delegate.publicKey,
+  { mint }
+);
+
+const tx = await revoke(
+  rpc,
+  payer,
+  delegatedAccounts.items,
+  owner                   // owner signs to revoke
+);
+
+console.log("Revoked:", tx);
+```
+
+## Security considerations
+
+- **Amount caps**: Always set the minimum amount needed. Delegation does not grant unlimited access.
+- **Single delegate**: Each compressed token account supports one active delegate at a time.
+- **Monitor usage**: Query `getCompressedTokenAccountsByDelegate` regularly to track delegate activity.
+- **Revoke promptly**: Remove delegation when the business relationship ends or the spending period expires.
+
+## Delegation vs. custody
+
+| | Delegation | Custody |
+|:--|:-----------|:--------|
+| **Key control** | Owner retains private key | Third party holds private key |
+| **Spending limit** | Capped at approved amount | Unlimited |
+| **Revocable** | Owner can revoke at any time | Requires key transfer back |
+| **Use case** | Subscriptions, managed spending | Custodial wallets, exchanges |
+
+<Note>
+For full TypeScript, Rust, and program-level examples, see the
+[approve and revoke cookbook page](/light-token/cookbook/approve-revoke).
+</Note>
+
+## Related guides
+
+<CardGroup cols={2}>
+<Card title="Deferred execution" icon="clock" href="/light-token/payments/advanced/deferred-execution">
+  Sign transactions now, execute later.
+</Card>
+<Card title="Fee abstraction" icon="hand-holding-dollar" href="/light-token/payments/send-payments/fee-abstraction">
+  Separate the fee payer from the token owner.
+</Card>
+</CardGroup>
+
+<SupportFooter />

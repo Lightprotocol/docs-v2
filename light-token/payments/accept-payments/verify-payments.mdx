@@ -1,0 +1,90 @@
+---
+title: "Verify Payments"
+sidebarTitle: "Verify payments"
+description: "Query token balances and transaction history to verify incoming payments."
+keywords: ["verify payment solana", "token balance solana", "transaction history light token", "payment verification"]
+---
+
+import ToolkitsSetup from "/snippets/setup/toolkits-setup.mdx";
+import SupportFooter from "/snippets/support-footer.mdx";
+
+Query balances and transaction history to confirm incoming payments.
+
+## Setup
+
+<ToolkitsSetup />
+
+```typescript
+import { createRpc } from "@lightprotocol/stateless.js";
+
+const rpc = createRpc(RPC_ENDPOINT);
+```
+
+## Query balance
+
+<Note>
+Find a full code example [here](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments-and-wallets/get-balance.ts).
+</Note>
+
+```typescript
+import {
+  getAssociatedTokenAddressInterface,
+  getAtaInterface,
+} from "@lightprotocol/compressed-token/unified";
+
+const ata = getAssociatedTokenAddressInterface(mint, owner);
+const account = await getAtaInterface(rpc, ata, owner, mint);
+
+console.log(account.parsed.amount);
+```
+
+<Accordion title="Compare to SPL">
+
+```typescript
+import { getAccount } from "@solana/spl-token";
+
+const account = await getAccount(connection, ata);
+
+console.log(account.amount);
+```
+
+</Accordion>
+
+## Transaction history
+
+<Note>
+Find a full code example [here](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments-and-wallets/get-history.ts).
+</Note>
+
+Query all transactions for an owner across both on-chain and compressed state:
+
+```typescript
+const result = await rpc.getSignaturesForOwnerInterface(owner);
+
+console.log(result.signatures); // Merged + deduplicated
+console.log(result.solana);     // On-chain transactions only
+console.log(result.compressed); // Compressed transactions only
+```
+
+Use `getSignaturesForAddressInterface(address)` if you want address-specific rather than owner-wide history.
+
+<Accordion title="Compare to SPL">
+
+```typescript
+const signatures = await connection.getSignaturesForAddress(ata);
+```
+
+</Accordion>
+
+## Related guides
+
+<CardGroup cols={2}>
+<Card title="Receive payments" icon="arrow-down" href="/light-token/payments/accept-payments/receive-payments">
+  Load cold accounts and prepare to receive.
+</Card>
+<Card title="Basic payment" icon="arrow-right" href="/light-token/payments/send-payments/basic-payment">
+  Send a single token transfer.
+</Card>
+</CardGroup>
+
+<SupportFooter />

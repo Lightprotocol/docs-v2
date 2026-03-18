@@ -1,0 +1,109 @@
+---
+title: "Payment with Memo"
+sidebarTitle: "Payment with memo"
+description: "Attach invoice IDs, payment references, or notes to Light Token transfers using the memo program."
+keywords: ["memo payment solana", "invoice reconciliation solana", "payment reference light token", "memo instruction"]
+---
+
+import ToolkitsSetup from "/snippets/setup/toolkits-setup.mdx";
+import SupportFooter from "/snippets/support-footer.mdx";
+
+Attach metadata like invoice IDs or payment references to a Light Token transfer
+using Solana's memo program. The memo is recorded in the transaction logs for reconciliation.
+
+<Warning>
+The memo program is a standard Solana program that works with any transaction.
+Adding a memo instruction alongside a Light Token transfer should work, but verify
+on devnet before using in production.
+</Warning>
+
+## How it works
+
+1. Create the transfer instructions with `createTransferInterfaceInstructions()`.
+2. Add a memo instruction to the transfer transaction (the last batch).
+3. Both instructions execute atomically in the same transaction.
+
+## Setup
+
+<ToolkitsSetup />
+
+Additionally install the memo program package:
+
+```bash
+npm install @solana/spl-memo
+```
+
+```typescript
+import { createRpc } from "@lightprotocol/stateless.js";
+
+const rpc = createRpc(RPC_ENDPOINT);
+```
+
+## Send a payment with memo
+
+```typescript
+import { Transaction, sendAndConfirmTransaction, TransactionInstruction, PublicKey } from "@solana/web3.js";
+import {
+  createTransferInterfaceInstructions,
+  sliceLast,
+} from "@lightprotocol/compressed-token/unified";
+
+const MEMO_PROGRAM_ID = new PublicKey("MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr");
+
+const instructions = await createTransferInterfaceInstructions(
+  rpc,
+  payer.publicKey,
+  mint,
+  amount,
+  owner.publicKey,
+  recipient
+);
+
+const { rest: loadInstructions, last: transferInstructions } = sliceLast(instructions);
+
+// Send load transactions first (if any)
+for (const ixs of loadInstructions) {
+  const tx = new Transaction().add(...ixs);
+  await sendAndConfirmTransaction(rpc, tx, [payer, owner]);
+}
+
+// Add memo to the transfer transaction
+const memoIx = new TransactionInstruction({
+  keys: [],
+  programId: MEMO_PROGRAM_ID,
+  data: Buffer.from("INV-2024-001"),
+});
+
+const transferTx = new Transaction().add(...transferInstructions, memoIx);
+await sendAndConfirmTransaction(rpc, transferTx, [payer, owner]);
+```
+
+## Read memo from transaction logs
+
+After the transaction confirms, the memo appears in the transaction logs:
+
+```typescript
+const txDetails = await rpc.getTransaction(signature, {
+  maxSupportedTransactionVersion: 0,
+});
+
+// Look for memo program log entries
+const logs = txDetails?.meta?.logMessages || [];
+const memoLogs = logs.filter((log) =>
+  log.includes("Program MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr")
+);
+console.log("Memo logs:", memoLogs);
+```
+
+## Related guides
+
+<CardGroup cols={2}>
+<Card title="Basic payment" icon="arrow-right" href="/light-token/payments/send-payments/basic-payment">
+  Send a single transfer without memo.
+</Card>
+<Card title="Verify payments" icon="magnifying-glass" href="/light-token/payments/accept-payments/verify-payments">
+  Query balances and transaction history.
+</Card>
+</CardGroup>
+
+<SupportFooter />

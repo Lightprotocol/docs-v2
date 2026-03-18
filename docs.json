@@ -57,7 +57,33 @@
                 "group": "For Stablecoin Payments",
                 "pages": [
                   "light-token/payments/overview",
-                  "light-token/payments/integration-guide"
+                  "light-token/payments/integration-guide",
+                  {
+                    "group": "Send Payments",
+                    "pages": [
+                      "light-token/payments/send-payments/basic-payment",
+                      "light-token/payments/send-payments/payment-with-memo",
+                      "light-token/payments/send-payments/verify-address",
+                      "light-token/payments/send-payments/batch-payments",
+                      "light-token/payments/send-payments/fee-abstraction"
+                    ]
+                  },
+                  {
+                    "group": "Accept Payments",
+                    "pages": [
+                      "light-token/payments/accept-payments/receive-payments",
+                      "light-token/payments/accept-payments/verify-payments"
+                    ]
+                  },
+                  {
+                    "group": "Advanced",
+                    "pages": [
+                      "light-token/payments/advanced/spend-permissions",
+                      "light-token/payments/advanced/deferred-execution"
+                    ]
+                  },
+                  "light-token/payments/interop/wrap-unwrap",
+                  "light-token/payments/production-readiness"
                 ]
               },
               {

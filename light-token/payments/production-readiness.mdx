@@ -1,0 +1,116 @@
+---
+title: "Production Readiness"
+sidebarTitle: "Production readiness"
+description: "Checklist for deploying Light Token payment flows to production, including RPC infrastructure, error handling, and security."
+keywords: ["production readiness solana", "light token production", "photon indexer", "mainnet deployment solana"]
+---
+
+import SupportFooter from "/snippets/support-footer.mdx";
+
+Checklist and considerations for deploying Light Token payment flows to production.
+
+## Current status
+
+<Warning>
+Light Token is in **Beta on Solana devnet**. Mainnet launch is expected in Q1 2026.
+For production use today, use [Compressed Tokens V1](/resources/legacy-compressed-tokens),
+which are live on Solana mainnet and supported by Phantom and Backpack.
+</Warning>
+
+## RPC infrastructure
+
+Light Token requires a Photon-compatible RPC endpoint for cold account lookups and balance queries.
+
+| Provider | Photon support | Notes |
+|:---------|:---------------|:------|
+| [Helius](https://helius.dev) | Yes | Recommended. Maintains the Photon indexer. |
+| [Triton](https://triton.one) | Yes | Alternative provider. |
+| Self-hosted | Yes | Run the [open-source Photon indexer](https://github.com/helius-labs/photon). |
+
+<Info>
+If the Photon indexer is temporarily unavailable, hot accounts continue to work normally.
+Cold accounts cannot be loaded until the indexer recovers.
+</Info>
+
+### Redundant RPC configuration
+
+For production reliability, configure multiple RPC endpoints:
+
+```typescript
+import { createRpc } from "@lightprotocol/stateless.js";
+
+// Primary endpoint
+const rpc = createRpc(process.env.PRIMARY_RPC_URL);
+
+// Fallback: switch to secondary if primary fails
+const fallbackRpc = createRpc(process.env.SECONDARY_RPC_URL);
+```
+
+## Transaction landing
+
+Light Token transactions follow standard Solana patterns for landing:
+
+- **Priority fees**: Use `ComputeBudgetProgram.setComputeUnitPrice()` to increase transaction priority.
+- **Compute units**: Set appropriate compute unit limits with `ComputeBudgetProgram.setComputeUnitLimit()`.
+- **Retry logic**: Implement retries with fresh blockhashes for failed transactions.
+
+## Confirmation levels
+
+| Level | When to use |
+|:------|:------------|
+| `processed` | Fastest. Use for UI updates. Not guaranteed to finalize. |
+| `confirmed` | Recommended for most payment flows. Confirmed by supermajority of validators. |
+| `finalized` | Highest certainty. Use for high-value transfers or irreversible actions. |
+
+## Error handling
+
+Handle both standard Solana errors and Light Token-specific scenarios:
+
+- **Cold account load failures**: Retry the load if the indexer returns stale data.
+- **Associated token account creation**: Idempotent — safe to retry.
+- **Rent top-up failures**: Ensure the fee payer has sufficient SOL balance.
+- **Transaction size limits**: If `TransactionInstruction[][]` returns multiple batches, process them sequentially.
+
+## Fee sponsorship
+
+Set your application as the fee payer so users never interact with SOL:
+
+1. **Rent top-ups**: Set `payer` parameter on Light Token instructions. See [fee abstraction](/light-token/payments/send-payments/fee-abstraction).
+2. **Transaction fees**: Use standard Solana fee payer patterns or services like [Kora](https://github.com/nicholasgasior/kora).
+3. **Rent sponsor funding**: Ensure the rent sponsor PDA is funded. See [sponsor rent top-ups](/light-token/wallets/sponsor-top-ups).
+
+## Security
+
+- **Key management**: Use hardware security modules (HSMs) or managed key services for production signing keys.
+- **Signing infrastructure**: Separate hot wallets (for automated operations) from cold wallets (for treasury).
+- **Address verification**: Validate recipient addresses before sending. See [verify address](/light-token/payments/send-payments/verify-address).
+- **Monitoring**: Track transaction success rates, cold account loading frequency, and fee payer SOL balance.
+
+## Pre-launch checklist
+
+- [ ] Photon-compatible RPC endpoint configured and tested
+- [ ] Redundant RPC endpoint available for failover
+- [ ] Fee payer wallet funded with sufficient SOL
+- [ ] Cold account loading tested end-to-end
+- [ ] Error handling covers load failures, tx size limits, and retries
+- [ ] Confirmation level appropriate for your use case
+- [ ] Address verification implemented
+- [ ] Monitoring and alerting set up
+- [ ] Wrap/unwrap flows tested for CEX interoperability (if applicable)
+- [ ] Delegation (spend permissions) tested and revocation verified (if applicable)
+
+## Related guides
+
+<CardGroup cols={3}>
+<Card title="Fee abstraction" icon="hand-holding-dollar" href="/light-token/payments/send-payments/fee-abstraction">
+  Abstract fees for users.
+</Card>
+<Card title="Basic payment" icon="arrow-right" href="/light-token/payments/send-payments/basic-payment">
+  Send a single transfer.
+</Card>
+<Card title="Receive payments" icon="arrow-down" href="/light-token/payments/accept-payments/receive-payments">
+  Load cold accounts and prepare to receive.
+</Card>
+</CardGroup>
+
+<SupportFooter />

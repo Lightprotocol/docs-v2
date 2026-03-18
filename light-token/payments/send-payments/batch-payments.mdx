@@ -1,0 +1,179 @@
+---
+title: "Batch Payments"
+sidebarTitle: "Batch payments"
+description: "Handle multi-transaction batches and send payments to multiple recipients."
+keywords: ["batch payments solana", "multiple transfers solana", "light token batch", "signAndSendBatches"]
+---
+
+import ToolkitsSetup from "/snippets/setup/toolkits-setup.mdx";
+import SupportFooter from "/snippets/support-footer.mdx";
+
+Handle the `TransactionInstruction[][]` pattern that Light Token APIs return,
+and send payments to multiple recipients.
+
+<Info>
+**How Light Token batching differs from SPL**: SPL batching puts multiple transfer instructions
+in a single transaction. Light Token APIs return `TransactionInstruction[][]` because
+cold accounts may need loading before the transfer can execute. Each inner array is one
+atomic transaction. Almost always a single transaction, but the pattern handles multi-transaction
+cases automatically.
+</Info>
+
+## Setup
+
+<ToolkitsSetup />
+
+```typescript
+import { createRpc } from "@lightprotocol/stateless.js";
+
+const rpc = createRpc(RPC_ENDPOINT);
+```
+
+## Handle instruction batches
+
+Every Light Token API that modifies state returns `TransactionInstruction[][]`.
+The standard loop handles all cases:
+
+```typescript
+import { Transaction, sendAndConfirmTransaction } from "@solana/web3.js";
+import { createTransferInterfaceInstructions } from "@lightprotocol/compressed-token/unified";
+
+const instructions = await createTransferInterfaceInstructions(
+  rpc,
+  payer.publicKey,
+  mint,
+  amount,
+  owner.publicKey,
+  recipient
+);
+
+for (const ixs of instructions) {
+  const tx = new Transaction().add(...ixs);
+  await sendAndConfirmTransaction(rpc, tx, [payer, owner]);
+}
+```
+
+## Parallelize load transactions
+
+When the SDK returns multiple transaction batches (load + transfer), you can
+parallelize the load transactions and send the transfer last:
+
+```typescript
+import {
+  createTransferInterfaceInstructions,
+  sliceLast,
+} from "@lightprotocol/compressed-token/unified";
+
+const instructions = await createTransferInterfaceInstructions(
+  rpc,
+  payer.publicKey,
+  mint,
+  amount,
+  owner.publicKey,
+  recipient
+);
+
+const { rest: loadInstructions, last: transferInstructions } = sliceLast(instructions);
+
+// Parallelize loads (empty = nothing to load, will no-op)
+await Promise.all(
+  loadInstructions.map((ixs) => {
+    const tx = new Transaction().add(...ixs);
+    tx.sign(payer, owner);
+    return sendAndConfirmTransaction(rpc, tx);
+  })
+);
+
+// Send transfer after all loads confirm
+const transferTx = new Transaction().add(...transferInstructions);
+transferTx.sign(payer, owner);
+await sendAndConfirmTransaction(rpc, transferTx);
+```
+
+## Helper: signAndSendBatches
+
+For wallet integrations (Privy, Wallet Adapter), use a shared helper
+that handles blockhash, signing, sending, and confirming for each batch:
+
+```typescript
+import { Transaction, TransactionInstruction, PublicKey } from "@solana/web3.js";
+
+async function signAndSendBatches(
+  instructionBatches: TransactionInstruction[][],
+  rpc: any,
+  feePayer: PublicKey,
+  signTransaction: (tx: Transaction) => Promise<Transaction>
+): Promise<string | null> {
+  const signatures: string[] = [];
+
+  for (const ixs of instructionBatches) {
+    const tx = new Transaction().add(...ixs);
+    const { blockhash } = await rpc.getLatestBlockhash();
+    tx.recentBlockhash = blockhash;
+    tx.feePayer = feePayer;
+
+    const signedTx = await signTransaction(tx);
+    const sig = await rpc.sendRawTransaction(signedTx.serialize(), {
+      skipPreflight: false,
+      preflightCommitment: "confirmed",
+    });
+    await rpc.confirmTransaction(sig, "confirmed");
+    signatures.push(sig);
+  }
+
+  return signatures.length > 0 ? signatures[signatures.length - 1] : null;
+}
+```
+
+<Note>
+See the complete implementation in the
+[Privy integration](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/sign-with-privy/react/src/hooks/signAndSendBatches.ts) and
+[Wallet Adapter integration](https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/sign-with-wallet-adapter) examples.
+</Note>
+
+## Send to multiple recipients
+
+Call `createTransferInterfaceInstructions()` per recipient and process sequentially:
+
+```typescript
+const recipients = [
+  { address: recipientA, amount: 100 },
+  { address: recipientB, amount: 200 },
+  { address: recipientC, amount: 300 },
+];
+
+for (const { address, amount } of recipients) {
+  const instructions = await createTransferInterfaceInstructions(
+    rpc,
+    payer.publicKey,
+    mint,
+    amount,
+    owner.publicKey,
+    address
+  );
+
+  for (const ixs of instructions) {
+    const tx = new Transaction().add(...ixs);
+    await sendAndConfirmTransaction(rpc, tx, [payer, owner]);
+  }
+}
+```
+
+<Info>
+When all accounts are hot (no loading needed), multiple transfer instructions can fit in a single
+Solana transaction. However, the SDK does not batch multi-recipient transfers natively — call
+`createTransferInterfaceInstructions()` per recipient.
+</Info>
+
+## Related guides
+
+<CardGroup cols={2}>
+<Card title="Basic payment" icon="arrow-right" href="/light-token/payments/send-payments/basic-payment">
+  Send a single transfer.
+</Card>
+<Card title="Fee abstraction" icon="hand-holding-dollar" href="/light-token/payments/send-payments/fee-abstraction">
+  Separate the fee payer from the token owner.
+</Card>
+</CardGroup>
+
+<SupportFooter />
