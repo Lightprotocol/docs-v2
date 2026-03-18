@@ -91,7 +91,7 @@
                   "light-token/wallets/overview",
                   "light-token/wallets/privy",
                   "light-token/wallets/wallet-adapter",
-                  "light-token/wallets/sponsor-top-ups"
+                  "light-token/wallets/gasless-transactions"
                 ]
               },
               {
@@ -960,7 +960,11 @@
     },
     {
       "source": "/light-token/toolkits/sponsor-top-ups",
-      "destination": "https://zkcompression.com/light-token/wallets/sponsor-top-ups"
+      "destination": "https://zkcompression.com/light-token/wallets/gasless-transactions"
+    },
+    {
+      "source": "/light-token/wallets/sponsor-top-ups",
+      "destination": "https://zkcompression.com/light-token/wallets/gasless-transactions"
     },
     {
       "source": "/light-token/toolkits/for-streaming-mints",

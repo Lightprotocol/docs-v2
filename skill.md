@@ -178,7 +178,7 @@ Use rent-free PDAs for: user state, app state, nullifiers for payments, DePIN no
 | [Payments and Wallets](https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/payments-and-wallets) | All you need for wallet integrations and payment flows. Minimal API differences to SPL. |
 | [Streaming Tokens](https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/streaming-tokens/) | Stream mint events using Laserstream |
 | [Sign with Privy](https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/sign-with-privy/) | Light-token operations signed with Privy wallets (Node.js + React) |
-| [Sponsor Rent Top-Ups](https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/sponsor-rent-top-ups/) | Sponsor rent top-ups for users by setting your application as the fee payer |
+| [Gasless Transactions](https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/gasless-transactions/) | Abstract SOL fees so users never hold SOL. Sponsor rent top-ups and transaction fees. |
 
 ### TypeScript client (`@lightprotocol/compressed-token`)
 
