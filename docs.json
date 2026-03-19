@@ -33,7 +33,7 @@
             ]
           },
           {
-            "group": "Light Token Program",
+            "group": "Light Token APIs",
             "pages": [
               "light-token/welcome",
               {

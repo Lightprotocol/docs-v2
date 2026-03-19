@@ -13,7 +13,7 @@ import CloseMintAiPrompt from "/snippets/ai-prompts/extensions/close-mint.mdx";
 A designated authority can close a mint account and reclaim its rent-exempt lamports after all tokens have been burned and the total supply reaches zero.
 
 <Info>
-MintCloseAuthority mints require `compression_only` accounts. Use the Light Token interface APIs (`transferInterface`, `createTransferInterfaceInstructions`) for transfers — compressed transfer instructions are not supported.
+Set the `compression_only` flag when creating token accounts for this mint. Use `transferInterface` for transfers as usual.
 </Info>
 
 ## Key Parameters

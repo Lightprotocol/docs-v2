@@ -13,7 +13,7 @@ import PermanentDelegateAiPrompt from "/snippets/ai-prompts/extensions/permanent
 A designated authority gains irrevocable transfer and burn rights over every token account for a mint, set once at initialization and enforced permanently.
 
 <Info>
-PermanentDelegate mints require `compression_only` accounts. Use the Light Token interface APIs (`transferInterface`, `createTransferInterfaceInstructions`) for transfers — compressed transfer instructions are not supported.
+Set the `compression_only` flag when creating token accounts for this mint. Use `transferInterface` for transfers as usual.
 </Info>
 
 ## Key Parameters

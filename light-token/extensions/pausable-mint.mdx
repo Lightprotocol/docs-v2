@@ -13,8 +13,7 @@ import PausableMintAiPrompt from "/snippets/ai-prompts/extensions/pausable-mint.
 When paused, all minting, burning, and transfers are blocked until the authority resumes the mint.
 
 <Info>
-Pausable mints require `compression_only` accounts. Use the Light Token interface APIs (`transferInterface`, `createTransferInterfaceInstructions`) 
-for transfers.
+Set the `compression_only` flag when creating token accounts for this mint. Use `transferInterface` for transfers as usual.
 </Info>
 
 ## Key Parameters

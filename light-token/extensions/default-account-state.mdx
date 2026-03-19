@@ -13,7 +13,7 @@ import DefaultAccountStateAiPrompt from "/snippets/ai-prompts/extensions/default
 Every new token account created under a mint starts in a specified state, such as frozen, requiring the freeze authority to thaw accounts before holders can transact.
 
 <Info>
-DefaultAccountState mints require `compression_only` accounts. Use the Light Token interface APIs (`transferInterface`, `createTransferInterfaceInstructions`) for transfers — compressed transfer instructions are not supported.
+Set the `compression_only` flag when creating token accounts for this mint. Use `transferInterface` for transfers as usual.
 </Info>
 
 ## Key Parameters
