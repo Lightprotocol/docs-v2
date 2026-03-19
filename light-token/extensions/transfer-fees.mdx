@@ -12,7 +12,8 @@ import TransferFeesAiPrompt from "/snippets/ai-prompts/extensions/transfer-fees.
 
 ## Key Concepts
 
-Fees are expressed in basis points and accumulate in recipient token accounts. A designated withdraw authority can collect the accumulated fees.
+The TransferFeeExtension enables automatic fee collection on every token transfer.
+Fees accumulate in the recipient token accounts and can be withdrawn by the withdraw authority set on the mint account.
 
 Transfer fees are configured with four parameters:
 
@@ -23,21 +24,6 @@ Transfer fees are configured with four parameters:
 | `transferFeeConfigAuthority` | Authority that can modify fee settings. |
 | `withdrawWithheldAuthority` | Authority that can collect accumulated fees from recipient accounts. |
 
-During a transfer, the token program calculates the fee as a percentage of the transfer amount (capped by `maximumFee`) 
-and withholds it in the recipient's token account. With Light Token, both values are zero, so no fees are collected.
-
-## How It Works
-
-1. A mint authority creates a Token-2022 mint with the TransferFeeConfig extension
-2. The fee basis points and maximum fee are set at initialization
-3. On every `transfer_checked` call, the token program withholds the fee from the transferred amount
-4. Fees accumulate in recipient token accounts and can be harvested to the mint, then withdrawn by the withdraw authority
-
-<Info>
-Light Token requires the transfer fee to be set to **zero basis points** and the maximum fee to **zero**. 
-You can initialize the extension for compatibility with existing Token-2022 mints, but non-zero fees are not supported. Registration fails if fees are non-zero.
-</Info>
-
 ## Use TransferFeeConfig With Light Token
 
 <AgentSkillGeneric />
@@ -47,9 +33,6 @@ You can initialize the extension for compatibility with existing Token-2022 mint
 
 <ExtensionsSetup />
 
-<Steps>
-
-<Step>
 ### Create a Token-2022 Mint With Transfer Fees
 
 <Tabs>
@@ -161,12 +144,9 @@ const { mint, transactionSignature } = await createMintInterface(
 </Tab>
 </Tabs>
 
-</Step>
+### Create Interface PDA for Existing Mint
 
-<Step>
-### Register an Existing Mint
-
-If you already have a Token-2022 mint with a zero-fee TransferFeeConfig, register it with Light Token.
+If you already have a Token-2022 mint with a zero-fee TransferFeeConfig, create an interface PDA with Light Token.
 
 ```typescript
 import { LightTokenProgram } from "@lightprotocol/compressed-token";
@@ -178,36 +158,6 @@ const createSplInterfaceIx = await LightTokenProgram.createSplInterface({
     tokenProgramId: TOKEN_2022_PROGRAM_ID,
 });
 ```
-
-</Step>
-
-<Step>
-### Transfer Tokens
-
-Transfers work identically to any other Light Token mint. Because the fee is zero, no fees are withheld.
-
-```typescript
-import { Transaction, sendAndConfirmTransaction } from "@solana/web3.js";
-import { createTransferInterfaceInstructions } from "@lightprotocol/compressed-token/unified";
-
-const instructions = await createTransferInterfaceInstructions(
-    rpc,
-    payer.publicKey,
-    mint,
-    amount,
-    owner.publicKey,
-    recipient
-);
-
-for (const ixs of instructions) {
-    const tx = new Transaction().add(...ixs);
-    await sendAndConfirmTransaction(rpc, tx, [payer, owner]);
-}
-```
-
-</Step>
-
-</Steps>
 
 </Tab>
 <Tab title="AI Prompt">

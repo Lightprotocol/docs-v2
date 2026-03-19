@@ -444,15 +444,16 @@ export const splApproveCode = [
 ].join("\n");
 
 export const lightApproveCode = [
-  'import { approve } from "@lightprotocol/compressed-token";',
+  'import { approveInterface } from "@lightprotocol/compressed-token";',
   "",
-  "const tx = await approve(",
+  "const tx = await approveInterface(",
   "  rpc,",
   "  payer,",
+  "  tokenAccount,",
   "  mint,",
+  "  delegate,",
   "  amount,",
-  "  owner,",
-  "  delegate",
+  "  owner",
   ");",
 ].join("\n");
 
@@ -469,12 +470,13 @@ export const splRevokeCode = [
 ].join("\n");
 
 export const lightRevokeCode = [
-  'import { revoke } from "@lightprotocol/compressed-token";',
+  'import { revokeInterface } from "@lightprotocol/compressed-token";',
   "",
-  "const tx = await revoke(",
+  "const tx = await revokeInterface(",
   "  rpc,",
   "  payer,",
-  "  delegatedAccounts,",
+  "  tokenAccount,",
+  "  mint,",
   "  owner",
   ");",
 ].join("\n");

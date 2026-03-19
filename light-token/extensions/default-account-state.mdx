@@ -16,7 +16,7 @@ Every new token account created under a mint starts in a specified state, such a
 DefaultAccountState mints require `compression_only` accounts. Use the Light Token interface APIs (`transferInterface`, `createTransferInterfaceInstructions`) for transfers — compressed transfer instructions are not supported.
 </Info>
 
-## Key Concepts
+## Key Parameters
 
 DefaultAccountState is configured with two parameters:
 
@@ -27,13 +27,6 @@ DefaultAccountState is configured with two parameters:
 
 When a new token account is created for this mint, the token program automatically sets its state to the configured default. If the default is `Frozen`, the account cannot send or receive tokens until the freeze authority thaws it.
 
-## How It Works
-
-1. A mint authority creates a Token-2022 mint with the DefaultAccountState extension
-2. The default state is set at initialization (typically `Frozen`)
-3. Every new token account for that mint starts in the configured state
-4. The freeze authority thaws individual accounts after verifying the holder
-
 ## Use DefaultAccountState With Light Token
 
 <AgentSkillGeneric />
@@ -43,9 +36,6 @@ When a new token account is created for this mint, the token program automatical
 
 <ExtensionsSetup />
 
-<Steps>
-
-<Step>
 ### Create a Token-2022 Mint With Default Account State
 
 <Tabs>
@@ -155,12 +145,9 @@ const { mint, transactionSignature } = await createMintInterface(
 </Tab>
 </Tabs>
 
-</Step>
+### Create Interface PDA for Existing Mint
 
-<Step>
-### Register an Existing Mint
-
-If you already have a Token-2022 mint with DefaultAccountState, register it with Light Token.
+If you already have a Token-2022 mint with DefaultAccountState, create an interface PDA with Light Token.
 
 ```typescript
 import { LightTokenProgram } from "@lightprotocol/compressed-token";
@@ -172,36 +159,6 @@ const createSplInterfaceIx = await LightTokenProgram.createSplInterface({
     tokenProgramId: TOKEN_2022_PROGRAM_ID,
 });
 ```
-
-</Step>
-
-<Step>
-### Transfer Tokens
-
-Transfers work identically to any other Light Token mint. Accounts must be thawed by the freeze authority before they can send or receive tokens.
-
-```typescript
-import { Transaction, sendAndConfirmTransaction } from "@solana/web3.js";
-import { createTransferInterfaceInstructions } from "@lightprotocol/compressed-token/unified";
-
-const instructions = await createTransferInterfaceInstructions(
-    rpc,
-    payer.publicKey,
-    mint,
-    amount,
-    owner.publicKey,
-    recipient
-);
-
-for (const ixs of instructions) {
-    const tx = new Transaction().add(...ixs);
-    await sendAndConfirmTransaction(rpc, tx, [payer, owner]);
-}
-```
-
-</Step>
-
-</Steps>
 
 </Tab>
 <Tab title="AI Prompt">

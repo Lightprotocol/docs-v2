@@ -4,18 +4,17 @@ import { Keypair } from "@solana/web3.js";
 import { createRpc } from "@lightprotocol/stateless.js";
 import {
     createMintInterface,
-    mintToCompressed,
-    approve,
-    revoke,
+    createAtaInterface,
+    getAssociatedTokenAddressInterface,
+    mintToInterface,
+    approveInterface,
+    revokeInterface,
 } from "@lightprotocol/compressed-token";
 import { homedir } from "os";
 import { readFileSync } from "fs";
 
-// devnet:
-// const RPC_URL = `https://devnet.helius-rpc.com?api-key=${process.env.API_KEY!}`;
-// const rpc = createRpc(RPC_URL);
-// localnet:
-const rpc = createRpc();
+const RPC_URL = `https://devnet.helius-rpc.com?api-key=${process.env.API_KEY!}`;
+const rpc = createRpc(RPC_URL);
 
 const payer = Keypair.fromSecretKey(
     new Uint8Array(
@@ -25,16 +24,23 @@ const payer = Keypair.fromSecretKey(
 
 (async function () {
     const { mint } = await createMintInterface(rpc, payer, payer, null, 9);
-    await mintToCompressed(rpc, payer, mint, payer, [{ recipient: payer.publicKey, amount: 1000n }]);
+
+    await createAtaInterface(rpc, payer, mint, payer.publicKey);
+    const senderAta = getAssociatedTokenAddressInterface(mint, payer.publicKey);
+    await mintToInterface(rpc, payer, mint, senderAta, payer, 1_000_000_000);
 
     const delegate = Keypair.generate();
-    await approve(rpc, payer, mint, 500, payer, delegate.publicKey);
-
-    const delegatedAccounts = await rpc.getCompressedTokenAccountsByDelegate(
+    await approveInterface(
+        rpc,
+        payer,
+        senderAta,
+        mint,
         delegate.publicKey,
-        { mint },
+        500_000_000,
+        payer,
     );
-    const tx = await revoke(rpc, payer, delegatedAccounts.items, payer);
+
+    const tx = await revokeInterface(rpc, payer, senderAta, mint, payer);
 
     console.log("Tx:", tx);
 })();

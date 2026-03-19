@@ -16,7 +16,7 @@ A designated authority can close a mint account and reclaim its rent-exempt lamp
 MintCloseAuthority mints require `compression_only` accounts. Use the Light Token interface APIs (`transferInterface`, `createTransferInterfaceInstructions`) for transfers — compressed transfer instructions are not supported.
 </Info>
 
-## Key Concepts
+## Key Parameters
 
 MintCloseAuthority is configured with one parameter:
 
@@ -25,13 +25,6 @@ MintCloseAuthority is configured with one parameter:
 | `closeAuthority` | The public key authorized to close the mint account and reclaim its rent-exempt lamports. |
 
 Standard SPL mints cannot be closed once created, leaving rent-exempt lamports locked permanently. MintCloseAuthority adds a close authority that can reclaim those lamports after the total supply reaches zero.
-
-## How It Works
-
-1. A mint authority creates a Token-2022 mint with the MintCloseAuthority extension
-2. The close authority is set at initialization
-3. All tokens must be burned, reducing the total supply to zero
-4. The close authority submits a close instruction to reclaim the mint account's rent
 
 ## Use MintCloseAuthority With Light Token
 
@@ -42,9 +35,6 @@ Standard SPL mints cannot be closed once created, leaving rent-exempt lamports l
 
 <ExtensionsSetup />
 
-<Steps>
-
-<Step>
 ### Create a Token-2022 Mint With Close Authority
 
 <Tabs>
@@ -153,12 +143,9 @@ const { mint, transactionSignature } = await createMintInterface(
 </Tab>
 </Tabs>
 
-</Step>
+### Create Interface PDA for Existing Mint
 
-<Step>
-### Register an Existing Mint
-
-If you already have a Token-2022 mint with MintCloseAuthority, register it with Light Token.
+If you already have a Token-2022 mint with MintCloseAuthority, create an interface PDA with Light Token.
 
 ```typescript
 import { LightTokenProgram } from "@lightprotocol/compressed-token";
@@ -170,36 +157,6 @@ const createSplInterfaceIx = await LightTokenProgram.createSplInterface({
     tokenProgramId: TOKEN_2022_PROGRAM_ID,
 });
 ```
-
-</Step>
-
-<Step>
-### Transfer Tokens
-
-Transfers work identically to any other Light Token mint. The close authority can reclaim rent only after all tokens are burned.
-
-```typescript
-import { Transaction, sendAndConfirmTransaction } from "@solana/web3.js";
-import { createTransferInterfaceInstructions } from "@lightprotocol/compressed-token/unified";
-
-const instructions = await createTransferInterfaceInstructions(
-    rpc,
-    payer.publicKey,
-    mint,
-    amount,
-    owner.publicKey,
-    recipient
-);
-
-for (const ixs of instructions) {
-    const tx = new Transaction().add(...ixs);
-    await sendAndConfirmTransaction(rpc, tx, [payer, owner]);
-}
-```
-
-</Step>
-
-</Steps>
 
 </Tab>
 <Tab title="AI Prompt">

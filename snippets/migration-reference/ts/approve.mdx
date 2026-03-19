@@ -1,12 +1,13 @@
 ```typescript
-import { approve } from "@lightprotocol/compressed-token";
+import { approveInterface } from "@lightprotocol/compressed-token";
 
-const tx = await approve(
+const tx = await approveInterface(
   rpc,
   payer,
+  tokenAccount,
   mint,
+  delegate,
   amount,
-  owner,
-  delegate
+  owner
 );
 ```

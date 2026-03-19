@@ -12,7 +12,7 @@ import TokenGroupsAndMembersAiPrompt from "/snippets/ai-prompts/extensions/token
 
 Organize tokens into hierarchical groups such as NFT collections by linking a group mint to one or more member mints through on-chain pointer and data extensions.
 
-## Key Concepts
+## Key Parameters
 
 Token groups use four related extensions that work in pairs:
 
@@ -23,14 +23,6 @@ Token groups use four related extensions that work in pairs:
 | `GroupMemberPointer` | `authority`, `memberAddress` | Designates a mint as a member mint by pointing to an account that stores membership data. Typically points to the mint itself. |
 | `TokenGroupMember` | `mint`, `group`, `memberNumber` | Stores the membership data (parent group address, sequential member number) directly on the mint account. |
 
-## How It Works
-
-1. A mint authority creates a **group mint** with the GroupPointer and TokenGroup extensions, setting a max member count and update authority
-2. The GroupPointer references the account that stores group data — typically the mint itself
-3. For each member, a separate **member mint** is created with the GroupMemberPointer and TokenGroupMember extensions
-4. The TokenGroupMember extension links the member mint to the parent group and assigns a sequential member number
-5. Both group and member mints are registered with Light Token for rent-free compressed accounts
-
 ## Use Token Groups With Light Token
 
 <AgentSkillGeneric />
@@ -40,15 +32,9 @@ Token groups use four related extensions that work in pairs:
 
 <ExtensionsSetup />
 
-<Steps>
-
-<Step>
 ### Create Group Mint
 
 Create a Token-2022 mint with the GroupPointer and TokenGroup extensions.
-
-<Tabs>
-<Tab title="Instruction">
 
 ```typescript
 import {
@@ -126,28 +112,6 @@ const signature = await sendAndConfirmTransaction(rpc, tx, [
 ]);
 ```
 
-</Tab>
-<Tab title="Action">
-
-```typescript
-import { createMintInterface } from "@lightprotocol/compressed-token";
-import { TOKEN_2022_PROGRAM_ID } from "@solana/spl-token";
-
-const { mint, transactionSignature } = await createMintInterface(
-    rpc, payer, payer, null, 0, groupMintKeypair, undefined, TOKEN_2022_PROGRAM_ID
-);
-```
-
-<Info>
-`createMintInterface` creates and registers a standard Token-2022 mint. To add the GroupPointer and TokenGroup extensions, use the instruction approach in the other tab.
-</Info>
-
-</Tab>
-</Tabs>
-
-</Step>
-
-<Step>
 ### Create Member Mint
 
 Create a member mint with the GroupMemberPointer and TokenGroupMember extensions, linking it to the group mint.
@@ -213,12 +177,9 @@ const memberTx = new Transaction().add(
 await sendAndConfirmTransaction(rpc, memberTx, [payer, memberMintKeypair]);
 ```
 
-</Step>
+### Create Interface PDA for Existing Mints
 
-<Step>
-### Register Both Mints With Light Token
-
-Register both the group mint and member mint with Light Token to enable rent-free compressed accounts.
+Create interface PDAs for both the group mint and member mint with Light Token.
 
 ```typescript
 // Register group mint
@@ -239,30 +200,6 @@ const registerTx = new Transaction().add(registerGroupIx, registerMemberIx);
 await sendAndConfirmTransaction(rpc, registerTx, [payer]);
 ```
 
-</Step>
-
-<Step>
-### Transfer Tokens
-
-Once mints are registered, transfers work identically to any other Light Token mint.
-
-```typescript
-import { Transaction, sendAndConfirmTransaction } from "@solana/web3.js";
-import { createTransferInterfaceInstructions } from "@lightprotocol/compressed-token/unified";
-
-const instructions = await createTransferInterfaceInstructions(
-    rpc, payer.publicKey, mint, amount, owner.publicKey, recipient
-);
-
-for (const ixs of instructions) {
-    const tx = new Transaction().add(...ixs);
-    await sendAndConfirmTransaction(rpc, tx, [payer, owner]);
-}
-```
-
-</Step>
-
-</Steps>
 
 </Tab>
 <Tab title="AI Prompt">

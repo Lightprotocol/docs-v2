@@ -44,6 +44,7 @@ import CreateMintAiPrompt from "/snippets/ai-prompts/ts-cookbook/create-mint.mdx
 import RustCreateMintAiPrompt from "/snippets/ai-prompts/rust-cookbook/create-mint.mdx";
 import ProgramCreateMintCpiAiPrompt from "/snippets/ai-prompts/program-cookbook/create-mint-cpi.mdx";
 import ProgramCreateMintMacrosAiPrompt from "/snippets/ai-prompts/program-cookbook/create-mint-macros.mdx";
+import SupportFooter from "/snippets/support-footer.mdx";
 
 1. Mint accounts uniquely represent a token on Solana and store its global metadata.
 2. Light mints are on-chain accounts like SPL mints, but the light token program sponsors the rent-exemption cost for you.
@@ -556,12 +557,11 @@ pub mint: UncheckedAccount<'info>,
 
 </Tabs>
 
-# Next Steps
+## Related Guides
 
-<Card
-  title="Learn how to mint tokens to Light Token accounts."
-  icon="chevron-right"
-  color="#0066ff"
-  href="/light-token/cookbook/mint-to"
-  horizontal
-/>
+<CardGroup cols={2}>
+<Card title="Add interface PDA" icon="link" href="/light-token/cookbook/add-interface-pda" horizontal />
+<Card title="Mint tokens" icon="coins" href="/light-token/cookbook/mint-to" horizontal />
+</CardGroup>
+
+<SupportFooter />

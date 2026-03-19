@@ -22,31 +22,6 @@ Light Token requires a Photon-compatible RPC endpoint for cold account lookups a
 |:---------|:---------------|:------|
 | [Helius](https://helius.dev) | Yes | Recommended. Maintains the Photon indexer. |
 | [Triton](https://triton.one) | Yes | Alternative provider. |
-| Self-hosted | Yes | Run the [open-source Photon indexer](https://github.com/helius-labs/photon). |
-
-<Info>
-If the Photon indexer is temporarily unavailable, hot accounts continue to work normally.
-Cold accounts cannot be loaded until the indexer recovers.
-</Info>
-
-### Redundant RPC configuration
-
-For production reliability, configure multiple RPC endpoints:
-
-```typescript
-import { createRpc } from "@lightprotocol/stateless.js";
-
-const primaryRpc = createRpc(process.env.PRIMARY_RPC_URL);
-const fallbackRpc = createRpc(process.env.SECONDARY_RPC_URL);
-
-async function sendWithFallback(fn: (rpc: any) => Promise<any>) {
-  try {
-    return await fn(primaryRpc);
-  } catch {
-    return await fn(fallbackRpc);
-  }
-}
-```
 
 ## Transaction landing
 
@@ -83,15 +58,11 @@ Set your application as the fee payer so users never interact with SOL:
 ## Pre-launch checklist
 
 - [ ] Photon-compatible RPC endpoint configured and tested
-- [ ] Redundant RPC endpoint available for failover
 - [ ] Fee payer wallet funded with sufficient SOL
-- [ ] [Cold account loading](/light-token/payments/receive-payments) tested end-to-end
 - [ ] Error handling covers load failures, tx size limits, and retries
 - [ ] Confirmation level appropriate for your use case
 - [ ] [Address verification](/light-token/payments/verify-recipient-address) implemented
-- [ ] Monitoring and alerting set up (tx success rates, cold account loading, fee payer balance)
-- [ ] [Wrap/unwrap](/light-token/payments/wrap-unwrap) flows tested for CEX interoperability (if applicable)
-- [ ] [Wrap/unwrap](/light-token/payments/wrap-unwrap) flows tested for SPL interoperability (if applicable)
+- [ ] [Wrap/unwrap](/light-token/payments/wrap-unwrap) flows tested for SPL / Token 2022 interoperability (if applicable)
 
 </Tab>
 <Tab title="AI Prompt">

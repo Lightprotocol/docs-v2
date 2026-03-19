@@ -1,0 +1,27 @@
+```typescript
+import { Keypair } from "@solana/web3.js";
+import { transferDelegatedInterface } from "@lightprotocol/compressed-token/unified";
+import { rpc, payer, setup } from "../setup.js";
+
+(async function () {
+    const { mint, senderAta } = await setup();
+
+    // Approve a delegate first (see delegate-approve.mdx)
+    const delegate = Keypair.generate();
+    const recipient = Keypair.generate();
+
+    // Delegate transfers tokens on behalf of the owner
+    const tx = await transferDelegatedInterface(
+        rpc,
+        payer,
+        senderAta,
+        mint,
+        recipient.publicKey,
+        delegate,
+        payer.publicKey,
+        200_000
+    );
+
+    console.log("Delegated transfer:", tx);
+})();
+```

@@ -1,0 +1,34 @@
+```typescript
+import {
+    Keypair,
+    Transaction,
+    sendAndConfirmTransaction,
+} from "@solana/web3.js";
+import { createTransferDelegatedInterfaceInstructions } from "@lightprotocol/compressed-token/unified";
+import { rpc, payer, setup } from "../setup.js";
+
+(async function () {
+    const { mint } = await setup();
+
+    const delegate = Keypair.generate();
+    const recipient = Keypair.generate();
+
+    // Returns TransactionInstruction[][]. Each inner array is one txn.
+    const instructions = await createTransferDelegatedInterfaceInstructions(
+        rpc,
+        payer.publicKey,
+        mint,
+        200_000,
+        delegate.publicKey,
+        payer.publicKey,
+        recipient.publicKey,
+        9
+    );
+
+    for (const ixs of instructions) {
+        const tx = new Transaction().add(...ixs);
+        const sig = await sendAndConfirmTransaction(rpc, tx, [payer, delegate]);
+        console.log("Tx:", sig);
+    }
+})();
+```

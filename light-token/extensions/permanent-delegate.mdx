@@ -16,7 +16,7 @@ A designated authority gains irrevocable transfer and burn rights over every tok
 PermanentDelegate mints require `compression_only` accounts. Use the Light Token interface APIs (`transferInterface`, `createTransferInterfaceInstructions`) for transfers — compressed transfer instructions are not supported.
 </Info>
 
-## Key Concepts
+## Key Parameters
 
 PermanentDelegate is configured with one parameter:
 
@@ -25,13 +25,6 @@ PermanentDelegate is configured with one parameter:
 | `delegate` | The public key granted permanent, irrevocable transfer and burn authority over all token accounts for this mint. |
 
 Unlike standard delegates set per token account, the permanent delegate operates at the mint level. Token account owners cannot revoke this authority. Only the current permanent delegate can reassign the role to a new account.
-
-## How It Works
-
-1. A mint authority creates a Token-2022 mint with the PermanentDelegate extension
-2. The delegate address is set at initialization and cannot be removed
-3. The permanent delegate can transfer or burn tokens from any token account for this mint without owner approval
-4. The delegate authority persists for the lifetime of the mint
 
 ## Use PermanentDelegate With Light Token
 
@@ -42,9 +35,6 @@ Unlike standard delegates set per token account, the permanent delegate operates
 
 <ExtensionsSetup />
 
-<Steps>
-
-<Step>
 ### Create a Token-2022 Mint With Permanent Delegate
 
 <Tabs>
@@ -153,12 +143,9 @@ const { mint, transactionSignature } = await createMintInterface(
 </Tab>
 </Tabs>
 
-</Step>
+### Create Interface PDA for Existing Mint
 
-<Step>
-### Register an Existing Mint
-
-If you already have a Token-2022 mint with PermanentDelegate, register it with Light Token.
+If you already have a Token-2022 mint with PermanentDelegate, create an interface PDA with Light Token.
 
 ```typescript
 import { LightTokenProgram } from "@lightprotocol/compressed-token";
@@ -170,36 +157,6 @@ const createSplInterfaceIx = await LightTokenProgram.createSplInterface({
     tokenProgramId: TOKEN_2022_PROGRAM_ID,
 });
 ```
-
-</Step>
-
-<Step>
-### Transfer Tokens
-
-Transfers work identically to any other Light Token mint. The permanent delegate retains authority to transfer or burn tokens from any account.
-
-```typescript
-import { Transaction, sendAndConfirmTransaction } from "@solana/web3.js";
-import { createTransferInterfaceInstructions } from "@lightprotocol/compressed-token/unified";
-
-const instructions = await createTransferInterfaceInstructions(
-    rpc,
-    payer.publicKey,
-    mint,
-    amount,
-    owner.publicKey,
-    recipient
-);
-
-for (const ixs of instructions) {
-    const tx = new Transaction().add(...ixs);
-    await sendAndConfirmTransaction(rpc, tx, [payer, owner]);
-}
-```
-
-</Step>
-
-</Steps>
 
 </Tab>
 <Tab title="AI Prompt">

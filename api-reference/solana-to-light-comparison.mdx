@@ -895,6 +895,46 @@ let ix = approve(
 </Tabs>
 </Accordion>
 
+### Delegated transfer
+
+Transfer tokens as an approved delegate. The delegate is the transaction authority; the owner's signature is not required.
+
+> [Guide](/light-token/payments/spend-permissions)
+
+<Tabs>
+<Tab title="TypeScript">
+<Columns cols={2}>
+```typescript title="Light"
+import { transferDelegatedInterface } from "@lightprotocol/compressed-token/unified";
+
+const tx = await transferDelegatedInterface(
+  rpc,
+  payer,
+  sourceAta,
+  mint,
+  recipient,
+  delegate,
+  owner.publicKey,
+  amount
+);
+```
+```typescript title="SPL"
+import { transfer } from "@solana/spl-token";
+
+// delegate signs instead of owner
+const tx = await transfer(
+  connection,
+  payer,
+  sourceAta,
+  destinationAta,
+  delegate,
+  amount
+);
+```
+</Columns>
+</Tab>
+</Tabs>
+
 ### Revoke delegate
 
 Remove all delegate permissions.

@@ -16,7 +16,7 @@ Encrypt token transfer amounts using ElGamal encryption so they are not visible 
 Light Token supports confidential transfer extensions in their **initialized-but-disabled state** only. You can create Token-2022 mints with these extensions configured and register them with Light Token, but the confidential transfer features (encrypted amounts, confidential fees, confidential minting/burning) cannot be actively used through Light Token.
 </Info>
 
-## Key Concepts
+## Key Parameters
 
 The confidential transfer family includes three extensions:
 
@@ -25,14 +25,6 @@ The confidential transfer family includes three extensions:
 | `ConfidentialTransferMint` | `authority`, `autoApproveNewAccounts`, `auditorElGamalPubkey` | Initialized but **not enabled**. The extension can exist on the mint, but encrypted transfers cannot be performed through Light Token. |
 | `ConfidentialTransferFeeConfig` | `authority`, `withdrawWithheldAuthorityElGamalPubkey`, `harvestToMintEnabled`, `withheldAmount` | Fees **must be zero**. The extension can be initialized for compatibility, but confidential fee collection is not supported. |
 | `ConfidentialMintBurn` | `confidentialSupply`, `decryptableSupply`, `supplyElGamalPubkey` | Initialized but **not enabled**. The extension can exist on the mint, but encrypted minting and burning cannot be performed through Light Token. |
-
-## How It Works
-
-1. A mint authority creates a Token-2022 mint with one or more confidential transfer extensions
-2. The extensions are initialized with their configuration parameters (authority, auditor key, auto-approve settings)
-3. The extensions remain in an initialized-but-disabled state — no encrypted transfers, fees, or minting/burning occur
-4. The mint is registered with Light Token, which validates the extensions are in their disabled state
-5. Transfers through Light Token use standard (non-encrypted) amounts
 
 ## Use Confidential Transfer With Light Token
 
@@ -43,13 +35,7 @@ The confidential transfer family includes three extensions:
 
 <ExtensionsSetup />
 
-<Steps>
-
-<Step>
 ### Create a Token-2022 Mint With ConfidentialTransferMint
-
-<Tabs>
-<Tab title="Instruction">
 
 ```typescript
 import {
@@ -174,36 +160,9 @@ const signature = await sendAndConfirmTransaction(rpc, tx, [
 ]);
 ```
 
-</Tab>
-<Tab title="Action">
+### Create Interface PDA for Existing Mint
 
-```typescript
-import { Keypair } from "@solana/web3.js";
-import { createRpc } from "@lightprotocol/stateless.js";
-import { createMintInterface } from "@lightprotocol/compressed-token";
-import { TOKEN_2022_PROGRAM_ID } from "@solana/spl-token";
-
-const rpc = createRpc(RPC_ENDPOINT);
-
-const mintKeypair = Keypair.generate();
-const { mint, transactionSignature } = await createMintInterface(
-    rpc, payer, payer, null, 9, mintKeypair, undefined, TOKEN_2022_PROGRAM_ID
-);
-```
-
-<Info>
-`createMintInterface` creates a basic Token-2022 mint with an interface PDA. To include the ConfidentialTransferMint extension, use the instruction approach shown in the other tab.
-</Info>
-
-</Tab>
-</Tabs>
-
-</Step>
-
-<Step>
-### Register an Existing Mint
-
-If you already have a Token-2022 mint with confidential transfer extensions in their disabled state, register it with Light Token.
+If you already have a Token-2022 mint with ConfidentialTransferMint, create an interface PDA with Light Token.
 
 ```typescript
 import { LightTokenProgram } from "@lightprotocol/compressed-token";
@@ -215,31 +174,6 @@ const createSplInterfaceIx = await LightTokenProgram.createSplInterface({
     tokenProgramId: TOKEN_2022_PROGRAM_ID,
 });
 ```
-
-</Step>
-
-<Step>
-### Transfer Tokens
-
-Transfers work identically to any other Light Token mint. The SDK handles loading cold balances automatically. Because confidential transfer is initialized but not enabled, all amounts remain unencrypted.
-
-```typescript
-import { Transaction, sendAndConfirmTransaction } from "@solana/web3.js";
-import { createTransferInterfaceInstructions } from "@lightprotocol/compressed-token/unified";
-
-const instructions = await createTransferInterfaceInstructions(
-    rpc, payer.publicKey, mint, amount, owner.publicKey, recipient
-);
-
-for (const ixs of instructions) {
-    const tx = new Transaction().add(...ixs);
-    await sendAndConfirmTransaction(rpc, tx, [payer, owner]);
-}
-```
-
-</Step>
-
-</Steps>
 
 </Tab>
 <Tab title="AI Prompt">

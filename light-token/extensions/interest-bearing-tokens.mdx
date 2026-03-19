@@ -10,7 +10,7 @@ import SupportFooter from "/snippets/support-footer.mdx";
 import AgentSkillGeneric from "/snippets/setup/agent-skill-generic.mdx";
 import InterestBearingTokensAiPrompt from "/snippets/ai-prompts/extensions/interest-bearing-tokens.mdx";
 
-## Key Concepts
+## Key Parameters
 
 A configurable interest rate on the mint lets clients display a UI-adjusted balance that grows over time, while the on-chain token balance remains unchanged.
 
@@ -24,14 +24,6 @@ InterestBearingConfig is configured with these parameters:
 | `lastUpdateTimestamp` | Network timestamp of the most recent rate change, used as the reference for interest calculations. |
 | `preUpdateAverageRate` | Previous rate value preserved when the rate authority updates `currentRate`. |
 
-## How It Works
-
-1. A mint authority creates a Token-2022 mint with the InterestBearingConfig extension
-2. The rate authority and initial interest rate are set at initialization
-3. The token program records the network timestamp as the initialization reference
-4. On every balance query, clients compute accrued interest from the stored rate and elapsed time
-5. The rate authority can update the rate at any time; the previous rate is preserved in `preUpdateAverageRate`
-
 This extension is fully supported by Light Token without restrictions.
 
 ## Use InterestBearingConfig With Light Token
@@ -43,9 +35,6 @@ This extension is fully supported by Light Token without restrictions.
 
 <ExtensionsSetup />
 
-<Steps>
-
-<Step>
 ### Create a Token-2022 Mint With Interest Bearing Config
 
 <Tabs>
@@ -157,12 +146,9 @@ const { mint, transactionSignature } = await createMintInterface(
 </Tab>
 </Tabs>
 
-</Step>
+### Create Interface PDA for Existing Mint
 
-<Step>
-### Register an Existing Mint
-
-If you already have a Token-2022 mint with InterestBearingConfig, register it with Light Token.
+If you already have a Token-2022 mint with InterestBearingConfig, create an interface PDA with Light Token.
 
 ```typescript
 import { LightTokenProgram } from "@lightprotocol/compressed-token";
@@ -174,36 +160,6 @@ const createSplInterfaceIx = await LightTokenProgram.createSplInterface({
     tokenProgramId: TOKEN_2022_PROGRAM_ID,
 });
 ```
-
-</Step>
-
-<Step>
-### Transfer Tokens
-
-Transfers work identically to any other Light Token mint. The interest bearing config does not affect transfer behavior; it only changes how clients display the balance.
-
-```typescript
-import { Transaction, sendAndConfirmTransaction } from "@solana/web3.js";
-import { createTransferInterfaceInstructions } from "@lightprotocol/compressed-token/unified";
-
-const instructions = await createTransferInterfaceInstructions(
-    rpc,
-    payer.publicKey,
-    mint,
-    amount,
-    owner.publicKey,
-    recipient
-);
-
-for (const ixs of instructions) {
-    const tx = new Transaction().add(...ixs);
-    await sendAndConfirmTransaction(rpc, tx, [payer, owner]);
-}
-```
-
-</Step>
-
-</Steps>
 
 </Tab>
 <Tab title="AI Prompt">

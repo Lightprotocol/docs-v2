@@ -12,7 +12,7 @@ import MetadataAndMetadataPointerAiPrompt from "/snippets/ai-prompts/extensions/
 
 MetadataPointer tells clients where to find a mint's metadata. TokenMetadata removes the need for a separate metadata account.
 
-## Key Concepts
+## Key Parameters
 
 MetadataPointer and TokenMetadata are configured together with these parameters:
 
@@ -28,14 +28,6 @@ MetadataPointer and TokenMetadata are configured together with these parameters:
 
 When the MetadataPointer points to the mint itself, TokenMetadata stores name, symbol, URI, and additional fields directly in the mint account data. This produces a self-describing token in a single account.
 
-## How It Works
-
-1. A mint authority creates a Token-2022 mint with both the MetadataPointer and TokenMetadata extensions
-2. MetadataPointer is initialized with the mint address as the metadata location
-3. The mint is initialized with decimals and authorities
-4. TokenMetadata is initialized with name, symbol, and URI on the mint account
-5. Clients read the MetadataPointer, find the mint address, and deserialize the TokenMetadata directly from it
-
 Both extensions work without restrictions in Light Token.
 
 ## Use MetadataPointer and TokenMetadata With Light Token
@@ -47,9 +39,6 @@ Both extensions work without restrictions in Light Token.
 
 <ExtensionsSetup />
 
-<Steps>
-
-<Step>
 ### Create a Token-2022 Mint With Metadata
 
 <Tabs>
@@ -69,8 +58,6 @@ import {
     getMintLen,
     createInitializeMint2Instruction,
     ExtensionType,
-} from "@solana/spl-token";
-import {
     createInitializeMetadataPointerInstruction,
 } from "@solana/spl-token";
 import {
@@ -183,18 +170,15 @@ const { mint, transactionSignature } = await createMintInterface(
 ```
 
 <Info>
-`createMintInterface` creates a basic Token 2022 mint with an interface PDA. To include MetadataPointer and TokenMetadata extensions, use the instruction approach shown in the other tab.
+`createMintInterface` creates a basic Token 2022 mint with an interface PDA. To include the MetadataPointer and TokenMetadata extensions, use the instruction approach shown in the other tab.
 </Info>
 
 </Tab>
 </Tabs>
 
-</Step>
+### Create Interface PDA for Existing Mint
 
-<Step>
-### Register an Existing Mint
-
-If you already have a Token-2022 mint with metadata, register it with Light Token.
+If you already have a Token-2022 mint with MetadataPointer and TokenMetadata, create an interface PDA with Light Token.
 
 ```typescript
 import { LightTokenProgram } from "@lightprotocol/compressed-token";
@@ -206,36 +190,6 @@ const createSplInterfaceIx = await LightTokenProgram.createSplInterface({
     tokenProgramId: TOKEN_2022_PROGRAM_ID,
 });
 ```
-
-</Step>
-
-<Step>
-### Transfer Tokens
-
-Transfers work identically to any other Light Token mint. The metadata extensions do not affect transfer behavior.
-
-```typescript
-import { Transaction, sendAndConfirmTransaction } from "@solana/web3.js";
-import { createTransferInterfaceInstructions } from "@lightprotocol/compressed-token/unified";
-
-const instructions = await createTransferInterfaceInstructions(
-    rpc,
-    payer.publicKey,
-    mint,
-    amount,
-    owner.publicKey,
-    recipient
-);
-
-for (const ixs of instructions) {
-    const tx = new Transaction().add(...ixs);
-    await sendAndConfirmTransaction(rpc, tx, [payer, owner]);
-}
-```
-
-</Step>
-
-</Steps>
 
 </Tab>
 <Tab title="AI Prompt">

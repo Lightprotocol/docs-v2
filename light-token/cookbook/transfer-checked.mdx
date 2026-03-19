@@ -1,62 +1,33 @@
 ---
 title: Transfer Checked
 sidebarTitle: Transfer Checked
-description: Rust client guide to transfer Light Tokens with decimal validation. Includes step-by-step implementation and full code examples.
+description: Program CPI guide for Light Token transfer with decimal validation. Includes step-by-step implementation and full code examples.
 keywords: ["transfer tokens solana", "checked transfer", "decimal validation"]
 ---
 
----
-
-import TokenClientPrerequisites from "/snippets/light-token-guides/light-token-client-prerequisites.mdx";
-import RustActionCode from "/snippets/code-snippets/light-token/transfer-checked/rust-client/action.mdx";
-import RustInstructionCode from "/snippets/code-snippets/light-token/transfer-checked/rust-client/instruction.mdx";
 import AnchorProgramCode from "/snippets/code-snippets/light-token/transfer-checked/anchor-program/full-example.mdx";
 import AgentSkillGeneric from "/snippets/setup/agent-skill-generic.mdx";
-import RustTransferCheckedAiPrompt from "/snippets/ai-prompts/rust-cookbook/transfer-checked.mdx";
 import ProgramTransferCheckedAiPrompt from "/snippets/ai-prompts/program-cookbook/transfer-checked.mdx";
+import SupportFooter from "/snippets/support-footer.mdx";
 
 1. TransferChecked validates that the decimals parameter matches the mint's decimals.
-2. Use for Light→Light transfers when you need decimal verification.
-3. For transfers involving SPL or Token 2022 accounts, use [Transfer Interface](/light-token/cookbook/transfer-interface) instead.
+2. Use `TransferCheckedCpi` for Light-to-Light transfers in on-chain programs when you need decimal verification without interface routing.
+3. For transfers involving SPL or Token 2022 accounts, use [Transfer Interface](/light-token/cookbook/transfer-interface) instead. It uses `transferChecked` under the hood.
 
 <AgentSkillGeneric />
 
 <Tabs>
+
+<Tab title="TypeScript Client">
+
+`transferChecked` is called automatically under the hood by [`transferInterface`](/light-token/cookbook/transfer-interface) and `createTransferInterfaceInstructions`. You do not need to call it directly.
+
+</Tab>
+
 <Tab title="Rust Client">
 
-<Tabs>
-<Tab title="Guide">
-<Steps>
-<Step>
-### Prerequisites
+`TransferChecked` is called automatically under the hood by [`TransferInterface`](/light-token/cookbook/transfer-interface). You do not need to call it directly.
 
-<TokenClientPrerequisites />
-
-</Step>
-
-<Step>
-### Transfer with Decimal Check
-
-<Info>
-  Find the source code [here](https://github.com/Lightprotocol/light-protocol/blob/main/sdk-libs/token-sdk/src/instruction/transfer_checked.rs).
-</Info>
-
-<Tabs>
-<Tab title="Action">
-<RustActionCode />
-</Tab>
-<Tab title="Instruction">
-<RustInstructionCode />
-</Tab>
-</Tabs>
-
-</Step>
-</Steps>
-</Tab>
-<Tab title="AI Prompt">
-<RustTransferCheckedAiPrompt />
-</Tab>
-</Tabs>
 </Tab>
 
 <Tab title="Program">
@@ -136,14 +107,11 @@ TransferCheckedCpi {
 
 </Tabs>
 
-# Next Steps
+## Related Guides
 
-{" "}
+<CardGroup cols={2}>
+<Card title="Transfer interface" icon="arrow-right-left" href="/light-token/cookbook/transfer-interface" horizontal />
+<Card title="Wrap and unwrap" icon="rotate" href="/light-token/cookbook/wrap-unwrap" horizontal />
+</CardGroup>
 
-<Card
-  title="Learn how to close Light Token accounts"
-  icon="chevron-right"
-  color="#0066ff"
-  href="/light-token/cookbook/close-token-account"
-  horizontal
-/>
+<SupportFooter />

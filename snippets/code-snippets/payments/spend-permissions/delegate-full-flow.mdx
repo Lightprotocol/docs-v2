@@ -3,6 +3,7 @@ import { Keypair } from "@solana/web3.js";
 import { getAtaInterface } from "@lightprotocol/compressed-token";
 import {
     approveInterface,
+    transferDelegatedInterface,
     revokeInterface,
 } from "@lightprotocol/compressed-token/unified";
 import { rpc, payer, setup } from "../setup.js";
@@ -43,19 +44,48 @@ import { rpc, payer, setup } from "../setup.js";
     );
     console.log("   Account balance:", account.parsed.amount.toString());
 
-    // 3. Owner revokes all delegate permissions
+    // 3. Delegate transfers 200,000 tokens on behalf of owner
+    const recipient = Keypair.generate();
+    const transferTx = await transferDelegatedInterface(
+        rpc,
+        payer,
+        senderAta,
+        mint,
+        recipient.publicKey,
+        delegate,
+        payer.publicKey,
+        200_000
+    );
+    console.log("\n3. Delegate transferred 200,000 tokens");
+    console.log("   Tx:", transferTx);
+
+    // 4. Verify balances after delegated transfer
+    const afterTransfer = await getAtaInterface(
+        rpc,
+        senderAta,
+        payer.publicKey,
+        mint
+    );
+    console.log("\n4. Account status after delegated transfer:");
+    console.log(
+        "   Remaining allowance:",
+        afterTransfer.parsed.delegatedAmount.toString()
+    );
+    console.log("   Account balance:", afterTransfer.parsed.amount.toString());
+
+    // 5. Owner revokes all delegate permissions
     const revokeTx = await revokeInterface(rpc, payer, senderAta, mint, payer);
-    console.log("\n3. Revoked all delegate permissions");
+    console.log("\n5. Revoked all delegate permissions");
     console.log("   Tx:", revokeTx);
 
-    // 4. Verify delegate is removed
+    // 6. Verify delegate is removed
     const afterRevoke = await getAtaInterface(
         rpc,
         senderAta,
         payer.publicKey,
         mint
     );
-    console.log("\n4. Account status after revoke:");
+    console.log("\n6. Account status after revoke:");
     console.log(
         "   Delegate:",
         afterRevoke.parsed.delegate?.toBase58() ?? "none"
