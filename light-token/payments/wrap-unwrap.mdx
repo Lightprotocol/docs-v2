@@ -159,22 +159,6 @@ await unwrap(rpc, payer, splAta, owner, mint, amount);
 </Tab>
 </Tabs>
 
-## Register an existing SPL mint
-
-For existing SPL mints like USDC, register the SPL interface PDA once before wrapping:
-
-<RegisterSplMint />
-
-<Note>
-`createMintInterface()` does this automatically when creating new mints.
-You only need to register manually for mints that already exist on-chain.
-</Note>
-
-<Info>
-For full TypeScript, Rust, and program-level examples, see the
-[wrap and unwrap cookbook page](/light-token/cookbook/wrap-unwrap).
-</Info>
-
 </Tab>
 <Tab title="AI Prompt">
 <PaymentsAiPrompt />
