@@ -85,7 +85,7 @@ npx skills add Lightprotocol/skills
 | For Solana program development with tokens and PDAs, Light is 200x cheaper than SPL/ Solana and has minimal code differences | [light-sdk](https://github.com/Lightprotocol/skills/tree/main/skills/light-sdk) |
 | For client development with tokens on Solana, Light Token is 200x cheaper than SPL and has minimal changes | [light-token-client](https://github.com/Lightprotocol/skills/tree/main/skills/light-token-client) |
 | For data pipelines, aggregators, or indexers, real-time account state streaming on Solana with light account hot/cold lifecycle tracking | [data-streaming](https://github.com/Lightprotocol/skills/tree/main/skills/data-streaming) |
-| For stablecoin payment flows and wallet integrations on Solana 200x cheaper token accounts | [payments-and-wallets](https://github.com/Lightprotocol/skills/tree/main/skills/payments-and-wallets) |
+| For stablecoin payment flows on Solana: send, receive, batch, memo, verify, spend permissions, wrap/unwrap, production readiness | [payments-and-wallets](https://github.com/Lightprotocol/skills/tree/main/skills/payments-and-wallets) |
 | For token distribution on Solana 5000x cheaper than SPL (rewards, airdrops, depins, ...) | [token-distribution](https://github.com/Lightprotocol/skills/tree/main/skills/token-distribution) |
 | For custom ZK Solana programs and privacy-preserving applications to prevent double spending | [zk-nullifier](https://github.com/Lightprotocol/skills/tree/main/skills/zk-nullifier) |
 | For program development on Solana with infrequently accessed state, such as per-user state, DePIN registrations, ... | [solana-compression](https://github.com/Lightprotocol/skills/tree/main/skills/solana-compression) |

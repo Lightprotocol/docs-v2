@@ -261,7 +261,7 @@ const EXAMPLES_PAYMENTS = [
   '- [payments-and-wallets](https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/payments-and-wallets): Wallet integrations and payment flows.',
   '- [sign-with-privy](https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/sign-with-privy): Light-token operations signed with Privy wallets.',
   '- [sign-with-wallet-adapter](https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/sign-with-wallet-adapter): Light-token operations signed with Wallet Adapter.',
-  '- [sponsor-rent-top-ups](https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/sponsor-rent-top-ups): Sponsor rent top-ups by setting your application as the fee payer.',
+  '- [gasless-transactions](https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/gasless-transactions): Abstract SOL fees so users never hold SOL. Sponsor rent top-ups and transaction fees.',
   '- [spl-to-light](https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/spl-to-light): Transfer from SPL to Light via TransferInterface.',
 ];
 
@@ -270,8 +270,8 @@ const EXAMPLES_PAYMENTS = [
 const PRIMITIVES_SECTION = `
 | Primitive        | Use case                                                                                                                                                                                               | Constraints                                                                    |
 | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------ |
-| Light Token      | Most token use cases (Payment Rails, Consumer Apps, DeFi). Rent-free mint and token accounts. More compute-unit efficient on the hot path.                                         | Currently in Beta and on Solana Devnet with mainnet in Q1 2026                 |
-| Light-PDA        | DeFi program state such as AMM pools and vaults. Can be implemented with minimal code changes.                                                                             | Currently in Beta and on Solana Devnet with mainnet in Q1 2026                 |
+| Light Token      | Most token use cases (Payment Rails, Consumer Apps, DeFi). Rent-free mint and token accounts. More compute-unit efficient on the hot path.                                         |                 |
+| Light-PDA        | DeFi program state such as AMM pools and vaults. Can be implemented with minimal code changes.                                                                             |                  |
 | Compressed Token | Only for Airdrops and token distribution. Prefer Light Token for other purposes. Used by Light Token under the hood for rent-free storage of inactive Light Tokens. Supported by Phantom and Backpack. | Do not use for general-purpose token features. Use Light Token instead.        |
 | Compressed PDA   | User state and app state, nullifiers (payments and ZK applications), DePIN nodes, and stake accounts. Similar to program-derived addresses without a rent-exempt balance.                              | Not for shared state, pool accounts, or config accounts. Use Light-PDA instead |
 

@@ -76,11 +76,21 @@ Comparing creation cost and CU usage:
 
 ## For Payments and Wallets
 - [Payment Flows on Solana with Light Token](https://www.zkcompression.com/light-token/payments/overview.md): Learn how the Light Token API's reduce account creation cost for stablecoin payment infrastructure by 99% with similar developer experience to SPL / Token 2022.
-- [Integration Guide for Stablecoin Payments](https://www.zkcompression.com/light-token/payments/integration-guide.md): Guide to integrate light-token APIs for stablecoin payments with comparison to SPL.
+- **Send Payments:** [Basic Payment](https://www.zkcompression.com/light-token/payments/basic-payment.md): Send a single token transfer with Light Token APIs for stablecoin payments with comparison to SPL.
+- **Send Payments:** [Batch Payments](https://www.zkcompression.com/light-token/payments/batch-payments.md): Send payments to multiple recipients in a single transaction or sequentially.
+- **Send Payments:** [Payment with Memo](https://www.zkcompression.com/light-token/payments/payment-with-memo.md): Attach invoice IDs, payment references, or notes to Light Token transfers using Solana's memo program. The memo is recorded in the transaction logs for reconciliation.
+- [Receive Payments](https://www.zkcompression.com/light-token/payments/receive-payments.md): Prepare to receive token payments by loading cold accounts and sharing your associated token account address.
+- **Verify Payments:** [Verify Payments](https://www.zkcompression.com/light-token/payments/verify-payments.md): Query token balances and transaction history to verify incoming payments.
+- **Verify Payments:** [Verify Address](https://www.zkcompression.com/light-token/payments/verify-recipient-address.md): Verify recipient addresses before sending payments. Address validation prevents sending tokens to invalid or unexpected account types.
+- [Wrap and Unwrap](https://www.zkcompression.com/light-token/payments/wrap-unwrap.md): Move tokens between SPL / Token 2022 and Light Token accounts for CEX on-ramps, off-ramps, and interoperability.
+- **Advanced:** [Spend Permissions via Delegation](https://www.zkcompression.com/light-token/payments/spend-permissions.md): Delegate token spending to a third party with an amount cap. The delegate can transfer tokens on behalf of the owner up to the approved amount, without the owner signing each transaction.
+- **Advanced:** [Create Nullifier PDAs](https://www.zkcompression.com/pda/compressed-pdas/nullifier-pda.md): Create rent-free nullifier PDAs to prevent duplicate actions.
+- [Production Readiness](https://www.zkcompression.com/light-token/payments/production-readiness.md): Non-exhaustive checklist for deploying Light Token payment flows to production, including RPC infrastructure, error handling, and security.
 - [Integration Guide for Wallet Applications](https://www.zkcompression.com/light-token/wallets/overview.md): Guide for Wallet Applications to add Light-token support.
 - [Sign with Privy](https://www.zkcompression.com/light-token/wallets/privy.md): Integrate light-token with Privy embedded wallets for rent-free token accounts and transfers.
 - [Sign with Wallet Adapter](https://www.zkcompression.com/light-token/wallets/wallet-adapter.md): Integrate light-token with Solana Wallet Adapter for rent-free token accounts and transfers.
-- [Sponsor Rent Top-Ups for Users](https://www.zkcompression.com/light-token/wallets/sponsor-top-ups.md): The Light SDK sponsors rent-exemption for Solana accounts and keeps accounts active through periodic top-ups paid by the fee payer. Sponsor top-ups by setting your application as the fee payer to abstract away holding SOL from your users or provide a rent-free experience similar to transaction fee sponsorship.
+- [Gasless Transactions](https://www.zkcompression.com/light-token/wallets/gasless-transactions.md): Abstract SOL fees so users never hold SOL. The Light SDK sponsors rent-exemption for Solana accounts and keeps accounts active through periodic top-ups paid by the fee payer. Sponsor top-ups and transaction fees by setting your application as the fee payer.
+- [Smart Wallets](https://www.zkcompression.com/light-token/wallets/smart-wallets.md): Send Light Tokens from PDA-based smart wallets. Covers off-curve associated token account creation, instruction-level transfers, and sync and async execution with Squads.
 
 ## For DeFi
 - [Router Integration](https://www.zkcompression.com/light-token/defi/routers.md): Add support for rent-free AMMs on Solana.
@@ -113,7 +123,6 @@ Comparing creation cost and CU usage:
 - [Light PDA](https://www.zkcompression.com/pda/light-pda/overview.md): Create Solana PDA accounts with sponsored rent-exemption and minimal code changes. Use like any Solana PDA, e.g. for DeFi pools, vaults, pool accounts, or other shared state.
 - **Compressed PDA:** [Overview & Program Template](https://www.zkcompression.com/pda/compressed-pdas/overview.md): Compressed PDAs provide full composability and functionality of accounts at PDAs, without rent-exemption cost per account. Suited for accounts where each user or entity gets their own PDA and state is infrequently accessed.
 - **Compressed PDA:** [Client Guide](https://www.zkcompression.com/pda/compressed-pdas/guides/client-guide.md): Rust and Typescript client guides with step-by-step implementation and full code examples.
-- **Compressed PDA:** [Create Nullifier PDAs](https://www.zkcompression.com/pda/compressed-pdas/how-to-create-nullifier-pdas.md): Create rent-free nullifier PDAs to prevent duplicate actions.
 - **Compressed PDA > Program Guides:** [Overview](https://www.zkcompression.com/pda/compressed-pdas/guides.md): Overview to guides for Solana programs to create, update, close, reinitialize, and burn permanently compressed accounts.
 - **Compressed PDA:** [Program Examples](https://www.zkcompression.com/pda/compressed-pdas/program-examples.md): Program example repository for compressed accounts with tests.
 
@@ -125,7 +134,7 @@ Comparing creation cost and CU usage:
 
 ## Learn
 - [Overview of core concepts](https://www.zkcompression.com/learn/overview.md): Learn about Light Token and ZK Compression Core.
-- [Core concepts of the Light Token program (Beta)](https://www.zkcompression.com/learn/light-token-standard.md): The Light Token Program is a high performance token program that reduces the cost of account creations by 200x, while being more CU efficient than SPL on hot paths.
+- [Core concepts of the Light Token program](https://www.zkcompression.com/learn/light-token-standard.md): The Light Token Program is a high performance token program that reduces the cost of account creations by 200x, while being more CU efficient than SPL on hot paths.
 - **Core Concepts (ZK Compression):** [High-level System Overview](https://www.zkcompression.com/learn/core-concepts.md): Overview to ZK Compression's Core Concepts. Get a high-level system overview and learn about the compressed account model, lifecycle of a transaction, and considerations.
 - **Core Concepts (ZK Compression):** [Compressed Account Model](https://www.zkcompression.com/learn/core-concepts/compressed-account-model.md): Overview to compressed accounts and comparison to Solana accounts.
 - **Core Concepts (ZK Compression):** [Merkle trees and Validity Proofs](https://www.zkcompression.com/learn/core-concepts/merkle-trees-validity-proofs.md): Learn the core concepts of state trees, address trees, and validity proofs for compressed accounts.
@@ -160,7 +169,7 @@ Comparing creation cost and CU usage:
 - [payments-and-wallets](https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/payments-and-wallets): Wallet integrations and payment flows.
 - [sign-with-privy](https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/sign-with-privy): Light-token operations signed with Privy wallets.
 - [sign-with-wallet-adapter](https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/sign-with-wallet-adapter): Light-token operations signed with Wallet Adapter.
-- [sponsor-rent-top-ups](https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/sponsor-rent-top-ups): Sponsor rent top-ups by setting your application as the fee payer.
+- [gasless-transactions](https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/gasless-transactions): Abstract SOL fees so users never hold SOL. Sponsor rent top-ups and transaction fees.
 - [spl-to-light](https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/spl-to-light): Transfer from SPL to Light via TransferInterface.
 
 ## OpenAPI Specs
