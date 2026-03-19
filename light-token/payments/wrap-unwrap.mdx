@@ -13,7 +13,7 @@ import PaymentsAiPrompt from "/snippets/ai-prompts/toolkits/payments.mdx";
 
 Wrap moves tokens from an SPL or Token 2022 account into a Light Token associated token account.
 Unwrap moves tokens back. Use wrap/unwrap to interoperate with applications that only support
-SPL or Token 2022, such as centralized exchanges.
+SPL or Token 2022, such as centralized exchanges or DeFi.
 
 <table>
   <thead>
@@ -41,14 +41,6 @@ SPL or Token 2022, such as centralized exchanges.
 
 <Tabs>
 <Tab title="Guide">
-
-## When to wrap and unwrap
-
-| Flow | Use case |
-|:-----|:---------|
-| **On-ramp** (SPL → Light Token) | User receives USDC from a CEX withdrawal, then wraps to Light Token for cheaper transfers. |
-| **Off-ramp** (Light Token → SPL) | User unwraps Light Token USDC to SPL, then deposits to a CEX. |
-| **DeFi interop** | Unwrap to use tokens with a protocol that only supports SPL. Wrap back after. |
 
 ## Setup
 
@@ -124,6 +116,7 @@ Find a full code example [here](https://github.com/Lightprotocol/examples-light-
 </Note>
 
 Unwrap moves the token balance from a Light Token associated token account to an SPL associated token account.
+Use this to compose with applications that do not yet support Light Token.
 
 <Tabs>
 <Tab title="Instruction">

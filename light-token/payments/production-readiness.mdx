@@ -80,13 +80,6 @@ Set your application as the fee payer so users never interact with SOL:
 1. **Rent top-ups and transaction fees**: Set `payer` parameter on Light Token instructions. See [gasless transactions](/light-token/wallets/gasless-transactions).
 2. **Rent sponsor funding**: Ensure the rent sponsor PDA is funded. See the [cost breakdown](/light-token/wallets/gasless-transactions) for required amounts.
 
-## Security
-
-- **Key management**: Use hardware security modules (HSMs) or managed key services for production signing keys.
-- **Signing infrastructure**: Separate hot wallets (for automated operations) from cold wallets (for treasury).
-- **Address verification**: Validate recipient addresses before sending. See [verify address](/light-token/payments/verify-recipient-address).
-- **Monitoring**: Track transaction success rates, cold account loading frequency, and fee payer SOL balance.
-
 ## Pre-launch checklist
 
 - [ ] Photon-compatible RPC endpoint configured and tested
@@ -105,19 +98,5 @@ Set your application as the fee payer so users never interact with SOL:
 <PaymentsAiPrompt />
 </Tab>
 </Tabs>
-
-## Related guides
-
-<CardGroup cols={3}>
-<Card title="Gasless transactions" icon="hand-holding-dollar" href="/light-token/wallets/gasless-transactions">
-  Abstract fees for users.
-</Card>
-<Card title="Basic payment" icon="arrow-right" href="/light-token/payments/basic-payment">
-  Send a single transfer.
-</Card>
-<Card title="Receive payments" icon="arrow-down" href="/light-token/payments/receive-payments">
-  Load cold accounts and prepare to receive.
-</Card>
-</CardGroup>
 
 <SupportFooter />

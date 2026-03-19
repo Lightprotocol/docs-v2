@@ -1,7 +1,7 @@
 ---
-title: "Spend Permissions"
+title: "Spend Permissions via Delegation"
 sidebarTitle: "Spend Permissions"
-description: "Delegate token spending to third parties with amount caps for subscriptions, recurring payments, and managed spending."
+description: "Delegate token spending to a third party with an amount cap. The delegate can transfer tokens on behalf of the owner up to the approved amount, without the owner signing each transaction."
 keywords: ["delegate tokens solana", "token delegation light token", "spend permissions solana", "recurring payments solana"]
 ---
 
@@ -10,9 +10,15 @@ import SupportFooter from "/snippets/support-footer.mdx";
 import AgentSkillPayments from "/snippets/setup/agent-skill-payments.mdx";
 import PaymentsAiPrompt from "/snippets/ai-prompts/toolkits/payments.mdx";
 
-Delegate token spending to a third party with an amount cap.
-The delegate can transfer tokens on behalf of the owner up to the approved amount,
-without the owner signing each transaction.
+---
+
+Delegation with Light Token works similar to SPL. 
+When you approve a delegate, you're authorizing a specific account to transfer tokens on your behalf:
+
+- **Owner retains custody**: You still own the tokens and can transfer or revoke at any time. Delegation is non-custodial. 
+- **Capped spending**: The delegate can spend tokens up to the limit, but cannot access or drain the account beyond the approved amount.
+- **Single delegate per account**: Each token account can only have one active delegate. The owner can revoke at any time.
+- **New approval replaces old**: Approving a new delegate automatically revokes the previous one
 
 <table>
   <thead>
@@ -104,27 +110,6 @@ const tx = await revokeInterface(rpc, payer, senderAta, mint, owner);
 
 console.log("Revoked:", tx);
 ```
-
-## Security considerations
-
-- **Amount caps**: Always set the minimum amount needed. Delegation does not grant unlimited access.
-- **Single delegate**: Each compressed token account supports one active delegate at a time.
-- **Monitor usage**: Query `getAtaInterface` regularly to track delegate activity.
-- **Revoke promptly**: Remove delegation when the business relationship ends or the spending period expires.
-
-## Delegation vs. custody
-
-| | Delegation | Custody |
-|:--|:-----------|:--------|
-| **Key control** | Owner retains private key | Third party holds private key |
-| **Spending limit** | Capped at approved amount | Unlimited |
-| **Revocable** | Owner can revoke at any time | Requires key transfer back |
-| **Use case** | Subscriptions, managed spending | Custodial wallets, exchanges |
-
-<Note>
-For full TypeScript, Rust, and program-level examples, see the
-[approve and revoke cookbook page](/light-token/cookbook/approve-revoke).
-</Note>
 
 </Tab>
 <Tab title="AI Prompt">
