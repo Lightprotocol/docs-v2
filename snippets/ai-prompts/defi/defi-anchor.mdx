@@ -87,7 +87,7 @@ Violations are bugs. All generated code must satisfy these constraints.
 - Constructor takes 9 args: \`(amount, decimals, source, destination, authority, fee_payer, light_token_cpi_authority, mint, system_program)\`
 - Use \`Option<AccountInfo>\` for SPL interface PDA accounts
 - Conditionally call \`.with_spl_interface(...)\` when \`spl_interface_pda.is_some()\`
-- This enables cross-standard transfers (SPL/T22 source to Light destination)
+- This enables cross-standard transfers (SPL/Token 2022 source to Light destination)
 
 **Authority pattern:**
 - Single authority PDA owns all vaults: \`seeds = [AUTHORITY_SEED], bump\`
@@ -196,7 +196,7 @@ Violations are bugs. All generated code must satisfy these constraints.
 - Constructor takes 9 args: `(amount, decimals, source, destination, authority, fee_payer, light_token_cpi_authority, mint, system_program)`
 - Use `Option<AccountInfo>` for SPL interface PDA accounts
 - Conditionally call `.with_spl_interface(...)` when `spl_interface_pda.is_some()`
-- This enables cross-standard transfers (SPL/T22 source to Light destination)
+- This enables cross-standard transfers (SPL/Token 2022 source to Light destination)
 
 **Authority pattern:**
 - Single authority PDA owns all vaults: `seeds = [AUTHORITY_SEED], bump`

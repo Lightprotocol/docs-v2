@@ -79,7 +79,7 @@ Light-mints **uniquely represent a token on Solana and store its global metadata
     pub struct CompressedMint {
         pub base: BaseMint,
         pub metadata: CompressedMintMetadata,
-        /// Reserved bytes for T22 layout compatibility (padding to reach byte 165)
+        /// Reserved bytes for Token 2022 layout compatibility (padding to reach byte 165)
         pub reserved: [u8; 49],
         /// Account type discriminator at byte 165 (1 = Mint, 2 = Account)
         pub account_type: u8,

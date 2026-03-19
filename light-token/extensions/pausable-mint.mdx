@@ -1,0 +1,218 @@
+---
+title: "Pausable mint"
+sidebarTitle: "Pausable mint"
+description: "Configure the Pausable extension to pause and resume all minting, burning, and transfers for a Token-2022 mint using Light Token."
+keywords: ["pausable light token", "pausable solana", "token 2022 pausable"]
+---
+
+import ExtensionsSetup from "/snippets/setup/extensions-setup.mdx";
+import SupportFooter from "/snippets/support-footer.mdx";
+import AgentSkillGeneric from "/snippets/setup/agent-skill-generic.mdx";
+import PausableMintAiPrompt from "/snippets/ai-prompts/extensions/pausable-mint.mdx";
+
+When paused, all minting, burning, and transfers are blocked until the authority resumes the mint.
+
+<Info>
+Pausable mints require `compression_only` accounts. Use the Light Token interface APIs (`transferInterface`, `createTransferInterfaceInstructions`) for transfers — compressed transfer instructions are not supported.
+</Info>
+
+## Key Concepts
+
+Pausable is configured with two parameters:
+
+| Parameter | Description |
+|-----------|-------------|
+| `authority` | The public key authorized to pause and resume the mint. |
+| `paused` | Boolean flag indicating the current pause state. Initialized as `false`. |
+
+When paused, the Token-2022 program rejects all transfers, mints, and burns for the token. The pause authority can resume operations at any time.
+
+## How It Works
+
+1. A mint authority creates a Token-2022 mint with the Pausable extension
+2. The pause authority is set at initialization, with the mint starting in an unpaused state
+3. The pause authority can call `pause` to halt all minting, burning, and transfers
+4. The pause authority can call `resume` to re-enable operations
+
+## Use Pausable With Light Token
+
+<AgentSkillGeneric />
+
+<Tabs>
+<Tab title="Guide">
+
+<ExtensionsSetup />
+
+<Steps>
+
+<Step>
+### Create a Token-2022 Mint With Pausable
+
+<Tabs>
+<Tab title="Instruction">
+
+```typescript
+import {
+    Keypair,
+    SystemProgram,
+    Transaction,
+    sendAndConfirmTransaction,
+} from "@solana/web3.js";
+import { createRpc } from "@lightprotocol/stateless.js";
+import { LightTokenProgram } from "@lightprotocol/compressed-token";
+import {
+    TOKEN_2022_PROGRAM_ID,
+    ExtensionType,
+    getMintLen,
+    createInitializeMint2Instruction,
+    createInitializePausableConfigInstruction,
+} from "@solana/spl-token";
+
+const rpc = createRpc(RPC_ENDPOINT);
+
+const mintKeypair = Keypair.generate();
+const decimals = 9;
+
+// Calculate space for mint + Pausable extension
+const mintLen = getMintLen([ExtensionType.PausableConfig]);
+const rentExemptBalance =
+    await rpc.getMinimumBalanceForRentExemption(mintLen);
+
+// Create account
+const createAccountIx = SystemProgram.createAccount({
+    fromPubkey: payer.publicKey,
+    lamports: rentExemptBalance,
+    newAccountPubkey: mintKeypair.publicKey,
+    programId: TOKEN_2022_PROGRAM_ID,
+    space: mintLen,
+});
+
+// Initialize Pausable extension
+const initPausableIx = createInitializePausableConfigInstruction(
+    mintKeypair.publicKey,
+    payer.publicKey, // pause authority
+    TOKEN_2022_PROGRAM_ID,
+);
+
+// Initialize mint
+const initMintIx = createInitializeMint2Instruction(
+    mintKeypair.publicKey,
+    decimals,
+    payer.publicKey, // mint authority
+    null,            // freeze authority
+    TOKEN_2022_PROGRAM_ID,
+);
+
+// Register interface PDA with Light Token
+const createSplInterfaceIx = await LightTokenProgram.createSplInterface({
+    feePayer: payer.publicKey,
+    mint: mintKeypair.publicKey,
+    tokenProgramId: TOKEN_2022_PROGRAM_ID,
+});
+
+const tx = new Transaction().add(
+    createAccountIx,
+    initPausableIx,
+    initMintIx,
+    createSplInterfaceIx
+);
+
+const signature = await sendAndConfirmTransaction(rpc, tx, [
+    payer,
+    mintKeypair,
+]);
+```
+
+</Tab>
+<Tab title="Action">
+
+```typescript
+import { Keypair } from "@solana/web3.js";
+import { createRpc } from "@lightprotocol/stateless.js";
+import { createMintInterface } from "@lightprotocol/compressed-token";
+import { TOKEN_2022_PROGRAM_ID } from "@solana/spl-token";
+
+const rpc = createRpc(RPC_ENDPOINT);
+
+const mintKeypair = Keypair.generate();
+const { mint, transactionSignature } = await createMintInterface(
+    rpc,
+    payer,
+    payer,
+    null,
+    9,
+    mintKeypair,
+    undefined,
+    TOKEN_2022_PROGRAM_ID
+);
+```
+
+<Info>
+`createMintInterface` creates a basic Token 2022 mint with an interface PDA. To include the Pausable extension, use the instruction approach shown in the other tab.
+</Info>
+
+</Tab>
+</Tabs>
+
+</Step>
+
+<Step>
+### Register an Existing Mint
+
+If you already have a Token-2022 mint with Pausable, register it with Light Token.
+
+```typescript
+import { LightTokenProgram } from "@lightprotocol/compressed-token";
+import { TOKEN_2022_PROGRAM_ID } from "@solana/spl-token";
+
+const createSplInterfaceIx = await LightTokenProgram.createSplInterface({
+    feePayer: payer.publicKey,
+    mint: mintKeypair.publicKey,
+    tokenProgramId: TOKEN_2022_PROGRAM_ID,
+});
+```
+
+</Step>
+
+<Step>
+### Transfer Tokens
+
+Transfers work identically to any other Light Token mint, as long as the mint is not currently paused.
+
+```typescript
+import { Transaction, sendAndConfirmTransaction } from "@solana/web3.js";
+import { createTransferInterfaceInstructions } from "@lightprotocol/compressed-token/unified";
+
+const instructions = await createTransferInterfaceInstructions(
+    rpc,
+    payer.publicKey,
+    mint,
+    amount,
+    owner.publicKey,
+    recipient
+);
+
+for (const ixs of instructions) {
+    const tx = new Transaction().add(...ixs);
+    await sendAndConfirmTransaction(rpc, tx, [payer, owner]);
+}
+```
+
+</Step>
+
+</Steps>
+
+</Tab>
+<Tab title="AI Prompt">
+<PausableMintAiPrompt />
+</Tab>
+</Tabs>
+
+## Related Guides
+
+<CardGroup cols={2}>
+<Card title="Transfer interface" icon="arrow-right" href="/light-token/cookbook/transfer-interface" horizontal />
+<Card title="Wrap and unwrap" icon="rotate" href="/light-token/cookbook/wrap-unwrap" horizontal />
+</CardGroup>
+
+<SupportFooter />

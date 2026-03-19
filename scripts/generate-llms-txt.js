@@ -139,8 +139,8 @@ function buildAiTools(anchor) {
       'For data pipelines, aggregators, or indexers, real-time account state streaming on Solana with light account hot/cold lifecycle tracking',
     ],
     [
-      'payments-and-wallets',
-      'For stablecoin payment flows and wallet integrations on Solana.',
+      'payments',
+      'Skill for payment flows using Light Token APIs for sponsored rent-exemption.',
     ],
     [
       'token-distribution',
@@ -258,7 +258,7 @@ const EXAMPLES_DEFI = [
 ];
 
 const EXAMPLES_PAYMENTS = [
-  '- [payments-and-wallets](https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/payments-and-wallets): Wallet integrations and payment flows.',
+  '- [payments](https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/payments): Wallet integrations and payment flows.',
   '- [sign-with-privy](https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/sign-with-privy): Light-token operations signed with Privy wallets.',
   '- [sign-with-wallet-adapter](https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/sign-with-wallet-adapter): Light-token operations signed with Wallet Adapter.',
   '- [gasless-transactions](https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/gasless-transactions): Abstract SOL fees so users never hold SOL. Sponsor rent top-ups and transaction fees.',

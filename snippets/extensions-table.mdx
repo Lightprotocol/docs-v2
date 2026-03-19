@@ -1,0 +1,18 @@
+| Extension | Description |
+|-----------|-------------|
+| [MetadataPointer](/light-token/extensions/metadata-and-metadata-pointer) | Points a mint to the account that stores its metadata. |
+| [TokenMetadata](/light-token/extensions/metadata-and-metadata-pointer) | Stores token name, symbol, and URI directly on the mint. |
+| [TransferFeeConfig](/light-token/extensions/transfer-fees) | Withholds a percentage of each transfer as a fee. |
+| [TransferHook](/light-token/extensions/transfer-hook) | Invokes a custom program on every transfer via CPI. |
+| [InterestBearingConfig](/light-token/extensions/interest-bearing-tokens) | Displays a UI-adjusted balance that accrues interest over time. |
+| [DefaultAccountState](/light-token/extensions/default-account-state) | Sets the initial state (e.g., frozen) for newly created token accounts. |
+| [PermanentDelegate](/light-token/extensions/permanent-delegate) | Grants an authority unrestricted transfer and burn rights over all accounts for the mint. |
+| [MintCloseAuthority](/light-token/extensions/close-mint) | Allows a designated authority to close a mint account. |
+| [GroupPointer](/light-token/extensions/token-groups-and-members) | Points a mint to the account that stores group configuration. |
+| [GroupMemberPointer](/light-token/extensions/token-groups-and-members) | Points a mint to the account that stores group member configuration. |
+| [TokenGroup](/light-token/extensions/token-groups-and-members) | Stores group configuration directly on the mint (e.g., NFT collections). |
+| [TokenGroupMember](/light-token/extensions/token-groups-and-members) | Stores group member configuration directly on the mint. |
+| [Pausable](/light-token/extensions/pausable-mint) | Allows an authority to pause all minting, burning, and transfers. |
+| [ConfidentialTransferMint](/light-token/extensions/confidential-transfer) | Configures auditor keys for confidential (encrypted) transfers. |
+| [ConfidentialTransferFeeConfig](/light-token/extensions/confidential-transfer) | Encrypts withheld transfer fees under an auditor's public key. |
+| [ConfidentialMintBurn](/light-token/extensions/confidential-transfer) | Allows minting and burning of tokens with encrypted amounts. |

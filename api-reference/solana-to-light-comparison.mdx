@@ -108,7 +108,7 @@ See [JSON RPC Methods](/api-reference/json-rpc-methods/overview).
 Fetch the parsed state of a light token account, including hot and cold balances.
 
 > [Guide](/light-token/payments/integration-guide) |
-> [Example](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments-and-wallets/get-balance.ts)
+> [Example](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments/verify/get-balance.ts)
 
 <Columns cols={2}>
 <LightGetBalanceTs />
@@ -126,7 +126,7 @@ console.log(account.amount);
 Fetch merged and deduplicated transaction history across on-chain and compressed transactions.
 
 > [Guide](/light-token/payments/integration-guide) |
-> [Example](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments-and-wallets/get-history.ts)
+> [Example](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments/verify/get-history.ts)
 
 <Columns cols={2}>
 <LightGetHistoryTs />
@@ -650,8 +650,8 @@ For payment flows, `createTransferInterfaceInstructions` returns
 transferring in one call:
 
 > [Guide](/light-token/payments/integration-guide) |
-> [Example (instruction)](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments-and-wallets/send-instruction.ts) |
-> [Example (action)](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments-and-wallets/send-action.ts)
+> [Example (instruction)](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments/send/send-instruction.ts) |
+> [Example (action)](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments/send/send-action.ts)
 
 ```typescript
 import { Transaction } from "@solana/web3.js";

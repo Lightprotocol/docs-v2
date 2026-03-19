@@ -1,0 +1,280 @@
+---
+title: "Token groups and members"
+sidebarTitle: "Token groups and members"
+description: "Configure the GroupPointer, TokenGroup, GroupMemberPointer, and TokenGroupMember extensions to organize tokens into collections using Light Token."
+keywords: ["token groups light token", "token groups solana", "token 2022 token groups", "nft collections solana"]
+---
+
+import ExtensionsSetup from "/snippets/setup/extensions-setup.mdx";
+import SupportFooter from "/snippets/support-footer.mdx";
+import AgentSkillGeneric from "/snippets/setup/agent-skill-generic.mdx";
+import TokenGroupsAndMembersAiPrompt from "/snippets/ai-prompts/extensions/token-groups-and-members.mdx";
+
+Organize tokens into hierarchical groups such as NFT collections by linking a group mint to one or more member mints through on-chain pointer and data extensions.
+
+## Key Concepts
+
+Token groups use four related extensions that work in pairs:
+
+| Extension | Parameters | Description |
+|-----------|------------|-------------|
+| `GroupPointer` | `authority`, `groupAddress` | Designates a mint as a group mint by pointing to an account that stores group configuration. Typically points to the mint itself. |
+| `TokenGroup` | `updateAuthority`, `mint`, `size`, `maxSize` | Stores the group metadata (update authority, current member count, maximum size) directly on the mint account. |
+| `GroupMemberPointer` | `authority`, `memberAddress` | Designates a mint as a member mint by pointing to an account that stores membership data. Typically points to the mint itself. |
+| `TokenGroupMember` | `mint`, `group`, `memberNumber` | Stores the membership data (parent group address, sequential member number) directly on the mint account. |
+
+## How It Works
+
+1. A mint authority creates a **group mint** with the GroupPointer and TokenGroup extensions, setting a max member count and update authority
+2. The GroupPointer references the account that stores group data — typically the mint itself
+3. For each member, a separate **member mint** is created with the GroupMemberPointer and TokenGroupMember extensions
+4. The TokenGroupMember extension links the member mint to the parent group and assigns a sequential member number
+5. Both group and member mints are registered with Light Token for rent-free compressed accounts
+
+## Use Token Groups With Light Token
+
+<AgentSkillGeneric />
+
+<Tabs>
+<Tab title="Guide">
+
+<ExtensionsSetup />
+
+<Steps>
+
+<Step>
+### Create Group Mint
+
+Create a Token-2022 mint with the GroupPointer and TokenGroup extensions.
+
+<Tabs>
+<Tab title="Instruction">
+
+```typescript
+import {
+    Keypair,
+    SystemProgram,
+    Transaction,
+    sendAndConfirmTransaction,
+} from "@solana/web3.js";
+import { createRpc } from "@lightprotocol/stateless.js";
+import { LightTokenProgram } from "@lightprotocol/compressed-token";
+import {
+    TOKEN_2022_PROGRAM_ID,
+    ExtensionType,
+    getMintLen,
+    createInitializeMint2Instruction,
+    createInitializeGroupPointerInstruction,
+    createInitializeGroupInstruction,
+} from "@solana/spl-token";
+
+const rpc = createRpc(RPC_ENDPOINT);
+
+const groupMintKeypair = Keypair.generate();
+const decimals = 0;
+
+// Calculate space including GroupPointer and TokenGroup extensions
+const mintLen = getMintLen([ExtensionType.GroupPointer, ExtensionType.TokenGroup]);
+const rentExemptBalance = await rpc.getMinimumBalanceForRentExemption(mintLen);
+
+// Create the mint account
+const createMintAccountIx = SystemProgram.createAccount({
+    fromPubkey: payer.publicKey,
+    lamports: rentExemptBalance,
+    newAccountPubkey: groupMintKeypair.publicKey,
+    programId: TOKEN_2022_PROGRAM_ID,
+    space: mintLen,
+});
+
+// Initialize GroupPointer (points to the mint itself)
+const initGroupPointerIx = createInitializeGroupPointerInstruction(
+    groupMintKeypair.publicKey,
+    payer.publicKey, // authority
+    groupMintKeypair.publicKey, // group address (self-referencing)
+    TOKEN_2022_PROGRAM_ID,
+);
+
+// Initialize the mint
+const initMintIx = createInitializeMint2Instruction(
+    groupMintKeypair.publicKey,
+    decimals,
+    payer.publicKey, // mint authority
+    null, // freeze authority
+    TOKEN_2022_PROGRAM_ID,
+);
+
+// Initialize the TokenGroup data on the mint
+const initGroupIx = createInitializeGroupInstruction({
+    group: groupMintKeypair.publicKey,
+    maxSize: 100,
+    mint: groupMintKeypair.publicKey,
+    mintAuthority: payer.publicKey,
+    programId: TOKEN_2022_PROGRAM_ID,
+    updateAuthority: payer.publicKey,
+});
+
+const tx = new Transaction().add(
+    createMintAccountIx,
+    initGroupPointerIx,
+    initMintIx,
+    initGroupIx,
+);
+
+const signature = await sendAndConfirmTransaction(rpc, tx, [
+    payer,
+    groupMintKeypair,
+]);
+```
+
+</Tab>
+<Tab title="Action">
+
+```typescript
+import { createMintInterface } from "@lightprotocol/compressed-token";
+import { TOKEN_2022_PROGRAM_ID } from "@solana/spl-token";
+
+const { mint, transactionSignature } = await createMintInterface(
+    rpc, payer, payer, null, 0, groupMintKeypair, undefined, TOKEN_2022_PROGRAM_ID
+);
+```
+
+<Info>
+`createMintInterface` creates and registers a standard Token-2022 mint. To add the GroupPointer and TokenGroup extensions, use the instruction approach in the other tab.
+</Info>
+
+</Tab>
+</Tabs>
+
+</Step>
+
+<Step>
+### Create Member Mint
+
+Create a member mint with the GroupMemberPointer and TokenGroupMember extensions, linking it to the group mint.
+
+```typescript
+import {
+    createInitializeGroupMemberPointerInstruction,
+    createInitializeMemberInstruction,
+} from "@solana/spl-token";
+
+const memberMintKeypair = Keypair.generate();
+
+// Calculate space including GroupMemberPointer and TokenGroupMember extensions
+const memberMintLen = getMintLen([
+    ExtensionType.GroupMemberPointer,
+    ExtensionType.TokenGroupMember,
+]);
+const memberRentExemptBalance = await rpc.getMinimumBalanceForRentExemption(memberMintLen);
+
+// Create the member mint account
+const createMemberMintIx = SystemProgram.createAccount({
+    fromPubkey: payer.publicKey,
+    lamports: memberRentExemptBalance,
+    newAccountPubkey: memberMintKeypair.publicKey,
+    programId: TOKEN_2022_PROGRAM_ID,
+    space: memberMintLen,
+});
+
+// Initialize GroupMemberPointer (points to the member mint itself)
+const initMemberPointerIx = createInitializeGroupMemberPointerInstruction(
+    memberMintKeypair.publicKey,
+    payer.publicKey, // authority
+    memberMintKeypair.publicKey, // member address (self-referencing)
+    TOKEN_2022_PROGRAM_ID,
+);
+
+// Initialize the member mint
+const initMemberMintIx = createInitializeMint2Instruction(
+    memberMintKeypair.publicKey,
+    0,
+    payer.publicKey, // mint authority
+    null, // freeze authority
+    TOKEN_2022_PROGRAM_ID,
+);
+
+// Initialize the TokenGroupMember data on the member mint
+const initMemberIx = createInitializeMemberInstruction({
+    group: groupMintKeypair.publicKey,
+    groupUpdateAuthority: payer.publicKey,
+    member: memberMintKeypair.publicKey,
+    memberMint: memberMintKeypair.publicKey,
+    memberMintAuthority: payer.publicKey,
+    programId: TOKEN_2022_PROGRAM_ID,
+});
+
+const memberTx = new Transaction().add(
+    createMemberMintIx,
+    initMemberPointerIx,
+    initMemberMintIx,
+    initMemberIx,
+);
+
+await sendAndConfirmTransaction(rpc, memberTx, [payer, memberMintKeypair]);
+```
+
+</Step>
+
+<Step>
+### Register Both Mints With Light Token
+
+Register both the group mint and member mint with Light Token to enable rent-free compressed accounts.
+
+```typescript
+// Register group mint
+const registerGroupIx = await LightTokenProgram.createSplInterface({
+    feePayer: payer.publicKey,
+    mint: groupMintKeypair.publicKey,
+    tokenProgramId: TOKEN_2022_PROGRAM_ID,
+});
+
+// Register member mint
+const registerMemberIx = await LightTokenProgram.createSplInterface({
+    feePayer: payer.publicKey,
+    mint: memberMintKeypair.publicKey,
+    tokenProgramId: TOKEN_2022_PROGRAM_ID,
+});
+
+const registerTx = new Transaction().add(registerGroupIx, registerMemberIx);
+await sendAndConfirmTransaction(rpc, registerTx, [payer]);
+```
+
+</Step>
+
+<Step>
+### Transfer Tokens
+
+Once mints are registered, transfers work identically to any other Light Token mint.
+
+```typescript
+import { Transaction, sendAndConfirmTransaction } from "@solana/web3.js";
+import { createTransferInterfaceInstructions } from "@lightprotocol/compressed-token/unified";
+
+const instructions = await createTransferInterfaceInstructions(
+    rpc, payer.publicKey, mint, amount, owner.publicKey, recipient
+);
+
+for (const ixs of instructions) {
+    const tx = new Transaction().add(...ixs);
+    await sendAndConfirmTransaction(rpc, tx, [payer, owner]);
+}
+```
+
+</Step>
+
+</Steps>
+
+</Tab>
+<Tab title="AI Prompt">
+<TokenGroupsAndMembersAiPrompt />
+</Tab>
+</Tabs>
+
+## Related Guides
+
+<CardGroup cols={2}>
+<Card title="Transfer interface" icon="arrow-right" href="/light-token/cookbook/transfer-interface" horizontal />
+<Card title="Wrap and unwrap" icon="rotate" href="/light-token/cookbook/wrap-unwrap" horizontal />
+</CardGroup>
+
+<SupportFooter />

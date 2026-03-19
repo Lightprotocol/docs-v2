@@ -1,0 +1,217 @@
+---
+title: "Permanent delegate"
+sidebarTitle: "Permanent delegate"
+description: "Configure the PermanentDelegate extension to grant irrevocable transfer and burn authority over all token accounts using Light Token."
+keywords: ["permanent delegate light token", "permanent delegate solana", "token 2022 permanent delegate"]
+---
+
+import ExtensionsSetup from "/snippets/setup/extensions-setup.mdx";
+import SupportFooter from "/snippets/support-footer.mdx";
+import AgentSkillGeneric from "/snippets/setup/agent-skill-generic.mdx";
+import PermanentDelegateAiPrompt from "/snippets/ai-prompts/extensions/permanent-delegate.mdx";
+
+A designated authority gains irrevocable transfer and burn rights over every token account for a mint, set once at initialization and enforced permanently.
+
+<Info>
+PermanentDelegate mints require `compression_only` accounts. Use the Light Token interface APIs (`transferInterface`, `createTransferInterfaceInstructions`) for transfers — compressed transfer instructions are not supported.
+</Info>
+
+## Key Concepts
+
+PermanentDelegate is configured with one parameter:
+
+| Parameter | Description |
+|-----------|-------------|
+| `delegate` | The public key granted permanent, irrevocable transfer and burn authority over all token accounts for this mint. |
+
+Unlike standard delegates set per token account, the permanent delegate operates at the mint level. Token account owners cannot revoke this authority. Only the current permanent delegate can reassign the role to a new account.
+
+## How It Works
+
+1. A mint authority creates a Token-2022 mint with the PermanentDelegate extension
+2. The delegate address is set at initialization and cannot be removed
+3. The permanent delegate can transfer or burn tokens from any token account for this mint without owner approval
+4. The delegate authority persists for the lifetime of the mint
+
+## Use PermanentDelegate With Light Token
+
+<AgentSkillGeneric />
+
+<Tabs>
+<Tab title="Guide">
+
+<ExtensionsSetup />
+
+<Steps>
+
+<Step>
+### Create a Token-2022 Mint With Permanent Delegate
+
+<Tabs>
+<Tab title="Instruction">
+
+```typescript
+import {
+    Keypair,
+    SystemProgram,
+    Transaction,
+    sendAndConfirmTransaction,
+} from "@solana/web3.js";
+import { createRpc } from "@lightprotocol/stateless.js";
+import { LightTokenProgram } from "@lightprotocol/compressed-token";
+import {
+    TOKEN_2022_PROGRAM_ID,
+    ExtensionType,
+    getMintLen,
+    createInitializeMint2Instruction,
+    createInitializePermanentDelegateInstruction,
+} from "@solana/spl-token";
+
+const rpc = createRpc(RPC_ENDPOINT);
+
+const mintKeypair = Keypair.generate();
+const decimals = 9;
+
+// Calculate space for mint + PermanentDelegate extension
+const mintLen = getMintLen([ExtensionType.PermanentDelegate]);
+const rentExemptBalance =
+    await rpc.getMinimumBalanceForRentExemption(mintLen);
+
+// Create account
+const createAccountIx = SystemProgram.createAccount({
+    fromPubkey: payer.publicKey,
+    lamports: rentExemptBalance,
+    newAccountPubkey: mintKeypair.publicKey,
+    programId: TOKEN_2022_PROGRAM_ID,
+    space: mintLen,
+});
+
+// Initialize PermanentDelegate extension
+const initPermanentDelegateIx = createInitializePermanentDelegateInstruction(
+    mintKeypair.publicKey,
+    payer.publicKey, // permanent delegate authority
+    TOKEN_2022_PROGRAM_ID,
+);
+
+// Initialize mint
+const initMintIx = createInitializeMint2Instruction(
+    mintKeypair.publicKey,
+    decimals,
+    payer.publicKey, // mint authority
+    null,            // freeze authority
+    TOKEN_2022_PROGRAM_ID,
+);
+
+// Register interface PDA with Light Token
+const createSplInterfaceIx = await LightTokenProgram.createSplInterface({
+    feePayer: payer.publicKey,
+    mint: mintKeypair.publicKey,
+    tokenProgramId: TOKEN_2022_PROGRAM_ID,
+});
+
+const tx = new Transaction().add(
+    createAccountIx,
+    initPermanentDelegateIx,
+    initMintIx,
+    createSplInterfaceIx
+);
+
+const signature = await sendAndConfirmTransaction(rpc, tx, [
+    payer,
+    mintKeypair,
+]);
+```
+
+</Tab>
+<Tab title="Action">
+
+```typescript
+import { Keypair } from "@solana/web3.js";
+import { createRpc } from "@lightprotocol/stateless.js";
+import { createMintInterface } from "@lightprotocol/compressed-token";
+import { TOKEN_2022_PROGRAM_ID } from "@solana/spl-token";
+
+const rpc = createRpc(RPC_ENDPOINT);
+
+const mintKeypair = Keypair.generate();
+const { mint, transactionSignature } = await createMintInterface(
+    rpc,
+    payer,
+    payer,
+    null,
+    9,
+    mintKeypair,
+    undefined,
+    TOKEN_2022_PROGRAM_ID
+);
+```
+
+<Info>
+`createMintInterface` creates a basic Token 2022 mint with an interface PDA. To include the PermanentDelegate extension, use the instruction approach shown in the other tab.
+</Info>
+
+</Tab>
+</Tabs>
+
+</Step>
+
+<Step>
+### Register an Existing Mint
+
+If you already have a Token-2022 mint with PermanentDelegate, register it with Light Token.
+
+```typescript
+import { LightTokenProgram } from "@lightprotocol/compressed-token";
+import { TOKEN_2022_PROGRAM_ID } from "@solana/spl-token";
+
+const createSplInterfaceIx = await LightTokenProgram.createSplInterface({
+    feePayer: payer.publicKey,
+    mint: mintKeypair.publicKey,
+    tokenProgramId: TOKEN_2022_PROGRAM_ID,
+});
+```
+
+</Step>
+
+<Step>
+### Transfer Tokens
+
+Transfers work identically to any other Light Token mint. The permanent delegate retains authority to transfer or burn tokens from any account.
+
+```typescript
+import { Transaction, sendAndConfirmTransaction } from "@solana/web3.js";
+import { createTransferInterfaceInstructions } from "@lightprotocol/compressed-token/unified";
+
+const instructions = await createTransferInterfaceInstructions(
+    rpc,
+    payer.publicKey,
+    mint,
+    amount,
+    owner.publicKey,
+    recipient
+);
+
+for (const ixs of instructions) {
+    const tx = new Transaction().add(...ixs);
+    await sendAndConfirmTransaction(rpc, tx, [payer, owner]);
+}
+```
+
+</Step>
+
+</Steps>
+
+</Tab>
+<Tab title="AI Prompt">
+<PermanentDelegateAiPrompt />
+</Tab>
+</Tabs>
+
+## Related Guides
+
+<CardGroup cols={2}>
+<Card title="Transfer interface" icon="arrow-right" href="/light-token/cookbook/transfer-interface" horizontal />
+<Card title="Wrap and unwrap" icon="rotate" href="/light-token/cookbook/wrap-unwrap" horizontal />
+</CardGroup>
+
+<SupportFooter />

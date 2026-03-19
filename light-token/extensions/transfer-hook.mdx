@@ -1,0 +1,222 @@
+---
+title: "Transfer hook"
+sidebarTitle: "Transfer hook"
+description: "Configure the TransferHook extension to attach a custom program callback to every token transfer using Light Token."
+keywords: ["transfer hook light token", "transfer hook solana", "token 2022 transfer hook"]
+---
+
+import ExtensionsSetup from "/snippets/setup/extensions-setup.mdx";
+import SupportFooter from "/snippets/support-footer.mdx";
+import AgentSkillGeneric from "/snippets/setup/agent-skill-generic.mdx";
+import TransferHookAiPrompt from "/snippets/ai-prompts/extensions/transfer-hook.mdx";
+
+
+## Key Concepts
+
+A program address stored on the mint is invoked via CPI on every token transfer to execute custom logic
+such as transfer restrictions, royalty enforcement, or event emission.
+
+TransferHook is configured with two parameters:
+
+| Parameter | Description |
+|-----------|-------------|
+| `authority` | Account that can update the transfer hook program address after initialization. |
+| `programId` | Address of the program invoked via CPI on every transfer. **Must be `PublicKey.default` (nil) for Light Token.** |
+
+
+## How It Works
+
+1. A mint authority creates a Token-2022 mint with the TransferHook extension
+2. The hook program address is set at initialization (must be nil for Light Token)
+3. On every `transfer_checked` call, the token program invokes the hook program via CPI
+4. All accounts from the initial transfer are passed as read-only to the hook program
+5. If the hook instruction fails, the entire token transfer reverts
+
+<Info>
+Light Token requires the TransferHook `program_id` to be set to `PublicKey.default` (all zeros). You can initialize the extension for compatibility, but active hooks are not supported. Registration fails if the `program_id` points to a real program.
+</Info>
+
+## Use TransferHook With Light Token
+
+<AgentSkillGeneric />
+
+<Tabs>
+<Tab title="Guide">
+
+<ExtensionsSetup />
+
+<Steps>
+
+<Step>
+### Create a Token-2022 Mint With Transfer Hook
+
+<Tabs>
+<Tab title="Instruction">
+
+```typescript
+import {
+    Keypair,
+    PublicKey,
+    SystemProgram,
+    Transaction,
+    sendAndConfirmTransaction,
+} from "@solana/web3.js";
+import { createRpc } from "@lightprotocol/stateless.js";
+import { LightTokenProgram } from "@lightprotocol/compressed-token";
+import {
+    TOKEN_2022_PROGRAM_ID,
+    getMintLen,
+    createInitializeMint2Instruction,
+    ExtensionType,
+    createInitializeTransferHookInstruction,
+} from "@solana/spl-token";
+
+const rpc = createRpc(RPC_ENDPOINT);
+
+const mintKeypair = Keypair.generate();
+const decimals = 9;
+
+// Calculate space for mint + TransferHook extension
+const mintLen = getMintLen([ExtensionType.TransferHook]);
+const rentExemptBalance =
+    await rpc.getMinimumBalanceForRentExemption(mintLen);
+
+// Create account
+const createAccountIx = SystemProgram.createAccount({
+    fromPubkey: payer.publicKey,
+    lamports: rentExemptBalance,
+    newAccountPubkey: mintKeypair.publicKey,
+    programId: TOKEN_2022_PROGRAM_ID,
+    space: mintLen,
+});
+
+// Initialize TransferHook with nil program_id (hook disabled)
+const initTransferHookIx = createInitializeTransferHookInstruction(
+    mintKeypair.publicKey,
+    payer.publicKey,    // authority
+    PublicKey.default,  // program_id must be nil
+    TOKEN_2022_PROGRAM_ID
+);
+
+// Initialize mint
+const initMintIx = createInitializeMint2Instruction(
+    mintKeypair.publicKey,
+    decimals,
+    payer.publicKey,
+    null,
+    TOKEN_2022_PROGRAM_ID
+);
+
+// Register interface PDA with Light Token
+const createSplInterfaceIx = await LightTokenProgram.createSplInterface({
+    feePayer: payer.publicKey,
+    mint: mintKeypair.publicKey,
+    tokenProgramId: TOKEN_2022_PROGRAM_ID,
+});
+
+const tx = new Transaction().add(
+    createAccountIx,
+    initTransferHookIx,
+    initMintIx,
+    createSplInterfaceIx
+);
+
+const signature = await sendAndConfirmTransaction(rpc, tx, [
+    payer,
+    mintKeypair,
+]);
+```
+
+</Tab>
+<Tab title="Action">
+
+```typescript
+import { Keypair } from "@solana/web3.js";
+import { createRpc } from "@lightprotocol/stateless.js";
+import { createMintInterface } from "@lightprotocol/compressed-token";
+import { TOKEN_2022_PROGRAM_ID } from "@solana/spl-token";
+
+const rpc = createRpc(RPC_ENDPOINT);
+
+const mintKeypair = Keypair.generate();
+const { mint, transactionSignature } = await createMintInterface(
+    rpc,
+    payer,
+    payer,
+    null,
+    9,
+    mintKeypair,
+    undefined,
+    TOKEN_2022_PROGRAM_ID
+);
+```
+
+<Info>
+`createMintInterface` creates a basic Token 2022 mint with an interface PDA. To include the TransferHook extension, use the instruction approach shown in the other tab.
+</Info>
+
+</Tab>
+</Tabs>
+
+</Step>
+
+<Step>
+### Register an Existing Mint
+
+If you already have a Token-2022 mint with TransferHook set to a nil `program_id`, register it with Light Token.
+
+```typescript
+import { LightTokenProgram } from "@lightprotocol/compressed-token";
+import { TOKEN_2022_PROGRAM_ID } from "@solana/spl-token";
+
+const createSplInterfaceIx = await LightTokenProgram.createSplInterface({
+    feePayer: payer.publicKey,
+    mint: mintKeypair.publicKey,
+    tokenProgramId: TOKEN_2022_PROGRAM_ID,
+});
+```
+
+</Step>
+
+<Step>
+### Transfer Tokens
+
+Transfers work identically to any other Light Token mint. Because the hook is disabled, no CPI is invoked during transfers.
+
+```typescript
+import { Transaction, sendAndConfirmTransaction } from "@solana/web3.js";
+import { createTransferInterfaceInstructions } from "@lightprotocol/compressed-token/unified";
+
+const instructions = await createTransferInterfaceInstructions(
+    rpc,
+    payer.publicKey,
+    mint,
+    amount,
+    owner.publicKey,
+    recipient
+);
+
+for (const ixs of instructions) {
+    const tx = new Transaction().add(...ixs);
+    await sendAndConfirmTransaction(rpc, tx, [payer, owner]);
+}
+```
+
+</Step>
+
+</Steps>
+
+</Tab>
+<Tab title="AI Prompt">
+<TransferHookAiPrompt />
+</Tab>
+</Tabs>
+
+## Related Guides
+
+<CardGroup cols={2}>
+<Card title="Transfer interface" icon="arrow-right" href="/light-token/cookbook/transfer-interface" horizontal />
+<Card title="Wrap and unwrap" icon="rotate" href="/light-token/cookbook/wrap-unwrap" horizontal />
+</CardGroup>
+
+<SupportFooter />

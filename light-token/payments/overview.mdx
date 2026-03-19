@@ -20,6 +20,7 @@ import {
 } from "/snippets/code-samples/code-compare-snippets.jsx";
 import SupportFooter from "/snippets/support-footer.mdx";
 import RentSponsorship from "/snippets/rent-sponsorship-explained.mdx";
+import ExtensionsTable from "/snippets/extensions-table.mdx";
 
 
 Payment flows on Solana include five core concepts: 
@@ -69,27 +70,12 @@ extra instructions.
 
 <Accordion title="Supported extensions by Light Token">
 
-| Extension | Description |
-|-----------|-------------|
-| MetadataPointer | Points a mint to the account that stores its metadata. |
-| TokenMetadata | Stores token name, symbol, and URI directly on the mint. |
-| InterestBearingConfig | Displays a UI-adjusted balance that accrues interest over time. |
-| GroupPointer | Points a mint to the account that stores group configuration. |
-| GroupMemberPointer | Points a mint to the account that stores group member configuration. |
-| TokenGroup | Stores group configuration directly on the mint (e.g., NFT collections). |
-| TokenGroupMember | Stores group member configuration directly on the mint. |
-| MintCloseAuthority | Allows a designated authority to close a mint account. |
-| TransferFeeConfig | Withholds a percentage of each transfer as a fee. |
-| DefaultAccountState | Sets the initial state (e.g., frozen) for newly created token accounts. |
-| PermanentDelegate | Grants an authority unrestricted transfer and burn rights over all accounts for the mint. |
-| TransferHook | Invokes a custom program on every transfer via CPI. |
-| Pausable | Allows an authority to pause all minting, burning, and transfers. |
-| ConfidentialTransferMint | Configures auditor keys for confidential (encrypted) transfers. |
-| ConfidentialTransferFeeConfig | Encrypts withheld transfer fees under an auditor's public key. |
-| ConfidentialMintBurn | Allows minting and burning of tokens with encrypted amounts. |
+<ExtensionsTable />
+
+<Card title="View all supported extensions" icon="chevron-right" color="#0066ff" href="/light-token/extensions/overview" horizontal />
 
 <Info>
-Learn more on extensions here: [Extensions](https://solana.com/docs/tokens/extensions).
+Learn more about Token-2022 extensions: [Extensions](https://solana.com/docs/tokens/extensions).
 </Info>
 </Accordion>
 

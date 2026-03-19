@@ -1,0 +1,225 @@
+---
+title: "Transfer fees"
+sidebarTitle: "Transfer fees"
+description: "Configure the TransferFeeConfig extension for automatic fee collection on every token transfer using Light Token."
+keywords: ["transfer fees light token", "transfer fees solana", "token 2022 transfer fees"]
+---
+
+import ExtensionsSetup from "/snippets/setup/extensions-setup.mdx";
+import SupportFooter from "/snippets/support-footer.mdx";
+import AgentSkillGeneric from "/snippets/setup/agent-skill-generic.mdx";
+import TransferFeesAiPrompt from "/snippets/ai-prompts/extensions/transfer-fees.mdx";
+
+## Key Concepts
+
+Fees are expressed in basis points and accumulate in recipient token accounts. A designated withdraw authority can collect the accumulated fees.
+
+Transfer fees are configured with four parameters:
+
+| Parameter | Description |
+|-----------|-------------|
+| `transferFeeBasisPoints` | Fee percentage in basis points (100 = 1%). **Must be zero for Light Token.** |
+| `maximumFee` | Upper limit on the fee charged per transfer, in token base units. **Must be zero for Light Token.** |
+| `transferFeeConfigAuthority` | Authority that can modify fee settings. |
+| `withdrawWithheldAuthority` | Authority that can collect accumulated fees from recipient accounts. |
+
+During a transfer, the token program calculates the fee as a percentage of the transfer amount (capped by `maximumFee`) 
+and withholds it in the recipient's token account. With Light Token, both values are zero, so no fees are collected.
+
+## How It Works
+
+1. A mint authority creates a Token-2022 mint with the TransferFeeConfig extension
+2. The fee basis points and maximum fee are set at initialization
+3. On every `transfer_checked` call, the token program withholds the fee from the transferred amount
+4. Fees accumulate in recipient token accounts and can be harvested to the mint, then withdrawn by the withdraw authority
+
+<Info>
+Light Token requires the transfer fee to be set to **zero basis points** and the maximum fee to **zero**. 
+You can initialize the extension for compatibility with existing Token-2022 mints, but non-zero fees are not supported. Registration fails if fees are non-zero.
+</Info>
+
+## Use TransferFeeConfig With Light Token
+
+<AgentSkillGeneric />
+
+<Tabs>
+<Tab title="Guide">
+
+<ExtensionsSetup />
+
+<Steps>
+
+<Step>
+### Create a Token-2022 Mint With Transfer Fees
+
+<Tabs>
+<Tab title="Instruction">
+
+```typescript
+import {
+    Keypair,
+    SystemProgram,
+    Transaction,
+    sendAndConfirmTransaction,
+} from "@solana/web3.js";
+import { createRpc } from "@lightprotocol/stateless.js";
+import { LightTokenProgram } from "@lightprotocol/compressed-token";
+import {
+    TOKEN_2022_PROGRAM_ID,
+    getMintLen,
+    createInitializeMint2Instruction,
+    ExtensionType,
+    createInitializeTransferFeeConfigInstruction,
+} from "@solana/spl-token";
+
+const rpc = createRpc(RPC_ENDPOINT);
+
+const mintKeypair = Keypair.generate();
+const decimals = 9;
+
+// Calculate space for mint + TransferFeeConfig extension
+const mintLen = getMintLen([ExtensionType.TransferFeeConfig]);
+const rentExemptBalance =
+    await rpc.getMinimumBalanceForRentExemption(mintLen);
+
+// Create account
+const createAccountIx = SystemProgram.createAccount({
+    fromPubkey: payer.publicKey,
+    lamports: rentExemptBalance,
+    newAccountPubkey: mintKeypair.publicKey,
+    programId: TOKEN_2022_PROGRAM_ID,
+    space: mintLen,
+});
+
+// Initialize TransferFeeConfig with zero fees
+const initTransferFeeIx = createInitializeTransferFeeConfigInstruction(
+    mintKeypair.publicKey,
+    payer.publicKey, // transfer fee config authority
+    payer.publicKey, // withdraw withheld authority
+    0,               // fee basis points (must be zero)
+    BigInt(0),       // maximum fee (must be zero)
+    TOKEN_2022_PROGRAM_ID
+);
+
+// Initialize mint
+const initMintIx = createInitializeMint2Instruction(
+    mintKeypair.publicKey,
+    decimals,
+    payer.publicKey,
+    null,
+    TOKEN_2022_PROGRAM_ID
+);
+
+// Register interface PDA with Light Token
+const createSplInterfaceIx = await LightTokenProgram.createSplInterface({
+    feePayer: payer.publicKey,
+    mint: mintKeypair.publicKey,
+    tokenProgramId: TOKEN_2022_PROGRAM_ID,
+});
+
+const tx = new Transaction().add(
+    createAccountIx,
+    initTransferFeeIx,
+    initMintIx,
+    createSplInterfaceIx
+);
+
+const signature = await sendAndConfirmTransaction(rpc, tx, [
+    payer,
+    mintKeypair,
+]);
+```
+
+</Tab>
+<Tab title="Action">
+
+```typescript
+import { Keypair } from "@solana/web3.js";
+import { createRpc } from "@lightprotocol/stateless.js";
+import { createMintInterface } from "@lightprotocol/compressed-token";
+import { TOKEN_2022_PROGRAM_ID } from "@solana/spl-token";
+
+const rpc = createRpc(RPC_ENDPOINT);
+
+const mintKeypair = Keypair.generate();
+const { mint, transactionSignature } = await createMintInterface(
+    rpc,
+    payer,
+    payer,
+    null,
+    9,
+    mintKeypair,
+    undefined,
+    TOKEN_2022_PROGRAM_ID
+);
+```
+
+<Info>
+`createMintInterface` creates a basic Token 2022 mint with an interface PDA. To include the TransferFeeConfig extension, use the instruction approach shown in the other tab.
+</Info>
+
+</Tab>
+</Tabs>
+
+</Step>
+
+<Step>
+### Register an Existing Mint
+
+If you already have a Token-2022 mint with a zero-fee TransferFeeConfig, register it with Light Token.
+
+```typescript
+import { LightTokenProgram } from "@lightprotocol/compressed-token";
+import { TOKEN_2022_PROGRAM_ID } from "@solana/spl-token";
+
+const createSplInterfaceIx = await LightTokenProgram.createSplInterface({
+    feePayer: payer.publicKey,
+    mint: mintKeypair.publicKey,
+    tokenProgramId: TOKEN_2022_PROGRAM_ID,
+});
+```
+
+</Step>
+
+<Step>
+### Transfer Tokens
+
+Transfers work identically to any other Light Token mint. Because the fee is zero, no fees are withheld.
+
+```typescript
+import { Transaction, sendAndConfirmTransaction } from "@solana/web3.js";
+import { createTransferInterfaceInstructions } from "@lightprotocol/compressed-token/unified";
+
+const instructions = await createTransferInterfaceInstructions(
+    rpc,
+    payer.publicKey,
+    mint,
+    amount,
+    owner.publicKey,
+    recipient
+);
+
+for (const ixs of instructions) {
+    const tx = new Transaction().add(...ixs);
+    await sendAndConfirmTransaction(rpc, tx, [payer, owner]);
+}
+```
+
+</Step>
+
+</Steps>
+
+</Tab>
+<Tab title="AI Prompt">
+<TransferFeesAiPrompt />
+</Tab>
+</Tabs>
+
+## Related Guides
+
+<CardGroup cols={2}>
+<Card title="Transfer interface" icon="arrow-right" href="/light-token/cookbook/transfer-interface" horizontal />
+<Card title="Wrap and unwrap" icon="rotate" href="/light-token/cookbook/wrap-unwrap" horizontal />
+</CardGroup>
+
+<SupportFooter />

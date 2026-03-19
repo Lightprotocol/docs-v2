@@ -39,7 +39,13 @@
               {
                 "group": "Cookbook",
                 "pages": [
-                  "light-token/cookbook/create-mint",
+                  {
+                    "group": "Mint Accounts",
+                    "pages": [
+                      "light-token/cookbook/create-mint",
+                      "light-token/cookbook/add-interface-pda"
+                    ]
+                  },
                   "light-token/cookbook/create-ata",
                   "light-token/cookbook/create-token-account",
                   "light-token/cookbook/mint-to",
@@ -51,6 +57,22 @@
                   "light-token/cookbook/load-ata",
                   "light-token/cookbook/close-token-account",
                   "light-token/cookbook/burn"
+                ]
+              },
+              {
+                "group": "Extensions",
+                "pages": [
+                  "light-token/extensions/overview",
+                  "light-token/extensions/metadata-and-metadata-pointer",
+                  "light-token/extensions/transfer-fees",
+                  "light-token/extensions/transfer-hook",
+                  "light-token/extensions/interest-bearing-tokens",
+                  "light-token/extensions/default-account-state",
+                  "light-token/extensions/permanent-delegate",
+                  "light-token/extensions/close-mint",
+                  "light-token/extensions/token-groups-and-members",
+                  "light-token/extensions/pausable-mint",
+                  "light-token/extensions/confidential-transfer"
                 ]
               },
               {
