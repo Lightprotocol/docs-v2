@@ -1,21 +1,40 @@
 ---
 title: "Payment with Memo"
-sidebarTitle: "Payment with memo"
+sidebarTitle: "Payment with Memo"
 description: "Attach invoice IDs, payment references, or notes to Light Token transfers using the memo program."
 keywords: ["memo payment solana", "invoice reconciliation solana", "payment reference light token", "memo instruction"]
 ---
 
 import ToolkitsSetup from "/snippets/setup/toolkits-setup.mdx";
 import SupportFooter from "/snippets/support-footer.mdx";
+import AgentSkillPayments from "/snippets/setup/agent-skill-payments.mdx";
+import PaymentsAiPrompt from "/snippets/ai-prompts/toolkits/payments.mdx";
 
 Attach metadata like invoice IDs or payment references to a Light Token transfer
 using Solana's memo program. The memo is recorded in the transaction logs for reconciliation.
 
-<Warning>
-The memo program is a standard Solana program that works with any transaction.
-Adding a memo instruction alongside a Light Token transfer should work, but verify
-on devnet before using in production.
-</Warning>
+<table>
+  <thead>
+    <tr>
+      <th style={{ width: "15%" }}></th>
+      <th>SPL</th>
+      <th>Light</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>**Transfer**</td>
+      <td>createTransferInstruction()</td>
+      <td>createTransferInterfaceInstructions()</td>
+    </tr>
+  </tbody>
+</table>
+
+<AgentSkillPayments />
+
+<Tabs>
+<Tab title="Guide">
+
 
 ## How it works
 
@@ -95,14 +114,23 @@ const memoLogs = logs.filter((log) =>
 console.log("Memo logs:", memoLogs);
 ```
 
+</Tab>
+<Tab title="AI Prompt">
+<PaymentsAiPrompt />
+</Tab>
+</Tabs>
+
 ## Related guides
 
-<CardGroup cols={2}>
-<Card title="Basic payment" icon="arrow-right" href="/light-token/payments/send-payments/basic-payment">
+<CardGroup cols={3}>
+<Card title="Basic payment" icon="arrow-right" href="/light-token/payments/basic-payment">
   Send a single transfer without memo.
 </Card>
-<Card title="Verify payments" icon="magnifying-glass" href="/light-token/payments/accept-payments/verify-payments">
+<Card title="Verify payments" icon="magnifying-glass" href="/light-token/payments/verify-payments">
   Query balances and transaction history.
+</Card>
+<Card title="Batch payments" icon="layer-group" href="/light-token/payments/batch-payments">
+  Pack multiple transfers into one transaction.
 </Card>
 </CardGroup>
 

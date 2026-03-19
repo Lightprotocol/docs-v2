@@ -1,33 +1,46 @@
 ---
 title: "Verify Address"
-sidebarTitle: "Verify address"
+sidebarTitle: "Verify Recipients Address"
 description: "Validate recipient addresses before sending payments to prevent lost funds."
 keywords: ["verify address solana", "address validation light token", "solana address check", "payment safety"]
 ---
 
 import ToolkitsSetup from "/snippets/setup/toolkits-setup.mdx";
 import SupportFooter from "/snippets/support-footer.mdx";
+import AgentSkillPayments from "/snippets/setup/agent-skill-payments.mdx";
+import PaymentsAiPrompt from "/snippets/ai-prompts/toolkits/payments.mdx";
 
 Verify recipient addresses before sending payments.
 Address validation prevents sending tokens to invalid or unexpected account types.
+
+<table>
+  <thead>
+    <tr>
+      <th style={{ width: "15%" }}></th>
+      <th>SPL</th>
+      <th>Light</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>**Get Account**</td>
+      <td>getAccount()</td>
+      <td>getAtaInterface()</td>
+    </tr>
+  </tbody>
+</table>
+
+<AgentSkillPayments />
+
+<Tabs>
+<Tab title="Guide">
 
 ## Understanding Solana addresses
 
 Solana has two types of addresses:
 
 - **On-curve addresses** (wallets): derived from a keypair, can sign transactions.
-- **Off-curve addresses** (PDAs): program-derived addresses, cannot sign transactions.
-
-## Account types in payments
-
-When validating a recipient, check what type of account the address belongs to:
-
-| Type | Description | Safe to send? |
-|:-----|:------------|:--------------|
-| **Wallet** | Standard keypair address, no on-chain account or a system account | Yes |
-| **Light Token associated token account** | An associated token account for the target mint | Yes |
-| **Token account (wrong mint)** | An associated token account for a different mint | No |
-| **Program or PDA** | A program-owned account or program-derived address | Depends on use case |
+- **Off-curve addresses** (PDAs): program-derived addresses, can only sign via CPI when used as [smart wallets](/light-token/wallets/smart-wallets).
 
 ## Verification flow
 
@@ -66,14 +79,23 @@ the SDK automatically creates the recipient's associated token account if it doe
 Address verification is a safety check, not a prerequisite.
 </Info>
 
+</Tab>
+<Tab title="AI Prompt">
+<PaymentsAiPrompt />
+</Tab>
+</Tabs>
+
 ## Related guides
 
-<CardGroup cols={2}>
-<Card title="Basic payment" icon="arrow-right" href="/light-token/payments/send-payments/basic-payment">
+<CardGroup cols={3}>
+<Card title="Basic payment" icon="arrow-right" href="/light-token/payments/basic-payment">
   Send a single token transfer.
 </Card>
-<Card title="Receive payments" icon="arrow-down" href="/light-token/payments/accept-payments/receive-payments">
+<Card title="Receive payments" icon="arrow-down" href="/light-token/payments/receive-payments">
   Load cold accounts and prepare to receive.
+</Card>
+<Card title="Verify payments" icon="magnifying-glass" href="/light-token/payments/verify-payments">
+  Query balances and transaction history.
 </Card>
 </CardGroup>
 

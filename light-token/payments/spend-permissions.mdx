@@ -1,16 +1,45 @@
 ---
 title: "Spend Permissions"
-sidebarTitle: "Spend permissions"
+sidebarTitle: "Spend Permissions"
 description: "Delegate token spending to third parties with amount caps for subscriptions, recurring payments, and managed spending."
 keywords: ["delegate tokens solana", "token delegation light token", "spend permissions solana", "recurring payments solana"]
 ---
 
 import ToolkitsSetup from "/snippets/setup/toolkits-setup.mdx";
 import SupportFooter from "/snippets/support-footer.mdx";
+import AgentSkillPayments from "/snippets/setup/agent-skill-payments.mdx";
+import PaymentsAiPrompt from "/snippets/ai-prompts/toolkits/payments.mdx";
 
 Delegate token spending to a third party with an amount cap.
 The delegate can transfer tokens on behalf of the owner up to the approved amount,
 without the owner signing each transaction.
+
+<table>
+  <thead>
+    <tr>
+      <th style={{ width: "15%" }}></th>
+      <th>SPL</th>
+      <th>Light</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>**Approve**</td>
+      <td>approve()</td>
+      <td>approveInterface()</td>
+    </tr>
+    <tr>
+      <td>**Revoke**</td>
+      <td>revoke()</td>
+      <td>revokeInterface()</td>
+    </tr>
+  </tbody>
+</table>
+
+<AgentSkillPayments />
+
+<Tabs>
+<Tab title="Guide">
 
 ## Use cases
 
@@ -36,31 +65,32 @@ const rpc = createRpc(RPC_ENDPOINT);
 Grant a delegate permission to spend up to a capped amount:
 
 ```typescript
-import { approve } from "@lightprotocol/compressed-token";
+import { approveInterface } from "@lightprotocol/compressed-token/unified";
 
-const tx = await approve(
+const tx = await approveInterface(
   rpc,
   payer,
+  senderAta,
   mint,
-  500,                    // amount cap
-  owner,                  // token owner (signs)
-  delegate.publicKey      // who gets permission
+  delegate.publicKey,     // who gets permission
+  500_000,                // amount cap
+  owner                   // token owner (signs)
 );
 
 console.log("Approved:", tx);
 ```
 
-## Query delegated accounts
+## Check delegation status
 
-Check which accounts a delegate has permission to spend:
+Check the delegation status of an account:
 
 ```typescript
-const delegatedAccounts = await rpc.getCompressedTokenAccountsByDelegate(
-  delegate.publicKey,
-  { mint }
-);
+import { getAtaInterface } from "@lightprotocol/compressed-token";
 
-console.log("Delegated accounts:", delegatedAccounts.items.length);
+const account = await getAtaInterface(rpc, senderAta, owner.publicKey, mint);
+
+console.log("Delegate:", account.parsed.delegate?.toBase58() ?? "none");
+console.log("Delegated amount:", account.parsed.delegatedAmount.toString());
 ```
 
 ## Revoke a delegate
@@ -68,19 +98,9 @@ console.log("Delegated accounts:", delegatedAccounts.items.length);
 Remove spending permission:
 
 ```typescript
-import { revoke } from "@lightprotocol/compressed-token";
+import { revokeInterface } from "@lightprotocol/compressed-token/unified";
 
-const delegatedAccounts = await rpc.getCompressedTokenAccountsByDelegate(
-  delegate.publicKey,
-  { mint }
-);
-
-const tx = await revoke(
-  rpc,
-  payer,
-  delegatedAccounts.items,
-  owner                   // owner signs to revoke
-);
+const tx = await revokeInterface(rpc, payer, senderAta, mint, owner);
 
 console.log("Revoked:", tx);
 ```
@@ -89,7 +109,7 @@ console.log("Revoked:", tx);
 
 - **Amount caps**: Always set the minimum amount needed. Delegation does not grant unlimited access.
 - **Single delegate**: Each compressed token account supports one active delegate at a time.
-- **Monitor usage**: Query `getCompressedTokenAccountsByDelegate` regularly to track delegate activity.
+- **Monitor usage**: Query `getAtaInterface` regularly to track delegate activity.
 - **Revoke promptly**: Remove delegation when the business relationship ends or the spending period expires.
 
 ## Delegation vs. custody
@@ -106,14 +126,23 @@ For full TypeScript, Rust, and program-level examples, see the
 [approve and revoke cookbook page](/light-token/cookbook/approve-revoke).
 </Note>
 
+</Tab>
+<Tab title="AI Prompt">
+<PaymentsAiPrompt />
+</Tab>
+</Tabs>
+
 ## Related guides
 
-<CardGroup cols={2}>
-<Card title="Deferred execution" icon="clock" href="/light-token/payments/advanced/deferred-execution">
-  Sign transactions now, execute later.
+<CardGroup cols={3}>
+<Card title="Basic payment" icon="arrow-right" href="/light-token/payments/basic-payment">
+  Send a single token transfer.
 </Card>
-<Card title="Fee abstraction" icon="hand-holding-dollar" href="/light-token/payments/send-payments/fee-abstraction">
+<Card title="Gasless transactions" icon="hand-holding-dollar" href="/light-token/wallets/gasless-transactions">
   Separate the fee payer from the token owner.
+</Card>
+<Card title="Receive payments" icon="arrow-down" href="/light-token/payments/receive-payments">
+  Load cold accounts and share ATA address with the sender.
 </Card>
 </CardGroup>
 

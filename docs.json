@@ -57,31 +57,24 @@
                 "group": "For Stablecoin Payments",
                 "pages": [
                   "light-token/payments/overview",
-                  "light-token/payments/integration-guide",
                   {
                     "group": "Send Payments",
                     "pages": [
-                      "light-token/payments/send-payments/basic-payment",
-                      "light-token/payments/send-payments/payment-with-memo",
-                      "light-token/payments/send-payments/verify-address",
-                      "light-token/payments/send-payments/batch-payments",
-                      "light-token/payments/send-payments/fee-abstraction"
+                      "light-token/payments/basic-payment",
+                      "light-token/payments/batch-payments",
+                      "light-token/payments/payment-with-memo"
                     ]
                   },
+                  "light-token/payments/receive-payments",
                   {
-                    "group": "Accept Payments",
+                    "group": "Verify Payments",
                     "pages": [
-                      "light-token/payments/accept-payments/receive-payments",
-                      "light-token/payments/accept-payments/verify-payments"
+                      "light-token/payments/verify-payments",
+                      "light-token/payments/verify-recipient-address"
                     ]
                   },
-                  {
-                    "group": "Advanced",
-                    "pages": [
-                      "light-token/payments/advanced/deferred-execution"
-                    ]
-                  },
-                  "light-token/payments/interop/wrap-unwrap",
+                  "light-token/payments/spend-permissions",
+                  "light-token/payments/wrap-unwrap",
                   "light-token/payments/production-readiness"
                 ]
               },
@@ -91,7 +84,8 @@
                   "light-token/wallets/overview",
                   "light-token/wallets/privy",
                   "light-token/wallets/wallet-adapter",
-                  "light-token/wallets/gasless-transactions"
+                  "light-token/wallets/gasless-transactions",
+                  "light-token/wallets/smart-wallets"
                 ]
               },
               {
@@ -964,6 +958,10 @@
     },
     {
       "source": "/light-token/wallets/sponsor-top-ups",
+      "destination": "https://zkcompression.com/light-token/wallets/gasless-transactions"
+    },
+    {
+      "source": "/light-token/payments/fee-abstraction",
       "destination": "https://zkcompression.com/light-token/wallets/gasless-transactions"
     },
     {

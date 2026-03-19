@@ -67,7 +67,7 @@ For example, here is the creation of an associated token account:
 Token extensions introduce optional features you can add to a token mint or token account through 
 extra instructions.
 
-<Accordion title="Supported Extensions by Light Token (with mainnet launch in Q1 2026)">
+<Accordion title="Supported extensions by Light Token">
 
 | Extension | Description |
 |-----------|-------------|
@@ -95,44 +95,27 @@ Learn more on extensions here: [Extensions](https://solana.com/docs/tokens/exten
 
 ## Start Integrating
 
-<Card
-  title="General Integration Guide"
-  icon="book-open"
-  color="#0066ff"
-  href="/light-token/payments/integration-guide"
-  horizontal
-/>
-<Card
-  title="When using Privy Wallets"
-  icon="key"
-  color="#0066ff"
-  href="/light-token/wallets/privy"
-  horizontal
-/>
-<Card
-  title="When using Wallet Adapter"
-  icon="wallet"
-  color="#0066ff"
-  href="/light-token/wallets/wallet-adapter"
-  horizontal
-/>
-
-## Payment guides
-
+### Payment Flows  
 <CardGroup cols={2}>
-<Card title="Send a basic payment" icon="arrow-right" href="/light-token/payments/send-payments/basic-payment">
-  Single token transfer with Light Token.
-</Card>
-<Card title="Accept payments" icon="arrow-down" href="/light-token/payments/accept-payments/receive-payments">
-  Load cold accounts and share your address.
-</Card>
-<Card title="Fee abstraction" icon="hand-holding-dollar" href="/light-token/payments/send-payments/fee-abstraction">
-  Separate the fee payer from the token owner.
-</Card>
-<Card title="Production readiness" icon="rocket" href="/light-token/payments/production-readiness">
-  Checklist for deploying to production.
-</Card>
+<Card title="Basic payment" icon="arrow-right" href="/light-token/payments/basic-payment" horizontal />
+<Card title="Batch payments" icon="layer-group" href="/light-token/payments/batch-payments" horizontal />
+<Card title="Receive payments" icon="arrow-down" href="/light-token/payments/receive-payments" horizontal />
+<Card title="Payment with memo" icon="memo" href="/light-token/payments/payment-with-memo" horizontal />
+<Card title="Get Balance and Transaction History" icon="magnifying-glass" href="/light-token/payments/verify-payments" horizontal />
+<Card title="Verify Recipients Address" icon="shield-check" href="/light-token/payments/verify-recipient-address" horizontal />
+<Card title="Configure Spend Permissions" icon="check" href="/light-token/payments/spend-permissions" horizontal />
+<Card title="Wrap and Unwrap to or from SPL / Token 2022" icon="rotate" href="/light-token/payments/wrap-unwrap" horizontal />
+
 </CardGroup>
 
+### Gasless Transactions
+<Card title="Gasless transactions" icon="hand-holding-dollar" href="/light-token/wallets/gasless-transactions" horizontal />
+
+### Signing 
+<Card title="When using Privy Wallets" icon="key" href="/light-token/wallets/privy" horizontal />
+<Card title="When using Solana Wallet Adapter" icon="wallet" href="/light-token/wallets/wallet-adapter" horizontal />
+
+### Go to Production
+<Card title="Checklist" icon="rocket" href="/light-token/payments/production-readiness" horizontal />
 
 <SupportFooter />

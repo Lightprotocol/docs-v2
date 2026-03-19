@@ -1,0 +1,31 @@
+```typescript
+import { Keypair } from "@solana/web3.js";
+import {
+    approveInterface,
+    revokeInterface,
+} from "@lightprotocol/compressed-token/unified";
+import { rpc, payer, setup } from "../setup.js";
+
+(async function () {
+    const { mint, senderAta } = await setup();
+
+    // Approve delegate
+    const delegate = Keypair.generate();
+    await approveInterface(
+        rpc,
+        payer,
+        senderAta,
+        mint,
+        delegate.publicKey,
+        500_000,
+        payer
+    );
+    console.log("Approved delegate:", delegate.publicKey.toBase58());
+
+    // Revoke all delegate permissions
+    const tx = await revokeInterface(rpc, payer, senderAta, mint, payer);
+
+    console.log("Revoked all delegate permissions");
+    console.log("Tx:", tx);
+})();
+```

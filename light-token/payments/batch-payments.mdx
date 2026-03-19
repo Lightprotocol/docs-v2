@@ -1,0 +1,220 @@
+---
+title: "Batch Payments"
+sidebarTitle: "Batch Payments"
+description: "Send payments to multiple recipients in a single transaction or sequentially."
+keywords: ["batch payments solana", "multiple transfers solana", "light token batch", "multi-recipient transfer"]
+---
+
+import ToolkitsSetup from "/snippets/setup/toolkits-setup.mdx";
+import SupportFooter from "/snippets/support-footer.mdx";
+import AgentSkillPayments from "/snippets/setup/agent-skill-payments.mdx";
+import PaymentsAiPrompt from "/snippets/ai-prompts/toolkits/payments.mdx";
+
+Send payments to multiple recipients in a single atomic transaction.
+
+<table>
+  <thead>
+    <tr>
+      <th style={{ width: "15%" }}></th>
+      <th>SPL</th>
+      <th>Light</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>**Transfer**</td>
+      <td>createTransferInstruction()</td>
+      <td>createTransferInterfaceInstructions()</td>
+    </tr>
+  </tbody>
+</table>
+
+<AgentSkillPayments />
+
+<Tabs>
+<Tab title="Guide">
+
+## Setup
+
+<ToolkitsSetup />
+
+```typescript
+import { createRpc } from "@lightprotocol/stateless.js";
+
+const rpc = createRpc(RPC_ENDPOINT);
+```
+
+<Note>
+Find full code examples:
+[single transaction](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments/batch-send-single-tx.ts) |
+[sequential](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments/batch-send.ts).
+</Note>
+
+## Send to multiple recipients in one transaction
+
+Load all accounts first, then batch the transfers into a single atomic transaction.
+
+```typescript
+import { Transaction, sendAndConfirmTransaction } from "@solana/web3.js";
+import {
+  createLoadAtaInstructions,
+  createTransferInterfaceInstructions,
+  getAssociatedTokenAddressInterface,
+} from "@lightprotocol/compressed-token/unified";
+
+const recipients = [
+  { address: recipient1, amount: 100 },
+  { address: recipient2, amount: 200 },
+  { address: recipient3, amount: 300 },
+];
+
+// 1. Load sender's cold balance (if needed)
+const senderAta = getAssociatedTokenAddressInterface(mint, owner.publicKey);
+const loadSenderIxs = await createLoadAtaInstructions(
+  rpc, senderAta, owner.publicKey, mint, payer.publicKey
+);
+for (const ixs of loadSenderIxs) {
+  await sendAndConfirmTransaction(rpc, new Transaction().add(...ixs), [payer]);
+}
+
+// 2. Load/create each recipient's associated token account
+for (const { address } of recipients) {
+  const recipientAta = getAssociatedTokenAddressInterface(mint, address);
+  const loadIxs = await createLoadAtaInstructions(
+    rpc, recipientAta, address, mint, payer.publicKey
+  );
+  for (const ixs of loadIxs) {
+    await sendAndConfirmTransaction(rpc, new Transaction().add(...ixs), [payer]);
+  }
+}
+
+// 3. All accounts are hot — batch transfers in one transaction
+const COMPUTE_BUDGET_ID = "ComputeBudget111111111111111111111111111111";
+const allTransferIxs = [];
+let isFirst = true;
+
+for (const { address, amount } of recipients) {
+  const ixs = await createTransferInterfaceInstructions(
+    rpc, payer.publicKey, mint, amount, owner.publicKey, address
+  );
+  // Filter duplicate ComputeBudget instructions from subsequent calls
+  for (const ix of ixs[0]) {
+    if (!isFirst && ix.programId.toBase58() === COMPUTE_BUDGET_ID) continue;
+    allTransferIxs.push(ix);
+  }
+  isFirst = false;
+}
+
+const batchTx = new Transaction().add(...allTransferIxs);
+await sendAndConfirmTransaction(rpc, batchTx, [payer, owner]);
+```
+
+## Send to multiple recipients sequentially
+
+When you cannot pre-load accounts or want simpler code, process each recipient independently.
+Cold accounts are loaded automatically.
+
+```typescript
+const recipients = [
+  { address: recipientA, amount: 100 },
+  { address: recipientB, amount: 200 },
+  { address: recipientC, amount: 300 },
+];
+
+for (const { address, amount } of recipients) {
+  const instructions = await createTransferInterfaceInstructions(
+    rpc,
+    payer.publicKey,
+    mint,
+    amount,
+    owner.publicKey,
+    address
+  );
+
+  for (const ixs of instructions) {
+    const tx = new Transaction().add(...ixs);
+    await sendAndConfirmTransaction(rpc, tx, [payer, owner]);
+  }
+}
+```
+
+## Advanced patterns
+
+<Accordion title="TransactionInstruction[][] pattern">
+
+Every Light Token API that modifies state returns `TransactionInstruction[][]`.
+Each inner array is one atomic transaction. Almost always a single transaction,
+but the loop pattern handles the rare multi-transaction case (cold account loading) automatically.
+
+```typescript
+const instructions = await createTransferInterfaceInstructions(
+  rpc, payer.publicKey, mint, amount, owner.publicKey, recipient
+);
+
+for (const ixs of instructions) {
+  const tx = new Transaction().add(...ixs);
+  await sendAndConfirmTransaction(rpc, tx, [payer, owner]);
+}
+```
+
+</Accordion>
+
+<Accordion title="Parallelize load transactions">
+
+When the SDK returns multiple transaction batches (load + transfer), parallelize
+the loads and send the transfer last.
+
+```typescript
+import { sliceLast } from "@lightprotocol/compressed-token/unified";
+
+const instructions = await createTransferInterfaceInstructions(
+  rpc, payer.publicKey, mint, amount, owner.publicKey, recipient
+);
+
+const { rest: loadInstructions, last: transferInstructions } = sliceLast(instructions);
+
+await Promise.all(
+  loadInstructions.map(async (ixs) => {
+    const tx = new Transaction().add(...ixs);
+    return sendAndConfirmTransaction(rpc, tx, [payer, owner]);
+  })
+);
+
+const transferTx = new Transaction().add(...transferInstructions);
+await sendAndConfirmTransaction(rpc, transferTx, [payer, owner]);
+```
+
+</Accordion>
+
+<Accordion title="signAndSendBatches helper">
+
+For wallet integrations (Privy, Wallet Adapter), use a helper that handles
+blockhash, signing, sending, and confirming for each batch.
+
+See the complete implementation in the
+[Privy integration](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/sign-with-privy/react/src/hooks/signAndSendBatches.ts) and
+[Wallet Adapter integration](https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/sign-with-wallet-adapter) examples.
+
+</Accordion>
+
+</Tab>
+<Tab title="AI Prompt">
+<PaymentsAiPrompt />
+</Tab>
+</Tabs>
+
+## Related guides
+
+<CardGroup cols={3}>
+<Card title="Basic payment" icon="arrow-right" href="/light-token/payments/basic-payment">
+  Send a single transfer.
+</Card>
+<Card title="Gasless transactions" icon="hand-holding-dollar" href="/light-token/wallets/gasless-transactions">
+  Separate the fee payer from the token owner.
+</Card>
+<Card title="Receive payments" icon="arrow-down" href="/light-token/payments/receive-payments">
+  Load cold accounts and share ATA address with the sender.
+</Card>
+</CardGroup>
+
+<SupportFooter />

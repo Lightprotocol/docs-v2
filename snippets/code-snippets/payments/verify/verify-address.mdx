@@ -1,0 +1,61 @@
+```typescript
+import { Keypair } from "@solana/web3.js";
+import {
+    createMintInterface,
+    createAtaInterface,
+    getAssociatedTokenAddressInterface,
+    getAtaInterface,
+} from "@lightprotocol/compressed-token";
+import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
+import { rpc, payer } from "../setup.js";
+
+(async function () {
+    const { mint } = await createMintInterface(
+        rpc,
+        payer,
+        payer,
+        null,
+        9,
+        undefined,
+        undefined,
+        TOKEN_PROGRAM_ID
+    );
+
+    // Create an associated token account for the payer (so it exists)
+    await createAtaInterface(rpc, payer, mint, payer.publicKey);
+
+    // --- Verify an address that HAS an associated token account ---
+    const existingRecipient = payer.publicKey;
+    const expectedAta = getAssociatedTokenAddressInterface(
+        mint,
+        existingRecipient
+    );
+
+    try {
+        const account = await getAtaInterface(
+            rpc,
+            expectedAta,
+            existingRecipient,
+            mint
+        );
+        console.log("Account exists, balance:", account.parsed.amount);
+    } catch {
+        console.log(
+            "Account does not exist yet — will be created on first transfer"
+        );
+    }
+
+    // --- Verify an address that does NOT have an associated token account ---
+    const newRecipient = Keypair.generate().publicKey;
+    const newAta = getAssociatedTokenAddressInterface(mint, newRecipient);
+
+    try {
+        const account = await getAtaInterface(rpc, newAta, newRecipient, mint);
+        console.log("Account exists, balance:", account.parsed.amount);
+    } catch {
+        console.log(
+            "Account does not exist yet — will be created on first transfer"
+        );
+    }
+})();
+```

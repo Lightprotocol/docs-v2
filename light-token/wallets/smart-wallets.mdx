@@ -1,0 +1,340 @@
+---
+title: "Smart Wallets"
+sidebarTitle: "Using Smart Wallets"
+description: "Send Light Tokens from PDA-based smart wallets. Covers off-curve associated token account creation, instruction-level transfers, and sync and async execution with Squads."
+keywords: ["smart wallets solana", "squads multisig light token", "PDA wallet token transfer", "off-curve ATA solana", "rent-free tokens smart wallet"]
+---
+
+import SmartWalletsAiPrompt from "/snippets/ai-prompts/wallets/smart-wallets.mdx";
+import SupportFooter from "/snippets/support-footer.mdx";
+
+---
+
+A smart wallet is a program deployed on-chain that provides secure, programmable wallet infrastructure. 
+The signer is separate from the wallet and can be anything: passkeys, AWS KMS, MPC, or a multisig threshold. 
+
+When a PDA owns tokens instead of a keypair, two things change:
+
+| | Standard wallet | Smart wallet (PDA) |
+|:------|:----------------|:-------------------|
+| **Create associated token account** | `createAtaInterface(rpc, payer, mint, owner)` | `createAtaInterface(rpc, payer, mint, walletPda, true)` |
+| **Transfer** | `transferInterface(...)` or `createTransferInterfaceInstructions(...)` | `createLightTokenTransferInstruction(...)` |
+| **Signing** | Keypair signs directly | Smart wallet program signs via CPI |
+
+`transferInterface` rejects off-curve addresses. Use `createLightTokenTransferInstruction` instead. It accepts any `PublicKey`, including PDAs. Pass `allowOwnerOffCurve=true` (5th argument) when creating the associated token account.
+
+This pattern applies to any PDA-based wallet program. The examples below use [Squads Smart Accounts](https://squads.so).
+
+<Note>
+The [full example](https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/smart-wallet) includes wallet creation, funding, sync transfer, and async governance flow with an integration test.
+</Note>
+
+<Tabs>
+<Tab title="Guide">
+
+## Prerequisites
+
+You need an existing smart wallet (PDA) and a ZK Compression-compatible RPC endpoint.
+
+```bash
+npm install @lightprotocol/compressed-token @lightprotocol/stateless.js @sqds/smart-account
+```
+
+```typescript
+import { createRpc } from "@lightprotocol/stateless.js";
+import {
+  createAtaInterface,
+  getAssociatedTokenAddressInterface,
+  createLightTokenTransferInstruction,
+} from "@lightprotocol/compressed-token";
+import * as smartAccount from "@sqds/smart-account";
+
+// Use a ZK Compression endpoint (Helius, Triton, or self-hosted)
+const rpc = createRpc(RPC_ENDPOINT);
+```
+
+<Accordion title="Creating a new Squads smart account">
+
+If you don't have a smart wallet yet, create one with Squads. Set `timeLock: 0` for sync execution, or a positive value to require async governance.
+
+```typescript
+const programConfig =
+  await smartAccount.accounts.ProgramConfig.fromAccountAddress(
+    rpc,
+    smartAccount.getProgramConfigPda({})[0]
+  );
+const accountIndex =
+  BigInt(programConfig.smartAccountIndex.toString()) + 1n;
+const [settingsPda] = smartAccount.getSettingsPda({ accountIndex });
+
+await smartAccount.rpc.createSmartAccount({
+  connection: rpc,
+  treasury: programConfig.treasury,
+  creator: payer,
+  settings: settingsPda,
+  settingsAuthority: null,
+  threshold: 1,
+  signers: [
+    {
+      key: payer.publicKey,
+      permissions: smartAccount.types.Permissions.all(),
+    },
+  ],
+  timeLock: 0,
+  rentCollector: null,
+  sendOptions: { skipPreflight: true },
+});
+```
+
+</Accordion>
+
+Snippets below assume `rpc`, `payer`, `mint`, `settingsPda`, and `walletPda` are defined. See the [full example](https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/smart-wallet) for runnable setup.
+
+## Create the wallet's token account
+
+<Steps>
+
+<Step title="Derive the wallet PDA">
+
+The wallet PDA is derived by the smart wallet program. It is off-curve and cannot be used as a keypair.
+
+```typescript
+const [walletPda] = smartAccount.getSmartAccountPda({
+  settingsPda,
+  accountIndex: 0,
+});
+```
+
+</Step>
+
+<Step title="Create the associated token account with off-curve support">
+
+Pass `true` as the 5th argument to allow the off-curve PDA as the token account owner:
+
+```typescript
+await createAtaInterface(rpc, payer, mint, walletPda, true);
+const walletAta = getAssociatedTokenAddressInterface(mint, walletPda, true);
+```
+
+</Step>
+
+</Steps>
+
+## Fund the wallet
+
+Anyone can send Light Tokens to the wallet's associated token account. No smart wallet approval is needed. You can use `transferInterface` or `createLightTokenTransferInstruction` from any standard wallet:
+
+```typescript
+const ix = createLightTokenTransferInstruction(
+  payerAta,          // source
+  walletAta,         // destination (the smart wallet's associated token account)
+  payer.publicKey,   // owner of the source
+  amount             // fee payer defaults to owner when omitted
+);
+```
+
+The wallet PDA also needs SOL for inner transaction fees. Around 0.01 SOL is sufficient for many transfers:
+
+```typescript
+import { SystemProgram } from "@solana/web3.js";
+
+const fundIx = SystemProgram.transfer({
+  fromPubkey: payer.publicKey,
+  toPubkey: walletPda,
+  lamports: 10_000_000, // 0.01 SOL
+});
+```
+
+## Send tokens from a smart wallet
+
+<Steps>
+
+<Step title="Build the transfer instruction">
+
+Use `createLightTokenTransferInstruction` to build the inner instruction. The wallet PDA is the owner. The optional 5th argument sets who pays rent top-ups. Pass `walletPda` so the wallet covers its own top-ups:
+
+```typescript
+const transferIx = createLightTokenTransferInstruction(
+  walletAta,       // source: wallet's Light Token associated token account
+  recipientAta,    // destination
+  walletPda,       // owner: the smart wallet PDA (off-curve)
+  amount,
+  walletPda        // fee payer for rent top-ups (optional, defaults to owner)
+);
+```
+
+</Step>
+
+<Step title="Execute via the smart wallet">
+
+The smart wallet program wraps your instruction and signs via CPI using the wallet PDA's seeds.
+
+Use **sync** when all signers are available and `timeLock=0`. The transfer happens in a single transaction. Use **async** when you need multi-party governance (threshold > 1 or time lock).
+
+<Tabs>
+<Tab title="Sync (single transaction)">
+
+```typescript
+import {
+  TransactionMessage,
+  VersionedTransaction,
+} from "@solana/web3.js";
+
+// Compile the inner instruction for synchronous execution
+const { instructions, accounts } =
+  smartAccount.utils.instructionsToSynchronousTransactionDetails({
+    vaultPda: walletPda,
+    members: [payer.publicKey],
+    transaction_instructions: [transferIx],
+  });
+
+const syncIx = smartAccount.instructions.executeTransactionSync({
+  settingsPda,
+  numSigners: 1,
+  accountIndex: 0,
+  instructions,
+  instruction_accounts: accounts,
+});
+
+// Send as a single transaction
+const { blockhash } = await rpc.getLatestBlockhash();
+const msg = new TransactionMessage({
+  payerKey: payer.publicKey,
+  recentBlockhash: blockhash,
+  instructions: [syncIx],
+}).compileToV0Message();
+
+const tx = new VersionedTransaction(msg);
+tx.sign([payer]);
+const sig = await rpc.sendRawTransaction(tx.serialize(), {
+  skipPreflight: true,
+});
+await rpc.confirmTransaction(sig, "confirmed");
+```
+
+</Tab>
+<Tab title="Async (proposal governance)">
+
+Each step is a separate transaction. This works with any threshold or time lock.
+
+```typescript
+import { TransactionMessage } from "@solana/web3.js";
+
+// Read the current transaction index
+const settings = await smartAccount.accounts.Settings.fromAccountAddress(
+  rpc,
+  settingsPda
+);
+const txIndex = BigInt(settings.transactionIndex.toString()) + 1n;
+const { blockhash } = await rpc.getLatestBlockhash();
+
+// 1. Create the transaction
+await smartAccount.rpc.createTransaction({
+  connection: rpc,
+  feePayer: payer,
+  settingsPda,
+  transactionIndex: txIndex,
+  creator: payer.publicKey,
+  accountIndex: 0,
+  ephemeralSigners: 0,
+  transactionMessage: new TransactionMessage({
+    payerKey: walletPda,
+    recentBlockhash: blockhash,
+    instructions: [transferIx],
+  }),
+  sendOptions: { skipPreflight: true },
+});
+
+// 2. Create a proposal
+await smartAccount.rpc.createProposal({
+  connection: rpc,
+  feePayer: payer,
+  settingsPda,
+  transactionIndex: txIndex,
+  creator: payer,
+  sendOptions: { skipPreflight: true },
+});
+
+// 3. Approve (repeat for each signer up to threshold)
+await smartAccount.rpc.approveProposal({
+  connection: rpc,
+  feePayer: payer,
+  settingsPda,
+  transactionIndex: txIndex,
+  signer: payer,
+  sendOptions: { skipPreflight: true },
+});
+
+// 4. Execute
+await smartAccount.rpc.executeTransaction({
+  connection: rpc,
+  feePayer: payer,
+  settingsPda,
+  transactionIndex: txIndex,
+  signer: payer.publicKey,
+  signers: [payer],
+  sendOptions: { skipPreflight: true },
+});
+```
+
+</Tab>
+</Tabs>
+
+</Step>
+
+</Steps>
+
+## Check balance
+
+Query the wallet's token balance like any other account:
+
+```typescript
+import { getAtaInterface } from "@lightprotocol/compressed-token/unified";
+
+const account = await getAtaInterface(rpc, walletAta, walletPda, mint);
+console.log(account.parsed.amount);
+```
+
+## Combine with gasless transactions
+
+You can sponsor the outer transaction fee so that only the wallet PDA's SOL is used for inner fees (rent top-ups). Set your application as `feePayer` on the outer transaction and pass it as the first signer:
+
+```typescript
+// Outer transaction: your server pays the Solana network fee
+const msg = new TransactionMessage({
+  payerKey: sponsor.publicKey,  // sponsor pays outer tx fee
+  recentBlockhash: blockhash,
+  instructions: [syncIx],
+}).compileToV0Message();
+
+const tx = new VersionedTransaction(msg);
+tx.sign([sponsor, payer]);  // sponsor + smart wallet signer
+```
+
+See [Gasless transactions](/light-token/wallets/gasless-transactions) for the full pattern.
+
+## Further reading
+
+- [Solana Smart Wallets](https://www.helius.dev/blog/solana-smart-wallets) : background on smart wallet concepts and account abstraction on Solana
+
+</Tab>
+<Tab title="AI Prompt">
+<SmartWalletsAiPrompt />
+</Tab>
+</Tabs>
+
+## Related guides
+
+<CardGroup cols={3}>
+<Card title="Basic payment" icon="arrow-right" href="/light-token/payments/basic-payment">
+  Send a single token transfer.
+</Card>
+<Card title="Gasless transactions" icon="hand-holding-dollar" href="/light-token/wallets/gasless-transactions">
+  Sponsor fees so users never hold SOL.
+</Card>
+<Card title="Integration guide" icon="book" href="/light-token/wallets/overview">
+  Full wallet integration reference.
+</Card>
+</CardGroup>
+
+<SupportFooter />

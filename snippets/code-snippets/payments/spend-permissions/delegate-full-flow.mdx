@@ -1,0 +1,65 @@
+```typescript
+import { Keypair } from "@solana/web3.js";
+import { getAtaInterface } from "@lightprotocol/compressed-token";
+import {
+    approveInterface,
+    revokeInterface,
+} from "@lightprotocol/compressed-token/unified";
+import { rpc, payer, setup } from "../setup.js";
+
+(async function () {
+    const { mint, senderAta } = await setup();
+
+    // 1. Owner approves delegate to spend up to 500,000 tokens
+    const delegate = Keypair.generate();
+    const approveTx = await approveInterface(
+        rpc,
+        payer,
+        senderAta,
+        mint,
+        delegate.publicKey,
+        500_000,
+        payer
+    );
+    console.log("1. Approved delegate:", delegate.publicKey.toBase58());
+    console.log("   Allowance: 500,000 tokens");
+    console.log("   Tx:", approveTx);
+
+    // 2. Check delegation status
+    const account = await getAtaInterface(
+        rpc,
+        senderAta,
+        payer.publicKey,
+        mint
+    );
+    console.log("\n2. Account status after approval:");
+    console.log(
+        "   Delegate:",
+        account.parsed.delegate?.toBase58() ?? "none"
+    );
+    console.log(
+        "   Delegated amount:",
+        account.parsed.delegatedAmount.toString()
+    );
+    console.log("   Account balance:", account.parsed.amount.toString());
+
+    // 3. Owner revokes all delegate permissions
+    const revokeTx = await revokeInterface(rpc, payer, senderAta, mint, payer);
+    console.log("\n3. Revoked all delegate permissions");
+    console.log("   Tx:", revokeTx);
+
+    // 4. Verify delegate is removed
+    const afterRevoke = await getAtaInterface(
+        rpc,
+        senderAta,
+        payer.publicKey,
+        mint
+    );
+    console.log("\n4. Account status after revoke:");
+    console.log(
+        "   Delegate:",
+        afterRevoke.parsed.delegate?.toBase58() ?? "none"
+    );
+    console.log("   Balance:", afterRevoke.parsed.amount.toString());
+})();
+```

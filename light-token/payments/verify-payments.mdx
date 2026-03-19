@@ -1,14 +1,41 @@
 ---
 title: "Verify Payments"
-sidebarTitle: "Verify payments"
+sidebarTitle: "Get Token Balance and Transaction History"
 description: "Query token balances and transaction history to verify incoming payments."
 keywords: ["verify payment solana", "token balance solana", "transaction history light token", "payment verification"]
 ---
 
 import ToolkitsSetup from "/snippets/setup/toolkits-setup.mdx";
 import SupportFooter from "/snippets/support-footer.mdx";
+import AgentSkillPayments from "/snippets/setup/agent-skill-payments.mdx";
+import PaymentsAiPrompt from "/snippets/ai-prompts/toolkits/payments.mdx";
 
-Query balances and transaction history to confirm incoming payments.
+<table>
+  <thead>
+    <tr>
+      <th style={{ width: "15%" }}></th>
+      <th>SPL</th>
+      <th>Light</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>**Get Balance**</td>
+      <td>getAccount()</td>
+      <td>getAtaInterface()</td>
+    </tr>
+    <tr>
+      <td>**Tx History**</td>
+      <td>getSignaturesForAddress()</td>
+      <td>rpc.getSignaturesForOwnerInterface()</td>
+    </tr>
+  </tbody>
+</table>
+
+<AgentSkillPayments />
+
+<Tabs>
+<Tab title="Guide">
 
 ## Setup
 
@@ -23,7 +50,7 @@ const rpc = createRpc(RPC_ENDPOINT);
 ## Query balance
 
 <Note>
-Find a full code example [here](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments-and-wallets/get-balance.ts).
+Find a full code example [here](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments/get-balance.ts).
 </Note>
 
 ```typescript
@@ -53,7 +80,7 @@ console.log(account.amount);
 ## Transaction history
 
 <Note>
-Find a full code example [here](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments-and-wallets/get-history.ts).
+Find a full code example [here](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments/get-history.ts).
 </Note>
 
 Query all transactions for an owner across both on-chain and compressed state:
@@ -76,14 +103,23 @@ const signatures = await connection.getSignaturesForAddress(ata);
 
 </Accordion>
 
+</Tab>
+<Tab title="AI Prompt">
+<PaymentsAiPrompt />
+</Tab>
+</Tabs>
+
 ## Related guides
 
-<CardGroup cols={2}>
-<Card title="Receive payments" icon="arrow-down" href="/light-token/payments/accept-payments/receive-payments">
+<CardGroup cols={3}>
+<Card title="Receive payments" icon="arrow-down" href="/light-token/payments/receive-payments">
   Load cold accounts and prepare to receive.
 </Card>
-<Card title="Basic payment" icon="arrow-right" href="/light-token/payments/send-payments/basic-payment">
+<Card title="Basic payment" icon="arrow-right" href="/light-token/payments/basic-payment">
   Send a single token transfer.
+</Card>
+<Card title="Verify address" icon="shield-check" href="/light-token/payments/verify-address">
+  Validate recipient addresses before sending.
 </Card>
 </CardGroup>
 

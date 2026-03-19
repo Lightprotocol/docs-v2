@@ -1,19 +1,40 @@
 ---
 title: "Receive Payments"
-sidebarTitle: "Receive payments"
+sidebarTitle: "Receive Payments"
 description: "Prepare to receive token payments by loading cold accounts and sharing your associated token account address."
 keywords: ["receive stablecoin solana", "light token receive", "load ata solana", "cold account loading"]
 ---
 
 import ToolkitsSetup from "/snippets/setup/toolkits-setup.mdx";
 import SupportFooter from "/snippets/support-footer.mdx";
+import AgentSkillPayments from "/snippets/setup/agent-skill-payments.mdx";
+import PaymentsAiPrompt from "/snippets/ai-prompts/toolkits/payments.mdx";
 
+1. Share the associated token account address with the sender.
+2. We recommend to prepend a load instruction before.
 Load creates the associated token account if needed and loads any cold balance into it.
-Share the associated token account address with the sender.
 
-<Note>
-Find a full code example [here](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments-and-wallets/receive.ts).
-</Note>
+<table>
+  <thead>
+    <tr>
+      <th style={{ width: "15%" }}></th>
+      <th>SPL</th>
+      <th>Light</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>**Receive**</td>
+      <td>getOrCreateAssociatedTokenAccount()</td>
+      <td>createLoadAtaInstructions()</td>
+    </tr>
+  </tbody>
+</table>
+
+<AgentSkillPayments />
+
+<Tabs>
+<Tab title="Guide">
 
 <Info>
 **About loading**: Light Token accounts reduce account rent ~200x by auto-compressing inactive
@@ -44,6 +65,9 @@ const ata = getAssociatedTokenAddressInterface(mint, recipient);
 ```
 
 ## Load the associated token account
+<Note>
+Find a full code example [here](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments/receive.ts).
+</Note>
 
 <Tabs>
 <Tab title="Instruction">
@@ -92,11 +116,6 @@ if (sig) console.log("Loaded:", sig);
 </Tab>
 </Tabs>
 
-<Info>
-The `payer` on load instructions is the fee sponsor. Set your application as the payer so users never interact with SOL.
-See [fee abstraction](/light-token/payments/send-payments/fee-abstraction) for details.
-</Info>
-
 <Accordion title="Compare to SPL">
 
 ```typescript
@@ -121,14 +140,23 @@ const ata = await getOrCreateAssociatedTokenAccount(
 
 </Accordion>
 
+</Tab>
+<Tab title="AI Prompt">
+<PaymentsAiPrompt />
+</Tab>
+</Tabs>
+
 ## Related guides
 
-<CardGroup cols={2}>
-<Card title="Verify payments" icon="magnifying-glass" href="/light-token/payments/accept-payments/verify-payments">
+<CardGroup cols={3}>
+<Card title="Verify payments" icon="magnifying-glass" href="/light-token/payments/verify-payments">
   Check balances and transaction history.
 </Card>
-<Card title="Fee abstraction" icon="hand-holding-dollar" href="/light-token/payments/send-payments/fee-abstraction">
+<Card title="Gasless transactions" icon="hand-holding-dollar" href="/light-token/wallets/gasless-transactions">
   Abstract SOL fees so users never hold SOL.
+</Card>
+<Card title="Basic payment" icon="arrow-right" href="/light-token/payments/basic-payment">
+  Send a single token transfer.
 </Card>
 </CardGroup>
 

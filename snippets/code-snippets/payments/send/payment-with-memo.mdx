@@ -1,0 +1,71 @@
+```typescript
+import {
+    Keypair,
+    Transaction,
+    TransactionInstruction,
+    PublicKey,
+    sendAndConfirmTransaction,
+} from "@solana/web3.js";
+import { createAtaInterfaceIdempotent } from "@lightprotocol/compressed-token";
+import {
+    getAssociatedTokenAddressInterface,
+    createTransferInterfaceInstructions,
+    sliceLast,
+} from "@lightprotocol/compressed-token/unified";
+import { rpc, payer, setup } from "../setup.js";
+
+const MEMO_PROGRAM_ID = new PublicKey(
+    "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr"
+);
+
+(async function () {
+    const { mint } = await setup();
+
+    const recipient = Keypair.generate();
+    await createAtaInterfaceIdempotent(rpc, payer, mint, recipient.publicKey);
+    const destination = getAssociatedTokenAddressInterface(
+        mint,
+        recipient.publicKey
+    );
+
+    const instructions = await createTransferInterfaceInstructions(
+        rpc,
+        payer.publicKey,
+        mint,
+        100,
+        payer.publicKey,
+        destination
+    );
+
+    const { rest: loadInstructions, last: transferInstructions } =
+        sliceLast(instructions);
+
+    // Send load transactions first (if any)
+    for (const ixs of loadInstructions) {
+        const tx = new Transaction().add(...ixs);
+        await sendAndConfirmTransaction(rpc, tx, [payer]);
+    }
+
+    // Add memo to the transfer transaction
+    const memoIx = new TransactionInstruction({
+        keys: [],
+        programId: MEMO_PROGRAM_ID,
+        data: Buffer.from("INV-2024-001"),
+    });
+
+    const transferTx = new Transaction().add(...transferInstructions, memoIx);
+    const signature = await sendAndConfirmTransaction(rpc, transferTx, [payer]);
+    console.log("Tx with memo:", signature);
+
+    // Read memo back from transaction logs
+    const txDetails = await rpc.getTransaction(signature, {
+        maxSupportedTransactionVersion: 0,
+    });
+
+    const logs = txDetails?.meta?.logMessages || [];
+    const memoLogs = logs.filter((log: string) =>
+        log.includes("Program MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr")
+    );
+    console.log("Memo logs:", memoLogs);
+})();
+```

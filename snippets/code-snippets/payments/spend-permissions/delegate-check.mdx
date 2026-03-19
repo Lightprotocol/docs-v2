@@ -1,0 +1,60 @@
+```typescript
+import { Keypair } from "@solana/web3.js";
+import { getAtaInterface } from "@lightprotocol/compressed-token";
+import { approveInterface } from "@lightprotocol/compressed-token/unified";
+import { rpc, payer, setup } from "../setup.js";
+
+(async function () {
+    const { mint, senderAta } = await setup();
+
+    // Check before approval — no delegate set
+    const beforeApproval = await getAtaInterface(
+        rpc,
+        senderAta,
+        payer.publicKey,
+        mint
+    );
+    console.log("Before approval:");
+    console.log(
+        "  Delegate:",
+        beforeApproval.parsed.delegate?.toBase58() ?? "none"
+    );
+    console.log(
+        "  Delegated amount:",
+        beforeApproval.parsed.delegatedAmount.toString()
+    );
+
+    // Approve delegate
+    const delegate = Keypair.generate();
+    await approveInterface(
+        rpc,
+        payer,
+        senderAta,
+        mint,
+        delegate.publicKey,
+        500_000,
+        payer
+    );
+
+    // Check after approval — delegate is set with allowance
+    const afterApproval = await getAtaInterface(
+        rpc,
+        senderAta,
+        payer.publicKey,
+        mint
+    );
+    console.log("\nAfter approval:");
+    console.log(
+        "  Delegate:",
+        afterApproval.parsed.delegate?.toBase58() ?? "none"
+    );
+    console.log(
+        "  Delegated amount:",
+        afterApproval.parsed.delegatedAmount.toString()
+    );
+    console.log(
+        "  Account balance:",
+        afterApproval.parsed.amount.toString()
+    );
+})();
+```
