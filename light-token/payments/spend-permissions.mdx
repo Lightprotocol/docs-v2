@@ -161,7 +161,8 @@ for (const ixs of instructions) {
 
 ## Revoke a delegate
 
-Remove spending permission:
+Remove all spending permissions from the current delegate.
+If you need to reduce the limit, approve the same delegate with a lower amount.
 
 ```typescript
 import { revokeInterface } from "@lightprotocol/compressed-token/unified";

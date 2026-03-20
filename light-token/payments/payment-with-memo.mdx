@@ -9,11 +9,15 @@ import ToolkitsSetup from "/snippets/setup/toolkits-setup.mdx";
 import SupportFooter from "/snippets/support-footer.mdx";
 import AgentSkillPayments from "/snippets/setup/agent-skill-payments.mdx";
 import PaymentsAiPrompt from "/snippets/ai-prompts/toolkits/payments.mdx";
+import PaymentsSetupHelper from "/snippets/setup/payments-setup-helper.mdx";
+import MemoCode from "/snippets/code-snippets/payments/send/payment-with-memo.mdx";
+
+---
 
 Solana's memo program lets you attach invoice numbers, order IDs, or custom references
 to any payment. These memos are permanently recorded on-chain and visible in transaction
  logs, making it easy to match payments to your internal systems.
-Use it with Light Token identical to SPL:
+Use just like with SPL token:
 
 <table>
   <thead>
@@ -37,15 +41,8 @@ Use it with Light Token identical to SPL:
 <Tabs>
 <Tab title="Guide">
 
-
-## How it works
-
-1. Create the transfer instructions with `createTransferInterfaceInstructions()`.
-2. Create a memo instruction with a message. This message will be visible in the program logs of the transaction..
-3. Both instructions execute atomically in the same transaction.
-
-After the transaction confirms, fetch it to view the memo in the logs. The memo appears as a log message from the Memo program.
-
+<Steps>
+<Step>
 ## Setup
 
 <ToolkitsSetup />
@@ -62,65 +59,34 @@ import { createRpc } from "@lightprotocol/stateless.js";
 const rpc = createRpc(RPC_ENDPOINT);
 ```
 
-<Steps>
+<PaymentsSetupHelper />
+
+</Step>
 <Step>
 ## Send a Payment with Memo
 
-```typescript
-import { Transaction, sendAndConfirmTransaction, TransactionInstruction, PublicKey } from "@solana/web3.js";
-import {
-  createTransferInterfaceInstructions,
-  sliceLast,
-} from "@lightprotocol/compressed-token/unified";
+1. Create the transfer instructions with `createTransferInterfaceInstructions()`. Load transactions are handled under the hood.
+2. Create a memo instruction with a message. This message will be visible in the program logs of the transaction.
+3. Both instructions execute atomically in the same transaction.
 
-const MEMO_PROGRAM_ID = new PublicKey("MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr");
+After the transaction confirms, fetch it to view the memo in the logs. The memo appears as a log message from the Memo program.
 
-const instructions = await createTransferInterfaceInstructions(
-  rpc,
-  payer.publicKey,
-  mint,
-  amount,
-  owner.publicKey,
-  recipient
-);
+<Info>
+**About loading**: Light Token accounts reduce account rent ~200x by auto-compressing inactive
+accounts. Before any action, the SDK detects cold balances and adds
+instructions to load them. This almost always fits in a single
+atomic transaction with your regular transfer. APIs return `TransactionInstruction[][]`
+ so the same
+loop handles the rare multi-transaction case automatically.
+</Info>
 
-const { rest: loadInstructions, last: transferInstructions } = sliceLast(instructions);
-
-// Send load transactions first (if any)
-for (const ixs of loadInstructions) {
-  const tx = new Transaction().add(...ixs);
-  await sendAndConfirmTransaction(rpc, tx, [payer, owner]);
-}
-
-// Add memo to the transfer transaction
-const memoIx = new TransactionInstruction({
-  keys: [],
-  programId: MEMO_PROGRAM_ID,
-  data: Buffer.from("INV-2024-001"),
-});
-
-const transferTx = new Transaction().add(...transferInstructions, memoIx);
-await sendAndConfirmTransaction(rpc, transferTx, [payer, owner]);
-```
+<MemoCode />
 
 </Step>
 <Step>
 ## Read Memo from Transaction Logs
 
 After the transaction confirms, the memo appears in the transaction logs:
-
-```typescript
-const txDetails = await rpc.getTransaction(signature, {
-  maxSupportedTransactionVersion: 0,
-});
-
-// Look for memo program log entries
-const logs = txDetails?.meta?.logMessages || [];
-const memoLogs = logs.filter((log) =>
-  log.includes("Program MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr")
-);
-console.log("Memo logs:", memoLogs);
-```
 
 ``` markdown Example Transaction Logs
 "Program TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb invoke [1]",

@@ -1,37 +1,33 @@
 ```typescript
-import { Keypair } from "@solana/web3.js";
+import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import {
     getAssociatedTokenAddressInterface,
     getAtaInterface,
-} from "@lightprotocol/compressed-token";
-import { transferInterface } from "@lightprotocol/compressed-token/unified";
+} from "@lightprotocol/compressed-token/unified";
 import { rpc, payer, setup } from "../setup.js";
 
 (async function () {
-    const { mint, senderAta } = await setup();
+    const { mint } = await setup();
 
-    const recipient = Keypair.generate();
-    await transferInterface(
-        rpc,
-        payer,
-        senderAta,
-        mint,
-        recipient.publicKey,
-        payer,
-        100
-    );
+    // SOL balance
+    const solLamports = await rpc.getBalance(payer.publicKey);
+    console.log(`SOL: ${solLamports / LAMPORTS_PER_SOL}`);
 
-    // Get recipient's balance
-    const recipientAta = getAssociatedTokenAddressInterface(
-        mint,
-        recipient.publicKey
-    );
-    const { parsed: account } = await getAtaInterface(
-        rpc,
-        recipientAta,
-        recipient.publicKey,
-        mint
-    );
-    console.log("Recipient's balance:", account.amount);
+    // Unified token balance via SDK aggregation
+    const ata = getAssociatedTokenAddressInterface(mint, payer.publicKey);
+    const account = await getAtaInterface(rpc, ata, payer.publicKey, mint);
+
+    const decimals = 9;
+    const unified =
+        Number(account.parsed.amount) / 10 ** decimals;
+    console.log(`\nToken ${mint.toBase58().slice(0, 6)}... (unified): ${unified}`);
+
+    // Per-source breakdown from _sources
+    if (account._sources && account._sources.length > 0) {
+        for (const source of account._sources) {
+            const amount = Number(source.amount) / 10 ** decimals;
+            console.log(`  ${source.type}: ${amount}`);
+        }
+    }
 })();
 ```

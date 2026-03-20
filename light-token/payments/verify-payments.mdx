@@ -9,6 +9,9 @@ import ToolkitsSetup from "/snippets/setup/toolkits-setup.mdx";
 import SupportFooter from "/snippets/support-footer.mdx";
 import AgentSkillPayments from "/snippets/setup/agent-skill-payments.mdx";
 import PaymentsAiPrompt from "/snippets/ai-prompts/toolkits/payments.mdx";
+import PaymentsSetupHelper from "/snippets/setup/payments-setup-helper.mdx";
+import GetBalanceCode from "/snippets/code-snippets/payments/verify/get-balance.mdx";
+import GetHistoryCode from "/snippets/code-snippets/payments/verify/get-history.mdx";
 
 <table>
   <thead>
@@ -47,6 +50,8 @@ import { createRpc } from "@lightprotocol/stateless.js";
 const rpc = createRpc(RPC_ENDPOINT);
 ```
 
+<PaymentsSetupHelper />
+
 ## Query balance
 
 `getAtaInterface` returns a unified balance aggregating Light Token (hot + cold), SPL, and Token 2022 sources in `parsed.amount`.
@@ -55,17 +60,7 @@ const rpc = createRpc(RPC_ENDPOINT);
 Find a full code example [here](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments/verify/get-balance.ts).
 </Note>
 
-```typescript
-import {
-  getAssociatedTokenAddressInterface,
-  getAtaInterface,
-} from "@lightprotocol/compressed-token/unified";
-
-const ata = getAssociatedTokenAddressInterface(mint, owner);
-const account = await getAtaInterface(rpc, ata, owner, mint);
-
-console.log(account.parsed.amount); // Unified balance
-```
+<GetBalanceCode />
 
 <Accordion title="Compare to SPL">
 
@@ -87,15 +82,7 @@ Find a full code example [here](https://github.com/Lightprotocol/examples-light-
 
 Query all transactions for an owner across both on-chain and compressed state:
 
-```typescript
-const result = await rpc.getSignaturesForOwnerInterface(owner);
-
-console.log(result.signatures); // Merged + deduplicated
-console.log(result.solana);     // On-chain transactions only
-console.log(result.compressed); // Compressed transactions only
-```
-
-Use `getSignaturesForAddressInterface(address)` if you want address-specific rather than owner-wide history.
+<GetHistoryCode />
 
 <Accordion title="Compare to SPL">
 

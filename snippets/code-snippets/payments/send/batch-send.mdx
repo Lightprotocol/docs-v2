@@ -5,8 +5,7 @@ import {
     sendAndConfirmTransaction,
 } from "@solana/web3.js";
 import {
-    createLoadAtaInstructions,
-    createLightTokenTransferInstruction,
+    createTransferInterfaceInstructions,
     getAtaInterface,
     getAssociatedTokenAddressInterface,
 } from "@lightprotocol/compressed-token/unified";
@@ -21,39 +20,24 @@ import { rpc, payer, setup } from "../setup.js";
         { address: Keypair.generate().publicKey, amount: 300 },
     ];
 
-    // Load sender's cold balance to hot (if needed) — one call, one tx
-    const senderAta = getAssociatedTokenAddressInterface(
-        mint,
-        payer.publicKey
-    );
-    const loadIxs = await createLoadAtaInstructions(
-        rpc,
-        senderAta,
-        payer.publicKey,
-        mint,
-        payer.publicKey
-    );
-    for (const ixs of loadIxs) {
-        const tx = new Transaction().add(...ixs);
-        await sendAndConfirmTransaction(rpc, tx, [payer]);
-    }
+    // Build transfer instructions for each recipient
+    const allTransferIxs = [];
 
-    // Build one transfer instruction per recipient
-    const transferIxs = recipients.map(({ address, amount }) => {
-        const recipientAta = getAssociatedTokenAddressInterface(
+    for (const { address, amount } of recipients) {
+        const instructions = await createTransferInterfaceInstructions(
+            rpc,
+            payer.publicKey,
             mint,
+            amount,
+            payer.publicKey,
             address
         );
-        return createLightTokenTransferInstruction(
-            senderAta,
-            recipientAta,
-            payer.publicKey,
-            amount
-        );
-    });
+
+        allTransferIxs.push(...instructions[instructions.length - 1]);
+    }
 
     // Send all transfers in a single transaction
-    const tx = new Transaction().add(...transferIxs);
+    const tx = new Transaction().add(...allTransferIxs);
     const sig = await sendAndConfirmTransaction(rpc, tx, [payer]);
     console.log("Batch tx:", sig);
 

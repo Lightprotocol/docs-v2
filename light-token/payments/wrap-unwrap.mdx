@@ -1,7 +1,7 @@
 ---
 title: "Wrap and Unwrap"
 sidebarTitle: "Wrap and Unwrap"
-description: "Move tokens between SPL / Token 2022 and Light Token accounts for interoperability with applications that don't support Light Token yet."
+description: "Move tokens between SPL / Token 2022 and Light Token accounts. Use wrap/unwrap to interoperate with applications that only support SPL or Token 2022."
 keywords: ["wrap tokens solana", "unwrap tokens solana", "spl to light token", "cex onramp solana", "token interoperability"]
 ---
 
@@ -10,32 +10,6 @@ import ToolkitsSetup from "/snippets/setup/toolkits-setup.mdx";
 import SupportFooter from "/snippets/support-footer.mdx";
 import AgentSkillPayments from "/snippets/setup/agent-skill-payments.mdx";
 import PaymentsAiPrompt from "/snippets/ai-prompts/toolkits/payments.mdx";
-
-Wrap moves tokens from an SPL or Token 2022 account into a Light Token associated token account.
-Unwrap moves tokens back. Use wrap/unwrap to interoperate with applications that only support
-SPL or Token 2022, such as centralized exchanges or DeFi.
-
-<table>
-  <thead>
-    <tr>
-      <th style={{ width: "15%" }}></th>
-      <th>SPL</th>
-      <th>Light</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>**Wrap from SPL**</td>
-      <td>N/A</td>
-      <td>createWrapInstruction()</td>
-    </tr>
-    <tr>
-      <td>**Unwrap to SPL**</td>
-      <td>N/A</td>
-      <td>createUnwrapInstructions() / unwrap()</td>
-    </tr>
-  </tbody>
-</table>
 
 <AgentSkillPayments />
 

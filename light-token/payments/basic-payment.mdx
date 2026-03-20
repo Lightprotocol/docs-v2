@@ -9,6 +9,9 @@ import ToolkitsSetup from "/snippets/setup/toolkits-setup.mdx";
 import SupportFooter from "/snippets/support-footer.mdx";
 import AgentSkillPayments from "/snippets/setup/agent-skill-payments.mdx";
 import PaymentsAiPrompt from "/snippets/ai-prompts/toolkits/payments.mdx";
+import PaymentsSetupHelper from "/snippets/setup/payments-setup-helper.mdx";
+import SendInstructionCode from "/snippets/code-snippets/payments/send/send-instruction.mdx";
+import SendActionCode from "/snippets/code-snippets/payments/send/send-action.mdx";
 
 1. The light-token API matches the SPL-token API almost entirely, and extends their functionality to include the light token program in addition to the SPL-token and Token-2022 programs.
 2. Your users use the same stablecoins, just stored more efficiently.
@@ -55,6 +58,8 @@ import {
 const rpc = createRpc(RPC_ENDPOINT);
 ```
 
+<PaymentsSetupHelper />
+
 <Note>
 Find full runnable code examples:
 [instruction](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments/send/send-instruction.ts) |
@@ -80,27 +85,7 @@ loop handles the rare multi-transaction case automatically.
 <Tabs>
 <Tab title="Instruction">
 
-```typescript
-import { Transaction, sendAndConfirmTransaction } from "@solana/web3.js";
-import { createTransferInterfaceInstructions } from "@lightprotocol/compressed-token/unified";
-
-// Returns TransactionInstruction[][].
-// Each inner array is one transaction.
-// Almost always returns just one.
-const instructions = await createTransferInterfaceInstructions(
-  rpc,
-  payer.publicKey,
-  mint,
-  amount,
-  owner.publicKey,
-  recipient
-);
-
-for (const ixs of instructions) {
-  const tx = new Transaction().add(...ixs);
-  await sendAndConfirmTransaction(rpc, tx, [payer, owner]);
-}
-```
+<SendInstructionCode />
 
 
 <Accordion title="Compare to SPL">
@@ -183,17 +168,7 @@ await sendAndConfirmTransaction(rpc, transferTx);
 </Tab>
 <Tab title="Action">
 
-```typescript
-import {
-  getAssociatedTokenAddressInterface,
-  transferInterface,
-} from "@lightprotocol/compressed-token/unified";
-
-const sourceAta = getAssociatedTokenAddressInterface(mint, owner.publicKey);
-
-// Handles loading, creates recipient associated token account, transfers.
-await transferInterface(rpc, payer, sourceAta, mint, recipient, owner, amount);
-```
+<SendActionCode />
 
 <Accordion title="Compare to SPL">
 
