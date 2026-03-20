@@ -1,15 +1,11 @@
 ```typescript
 import { useState } from 'react';
-import { PublicKey, type TransactionInstruction } from '@solana/web3.js';
+import { PublicKey } from '@solana/web3.js';
 import {
   createTransferInterfaceInstructions,
 } from '@lightprotocol/compressed-token/unified';
 import { createRpc } from '@lightprotocol/stateless.js';
 import { signAndSendBatches, type SignTransactionFn } from './signAndSendBatches';
-
-// For native SOL, the user must wrap SOL → WSOL first (via useWrap or
-// the payments toolkit). createTransferInterfaceInstructions works with
-// WSOL like any other SPL token once it exists in a token account.
 
 export interface TransferParams {
   ownerPublicKey: string;
@@ -34,19 +30,19 @@ export function useTransfer() {
       const { params, signTransaction } = args;
       const { ownerPublicKey, mint, toAddress, amount, decimals = 9 } = params;
 
-      const rpc = import.meta.env.VITE_LOCALNET === 'true'
-        ? createRpc()
-        : createRpc(import.meta.env.VITE_HELIUS_RPC_URL);
+      const rpc = createRpc(import.meta.env.VITE_HELIUS_RPC_URL);
 
       const owner = new PublicKey(ownerPublicKey);
       const mintPubkey = new PublicKey(mint);
       const recipient = new PublicKey(toAddress);
       const tokenAmount = Math.round(amount * Math.pow(10, decimals));
 
-      const instructions: TransactionInstruction[][] =
-        await createTransferInterfaceInstructions(
-          rpc, owner, mintPubkey, tokenAmount, owner, recipient,
-        );
+      // Returns TransactionInstruction[][].
+      // Each inner array is one transaction.
+      // Almost always returns just one.
+      const instructions = await createTransferInterfaceInstructions(
+        rpc, owner, mintPubkey, tokenAmount, owner, recipient,
+      );
 
       const signature = await signAndSendBatches(instructions, {
         rpc,

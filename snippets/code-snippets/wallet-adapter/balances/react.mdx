@@ -1,6 +1,6 @@
 ```typescript
 import { useState, useCallback } from 'react';
-import { PublicKey } from '@solana/web3.js';
+import { PublicKey, LAMPORTS_PER_SOL } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ID, TOKEN_2022_PROGRAM_ID, getMint } from '@solana/spl-token';
 import { createRpc } from '@lightprotocol/stateless.js';
 import {
@@ -28,9 +28,7 @@ export function useUnifiedBalance() {
 
     setIsLoading(true);
     try {
-      const rpc = import.meta.env.VITE_LOCALNET === 'true'
-        ? createRpc()
-        : createRpc(import.meta.env.VITE_HELIUS_RPC_URL);
+      const rpc = createRpc(import.meta.env.VITE_HELIUS_RPC_URL);
       const owner = new PublicKey(ownerAddress);
 
       // Per-mint accumulator
@@ -133,21 +131,16 @@ export function useUnifiedBalance() {
       // 7. Assemble TokenBalance[]
       const result: TokenBalance[] = [];
 
-      // Pull WSOL data from mintMap (if user has WSOL in token accounts)
-      const WSOL_MINT = 'So11111111111111111111111111111111111111112';
-      const wsolEntry = mintMap.get(WSOL_MINT);
-      mintMap.delete(WSOL_MINT); // prevent duplicate row
-
-      // SOL entry: native SOL + WSOL Light Token balances
+      // SOL entry
       result.push({
-        mint: WSOL_MINT,
+        mint: 'So11111111111111111111111111111111111111112',
         decimals: 9,
         isNative: true,
-        hot: wsolEntry?.hot ?? 0n,
-        cold: wsolEntry?.cold ?? 0n,
+        hot: 0n,
+        cold: 0n,
         spl: BigInt(solLamports),
-        t22: wsolEntry?.t22 ?? 0n,
-        unified: (wsolEntry?.hot ?? 0n) + (wsolEntry?.cold ?? 0n),
+        t22: 0n,
+        unified: 0n,
       });
 
       // Token entries

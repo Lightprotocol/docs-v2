@@ -6,9 +6,7 @@ import {
     PublicKey,
     sendAndConfirmTransaction,
 } from "@solana/web3.js";
-import { createAtaInterfaceIdempotent } from "@lightprotocol/compressed-token";
 import {
-    getAssociatedTokenAddressInterface,
     createTransferInterfaceInstructions,
     sliceLast,
 } from "@lightprotocol/compressed-token/unified";
@@ -20,13 +18,7 @@ const MEMO_PROGRAM_ID = new PublicKey(
 
 (async function () {
     const { mint } = await setup();
-
     const recipient = Keypair.generate();
-    await createAtaInterfaceIdempotent(rpc, payer, mint, recipient.publicKey);
-    const destination = getAssociatedTokenAddressInterface(
-        mint,
-        recipient.publicKey
-    );
 
     const instructions = await createTransferInterfaceInstructions(
         rpc,
@@ -34,7 +26,7 @@ const MEMO_PROGRAM_ID = new PublicKey(
         mint,
         100,
         payer.publicKey,
-        destination
+        recipient.publicKey
     );
 
     const { rest: loadInstructions, last: transferInstructions } =

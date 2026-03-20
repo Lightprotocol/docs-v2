@@ -4,12 +4,11 @@ import {
     Transaction,
     sendAndConfirmTransaction,
 } from "@solana/web3.js";
-import { createAtaInterfaceIdempotent } from "@lightprotocol/compressed-token";
 import {
     getAssociatedTokenAddressInterface,
-    transferInterface,
     createLoadAtaInstructions,
-} from "@lightprotocol/compressed-token/unified";
+} from "@lightprotocol/compressed-token";
+import { transferInterface } from "@lightprotocol/compressed-token/unified";
 import { rpc, payer, setup } from "../setup.js";
 
 (async function () {
@@ -17,22 +16,22 @@ import { rpc, payer, setup } from "../setup.js";
 
     // Transfer to a fresh recipient so they have cold tokens
     const recipient = Keypair.generate();
-    await createAtaInterfaceIdempotent(rpc, payer, mint, recipient.publicKey);
-    const recipientAta = getAssociatedTokenAddressInterface(
-        mint,
-        recipient.publicKey
-    );
     await transferInterface(
         rpc,
         payer,
         senderAta,
         mint,
-        recipientAta,
+        recipient.publicKey,
         payer,
         500
     );
 
     // --- Receive: load creates ATA if needed + pulls cold state to hot ---
+    const recipientAta = getAssociatedTokenAddressInterface(
+        mint,
+        recipient.publicKey
+    );
+
     // Returns TransactionInstruction[][]. Each inner array is one txn.
     // Almost always one. Empty = noop.
     const instructions = await createLoadAtaInstructions(

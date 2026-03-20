@@ -9,7 +9,10 @@ import {
     getAssociatedTokenAddressInterface,
     getAtaInterface,
 } from "@lightprotocol/compressed-token";
-import { createTransferInterfaceInstructions } from "@lightprotocol/compressed-token/unified";
+import {
+    createTransferToAccountInterfaceInstructions,
+    createLoadAtaInstructions,
+} from "@lightprotocol/compressed-token/unified";
 import { rpc, payer, setup } from "../setup.js";
 
 (async function () {
@@ -33,7 +36,7 @@ import { rpc, payer, setup } from "../setup.js";
         getAssociatedTokenAddressInterface(mint, address)
     );
 
-    // Step 4: Create transfer instructions
+    // Step 4: Create transfer instructions using explicit-account variant
     const COMPUTE_BUDGET_ID =
         "ComputeBudget111111111111111111111111111111";
     const allTransferIxs = [];
@@ -41,7 +44,7 @@ import { rpc, payer, setup } from "../setup.js";
 
     for (const { address, amount } of recipients) {
         const destination = getAssociatedTokenAddressInterface(mint, address);
-        const ixs = await createTransferInterfaceInstructions(
+        const ixs = await createTransferToAccountInterfaceInstructions(
             rpc,
             payer.publicKey,
             mint,

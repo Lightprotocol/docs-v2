@@ -1,28 +1,18 @@
 ```typescript
 import { Keypair } from "@solana/web3.js";
-import { createAtaInterfaceIdempotent } from "@lightprotocol/compressed-token";
-import {
-    getAssociatedTokenAddressInterface,
-    transferInterface,
-} from "@lightprotocol/compressed-token/unified";
+import { transferInterface } from "@lightprotocol/compressed-token/unified";
 import { rpc, payer, setup } from "../setup.js";
 
 (async function () {
     const { mint, senderAta } = await setup();
-
     const recipient = Keypair.generate();
-    await createAtaInterfaceIdempotent(rpc, payer, mint, recipient.publicKey);
-    const recipientAta = getAssociatedTokenAddressInterface(
-        mint,
-        recipient.publicKey
-    );
 
     const sig = await transferInterface(
         rpc,
         payer,
         senderAta,
         mint,
-        recipientAta,
+        recipient.publicKey,
         payer,
         100
     );

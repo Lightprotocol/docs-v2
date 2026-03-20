@@ -29,9 +29,7 @@ export function useTransactionHistory() {
       setError(null);
 
       try {
-        const rpc = import.meta.env.VITE_LOCALNET === 'true'
-          ? createRpc()
-          : createRpc(import.meta.env.VITE_HELIUS_RPC_URL);
+        const rpc = createRpc(import.meta.env.VITE_HELIUS_RPC_URL);
         const owner = new PublicKey(ownerAddress);
 
         const result = await rpc.getSignaturesForOwnerInterface(owner);

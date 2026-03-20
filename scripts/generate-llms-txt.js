@@ -181,7 +181,7 @@ function splitLightTokenProgram(group) {
   for (const entry of group.pages) {
     if (typeof entry === 'string') {
       basics.push(formatPage(entry));
-    } else if (entry.group === 'Cookbook' || entry.group === 'Examples') {
+    } else if (entry.group === 'Cookbook' || entry.group === 'Examples' || entry.group === 'Extensions') {
       basics.push(...collectFlatPages(entry.pages));
     } else if (entry.group === 'For Stablecoin Payments') {
       paymentsWallets.push(...collectFlatPages(entry.pages));
@@ -248,13 +248,13 @@ function buildOpenApiSpecs() {
 // ── Hardcoded examples ──────────────────────────────────────────────
 
 const EXAMPLES_DEFI = [
-  '- [cp-swap-reference](https://github.com/Lightprotocol/program-examples/tree/main/cp-swap-reference): Fork of Raydium AMM that creates markets without paying rent-exemption.',
-  '- [pinocchio-swap](https://github.com/Lightprotocol/program-examples/tree/main/pinocchio-swap): Light Token swap reference implementation.',
-  '- [token-swap](https://github.com/Lightprotocol/program-examples/tree/main/token-swap): AMM with liquidity pools and swaps.',
-  '- [escrow](https://github.com/Lightprotocol/program-examples/tree/main/escrow): Peer-to-peer light-token swap with offer/accept flow.',
-  '- [fundraiser](https://github.com/Lightprotocol/program-examples/tree/main/fundraiser): Token fundraiser with target, deadline, and refunds.',
-  '- [create-and-transfer](https://github.com/Lightprotocol/program-examples/tree/main/create-and-transfer): Create account via macro and transfer via CPI.',
-  '- [light-token-minter](https://github.com/Lightprotocol/program-examples/tree/main/light-token-minter): Create light-mints with metadata, mint tokens.',
+  '- [cp-swap-reference](https://github.com/Lightprotocol/cp-swap-reference): Fork of Raydium AMM that creates markets without paying rent-exemption.',
+  '- [pinocchio-swap](https://github.com/Lightprotocol/examples-light-token/tree/main/pinocchio/swap): Light Token swap reference implementation.',
+  '- [token-swap](https://github.com/Lightprotocol/examples-light-token/tree/main/programs/anchor/token-swap): AMM with liquidity pools and swaps.',
+  '- [escrow](https://github.com/Lightprotocol/examples-light-token/tree/main/programs/anchor/escrow): Peer-to-peer light-token swap with offer/accept flow.',
+  '- [fundraiser](https://github.com/Lightprotocol/examples-light-token/tree/main/programs/anchor/fundraiser): Token fundraiser with target, deadline, and refunds.',
+  '- [create-and-transfer](https://github.com/Lightprotocol/examples-light-token/tree/main/programs/anchor/create-and-transfer): Create account via macro and transfer via CPI.',
+  '- [light-token-minter](https://github.com/Lightprotocol/examples-light-token/tree/main/programs/anchor/light-token-minter): Create light-mints with metadata, mint tokens.',
 ];
 
 const EXAMPLES_PAYMENTS = [
@@ -262,7 +262,8 @@ const EXAMPLES_PAYMENTS = [
   '- [sign-with-privy](https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/sign-with-privy): Light-token operations signed with Privy wallets.',
   '- [sign-with-wallet-adapter](https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/sign-with-wallet-adapter): Light-token operations signed with Wallet Adapter.',
   '- [gasless-transactions](https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/gasless-transactions): Abstract SOL fees so users never hold SOL. Sponsor rent top-ups and transaction fees.',
-  '- [spl-to-light](https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/spl-to-light): Transfer from SPL to Light via TransferInterface.',
+  '- [spl-to-light](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/instructions/spl_to_light_transfer.rs): Transfer from SPL to Light via TransferInterface.',
+  '- [streaming-tokens](https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/streaming-tokens): Stream mint events using Laserstream.',
 ];
 
 // ── Hardcoded primitives routing table ────────────────────────────────
@@ -329,13 +330,13 @@ function generate() {
 
   // Light Token sections (payments, defi, streaming, then basics)
   const ltGroup = docAnchor.groups.find(
-    (g) => g.group === 'Light Token Program',
+    (g) => g.group === 'Light Token APIs',
   );
   if (ltGroup) sections.push(...splitLightTokenProgram(ltGroup));
 
   // Remaining Documentation groups (PDA, Other Use Cases, Learn, Resources)
   for (const group of docAnchor.groups) {
-    if (group.group === 'Introduction' || group.group === 'Light Token Program')
+    if (group.group === 'Introduction' || group.group === 'Light Token APIs')
       continue;
     sections.push({
       name: sectionRenames[group.group] || group.group,

@@ -41,12 +41,12 @@ export function useUnwrap() {
       const mintPubkey = new PublicKey(mint);
       const tokenAmount = BigInt(Math.round(amount * Math.pow(10, decimals)));
 
-      // Auto-detect token program (SPL vs Token 2022) from mint account owner
+      // Auto-detect token program (SPL vs T22) from mint account owner
       const mintAccountInfo = await rpc.getAccountInfo(mintPubkey);
       if (!mintAccountInfo) throw new Error(`Mint account ${mint} not found`);
       const tokenProgramId = mintAccountInfo.owner;
 
-      // Destination: SPL/Token 2022 associated token account
+      // Destination: SPL/T22 associated token account
       const splAta = getAssociatedTokenAddressSync(mintPubkey, owner, false, tokenProgramId);
 
       // Returns TransactionInstruction[][].

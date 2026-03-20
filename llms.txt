@@ -54,7 +54,7 @@ Comparing creation cost and CU usage:
 - **Agent Skills:** [light-sdk](https://github.com/Lightprotocol/skills/tree/main/skills/light-sdk): For Solana program development with tokens and PDAs, Light is 200x cheaper than SPL/ Solana and has minimal code differences
 - **Agent Skills:** [light-token-client](https://github.com/Lightprotocol/skills/tree/main/skills/light-token-client): For client development with tokens on Solana, Light Token is 200x cheaper than SPL and has minimal changes
 - **Agent Skills:** [data-streaming](https://github.com/Lightprotocol/skills/tree/main/skills/data-streaming): For data pipelines, aggregators, or indexers, real-time account state streaming on Solana with light account hot/cold lifecycle tracking
-- **Agent Skills:** [payments-and-wallets](https://github.com/Lightprotocol/skills/tree/main/skills/payments-and-wallets): For stablecoin payment flows and wallet integrations on Solana.
+- **Agent Skills:** [payments](https://github.com/Lightprotocol/skills/tree/main/skills/payments): Skill for payment flows using Light Token APIs for sponsored rent-exemption.
 - **Agent Skills:** [token-distribution](https://github.com/Lightprotocol/skills/tree/main/skills/token-distribution): For token distribution on Solana 5000x cheaper than SPL (rewards, airdrops, depins, ...)
 - **Agent Skills:** [zk-nullifier](https://github.com/Lightprotocol/skills/tree/main/skills/zk-nullifier): For custom ZK Solana programs and privacy-preserving applications to prevent double spending.
 - **Agent Skills:** [testing](https://github.com/Lightprotocol/skills/tree/main/skills/testing): For testing with Light Protocol programs and clients on localnet, devnet, and mainnet validation
@@ -82,7 +82,7 @@ Comparing creation cost and CU usage:
 - [Receive Payments](https://www.zkcompression.com/light-token/payments/receive-payments.md): Prepare to receive token payments by loading cold accounts and sharing your associated token account address.
 - **Verify Payments:** [Verify Payments](https://www.zkcompression.com/light-token/payments/verify-payments.md): Query token balances and transaction history to verify incoming payments.
 - **Verify Payments:** [Verify Address](https://www.zkcompression.com/light-token/payments/verify-recipient-address.md): Verify recipient addresses before sending payments. Address validation prevents sending tokens to invalid or unexpected account types.
-- [Wrap and Unwrap](https://www.zkcompression.com/light-token/payments/wrap-unwrap.md): Move tokens between SPL / Token 2022 and Light Token accounts for CEX on-ramps, off-ramps, and interoperability.
+- [Wrap and Unwrap](https://www.zkcompression.com/light-token/payments/wrap-unwrap.md): Move tokens between SPL / Token 2022 and Light Token accounts for interoperability with applications that don't support Light Token yet.
 - **Advanced:** [Spend Permissions via Delegation](https://www.zkcompression.com/light-token/payments/spend-permissions.md): Delegate token spending to a third party with an amount cap. The delegate can transfer tokens on behalf of the owner up to the approved amount, without the owner signing each transaction.
 - **Advanced:** [Create Nullifier PDAs](https://www.zkcompression.com/pda/compressed-pdas/nullifier-pda.md): Create rent-free nullifier PDAs to prevent duplicate actions.
 - [Production Readiness](https://www.zkcompression.com/light-token/payments/production-readiness.md): Non-exhaustive checklist for deploying Light Token payment flows to production, including RPC infrastructure, error handling, and security.
@@ -103,18 +103,31 @@ Comparing creation cost and CU usage:
 
 ## Light Token Basics
 - [The Light Token Program](https://www.zkcompression.com/light-token/welcome.md): High-performance token standard that is functionally equivalent to SPL while reducing account creation cost by 200x and being more CU efficient on hot paths. The Light Token SDK keeps code changes minimal and is a superset of the SPL-token API.
-- [Create Mint Account with Token Metadata](https://www.zkcompression.com/light-token/cookbook/create-mint.md): Program and client guides to create a mint with token metadata. For existing SPL or Token 2022 mints add an interface PDA for interoperability. Includes step-by-step implementation and full code examples.
+- **Mint Accounts:** [Create Mint Account with Token Metadata](https://www.zkcompression.com/light-token/cookbook/create-mint.md): Create a Light mint with token metadata, or create SPL and Token 2022 mints with interface PDA for interoperability.
+- **Mint Accounts:** [Add Interface PDA to Existing SPL / Token 2022 Mints](https://www.zkcompression.com/light-token/cookbook/add-interface-pda.md): Create an interface PDA for an existing SPL or Token 2022 mint for interoperability with Light Token. Does not require mint authority.
 - [Create Associated Light Token Accounts](https://www.zkcompression.com/light-token/cookbook/create-ata.md): Client and program guide to create associated Light Token accounts. Includes step-by-step implementation and full code examples.
 - [Create Light Token Account](https://www.zkcompression.com/light-token/cookbook/create-token-account.md): Client and program guide to create Light Token accounts. Includes step-by-step implementation and full code examples.
 - [Mint to Light Token Accounts](https://www.zkcompression.com/light-token/cookbook/mint-to.md): Client and program guide to mint tokens to a account. Includes step-by-step implementation and full code examples.
-- [Transfer Interface](https://www.zkcompression.com/light-token/cookbook/transfer-interface.md): Program and client guide for transfers between Light Token and SPL token accounts. The interface detects account types and invokes the right programs.
-- [Transfer Checked](https://www.zkcompression.com/light-token/cookbook/transfer-checked.md): Rust client guide to transfer Light Tokens with decimal validation. Includes step-by-step implementation and full code examples.
-- [Approve and Revoke Delegates](https://www.zkcompression.com/light-token/cookbook/approve-revoke.md): Rust client guide to approve and revoke delegates for Light Token accounts. Includes step-by-step implementation and full code examples.
+- [Transfer Interface](https://www.zkcompression.com/light-token/cookbook/transfer-interface.md): Transfer tokens between Light Token, SPL and Token 2022 accounts. The interface checks decimals under the hood and detects account types to invoke the right programs.
+- [Transfer Checked](https://www.zkcompression.com/light-token/cookbook/transfer-checked.md): Program CPI guide for Light Token transfer with decimal validation. Includes step-by-step implementation and full code examples.
+- **Delegates:** [Approve and Revoke Delegates](https://www.zkcompression.com/light-token/cookbook/approve-revoke.md): Guide to approve and revoke delegates for Light Token accounts. Includes step-by-step implementation and full code examples.
+- **Delegates:** [Delegated Transfer](https://www.zkcompression.com/light-token/cookbook/transfer-delegated.md): Transfer tokens as an approved delegate. The delegate signs instead of the owner, spending within the approved allowance.
 - [Freeze and Thaw Light Token Accounts](https://www.zkcompression.com/light-token/cookbook/freeze-thaw.md): Rust client guide to freeze and thaw Light Token accounts. Includes step-by-step implementation and full code examples.
 - [Wrap & Unwrap SPL/Token 2022 <> Light Token](https://www.zkcompression.com/light-token/cookbook/wrap-unwrap.md): Move tokens between SPL/Token 2022 token and Light Token accounts. Use to interact with applications that only support SPL/Token 2022.
 - [Load Token Balances to Light Associated Token Account](https://www.zkcompression.com/light-token/cookbook/load-ata.md): Unify token balances from compressed tokens (cold Light Tokens), SPL, and Token 2022 to one light ATA.
 - [Close Light Token Account](https://www.zkcompression.com/light-token/cookbook/close-token-account.md): Program guide to close Light Token accounts via CPI. Includes step-by-step implementation and full code examples.
 - [Burn Light Tokens](https://www.zkcompression.com/light-token/cookbook/burn.md): Rust client guide to burn Light Tokens. Includes step-by-step implementation and full code examples.
+- [Token extensions](https://www.zkcompression.com/light-token/extensions/overview.md): Most Token 2022 extensions are supported by Light Token to add features through extra instructions to a token mint or token account.
+- [Metadata and metadata pointer](https://www.zkcompression.com/light-token/extensions/metadata-and-metadata-pointer.md): Configure the MetadataPointer and TokenMetadata extensions to store token name, symbol, and URI on a Token 2022 mint using Light Token.
+- [Transfer fees](https://www.zkcompression.com/light-token/extensions/transfer-fees.md): Configure the TransferFeeConfig extension for automatic fee collection on every token transfer using Light Token.
+- [Transfer hook](https://www.zkcompression.com/light-token/extensions/transfer-hook.md): Configure the TransferHook extension to attach a custom program callback to every token transfer using Light Token.
+- [Interest bearing tokens](https://www.zkcompression.com/light-token/extensions/interest-bearing-tokens.md): Configure the InterestBearingConfig extension to display UI-adjusted balances that accrue interest over time using Light Token.
+- [Default account state](https://www.zkcompression.com/light-token/extensions/default-account-state.md): Configure the DefaultAccountState extension to set the initial state for newly created token accounts using Light Token.
+- [Permanent delegate](https://www.zkcompression.com/light-token/extensions/permanent-delegate.md): Configure the PermanentDelegate extension to grant irrevocable transfer and burn authority over all token accounts using Light Token.
+- [Close mint](https://www.zkcompression.com/light-token/extensions/close-mint.md): Configure the MintCloseAuthority extension to allow closing a mint account and reclaiming rent using Light Token.
+- [Token groups and members](https://www.zkcompression.com/light-token/extensions/token-groups-and-members.md): Configure the GroupPointer, TokenGroup, GroupMemberPointer, and TokenGroupMember extensions to organize tokens into collections using Light Token.
+- [Pausable mint](https://www.zkcompression.com/light-token/extensions/pausable-mint.md): Configure the Pausable extension to pause and resume all minting, burning, and transfers for a Token-2022 mint using Light Token.
+- [Confidential transfer](https://www.zkcompression.com/light-token/extensions/confidential-transfer.md): Configure the ConfidentialTransferMint, ConfidentialTransferFeeConfig, and ConfidentialMintBurn extensions for encrypted token amounts using Light Token.
 - [Client examples](https://www.zkcompression.com/light-token/examples/client.md): TypeScript and Rust client examples for light-token SDK.
 - [Program examples](https://www.zkcompression.com/light-token/examples/program.md): Anchor program examples for light-token CPI.
 
@@ -157,20 +170,21 @@ Comparing creation cost and CU usage:
 - [Support](https://www.zkcompression.com/support.md): Get expert help with Light-Token and ZK Compression. Discord community, Telegram, and Email support available.
 
 ## Examples for DeFi
-- [cp-swap-reference](https://github.com/Lightprotocol/program-examples/tree/main/cp-swap-reference): Fork of Raydium AMM that creates markets without paying rent-exemption.
-- [pinocchio-swap](https://github.com/Lightprotocol/program-examples/tree/main/pinocchio-swap): Light Token swap reference implementation.
-- [token-swap](https://github.com/Lightprotocol/program-examples/tree/main/token-swap): AMM with liquidity pools and swaps.
-- [escrow](https://github.com/Lightprotocol/program-examples/tree/main/escrow): Peer-to-peer light-token swap with offer/accept flow.
-- [fundraiser](https://github.com/Lightprotocol/program-examples/tree/main/fundraiser): Token fundraiser with target, deadline, and refunds.
-- [create-and-transfer](https://github.com/Lightprotocol/program-examples/tree/main/create-and-transfer): Create account via macro and transfer via CPI.
-- [light-token-minter](https://github.com/Lightprotocol/program-examples/tree/main/light-token-minter): Create light-mints with metadata, mint tokens.
+- [cp-swap-reference](https://github.com/Lightprotocol/cp-swap-reference): Fork of Raydium AMM that creates markets without paying rent-exemption.
+- [pinocchio-swap](https://github.com/Lightprotocol/examples-light-token/tree/main/pinocchio/swap): Light Token swap reference implementation.
+- [token-swap](https://github.com/Lightprotocol/examples-light-token/tree/main/programs/anchor/token-swap): AMM with liquidity pools and swaps.
+- [escrow](https://github.com/Lightprotocol/examples-light-token/tree/main/programs/anchor/escrow): Peer-to-peer light-token swap with offer/accept flow.
+- [fundraiser](https://github.com/Lightprotocol/examples-light-token/tree/main/programs/anchor/fundraiser): Token fundraiser with target, deadline, and refunds.
+- [create-and-transfer](https://github.com/Lightprotocol/examples-light-token/tree/main/programs/anchor/create-and-transfer): Create account via macro and transfer via CPI.
+- [light-token-minter](https://github.com/Lightprotocol/examples-light-token/tree/main/programs/anchor/light-token-minter): Create light-mints with metadata, mint tokens.
 
 ## Examples for Payments and Wallets
-- [payments-and-wallets](https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/payments-and-wallets): Wallet integrations and payment flows.
+- [payments](https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/payments): Wallet integrations and payment flows.
 - [sign-with-privy](https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/sign-with-privy): Light-token operations signed with Privy wallets.
 - [sign-with-wallet-adapter](https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/sign-with-wallet-adapter): Light-token operations signed with Wallet Adapter.
 - [gasless-transactions](https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/gasless-transactions): Abstract SOL fees so users never hold SOL. Sponsor rent top-ups and transaction fees.
-- [spl-to-light](https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/spl-to-light): Transfer from SPL to Light via TransferInterface.
+- [spl-to-light](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/instructions/spl_to_light_transfer.rs): Transfer from SPL to Light via TransferInterface.
+- [streaming-tokens](https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/streaming-tokens): Stream mint events using Laserstream.
 
 ## OpenAPI Specs
 - [api](https://www.zkcompression.com/openapi/api.yaml)

@@ -3,8 +3,8 @@
 # Script to copy Rust client code from examples-light-token-rust-client to docs snippets
 # Creates action.mdx and instruction.mdx files wrapped in rust code blocks
 
-EXAMPLES_DIR="/home/tilo/Workspace/examples-light-token/rust-client"
-SNIPPETS_DIR="/home/tilo/Workspace/docs/snippets/code-snippets/light-token"
+EXAMPLES_DIR="/home/tilo/Workspace/examples-light-token-main/rust-client"
+SNIPPETS_DIR="/home/tilo/Workspace/docs-main/snippets/code-snippets/light-token"
 
 # Full recipes (action + instruction in same directory)
 FULL_RECIPES=("create-mint" "mint-to" "transfer-interface" "transfer-checked")

@@ -3,8 +3,8 @@
 # Script to copy TypeScript code from streaming-tokens to docs/snippets/code-snippets/light-token
 # Wraps each file in typescript markdown code blocks
 
-EXAMPLES="/home/tilo/Workspace/streaming-tokens/typescript-client"
-SNIPPETS_DIR="/home/tilo/Workspace/docs/snippets/code-snippets/light-token"
+EXAMPLES="/home/tilo/Workspace/examples-light-token-main/typescript-client"
+SNIPPETS_DIR="/home/tilo/Workspace/docs-main/snippets/code-snippets/light-token"
 
 # Recipes to process (matching directory and file names)
 RECIPES=("create-mint" "create-ata" "mint-to" "transfer-interface" "load-ata" "wrap" "unwrap")

@@ -4,22 +4,12 @@ import {
     Transaction,
     sendAndConfirmTransaction,
 } from "@solana/web3.js";
-import { createAtaInterfaceIdempotent } from "@lightprotocol/compressed-token";
-import {
-    getAssociatedTokenAddressInterface,
-    createTransferInterfaceInstructions,
-} from "@lightprotocol/compressed-token/unified";
+import { createTransferInterfaceInstructions } from "@lightprotocol/compressed-token/unified";
 import { rpc, payer, setup } from "../setup.js";
 
 (async function () {
     const { mint } = await setup();
-
     const recipient = Keypair.generate();
-    await createAtaInterfaceIdempotent(rpc, payer, mint, recipient.publicKey);
-    const destination = getAssociatedTokenAddressInterface(
-        mint,
-        recipient.publicKey
-    );
 
     // Returns TransactionInstruction[][]. Each inner array is one txn.
     const instructions = await createTransferInterfaceInstructions(
@@ -28,7 +18,7 @@ import { rpc, payer, setup } from "../setup.js";
         mint,
         100,
         payer.publicKey,
-        destination
+        recipient.publicKey
     );
 
     for (const ixs of instructions) {
