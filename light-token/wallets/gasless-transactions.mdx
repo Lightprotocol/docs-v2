@@ -15,8 +15,8 @@ import SupportFooter from "/snippets/support-footer.mdx";
 
 ## Sponsor Top-ups and Transaction Fees
 
-Every Solana transaction requires SOL to pay network fees (around 0.001 USD) and in some cases you need to create a token account (around 0.30 USD with SPL).
-Light Token lets your application cover both rent and transaction fees for around 0.001 USD.
+Every Solana transaction requires SOL to pay network fees (~$ 0.001) and in some cases you need to create a token account (~$ 0.30 with SPL).
+Light Token lets your application cover both rent and transaction fees for around ~$ 0.001.
 <Accordion title="Prerequisite: How Rent Sponsorship works">
 Rent sponsorship is a built-in feature of the Light SDK’s that sponsors rent-exemption for all account types to reduce creation cost.
 This is dealt with under the hood in a way that doesn’t disrupt the UX of what your users are used to with SPL-token.
@@ -36,9 +36,9 @@ Your sponsor covers three costs:
 
 |  |  |  |
 |:-----|:-------|:----|
-| **Account creation** | around 11,000 lamports (0.001 USD) | Initial bump on virtual rent balance. Rent-exemption is sponsored. |
+| **Account creation** | 11,000 lamports | Initial bump on virtual rent balance. Rent-exemption is sponsored. |
 | **Rent top-ups** | ~766 lamports per write | Fee payer bumps the virtual rent balance on each write to keep accounts active. Set `payer` parameter on any Light Token instruction. |
-| **Transaction fees** | ~5,000 lamports per tx | Standard Solana fee payer. Set `feePayer` on the transaction. |
+| **Transaction fees**<br/>+ Priority Fee | 5,000 lamports<br/>+ Priority Fee per tx  | Standard Solana fee payer. Set `feePayer` on the transaction. |
 
 ## Send a gasless transfer
 

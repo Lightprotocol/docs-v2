@@ -1,2 +1,63 @@
 ```typescript
+import 'dotenv/config';
+import {PrivyClient} from '@privy-io/node';
+import {createRpc} from '@lightprotocol/stateless.js';
+import {PublicKey, Transaction} from '@solana/web3.js';
+import {
+  createLoadAtaInstructions,
+  getAssociatedTokenAddressInterface,
+} from '@lightprotocol/compressed-token/unified';
+
+const receiveLightTokens = async (
+  recipientAddress: string,
+  tokenMintAddress: string,
+) => {
+  const connection = createRpc(process.env.HELIUS_RPC_URL!);
+
+  const privy = new PrivyClient({
+    appId: process.env.PRIVY_APP_ID!,
+    appSecret: process.env.PRIVY_APP_SECRET!,
+  });
+
+  const recipient = new PublicKey(recipientAddress);
+  const mintPubkey = new PublicKey(tokenMintAddress);
+  const ata = getAssociatedTokenAddressInterface(mintPubkey, recipient);
+
+  // Creates the ATA if needed and loads any compressed state into it.
+  // Returns TransactionInstruction[][] — almost always just one.
+  const instructions = await createLoadAtaInstructions(
+    connection, ata, recipient, mintPubkey, recipient,
+  );
+
+  // Sign and send each batch via Privy
+  const walletId = process.env.TREASURY_WALLET_ID!;
+  const authorizationKey = process.env.TREASURY_AUTHORIZATION_KEY!;
+  const signatures: string[] = [];
+
+  for (const ixs of instructions) {
+    const tx = new Transaction().add(...ixs);
+    const {blockhash} = await connection.getLatestBlockhash();
+    tx.recentBlockhash = blockhash;
+    tx.feePayer = recipient;
+
+    const {signed_transaction} = await privy.wallets().solana().signTransaction(
+      walletId, {
+        transaction: tx.serialize({requireAllSignatures: false}),
+        authorization_context: {authorization_private_keys: [authorizationKey]},
+      },
+    ) as any;
+
+    const sig = await connection.sendRawTransaction(
+      Buffer.from(signed_transaction, 'base64'),
+      {skipPreflight: false, preflightCommitment: 'confirmed'},
+    );
+    await connection.confirmTransaction(sig, 'confirmed');
+    signatures.push(sig);
+  }
+
+  return signatures.length > 0 ? signatures[signatures.length - 1] : null;
+};
+
+export default receiveLightTokens;
+
 ```

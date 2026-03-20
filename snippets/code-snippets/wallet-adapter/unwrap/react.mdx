@@ -34,7 +34,7 @@ export function useUnwrap() {
 
       const owner = new PublicKey(ownerPublicKey);
       const mintPubkey = new PublicKey(mint);
-      const tokenAmount = BigInt(Math.round(amount * Math.pow(10, decimals)));
+      const tokenAmount = BigInt(Math.floor(amount * Math.pow(10, decimals)));
 
       // Auto-detect token program (SPL vs T22) from mint account owner
       const mintAccountInfo = await rpc.getAccountInfo(mintPubkey);
