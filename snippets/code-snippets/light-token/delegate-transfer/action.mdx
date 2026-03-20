@@ -9,7 +9,7 @@ import {
 } from "@lightprotocol/compressed-token";
 import {
     approveInterface,
-    revokeInterface,
+    transferDelegatedInterface,
 } from "@lightprotocol/compressed-token/unified";
 import { homedir } from "os";
 import { readFileSync } from "fs";
@@ -34,6 +34,9 @@ const payer = Keypair.fromSecretKey(
 
     const senderAta = getAssociatedTokenAddressInterface(mint, payer.publicKey);
     const delegate = Keypair.generate();
+    const recipient = Keypair.generate();
+
+    // Approve delegate
     await approveInterface(
         rpc,
         payer,
@@ -45,9 +48,18 @@ const payer = Keypair.fromSecretKey(
     );
     console.log("Approved delegate:", delegate.publicKey.toBase58());
 
-    const tx = await revokeInterface(rpc, payer, senderAta, mint, payer);
+    // Delegate transfers tokens on behalf of the owner
+    const tx = await transferDelegatedInterface(
+        rpc,
+        payer,
+        senderAta,
+        mint,
+        recipient.publicKey,
+        delegate,
+        payer.publicKey,
+        200_000
+    );
 
-    console.log("Revoked all delegate permissions");
-    console.log("Tx:", tx);
+    console.log("Delegated transfer:", tx);
 })();
 ```

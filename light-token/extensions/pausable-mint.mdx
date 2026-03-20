@@ -9,6 +9,7 @@ import ExtensionsSetup from "/snippets/setup/extensions-setup.mdx";
 import SupportFooter from "/snippets/support-footer.mdx";
 import AgentSkillGeneric from "/snippets/setup/agent-skill-generic.mdx";
 import PausableMintAiPrompt from "/snippets/ai-prompts/extensions/pausable-mint.mdx";
+import PausableAction from "/snippets/code-snippets/light-token/extensions/pausable/action.mdx";
 
 When paused, all minting, burning, and transfers are blocked until the authority resumes the mint.
 
@@ -115,27 +116,7 @@ const signature = await sendAndConfirmTransaction(rpc, tx, [
 
 </Tab>
 <Tab title="Action">
-
-```typescript
-import { Keypair } from "@solana/web3.js";
-import { createRpc } from "@lightprotocol/stateless.js";
-import { createMintInterface } from "@lightprotocol/compressed-token";
-import { TOKEN_2022_PROGRAM_ID } from "@solana/spl-token";
-
-const rpc = createRpc(RPC_ENDPOINT);
-
-const mintKeypair = Keypair.generate();
-const { mint, transactionSignature } = await createMintInterface(
-    rpc,
-    payer,
-    payer,
-    null,
-    9,
-    mintKeypair,
-    undefined,
-    TOKEN_2022_PROGRAM_ID
-);
-```
+<PausableAction />
 
 <Info>
 `createMintInterface` creates a basic Token 2022 mint with an interface PDA. To include the Pausable extension, use the instruction approach shown in the other tab.
