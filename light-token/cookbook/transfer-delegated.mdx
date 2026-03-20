@@ -11,7 +11,7 @@ import DelegateTransferAction from "/snippets/code-snippets/payments/spend-permi
 import DelegateTransferInstruction from "/snippets/code-snippets/payments/spend-permissions/delegate-transfer-instruction.mdx";
 import SupportFooter from "/snippets/support-footer.mdx";
 
-`transferDelegatedInterface` transfers tokens from an associated token account as an approved delegate. The delegate is the transaction authority. Only the delegate and fee payer sign; the owner's signature is not required.
+`transferInterface` with `{ owner }` transfers tokens from an associated token account as an approved delegate. The delegate is the transaction authority. Only the delegate and fee payer sign; the owner's signature is not required.
 
 - The recipient is a wallet address (associated token account derived and created internally)
 - The amount must be within the approved allowance

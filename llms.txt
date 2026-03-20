@@ -90,7 +90,6 @@ Comparing creation cost and CU usage:
 - [Sign with Privy](https://www.zkcompression.com/light-token/wallets/privy.md): Integrate light-token with Privy embedded wallets for rent-free token accounts and transfers.
 - [Sign with Wallet Adapter](https://www.zkcompression.com/light-token/wallets/wallet-adapter.md): Integrate light-token with Solana Wallet Adapter for rent-free token accounts and transfers.
 - [Gasless Transactions](https://www.zkcompression.com/light-token/wallets/gasless-transactions.md): Abstract SOL fees so users never hold SOL. The Light SDK sponsors rent-exemption for Solana accounts and keeps accounts active through periodic top-ups paid by the fee payer. Sponsor top-ups and transaction fees by setting your application as the fee payer.
-- [Smart Wallets](https://www.zkcompression.com/light-token/wallets/smart-wallets.md): Send Light Tokens from PDA-based smart wallets. Covers off-curve associated token account creation, instruction-level transfers, and sync and async execution with Squads.
 
 ## For DeFi
 - [Router Integration](https://www.zkcompression.com/light-token/defi/routers.md): Add support for rent-free AMMs on Solana.
@@ -117,17 +116,7 @@ Comparing creation cost and CU usage:
 - [Load Token Balances to Light Associated Token Account](https://www.zkcompression.com/light-token/cookbook/load-ata.md): Unify token balances from compressed tokens (cold Light Tokens), SPL, and Token 2022 to one light ATA.
 - [Close Light Token Account](https://www.zkcompression.com/light-token/cookbook/close-token-account.md): Program guide to close Light Token accounts via CPI. Includes step-by-step implementation and full code examples.
 - [Burn Light Tokens](https://www.zkcompression.com/light-token/cookbook/burn.md): Rust client guide to burn Light Tokens. Includes step-by-step implementation and full code examples.
-- [Token extensions](https://www.zkcompression.com/light-token/extensions/overview.md): Most Token 2022 extensions are supported by Light Token to add features through extra instructions to a token mint or token account.
-- [Metadata and metadata pointer](https://www.zkcompression.com/light-token/extensions/metadata-and-metadata-pointer.md): Configure the MetadataPointer and TokenMetadata extensions to store token name, symbol, and URI on a Token 2022 mint using Light Token.
-- [Transfer fees](https://www.zkcompression.com/light-token/extensions/transfer-fees.md): Configure the TransferFeeConfig extension for automatic fee collection on every token transfer using Light Token.
-- [Transfer hook](https://www.zkcompression.com/light-token/extensions/transfer-hook.md): Configure the TransferHook extension to attach a custom program callback to every token transfer using Light Token.
-- [Interest bearing tokens](https://www.zkcompression.com/light-token/extensions/interest-bearing-tokens.md): Configure the InterestBearingConfig extension to display UI-adjusted balances that accrue interest over time using Light Token.
-- [Default account state](https://www.zkcompression.com/light-token/extensions/default-account-state.md): Configure the DefaultAccountState extension to set the initial state for newly created token accounts using Light Token.
-- [Permanent delegate](https://www.zkcompression.com/light-token/extensions/permanent-delegate.md): Configure the PermanentDelegate extension to grant irrevocable transfer and burn authority over all token accounts using Light Token.
-- [Close mint](https://www.zkcompression.com/light-token/extensions/close-mint.md): Configure the MintCloseAuthority extension to allow closing a mint account and reclaiming rent using Light Token.
-- [Token groups and members](https://www.zkcompression.com/light-token/extensions/token-groups-and-members.md): Configure the GroupPointer, TokenGroup, GroupMemberPointer, and TokenGroupMember extensions to organize tokens into collections using Light Token.
-- [Pausable mint](https://www.zkcompression.com/light-token/extensions/pausable-mint.md): Configure the Pausable extension to pause and resume all minting, burning, and transfers for a Token-2022 mint using Light Token.
-- [Confidential transfer](https://www.zkcompression.com/light-token/extensions/confidential-transfer.md): Configure the ConfidentialTransferMint, ConfidentialTransferFeeConfig, and ConfidentialMintBurn extensions for encrypted token amounts using Light Token.
+- [Token 2022 Extensions with Light Token](https://www.zkcompression.com/light-token/extensions/overview.md): Most Token 2022 extensions are supported by Light Token to add features through extra instructions to a token mint or token account.
 - [Client examples](https://www.zkcompression.com/light-token/examples/client.md): TypeScript and Rust client examples for light-token SDK.
 - [Program examples](https://www.zkcompression.com/light-token/examples/program.md): Anchor program examples for light-token CPI.
 

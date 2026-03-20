@@ -65,22 +65,7 @@
                   "light-token/cookbook/burn"
                 ]
               },
-              {
-                "group": "Extensions",
-                "pages": [
-                  "light-token/extensions/overview",
-                  "light-token/extensions/metadata-and-metadata-pointer",
-                  "light-token/extensions/transfer-fees",
-                  "light-token/extensions/transfer-hook",
-                  "light-token/extensions/interest-bearing-tokens",
-                  "light-token/extensions/default-account-state",
-                  "light-token/extensions/permanent-delegate",
-                  "light-token/extensions/close-mint",
-                  "light-token/extensions/token-groups-and-members",
-                  "light-token/extensions/pausable-mint",
-                  "light-token/extensions/confidential-transfer"
-                ]
-              },
+              "light-token/extensions/overview",
               {
                 "group": "For Stablecoin Payments",
                 "pages": [
@@ -118,8 +103,7 @@
                   "light-token/wallets/overview",
                   "light-token/wallets/privy",
                   "light-token/wallets/wallet-adapter",
-                  "light-token/wallets/gasless-transactions",
-                  "light-token/wallets/smart-wallets"
+                  "light-token/wallets/gasless-transactions"
                 ]
               },
               {

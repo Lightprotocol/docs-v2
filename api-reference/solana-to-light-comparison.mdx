@@ -140,7 +140,7 @@ const signatures = await connection.getSignaturesForAddress(ata);
 
 ## Client
 
-Both `@lightprotocol/compressed-token` (TypeScript) and `light_token_client` (Rust) match the SPL Token API. 
+Both `@lightprotocol/compressed-token` (TypeScript) and `light_token_client` (Rust) are a superset of the SPL Token API. Every SPL operation has a 1:1 equivalent. The SDKs add unified balance queries (`getAtaInterface`), automatic load/decompress for cold state, wrap/unwrap for SPL and Token 2022 interop, and cross-program dispatch via `Interface` methods like `transferInterface` that auto-detect the token program.
 
 ### Create mint
 
@@ -905,17 +905,19 @@ Transfer tokens as an approved delegate. The delegate is the transaction authori
 <Tab title="TypeScript">
 <Columns cols={2}>
 ```typescript title="Light"
-import { transferDelegatedInterface } from "@lightprotocol/compressed-token/unified";
+import { transferInterface } from "@lightprotocol/compressed-token/unified";
 
-const tx = await transferDelegatedInterface(
+const tx = await transferInterface(
   rpc,
   payer,
   sourceAta,
   mint,
   recipient,
   delegate,
-  owner.publicKey,
-  amount
+  amount,
+  undefined,
+  undefined,
+  { owner: owner.publicKey }
 );
 ```
 ```typescript title="SPL"

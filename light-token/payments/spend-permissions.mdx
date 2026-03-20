@@ -37,7 +37,7 @@ When you approve a delegate, you're authorizing a specific account to transfer t
     <tr>
       <td>**Delegated Transfer**</td>
       <td>transfer() (delegate signs)</td>
-      <td>transferDelegatedInterface()</td>
+      <td>transferInterface({ owner })</td>
     </tr>
     <tr>
       <td>**Revoke**</td>
@@ -108,20 +108,22 @@ console.log("Delegated amount:", account.parsed.delegatedAmount.toString());
 
 Once approved, the delegate can transfer tokens on behalf of the owner. The delegate is the transaction authority. Only the delegate and fee payer sign; the owner's signature is not required.
 
-`transferDelegatedInterface` takes a recipient wallet address and creates the recipient's associated token account internally.
+`transferInterface` takes a recipient wallet address and creates the recipient's associated token account internally. Pass `{ owner }` to transfer as a delegate instead of the owner.
 
 ```typescript
-import { transferDelegatedInterface } from "@lightprotocol/compressed-token/unified";
+import { transferInterface } from "@lightprotocol/compressed-token/unified";
 
-const tx = await transferDelegatedInterface(
+const tx = await transferInterface(
   rpc,
   payer,
   senderAta,
   mint,
   recipient.publicKey,   // recipient wallet (associated token account created internally)
   delegate,              // delegate authority (signer)
-  owner.publicKey,       // owner (does not sign)
   200_000,               // must be within approved cap
+  undefined,
+  undefined,
+  { owner: owner.publicKey }  // owner (does not sign)
 );
 
 console.log("Delegated transfer:", tx);
@@ -129,24 +131,24 @@ console.log("Delegated transfer:", tx);
 
 <Accordion title="Instruction-level builder">
 
-`createTransferDelegatedInterfaceInstructions` returns `TransactionInstruction[][]` for manual transaction control.
+`createTransferInterfaceInstructions` returns `TransactionInstruction[][]` for manual transaction control. Pass `owner` to transfer as a delegate.
 
 ```typescript
 import {
   Transaction,
   sendAndConfirmTransaction,
 } from "@solana/web3.js";
-import { createTransferDelegatedInterfaceInstructions } from "@lightprotocol/compressed-token/unified";
+import { createTransferInterfaceInstructions } from "@lightprotocol/compressed-token/unified";
 
-const instructions = await createTransferDelegatedInterfaceInstructions(
+const instructions = await createTransferInterfaceInstructions(
   rpc,
   payer.publicKey,
   mint,
   200_000,
   delegate.publicKey,
-  owner.publicKey,
   recipient.publicKey,
   9, // decimals
+  { owner: owner.publicKey }
 );
 
 for (const ixs of instructions) {

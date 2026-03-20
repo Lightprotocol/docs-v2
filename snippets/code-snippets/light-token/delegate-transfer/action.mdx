@@ -9,7 +9,7 @@ import {
 } from "@lightprotocol/compressed-token";
 import {
     approveInterface,
-    transferDelegatedInterface,
+    transferInterface,
 } from "@lightprotocol/compressed-token/unified";
 import { homedir } from "os";
 import { readFileSync } from "fs";
@@ -49,15 +49,17 @@ const payer = Keypair.fromSecretKey(
     console.log("Approved delegate:", delegate.publicKey.toBase58());
 
     // Delegate transfers tokens on behalf of the owner
-    const tx = await transferDelegatedInterface(
+    const tx = await transferInterface(
         rpc,
         payer,
         senderAta,
         mint,
         recipient.publicKey,
         delegate,
-        payer.publicKey,
-        200_000
+        200_000,
+        undefined,
+        undefined,
+        { owner: payer.publicKey }
     );
 
     console.log("Delegated transfer:", tx);

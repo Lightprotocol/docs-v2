@@ -1,42 +1,26 @@
 ---
-title: "Token extensions"
-sidebarTitle: "Overview"
+title: "Token 2022 Extensions with Light Token"
+sidebarTitle: "Extensions"
 description: "Most Token 2022 extensions are supported by Light Token to add features through extra instructions to a token mint or token account."
 keywords: ["token 2022 extensions light token", "token extensions solana", "metadata pointer light token", "transfer fee config light token", "confidential transfers light token"]
 ---
 
 import SupportFooter from "/snippets/support-footer.mdx";
+import ExtensionsTable from "/snippets/extensions-table.mdx";
 
 ## How extensions work with Light Token
 
 1. **Create** a Token-2022 mint with one or more extensions
-2. **Register** an interface PDA to hold balances from that mint in Light Token accounts
+2. **[Register an interface PDA](/light-token/cookbook/add-interface-pda)** to hold balances from that mint in Light Token accounts
 3. **Use** the same Light Token APIs (`transferInterface`, `wrap`, `unwrap`) as any other token
 
 Each extension adds specific state that's generally initialized during mint or token account creation.
 When initializing either account, you can enable specific extensions simultaneously for different functionality.
-Most extensions can't be added after an account is initialized.
+Most extensions can't be added after an account is initialized. Use the Solana documentation to learn more about Token 2022 extensions.
 
 ## Supported extensions
 
-| Extension | Restriction | Description |
-|-----------|-------------|-------------|
-| [MetadataPointer](/light-token/extensions/metadata-and-metadata-pointer) | - | Points a mint to the account that stores its metadata. |
-| [TokenMetadata](/light-token/extensions/metadata-and-metadata-pointer) | - | Stores token name, symbol, and URI directly on the mint. |
-| [TransferFeeConfig](/light-token/extensions/transfer-fees) | Fees must be zero | Withholds a percentage of each transfer as a fee. |
-| [TransferHook](/light-token/extensions/transfer-hook) | `program_id` must be nil | Invokes a custom program on every transfer via CPI. |
-| [InterestBearingConfig](/light-token/extensions/interest-bearing-tokens) | - | Displays a UI-adjusted balance that accrues interest over time. |
-| [DefaultAccountState](/light-token/extensions/default-account-state) | No compressed transfer | Sets the initial state (e.g., frozen) for newly created token accounts. |
-| [PermanentDelegate](/light-token/extensions/permanent-delegate) | No compressed transfer | Grants an authority unrestricted transfer and burn rights over all accounts for the mint. |
-| [MintCloseAuthority](/light-token/extensions/close-mint) | No compressed transfer | Allows a designated authority to close a mint account. |
-| [GroupPointer](/light-token/extensions/token-groups-and-members) | - | Points a mint to the account that stores group configuration. |
-| [GroupMemberPointer](/light-token/extensions/token-groups-and-members) | - | Points a mint to the account that stores group member configuration. |
-| [TokenGroup](/light-token/extensions/token-groups-and-members) | - | Stores group configuration directly on the mint (e.g., NFT collections). |
-| [TokenGroupMember](/light-token/extensions/token-groups-and-members) | - | Stores group member configuration directly on the mint. |
-| [Pausable](/light-token/extensions/pausable-mint) | No compressed transfer | Allows an authority to pause all minting, burning, and transfers. |
-| [ConfidentialTransferMint](/light-token/extensions/confidential-transfer) | Initialized but not enabled | Configures auditor keys for confidential (encrypted) transfers. |
-| [ConfidentialTransferFeeConfig](/light-token/extensions/confidential-transfer) | Fees must be zero | Encrypts withheld transfer fees under an auditor's public key. |
-| [ConfidentialMintBurn](/light-token/extensions/confidential-transfer) | Initialized but not enabled | Allows minting and burning of tokens with encrypted amounts. |
+<ExtensionsTable />
 
 ## Not supported
 

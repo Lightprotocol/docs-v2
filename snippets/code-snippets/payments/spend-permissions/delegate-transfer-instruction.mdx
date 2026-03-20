@@ -4,7 +4,7 @@ import {
     Transaction,
     sendAndConfirmTransaction,
 } from "@solana/web3.js";
-import { createTransferDelegatedInterfaceInstructions } from "@lightprotocol/compressed-token/unified";
+import { createTransferInterfaceInstructions } from "@lightprotocol/compressed-token/unified";
 import { rpc, payer, setup } from "../setup.js";
 
 (async function () {
@@ -14,15 +14,15 @@ import { rpc, payer, setup } from "../setup.js";
     const recipient = Keypair.generate();
 
     // Returns TransactionInstruction[][]. Each inner array is one txn.
-    const instructions = await createTransferDelegatedInterfaceInstructions(
+    const instructions = await createTransferInterfaceInstructions(
         rpc,
         payer.publicKey,
         mint,
         200_000,
         delegate.publicKey,
-        payer.publicKey,
         recipient.publicKey,
-        9
+        9,
+        { owner: payer.publicKey }
     );
 
     for (const ixs of instructions) {

@@ -1,18 +1,18 @@
-| Extension | Description |
-|-----------|-------------|
-| [MetadataPointer](/light-token/extensions/metadata-and-metadata-pointer) | Points a mint to the account that stores its metadata. |
-| [TokenMetadata](/light-token/extensions/metadata-and-metadata-pointer) | Stores token name, symbol, and URI directly on the mint. |
-| [TransferFeeConfig](/light-token/extensions/transfer-fees) | Withholds a percentage of each transfer as a fee. |
-| [TransferHook](/light-token/extensions/transfer-hook) | Invokes a custom program on every transfer via CPI. |
-| [InterestBearingConfig](/light-token/extensions/interest-bearing-tokens) | Displays a UI-adjusted balance that accrues interest over time. |
-| [DefaultAccountState](/light-token/extensions/default-account-state) | Sets the initial state (e.g., frozen) for newly created token accounts. |
-| [PermanentDelegate](/light-token/extensions/permanent-delegate) | Grants an authority unrestricted transfer and burn rights over all accounts for the mint. |
-| [MintCloseAuthority](/light-token/extensions/close-mint) | Allows a designated authority to close a mint account. |
-| [GroupPointer](/light-token/extensions/token-groups-and-members) | Points a mint to the account that stores group configuration. |
-| [GroupMemberPointer](/light-token/extensions/token-groups-and-members) | Points a mint to the account that stores group member configuration. |
-| [TokenGroup](/light-token/extensions/token-groups-and-members) | Stores group configuration directly on the mint (e.g., NFT collections). |
-| [TokenGroupMember](/light-token/extensions/token-groups-and-members) | Stores group member configuration directly on the mint. |
-| [Pausable](/light-token/extensions/pausable-mint) | Allows an authority to pause all minting, burning, and transfers. |
-| [ConfidentialTransferMint](/light-token/extensions/confidential-transfer) | Configures auditor keys for confidential (encrypted) transfers. |
-| [ConfidentialTransferFeeConfig](/light-token/extensions/confidential-transfer) | Encrypts withheld transfer fees under an auditor's public key. |
-| [ConfidentialMintBurn](/light-token/extensions/confidential-transfer) | Allows minting and burning of tokens with encrypted amounts. |
+| Extension | Restriction | Description | Links |
+|-----------|-------------|-------------|-------|
+| **MetadataPointer** | - | Points a mint to the account that stores its metadata. | [Solana Docs](https://solana.com/developers/guides/token-extensions/metadata-pointer) · [Example](https://github.com/Lightprotocol/examples-light-token/blob/main/extensions/metadata-and-metadata-pointer.ts) |
+| **TokenMetadata** | - | Stores token name, symbol, and URI directly on the mint. | [Solana Docs](https://solana.com/developers/guides/token-extensions/metadata-pointer) · [Example](https://github.com/Lightprotocol/examples-light-token/blob/main/extensions/metadata-and-metadata-pointer.ts) |
+| **TransferFeeConfig** | Fees must be zero | Withholds a percentage of each transfer as a fee. | [Solana Docs](https://solana.com/developers/guides/token-extensions/transfer-fee) · [Example](https://github.com/Lightprotocol/examples-light-token/blob/main/extensions/transfer-fees.ts) |
+| **TransferHook** | `program_id` must be nil | Invokes a custom program on every transfer via CPI. | [Solana Docs](https://solana.com/developers/guides/token-extensions/transfer-hook) · [Example](https://github.com/Lightprotocol/examples-light-token/blob/main/extensions/transfer-hook.ts) |
+| **InterestBearingConfig** | - | Displays a UI-adjusted balance that accrues interest over time. | [Solana Docs](https://solana.com/developers/guides/token-extensions/interest-bearing-tokens) · [Example](https://github.com/Lightprotocol/examples-light-token/blob/main/extensions/interest-bearing-tokens.ts) |
+| **DefaultAccountState** | Set `compression_only` flag on token accounts | Sets the initial state (e.g., frozen) for newly created token accounts. | [Solana Docs](https://solana.com/developers/guides/token-extensions/default-account-state) · [Example](https://github.com/Lightprotocol/examples-light-token/blob/main/extensions/default-account-state.ts) |
+| **PermanentDelegate** | Set `compression_only` flag on token accounts | Grants an authority unrestricted transfer and burn rights over all accounts for the mint. | [Solana Docs](https://solana.com/developers/guides/token-extensions/permanent-delegate) · [Example](https://github.com/Lightprotocol/examples-light-token/blob/main/extensions/permanent-delegate.ts) |
+| **MintCloseAuthority** | Set `compression_only` flag on token accounts | Allows a designated authority to close a mint account. | [Solana Docs](https://solana.com/developers/guides/token-extensions/mint-close-authority) · [Example](https://github.com/Lightprotocol/examples-light-token/blob/main/extensions/close-mint.ts) |
+| **GroupPointer** | - | Points a mint to the account that stores group configuration. | [Solana Docs](https://solana.com/developers/guides/token-extensions/group-member) · [Example](https://github.com/Lightprotocol/examples-light-token/blob/main/extensions/token-groups-and-members.ts) |
+| **GroupMemberPointer** | - | Points a mint to the account that stores group member configuration. | [Solana Docs](https://solana.com/developers/guides/token-extensions/group-member) · [Example](https://github.com/Lightprotocol/examples-light-token/blob/main/extensions/token-groups-and-members.ts) |
+| **TokenGroup** | - | Stores group configuration directly on the mint (e.g., NFT collections). | [Solana Docs](https://solana.com/developers/guides/token-extensions/group-member) · [Example](https://github.com/Lightprotocol/examples-light-token/blob/main/extensions/token-groups-and-members.ts) |
+| **TokenGroupMember** | - | Stores group member configuration directly on the mint. | [Solana Docs](https://solana.com/developers/guides/token-extensions/group-member) · [Example](https://github.com/Lightprotocol/examples-light-token/blob/main/extensions/token-groups-and-members.ts) |
+| **Pausable** | Set `compression_only` flag on token accounts | Allows an authority to pause all minting, burning, and transfers. | [Solana Docs](https://solana.com/docs/tokens/extensions/pausable) · [Example](https://github.com/Lightprotocol/examples-light-token/blob/main/extensions/pausable-mint.ts) |
+| **ConfidentialTransferMint** | Initialized but not enabled | Configures auditor keys for confidential (encrypted) transfers. | [Solana Docs](https://www.solana-program.com/docs/confidential-balances) · [Example](https://github.com/Lightprotocol/examples-light-token/blob/main/extensions/confidential-transfer.ts) |
+| **ConfidentialTransferFeeConfig** | Initialized but not enabled | Encrypts withheld transfer fees under an auditor's public key. | [Solana Docs](https://www.solana-program.com/docs/confidential-balances) |
+| **ConfidentialMintBurn** | Initialized but not enabled | Allows minting and burning of tokens with encrypted amounts. | [Solana Docs](https://www.solana-program.com/docs/confidential-balances) |

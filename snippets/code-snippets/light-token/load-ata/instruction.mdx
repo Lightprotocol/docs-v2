@@ -52,9 +52,11 @@ const payer = Keypair.fromSecretKey(
 
     if (ixs.length === 0) return console.log("Nothing to load");
 
-    const blockhash = await rpc.getLatestBlockhash();
-    const tx = buildAndSignTx(ixs, payer, blockhash.blockhash);
-    const signature = await sendAndConfirmTx(rpc, tx);
-    console.log("Tx:", signature);
+    for (const batch of ixs) {
+        const blockhash = await rpc.getLatestBlockhash();
+        const tx = buildAndSignTx(batch, payer, blockhash.blockhash);
+        const signature = await sendAndConfirmTx(rpc, tx);
+        console.log("Tx:", signature);
+    }
 })();
 ```

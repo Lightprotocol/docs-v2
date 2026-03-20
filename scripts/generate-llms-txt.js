@@ -181,7 +181,7 @@ function splitLightTokenProgram(group) {
   for (const entry of group.pages) {
     if (typeof entry === 'string') {
       basics.push(formatPage(entry));
-    } else if (entry.group === 'Cookbook' || entry.group === 'Examples' || entry.group === 'Extensions') {
+    } else if (entry.group === 'Cookbook' || entry.group === 'Examples') {
       basics.push(...collectFlatPages(entry.pages));
     } else if (entry.group === 'For Stablecoin Payments') {
       paymentsWallets.push(...collectFlatPages(entry.pages));

@@ -1,27 +1,44 @@
 ```typescript
 import { Keypair } from "@solana/web3.js";
-import { transferDelegatedInterface } from "@lightprotocol/compressed-token/unified";
+import {
+    approveInterface,
+    transferInterface,
+} from "@lightprotocol/compressed-token/unified";
 import { rpc, payer, setup } from "../setup.js";
 
 (async function () {
     const { mint, senderAta } = await setup();
 
-    // Approve a delegate first (see delegate-approve.mdx)
+    // Approve: grant delegate permission to spend up to 500,000 tokens
     const delegate = Keypair.generate();
-    const recipient = Keypair.generate();
+    await approveInterface(
+        rpc,
+        payer,
+        senderAta,
+        mint,
+        delegate.publicKey,
+        500_000,
+        payer
+    );
+    console.log("Approved delegate:", delegate.publicKey.toBase58());
 
     // Delegate transfers tokens on behalf of the owner
-    const tx = await transferDelegatedInterface(
+    const recipient = Keypair.generate();
+    const tx = await transferInterface(
         rpc,
         payer,
         senderAta,
         mint,
         recipient.publicKey,
         delegate,
-        payer.publicKey,
-        200_000
+        200_000,
+        undefined,
+        undefined,
+        { owner: payer.publicKey }
     );
 
-    console.log("Delegated transfer:", tx);
+    console.log("Delegated transfer to:", recipient.publicKey.toBase58());
+    console.log("Amount: 200,000 tokens");
+    console.log("Tx:", tx);
 })();
 ```

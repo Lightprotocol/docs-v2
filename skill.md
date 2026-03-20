@@ -169,7 +169,6 @@ Use rent-free PDAs for: user state, app state, nullifiers for payments, DePIN no
 | Sign with Privy | Integrate light-token with Privy embedded wallets for rent-free token accounts and transfers. | [privy](https://zkcompression.com/light-token/wallets/privy) | [sign-with-privy](https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/sign-with-privy) |
 | Sign with Wallet Adapter | Integrate light-token with Solana Wallet Adapter for rent-free token accounts and transfers. | [wallet-adapter](https://zkcompression.com/light-token/wallets/wallet-adapter) | [sign-with-wallet-adapter](https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/sign-with-wallet-adapter) |
 | Gasless transactions | Abstract SOL fees so users never hold SOL. Sponsor top-ups and transaction fees by setting your application as the fee payer. | [gasless-transactions](https://zkcompression.com/light-token/wallets/gasless-transactions) | [gasless-transactions](https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/gasless-transactions) |
-| Smart wallets | Send Light Tokens from PDA-based smart wallets. Covers off-curve associated token account creation, instruction-level transfers, and sync and async execution with Squads. | [smart-wallets](https://zkcompression.com/light-token/wallets/smart-wallets) | |
 
 ## Examples
 
@@ -257,21 +256,6 @@ CPI calls can be combined with existing and/or light macros. The API is a supers
 | `FreezeCpi`                  | [freeze-thaw](https://zkcompression.com/light-token/cookbook/freeze-thaw)                   | [src](https://github.com/Lightprotocol/examples-light-token/blob/main/programs/anchor/basic-instructions/freeze/src/lib.rs)               |
 | `ThawCpi`                    | [freeze-thaw](https://zkcompression.com/light-token/cookbook/freeze-thaw)                   | [src](https://github.com/Lightprotocol/examples-light-token/blob/main/programs/anchor/basic-instructions/thaw/src/lib.rs)                 |
 | `CloseAccountCpi`            | [close-token-account](https://zkcompression.com/light-token/cookbook/close-token-account)   | [src](https://github.com/Lightprotocol/examples-light-token/blob/main/programs/anchor/basic-instructions/close/src/lib.rs)                |
-
-### Extensions
-
-| Extension | Docs guide | GitHub example |
-|-----------|-----------|----------------|
-| Close mint | [close-mint](https://zkcompression.com/light-token/extensions/close-mint) | [example](https://github.com/Lightprotocol/examples-light-token/blob/main/extensions/close-mint.ts) |
-| Confidential transfer | [confidential-transfer](https://zkcompression.com/light-token/extensions/confidential-transfer) | [example](https://github.com/Lightprotocol/examples-light-token/blob/main/extensions/confidential-transfer.ts) |
-| Default account state | [default-account-state](https://zkcompression.com/light-token/extensions/default-account-state) | [example](https://github.com/Lightprotocol/examples-light-token/blob/main/extensions/default-account-state.ts) |
-| Interest-bearing tokens | [interest-bearing-tokens](https://zkcompression.com/light-token/extensions/interest-bearing-tokens) | [example](https://github.com/Lightprotocol/examples-light-token/blob/main/extensions/interest-bearing-tokens.ts) |
-| Metadata and metadata pointer | [metadata-and-metadata-pointer](https://zkcompression.com/light-token/extensions/metadata-and-metadata-pointer) | [example](https://github.com/Lightprotocol/examples-light-token/blob/main/extensions/metadata-and-metadata-pointer.ts) |
-| Pausable mint | [pausable-mint](https://zkcompression.com/light-token/extensions/pausable-mint) | [example](https://github.com/Lightprotocol/examples-light-token/blob/main/extensions/pausable-mint.ts) |
-| Permanent delegate | [permanent-delegate](https://zkcompression.com/light-token/extensions/permanent-delegate) | [example](https://github.com/Lightprotocol/examples-light-token/blob/main/extensions/permanent-delegate.ts) |
-| Token groups and members | [token-groups-and-members](https://zkcompression.com/light-token/extensions/token-groups-and-members) | [example](https://github.com/Lightprotocol/examples-light-token/blob/main/extensions/token-groups-and-members.ts) |
-| Transfer fees | [transfer-fees](https://zkcompression.com/light-token/extensions/transfer-fees) | [example](https://github.com/Lightprotocol/examples-light-token/blob/main/extensions/transfer-fees.ts) |
-| Transfer hook | [transfer-hook](https://zkcompression.com/light-token/extensions/transfer-hook) | [example](https://github.com/Lightprotocol/examples-light-token/blob/main/extensions/transfer-hook.ts) |
 
 ## SDK references
 

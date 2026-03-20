@@ -5,6 +5,7 @@ keywords: ["spl token vs light token comparison", "token 2022 vs light token dif
 ---
 
 import { CodeCompare } from "/snippets/jsx/code-compare.jsx";
+import ExtensionsTable from "/snippets/extensions-table.mdx";
 import CompressibleRentExplained from "/snippets/compressible-rent-explained.mdx";
 import RentSponsorshipExplained from "/snippets/rent-sponsorship-explained.mdx";
 import { RentLifecycleVisualizer } from "/snippets/jsx/rent-lifecycle-visualizer.jsx";
@@ -83,8 +84,7 @@ For token distribution use cases (airdrops, claims), see [Compressed Tokens](/re
 
 <Accordion title="Do I need to change my client code significantly?">
 
-No. The `light-token-sdk` methods are a superset of the SPL-token API.
-Find examples below.
+No. The `light-token-sdk` methods are a superset of the SPL-token API — every SPL operation (transfer, approve, revoke, freeze, thaw, burn, close) plus unified balance aggregation, automatic load/decompress, wrap/unwrap, and cross-program dispatch. See "What does 'superset of the SPL-token API' mean?" below for details.
 
 <CodeCompare
   firstCode={splCreateAtaCode}
@@ -131,6 +131,39 @@ Find examples below.
 
 </Accordion>
 
+<Accordion title="What does 'superset of the SPL-token API' mean?">
+
+The Light Token SDK covers every SPL Token operation and adds extra capabilities:
+
+<table>
+  <thead>
+    <tr>
+      <th style={{ width: "25%" }}>Category</th>
+      <th>What it does</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+      <td>**Cross-program dispatch**</td>
+      <td>`Interface` methods (e.g., `transferInterface`) auto-detect the token program and dispatch to SPL, Token 2022, or Light Token.</td>
+    </tr>
+    <tr>
+      <td>**Unified balance**</td>
+      <td>`getAtaInterface` returns the Light Token ATA balance for a given mint. To include compressed (cold), SPL, and Token 2022 balances, call `loadAta` first to unify them into the ATA.</td>
+    </tr>
+    <tr>
+      <td>**Wrap / Unwrap**</td>
+      <td>For interoperability with applications that don't support Light Token yet, you can wrap / unwrap SPL or Token 2022 tokens into Light Token associated token accounts and back.</td>
+    </tr>
+  </tbody>
+</table>
+
+<Card title="View complete Solana to Light reference" icon="code-compare" href="/api-reference/solana-to-light-comparison">
+  Side-by-side mapping of every Light Token instruction against its SPL/Solana equivalent.
+</Card>
+
+</Accordion>
+
 <Accordion title="Can light-token accounts hold SPL tokens?">
 
 Yes, light-token accounts can hold tokens from light, SPL, or Token 2022 mints.
@@ -159,9 +192,11 @@ The account is loaded into hot account state in-flight when someone interacts wi
 
 <Accordion title="Does light-token support extensions?">
 
-Light Token supports 16 Token-2022 extensions, including MetadataPointer, TokenMetadata, TransferFeeConfig, PermanentDelegate, TransferHook, and more. Some extensions have restrictions (e.g., transfer fees must be zero).
+Light Token supports 16 Token-2022 extensions. Some have restrictions.
 
-<Card title="View supported extensions" icon="chevron-right" color="#0066ff" href="/light-token/extensions/overview" horizontal />
+<ExtensionsTable />
+
+<Card title="View all supported extensions" icon="chevron-right" color="#0066ff" href="/light-token/extensions/overview" horizontal />
 
 Additional extensions can be requested.
 

@@ -49,6 +49,10 @@ const rpc = createRpc(RPC_ENDPOINT);
 
 ## Query balance
 
+### Light Token balance
+
+Returns the Light Token ATA balance (hot balance).
+
 <Note>
 Find a full code example [here](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments/verify/get-balance.ts).
 </Note>
@@ -62,7 +66,7 @@ import {
 const ata = getAssociatedTokenAddressInterface(mint, owner);
 const account = await getAtaInterface(rpc, ata, owner, mint);
 
-console.log(account.parsed.amount);
+console.log(account.parsed.amount); // Light Token ATA balance
 ```
 
 <Accordion title="Compare to SPL">
@@ -76,6 +80,30 @@ console.log(account.amount);
 ```
 
 </Accordion>
+
+### Unified balance
+
+To include compressed (cold) and optionally SPL/T22 balances, call `loadAta` first to unify everything into the Light Token ATA, then read the balance.
+
+```typescript
+import {
+  loadAta,
+  getAssociatedTokenAddressInterface,
+  getAtaInterface,
+} from "@lightprotocol/compressed-token/unified";
+
+const ata = getAssociatedTokenAddressInterface(mint, owner);
+
+// Unify compressed (cold) balances into the Light Token ATA
+await loadAta(rpc, ata, payer, mint, payer);
+
+const account = await getAtaInterface(rpc, ata, owner, mint);
+console.log(account.parsed.amount); // Unified balance
+```
+
+<Info>
+See the [Load Associated Token Account](/light-token/cookbook/load-ata) guide for details on `loadAta`, including wrapping SPL and Token 2022 balances.
+</Info>
 
 ## Transaction history
 

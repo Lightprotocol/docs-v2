@@ -20,7 +20,6 @@ import {
 } from "/snippets/code-samples/code-compare-snippets.jsx";
 import SupportFooter from "/snippets/support-footer.mdx";
 import RentSponsorship from "/snippets/rent-sponsorship-explained.mdx";
-import ExtensionsTable from "/snippets/extensions-table.mdx";
 
 
 Payment flows on Solana include five core concepts: 
@@ -62,21 +61,40 @@ For example, here is the creation of an associated token account:
   secondLabel="SPL"
 />
 
+## Interoperability
+
+
+The Light Token APIs cover every SPL Token operation and adds extra capabilities:
+
+<table>
+  <thead>
+    <tr>
+      <th style={{ width: "25%" }}>Category</th>
+      <th>What it does</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+      <td>**Cross-program dispatch**</td>
+      <td>`Interface` methods (e.g., `transferInterface`) auto-detect the token program and dispatch to SPL, Token 2022, or Light Token.</td>
+    </tr>
+    <tr>
+      <td>**Unified balance**</td>
+      <td>`getAtaInterface` returns a unified balance for a given mint held in Light Token accounts. With `wrap=true`, it also includes SPL and Token 2022 balances.</td>
+    </tr>
+    <tr>
+      <td>**Wrap / Unwrap**</td>
+      <td>For interoperability with applications that don't support Light Token yet, you can wrap / unwrap SPL or Token 2022 tokens into Light Token associated token accounts and back.</td>
+    </tr>
+  </tbody>
+</table>
+
 ## Token Extensions 
 
 Token extensions introduce optional features you can add to a token mint or token account through 
-extra instructions.
+extra instructions. Light Token supports most Token 2022 extensions.
 
-<Accordion title="Supported extensions by Light Token">
-
-<ExtensionsTable />
-
-<Card title="View all supported extensions" icon="chevron-right" color="#0066ff" href="/light-token/extensions/overview" horizontal />
-
-<Info>
-Learn more about Token-2022 extensions: [Extensions](https://solana.com/docs/tokens/extensions).
-</Info>
-</Accordion>
+<Card title="How Extensions work with Light Token" icon="chevron-right" color="#0066ff" href="/light-token/extensions/overview" horizontal />
 
 ## Start Integrating
 
