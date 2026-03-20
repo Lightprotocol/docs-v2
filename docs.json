@@ -354,10 +354,6 @@
   },
   "redirects": [
     {
-      "source": "/pda/compressed-pdas/nullifier-pda",
-      "destination": "https://zkcompression.com/pda/compressed-pdas/nullifier-pda"
-    },
-    {
       "source": "/light-token/payments/nullifier-pda",
       "destination": "https://zkcompression.com/pda/compressed-pdas/nullifier-pda"
     },

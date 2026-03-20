@@ -4,8 +4,11 @@
 # Source: examples-light-token/toolkits/sign-with-wallet-adapter/react/src/hooks
 # Output: snippets/code-snippets/wallet-adapter/{operation}/react.mdx
 
-REACT_SRC="/home/tilo/Workspace/examples-light-token-main/toolkits/sign-with-wallet-adapter/react/src/hooks"
-SNIPPETS_DIR="/home/tilo/Workspace/docs-main/snippets/code-snippets/wallet-adapter"
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+REACT_SRC="${EXAMPLES_LIGHT_TOKEN:?Set EXAMPLES_LIGHT_TOKEN to examples-light-token repo root}/toolkits/sign-with-wallet-adapter/react/src/hooks"
+SNIPPETS_DIR="$SCRIPT_DIR/../snippets/code-snippets/wallet-adapter"
 
 # Operations to process
 OPERATIONS=("transfer" "receive" "wrap" "unwrap" "balances" "transaction-history")

@@ -3,8 +3,11 @@
 # Script to copy TypeScript code from examples-light-token payments to docs snippets.
 # Wraps each file in typescript markdown code blocks.
 
-EXAMPLES="/home/tilo/Workspace/examples-light-token-main/toolkits/payments"
-SNIPPETS_DIR="/home/tilo/Workspace/docs-main/snippets/code-snippets/payments"
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+EXAMPLES="${EXAMPLES_LIGHT_TOKEN:?Set EXAMPLES_LIGHT_TOKEN to examples-light-token repo root}/toolkits/payments"
+SNIPPETS_DIR="$SCRIPT_DIR/../snippets/code-snippets/payments"
 
 # Function to wrap TypeScript code in markdown
 wrap_typescript() {

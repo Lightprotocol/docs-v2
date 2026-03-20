@@ -3,13 +3,16 @@
 # Script to copy program code from example repos to docs snippets
 # Creates CodeGroup MDX files with lib.rs/instruction.rs and test.rs combined
 
-SNIPPETS_DIR="/home/tilo/Workspace/docs-main/snippets/code-snippets/light-token"
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+SNIPPETS_DIR="$SCRIPT_DIR/../snippets/code-snippets/light-token"
 
 # =============================================================================
 # ANCHOR PROGRAMS
 # =============================================================================
 
-ANCHOR_EXAMPLES_DIR="/home/tilo/Workspace/examples-light-token-main/programs/anchor/basic-instructions"
+ANCHOR_EXAMPLES_DIR="${EXAMPLES_LIGHT_TOKEN:?Set EXAMPLES_LIGHT_TOKEN to examples-light-token repo root}/programs/anchor/basic-instructions"
 
 # Anchor recipes (output-name:anchor-dir-name)
 # Some have different directory names (e.g., close-token-account uses 'close' dir)
@@ -82,7 +85,7 @@ done
 # ANCHOR MACROS
 # =============================================================================
 
-ANCHOR_MACROS_DIR="/home/tilo/Workspace/examples-light-token-main/programs/anchor/basic-macros"
+ANCHOR_MACROS_DIR="${EXAMPLES_LIGHT_TOKEN}/programs/anchor/basic-macros"
 
 ANCHOR_MACRO_RECIPES=(
     "create-mint:create-mint"
