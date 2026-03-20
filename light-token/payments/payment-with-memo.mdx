@@ -1,7 +1,7 @@
 ---
 title: "Payment with Memo"
 sidebarTitle: "Payment with Memo"
-description: "Attach invoice IDs, payment references, or notes to Light Token transfers using Solana's memo program. The memo is recorded in the transaction logs for reconciliation."
+description: "Attach invoice IDs, payment references, or notes to Light Token transfers using Solana's memo program."
 keywords: ["memo payment solana", "invoice reconciliation solana", "payment reference light token", "memo instruction"]
 ---
 
@@ -9,6 +9,11 @@ import ToolkitsSetup from "/snippets/setup/toolkits-setup.mdx";
 import SupportFooter from "/snippets/support-footer.mdx";
 import AgentSkillPayments from "/snippets/setup/agent-skill-payments.mdx";
 import PaymentsAiPrompt from "/snippets/ai-prompts/toolkits/payments.mdx";
+
+Solana's memo program lets you attach invoice numbers, order IDs, or custom references
+to any payment. These memos are permanently recorded on-chain and visible in transaction
+ logs, making it easy to match payments to your internal systems.
+Use it with Light Token identical to SPL:
 
 <table>
   <thead>
@@ -36,8 +41,10 @@ import PaymentsAiPrompt from "/snippets/ai-prompts/toolkits/payments.mdx";
 ## How it works
 
 1. Create the transfer instructions with `createTransferInterfaceInstructions()`.
-2. Add a memo instruction to the transfer transaction (the last batch).
+2. Create a memo instruction with a message. This message will be visible in the program logs of the transaction..
 3. Both instructions execute atomically in the same transaction.
+
+After the transaction confirms, fetch it to view the memo in the logs. The memo appears as a log message from the Memo program.
 
 ## Setup
 
@@ -55,7 +62,9 @@ import { createRpc } from "@lightprotocol/stateless.js";
 const rpc = createRpc(RPC_ENDPOINT);
 ```
 
-## Send a payment with memo
+<Steps>
+<Step>
+## Send a Payment with Memo
 
 ```typescript
 import { Transaction, sendAndConfirmTransaction, TransactionInstruction, PublicKey } from "@solana/web3.js";
@@ -94,7 +103,9 @@ const transferTx = new Transaction().add(...transferInstructions, memoIx);
 await sendAndConfirmTransaction(rpc, transferTx, [payer, owner]);
 ```
 
-## Read memo from transaction logs
+</Step>
+<Step>
+## Read Memo from Transaction Logs
 
 After the transaction confirms, the memo appears in the transaction logs:
 
@@ -111,6 +122,21 @@ const memoLogs = logs.filter((log) =>
 console.log("Memo logs:", memoLogs);
 ```
 
+``` markdown Example Transaction Logs
+"Program TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb invoke [1]",
+"Program log: Instruction: Transfer",
+"Program TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb consumed 1682 of 200000 compute units",
+"Program TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb success",
+"Program MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr invoke [1]",
+'Program log: Memo (len 46): "Payment for services rendered - Invoice #12345"',
+"Program MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr consumed 18097 of 198318 compute units",
+"Program MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr success",
+"Program ComputeBudget111111111111111111111111111111 invoke [1]",
+"Program ComputeBudget111111111111111111111111111111 success"
+```
+
+</Step>
+</Steps>
 </Tab>
 <Tab title="AI Prompt">
 <PaymentsAiPrompt />

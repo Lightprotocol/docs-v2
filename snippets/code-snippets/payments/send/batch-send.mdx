@@ -5,68 +5,59 @@ import {
     sendAndConfirmTransaction,
 } from "@solana/web3.js";
 import {
-    createAtaInterfaceIdempotent,
-    getAssociatedTokenAddressInterface,
-    getAtaInterface,
-} from "@lightprotocol/compressed-token";
-import {
-    createTransferToAccountInterfaceInstructions,
     createLoadAtaInstructions,
+    createLightTokenTransferInstruction,
+    getAtaInterface,
+    getAssociatedTokenAddressInterface,
 } from "@lightprotocol/compressed-token/unified";
 import { rpc, payer, setup } from "../setup.js";
 
 (async function () {
-    // Step 1: Setup — create mint and fund sender
     const { mint } = await setup();
 
-    const recipients = Array.from({ length: 5 }, (_, i) => ({
-        address: Keypair.generate().publicKey,
-        amount: (i + 1) * 100,
-    }));
+    const recipients = [
+        { address: Keypair.generate().publicKey, amount: 100 },
+        { address: Keypair.generate().publicKey, amount: 200 },
+        { address: Keypair.generate().publicKey, amount: 300 },
+    ];
 
-    // Step 2: Create ATAs idempotently for sender + all recipients
-    await createAtaInterfaceIdempotent(rpc, payer, mint, payer.publicKey);
-    for (const { address } of recipients) {
-        await createAtaInterfaceIdempotent(rpc, payer, mint, address);
-    }
-
-    // Step 3: Derive ATA addresses
-    const senderAta = getAssociatedTokenAddressInterface(mint, payer.publicKey);
-    const recipientAtas = recipients.map(({ address }) =>
-        getAssociatedTokenAddressInterface(mint, address)
+    // Load sender's cold balance to hot (if needed) — one call, one tx
+    const senderAta = getAssociatedTokenAddressInterface(
+        mint,
+        payer.publicKey
     );
-
-    // Step 4: Create transfer instructions using explicit-account variant
-    const COMPUTE_BUDGET_ID =
-        "ComputeBudget111111111111111111111111111111";
-    const allTransferIxs = [];
-    let isFirst = true;
-
-    for (const { address, amount } of recipients) {
-        const destination = getAssociatedTokenAddressInterface(mint, address);
-        const ixs = await createTransferToAccountInterfaceInstructions(
-            rpc,
-            payer.publicKey,
-            mint,
-            amount,
-            payer.publicKey,
-            destination
-        );
-        // Deduplicate ComputeBudget across transfers.
-        for (const ix of ixs[0]) {
-            if (!isFirst && ix.programId.toBase58() === COMPUTE_BUDGET_ID)
-                continue;
-            allTransferIxs.push(ix);
-        }
-        isFirst = false;
+    const loadIxs = await createLoadAtaInstructions(
+        rpc,
+        senderAta,
+        payer.publicKey,
+        mint,
+        payer.publicKey
+    );
+    for (const ixs of loadIxs) {
+        const tx = new Transaction().add(...ixs);
+        await sendAndConfirmTransaction(rpc, tx, [payer]);
     }
 
-    // Step 5: Batch into single transaction
-    const batchTx = new Transaction().add(...allTransferIxs);
-    const sig = await sendAndConfirmTransaction(rpc, batchTx, [payer]);
+    // Build one transfer instruction per recipient
+    const transferIxs = recipients.map(({ address, amount }) => {
+        const recipientAta = getAssociatedTokenAddressInterface(
+            mint,
+            address
+        );
+        return createLightTokenTransferInstruction(
+            senderAta,
+            recipientAta,
+            payer.publicKey,
+            amount
+        );
+    });
+
+    // Send all transfers in a single transaction
+    const tx = new Transaction().add(...transferIxs);
+    const sig = await sendAndConfirmTransaction(rpc, tx, [payer]);
     console.log("Batch tx:", sig);
 
-    // Step 6: Verify balances
+    // Verify balances
     for (const { address, amount } of recipients) {
         const ata = getAssociatedTokenAddressInterface(mint, address);
         const { parsed } = await getAtaInterface(rpc, ata, address, mint);

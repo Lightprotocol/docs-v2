@@ -1,7 +1,7 @@
 ---
 title: "Basic Payment"
 sidebarTitle: "Basic Payment"
-description: "Send a single token transfer with Light Token APIs for stablecoin payments with comparison to SPL."
+description: "Send a single token transfer with Light Token APIs with comparison to SPL.  If the recipient is receiving this token for the first time, their token account can be created as part of the same transaction."
 keywords: ["stablecoin transfer solana", "light token transfer", "send payment solana", "rent free transfer"]
 ---
 
@@ -35,6 +35,8 @@ import PaymentsAiPrompt from "/snippets/ai-prompts/toolkits/payments.mdx";
 <Tabs>
 <Tab title="Guide">
 
+<Steps>
+<Step>
 ## Setup
 
 <ToolkitsSetup />
@@ -59,10 +61,13 @@ Find full runnable code examples:
 [action](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments/send/send-action.ts).
 </Note>
 
-## Send a payment
+</Step>
+<Step>
+## Send a Payment
 
-
-The SDK checks whether the sender's account has a cold balance and adds load instructions if needed.
+Use `createTransferInterfaceInstructions` to transfer tokens between wallets. The method:
+- automatically derives Associated Token Accounts for the sender and recipient. If the recipient's ATA doesn't exist, the instruction to create the account is automatically added to the same transaction.
+- determines whether the sender's account has a cold balance and adds load instructions if needed.
 
 <Info>
 **About loading**: Light Token accounts reduce account rent ~200x by auto-compressing inactive
@@ -210,6 +215,9 @@ await transfer(connection, payer, sourceAta, destinationAta, owner, amount);
 
 </Tab>
 </Tabs>
+
+</Step>
+</Steps>
 
 </Tab>
 <Tab title="AI Prompt">
