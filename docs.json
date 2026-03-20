@@ -370,7 +370,7 @@
   },
   "redirects": [
     {
-      "source": "/pda/compressed-pdas/how-to-create-nullifier-pdas",
+      "source": "/pda/compressed-pdas/nullifier-pda",
       "destination": "https://zkcompression.com/pda/compressed-pdas/nullifier-pda"
     },
     {
