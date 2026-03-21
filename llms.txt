@@ -47,7 +47,6 @@ Comparing creation cost and CU usage:
 | **Transfer** (rent-free) |    **1,885 CU** |   4,645 CU |
 
 ## AI Agent Resources
-
 Install orchestrator agent skill or view [skill.md](https://www.zkcompression.com/skill.md):
 
 ```bash
@@ -59,7 +58,6 @@ Install or view [dedicated agent skills](/ai-tools/overview#agent-skills).
 ```
 npx skills add Lightprotocol/skills
 ```
-
 - [Agent skills](https://www.zkcompression.com/ai-tools/agent-skills.md): Install structured agent skill files for Token API's and PDA accounts. Skills tell AI coding agents what they can do with ZK Compression.
 - [MCP](https://www.zkcompression.com/ai-tools/mcp.md): Connect AI apps to Light Protocol data sources and tools via the Model Context Protocol (MCP). Includes installation for Claude Code, Codex, Cursor, and more.
 - [AI Prompts](https://www.zkcompression.com/ai-tools/prompts.md): Ready-to-use AI prompts for Light Protocol. Copy a prompt, paste into your AI coding agent, and let it implement the recipe in your project.
@@ -89,15 +87,15 @@ npx skills add Lightprotocol/skills
 
 ## For Payments and Wallets
 - [Payment Flows on Solana with Light Token](https://www.zkcompression.com/light-token/payments/overview.md): Learn how the Light Token API's reduce account creation cost for stablecoin payment infrastructure by 99% with similar developer experience to SPL / Token 2022.
-- **Send Payments:** [Basic Payment](https://www.zkcompression.com/light-token/payments/basic-payment.md): Send a single token transfer with Light Token APIs for stablecoin payments with comparison to SPL.
+- **Send Payments:** [Basic Payment](https://www.zkcompression.com/light-token/payments/basic-payment.md): Send a single token transfer with Light Token APIs with comparison to SPL.  If the recipient is receiving this token for the first time, their token account can be created as part of the same transaction.
 - **Send Payments:** [Batch Payments](https://www.zkcompression.com/light-token/payments/batch-payments.md): Send payments to multiple recipients in a single transaction or sequentially.
-- **Send Payments:** [Payment with Memo](https://www.zkcompression.com/light-token/payments/payment-with-memo.md): Attach invoice IDs, payment references, or notes to Light Token transfers using Solana's memo program. The memo is recorded in the transaction logs for reconciliation.
+- **Send Payments:** [Payment with Memo](https://www.zkcompression.com/light-token/payments/payment-with-memo.md): Attach invoice IDs, payment references, or notes to Light Token transfers using Solana's memo program.
 - [Receive Payments](https://www.zkcompression.com/light-token/payments/receive-payments.md): Prepare to receive token payments by loading cold accounts and sharing your associated token account address.
 - **Verify Payments:** [Verify Payments](https://www.zkcompression.com/light-token/payments/verify-payments.md): Query token balances and transaction history to verify incoming payments.
 - **Verify Payments:** [Verify Address](https://www.zkcompression.com/light-token/payments/verify-recipient-address.md): Verify recipient addresses before sending payments. Address validation prevents sending tokens to invalid or unexpected account types.
-- [Wrap and Unwrap](https://www.zkcompression.com/light-token/payments/wrap-unwrap.md): Move tokens between SPL / Token 2022 and Light Token accounts for interoperability with applications that don't support Light Token yet.
-- **Advanced:** [Spend Permissions via Delegation](https://www.zkcompression.com/light-token/payments/spend-permissions.md): Delegate token spending to a third party with an amount cap. The delegate can transfer tokens on behalf of the owner up to the approved amount, without the owner signing each transaction.
-- **Advanced:** [Create Nullifier PDAs](https://www.zkcompression.com/pda/compressed-pdas/nullifier-pda.md): Create rent-free nullifier PDAs to prevent duplicate actions.
+- [Spend Permissions via Delegation](https://www.zkcompression.com/light-token/payments/spend-permissions.md): Delegate token spending to a third party with an amount cap. The delegate can transfer tokens on behalf of the owner up to the approved amount, without the owner signing each transaction.
+- [Wrap and Unwrap](https://www.zkcompression.com/light-token/payments/wrap-unwrap.md): Move tokens between SPL / Token 2022 and Light Token accounts. Use wrap/unwrap to interoperate with applications that only support SPL or Token 2022.
+- [Create Nullifier PDAs](https://www.zkcompression.com/pda/compressed-pdas/nullifier-pda.md): Create rent-free nullifier PDAs to prevent duplicate actions.
 - [Production Readiness](https://www.zkcompression.com/light-token/payments/production-readiness.md): Non-exhaustive checklist for deploying Light Token payment flows to production, including RPC infrastructure, error handling, and security.
 - [Integration Guide for Wallet Applications](https://www.zkcompression.com/light-token/wallets/overview.md): Guide for Wallet Applications to add Light-token support.
 - [Sign with Privy](https://www.zkcompression.com/light-token/wallets/privy.md): Integrate light-token with Privy embedded wallets for rent-free token accounts and transfers.
