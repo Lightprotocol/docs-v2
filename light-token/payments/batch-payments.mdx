@@ -10,8 +10,7 @@ import SupportFooter from "/snippets/support-footer.mdx";
 import AgentSkillPayments from "/snippets/setup/agent-skill-payments.mdx";
 import PaymentsAiPrompt from "/snippets/ai-prompts/toolkits/payments.mdx";
 import PaymentsSetupHelper from "/snippets/setup/payments-setup-helper.mdx";
-import BatchSendActionCode from "/snippets/code-snippets/payments/send/batch-send-action.mdx";
-import BatchSendInstructionCode from "/snippets/code-snippets/payments/send/batch-send-instruction.mdx";
+import BatchSendCode from "/snippets/code-snippets/payments/send/batch-send.mdx";
 import SplBatchSend from "/snippets/code-snippets/payments/spl/batch-send.mdx";
 
 ---
@@ -58,8 +57,7 @@ const rpc = createRpc(RPC_ENDPOINT);
 
 <Note>
 Find full code examples:
-[instruction](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments/send/batch-send-instruction.ts) |
-[action](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments/send/batch-send-action.ts).
+[batch transfer](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments/send/batch-send.ts).
 </Note>
 
 </Step>
@@ -79,24 +77,13 @@ atomic transaction with your regular transfer. APIs return `TransactionInstructi
 loop handles the rare multi-transaction case automatically.
 </Info>
 
-<Tabs>
-<Tab title="Instruction">
-
-<BatchSendInstructionCode />
-
-</Tab>
-<Tab title="Action">
-
-<BatchSendActionCode />
+<BatchSendCode />
 
 <Accordion title="Compare to SPL">
 
 <SplBatchSend />
 
 </Accordion>
-
-</Tab>
-</Tabs>
 
 </Step>
 </Steps>
