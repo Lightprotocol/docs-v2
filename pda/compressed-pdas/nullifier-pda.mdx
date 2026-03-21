@@ -1,16 +1,15 @@
 ---
 title: Create Nullifier PDAs
 sidebarTitle: Nullifiers
-description: Create rent-free nullifier PDAs to prevent duplicate actions.
+description: For some use cases, such as sending payments, you might want to prevent your on chain instruction from being executed more than once.
 keywords: ["nullifiers on solana", "prevent double spending", "compressed pdas", "rent-free nullifiers"]
 ---
 
 import NullifiersAiPrompt from "/snippets/ai-prompts/toolkits/nullifiers.mdx";
 
-For some use cases, such as sending payments, you might want to prevent your
-onchain instruction from being executed more than once.
-
-The nullifier program utility solves this for you.
+The nullifier program utility solves this for you. 
+It records a unique value of your choice in a rent-free PDA account.
+If it already exists, the next transaction with the same value fails.
 We also deployed a reference implementation to public networks so you can get started quickly:
 
 | | |
