@@ -26,6 +26,7 @@ import AgentSkillGeneric from "/snippets/setup/agent-skill-generic.mdx";
 import RustCreateTokenAccountAiPrompt from "/snippets/ai-prompts/rust-cookbook/create-token-account.mdx";
 import ProgramCreateTokenAccountCpiAiPrompt from "/snippets/ai-prompts/program-cookbook/create-token-account-cpi.mdx";
 import ProgramCreateTokenAccountMacrosAiPrompt from "/snippets/ai-prompts/program-cookbook/create-token-account-macros.mdx";
+import SupportFooter from "/snippets/support-footer.mdx";
 
 1. Light token accounts are Solana accounts that hold token balances of light, SPL, or Token 2022 mints.
 2. Light token accounts are on-chain accounts like SPL ATA's, but the light token program sponsors the rent-exemption cost for you.
@@ -276,11 +277,11 @@ pub vault: UncheckedAccount<'info>,
 </Tab>
 
 </Tabs>
-# Next Steps
-  <Card
-    title="Learn how to mint tokens to Light Token accounts"
-    icon="chevron-right"
-    color="#0066ff"
-    href="/light-token/cookbook/mint-to"
-    horizontal
-  />
+## Related Guides
+
+<CardGroup cols={2}>
+<Card title="Transfer interface" icon="arrow-right-left" href="/light-token/cookbook/transfer-interface" horizontal />
+<Card title="Wrap and unwrap" icon="rotate" href="/light-token/cookbook/wrap-unwrap" horizontal />
+</CardGroup>
+
+<SupportFooter />

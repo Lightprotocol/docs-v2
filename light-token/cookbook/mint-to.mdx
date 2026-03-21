@@ -28,6 +28,7 @@ import AgentSkillGeneric from "/snippets/setup/agent-skill-generic.mdx";
 import MintToAiPrompt from "/snippets/ai-prompts/ts-cookbook/mint-to.mdx";
 import RustMintToAiPrompt from "/snippets/ai-prompts/rust-cookbook/mint-to.mdx";
 import ProgramMintToAiPrompt from "/snippets/ai-prompts/program-cookbook/mint-to.mdx";
+import SupportFooter from "/snippets/support-footer.mdx";
 
 
 1. Mint To creates new tokens of a mint and deposits them to a specified token account.
@@ -212,12 +213,11 @@ MintToCpi {
 </Tab>
 </Tabs>
 
-# Next Steps
+## Related Guides
 
-<Card
-  title="Learn to use the transfer interface for Light Token <> SPL token transfers"
-  icon="chevron-right"
-  color="#0066ff"
-  href="/light-token/cookbook/transfer-interface"
-  horizontal
-></Card>
+<CardGroup cols={2}>
+<Card title="Transfer interface" icon="arrow-right-left" href="/light-token/cookbook/transfer-interface" horizontal />
+<Card title="Approve and revoke" icon="key" href="/light-token/cookbook/approve-revoke" horizontal />
+</CardGroup>
+
+<SupportFooter />

@@ -1,10 +1,11 @@
 ```typescript
-import { revoke } from "@lightprotocol/compressed-token";
+import { revokeInterface } from "@lightprotocol/compressed-token";
 
-const tx = await revoke(
+const tx = await revokeInterface(
   rpc,
   payer,
-  delegatedAccounts,
+  tokenAccount,
+  mint,
   owner
 );
 ```

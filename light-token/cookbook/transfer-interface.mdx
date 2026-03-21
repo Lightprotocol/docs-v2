@@ -1,6 +1,6 @@
 ---
 title: Transfer Interface
-description: Program and client guide for transfers between Light Token and SPL token accounts. The interface detects account types and invokes the right programs.
+description: Transfer tokens between Light Token, SPL and Token 2022 accounts. The interface checks decimals under the hood and detects account types to invoke the right programs.
 keywords: ["transfer tokens on solana", "token transfer on solana", "interface methods on solana", "spl transfer for developers"]
 ---
 
@@ -26,6 +26,7 @@ import AgentSkillGeneric from "/snippets/setup/agent-skill-generic.mdx";
 import TransferInterfaceAiPrompt from "/snippets/ai-prompts/ts-cookbook/transfer-interface.mdx";
 import RustTransferInterfaceAiPrompt from "/snippets/ai-prompts/rust-cookbook/transfer-interface.mdx";
 import ProgramTransferInterfaceAiPrompt from "/snippets/ai-prompts/program-cookbook/transfer-interface.mdx";
+import SupportFooter from "/snippets/support-footer.mdx";
 
 
 <table>
@@ -39,20 +40,20 @@ import ProgramTransferInterfaceAiPrompt from "/snippets/ai-prompts/program-cookb
       </td>
     </tr>
     <tr>
-      <td>**SPL token -> Light Token Account**</td>
+      <td>**Token 2022 / SPL token -> Light Token Account**</td>
       <td>
         <ul>
           <li>Transfers SPL tokens to Light Token accounts</li>
-          <li>SPL tokens are locked in interface PDA</li>
+          <li>SPL / Token 2022 tokens are locked in interface PDA</li>
           <li>Tokens are minted to Light Token account</li>
         </ul>
       </td>
     </tr>
     <tr>
-      <td>**Light Token -> SPL Account**</td>
+      <td>**Light Token -> SPL / Token 2022 Account**</td>
       <td>
         <ul>
-          <li>Releases SPL tokens from interface PDA to SPL account</li>
+          <li>Releases SPL / Token 2022 tokens from interface PDA to SPL account</li>
           <li>Burns tokens in source Light Token account</li>
         </ul>
       </td>
@@ -66,7 +67,7 @@ import ProgramTransferInterfaceAiPrompt from "/snippets/ai-prompts/program-cookb
 
 <Tab title="TypeScript Client">
 
-The `transferInterface` function transfers tokens between token accounts (SPL, Token 2022, or Light) in a single call.
+The `transferInterface` function transfers tokens between token accounts (SPL, Token 2022, or Light) in a single call and checks decimals.
 
 Compare to SPL:
 
@@ -108,11 +109,66 @@ Compare to SPL:
 </Tab>
 </Tabs>
 
+### Advanced: Explicit Destination Account
+
+For PDA destinations or program-owned accounts where you need to specify the exact destination token account, use `transferToAccountInterface`. This is an edge case; most transfers should use `transferInterface` with a wallet address.
+
+<Tabs>
+<Tab title="Action">
+
+```typescript
+import {
+    transferToAccountInterface,
+    getAssociatedTokenAddressInterface,
+} from "@lightprotocol/compressed-token";
+
+// The destination must be an existing token account (not a wallet address).
+await transferToAccountInterface(
+    rpc,
+    payer,
+    sourceAta,
+    mint,
+    destinationTokenAccount,
+    owner,
+    amount,
+);
+```
+
+</Tab>
+<Tab title="Instruction">
+
+```typescript
+import {
+    createTransferToAccountInterfaceInstructions,
+    getMintInterface,
+    sliceLast,
+} from "@lightprotocol/compressed-token";
+
+const decimals = (await getMintInterface(rpc, mint)).mint.decimals;
+
+// Returns TransactionInstruction[][]. The destination must be an existing token account.
+const batches = await createTransferToAccountInterfaceInstructions(
+    rpc,
+    payer.publicKey,
+    mint,
+    amount,
+    owner.publicKey,
+    destinationTokenAccount,
+    decimals,
+);
+
+const { rest: loads, last: transfer } = sliceLast(batches);
+```
+
+</Tab>
+</Tabs>
+
+
 </Tab>
 
 <Tab title="Rust Client">
 
-Use the unified `TransferInterface` to transfer tokens between token accounts (SPL, Token 2022, or Light) in a single call.
+Use the unified `TransferInterface` to transfer tokens between token accounts (SPL, Token 2022, or Light) in a single call and checks decimals.
 
 <CodeCompare
   firstCode={lightTransferRustCode}
@@ -258,14 +314,11 @@ Uses the `#[light_account(init, associated_token::...)]` macro to create the des
 
 </Tabs>
 
-# Next Steps
+## Related Guides
 
-{" "}
+<CardGroup cols={2}>
+<Card title="Wrap and unwrap" icon="rotate" href="/light-token/cookbook/wrap-unwrap" horizontal />
+<Card title="Payments overview" icon="credit-card" href="/light-token/payments/overview" horizontal />
+</CardGroup>
 
-<Card
-  title="Learn about Transfer Checked"
-  icon="chevron-right"
-  color="#0066ff"
-  href="/light-token/cookbook/transfer-checked"
-  horizontal
-/>
+<SupportFooter />

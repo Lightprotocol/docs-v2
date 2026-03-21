@@ -1,0 +1,62 @@
+```typescript
+import {
+    Keypair,
+    Transaction,
+    sendAndConfirmTransaction,
+} from "@solana/web3.js";
+import {
+    createTransferInterfaceInstructions,
+    sliceLast,
+} from "@lightprotocol/compressed-token/unified";
+import { rpc, payer, setup } from "../setup.js";
+
+(async function () {
+    const { mint } = await setup();
+    const recipient = Keypair.generate();
+
+    const instructions = await createTransferInterfaceInstructions(
+        rpc,
+        payer.publicKey,
+        mint,
+        100,
+        payer.publicKey,
+        recipient.publicKey
+    );
+
+    // --- Sign all transactions together — one approval for all ---
+    const transactions = instructions.map(
+        (ixs) => new Transaction().add(...ixs)
+    );
+    // In a wallet context: await wallet.signAllTransactions(transactions)
+    for (const tx of transactions) {
+        const sig = await sendAndConfirmTransaction(rpc, tx, [payer]);
+        console.log("Tx:", sig);
+    }
+
+    // --- Parallel optimization: parallelize loads, then send transfer ---
+    const instructions2 = await createTransferInterfaceInstructions(
+        rpc,
+        payer.publicKey,
+        mint,
+        50,
+        payer.publicKey,
+        recipient.publicKey
+    );
+
+    const { rest: loadInstructions, last: transferInstructions } =
+        sliceLast(instructions2);
+
+    // Parallelize loads (empty = nothing to load, will no-op)
+    await Promise.all(
+        loadInstructions.map((ixs) => {
+            const tx = new Transaction().add(...ixs);
+            return sendAndConfirmTransaction(rpc, tx, [payer]);
+        })
+    );
+
+    // Send transfer after all loads confirm
+    const transferTx = new Transaction().add(...transferInstructions);
+    const sig = await sendAndConfirmTransaction(rpc, transferTx, [payer]);
+    console.log("Parallel optimized Tx:", sig);
+})();
+```

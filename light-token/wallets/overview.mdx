@@ -64,7 +64,7 @@ import SupportFooter from "/snippets/support-footer.mdx";
 
 <Note>
   Find full runnable code examples
-  [here](https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/payments-and-wallets).
+  [here](https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/payments).
 </Note>
 
 <AgentSkillPayments />
@@ -77,7 +77,7 @@ import SupportFooter from "/snippets/support-footer.mdx";
 <ToolkitsSetup />
 
 Snippets below assume `rpc`, `payer`, `mint`, `owner`, `recipient`, and `amount` are defined.
-See the [full examples](https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/payments-and-wallets) for runnable setup.
+See the [full examples](https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/payments) for runnable setup.
 
 ```typescript
 import { createRpc } from "@lightprotocol/stateless.js";
@@ -108,7 +108,7 @@ loop handles the rare multi-transaction case automatically.
 ## Receive Payments
 
 <Note>
-Find a full code example [here](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments-and-wallets/receive.ts).
+Find a full code example [here](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments/receive/receive.ts).
 </Note>
 
 Load creates the associated token account (ATA) if needed and loads any compressed state into it. Share the ATA address with the sender.
@@ -187,7 +187,7 @@ const ata = await getOrCreateAssociatedTokenAccount(
 ## Send Payments
 
 <Note>
-Find a full code example: [instruction](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments-and-wallets/send-instruction.ts) | [action](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments-and-wallets/send-action.ts).
+Find a full code example: [instruction](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments/send/basic-send-instruction.ts) | [action](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments/send/basic-send-action.ts).
 </Note>
 
 <Tabs>
@@ -276,7 +276,7 @@ await transfer(connection, payer, sourceAta, destinationAta, owner, amount);
 ## Show Balance
 
 <Note>
-Find a full code example [here](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments-and-wallets/get-balance.ts).
+Find a full code example [here](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments/verify/get-balance.ts).
 </Note>
 
 ```typescript
@@ -306,7 +306,7 @@ console.log(account.amount);
 ## Transaction History
 
 <Note>
-Find a full code example [here](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments-and-wallets/get-history.ts).
+Find a full code example [here](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments/verify/get-history.ts).
 </Note>
 
 ```typescript
@@ -332,7 +332,7 @@ const signatures = await connection.getSignaturesForAddress(ata);
 Wrap tokens from SPL/Token-2022 accounts to light-token ATA.
 
 <Note>
-Find a full code example [here](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments-and-wallets/wrap.ts).
+Find a full code example [here](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments/interop/wrap.ts).
 </Note>
 
 <Tabs>
@@ -392,7 +392,7 @@ Unwrap moves the token balance from a light-token account to a SPL-token account
 Use this to compose with applications that do not yet support light-token.
 
 <Note>
-Find a full code example [here](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments-and-wallets/unwrap.ts).
+Find a full code example [here](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments/interop/unwrap.ts).
 </Note>
 
 <Tabs>
@@ -449,7 +449,7 @@ await unwrap(rpc, payer, splAta, owner, mint, amount);
   </Card>
   <Card title="Sign with Wallet Adapter" icon="wallet" href="/light-token/wallets/wallet-adapter">
   </Card>
-  <Card title="Sponsor Rent Top-Ups for Users" icon="hand-holding-dollar" href="/light-token/wallets/sponsor-top-ups">
+  <Card title="Gasless Transactions" icon="hand-holding-dollar" href="/light-token/wallets/gasless-transactions">
   </Card>
 </CardGroup>
 

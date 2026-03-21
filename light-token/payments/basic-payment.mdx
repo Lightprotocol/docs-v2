@@ -1,0 +1,217 @@
+---
+title: "Basic Payment"
+sidebarTitle: "Basic Payment"
+description: "Send a single token transfer with Light Token APIs with comparison to SPL.  If the recipient is receiving this token for the first time, their token account can be created as part of the same transaction."
+keywords: ["stablecoin transfer solana", "light token transfer", "send payment solana", "rent free transfer"]
+---
+
+import FullSetup from "/snippets/setup/full-setup.mdx";
+import SupportFooter from "/snippets/support-footer.mdx";
+import AgentSkillPayments from "/snippets/setup/agent-skill-payments.mdx";
+import PaymentsAiPrompt from "/snippets/ai-prompts/toolkits/payments.mdx";
+import PaymentsSetupHelper from "/snippets/setup/payments-setup-helper.mdx";
+import SendInstructionCode from "/snippets/code-snippets/payments/send/basic-send-instruction.mdx";
+import SendActionCode from "/snippets/code-snippets/payments/send/basic-send-action.mdx";
+
+1. The light-token API matches the SPL-token API almost entirely, and extends their functionality to include the light token program in addition to the SPL-token and Token-2022 programs.
+2. Your users use the same stablecoins, just stored more efficiently.
+
+<table>
+  <thead>
+    <tr>
+      <th style={{ width: "15%" }}></th>
+      <th>SPL</th>
+      <th>Light</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>**Transfer**</td>
+      <td>createTransferInstruction()</td>
+      <td>createTransferInterfaceInstructions()</td>
+    </tr>
+  </tbody>
+</table>
+
+<AgentSkillPayments />
+
+<Tabs>
+<Tab title="Guide">
+
+<Steps>
+<Step>
+## Setup
+
+<FullSetup />
+
+Snippets below assume `rpc`, `payer`, `mint`, `owner`, `recipient`, and `amount` are defined.
+See the [full examples](https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/payments) for runnable setup.
+
+```typescript
+import { createRpc } from "@lightprotocol/stateless.js";
+
+import {
+  createTransferInterfaceInstructions,
+  transferInterface
+} from "@lightprotocol/compressed-token/unified";
+
+const rpc = createRpc(RPC_ENDPOINT);
+```
+
+<PaymentsSetupHelper />
+
+<Note>
+Find full runnable code examples:
+[instruction](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments/send/basic-send-instruction.ts) |
+[action](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments/send/basic-send-action.ts).
+</Note>
+
+</Step>
+<Step>
+## Send a Payment
+
+Use `createTransferInterfaceInstructions` to transfer tokens between wallets. The method:
+- automatically derives Associated Token Accounts for the sender and recipient. If the recipient's ATA doesn't exist, the instruction to create the account is automatically added to the same transaction.
+- determines whether the sender's account has a cold balance and adds load instructions if needed.
+
+<Info>
+**About loading**: Light Token accounts reduce account rent ~200x by auto-compressing inactive
+accounts. Before any action, the SDK detects cold balances and adds
+instructions to load them. This almost always fits in a single
+atomic transaction with your regular transfer. APIs return `TransactionInstruction[][]` so the same
+loop handles the rare multi-transaction case automatically.
+</Info>
+
+<Tabs>
+<Tab title="Instruction">
+
+<SendInstructionCode />
+
+
+<Accordion title="Compare to SPL">
+
+```typescript
+import {
+  getAssociatedTokenAddressSync,
+  createAssociatedTokenAccountIdempotentInstruction,
+  createTransferInstruction,
+} from "@solana/spl-token";
+
+const sourceAta = getAssociatedTokenAddressSync(mint, owner.publicKey);
+const destinationAta = getAssociatedTokenAddressSync(mint, recipient);
+
+const tx = new Transaction().add(
+  createAssociatedTokenAccountIdempotentInstruction(
+    payer.publicKey, destinationAta, recipient, mint
+  ),
+  createTransferInstruction(sourceAta, destinationAta, owner.publicKey, amount)
+);
+```
+
+</Accordion>
+
+Your app logic may require you to create a single sign request for your user:
+
+<Accordion title="Sign all transactions together">
+
+```typescript
+const transactions = instructions.map((ixs) => new Transaction().add(...ixs));
+
+// One approval for all
+const signed = await wallet.signAllTransactions(transactions);
+
+for (const tx of signed) {
+  await sendAndConfirmTransaction(rpc, tx);
+}
+```
+
+</Accordion>
+
+While almost always you will have only one transfer transaction, you can
+optimize sending in the rare cases where you have multiple transactions.
+Parallelize the loads, confirm them, and then send the transfer instruction
+after.
+
+<Accordion title="Optimize sending (parallel conditional loads, then transfer)">
+
+```typescript
+import {
+  createTransferInterfaceInstructions,
+  sliceLast,
+} from "@lightprotocol/compressed-token/unified";
+
+const instructions = await createTransferInterfaceInstructions(
+  rpc,
+  payer.publicKey,
+  mint,
+  amount,
+  owner.publicKey,
+  recipient
+);
+const { rest: loadInstructions, last: transferInstructions } = sliceLast(instructions);
+// empty = nothing to load, will no-op.
+await Promise.all(
+  loadInstructions.map((ixs) => {
+    const tx = new Transaction().add(...ixs);
+    tx.sign(payer, owner);
+    return sendAndConfirmTransaction(rpc, tx);
+  })
+);
+
+const transferTx = new Transaction().add(...transferInstructions);
+transferTx.sign(payer, owner);
+await sendAndConfirmTransaction(rpc, transferTx);
+```
+
+</Accordion>
+
+</Tab>
+<Tab title="Action">
+
+<SendActionCode />
+
+<Accordion title="Compare to SPL">
+
+```typescript
+import {
+  getAssociatedTokenAddressSync,
+  getOrCreateAssociatedTokenAccount,
+  transfer,
+} from "@solana/spl-token";
+
+await getOrCreateAssociatedTokenAccount(connection, payer, mint, recipient);
+
+const sourceAta = getAssociatedTokenAddressSync(mint, owner.publicKey);
+const destinationAta = getAssociatedTokenAddressSync(mint, recipient);
+await transfer(connection, payer, sourceAta, destinationAta, owner, amount);
+```
+
+</Accordion>
+
+</Tab>
+</Tabs>
+
+</Step>
+</Steps>
+
+</Tab>
+<Tab title="AI Prompt">
+<PaymentsAiPrompt />
+</Tab>
+</Tabs>
+
+## Related guides
+
+<CardGroup cols={3}>
+<Card title="Batch payments" icon="layer-group" href="/light-token/payments/batch-payments">
+  Pack multiple transfers to multiple recipients into one transaction.
+</Card>
+<Card title="Gasless transactions" icon="hand-holding-dollar" href="/light-token/wallets/gasless-transactions">
+  Abstract SOL fees from the user. Sponsor top-ups and transaction fees.
+</Card>
+<Card title="Receive payments" icon="arrow-down" href="/light-token/payments/receive-payments">
+  Unify token balances and share ATA address with the sender.
+</Card>
+</CardGroup>
+
+<SupportFooter />

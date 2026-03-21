@@ -12,10 +12,14 @@ Context:
 - SPL to Light reference: https://zkcompression.com/api-reference/solana-to-light-comparison
 - Packages: @lightprotocol/compressed-token, @lightprotocol/stateless.js
 
-transferInterface() transfers tokens between token accounts (SPL, Token 2022, or Light Token) in a single call.
+transferInterface() transfers tokens in a single call. The recipient parameter is a wallet public key.
+The SDK derives and creates the destination ATA internally. All transfers use transferChecked under the hood.
 - Light Token → Light Token: transfers between Light Token accounts
 - SPL → Light Token: locks SPL tokens in interface PDA, mints to Light Token account
 - Light Token → SPL: burns Light Token balance, releases SPL tokens from interface PDA
+
+Edge case: for explicit destination token accounts (PDA/program-owned), use transferToAccountInterface()
+or createTransferToAccountInterfaceInstructions(). Most integrations should use transferInterface().
 
 ### 1. Index project
 - Grep \`@solana/spl-token|Connection|Keypair|transfer|transferInterface\` across src/
@@ -71,10 +75,14 @@ Context:
 - SPL to Light reference: https://zkcompression.com/api-reference/solana-to-light-comparison
 - Packages: @lightprotocol/compressed-token, @lightprotocol/stateless.js
 
-transferInterface() transfers tokens between token accounts (SPL, Token 2022, or Light Token) in a single call.
+transferInterface() transfers tokens in a single call. The recipient parameter is a wallet public key.
+The SDK derives and creates the destination ATA internally. All transfers use transferChecked under the hood.
 - Light Token → Light Token: transfers between Light Token accounts
 - SPL → Light Token: locks SPL tokens in interface PDA, mints to Light Token account
 - Light Token → SPL: burns Light Token balance, releases SPL tokens from interface PDA
+
+Edge case: for explicit destination token accounts (PDA/program-owned), use transferToAccountInterface()
+or createTransferToAccountInterfaceInstructions(). Most integrations should use transferInterface().
 
 ### 1. Index project
 - Grep `@solana/spl-token|Connection|Keypair|transfer|transferInterface` across src/

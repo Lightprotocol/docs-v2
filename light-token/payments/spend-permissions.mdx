@@ -1,0 +1,223 @@
+---
+title: "Spend Permissions via Delegation"
+sidebarTitle: "Spend Permissions"
+description: "Delegate token spending to a third party with an amount cap. The delegate can transfer tokens on behalf of the owner up to the approved amount, without the owner signing each transaction."
+keywords: ["delegate tokens solana", "token delegation light token", "spend permissions solana", "recurring payments solana"]
+---
+
+import FullSetup from "/snippets/setup/full-setup.mdx";
+import SupportFooter from "/snippets/support-footer.mdx";
+import AgentSkillPayments from "/snippets/setup/agent-skill-payments.mdx";
+import PaymentsAiPrompt from "/snippets/ai-prompts/toolkits/payments.mdx";
+import SplDelegateApprove from "/snippets/code-snippets/payments/spl/delegate-approve.mdx";
+import SplDelegateCheck from "/snippets/code-snippets/payments/spl/delegate-check.mdx";
+import SplDelegateTransfer from "/snippets/code-snippets/payments/spl/delegate-transfer.mdx";
+import SplDelegateRevoke from "/snippets/code-snippets/payments/spl/delegate-revoke.mdx";
+
+---
+
+Delegation with Light Token works similar to SPL. 
+When you approve a delegate, you're authorizing a specific account to transfer tokens on your behalf:
+
+- **Owner retains custody**: You still own the tokens and can transfer or revoke at any time. Delegation is non-custodial. 
+- **Capped spending**: The delegate can spend tokens up to the limit, but cannot access or drain the account beyond the approved amount.
+- **Single delegate per account**: Each token account can only have one active delegate. The owner can revoke at any time.
+- **New approval replaces old**: Approving a new delegate automatically revokes the previous one
+
+<table>
+  <thead>
+    <tr>
+      <th style={{ width: "15%" }}></th>
+      <th>SPL</th>
+      <th>Light</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>**Approve**</td>
+      <td>approve()</td>
+      <td>approveInterface()</td>
+    </tr>
+    <tr>
+      <td>**Delegated Transfer**</td>
+      <td>transfer() (delegate signs)</td>
+      <td>transferInterface({ owner })</td>
+    </tr>
+    <tr>
+      <td>**Revoke**</td>
+      <td>revoke()</td>
+      <td>revokeInterface()</td>
+    </tr>
+  </tbody>
+</table>
+
+<AgentSkillPayments />
+
+<Tabs>
+<Tab title="Guide">
+
+## Use cases
+
+| Use case | How delegation helps |
+|:---------|:--------------------|
+| **Subscriptions** | Approve a monthly cap. The service provider transfers the fee each period. |
+| **Recurring payments** | Approve a spending limit. The payment processor draws funds as needed. |
+| **Managed spending** | A parent or admin approves a cap for a sub-account. |
+| **Agent wallets** | An AI agent operates within a delegated spending limit. |
+
+## Setup
+
+<FullSetup />
+
+```typescript
+import { createRpc } from "@lightprotocol/stateless.js";
+
+const rpc = createRpc(RPC_ENDPOINT);
+```
+
+## Approve a delegate
+
+Grant a delegate permission to spend up to a capped amount:
+
+```typescript
+import { approveInterface } from "@lightprotocol/compressed-token/unified";
+
+const tx = await approveInterface(
+  rpc,
+  payer,
+  senderAta,
+  mint,
+  delegate.publicKey,     // who gets permission
+  500_000,                // amount cap
+  owner                   // token owner (signs)
+);
+
+console.log("Approved:", tx);
+```
+
+<Accordion title="Compare to SPL">
+
+<SplDelegateApprove />
+
+</Accordion>
+
+## Check delegation status
+
+Check the delegation status of an account:
+
+```typescript
+import { getAtaInterface } from "@lightprotocol/compressed-token";
+
+const account = await getAtaInterface(rpc, senderAta, owner.publicKey, mint);
+
+console.log("Delegate:", account.parsed.delegate?.toBase58() ?? "none");
+console.log("Delegated amount:", account.parsed.delegatedAmount.toString());
+```
+
+<Accordion title="Compare to SPL">
+
+<SplDelegateCheck />
+
+</Accordion>
+
+## Transfer as Delegate
+
+Once approved, the delegate can transfer tokens on behalf of the owner. The delegate is the transaction authority. Only the delegate and fee payer sign; the owner's signature is not required.
+
+`transferInterface` takes a recipient wallet address and creates the recipient's associated token account internally. Pass `{ owner }` to transfer as a delegate instead of the owner.
+
+```typescript
+import { transferInterface } from "@lightprotocol/compressed-token/unified";
+
+const tx = await transferInterface(
+  rpc,
+  payer,
+  senderAta,
+  mint,
+  recipient.publicKey,   // recipient wallet (associated token account created internally)
+  delegate,              // delegate authority (signer)
+  200_000,               // must be within approved cap
+  undefined,
+  undefined,
+  { owner: owner.publicKey }  // owner (does not sign)
+);
+
+console.log("Delegated transfer:", tx);
+```
+
+<Accordion title="Compare to SPL">
+
+<SplDelegateTransfer />
+
+</Accordion>
+
+<Accordion title="Instruction-level builder">
+
+`createTransferInterfaceInstructions` returns `TransactionInstruction[][]` for manual transaction control. Pass `owner` to transfer as a delegate.
+
+```typescript
+import {
+  Transaction,
+  sendAndConfirmTransaction,
+} from "@solana/web3.js";
+import { createTransferInterfaceInstructions } from "@lightprotocol/compressed-token/unified";
+
+const instructions = await createTransferInterfaceInstructions(
+  rpc,
+  payer.publicKey,
+  mint,
+  200_000,
+  delegate.publicKey,
+  recipient.publicKey,
+  9, // decimals
+  { owner: owner.publicKey }
+);
+
+for (const ixs of instructions) {
+  const tx = new Transaction().add(...ixs);
+  await sendAndConfirmTransaction(rpc, tx, [payer, delegate]);
+}
+```
+
+</Accordion>
+
+## Revoke a delegate
+
+Remove all spending permissions from the current delegate.
+If you need to reduce the limit, approve the same delegate with a lower amount.
+
+```typescript
+import { revokeInterface } from "@lightprotocol/compressed-token/unified";
+
+const tx = await revokeInterface(rpc, payer, senderAta, mint, owner);
+
+console.log("Revoked:", tx);
+```
+
+<Accordion title="Compare to SPL">
+
+<SplDelegateRevoke />
+
+</Accordion>
+
+</Tab>
+<Tab title="AI Prompt">
+<PaymentsAiPrompt />
+</Tab>
+</Tabs>
+
+## Related guides
+
+<CardGroup cols={3}>
+<Card title="Basic payment" icon="arrow-right" href="/light-token/payments/basic-payment">
+  Send a single token transfer.
+</Card>
+<Card title="Gasless transactions" icon="hand-holding-dollar" href="/light-token/wallets/gasless-transactions">
+  Separate the fee payer from the token owner.
+</Card>
+<Card title="Receive payments" icon="arrow-down" href="/light-token/payments/receive-payments">
+  Load cold accounts and share ATA address with the sender.
+</Card>
+</CardGroup>
+
+<SupportFooter />

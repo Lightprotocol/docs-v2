@@ -1,0 +1,104 @@
+```typescript
+import "dotenv/config";
+import {
+    Keypair,
+    Transaction,
+    sendAndConfirmTransaction,
+} from "@solana/web3.js";
+import { createRpc } from "@lightprotocol/stateless.js";
+import {
+    getAssociatedTokenAddressInterface,
+    getAtaInterface,
+} from "@lightprotocol/compressed-token";
+import { createTransferInterfaceInstructions } from "@lightprotocol/compressed-token/unified";
+import { homedir } from "os";
+import { readFileSync } from "fs";
+import { setup } from "./setup.js";
+
+// devnet:
+// const RPC_URL = `https://devnet.helius-rpc.com?api-key=${process.env.API_KEY!}`;
+// const rpc = createRpc(RPC_URL);
+// localnet:
+const rpc = createRpc();
+
+const sponsor = Keypair.fromSecretKey(
+    new Uint8Array(
+        JSON.parse(readFileSync(`${homedir()}/.config/solana/id.json`, "utf8")),
+    ),
+);
+const sender = Keypair.generate();
+const recipient = Keypair.generate();
+
+console.log("Sponsor Address (Fee Payer):", sponsor.publicKey.toBase58());
+console.log("Sender Address:", sender.publicKey.toBase58());
+console.log("Recipient Address:", recipient.publicKey.toBase58());
+
+(async function () {
+    const { mint } = await setup(rpc, sponsor, sender, recipient);
+
+    console.log("\nMint Address:", mint.toBase58());
+
+    // Derive ATAs
+    const senderAta = getAssociatedTokenAddressInterface(mint, sender.publicKey);
+    const recipientAta = getAssociatedTokenAddressInterface(
+        mint,
+        recipient.publicKey,
+    );
+
+    console.log("Sender Token Account:", senderAta.toBase58());
+    console.log("Recipient Token Account:", recipientAta.toBase58());
+
+    // Create transfer instruction
+    const instructions = await createTransferInterfaceInstructions(
+        rpc,
+        sponsor.publicKey,
+        mint,
+        500_000,
+        sender.publicKey,
+        recipient.publicKey,
+    );
+
+    // Send — sponsor pays fees, sender authorizes transfer
+    let signature: string;
+    for (const ixs of instructions) {
+        const tx = new Transaction().add(...ixs);
+        signature = await sendAndConfirmTransaction(rpc, tx, [sponsor, sender]);
+    }
+
+    console.log("\n=== Sponsored Token Payment Complete ===");
+    console.log("Transaction Signature:", signature!);
+
+    // Verify balances
+    const { parsed: senderBalance } = await getAtaInterface(
+        rpc,
+        senderAta,
+        sender.publicKey,
+        mint,
+    );
+    const { parsed: recipientBalance } = await getAtaInterface(
+        rpc,
+        recipientAta,
+        recipient.publicKey,
+        mint,
+    );
+
+    console.log(
+        "\nSender Token Account Balance:",
+        senderBalance.amount.toString(),
+    );
+    console.log(
+        "Recipient Token Account Balance:",
+        recipientBalance.amount.toString(),
+    );
+
+    // Verify fee payer
+    const tx = await rpc.getTransaction(signature!, {
+        maxSupportedTransactionVersion: 0,
+    });
+    const feePayer = tx?.transaction.message.accountKeys[0];
+    console.log(
+        "\nNote: The first account in accountKeys is always the fee payer",
+    );
+    console.log("Fee Payer Address:", feePayer?.toBase58());
+})();
+```

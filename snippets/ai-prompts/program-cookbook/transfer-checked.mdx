@@ -15,6 +15,9 @@ Context:
 
 Key CPI struct: \`light_token::instruction::TransferCheckedCpi\`
 
+Note: TransferInterface uses TransferChecked under the hood for Light-to-Light transfers.
+Use TransferChecked/TransferCheckedCpi directly only when you need Light-to-Light without interface routing.
+
 ### 1. Index project
 - Grep \`declare_id|#\[program\]|anchor_lang|Account<|Pubkey|invoke|transfer|decimals|amount\` across src/
 - Glob \`**/*.rs\` and \`**/Cargo.toml\` for project structure
@@ -72,6 +75,9 @@ Context:
 - Example: https://github.com/Lightprotocol/examples-light-token/tree/main/programs/anchor/basic-instructions/transfer-checked
 
 Key CPI struct: `light_token::instruction::TransferCheckedCpi`
+
+Note: TransferInterface uses TransferChecked under the hood for Light-to-Light transfers.
+Use TransferChecked/TransferCheckedCpi directly only when you need Light-to-Light without interface routing.
 
 ### 1. Index project
 - Grep `declare_id|#\[program\]|anchor_lang|Account<|Pubkey|invoke|transfer|decimals|amount` across src/

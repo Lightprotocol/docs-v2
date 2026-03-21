@@ -1,0 +1,52 @@
+```typescript
+import {
+    Keypair,
+    Transaction,
+    sendAndConfirmTransaction,
+} from "@solana/web3.js";
+import {
+    transferInterface,
+    getAssociatedTokenAddressInterface,
+    createLoadAtaInstructions,
+} from "@lightprotocol/compressed-token/unified";
+import { rpc, payer, setup } from "../setup.js";
+
+(async function () {
+    const { mint, senderAta } = await setup();
+
+    // Transfer to a fresh recipient so they have cold tokens
+    const recipient = Keypair.generate();
+    await transferInterface(
+        rpc,
+        payer,
+        senderAta,
+        mint,
+        recipient.publicKey,
+        payer,
+        500
+    );
+
+    // --- Receive: load creates ATA if needed + pulls cold state to hot ---
+    const recipientAta = getAssociatedTokenAddressInterface(
+        mint,
+        recipient.publicKey
+    );
+
+    // Returns TransactionInstruction[][]. Each inner array is one txn.
+    // Almost always one. Empty = noop.
+    const instructions = await createLoadAtaInstructions(
+        rpc,
+        recipientAta,
+        recipient.publicKey,
+        mint,
+        payer.publicKey
+    );
+
+    for (const ixs of instructions) {
+        const tx = new Transaction().add(...ixs);
+        await sendAndConfirmTransaction(rpc, tx, [payer]);
+    }
+
+    console.log("Recipient ATA:", recipientAta.toBase58());
+})();
+```

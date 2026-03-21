@@ -24,7 +24,7 @@ const transferLightTokens = async (
   const fromPubkey = new PublicKey(fromAddress);
   const toPubkey = new PublicKey(toAddress);
   const mintPubkey = new PublicKey(tokenMintAddress);
-  const tokenAmount = Math.round(amount * Math.pow(10, decimals));
+  const tokenAmount = Math.floor(amount * Math.pow(10, decimals));
 
   // Loads cold (compressed), SPL, and Token 2022 balances into the Light Token associated token account before transfer.
   // Returns TransactionInstruction[][] — send [0..n-2] in parallel, then [n-1] last.

@@ -9,11 +9,12 @@ import FullSetup from "/snippets/setup/full-setup.mdx";
 import ActionCode from "/snippets/code-snippets/light-token/load-ata/action.mdx";
 import InstructionCode from "/snippets/code-snippets/light-token/load-ata/instruction.mdx";
 import AgentSkillGeneric from "/snippets/setup/agent-skill-generic.mdx";
+import SupportFooter from "/snippets/support-footer.mdx";
 
 1. `loadAta` unifies tokens from multiple sources to a single ATA:
     * Compressed tokens (cold Light Tokens) -> Decompresses -> light ATA
     * SPL balance (if wrap=true) -> Wraps -> light ATA
-    * T22 balance (if wrap=true) -> Wraps -> light ATA
+    * Token 2022 balance (if wrap=true) -> Wraps -> light ATA
 
 2. Returns `null` if there's nothing to load (idempotent)
 
@@ -42,3 +43,12 @@ Find the source code [here](https://github.com/Lightprotocol/light-protocol/blob
 
 </Step>
 </Steps>
+
+## Related Guides
+
+<CardGroup cols={2}>
+<Card title="Payments overview" icon="credit-card" href="/light-token/payments/overview" horizontal />
+<Card title="Wrap and unwrap" icon="rotate" href="/light-token/cookbook/wrap-unwrap" horizontal />
+</CardGroup>
+
+<SupportFooter />

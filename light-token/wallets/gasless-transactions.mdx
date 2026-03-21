@@ -1,0 +1,221 @@
+---
+title: Gasless Transactions
+sidebarTitle: Gasless transactions
+description: Abstract SOL fees so users never hold SOL. The Light SDK sponsors rent-exemption for Solana accounts and keeps accounts active through periodic top-ups paid by the fee payer. Sponsor top-ups and transaction fees by setting your application as the fee payer.
+keywords: ["gasless transactions solana", "fee abstraction solana", "rent sponsorship light token", "gasless solana tokens", "rent free tokens on solana"]
+---
+
+import TransferInstructionCode from "/snippets/code-snippets/light-token/gasless-transactions/ts-instruction.mdx";
+import RustInstructionCode from "/snippets/code-snippets/light-token/gasless-transactions/rust-instruction.mdx";
+import RentSponsorshipExplained from "/snippets/rent-sponsorship-explained.mdx";
+import GaslessTransactionsAiPrompt from "/snippets/ai-prompts/wallets/gasless-transactions.mdx";
+import SupportFooter from "/snippets/support-footer.mdx";
+
+---
+
+## Sponsor Top-ups and Transaction Fees
+
+<Accordion title="Prerequisite: How Rent Sponsorship with Light Token works">
+Rent sponsorship is a built-in feature of the Light SDK’s that sponsors rent-exemption.
+This is dealt with under the hood in a way that doesn’t disrupt the UX of what your users are used to with SPL-token.
+
+<RentSponsorshipExplained />
+</Accordion>
+Solana transactions have a designated fee payer, the account that pays the
+network fee. By default, this is the first signer. You can specify a
+different account as the fee payer, allowing a third party (the "sponsor") to
+cover fees on behalf of the sender. 
+
+Light Token extends this: The `payer` parameter on any Light Token
+instruction determines who pays rent top-ups in addition to transaction fees.
+Set your application as the payer so users never interact with SOL.
+
+In total, your sponsor covers three costs:
+
+|  |  |  |
+|:-----|:-------|:----|
+| **Account creation** | 11,000 lamports | Initial bump on virtual rent balance. Rent-exemption is sponsored. |
+| **Rent top-ups** | ~766 lamports per write | Fee payer bumps the virtual rent balance on each write to keep accounts active. Set `payer` parameter on any Light Token instruction. |
+| **Transaction fees**<br/>+ Priority Fee | 5,000 lamports<br/>+ Priority Fee per tx  | Standard Solana fee payer. Set `feePayer` on the transaction. |
+<Accordion title="Cost Breakdown in Practice">
+
+|      | Light | SPL / Token 2022 |
+| :--- | :--- | :--- |
+| **Transfer** | *~\$0.001*  | *~\$0.001* |
+| **Create Token Account** | **~\$0.001** (0.00001 SOL) | **~\$0.30** (0.0029 SOL) |
+| **Transfer + Create Token Account** | **~\$0.001** (0.00001 SOL) | **~\$0.30** (0.0029 SOL) |
+
+</Accordion>
+
+## Send a gasless transfer
+
+<Note>
+Find a full code example [here](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/gasless-transactions/typescript/gasless-transfer.ts).
+</Note>
+
+<Tabs>
+<Tab title="TypeScript Client">
+
+<Steps>
+
+<Step title="Create a sponsor account">
+
+Generate or load a keypair for the sponsor who will pay transaction fees and rent top-ups.
+The sponsor needs SOL but doesn't need to hold the tokens being transferred.
+
+```typescript
+import { Keypair } from "@solana/web3.js";
+import { createRpc } from "@lightprotocol/stateless.js";
+
+const rpc = createRpc(RPC_ENDPOINT);
+
+// Sponsor: your application server
+const sponsor = Keypair.fromSecretKey(/* your server keypair */);
+
+// User: only signs to authorize the transfer
+const sender = Keypair.fromSecretKey(/* user's keypair */);
+```
+
+</Step>
+
+<Step title="Create the transfer instruction">
+
+Create the transfer instruction with the sponsor as `payer` and the sender as `authority`.
+The sender owns the tokens and must sign the transfer.
+
+```typescript
+import { createTransferInterfaceInstructions } from "@lightprotocol/compressed-token/unified";
+
+const instructions = await createTransferInterfaceInstructions(
+  rpc,
+  sponsor.publicKey,      // payer: covers rent top-ups and transaction fees
+  mint,
+  amount,
+  sender.publicKey,       // authority: user signs to authorize
+  recipient.publicKey
+);
+```
+
+</Step>
+
+<Step title="Send with both signers">
+
+Both the sponsor and sender must sign the transaction:
+
+|  | Parameter | What it does |
+|:-----|:----------|:-------------|
+| **Payer** (fee payer) | First positional arg | Signs to authorize payment of rent top-ups and transaction fees. Can be your application server. |
+| **Authority** (owner) | `owner` / authority arg | Signs to authorize the token transfer. The account holder. |
+
+
+```typescript
+import { Transaction, sendAndConfirmTransaction } from "@solana/web3.js";
+
+for (const ixs of instructions) {
+  const tx = new Transaction().add(...ixs);
+  // Both sponsor and sender must sign
+  await sendAndConfirmTransaction(rpc, tx, [sponsor, sender]);
+}
+```
+
+</Step>
+
+</Steps>
+
+<Accordion title="Full example">
+<TransferInstructionCode />
+</Accordion>
+
+</Tab>
+<Tab title="Rust Client">
+
+<Steps>
+
+<Step title="Create a sponsor account">
+
+Load or generate a keypair for the sponsor. The sponsor needs SOL but doesn't need to hold the tokens being transferred.
+
+```rust
+use solana_sdk::{pubkey::Pubkey, signature::Keypair, signer::Signer};
+
+// Sponsor: your application server
+let sponsor: Keypair = /* your server keypair */;
+
+// User: only signs to authorize the transfer
+let sender: Keypair = /* user's keypair */;
+let recipient: Pubkey = /* recipient address */;
+let mint: Pubkey = /* e.g. USDC mint */;
+```
+
+</Step>
+
+<Step title="Create the transfer instruction">
+
+Build the transfer instruction with the sponsor as `payer` and the sender as `authority`.
+
+```rust
+use light_token::instruction::{
+    get_associated_token_address, TransferInterface, LIGHT_TOKEN_PROGRAM_ID,
+};
+
+let sender_ata = get_associated_token_address(&sender.pubkey(), &mint);
+let recipient_ata = get_associated_token_address(&recipient, &mint);
+
+let transfer_ix = TransferInterface {
+    source: sender_ata,
+    destination: recipient_ata,
+    amount: 500_000,
+    decimals: 6,
+    authority: sender.pubkey(),       // user signs to authorize
+    payer: sponsor.pubkey(),          // sponsor covers rent top-ups and transaction fees
+    spl_interface: None,
+    source_owner: LIGHT_TOKEN_PROGRAM_ID,
+    destination_owner: LIGHT_TOKEN_PROGRAM_ID,
+}
+.instruction()?;
+```
+
+</Step>
+
+<Step title="Send with both signers">
+
+Both the sponsor and sender must sign the transaction.
+
+```rust
+let sig = rpc
+    .create_and_send_transaction(
+        &[transfer_ix],
+        &sponsor.pubkey(),          // fee payer
+        &[&sponsor, &sender],       // both sign
+    )
+    .await?;
+
+println!("Tx: {sig}");
+```
+
+</Step>
+
+</Steps>
+
+<Accordion title="Full example">
+<RustInstructionCode />
+</Accordion>
+
+</Tab>
+<Tab title="AI Prompt">
+<GaslessTransactionsAiPrompt />
+</Tab>
+</Tabs>
+
+## Related guides
+
+<CardGroup cols={2}>
+<Card title="Basic payment" icon="arrow-right" href="/light-token/payments/basic-payment">
+  Send a single token transfer.
+</Card>
+<Card title="Receive payments" icon="arrow-down" href="/light-token/payments/receive-payments">
+  Load cold accounts and prepare to receive.
+</Card>
+</CardGroup>
+
+<SupportFooter />

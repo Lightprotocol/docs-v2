@@ -1,0 +1,46 @@
+```typescript
+import {
+    Keypair,
+    Transaction,
+    sendAndConfirmTransaction,
+} from "@solana/web3.js";
+import { createTransferInterfaceInstructions } from "@lightprotocol/compressed-token/unified";
+import { createMemoInstruction } from "@solana/spl-memo";
+import { rpc, payer, setup } from "../setup.js";
+
+(async function () {
+    const { mint } = await setup();
+    const recipient = Keypair.generate();
+
+    const instructions = await createTransferInterfaceInstructions(
+        rpc,
+        payer.publicKey,
+        mint,
+        100,
+        payer.publicKey,
+        recipient.publicKey
+    );
+
+    // Append memo to the transfer transaction (last batch)
+    const memoIx = createMemoInstruction("INV-2024-001");
+    instructions[instructions.length - 1].push(memoIx);
+
+    let signature;
+    for (const ixs of instructions) {
+        const tx = new Transaction().add(...ixs);
+        signature = await sendAndConfirmTransaction(rpc, tx, [payer]);
+    }
+    console.log("Tx with memo:", signature);
+
+    // Read memo back from transaction logs
+    const txDetails = await rpc.getTransaction(signature!, {
+        maxSupportedTransactionVersion: 0,
+    });
+
+    const logs = txDetails?.meta?.logMessages || [];
+    const memoLogs = logs.filter((log: string) =>
+        log.includes("Program MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr")
+    );
+    console.log("Memo logs:", memoLogs);
+})();
+```

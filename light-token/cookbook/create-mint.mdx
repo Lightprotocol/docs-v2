@@ -1,7 +1,7 @@
 ---
 title: Create Mint Account with Token Metadata
-sidebarTitle: Create Mint Account
-description: Program and client guides to create a mint with token metadata. For existing SPL or Token 2022 mints add an interface PDA for interoperability. Includes step-by-step implementation and full code examples.
+sidebarTitle: Create Light / SPL / Token 2022 Mint Account
+description: Create a Light mint with token metadata, or create SPL and Token 2022 mints with interface PDA for interoperability.
 keywords: ["create mint account on solana", "rent free mint on solana", "rent free token mints on solana", "spl create mint alternative"]
 ---
 
@@ -33,8 +33,7 @@ import SplActionCode from "/snippets/code-snippets/light-token/create-spl-mint/a
 import SplInstructionCode from "/snippets/code-snippets/light-token/create-spl-mint/instruction.mdx";
 import T22ActionCode from "/snippets/code-snippets/light-token/create-t22-mint/action.mdx";
 import T22InstructionCode from "/snippets/code-snippets/light-token/create-t22-mint/instruction.mdx";
-import TokenPoolActionCode from "/snippets/code-snippets/light-token/create-token-pool/action.mdx";
-import TokenPoolInstructionCode from "/snippets/code-snippets/light-token/create-token-pool/instruction.mdx";
+
 import RustActionCode from "/snippets/code-snippets/light-token/create-mint/rust-client/action.mdx";
 import RustInstructionCode from "/snippets/code-snippets/light-token/create-mint/rust-client/instruction.mdx";
 import AnchorProgramCode from "/snippets/code-snippets/light-token/create-mint/anchor-program/full-example.mdx";
@@ -45,10 +44,11 @@ import CreateMintAiPrompt from "/snippets/ai-prompts/ts-cookbook/create-mint.mdx
 import RustCreateMintAiPrompt from "/snippets/ai-prompts/rust-cookbook/create-mint.mdx";
 import ProgramCreateMintCpiAiPrompt from "/snippets/ai-prompts/program-cookbook/create-mint-cpi.mdx";
 import ProgramCreateMintMacrosAiPrompt from "/snippets/ai-prompts/program-cookbook/create-mint-macros.mdx";
+import SupportFooter from "/snippets/support-footer.mdx";
 
 1. Mint accounts uniquely represent a token on Solana and store its global metadata.
 2. Light mints are on-chain accounts like SPL mints, but the light token program sponsors the rent-exemption cost for you.
-3. Add an interface PDA to existing SPL or Token 2022 mints for interoperability with Light Token. The interface PDA holds SPL or Token 2022 tokens when wrapped to Light Token.
+3. [Add an interface PDA](/light-token/cookbook/add-interface-pda) to existing SPL or Token 2022 mints for interoperability with Light Token. The interface PDA holds SPL or Token 2022 tokens when wrapped to Light Token.
 
 <Accordion title="Light Rent Config Explained">
   <CompressibleRentExplained />
@@ -63,7 +63,7 @@ import ProgramCreateMintMacrosAiPrompt from "/snippets/ai-prompts/program-cookbo
 
 `createMintInterface` is a unified interface that dispatches to different mint creation paths based on programId:
 
-- `TOKEN_PROGRAM_ID` or `TOKEN_2022_PROGRAM_ID` → delegates to SPL or T22 `createMint`
+- `TOKEN_PROGRAM_ID` or `TOKEN_2022_PROGRAM_ID` → delegates to SPL or Token 2022 `createMint`
 - Otherwise it defaults to `LIGHT_TOKEN_PROGRAM_ID` → creates a Light Token mint
 
 You can use the same interface regardless of mint type.
@@ -93,7 +93,7 @@ Compare to SPL:
 
 <Note>
   The `mintAuthority` must be a `Signer` for light-mints but can be just a
-  `PublicKey` for SPL/T22.
+  `PublicKey` for SPL/Token 2022.
 </Note>
 
 <Tabs>
@@ -113,24 +113,7 @@ Compare to SPL:
 </Tab>
 </Tabs>
 
-### Add Interface PDA to SPL / Token 2022 mints
-
-<Tabs>
-<Tab title="Add to Existing Mints">
-
-Register an interface PDA for an existing SPL mint for interoperability with Light Token. No mint authority required.
-
-<Tabs>
-<Tab title="Action">
-<TokenPoolActionCode />
-</Tab>
-<Tab title="Instruction">
-<TokenPoolInstructionCode />
-</Tab>
-</Tabs>
-
-</Tab>
-<Tab title="Create SPL Mint with Interface PDA">
+## Create SPL mint with interface PDA
 
 Pass `TOKEN_PROGRAM_ID` to create a standard SPL mint with an interface PDA in one transaction for interoperability with Light Token.
 
@@ -143,8 +126,7 @@ Pass `TOKEN_PROGRAM_ID` to create a standard SPL mint with an interface PDA in o
 </Tab>
 </Tabs>
 
-</Tab>
-<Tab title="Create Token 2022 with Interface PDA">
+## Create Token 2022 mint with interface PDA
 
 Pass `TOKEN_2022_PROGRAM_ID` to create a Token-2022 mint with an interface PDA in one transaction for interoperability with Light Token.
 
@@ -154,9 +136,6 @@ Pass `TOKEN_2022_PROGRAM_ID` to create a Token-2022 mint with an interface PDA i
 </Tab>
 <Tab title="Instruction">
 <T22InstructionCode />
-</Tab>
-</Tabs>
-
 </Tab>
 </Tabs>
 
@@ -578,12 +557,11 @@ pub mint: UncheckedAccount<'info>,
 
 </Tabs>
 
-# Next Steps
+## Related Guides
 
-<Card
-  title="Learn how to mint tokens to Light Token accounts."
-  icon="chevron-right"
-  color="#0066ff"
-  href="/light-token/cookbook/mint-to"
-  horizontal
-/>
+<CardGroup cols={2}>
+<Card title="Add interface PDA" icon="link" href="/light-token/cookbook/add-interface-pda" horizontal />
+<Card title="Mint tokens" icon="coins" href="/light-token/cookbook/mint-to" horizontal />
+</CardGroup>
+
+<SupportFooter />

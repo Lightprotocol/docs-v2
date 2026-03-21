@@ -24,7 +24,7 @@ pub fn transfer_checked_invoke(
     let amount = u64::from_le_bytes(data[0..8].try_into().unwrap());
     let decimals = data[8];
 
-    // TransferChecked validates decimals. Only for Light->Light. Use TransferInterface for SPL/T22
+    // TransferChecked validates decimals. Only for Light->Light. Use TransferInterface for SPL/Token 2022
     TransferCheckedCpi {
         source: source.clone(),
         mint: mint.clone(),

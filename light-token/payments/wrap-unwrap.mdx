@@ -1,0 +1,156 @@
+---
+title: "Wrap and Unwrap"
+sidebarTitle: "Wrap and Unwrap"
+description: "Move tokens between SPL / Token 2022 and Light Token accounts. Use wrap/unwrap to interoperate with applications that only support SPL or Token 2022."
+keywords: ["wrap tokens solana", "unwrap tokens solana", "spl to light token", "cex onramp solana", "token interoperability"]
+---
+
+import RegisterSplMint from "/snippets/setup/register-spl-mint.mdx";
+import FullSetup from "/snippets/setup/full-setup.mdx";
+import SupportFooter from "/snippets/support-footer.mdx";
+import AgentSkillPayments from "/snippets/setup/agent-skill-payments.mdx";
+import PaymentsAiPrompt from "/snippets/ai-prompts/toolkits/payments.mdx";
+
+<AgentSkillPayments />
+
+<Tabs>
+<Tab title="Guide">
+
+## Setup
+
+<FullSetup />
+
+```typescript
+import { createRpc } from "@lightprotocol/stateless.js";
+
+const rpc = createRpc(RPC_ENDPOINT);
+```
+
+## Wrap from SPL
+
+<Note>
+Find a full code example [here](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments/interop/wrap.ts).
+</Note>
+
+<Tabs>
+<Tab title="Instruction">
+
+```typescript
+import { Transaction } from "@solana/web3.js";
+import { getAssociatedTokenAddressSync } from "@solana/spl-token";
+import {
+  createWrapInstruction,
+  getAssociatedTokenAddressInterface,
+} from "@lightprotocol/compressed-token/unified";
+import { getSplInterfaceInfos } from "@lightprotocol/compressed-token";
+
+const splAta = getAssociatedTokenAddressSync(mint, owner.publicKey);
+const tokenAta = getAssociatedTokenAddressInterface(mint, owner.publicKey);
+
+const splInterfaceInfos = await getSplInterfaceInfos(rpc, mint);
+const splInterfaceInfo = splInterfaceInfos.find((i) => i.isInitialized);
+
+const tx = new Transaction().add(
+  createWrapInstruction(
+    splAta,
+    tokenAta,
+    owner.publicKey,
+    mint,
+    amount,
+    splInterfaceInfo,
+    decimals,
+    payer.publicKey
+  )
+);
+```
+
+</Tab>
+<Tab title="Action">
+
+```typescript
+import { getAssociatedTokenAddressSync } from "@solana/spl-token";
+import {
+  wrap,
+  getAssociatedTokenAddressInterface,
+} from "@lightprotocol/compressed-token/unified";
+
+const splAta = getAssociatedTokenAddressSync(mint, owner.publicKey);
+const tokenAta = getAssociatedTokenAddressInterface(mint, owner.publicKey);
+
+await wrap(rpc, payer, splAta, tokenAta, owner, mint, amount);
+```
+
+</Tab>
+</Tabs>
+
+## Unwrap to SPL
+
+<Note>
+Find a full code example [here](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments/interop/unwrap.ts).
+</Note>
+
+Unwrap moves the token balance from a Light Token associated token account to an SPL associated token account.
+Use this to compose with applications that do not yet support Light Token.
+
+<Tabs>
+<Tab title="Instruction">
+
+```typescript
+import { Transaction, sendAndConfirmTransaction } from "@solana/web3.js";
+import { getAssociatedTokenAddressSync } from "@solana/spl-token";
+import { createUnwrapInstructions } from "@lightprotocol/compressed-token/unified";
+
+const splAta = getAssociatedTokenAddressSync(mint, owner.publicKey);
+
+// Each inner array = one transaction. Handles loading + unwrapping together.
+const instructions = await createUnwrapInstructions(
+  rpc,
+  splAta,
+  owner.publicKey,
+  mint,
+  amount,
+  payer.publicKey
+);
+
+for (const ixs of instructions) {
+  const tx = new Transaction().add(...ixs);
+  await sendAndConfirmTransaction(rpc, tx, [payer, owner]);
+}
+```
+
+</Tab>
+<Tab title="Action">
+
+```typescript
+import { getAssociatedTokenAddressSync } from "@solana/spl-token";
+import { unwrap } from "@lightprotocol/compressed-token/unified";
+
+const splAta = getAssociatedTokenAddressSync(mint, owner.publicKey);
+
+await unwrap(rpc, payer, splAta, owner, mint, amount);
+```
+
+</Tab>
+</Tabs>
+
+</Tab>
+<Tab title="AI Prompt">
+<PaymentsAiPrompt />
+</Tab>
+</Tabs>
+
+## Related guides
+
+<CardGroup cols={3}>
+<Card title="Basic payment" icon="arrow-right" href="/light-token/payments/basic-payment">
+  Send a single token transfer.
+</Card>
+<Card title="Receive payments" icon="arrow-down" href="/light-token/payments/receive-payments">
+  Load cold accounts and prepare to receive.
+</Card>
+<Card title="Gasless transactions" icon="hand-holding-dollar" href="/light-token/wallets/gasless-transactions">
+  Abstract SOL fees from the user.
+</Card>
+</CardGroup>
+
+<SupportFooter />

@@ -1,0 +1,115 @@
+---
+title: "Verify Payments"
+sidebarTitle: "Get Token Balance and Transaction History"
+description: "Query token balances and transaction history to verify incoming payments."
+keywords: ["verify payment solana", "token balance solana", "transaction history light token", "payment verification"]
+---
+
+import FullSetup from "/snippets/setup/full-setup.mdx";
+import SupportFooter from "/snippets/support-footer.mdx";
+import AgentSkillPayments from "/snippets/setup/agent-skill-payments.mdx";
+import PaymentsAiPrompt from "/snippets/ai-prompts/toolkits/payments.mdx";
+import PaymentsSetupHelper from "/snippets/setup/payments-setup-helper.mdx";
+import GetBalanceCode from "/snippets/code-snippets/payments/verify/get-balance.mdx";
+import GetHistoryCode from "/snippets/code-snippets/payments/verify/get-history.mdx";
+
+<table>
+  <thead>
+    <tr>
+      <th style={{ width: "15%" }}></th>
+      <th>SPL</th>
+      <th>Light</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>**Get Balance**</td>
+      <td>getAccount()</td>
+      <td>getAtaInterface()</td>
+    </tr>
+    <tr>
+      <td>**Tx History**</td>
+      <td>getSignaturesForAddress()</td>
+      <td>rpc.getSignaturesForOwnerInterface()</td>
+    </tr>
+  </tbody>
+</table>
+
+<AgentSkillPayments />
+
+<Tabs>
+<Tab title="Guide">
+
+## Setup
+
+<FullSetup />
+
+```typescript
+import { createRpc } from "@lightprotocol/stateless.js";
+
+const rpc = createRpc(RPC_ENDPOINT);
+```
+
+<PaymentsSetupHelper />
+
+## Query balance
+
+`getAtaInterface` returns a unified balance aggregating Light Token (hot + cold), SPL, and Token 2022 sources in `parsed.amount`.
+
+<Note>
+Find a full code example [here](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments/verify/get-balance.ts).
+</Note>
+
+<GetBalanceCode />
+
+<Accordion title="Compare to SPL">
+
+```typescript
+import { getAccount } from "@solana/spl-token";
+
+const account = await getAccount(connection, ata);
+
+console.log(account.amount);
+```
+
+</Accordion>
+
+## Transaction history
+
+<Note>
+Find a full code example [here](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments/verify/get-history.ts).
+</Note>
+
+Query all transactions for an owner across both on-chain and compressed state:
+
+<GetHistoryCode />
+
+<Accordion title="Compare to SPL">
+
+```typescript
+const signatures = await connection.getSignaturesForAddress(ata);
+```
+
+</Accordion>
+
+</Tab>
+<Tab title="AI Prompt">
+<PaymentsAiPrompt />
+</Tab>
+</Tabs>
+
+## Related guides
+
+<CardGroup cols={3}>
+<Card title="Receive payments" icon="arrow-down" href="/light-token/payments/receive-payments">
+  Load cold accounts and prepare to receive.
+</Card>
+<Card title="Basic payment" icon="arrow-right" href="/light-token/payments/basic-payment">
+  Send a single token transfer.
+</Card>
+<Card title="Verify address" icon="shield-check" href="/light-token/payments/verify-recipient-address">
+  Validate recipient addresses before sending.
+</Card>
+</CardGroup>
+
+<SupportFooter />

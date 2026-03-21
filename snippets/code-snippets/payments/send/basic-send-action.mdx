@@ -1,0 +1,21 @@
+```typescript
+import { Keypair } from "@solana/web3.js";
+import { transferInterface } from "@lightprotocol/compressed-token/unified";
+import { rpc, payer, setup } from "../setup.js";
+
+(async function () {
+    const { mint, senderAta } = await setup();
+    const recipient = Keypair.generate();
+
+    const sig = await transferInterface(
+        rpc,
+        payer,
+        senderAta,
+        mint,
+        recipient.publicKey,
+        payer,
+        100
+    );
+    console.log("Tx:", sig);
+})();
+```

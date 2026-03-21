@@ -20,6 +20,7 @@ import AnchorProgramCode from "/snippets/code-snippets/light-token/close-token-a
 import AgentSkillGeneric from "/snippets/setup/agent-skill-generic.mdx";
 import RustCloseTokenAccountAiPrompt from "/snippets/ai-prompts/rust-cookbook/close-token-account.mdx";
 import ProgramCloseTokenAccountAiPrompt from "/snippets/ai-prompts/program-cookbook/close-token-account.mdx";
+import SupportFooter from "/snippets/support-footer.mdx";
 
 1. Closing a Light Token account transfers remaining lamports to a destination account and the rent sponsor can reclaim sponsored rent.
 2. Light token accounts can be closed by the owner.
@@ -152,14 +153,11 @@ CloseAccountCpi {
 
 </Tabs>
 
-# Next Steps
+## Related Guides
 
-{" "}
+<CardGroup cols={2}>
+<Card title="Burn tokens" icon="flame" href="/light-token/cookbook/burn" horizontal />
+<Card title="Wrap and unwrap" icon="rotate" href="/light-token/cookbook/wrap-unwrap" horizontal />
+</CardGroup>
 
-<Card
-  title="Go back to the overview for the Light Token standard."
-  icon="chevron-right"
-  color="#0066ff"
-  href="/light-token/welcome"
-  horizontal
-/>
+<SupportFooter />

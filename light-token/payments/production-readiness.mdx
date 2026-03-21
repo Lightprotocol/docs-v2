@@ -1,0 +1,73 @@
+---
+title: "Production Readiness"
+sidebarTitle: "Production Readiness"
+description: "Non-exhaustive checklist for deploying Light Token payment flows to production, including RPC infrastructure, error handling, and security."
+keywords: ["production readiness solana", "light token production", "photon indexer", "mainnet deployment solana"]
+---
+
+import SupportFooter from "/snippets/support-footer.mdx";
+import AgentSkillPayments from "/snippets/setup/agent-skill-payments.mdx";
+import PaymentsAiPrompt from "/snippets/ai-prompts/toolkits/payments.mdx";
+
+<AgentSkillPayments />
+
+<Tabs>
+<Tab title="Guide">
+
+## RPC infrastructure
+
+Light Token requires a Photon-compatible RPC endpoint for cold account lookups and balance queries.
+
+| Provider | Photon support | Notes |
+|:---------|:---------------|:------|
+| [Helius](https://helius.dev) | Yes | Recommended. Maintains the Photon indexer. |
+| [Triton](https://triton.one) | Yes | Alternative provider. |
+
+## Transaction landing
+
+Light Token transactions follow standard Solana patterns for landing:
+
+- **Priority fees**: Use `ComputeBudgetProgram.setComputeUnitPrice()` to increase transaction priority. See [Solana priority fees](https://solana.com/docs/core/fees).
+- **Compute units**: Set appropriate compute unit limits with `ComputeBudgetProgram.setComputeUnitLimit()`.
+- **Retry logic**: Implement retries with fresh blockhashes for failed transactions.
+
+## Confirmation levels
+
+| Level | When to use |
+|:------|:------------|
+| `processed` | Fastest. Use for UI updates. Not guaranteed to finalize. |
+| `confirmed` | Recommended for most payment flows. Confirmed by supermajority of validators. |
+| `finalized` | Highest certainty. Use for high-value transfers or irreversible actions. |
+
+## Error handling
+
+Handle both standard Solana errors and Light Token-specific scenarios:
+
+- **[Cold account](/light-token/payments/receive-payments) load failures**: Retry the load if the indexer returns stale data.
+- **Associated token account creation**: Idempotent — safe to retry.
+- **Rent top-up failures**: Ensure the fee payer has sufficient SOL balance. See [gasless transactions](/light-token/wallets/gasless-transactions) for cost breakdown.
+- **Transaction size limits**: If `TransactionInstruction[][]` returns [multiple batches](/light-token/payments/basic-payment), process them sequentially.
+
+## Fee sponsorship
+
+Set your application as the fee payer so users never interact with SOL:
+
+1. **Rent top-ups and transaction fees**: Set `payer` parameter on Light Token instructions. See [gasless transactions](/light-token/wallets/gasless-transactions).
+2. **Rent sponsor funding**: Ensure the rent sponsor PDA is funded. See the [cost breakdown](/light-token/wallets/gasless-transactions) for required amounts.
+
+## Pre-launch checklist
+
+- [ ] Photon-compatible RPC endpoint configured and tested
+- [ ] Fee payer wallet funded with sufficient SOL
+- [ ] Error handling covers load failures, tx size limits, and retries
+- [ ] Confirmation level appropriate for your use case
+- [ ] [Address verification](/light-token/payments/verify-recipient-address) implemented
+- [ ] [Wrap/unwrap](/light-token/payments/wrap-unwrap) flows tested for SPL / Token 2022 interoperability (if applicable)
+
+</Tab>
+<Tab title="AI Prompt">
+<PaymentsAiPrompt />
+</Tab>
+</Tabs>
+
+<SupportFooter />

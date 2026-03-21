@@ -2,22 +2,27 @@
 
 | | | |
 |---------|-------------|-------------|
-| **payments-and-wallets** | All you need for wallet integrations and payment flows. Minimal API differences to SPL. | [Example](https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/payments-and-wallets) \| [Docs](/light-token/payments/integration-guide) |
+| **payments** | All you need for wallet integrations and payment flows. Minimal API differences to SPL. | [Example](https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/payments) \| [Docs](/light-token/payments/overview) |
 | **sign-with-privy** | Light-token operations signed with Privy wallets (Node.js + React) | [Example](https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/sign-with-privy) \| [Docs](/light-token/wallets/privy) |
 | **sign-with-wallet-adapter** | Light-token operations signed with Wallet Adapter (React) | [Example](https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/sign-with-wallet-adapter) \| [Docs](/light-token/wallets/wallet-adapter) |
-| **sponsor-rent-top-ups** | Sponsor rent top-ups by setting your application as the fee payer | [Example](https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/sponsor-rent-top-ups) \| [Docs](/light-token/wallets/sponsor-top-ups) |
+| **gasless-transactions** | Abstract SOL fees so users never hold SOL. Sponsor rent top-ups and transaction fees. | [Example](https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/gasless-transactions) \| [Docs](/light-token/wallets/gasless-transactions) |
 | **spl-to-light** | Transfer from SPL to Light via TransferInterface | [Example](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/instructions/spl_to_light_transfer.rs) |
 
 ### TypeScript
 
 | | | | |
 |---------|--------|-------------|------|
-| **approve** | [Action](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/actions/delegate-approve.ts) | — | [Docs](/light-token/cookbook/approve-revoke) |
+| **approve** | [Action](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/actions/delegate-approve.ts) | [Instruction](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/instructions/delegate-approve.ts) | [Docs](/light-token/cookbook/approve-revoke) |
 | **create-ata** | [Action](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/actions/create-ata.ts) | [Instruction](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/instructions/create-ata.ts) | [Docs](/light-token/cookbook/create-ata) |
+| **create-ata-explicit-rent-sponsor** | [Action](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/actions/create-ata-explicit-rent-sponsor.ts) | — | [Docs](/light-token/cookbook/create-ata) |
 | **create-mint** | [Action](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/actions/create-mint.ts) | [Instruction](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/instructions/create-mint.ts) | [Docs](/light-token/cookbook/create-mint) |
+| **create-spl-interface** | [Action](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/actions/create-spl-interface.ts) | [Instruction](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/instructions/create-spl-interface.ts) | [Docs](light-token/cookbook/add-interface-pda) |
+| **create-spl-mint** | [Action](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/actions/create-spl-mint.ts) | [Instruction](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/instructions/create-spl-mint.ts) | [Docs](/light-token/cookbook/create-mint#create-spl-mint-with-interface-pda) |
+| **create-t22-mint** | [Action](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/actions/create-t22-mint.ts) | [Instruction](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/instructions/create-t22-mint.ts) | [Docs](/light-token/cookbook/create-mint#create-token-2022-mint-with-interface-pda) |
+| **delegate-transfer** | [Action](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/actions/delegate-transfer.ts) | — | [Docs](/light-token/cookbook/transfer-delegated) |
 | **load-ata** | [Action](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/actions/load-ata.ts) | [Instruction](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/instructions/load-ata.ts) | [Docs](/light-token/cookbook/load-ata) |
 | **mint-to** | [Action](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/actions/mint-to.ts) | [Instruction](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/instructions/mint-to.ts) | [Docs](/light-token/cookbook/mint-to) |
-| **revoke** | [Action](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/actions/delegate-revoke.ts) | — | [Docs](/light-token/cookbook/approve-revoke) |
+| **revoke** | [Action](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/actions/delegate-revoke.ts) | [Instruction](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/instructions/delegate-revoke.ts) | [Docs](/light-token/cookbook/approve-revoke) |
 | **transfer-interface** | [Action](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/actions/transfer-interface.ts) | [Instruction](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/instructions/transfer-interface.ts) | [Docs](/light-token/cookbook/transfer-interface) |
 | **unwrap** | [Action](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/actions/unwrap.ts) | [Instruction](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/instructions/unwrap.ts) | [Docs](/light-token/cookbook/wrap-unwrap) |
 | **wrap** | [Action](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/actions/wrap.ts) | [Instruction](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/instructions/wrap.ts) | [Docs](/light-token/cookbook/wrap-unwrap) |
@@ -42,3 +47,20 @@
 | **transfer-interface** | [Action](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/actions/transfer_interface.rs) | [Instruction](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/instructions/transfer_interface.rs) | [Docs](/light-token/cookbook/transfer-interface) |
 | **unwrap** | [Action](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/actions/unwrap.rs) | — | [Docs](/light-token/cookbook/wrap-unwrap) |
 | **wrap** | [Action](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/actions/wrap.rs) | — | [Docs](/light-token/cookbook/wrap-unwrap) |
+
+### Extensions
+
+See how [Light Token works with Token 2022 extensions](/light-token/extensions/overview).
+
+| | |
+|---------|-------------|
+| **close-mint** | [Example](https://github.com/Lightprotocol/examples-light-token/blob/main/extensions/close-mint.ts) |
+| **confidential-transfer** | [Example](https://github.com/Lightprotocol/examples-light-token/blob/main/extensions/confidential-transfer.ts) |
+| **default-account-state** | [Example](https://github.com/Lightprotocol/examples-light-token/blob/main/extensions/default-account-state.ts) |
+| **interest-bearing-tokens** | [Example](https://github.com/Lightprotocol/examples-light-token/blob/main/extensions/interest-bearing-tokens.ts) |
+| **metadata-and-metadata-pointer** | [Example](https://github.com/Lightprotocol/examples-light-token/blob/main/extensions/metadata-and-metadata-pointer.ts) |
+| **pausable-mint** | [Example](https://github.com/Lightprotocol/examples-light-token/blob/main/extensions/pausable-mint.ts) |
+| **permanent-delegate** | [Example](https://github.com/Lightprotocol/examples-light-token/blob/main/extensions/permanent-delegate.ts) |
+| **token-groups-and-members** | [Example](https://github.com/Lightprotocol/examples-light-token/blob/main/extensions/token-groups-and-members.ts) |
+| **transfer-fees** | [Example](https://github.com/Lightprotocol/examples-light-token/blob/main/extensions/transfer-fees.ts) |
+| **transfer-hook** | [Example](https://github.com/Lightprotocol/examples-light-token/blob/main/extensions/transfer-hook.ts) |

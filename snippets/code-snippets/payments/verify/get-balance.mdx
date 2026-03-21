@@ -1,0 +1,16 @@
+```typescript
+import { PublicKey } from "@solana/web3.js";
+import { createRpc } from "@lightprotocol/stateless.js";
+import {
+    getAssociatedTokenAddressInterface,
+    getAtaInterface,
+} from "@lightprotocol/compressed-token/unified";
+
+const rpc = createRpc();
+const mint = new PublicKey("YOUR_MINT_ADDRESS");
+const owner = new PublicKey("YOUR_OWNER_ADDRESS");
+
+const ata = getAssociatedTokenAddressInterface(mint, owner);
+const account = await getAtaInterface(rpc, ata, owner, mint);
+console.log("Balance:", account.parsed.amount.toString());
+```

@@ -14,6 +14,13 @@ npx skills add https://zkcompression.com
 ## Dedicated Agent Skills
 
 <Tabs>
+<Tab title="Any Agent">
+
+Install dedicated agent skills with this command:
+```
+npx skills add Lightprotocol/skills
+```
+</Tab>
 <Tab title="Claude Code">
 Add the marketplace and install:
 
@@ -27,24 +34,20 @@ Add the marketplace and install:
 2. Navigate to **Rules & Commands** → **Project Rules** → **Add Rule** → **Remote Rule (GitHub)**
 3. Enter: `https://github.com/Lightprotocol/skills.git`
 </Tab>
-<Tab title="Any Agent">
-```
-npx skills add Lightprotocol/skills
-```
-</Tab>
+
 </Tabs>
 
 | Use case                                                                                                                                                                                              | Skill                                                |
 | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
-| Build rent-free Solana programs with Light SDK (Anchor or Pinocchio). Includes router integration.                                                                                                    | [light-sdk](https://github.com/Lightprotocol/skills/tree/main/skills/light-sdk)                       |
-| Use Light Token client SDKs (TypeScript and Rust) for mints, ATAs, transfers                                                                                                                         | [light-token-client](https://github.com/Lightprotocol/skills/tree/main/skills/light-token-client)     |
-| Stream account state via Laserstream gRPC                                                                                                                                                             | [data-streaming](https://github.com/Lightprotocol/skills/tree/main/skills/data-streaming)             |
-| Wallets and payment flows with light-token. Includes privy, wallet adapter, mobile wallet adapter signing. Optional nullifier to prevent your onchain instruction from being executed more than once. | [payments-and-wallets](https://github.com/Lightprotocol/skills/tree/main/skills/payments-and-wallets) |
-| Airdrops, DePIN, token distribution                                                                                                                                                                   | [token-distribution](https://github.com/Lightprotocol/skills/tree/main/skills/token-distribution)     |
-| Anti-double-spend nullifiers for Privacy-preserving ZK programs                                                                                                                                       | [zk-nullifier](https://github.com/Lightprotocol/skills/tree/main/skills/zk-nullifier)                 |
-| Testing programs and clients on localnet, devnet, mainnet                                                                                                                                             | [testing](https://github.com/Lightprotocol/skills/tree/main/skills/testing)                           |
-| For per-user state, DePIN nodes, and infrequently accessed app state with compressed PDAs                                                                                                             | [solana-compression](https://github.com/Lightprotocol/skills/tree/main/skills/solana-compression)     |
-| Help with Debugging and Questions via DeepWiki MCP                                                                                                                                                    | [ask-mcp](https://github.com/Lightprotocol/skills/tree/main/skills/ask-mcp)                           |
+| For stablecoin payment flows and wallet integrations on Solana. | [payments](https://github.com/Lightprotocol/skills/tree/main/skills/payments) |
+| For client development with Light Token APIs on Solana. | [light-token-client](https://github.com/Lightprotocol/skills/tree/main/skills/light-token-client) |
+| For Solana program development with tokens and PDAs. | [light-sdk](https://github.com/Lightprotocol/skills/tree/main/skills/light-sdk) |
+| For data pipelines, aggregators, or indexers, real-time account state streaming on Solana with light account hot/cold lifecycle tracking | [data-streaming](https://github.com/Lightprotocol/skills/tree/main/skills/data-streaming) |
+| For token distribution on Solana 5000x cheaper than SPL (rewards, airdrops, depins, ...) | [token-distribution](https://github.com/Lightprotocol/skills/tree/main/skills/token-distribution) |
+| For custom ZK Solana programs and privacy-preserving applications to prevent double spending | [zk-nullifier](https://github.com/Lightprotocol/skills/tree/main/skills/zk-nullifier) |
+| For program development on Solana with infrequently accessed state, such as per-user state, DePIN registrations, ... | [solana-compression](https://github.com/Lightprotocol/skills/tree/main/skills/solana-compression) |
+| For testing with Light Protocol programs and clients on localnet, devnet, and mainnet validation | [testing](https://github.com/Lightprotocol/skills/tree/main/skills/testing) |
+| For questions about compressed accounts, Light SDK, Solana development, Claude Code features, or agent skills | [ask-mcp](https://github.com/Lightprotocol/skills/tree/main/skills/ask-mcp) |
 
 > View all skills here: https://github.com/Lightprotocol/skills.
 

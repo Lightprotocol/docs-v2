@@ -1,0 +1,10 @@
+```typescript
+import { PublicKey } from "@solana/web3.js";
+import { createRpc } from "@lightprotocol/stateless.js";
+
+const rpc = createRpc();
+const owner = new PublicKey("YOUR_OWNER_ADDRESS");
+
+const result = await rpc.getSignaturesForOwnerInterface(owner);
+console.log("Signatures:", result.signatures.length);
+```

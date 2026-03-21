@@ -15,3 +15,6 @@ docs-audit.txt
 docs-anchor.json
 product-docs.json
 tabs-docs.json
+
+# Local helper scripts with hardcoded paths
+scripts/copy-payments-snippets.sh

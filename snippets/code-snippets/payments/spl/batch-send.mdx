@@ -1,0 +1,51 @@
+```typescript
+import { findAssociatedTokenPda, TOKEN_2022_PROGRAM_ADDRESS } from "@solana-program/token";
+import { getTransferInstruction } from "@solana-program/token";
+
+const [senderAta] = await findAssociatedTokenPda({
+  mint: mint.address,
+  owner: sender.address,
+  tokenProgram: TOKEN_2022_PROGRAM_ADDRESS
+});
+
+const [recipient1Ata] = await findAssociatedTokenPda({
+  mint: mint.address,
+  owner: recipient1.address,
+  tokenProgram: TOKEN_2022_PROGRAM_ADDRESS
+});
+
+const [recipient2Ata] = await findAssociatedTokenPda({
+  mint: mint.address,
+  owner: recipient2.address,
+  tokenProgram: TOKEN_2022_PROGRAM_ADDRESS
+});
+
+const transfer1Instruction = getTransferInstruction({
+  source: senderAta,
+  destination: recipient1Ata,
+  authority: sender.address,
+  amount: 250_000n
+});
+
+const transfer2Instruction = getTransferInstruction({
+  source: senderAta,
+  destination: recipient2Ata,
+  authority: sender.address,
+  amount: 250_000n
+});
+
+const signature = await client.transaction.prepareAndSend({
+  authority: sender,
+  instructions: [transfer1Instruction, transfer2Instruction],
+  version: 0
+});
+
+const splToken = client.splToken({
+  mint: mint.address,
+  tokenProgram: "auto"
+});
+
+const senderBalance = await splToken.fetchBalance(sender.address);
+const recipient1Balance = await splToken.fetchBalance(recipient1.address);
+const recipient2Balance = await splToken.fetchBalance(recipient2.address);
+```

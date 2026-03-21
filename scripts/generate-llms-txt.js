@@ -111,6 +111,20 @@ function slugify(text) {
 // ── Section builders ────────────────────────────────────────────────
 
 function buildAiTools(anchor) {
+  const prefix = [
+    `Install orchestrator agent skill or view [skill.md](${BASE_URL}/skill.md):`,
+    '',
+    '```bash',
+    'npx skills add https://zkcompression.com',
+    '```',
+    '',
+    'Install or view [dedicated agent skills](/ai-tools/overview#agent-skills).',
+    '',
+    '```',
+    'npx skills add Lightprotocol/skills',
+    '```',
+  ].join('\n');
+
   const lines = [];
 
   for (const group of anchor.groups) {
@@ -139,8 +153,8 @@ function buildAiTools(anchor) {
       'For data pipelines, aggregators, or indexers, real-time account state streaming on Solana with light account hot/cold lifecycle tracking',
     ],
     [
-      'payments-and-wallets',
-      'For stablecoin payment flows and wallet integrations on Solana.',
+      'payments',
+      'Skill for payment flows using Light Token APIs for sponsored rent-exemption.',
     ],
     [
       'token-distribution',
@@ -169,7 +183,7 @@ function buildAiTools(anchor) {
     );
   }
 
-  return lines;
+  return { prefix, lines };
 }
 
 function splitLightTokenProgram(group) {
@@ -248,21 +262,22 @@ function buildOpenApiSpecs() {
 // ── Hardcoded examples ──────────────────────────────────────────────
 
 const EXAMPLES_DEFI = [
-  '- [cp-swap-reference](https://github.com/Lightprotocol/program-examples/tree/main/cp-swap-reference): Fork of Raydium AMM that creates markets without paying rent-exemption.',
-  '- [pinocchio-swap](https://github.com/Lightprotocol/program-examples/tree/main/pinocchio-swap): Light Token swap reference implementation.',
-  '- [token-swap](https://github.com/Lightprotocol/program-examples/tree/main/token-swap): AMM with liquidity pools and swaps.',
-  '- [escrow](https://github.com/Lightprotocol/program-examples/tree/main/escrow): Peer-to-peer light-token swap with offer/accept flow.',
-  '- [fundraiser](https://github.com/Lightprotocol/program-examples/tree/main/fundraiser): Token fundraiser with target, deadline, and refunds.',
-  '- [create-and-transfer](https://github.com/Lightprotocol/program-examples/tree/main/create-and-transfer): Create account via macro and transfer via CPI.',
-  '- [light-token-minter](https://github.com/Lightprotocol/program-examples/tree/main/light-token-minter): Create light-mints with metadata, mint tokens.',
+  '- [cp-swap-reference](https://github.com/Lightprotocol/cp-swap-reference): Fork of Raydium AMM that creates markets without paying rent-exemption.',
+  '- [pinocchio-swap](https://github.com/Lightprotocol/examples-light-token/tree/main/pinocchio/swap): Light Token swap reference implementation.',
+  '- [token-swap](https://github.com/Lightprotocol/examples-light-token/tree/main/programs/anchor/token-swap): AMM with liquidity pools and swaps.',
+  '- [escrow](https://github.com/Lightprotocol/examples-light-token/tree/main/programs/anchor/escrow): Peer-to-peer light-token swap with offer/accept flow.',
+  '- [fundraiser](https://github.com/Lightprotocol/examples-light-token/tree/main/programs/anchor/fundraiser): Token fundraiser with target, deadline, and refunds.',
+  '- [create-and-transfer](https://github.com/Lightprotocol/examples-light-token/tree/main/programs/anchor/create-and-transfer): Create account via macro and transfer via CPI.',
+  '- [light-token-minter](https://github.com/Lightprotocol/examples-light-token/tree/main/programs/anchor/light-token-minter): Create light-mints with metadata, mint tokens.',
 ];
 
 const EXAMPLES_PAYMENTS = [
-  '- [payments-and-wallets](https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/payments-and-wallets): Wallet integrations and payment flows.',
+  '- [payments](https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/payments): Wallet integrations and payment flows.',
   '- [sign-with-privy](https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/sign-with-privy): Light-token operations signed with Privy wallets.',
   '- [sign-with-wallet-adapter](https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/sign-with-wallet-adapter): Light-token operations signed with Wallet Adapter.',
-  '- [sponsor-rent-top-ups](https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/sponsor-rent-top-ups): Sponsor rent top-ups by setting your application as the fee payer.',
-  '- [spl-to-light](https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/spl-to-light): Transfer from SPL to Light via TransferInterface.',
+  '- [gasless-transactions](https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/gasless-transactions): Abstract SOL fees so users never hold SOL. Sponsor rent top-ups and transaction fees.',
+  '- [spl-to-light](https://github.com/Lightprotocol/examples-light-token/blob/main/rust-client/instructions/spl_to_light_transfer.rs): Transfer from SPL to Light via TransferInterface.',
+  '- [streaming-tokens](https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/streaming-tokens): Stream mint events using Laserstream.',
 ];
 
 // ── Hardcoded primitives routing table ────────────────────────────────
@@ -270,8 +285,8 @@ const EXAMPLES_PAYMENTS = [
 const PRIMITIVES_SECTION = `
 | Primitive        | Use case                                                                                                                                                                                               | Constraints                                                                    |
 | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------ |
-| Light Token      | Most token use cases (Payment Rails, Consumer Apps, DeFi). Rent-free mint and token accounts. More compute-unit efficient on the hot path.                                         | Currently in Beta and on Solana Devnet with mainnet in Q1 2026                 |
-| Light-PDA        | DeFi program state such as AMM pools and vaults. Can be implemented with minimal code changes.                                                                             | Currently in Beta and on Solana Devnet with mainnet in Q1 2026                 |
+| Light Token      | Most token use cases (Payment Rails, Consumer Apps, DeFi). Rent-free mint and token accounts. More compute-unit efficient on the hot path.                                         |                 |
+| Light-PDA        | DeFi program state such as AMM pools and vaults. Can be implemented with minimal code changes.                                                                             |                  |
 | Compressed Token | Only for Airdrops and token distribution. Prefer Light Token for other purposes. Used by Light Token under the hood for rent-free storage of inactive Light Tokens. Supported by Phantom and Backpack. | Do not use for general-purpose token features. Use Light Token instead.        |
 | Compressed PDA   | User state and app state, nullifiers (payments and ZK applications), DePIN nodes, and stake accounts. Similar to program-derived addresses without a rent-exempt balance.                              | Not for shared state, pool accounts, or config accounts. Use Light-PDA instead |
 
@@ -301,7 +316,8 @@ function generate() {
 
   // 1. AI Agent Resources
   const aiAnchor = anchors.find((a) => a.anchor === 'AI Tools');
-  sections.push({ name: 'AI Agent Resources', lines: buildAiTools(aiAnchor) });
+  const aiTools = buildAiTools(aiAnchor);
+  sections.push({ name: 'AI Agent Resources', prefix: aiTools.prefix, lines: aiTools.lines });
 
   // 2. Documentation and API Reference — interleaved
   const docAnchor = anchors.find((a) => a.anchor === 'Documentation');
@@ -329,13 +345,13 @@ function generate() {
 
   // Light Token sections (payments, defi, streaming, then basics)
   const ltGroup = docAnchor.groups.find(
-    (g) => g.group === 'Light Token Program',
+    (g) => g.group === 'Light Token APIs',
   );
   if (ltGroup) sections.push(...splitLightTokenProgram(ltGroup));
 
   // Remaining Documentation groups (PDA, Other Use Cases, Learn, Resources)
   for (const group of docAnchor.groups) {
-    if (group.group === 'Introduction' || group.group === 'Light Token Program')
+    if (group.group === 'Introduction' || group.group === 'Light Token APIs')
       continue;
     sections.push({
       name: sectionRenames[group.group] || group.group,
@@ -394,6 +410,9 @@ function generate() {
   // Section content
   for (const s of sections) {
     out.push(`## ${s.name}`);
+    if (s.prefix) {
+      out.push(s.prefix);
+    }
     if (s.raw) {
       out.push(s.raw);
     } else {

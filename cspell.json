@@ -197,7 +197,11 @@
     "clippy",
     "Raydium",
     "raydium",
-    "USDG"
+    "USDG",
+    "Gamal",
+    "blockhashes",
+    "supermajority",
+    "sqds"
   ],
   "ignorePaths": [
     "node_modules",

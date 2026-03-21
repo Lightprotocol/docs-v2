@@ -4,9 +4,12 @@
 # Source: examples-light-token/privy/{nodejs,react}
 # Output: snippets/code-snippets/privy/{operation}/{nodejs,react}.mdx
 
-NODEJS_SRC="/home/tilo/Workspace/examples-light-token-main/toolkits/sign-with-privy/nodejs/src"
-REACT_SRC="/home/tilo/Workspace/examples-light-token-main/toolkits/sign-with-privy/react/src/hooks"
-SNIPPETS_DIR="/home/tilo/Workspace/docs-main/snippets/code-snippets/privy"
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+NODEJS_SRC="${EXAMPLES_LIGHT_TOKEN:?Set EXAMPLES_LIGHT_TOKEN to examples-light-token repo root}/toolkits/sign-with-privy/nodejs/src"
+REACT_SRC="${EXAMPLES_LIGHT_TOKEN}/toolkits/sign-with-privy/react/src/hooks"
+SNIPPETS_DIR="$SCRIPT_DIR/../snippets/code-snippets/privy"
 
 # Operations to process
 OPERATIONS=("transfer" "receive" "wrap" "unwrap" "balances" "transaction-history")

@@ -1,0 +1,62 @@
+```typescript
+import {
+    Keypair,
+    Transaction,
+    sendAndConfirmTransaction,
+} from "@solana/web3.js";
+import {
+    createTransferInterfaceInstructions,
+    getAtaInterface,
+    getAssociatedTokenAddressInterface,
+} from "@lightprotocol/compressed-token/unified";
+import { rpc, payer, setup } from "../setup.js";
+
+(async function () {
+    const { mint } = await setup();
+
+    const recipients = [
+        { address: Keypair.generate().publicKey, amount: 100 },
+        { address: Keypair.generate().publicKey, amount: 200 },
+        { address: Keypair.generate().publicKey, amount: 300 },
+    ];
+
+    // Build transfer instructions for each recipient
+    const COMPUTE_BUDGET = "ComputeBudget111111111111111111111111111111";
+    const allTransferIxs = [];
+    let hasComputeBudget = false;
+
+    for (const { address, amount } of recipients) {
+        const instructions = await createTransferInterfaceInstructions(
+            rpc,
+            payer.publicKey,
+            mint,
+            amount,
+            payer.publicKey,
+            address
+        );
+        
+        for (const ix of instructions[instructions.length - 1]) {
+            // Deduplicate ComputeBudget instructions
+            if (ix.programId.toBase58() === COMPUTE_BUDGET) {
+                if (hasComputeBudget) continue;
+                hasComputeBudget = true;
+            }
+            allTransferIxs.push(ix);
+        }
+    }
+
+    // Send all transfers in a single transaction
+    const tx = new Transaction().add(...allTransferIxs);
+    const sig = await sendAndConfirmTransaction(rpc, tx, [payer]);
+    console.log("Batch tx:", sig);
+
+    // Verify balances
+    for (const { address, amount } of recipients) {
+        const ata = getAssociatedTokenAddressInterface(mint, address);
+        const { parsed } = await getAtaInterface(rpc, ata, address, mint);
+        console.log(
+            `  ${address.toBase58()}: ${parsed.amount} (expected ${amount})`
+        );
+    }
+})();
+```

@@ -25,8 +25,8 @@ const rpc = createRpc();
 
 const payer = Keypair.fromSecretKey(
     new Uint8Array(
-        JSON.parse(readFileSync(`${homedir()}/.config/solana/id.json`, "utf8")),
-    ),
+        JSON.parse(readFileSync(`${homedir()}/.config/solana/id.json`, "utf8"))
+    )
 );
 
 (async function () {
@@ -36,7 +36,7 @@ const payer = Keypair.fromSecretKey(
     await createAtaInterface(rpc, payer, mint, recipient.publicKey);
     const destination = getAssociatedTokenAddressInterface(
         mint,
-        recipient.publicKey,
+        recipient.publicKey
     );
 
     const mintInterface = await getMintInterface(rpc, mint);
@@ -53,7 +53,7 @@ const payer = Keypair.fromSecretKey(
                 },
             ],
             [],
-            DerivationMode.compressible,
+            DerivationMode.compressible
         );
     }
 
@@ -63,12 +63,12 @@ const payer = Keypair.fromSecretKey(
         payer.publicKey,
         payer.publicKey,
         1_000_000_000,
-        validityProof,
+        validityProof
     );
 
     const tx = new Transaction().add(
         ComputeBudgetProgram.setComputeUnitLimit({ units: 500_000 }),
-        ix,
+        ix
     );
     const signature = await sendAndConfirmTransaction(rpc, tx, [payer]);
 

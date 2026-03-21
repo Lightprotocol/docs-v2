@@ -23,7 +23,7 @@ const unwrapTokens = async (
 
   const fromPubkey = new PublicKey(fromAddress);
   const mintPubkey = new PublicKey(tokenMintAddress);
-  const tokenAmount = BigInt(Math.round(amount * Math.pow(10, decimals)));
+  const tokenAmount = BigInt(Math.floor(amount * Math.pow(10, decimals)));
 
   // Auto-detect token program (SPL vs Token 2022) from mint account owner
   const mintAccountInfo = await connection.getAccountInfo(mintPubkey);

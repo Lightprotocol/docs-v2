@@ -8,5 +8,6 @@ Resources for developers to learn and build:
 Find more resources here:
 
 - Documentation: [zkcompression.com](https://www.zkcompression.com).
+- Index for LLMs and Agents: [llms.txt](https://www.zkcompression.com/llms.txt)
 - [Examples](https://github.com/Lightprotocol/examples-light-token)
 - [Agent Skills](https://github.com/Lightprotocol/skills/tree/main)

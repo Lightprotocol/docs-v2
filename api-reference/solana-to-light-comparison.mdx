@@ -107,8 +107,8 @@ See [JSON RPC Methods](/api-reference/json-rpc-methods/overview).
 <Accordion title="Get balance">
 Fetch the parsed state of a light token account, including hot and cold balances.
 
-> [Guide](/light-token/payments/integration-guide) |
-> [Example](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments-and-wallets/get-balance.ts)
+> [Guide](/light-token/payments/overview) |
+> [Example](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments/verify/get-balance.ts)
 
 <Columns cols={2}>
 <LightGetBalanceTs />
@@ -125,8 +125,8 @@ console.log(account.amount);
 <Accordion title="Transaction history">
 Fetch merged and deduplicated transaction history across on-chain and compressed transactions.
 
-> [Guide](/light-token/payments/integration-guide) |
-> [Example](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments-and-wallets/get-history.ts)
+> [Guide](/light-token/payments/overview) |
+> [Example](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments/verify/get-history.ts)
 
 <Columns cols={2}>
 <LightGetHistoryTs />
@@ -140,7 +140,7 @@ const signatures = await connection.getSignaturesForAddress(ata);
 
 ## Client
 
-Both `@lightprotocol/compressed-token` (TypeScript) and `light_token_client` (Rust) match the SPL Token API. 
+Both `@lightprotocol/compressed-token` (TypeScript) and `light_token_client` (Rust) are a superset of the SPL Token API. Every SPL operation has a 1:1 equivalent. The SDKs add unified balance queries (`getAtaInterface`), automatic load/decompress for cold state, wrap/unwrap for SPL and Token 2022 interop, and cross-program dispatch via `Interface` methods like `transferInterface` that auto-detect the token program.
 
 ### Create mint
 
@@ -649,9 +649,9 @@ For payment flows, `createTransferInterfaceInstructions` returns
 `TransactionInstruction[][]` — handles loading cold state and
 transferring in one call:
 
-> [Guide](/light-token/payments/integration-guide) |
-> [Example (instruction)](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments-and-wallets/send-instruction.ts) |
-> [Example (action)](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments-and-wallets/send-action.ts)
+> [Guide](/light-token/payments/overview) |
+> [Example (instruction)](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments/send/basic-send-instruction.ts) |
+> [Example (action)](https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments/send/basic-send-action.ts)
 
 ```typescript
 import { Transaction } from "@solana/web3.js";
@@ -895,6 +895,48 @@ let ix = approve(
 </Tabs>
 </Accordion>
 
+### Delegated transfer
+
+Transfer tokens as an approved delegate. The delegate is the transaction authority; the owner's signature is not required.
+
+> [Guide](/light-token/payments/spend-permissions)
+
+<Tabs>
+<Tab title="TypeScript">
+<Columns cols={2}>
+```typescript title="Light"
+import { transferInterface } from "@lightprotocol/compressed-token/unified";
+
+const tx = await transferInterface(
+  rpc,
+  payer,
+  sourceAta,
+  mint,
+  recipient,
+  delegate,
+  amount,
+  undefined,
+  undefined,
+  { owner: owner.publicKey }
+);
+```
+```typescript title="SPL"
+import { transfer } from "@solana/spl-token";
+
+// delegate signs instead of owner
+const tx = await transfer(
+  connection,
+  payer,
+  sourceAta,
+  destinationAta,
+  delegate,
+  amount
+);
+```
+</Columns>
+</Tab>
+</Tabs>
+
 ### Revoke delegate
 
 Remove all delegate permissions.
@@ -1123,7 +1165,7 @@ invoke(&ix, &[mint, rent_sysvar])?;
 Create a rent-free associated token account via CPI.
 
 > [Guide](/light-token/cookbook/create-ata) |
-> [Example](https://github.com/Lightprotocol/examples-light-token/blob/main/programs/anchor/basic-instructions/create-ata/src/lib.rs) |
+> [Example](https://github.com/Lightprotocol/examples-light-token/blob/main/programs/anchor/basic-instructions/create-associated-token-account/src/lib.rs) |
 > [Source](https://docs.rs/light-token)
 
 <Columns cols={2}>
@@ -1455,7 +1497,7 @@ token_metadata_initialize(
 ### Create associated token account
 
 > [Guide](/light-token/cookbook/create-ata) |
-> [Example](https://github.com/Lightprotocol/examples-light-token/tree/main/programs/anchor/basic-macros/create-ata) |
+> [Example](https://github.com/Lightprotocol/examples-light-token/tree/main/programs/anchor/basic-macros/create-associated-token-account) |
 > [Source](https://docs.rs/light-token)
 
 <Columns cols={2}>

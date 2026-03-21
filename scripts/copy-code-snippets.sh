@@ -3,8 +3,11 @@
 # Script to copy code from program-examples to docs/snippets/code-snippets
 # Wraps each file in appropriate markdown code blocks
 
-PROGRAM_EXAMPLES="/home/tilo/Workspace/program-examples/basic-operations"
-SNIPPETS_DIR="/home/tilo/Workspace/docs/snippets/code-snippets"
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PROGRAM_EXAMPLES="${PROGRAM_EXAMPLES_ROOT:?Set PROGRAM_EXAMPLES_ROOT to program-examples repo root}/basic-operations"
+SNIPPETS_DIR="$SCRIPT_DIR/../snippets/code-snippets"
 
 # Operations to process
 OPERATIONS=("create" "update" "close" "reinit" "burn")

@@ -1,0 +1,51 @@
+---
+title: Add Interface PDA to Existing SPL / Token 2022 Mints
+sidebarTitle: Add Interface PDA to Existing Mints
+description: Create an interface PDA for an existing SPL or Token 2022 mint for interoperability with Light Token. Does not require mint authority.
+---
+
+import TokenPoolActionCode from "/snippets/code-snippets/light-token/create-token-pool/action.mdx";
+import TokenPoolInstructionCode from "/snippets/code-snippets/light-token/create-token-pool/instruction.mdx";
+import SupportFooter from "/snippets/support-footer.mdx";
+import TokenClientPrerequisites from "/snippets/light-token-guides/light-token-client-prerequisites.mdx";
+import AgentSkillGeneric from "/snippets/setup/agent-skill-generic.mdx";
+import AddInterfacePdaAiPrompt from "/snippets/ai-prompts/ts-cookbook/add-interface-pda.mdx";
+
+<AgentSkillGeneric />
+
+<Info>
+  Find the [source code](https://github.com/Lightprotocol/light-protocol/blob/main/js/compressed-token/src/actions/create-token-pool.ts) and examples: [Action](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/actions/create-spl-interface.ts) · [Instruction](https://github.com/Lightprotocol/examples-light-token/blob/main/typescript-client/instructions/create-spl-interface.ts).
+</Info>
+
+<Tabs>
+<Tab title="Guide">
+<Steps>
+<Step>
+### Prerequisites
+<TokenClientPrerequisites />
+</Step>
+<Step>
+<Tabs>
+<Tab title="Action">
+<TokenPoolActionCode />
+</Tab>
+<Tab title="Instruction">
+<TokenPoolInstructionCode />
+</Tab>
+</Tabs>
+</Step>
+</Steps>
+</Tab>
+<Tab title="AI Prompt">
+<AddInterfacePdaAiPrompt />
+</Tab>
+</Tabs>
+
+## Related Guides
+
+<CardGroup cols={2}>
+<Card title="Transfer interface" icon="arrow-right-left" href="/light-token/cookbook/transfer-interface" horizontal />
+<Card title="Wrap and unwrap" icon="rotate" href="/light-token/cookbook/wrap-unwrap" horizontal />
+</CardGroup>
+
+<SupportFooter />

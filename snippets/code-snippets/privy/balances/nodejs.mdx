@@ -1,7 +1,7 @@
 ```typescript
 import 'dotenv/config';
 import {PublicKey, LAMPORTS_PER_SOL} from '@solana/web3.js';
-import {TOKEN_PROGRAM_ID, TOKEN_2022_PROGRAM_ID} from '@solana/spl-token';
+import {TOKEN_PROGRAM_ID, TOKEN_2022_PROGRAM_ID, getMint} from '@solana/spl-token';
 import {createRpc} from '@lightprotocol/stateless.js';
 import {
   getAtaInterface,
@@ -37,13 +37,13 @@ export async function getBalances(
     console.error('Failed to fetch SOL balance:', e);
   }
 
-  // Per-mint accumulator
-  const mintMap = new Map<string, {spl: number; t22: number; hot: number; cold: number; decimals: number}>();
+  // Per-mint accumulator (raw values, converted at assembly)
+  const mintMap = new Map<string, {spl: bigint; t22: bigint; hot: bigint; cold: bigint; decimals: number; tokenProgram: PublicKey}>();
 
   const getOrCreate = (mintStr: string) => {
     let entry = mintMap.get(mintStr);
     if (!entry) {
-      entry = {spl: 0, t22: 0, hot: 0, cold: 0, decimals: 9};
+      entry = {spl: 0n, t22: 0n, hot: 0n, cold: 0n, decimals: 9, tokenProgram: TOKEN_PROGRAM_ID};
       mintMap.set(mintStr, entry);
     }
     return entry;
@@ -60,7 +60,7 @@ export async function getBalances(
       const mint = new PublicKey(buf.subarray(0, 32));
       const amount = buf.readBigUInt64LE(64);
       const mintStr = mint.toBase58();
-      getOrCreate(mintStr).spl += toUiAmount(amount, 9);
+      getOrCreate(mintStr).spl += amount;
     }
   } catch {
     // No SPL accounts
@@ -77,49 +77,66 @@ export async function getBalances(
       const mint = new PublicKey(buf.subarray(0, 32));
       const amount = buf.readBigUInt64LE(64);
       const mintStr = mint.toBase58();
-      getOrCreate(mintStr).t22 += toUiAmount(amount, 9);
+      const entry = getOrCreate(mintStr);
+      entry.t22 += amount;
+      entry.tokenProgram = TOKEN_2022_PROGRAM_ID;
     }
   } catch {
     // No Token 2022 accounts
   }
 
-  // 3. Hot balance from Light Token associated token account
+  // 3. Cold balance from compressed token accounts
+  try {
+    const compressed = await rpc.getCompressedTokenBalancesByOwnerV2(owner);
+    for (const item of compressed.value.items) {
+      const mintStr = item.mint.toBase58();
+      getOrCreate(mintStr).cold += BigInt(item.balance.toString());
+    }
+  } catch {
+    // No compressed accounts
+  }
+
+  // 4. Fetch actual decimals for each mint
   const mintKeys = [...mintMap.keys()];
+  await Promise.allSettled(
+    mintKeys.map(async (mintStr) => {
+      try {
+        const mint = new PublicKey(mintStr);
+        const entry = getOrCreate(mintStr);
+        const mintInfo = await getMint(rpc, mint, undefined, entry.tokenProgram);
+        entry.decimals = mintInfo.decimals;
+      } catch {
+        // Keep default decimals if mint fetch fails
+      }
+    }),
+  );
+
+  // 5. Hot balance from Light Token associated token account
   await Promise.allSettled(
     mintKeys.map(async (mintStr) => {
       try {
         const mint = new PublicKey(mintStr);
         const ata = getAssociatedTokenAddressInterface(mint, owner);
         const {parsed} = await getAtaInterface(rpc, ata, owner, mint);
-        getOrCreate(mintStr).hot = toUiAmount(parsed.amount, 9);
+        getOrCreate(mintStr).hot = BigInt(parsed.amount.toString());
       } catch {
         // Associated token account does not exist for this mint
       }
     }),
   );
 
-  // 4. Cold balance from compressed token accounts
-  try {
-    const compressed = await rpc.getCompressedTokenBalancesByOwnerV2(owner);
-    for (const item of compressed.value.items) {
-      const mintStr = item.mint.toBase58();
-      getOrCreate(mintStr).cold += toUiAmount(BigInt(item.balance.toString()), 9);
-    }
-  } catch {
-    // No compressed accounts
-  }
-
-  // Assemble result
+  // 6. Assemble result (convert raw → UI amounts here)
   const tokens: TokenBalance[] = [];
   for (const [mintStr, entry] of mintMap) {
+    const d = entry.decimals;
     tokens.push({
       mint: mintStr,
-      decimals: entry.decimals,
-      hot: entry.hot,
-      cold: entry.cold,
-      spl: entry.spl,
-      t22: entry.t22,
-      unified: entry.hot + entry.cold,
+      decimals: d,
+      hot: toUiAmount(entry.hot, d),
+      cold: toUiAmount(entry.cold, d),
+      spl: toUiAmount(entry.spl, d),
+      t22: toUiAmount(entry.t22, d),
+      unified: toUiAmount(entry.hot + entry.cold, d),
     });
   }
 
@@ -132,9 +149,8 @@ function toBuffer(data: Buffer | Uint8Array | string | unknown): Buffer | null {
   return null;
 }
 
-function toUiAmount(raw: bigint | {toNumber: () => number}, decimals: number): number {
-  const value = typeof raw === 'bigint' ? Number(raw) : raw.toNumber();
-  return value / 10 ** decimals;
+function toUiAmount(raw: bigint, decimals: number): number {
+  return Number(raw) / 10 ** decimals;
 }
 
 export default getBalances;

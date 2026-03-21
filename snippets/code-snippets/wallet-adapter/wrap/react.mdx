@@ -33,13 +33,11 @@ export function useWrap() {
       const { params, signTransaction } = args;
       const { ownerPublicKey, mint, amount, decimals = 9 } = params;
 
-      const rpc = import.meta.env.VITE_LOCALNET === 'true'
-        ? createRpc()
-        : createRpc(import.meta.env.VITE_HELIUS_RPC_URL);
+      const rpc = createRpc(import.meta.env.VITE_HELIUS_RPC_URL);
 
       const owner = new PublicKey(ownerPublicKey);
       const mintPubkey = new PublicKey(mint);
-      const tokenAmount = BigInt(Math.round(amount * Math.pow(10, decimals)));
+      const tokenAmount = BigInt(Math.floor(amount * Math.pow(10, decimals)));
 
       // Get SPL interface info — determines whether mint uses SPL or T22
       const splInterfaceInfos = await getSplInterfaceInfos(rpc, mintPubkey);

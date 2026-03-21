@@ -32,6 +32,7 @@ import CreateAtaAiPrompt from "/snippets/ai-prompts/ts-cookbook/create-ata.mdx";
 import RustCreateAtaAiPrompt from "/snippets/ai-prompts/rust-cookbook/create-ata.mdx";
 import ProgramCreateAtaCpiAiPrompt from "/snippets/ai-prompts/program-cookbook/create-ata-cpi.mdx";
 import ProgramCreateAtaMacrosAiPrompt from "/snippets/ai-prompts/program-cookbook/create-ata-macros.mdx";
+import SupportFooter from "/snippets/support-footer.mdx";
 
 1. Associated Light Token accounts can hold token balances of light, SPL, or Token 2022 mints.
 2. Light-ATAs are on-chain accounts like SPL ATA's, but the light token program sponsors the rent-exemption cost for you.
@@ -337,14 +338,11 @@ pub ata: UncheckedAccount<'info>,
 </Tab>
 
 </Tabs>
-# Next Steps
+## Related Guides
 
-{" "}
+<CardGroup cols={2}>
+<Card title="Transfer interface" icon="arrow-right-left" href="/light-token/cookbook/transfer-interface" horizontal />
+<Card title="Wrap and unwrap" icon="rotate" href="/light-token/cookbook/wrap-unwrap" horizontal />
+</CardGroup>
 
-<Card
-  title="Learn how to mint Light Tokens"
-  icon="chevron-right"
-  color="#0066ff"
-  href="/light-token/cookbook/mint-to"
-  horizontal
-/>
+<SupportFooter />

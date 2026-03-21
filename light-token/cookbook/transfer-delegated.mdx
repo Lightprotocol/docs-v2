@@ -1,0 +1,52 @@
+---
+title: Delegated Transfer
+sidebarTitle: Delegated Transfer
+description: Transfer tokens as an approved delegate. The delegate signs instead of the owner, spending within the approved allowance.
+keywords: ["delegated transfer solana", "delegate transfer light token", "token delegation transfer"]
+---
+
+import FullSetup from "/snippets/setup/full-setup.mdx";
+import AgentSkillGeneric from "/snippets/setup/agent-skill-generic.mdx";
+import DelegateTransferAction from "/snippets/code-snippets/payments/spend-permissions/delegate-transfer.mdx";
+import DelegateTransferInstruction from "/snippets/code-snippets/payments/spend-permissions/delegate-transfer-instruction.mdx";
+import SupportFooter from "/snippets/support-footer.mdx";
+
+`transferInterface` with `{ owner }` transfers tokens from an associated token account as an approved delegate. The delegate is the transaction authority. Only the delegate and fee payer sign; the owner's signature is not required.
+
+- The recipient is a wallet address (associated token account derived and created internally)
+- The amount must be within the approved allowance
+- Each transfer reduces the remaining allowance
+
+<AgentSkillGeneric />
+
+<Tabs>
+<Tab title="Guide">
+<Steps>
+
+<Step>
+### Delegated Transfer
+
+<FullSetup />
+
+<Tabs>
+<Tab title="Action">
+<DelegateTransferAction />
+</Tab>
+<Tab title="Instruction">
+<DelegateTransferInstruction />
+</Tab>
+</Tabs>
+
+</Step>
+</Steps>
+</Tab>
+</Tabs>
+
+## Related Guides
+
+<CardGroup cols={2}>
+<Card title="Approve and revoke" icon="key" href="/light-token/cookbook/approve-revoke" horizontal />
+<Card title="Payments overview" icon="credit-card" href="/light-token/payments/overview" horizontal />
+</CardGroup>
+
+<SupportFooter />

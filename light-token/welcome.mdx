@@ -6,6 +6,10 @@ keywords: ["rent free tokens on solana", "rent free solana accounts", "spl token
 ---
 
 import LightTokenPrompts from "/snippets/ai-prompts/light-token-prompts.mdx";
+import AgentSkillPayments from "/snippets/setup/agent-skill-payments.mdx";
+import AgentSkillGeneric from "/snippets/setup/agent-skill-generic.mdx";
+import AgentSkillDefi from "/snippets/setup/agent-skill-defi.mdx";
+import AgentSkillStreaming from "/snippets/setup/agent-skill-streaming.mdx";
 import CookbookGuidesTable from "/snippets/overview-tables/cookbook-guides-table.mdx";
 import WelcomePageInstall from "/snippets/setup/welcome-page-install.mdx";
 import SdkReference from "/snippets/overview-tables/sdk-reference.mdx";
@@ -29,8 +33,6 @@ import {
   lightCreateAtaMacroCode,
 } from "/snippets/code-samples/code-compare-snippets.jsx";
 
-<Info> **Note: This page is for the new Light Token Program Beta.** <br/> For legacy
-  compressed tokens, please go [here](/resources/legacy-compressed-tokens). </Info>
 
 ### Mint Accounts
 
@@ -162,7 +164,81 @@ View the [guide](/light-token/cookbook/create-ata) to create associated token ac
 </Steps>
 
 <Tabs>
+<Tab title="Stablecoin Payments and Wallets">
+
+### Payment Skill for Agents
+
+<AgentSkillPayments />
+
+### Payment Flows
+<CardGroup cols={2}>
+  <Card title="Payments Overview" icon="credit-card" href="/light-token/payments/overview" horizontal />
+  <Card title="Basic payment" icon="arrow-right" href="/light-token/payments/basic-payment" horizontal />
+  <Card title="Batch payments" icon="layer-group" href="/light-token/payments/batch-payments" horizontal />
+  <Card title="Receive payments" icon="arrow-down" href="/light-token/payments/receive-payments" horizontal />
+  <Card title="Payment with memo" icon="memo" href="/light-token/payments/payment-with-memo" horizontal />
+  <Card title="Get Balance and Transaction History" icon="magnifying-glass" href="/light-token/payments/verify-payments" horizontal />
+  <Card title="Verify Recipients Address" icon="shield-check" href="/light-token/payments/verify-recipient-address" horizontal />
+  <Card title="Configure Spend Permissions" icon="check" href="/light-token/payments/spend-permissions" horizontal />
+  <Card title="Wrap and Unwrap to or from SPL / Token 2022" icon="rotate" href="/light-token/payments/wrap-unwrap" horizontal />
+  <Card title="Nullifier PDA" icon="code-commit" href="/pda/compressed-pdas/nullifier-pda" horizontal />
+</CardGroup>
+
+### Fee Abstraction
+<Card title="Gasless transactions" icon="hand-holding-dollar" href="/light-token/wallets/gasless-transactions" horizontal />
+
+### Signing
+<Card title="When using Privy Wallets" icon="key" href="/light-token/wallets/privy" horizontal />
+<Card title="When using Wallet Adapter" icon="wallet" href="/light-token/wallets/wallet-adapter" horizontal />
+
+### Go to Production
+<Card title="Checklist" icon="rocket" href="/light-token/payments/production-readiness" horizontal />
+
+</Tab>
+<Tab title="DeFi">
+
+### Agent Skill for DeFi
+
+<AgentSkillDefi />
+
+### Guides
+
+<CardGroup cols={2}>
+  <Card title="Program Integration" icon="cube" href="/light-token/defi/programs">
+    Build rent-free AMMs and DeFi programs.
+  </Card>
+  <Card title="Router Integration" icon="route" href="/light-token/defi/routers">
+    Add support for rent-free AMMs to your aggregator.
+  </Card>
+  <Card title="Pinocchio Programs" icon="feather" href="/light-token/defi/programs-pinocchio">
+    High-performance DeFi programs with Pinocchio.
+  </Card>
+</CardGroup>
+
+</Tab>
+<Tab title="Data Streaming">
+
+### Agent Skill for Data Streaming
+
+<AgentSkillStreaming />
+
+### Guides
+
+<CardGroup cols={2}>
+  <Card title="Mint Accounts" icon="bolt" href="/light-token/streaming/mints">
+    Stream mint events from the network in real-time.
+  </Card>
+  <Card title="Token Accounts" icon="stream" href="/light-token/streaming/tokens">
+    Stream token events from the network in real-time.
+  </Card>
+</CardGroup>
+
+</Tab>
 <Tab title="Basics and Examples">
+
+### Agent Skills for Tokens
+
+<AgentSkillGeneric />
 
 ## Cookbook
 
@@ -185,62 +261,6 @@ View the [guide](/light-token/cookbook/create-ata) to create associated token ac
 | [**Examples**](/light-token/examples/program#examples) | AMM reference, CPI create-and-transfer, Pinocchio swap |
 | [**Macros**](/light-token/examples/program#macros) | Counter PDA, ATA, mint, and token account creation |
 | [**Instructions**](/light-token/examples/program#instructions) | All CPI instructions: approve, burn, close, freeze, mint-to, transfer, and more |
-
-</Tab>
-<Tab title="Use Cases">
-
-## Stablecoin Payments
-
-<CardGroup cols={2}>
-  <Card title="Integration Guide" icon="credit-card" href="/light-token/payments/overview">
-    Learn how to integrate Light Token in your stablecoin payment infrastructure.
-  </Card>
-  <Card title="Nullifier PDA" icon="code-commit" href="/pda/compressed-pdas/how-to-create-nullifier-pdas">
-    Prevent onchain instructions from being executed more than once.
-  </Card>
-</CardGroup>
-
-## Wallets
-
-<CardGroup cols={2}>
-  <Card title="Integration Guide" icon="wallet" href="/light-token/wallets/overview">
-    Guide for Wallet Applications to let users display and swap light-tokens.
-  </Card>
-  <Card title="Sign with Privy Wallets" icon="key" href="/light-token/wallets/privy">
-    Build and sign transactions using Privy.
-  </Card>
-  <Card title="Sign with Wallet Adapter" icon="wallet" href="/light-token/wallets/wallet-adapter">
-    Build and sign transactions using the Solana Wallet Adapter.
-  </Card>
-  <Card title="Sponsor Rent Top-Ups" icon="hand-holding-dollar" href="/light-token/wallets/sponsor-top-ups">
-    Sponsor rent top-ups from users to abstract away holding SOL and provide a rent-free experience.
-  </Card>
-</CardGroup>
-
-## DeFi Integration
-
-<CardGroup cols={2}>
-  <Card title="Program Integration" icon="cube" href="/light-token/defi/programs">
-    Build rent-free AMMs and DeFi programs.
-  </Card>
-  <Card title="Router Integration" icon="route" href="/light-token/defi/routers">
-    Add support for rent-free AMMs to your aggregator.
-  </Card>
-  <Card title="Pinocchio Programs" icon="feather" href="/light-token/defi/programs-pinocchio">
-    High-performance DeFi programs with Pinocchio.
-  </Card>
-</CardGroup>
-
-## Data Streaming
-
-<CardGroup cols={2}>
-  <Card title="Mint Accounts" icon="bolt" href="/light-token/streaming/mints">
-    Stream mint events from the network in real-time.
-  </Card>
-  <Card title="Token Accounts" icon="stream" href="/light-token/streaming/tokens">
-    Stream token events from the network in real-time.
-  </Card>
-</CardGroup>
 
 </Tab>
 <Tab title="AI Prompts">

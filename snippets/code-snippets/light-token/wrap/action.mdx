@@ -1,24 +1,26 @@
 ```typescript
 import "dotenv/config";
 import { Keypair } from "@solana/web3.js";
-import { createRpc, bn } from "@lightprotocol/stateless.js";
+import { createRpc } from "@lightprotocol/stateless.js";
 import {
-    createMint,
-    mintTo,
-    decompress,
-    wrap,
+    createMintInterface,
+    createAtaInterface,
     getAssociatedTokenAddressInterface,
-    createAtaInterfaceIdempotent,
 } from "@lightprotocol/compressed-token";
-import { createAssociatedTokenAccount } from "@solana/spl-token";
+import { wrap } from "@lightprotocol/compressed-token/unified";
+import {
+    TOKEN_PROGRAM_ID,
+    createAssociatedTokenAccount,
+    mintTo,
+} from "@solana/spl-token";
 import { homedir } from "os";
 import { readFileSync } from "fs";
 
 // devnet:
-const RPC_URL = `https://devnet.helius-rpc.com?api-key=${process.env.API_KEY!}`;
-const rpc = createRpc(RPC_URL);
+// const RPC_URL = `https://devnet.helius-rpc.com?api-key=${process.env.API_KEY!}`;
+// const rpc = createRpc(RPC_URL);
 // localnet:
-// const rpc = createRpc();
+const rpc = createRpc();
 
 const payer = Keypair.fromSecretKey(
     new Uint8Array(
@@ -27,22 +29,35 @@ const payer = Keypair.fromSecretKey(
 );
 
 (async function () {
-    // Setup: Get SPL tokens (needed to wrap)
-    const { mint } = await createMint(rpc, payer, payer.publicKey, 9);
+    // Setup: Create SPL mint and fund an SPL ATA
+    const { mint } = await createMintInterface(
+        rpc,
+        payer,
+        payer,
+        null,
+        9,
+        undefined,
+        undefined,
+        TOKEN_PROGRAM_ID
+    );
     const splAta = await createAssociatedTokenAccount(
         rpc,
         payer,
         mint,
+        payer.publicKey,
+        undefined,
+        TOKEN_PROGRAM_ID
+    );
+    await mintTo(rpc, payer, mint, splAta, payer, 1000);
+
+    // Create light-token ATA and wrap SPL tokens into it
+    await createAtaInterface(rpc, payer, mint, payer.publicKey);
+    const lightTokenAta = getAssociatedTokenAddressInterface(
+        mint,
         payer.publicKey
     );
-    await mintTo(rpc, payer, mint, payer.publicKey, payer, bn(1000));
-    await decompress(rpc, payer, mint, bn(1000), payer, splAta);
 
-    // Wrap SPL tokens to rent-free token ATA
-    const lightTokenAta = getAssociatedTokenAddressInterface(mint, payer.publicKey);
-    await createAtaInterfaceIdempotent(rpc, payer, mint, payer.publicKey);
-
-    const tx = await wrap(rpc, payer, splAta, lightTokenAta, payer, mint, bn(500));
+    const tx = await wrap(rpc, payer, splAta, lightTokenAta, payer, mint, 500);
 
     console.log("Tx:", tx);
 })();

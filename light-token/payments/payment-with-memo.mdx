@@ -1,0 +1,133 @@
+---
+title: "Payment with Memo"
+sidebarTitle: "Payment with Memo"
+description: "Attach invoice IDs, payment references, or notes to Light Token transfers using Solana's memo program."
+keywords: ["memo payment solana", "invoice reconciliation solana", "payment reference light token", "memo instruction"]
+---
+
+import FullSetup from "/snippets/setup/full-setup.mdx";
+import SupportFooter from "/snippets/support-footer.mdx";
+import AgentSkillPayments from "/snippets/setup/agent-skill-payments.mdx";
+import PaymentsAiPrompt from "/snippets/ai-prompts/toolkits/payments.mdx";
+import PaymentsSetupHelper from "/snippets/setup/payments-setup-helper.mdx";
+import MemoCode from "/snippets/code-snippets/payments/send/payment-with-memo.mdx";
+import SplMemo from "/snippets/code-snippets/payments/spl/payment-with-memo.mdx";
+
+---
+
+Solana's memo program lets you attach invoice numbers, order IDs, or custom references
+to any payment. These memos are permanently recorded on-chain and visible in transaction
+ logs, making it easy to match payments to your internal systems.
+Use just like with SPL token:
+
+<table>
+  <thead>
+    <tr>
+      <th style={{ width: "15%" }}></th>
+      <th>SPL</th>
+      <th>Light</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>**Transfer**</td>
+      <td>createTransferInstruction()</td>
+      <td>createTransferInterfaceInstructions()</td>
+    </tr>
+  </tbody>
+</table>
+
+<AgentSkillPayments />
+
+<Tabs>
+<Tab title="Guide">
+
+<Steps>
+<Step>
+## Setup
+
+<FullSetup />
+
+Additionally install the memo program package:
+
+```bash
+npm install @solana/spl-memo
+```
+
+```typescript
+import { createRpc } from "@lightprotocol/stateless.js";
+
+const rpc = createRpc(RPC_ENDPOINT);
+```
+
+<PaymentsSetupHelper />
+
+</Step>
+<Step>
+## Send a Payment with Memo
+
+1. Create the transfer instructions with `createTransferInterfaceInstructions()`. Load transactions are handled under the hood.
+2. Create a memo instruction with a message. This message will be visible in the program logs of the transaction.
+3. Both instructions execute atomically in the same transaction.
+
+After the transaction confirms, fetch it to view the memo in the logs. The memo appears as a log message from the Memo program.
+
+<Info>
+**About loading**: Light Token accounts reduce account rent ~200x by auto-compressing inactive
+accounts. Before any action, the SDK detects cold balances and adds
+instructions to load them. This almost always fits in a single
+atomic transaction with your regular transfer. APIs return `TransactionInstruction[][]`
+ so the same
+loop handles the rare multi-transaction case automatically.
+</Info>
+
+<MemoCode />
+
+<Accordion title="Compare to SPL">
+
+<SplMemo />
+
+</Accordion>
+
+</Step>
+<Step>
+## Read Memo from Transaction Logs
+
+After the transaction confirms, the memo appears in the transaction logs:
+
+``` markdown Example Transaction Logs
+"Program TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb invoke [1]",
+"Program log: Instruction: Transfer",
+"Program TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb consumed 1682 of 200000 compute units",
+"Program TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb success",
+"Program MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr invoke [1]",
+'Program log: Memo (len 46): "Payment for services rendered - Invoice #12345"',
+"Program MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr consumed 18097 of 198318 compute units",
+"Program MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr success",
+"Program ComputeBudget111111111111111111111111111111 invoke [1]",
+"Program ComputeBudget111111111111111111111111111111 success"
+```
+
+</Step>
+</Steps>
+</Tab>
+<Tab title="AI Prompt">
+<PaymentsAiPrompt />
+</Tab>
+</Tabs>
+
+## Related guides
+
+<CardGroup cols={3}>
+<Card title="Basic payment" icon="arrow-right" href="/light-token/payments/basic-payment">
+  Send a single transfer without memo.
+</Card>
+<Card title="Verify payments" icon="magnifying-glass" href="/light-token/payments/verify-payments">
+  Query balances and transaction history.
+</Card>
+<Card title="Batch payments" icon="layer-group" href="/light-token/payments/batch-payments">
+  Pack multiple transfers into one transaction.
+</Card>
+</CardGroup>
+
+<SupportFooter />

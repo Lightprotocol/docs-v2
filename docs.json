@@ -33,19 +33,31 @@
             ]
           },
           {
-            "group": "Light Token Program",
+            "group": "Light Token APIs",
             "pages": [
               "light-token/welcome",
               {
                 "group": "Cookbook",
                 "pages": [
-                  "light-token/cookbook/create-mint",
+                  {
+                    "group": "Mint Accounts",
+                    "pages": [
+                      "light-token/cookbook/create-mint",
+                      "light-token/cookbook/add-interface-pda"
+                    ]
+                  },
                   "light-token/cookbook/create-ata",
                   "light-token/cookbook/create-token-account",
                   "light-token/cookbook/mint-to",
                   "light-token/cookbook/transfer-interface",
                   "light-token/cookbook/transfer-checked",
-                  "light-token/cookbook/approve-revoke",
+                  {
+                    "group": "Delegates",
+                    "pages": [
+                      "light-token/cookbook/approve-revoke",
+                      "light-token/cookbook/transfer-delegated"
+                    ]
+                  },
                   "light-token/cookbook/freeze-thaw",
                   "light-token/cookbook/wrap-unwrap",
                   "light-token/cookbook/load-ata",
@@ -53,11 +65,31 @@
                   "light-token/cookbook/burn"
                 ]
               },
+              "light-token/extensions/overview",
               {
                 "group": "For Stablecoin Payments",
                 "pages": [
                   "light-token/payments/overview",
-                  "light-token/payments/integration-guide"
+                  {
+                    "group": "Send Payments",
+                    "pages": [
+                      "light-token/payments/basic-payment",
+                      "light-token/payments/batch-payments",
+                      "light-token/payments/payment-with-memo"
+                    ]
+                  },
+                  "light-token/payments/receive-payments",
+                  {
+                    "group": "Verify Payments",
+                    "pages": [
+                      "light-token/payments/verify-payments",
+                      "light-token/payments/verify-recipient-address"
+                    ]
+                  },
+                  "light-token/payments/spend-permissions",
+                  "light-token/payments/wrap-unwrap",
+                  "pda/compressed-pdas/nullifier-pda",
+                  "light-token/payments/production-readiness"
                 ]
               },
               {
@@ -66,7 +98,7 @@
                   "light-token/wallets/overview",
                   "light-token/wallets/privy",
                   "light-token/wallets/wallet-adapter",
-                  "light-token/wallets/sponsor-top-ups"
+                  "light-token/wallets/gasless-transactions"
                 ]
               },
               {
@@ -103,7 +135,6 @@
                 "pages": [
                   "pda/compressed-pdas/overview",
                   "pda/compressed-pdas/guides/client-guide",
-                  "pda/compressed-pdas/how-to-create-nullifier-pdas",
                   {
                     "group": "Program Guides",
                     "expanded": true,
@@ -318,6 +349,18 @@
   },
   "redirects": [
     {
+      "source": "/light-token/payments/integration-guide",
+      "destination": "https://zkcompression.com/light-token/payments/overview"
+    },
+    {
+      "source": "/light-token/payments/nullifier-pda",
+      "destination": "https://zkcompression.com/pda/compressed-pdas/nullifier-pda"
+    },
+    {
+      "source": "/light-token/nullifier-pda",
+      "destination": "https://zkcompression.com/pda/compressed-pdas/nullifier-pda"
+    },
+    {
       "source": "/airdrop",
       "destination": "https://zkcompression.com/token-distribution"
     },
@@ -419,7 +462,7 @@
     },
     {
       "source": "/compressed-pdas/guides/how-to-create-nullifier-pdas",
-      "destination": "https://zkcompression.com/pda/compressed-pdas/how-to-create-nullifier-pdas"
+      "destination": "https://zkcompression.com/pda/compressed-pdas/nullifier-pda"
     },
     {
       "source": "/compressed-pdas/guides/how-to-reinitialize-compressed-accounts",
@@ -559,7 +602,7 @@
     },
     {
       "source": "/c-token-program/c-token-toolkits/for-payments",
-      "destination": "https://zkcompression.com/light-token/payments/integration-guide"
+      "destination": "https://zkcompression.com/light-token/payments/overview"
     },
     {
       "source": "/c-token-program/c-token-toolkits/for-streaming-mints",
@@ -827,7 +870,7 @@
     },
     {
       "source": "/compressed-token-program/integrate/for-payment-companies",
-      "destination": "https://zkcompression.com/light-token/payments/integration-guide"
+      "destination": "https://zkcompression.com/light-token/payments/overview"
     },
     {
       "source": "/compressed-token-program/integrate/for-wallet-applications",
@@ -919,7 +962,7 @@
     },
     {
       "source": "/light-token/toolkits/for-payments",
-      "destination": "https://zkcompression.com/light-token/payments/integration-guide"
+      "destination": "https://zkcompression.com/light-token/payments/overview"
     },
     {
       "source": "/light-token/toolkits/for-wallets",
@@ -935,7 +978,15 @@
     },
     {
       "source": "/light-token/toolkits/sponsor-top-ups",
-      "destination": "https://zkcompression.com/light-token/wallets/sponsor-top-ups"
+      "destination": "https://zkcompression.com/light-token/wallets/gasless-transactions"
+    },
+    {
+      "source": "/light-token/wallets/sponsor-top-ups",
+      "destination": "https://zkcompression.com/light-token/wallets/gasless-transactions"
+    },
+    {
+      "source": "/light-token/payments/fee-abstraction",
+      "destination": "https://zkcompression.com/light-token/wallets/gasless-transactions"
     },
     {
       "source": "/light-token/toolkits/for-streaming-mints",
@@ -951,7 +1002,7 @@
     },
     {
       "source": "/pda/compressed-pdas/guides/how-to-create-nullifier-pdas",
-      "destination": "https://zkcompression.com/pda/compressed-pdas/how-to-create-nullifier-pdas"
+      "destination": "https://zkcompression.com/pda/compressed-pdas/nullifier-pda"
     }
   ]
 }
