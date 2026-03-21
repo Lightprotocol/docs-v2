@@ -64,12 +64,24 @@ Find a full code example [here](https://github.com/Lightprotocol/examples-light-
 
 <Accordion title="Compare to SPL">
 
+|  | SPL | Light |
+|------|-----|-------|
+| Connection | `new Connection(endpoint)` | `createRpc()` |
+| Derive ATA | `getAssociatedTokenAddress(mint, owner)` | `getAssociatedTokenAddressInterface(mint, owner)` |
+| Fetch account | `getAccount(connection, ata)` | `getAtaInterface(rpc, ata, owner, mint)` |
+| Read balance | `account.amount` | `account.parsed.amount` |
+
 ```typescript
-import { getAccount } from "@solana/spl-token";
-
-const account = await getAccount(connection, ata);
-
-console.log(account.amount);
+  import { Connection, PublicKey } from "@solana/web3.js";                                
+  import { getAssociatedTokenAddress, getAccount } from "@solana/spl-token";                
+                                                                            
+  const connection = new Connection("https://api.mainnet-beta.solana.com");                 
+  const mint = new PublicKey("YOUR_MINT_ADDRESS");                                        
+  const owner = new PublicKey("YOUR_OWNER_ADDRESS");                                        
+                                                                                            
+  const ata = getAssociatedTokenAddress(mint, owner);
+  const account = await getAccount(connection, ata);                                        
+  console.log("Balance:", account.amount.toString());
 ```
 
 </Accordion>
