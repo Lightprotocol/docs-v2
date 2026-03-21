@@ -8,8 +8,12 @@ keywords: ["nullifiers on solana", "prevent double spending", "compressed pdas",
 import NullifiersAiPrompt from "/snippets/ai-prompts/toolkits/nullifiers.mdx";
 
 The nullifier program utility solves this for you. 
-It records a unique value of your choice in a rent-free PDA account.
-If it already exists, the next transaction with the same value fails.
+
+1. It derives PDA from `["nullifier", id]` seeds (where `id` is your unique identifier, e.g. a nonce, uuid, hash of signature, etc.)
+2. Creates an empty rent-free PDA at that address
+3. If the address exists, the whole transaction fails
+4. Prepend or append this instruction to your transaction.
+
 We also deployed a reference implementation to public networks so you can get started quickly:
 
 | | |
@@ -26,13 +30,6 @@ Example source code: [TypeScript](https://github.com/Lightprotocol/nullifier-pro
 
 <Tabs>
 <Tab title="Guide">
-
-## How It Works
-
-1. Derives PDA from `["nullifier", id]` seeds (where `id` is your unique identifier, e.g. a nonce, uuid, hash of signature, etc.)
-2. Creates an empty rent-free PDA at that address
-3. If the address exists, the whole transaction fails
-4. Prepend or append this instruction to your transaction.
 
 ## Dependencies
 
