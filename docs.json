@@ -603,7 +603,7 @@
     },
     {
       "source": "/c-token-program/c-token-toolkits/for-payments",
-      "destination": "https://zkcompression.com/light-token/payments/integration-guide"
+      "destination": "https://zkcompression.com/light-token/payments/overview"
     },
     {
       "source": "/c-token-program/c-token-toolkits/for-streaming-mints",
@@ -871,7 +871,7 @@
     },
     {
       "source": "/compressed-token-program/integrate/for-payment-companies",
-      "destination": "https://zkcompression.com/light-token/payments/integration-guide"
+      "destination": "https://zkcompression.com/light-token/payments/overview"
     },
     {
       "source": "/compressed-token-program/integrate/for-wallet-applications",
@@ -963,7 +963,7 @@
     },
     {
       "source": "/light-token/toolkits/for-payments",
-      "destination": "https://zkcompression.com/light-token/payments/integration-guide"
+      "destination": "https://zkcompression.com/light-token/payments/overview"
     },
     {
       "source": "/light-token/toolkits/for-wallets",

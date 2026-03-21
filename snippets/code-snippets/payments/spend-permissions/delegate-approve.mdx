@@ -6,7 +6,7 @@ import { rpc, payer, setup } from "../setup.js";
 (async function () {
     const { mint, senderAta } = await setup();
 
-    // Approve: grant delegate permission to spend up to 500,000 tokens
+    // Approve: grant delegate permission to spend up to 500,000,000 tokens
     const delegate = Keypair.generate();
     const tx = await approveInterface(
         rpc,
@@ -14,12 +14,12 @@ import { rpc, payer, setup } from "../setup.js";
         senderAta,
         mint,
         delegate.publicKey,
-        500_000,
+        500_000_000,
         payer
     );
 
     console.log("Approved delegate:", delegate.publicKey.toBase58());
-    console.log("Allowance: 500,000 tokens");
+    console.log("Allowance: 500,000,000 tokens");
     console.log("Tx:", tx);
 })();
 ```

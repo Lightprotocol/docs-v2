@@ -1,33 +1,16 @@
 ```typescript
-import { LAMPORTS_PER_SOL } from "@solana/web3.js";
+import { PublicKey } from "@solana/web3.js";
+import { createRpc } from "@lightprotocol/stateless.js";
 import {
     getAssociatedTokenAddressInterface,
     getAtaInterface,
 } from "@lightprotocol/compressed-token/unified";
-import { rpc, payer, setup } from "../setup.js";
 
-(async function () {
-    const { mint } = await setup();
+const rpc = createRpc();
+const mint = new PublicKey("YOUR_MINT_ADDRESS");
+const owner = new PublicKey("YOUR_OWNER_ADDRESS");
 
-    // SOL balance
-    const solLamports = await rpc.getBalance(payer.publicKey);
-    console.log(`SOL: ${solLamports / LAMPORTS_PER_SOL}`);
-
-    // Unified token balance via SDK aggregation
-    const ata = getAssociatedTokenAddressInterface(mint, payer.publicKey);
-    const account = await getAtaInterface(rpc, ata, payer.publicKey, mint);
-
-    const decimals = 9;
-    const unified =
-        Number(account.parsed.amount) / 10 ** decimals;
-    console.log(`\nToken ${mint.toBase58().slice(0, 6)}... (unified): ${unified}`);
-
-    // Per-source breakdown from _sources
-    if (account._sources && account._sources.length > 0) {
-        for (const source of account._sources) {
-            const amount = Number(source.amount) / 10 ** decimals;
-            console.log(`  ${source.type}: ${amount}`);
-        }
-    }
-})();
+const ata = getAssociatedTokenAddressInterface(mint, owner);
+const account = await getAtaInterface(rpc, ata, owner, mint);
+console.log("Balance:", account.parsed.amount.toString());
 ```

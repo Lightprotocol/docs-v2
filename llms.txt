@@ -47,6 +47,19 @@ Comparing creation cost and CU usage:
 | **Transfer** (rent-free) |    **1,885 CU** |   4,645 CU |
 
 ## AI Agent Resources
+
+Install orchestrator agent skill or view [skill.md](https://www.zkcompression.com/skill.md):
+
+```bash
+npx skills add https://zkcompression.com
+```
+
+Install or view [dedicated agent skills](/ai-tools/overview#agent-skills).
+
+```
+npx skills add Lightprotocol/skills
+```
+
 - [Agent skills](https://www.zkcompression.com/ai-tools/agent-skills.md): Install structured agent skill files for Token API's and PDA accounts. Skills tell AI coding agents what they can do with ZK Compression.
 - [MCP](https://www.zkcompression.com/ai-tools/mcp.md): Connect AI apps to Light Protocol data sources and tools via the Model Context Protocol (MCP). Includes installation for Claude Code, Codex, Cursor, and more.
 - [AI Prompts](https://www.zkcompression.com/ai-tools/prompts.md): Ready-to-use AI prompts for Light Protocol. Copy a prompt, paste into your AI coding agent, and let it implement the recipe in your project.

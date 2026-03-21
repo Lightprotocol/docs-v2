@@ -6,6 +6,10 @@ keywords: ["rent free tokens on solana", "rent free solana accounts", "spl token
 ---
 
 import LightTokenPrompts from "/snippets/ai-prompts/light-token-prompts.mdx";
+import AgentSkillPayments from "/snippets/setup/agent-skill-payments.mdx";
+import AgentSkillGeneric from "/snippets/setup/agent-skill-generic.mdx";
+import AgentSkillDefi from "/snippets/setup/agent-skill-defi.mdx";
+import AgentSkillStreaming from "/snippets/setup/agent-skill-streaming.mdx";
 import CookbookGuidesTable from "/snippets/overview-tables/cookbook-guides-table.mdx";
 import WelcomePageInstall from "/snippets/setup/welcome-page-install.mdx";
 import SdkReference from "/snippets/overview-tables/sdk-reference.mdx";
@@ -162,6 +166,10 @@ View the [guide](/light-token/cookbook/create-ata) to create associated token ac
 <Tabs>
 <Tab title="Basics and Examples">
 
+### Agent Skills for Tokens
+
+<AgentSkillGeneric />
+
 ## Cookbook
 
 <CookbookGuidesTable />
@@ -185,37 +193,44 @@ View the [guide](/light-token/cookbook/create-ata) to create associated token ac
 | [**Instructions**](/light-token/examples/program#instructions) | All CPI instructions: approve, burn, close, freeze, mint-to, transfer, and more |
 
 </Tab>
-<Tab title="Use Cases">
+<Tab title="Stablecoin Payments and Wallets">
 
-## Stablecoin Payments
+### Payment Skill for Agents
 
+<AgentSkillPayments />
+
+### Payment Flows
 <CardGroup cols={2}>
-  <Card title="Integration Guide" icon="credit-card" href="/light-token/payments/overview">
-    Learn how to integrate Light Token in your stablecoin payment infrastructure.
-  </Card>
-  <Card title="Nullifier PDA" icon="code-commit" href="/pda/compressed-pdas/nullifier-pda">
-    Prevent onchain instructions from being executed more than once.
-  </Card>
+  <Card title="Payments Overview" icon="credit-card" href="/light-token/payments/overview" horizontal />
+  <Card title="Basic payment" icon="arrow-right" href="/light-token/payments/basic-payment" horizontal />
+  <Card title="Batch payments" icon="layer-group" href="/light-token/payments/batch-payments" horizontal />
+  <Card title="Receive payments" icon="arrow-down" href="/light-token/payments/receive-payments" horizontal />
+  <Card title="Payment with memo" icon="memo" href="/light-token/payments/payment-with-memo" horizontal />
+  <Card title="Get Balance and Transaction History" icon="magnifying-glass" href="/light-token/payments/verify-payments" horizontal />
+  <Card title="Verify Recipients Address" icon="shield-check" href="/light-token/payments/verify-recipient-address" horizontal />
+  <Card title="Configure Spend Permissions" icon="check" href="/light-token/payments/spend-permissions" horizontal />
+  <Card title="Wrap and Unwrap to or from SPL / Token 2022" icon="rotate" href="/light-token/payments/wrap-unwrap" horizontal />
+  <Card title="Nullifier PDA" icon="code-commit" href="/pda/compressed-pdas/nullifier-pda" horizontal />
 </CardGroup>
 
-## Wallets
+### Fee Abstraction
+<Card title="Gasless transactions" icon="hand-holding-dollar" href="/light-token/wallets/gasless-transactions" horizontal />
 
-<CardGroup cols={2}>
-  <Card title="Integration Guide" icon="wallet" href="/light-token/wallets/overview">
-    Guide for Wallet Applications to let users display and swap light-tokens.
-  </Card>
-  <Card title="Sign with Privy Wallets" icon="key" href="/light-token/wallets/privy">
-    Build and sign transactions using Privy.
-  </Card>
-  <Card title="Sign with Wallet Adapter" icon="wallet" href="/light-token/wallets/wallet-adapter">
-    Build and sign transactions using the Solana Wallet Adapter.
-  </Card>
-  <Card title="Gasless Transactions" icon="hand-holding-dollar" href="/light-token/wallets/gasless-transactions">
-    Abstract SOL fees so users never hold SOL. Sponsor rent top-ups and transaction fees.
-  </Card>
-</CardGroup>
+### Signing
+<Card title="When using Privy Wallets" icon="key" href="/light-token/wallets/privy" horizontal />
+<Card title="When using Wallet Adapter" icon="wallet" href="/light-token/wallets/wallet-adapter" horizontal />
 
-## DeFi Integration
+### Go to Production
+<Card title="Checklist" icon="rocket" href="/light-token/payments/production-readiness" horizontal />
+
+</Tab>
+<Tab title="DeFi">
+
+### Agent Skill for DeFi
+
+<AgentSkillDefi />
+
+### Guides 
 
 <CardGroup cols={2}>
   <Card title="Program Integration" icon="cube" href="/light-token/defi/programs">
@@ -229,7 +244,14 @@ View the [guide](/light-token/cookbook/create-ata) to create associated token ac
   </Card>
 </CardGroup>
 
-## Data Streaming
+</Tab>
+<Tab title="Data Streaming">
+
+### Agent Skill for Data Streaming
+
+<AgentSkillStreaming />
+
+### Guides 
 
 <CardGroup cols={2}>
   <Card title="Mint Accounts" icon="bolt" href="/light-token/streaming/mints">

@@ -29,7 +29,7 @@ const payer = Keypair.fromSecretKey(
 (async function () {
     const { mint } = await createMintInterface(rpc, payer, payer, null, 9);
     await mintToCompressed(rpc, payer, mint, payer, [
-        { recipient: payer.publicKey, amount: 1000n },
+        { recipient: payer.publicKey, amount: 1_000_000_000n },
     ]);
 
     const senderAta = getAssociatedTokenAddressInterface(mint, payer.publicKey);
@@ -40,7 +40,7 @@ const payer = Keypair.fromSecretKey(
         senderAta,
         mint,
         delegate.publicKey,
-        500_000,
+        500_000_000,
         payer
     );
     console.log("Approved delegate:", delegate.publicKey.toBase58());

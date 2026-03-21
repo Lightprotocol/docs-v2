@@ -11,7 +11,7 @@ import {
     mintToCompressed,
     createLoadAtaInstructions,
     getAssociatedTokenAddressInterface,
-} from "@lightprotocol/compressed-token/unified";
+} from "@lightprotocol/compressed-token";
 import { homedir } from "os";
 import { readFileSync } from "fs";
 
@@ -52,11 +52,9 @@ const payer = Keypair.fromSecretKey(
 
     if (ixs.length === 0) return console.log("Nothing to load");
 
-    for (const batch of ixs) {
-        const blockhash = await rpc.getLatestBlockhash();
-        const tx = buildAndSignTx(batch, payer, blockhash.blockhash);
-        const signature = await sendAndConfirmTx(rpc, tx);
-        console.log("Tx:", signature);
-    }
+    const blockhash = await rpc.getLatestBlockhash();
+    const tx = buildAndSignTx(ixs, payer, blockhash.blockhash);
+    const signature = await sendAndConfirmTx(rpc, tx);
+    console.log("Tx:", signature);
 })();
 ```

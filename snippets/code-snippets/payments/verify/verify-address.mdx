@@ -1,61 +1,20 @@
 ```typescript
-import { Keypair } from "@solana/web3.js";
+import { PublicKey } from "@solana/web3.js";
+import { createRpc } from "@lightprotocol/stateless.js";
 import {
-    createMintInterface,
-    createAtaInterface,
     getAssociatedTokenAddressInterface,
     getAtaInterface,
-} from "@lightprotocol/compressed-token";
-import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
-import { rpc, payer } from "../setup.js";
+} from "@lightprotocol/compressed-token/unified";
 
-(async function () {
-    const { mint } = await createMintInterface(
-        rpc,
-        payer,
-        payer,
-        null,
-        9,
-        undefined,
-        undefined,
-        TOKEN_PROGRAM_ID
-    );
+const rpc = createRpc();
+const mint = new PublicKey("YOUR_MINT_ADDRESS");
+const owner = new PublicKey("YOUR_OWNER_ADDRESS");
 
-    // Create an associated token account for the payer (so it exists)
-    await createAtaInterface(rpc, payer, mint, payer.publicKey);
-
-    // --- Verify an address that HAS an associated token account ---
-    const existingRecipient = payer.publicKey;
-    const expectedAta = getAssociatedTokenAddressInterface(
-        mint,
-        existingRecipient
-    );
-
-    try {
-        const account = await getAtaInterface(
-            rpc,
-            expectedAta,
-            existingRecipient,
-            mint
-        );
-        console.log("Account exists, balance:", account.parsed.amount);
-    } catch {
-        console.log(
-            "Account does not exist yet — will be created on first transfer"
-        );
-    }
-
-    // --- Verify an address that does NOT have an associated token account ---
-    const newRecipient = Keypair.generate().publicKey;
-    const newAta = getAssociatedTokenAddressInterface(mint, newRecipient);
-
-    try {
-        const account = await getAtaInterface(rpc, newAta, newRecipient, mint);
-        console.log("Account exists, balance:", account.parsed.amount);
-    } catch {
-        console.log(
-            "Account does not exist yet — will be created on first transfer"
-        );
-    }
-})();
+const ata = getAssociatedTokenAddressInterface(mint, owner);
+try {
+    const account = await getAtaInterface(rpc, ata, owner, mint);
+    console.log("Account exists, balance:", account.parsed.amount.toString());
+} catch {
+    console.log("Account does not exist yet");
+}
 ```

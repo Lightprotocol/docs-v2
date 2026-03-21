@@ -5,10 +5,10 @@ import {
     sendAndConfirmTransaction,
 } from "@solana/web3.js";
 import {
+    transferInterface,
     getAssociatedTokenAddressInterface,
     createLoadAtaInstructions,
-} from "@lightprotocol/compressed-token";
-import { transferInterface } from "@lightprotocol/compressed-token/unified";
+} from "@lightprotocol/compressed-token/unified";
 import { rpc, payer, setup } from "../setup.js";
 
 (async function () {

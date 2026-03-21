@@ -55,7 +55,15 @@ View a complete API comparison to SPL and Solana: https://www.zkcompression.com/
 
 ### Install
 
-```bash theme={null}
+Install orchestrator agent skill or view [skill.md](https://www.zkcompression.com/skill.md):
+
+```bash
+npx skills add https://zkcompression.com
+```
+
+Install or view [dedicated agent skills](/ai-tools/overview#agent-skills).
+
+```
 npx skills add Lightprotocol/skills
 ```
 
@@ -91,12 +99,6 @@ npx skills add Lightprotocol/skills
 | For program development on Solana with infrequently accessed state, such as per-user state, DePIN registrations, ... | [solana-compression](https://github.com/Lightprotocol/skills/tree/main/skills/solana-compression) |
 | For testing with Light Protocol programs and clients on localnet, devnet, and mainnet validation | [testing](https://github.com/Lightprotocol/skills/tree/main/skills/testing) |
 | For questions about compressed accounts, Light SDK, Solana development, Claude Code features, or agent skills | [ask-mcp](https://github.com/Lightprotocol/skills/tree/main/skills/ask-mcp) |
-
-### Install to Any Agent
-
-```
-npx skills add Lightprotocol/skills
-```
 
 ## Context
 

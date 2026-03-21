@@ -1,24 +1,10 @@
 ```typescript
-import { Keypair } from "@solana/web3.js";
-import { transferInterface } from "@lightprotocol/compressed-token/unified";
-import { rpc, payer, setup } from "../setup.js";
+import { PublicKey } from "@solana/web3.js";
+import { createRpc } from "@lightprotocol/stateless.js";
 
-(async function () {
-    const { mint, senderAta } = await setup();
+const rpc = createRpc();
+const owner = new PublicKey("YOUR_OWNER_ADDRESS");
 
-    const recipient = Keypair.generate();
-    await transferInterface(
-        rpc,
-        payer,
-        senderAta,
-        mint,
-        recipient.publicKey,
-        payer,
-        100
-    );
-
-    // Get transaction history
-    const result = await rpc.getSignaturesForOwnerInterface(payer.publicKey);
-    console.log("Signatures:", result.signatures.length);
-})();
+const result = await rpc.getSignaturesForOwnerInterface(owner);
+console.log("Signatures:", result.signatures.length);
 ```

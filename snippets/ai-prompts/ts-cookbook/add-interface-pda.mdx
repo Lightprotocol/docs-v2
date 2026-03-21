@@ -1,0 +1,111 @@
+<Prompt description="Add interface PDA to existing SPL / Token 2022 mint" actions={["copy", "cursor"]}>
+{`---
+description: Add interface PDA to existing SPL / Token 2022 mint
+allowed-tools: Bash, Read, Write, Edit, Glob, Grep, WebFetch, AskUserQuestion, Task, TaskCreate, TaskGet, TaskList, TaskUpdate, TaskOutput, mcp__deepwiki, mcp__zkcompression
+---
+
+## Add interface PDA to existing SPL / Token 2022 mint
+
+Context:
+- Guide: https://zkcompression.com/light-token/cookbook/add-interface-pda
+- Skills and resources index: https://zkcompression.com/skill.md
+- SPL to Light reference: https://zkcompression.com/api-reference/solana-to-light-comparison
+- Packages: @lightprotocol/compressed-token, @lightprotocol/stateless.js
+
+SPL equivalent: (none) → Light Token: createSplInterface()
+
+### 1. Index project
+- Grep \`@solana/spl-token|Connection|Keypair|createSplInterface|LightTokenProgram\` across src/
+- Glob \`**/*.ts\` for project structure
+- Identify: RPC setup, existing mint references, entry point for interface PDA creation
+- Task subagent (Grep/Read/WebFetch) if project has multiple packages to scan in parallel
+
+### 2. Read references
+- WebFetch the guide above — follow the TypeScript Client tab
+- WebFetch skill.md — check for a dedicated skill and resources matching this task
+- TaskCreate one todo per phase below to track progress
+
+### 3. Clarify intention
+- AskUserQuestion: what is the goal? (register existing SPL mint, register Token 2022 mint, or both)
+- AskUserQuestion: does the project already have Light Token operations, or is this the first integration?
+- Summarize findings and wait for user confirmation before implementing
+
+### 4. Create plan
+- Based on steps 1–3, draft an implementation plan: which files to modify, what code to add, dependency changes
+- Verify existing connection/signer setup is compatible with the cookbook prerequisites
+- If anything is unclear or ambiguous, loop back to step 3 (AskUserQuestion)
+- Present the plan to the user for approval before proceeding
+
+### 5. Implement
+- Add deps if missing: Bash \`npm install @lightprotocol/compressed-token @lightprotocol/stateless.js\`
+- Follow the cookbook guide and the approved plan
+- Write/Edit to create or modify files
+- TaskUpdate to mark each step done
+
+### 6. Verify
+- Bash \`tsc --noEmit\`
+- Bash run existing test suite if present
+- TaskUpdate to mark complete
+
+### Tools
+- mcp__zkcompression__SearchLightProtocol("<query>") for API details
+- mcp__deepwiki__ask_question("Lightprotocol/light-protocol", "<q>") for architecture
+- Task subagent with Grep/Read/WebFetch for parallel lookups
+- TaskList to check remaining work`}
+</Prompt>
+
+```text
+---
+description: Add interface PDA to existing SPL / Token 2022 mint
+allowed-tools: Bash, Read, Write, Edit, Glob, Grep, WebFetch, AskUserQuestion, Task, TaskCreate, TaskGet, TaskList, TaskUpdate, TaskOutput, mcp__deepwiki, mcp__zkcompression
+---
+
+## Add interface PDA to existing SPL / Token 2022 mint
+
+Context:
+- Guide: https://zkcompression.com/light-token/cookbook/add-interface-pda
+- Skills and resources index: https://zkcompression.com/skill.md
+- SPL to Light reference: https://zkcompression.com/api-reference/solana-to-light-comparison
+- Packages: @lightprotocol/compressed-token, @lightprotocol/stateless.js
+
+SPL equivalent: (none) → Light Token: createSplInterface()
+
+### 1. Index project
+- Grep `@solana/spl-token|Connection|Keypair|createSplInterface|LightTokenProgram` across src/
+- Glob `**/*.ts` for project structure
+- Identify: RPC setup, existing mint references, entry point for interface PDA creation
+- Task subagent (Grep/Read/WebFetch) if project has multiple packages to scan in parallel
+
+### 2. Read references
+- WebFetch the guide above — follow the TypeScript Client tab
+- WebFetch skill.md — check for a dedicated skill and resources matching this task
+- TaskCreate one todo per phase below to track progress
+
+### 3. Clarify intention
+- AskUserQuestion: what is the goal? (register existing SPL mint, register Token 2022 mint, or both)
+- AskUserQuestion: does the project already have Light Token operations, or is this the first integration?
+- Summarize findings and wait for user confirmation before implementing
+
+### 4. Create plan
+- Based on steps 1–3, draft an implementation plan: which files to modify, what code to add, dependency changes
+- Verify existing connection/signer setup is compatible with the cookbook prerequisites
+- If anything is unclear or ambiguous, loop back to step 3 (AskUserQuestion)
+- Present the plan to the user for approval before proceeding
+
+### 5. Implement
+- Add deps if missing: Bash `npm install @lightprotocol/compressed-token @lightprotocol/stateless.js`
+- Follow the cookbook guide and the approved plan
+- Write/Edit to create or modify files
+- TaskUpdate to mark each step done
+
+### 6. Verify
+- Bash `tsc --noEmit`
+- Bash run existing test suite if present
+- TaskUpdate to mark complete
+
+### Tools
+- mcp__zkcompression__SearchLightProtocol("<query>") for API details
+- mcp__deepwiki__ask_question("Lightprotocol/light-protocol", "<q>") for architecture
+- Task subagent with Grep/Read/WebFetch for parallel lookups
+- TaskList to check remaining work
+```

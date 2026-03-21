@@ -7,12 +7,12 @@ allowed-tools: Bash, Read, Write, Edit, Glob, Grep, WebFetch, AskUserQuestion, T
 ## Integrate light-token APIs for stablecoin payments
 
 Context:
-- Guide: https://zkcompression.com/light-token/payments/integration-guide
+- Guide: https://zkcompression.com/light-token/payments/overview
 - Skills and resources index: https://zkcompression.com/skill.md
 - SPL to Light reference: https://zkcompression.com/api-reference/solana-to-light-comparison
 - Dedicated skill: https://github.com/Lightprotocol/skills/tree/main/skills/payments
 - Packages: @lightprotocol/compressed-token, @lightprotocol/stateless.js
-- Full examples: https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/payments
+- Import from @lightprotocol/compressed-token/unified for all interface APIs
 
 SPL → Light Token API mapping:
 | Operation    | SPL                               | Light Token                              |
@@ -66,7 +66,41 @@ SPL → Light Token API mapping:
 - mcp__zkcompression__SearchLightProtocol("<query>") for API details
 - mcp__deepwiki__ask_question("Lightprotocol/light-protocol", "<q>") for architecture
 - Task subagent with Grep/Read/WebFetch for parallel lookups
-- TaskList to check remaining work`}
+- TaskList to check remaining work
+
+### Resources
+
+Guides:
+- Basic payment: https://zkcompression.com/light-token/payments/basic-payment
+- Batch payments: https://zkcompression.com/light-token/payments/batch-payments
+- Payment with memo: https://zkcompression.com/light-token/payments/payment-with-memo
+- Receive payments: https://zkcompression.com/light-token/payments/receive-payments
+- Verify payments: https://zkcompression.com/light-token/payments/verify-payments
+- Verify recipient address: https://zkcompression.com/light-token/payments/verify-recipient-address
+- Spend permissions: https://zkcompression.com/light-token/payments/spend-permissions
+- Wrap and unwrap: https://zkcompression.com/light-token/payments/wrap-unwrap
+- Production readiness: https://zkcompression.com/light-token/payments/production-readiness
+- FAQ: https://zkcompression.com/faq
+- Sign with Privy: https://zkcompression.com/light-token/wallets/privy
+- Sign with Wallet Adapter: https://zkcompression.com/light-token/wallets/wallet-adapter
+- Gasless transactions: https://zkcompression.com/light-token/wallets/gasless-transactions
+
+Examples:
+- All payments: https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/payments
+- Send (instruction): https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments/send/send-instruction.ts
+- Send (action): https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments/send/send-action.ts
+- Batch send: https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments/send/batch-send.ts
+- Payment with memo: https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments/send/payment-with-memo.ts
+- Receive: https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments/receive/receive.ts
+- Get balance: https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments/verify/get-balance.ts
+- Get history: https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments/verify/get-history.ts
+- Verify address: https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments/verify/verify-address.ts
+- Wrap: https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments/interop/wrap.ts
+- Unwrap: https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments/interop/unwrap.ts
+- Privy (Node.js): https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/sign-with-privy/nodejs
+- Privy (React): https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/sign-with-privy/react
+- Wallet Adapter (React): https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/sign-with-wallet-adapter/react
+- Gasless transfer: https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/gasless-transactions/typescript/gasless-transfer.ts`}
 </Prompt>
 
 ```text
@@ -78,12 +112,12 @@ allowed-tools: Bash, Read, Write, Edit, Glob, Grep, WebFetch, AskUserQuestion, T
 ## Integrate light-token APIs for stablecoin payments
 
 Context:
-- Guide: https://zkcompression.com/light-token/payments/integration-guide
+- Guide: https://zkcompression.com/light-token/payments/overview
 - Skills and resources index: https://zkcompression.com/skill.md
 - SPL to Light reference: https://zkcompression.com/api-reference/solana-to-light-comparison
 - Dedicated skill: https://github.com/Lightprotocol/skills/tree/main/skills/payments
 - Packages: @lightprotocol/compressed-token, @lightprotocol/stateless.js
-- Full examples: https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/payments
+- Import from @lightprotocol/compressed-token/unified for all interface APIs
 
 SPL → Light Token API mapping:
 | Operation    | SPL                               | Light Token                              |
@@ -138,4 +172,38 @@ SPL → Light Token API mapping:
 - mcp__deepwiki__ask_question("Lightprotocol/light-protocol", "<q>") for architecture
 - Task subagent with Grep/Read/WebFetch for parallel lookups
 - TaskList to check remaining work
+
+### Resources
+
+Guides:
+- Basic payment: https://zkcompression.com/light-token/payments/basic-payment
+- Batch payments: https://zkcompression.com/light-token/payments/batch-payments
+- Payment with memo: https://zkcompression.com/light-token/payments/payment-with-memo
+- Receive payments: https://zkcompression.com/light-token/payments/receive-payments
+- Verify payments: https://zkcompression.com/light-token/payments/verify-payments
+- Verify recipient address: https://zkcompression.com/light-token/payments/verify-recipient-address
+- Spend permissions: https://zkcompression.com/light-token/payments/spend-permissions
+- Wrap and unwrap: https://zkcompression.com/light-token/payments/wrap-unwrap
+- Production readiness: https://zkcompression.com/light-token/payments/production-readiness
+- FAQ: https://zkcompression.com/faq
+- Sign with Privy: https://zkcompression.com/light-token/wallets/privy
+- Sign with Wallet Adapter: https://zkcompression.com/light-token/wallets/wallet-adapter
+- Gasless transactions: https://zkcompression.com/light-token/wallets/gasless-transactions
+
+Examples:
+- All payments: https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/payments
+- Send (instruction): https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments/send/send-instruction.ts
+- Send (action): https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments/send/send-action.ts
+- Batch send: https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments/send/batch-send.ts
+- Payment with memo: https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments/send/payment-with-memo.ts
+- Receive: https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments/receive/receive.ts
+- Get balance: https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments/verify/get-balance.ts
+- Get history: https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments/verify/get-history.ts
+- Verify address: https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments/verify/verify-address.ts
+- Wrap: https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments/interop/wrap.ts
+- Unwrap: https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/payments/interop/unwrap.ts
+- Privy (Node.js): https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/sign-with-privy/nodejs
+- Privy (React): https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/sign-with-privy/react
+- Wallet Adapter (React): https://github.com/Lightprotocol/examples-light-token/tree/main/toolkits/sign-with-wallet-adapter/react
+- Gasless transfer: https://github.com/Lightprotocol/examples-light-token/blob/main/toolkits/gasless-transactions/typescript/gasless-transfer.ts
 ```
