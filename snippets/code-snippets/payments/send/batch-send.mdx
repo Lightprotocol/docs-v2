@@ -21,7 +21,9 @@ import { rpc, payer, setup } from "../setup.js";
     ];
 
     // Build transfer instructions for each recipient
+    const COMPUTE_BUDGET = "ComputeBudget111111111111111111111111111111";
     const allTransferIxs = [];
+    let hasComputeBudget = false;
 
     for (const { address, amount } of recipients) {
         const instructions = await createTransferInterfaceInstructions(
@@ -32,8 +34,15 @@ import { rpc, payer, setup } from "../setup.js";
             payer.publicKey,
             address
         );
-
-        allTransferIxs.push(...instructions[instructions.length - 1]);
+        
+        for (const ix of instructions[instructions.length - 1]) {
+            // Deduplicate ComputeBudget instructions
+            if (ix.programId.toBase58() === COMPUTE_BUDGET) {
+                if (hasComputeBudget) continue;
+                hasComputeBudget = true;
+            }
+            allTransferIxs.push(ix);
+        }
     }
 
     // Send all transfers in a single transaction

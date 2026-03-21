@@ -10,16 +10,14 @@ import { createRpc } from "@lightprotocol/stateless.js";
 import {
     createMintInterface,
     createAtaInterface,
-    mintToInterface,
-    decompressInterface,
     createWrapInstruction,
     getAssociatedTokenAddressInterface,
-    createAtaInterfaceIdempotent,
     getSplInterfaceInfos,
 } from "@lightprotocol/compressed-token";
 import {
+    TOKEN_PROGRAM_ID,
     createAssociatedTokenAccount,
-    TOKEN_2022_PROGRAM_ID,
+    mintTo,
 } from "@solana/spl-token";
 import { homedir } from "os";
 import { readFileSync } from "fs";
@@ -37,30 +35,33 @@ const payer = Keypair.fromSecretKey(
 );
 
 (async function () {
-    // Setup: Get SPL tokens (needed to wrap)
-    const { mint } = await createMintInterface(rpc, payer, payer, null, 9);
-    await createAtaInterface(rpc, payer, mint, payer.publicKey);
-    const destination = getAssociatedTokenAddressInterface(
-        mint,
-        payer.publicKey
+    // Setup: Create SPL mint and fund an SPL ATA
+    const { mint } = await createMintInterface(
+        rpc,
+        payer,
+        payer,
+        null,
+        9,
+        undefined,
+        undefined,
+        TOKEN_PROGRAM_ID
     );
-    await mintToInterface(rpc, payer, mint, destination, payer, 1000);
     const splAta = await createAssociatedTokenAccount(
         rpc,
         payer,
         mint,
         payer.publicKey,
         undefined,
-        TOKEN_2022_PROGRAM_ID
+        TOKEN_PROGRAM_ID
     );
-    await decompressInterface(rpc, payer, payer, mint, 1000);
+    await mintTo(rpc, payer, mint, splAta, payer, 1000);
 
     // Create wrap instruction
+    await createAtaInterface(rpc, payer, mint, payer.publicKey);
     const lightTokenAta = getAssociatedTokenAddressInterface(
         mint,
         payer.publicKey
     );
-    await createAtaInterfaceIdempotent(rpc, payer, mint, payer.publicKey);
 
     const splInterfaceInfos = await getSplInterfaceInfos(rpc, mint);
     const splInterfaceInfo = splInterfaceInfos.find(
@@ -76,7 +77,7 @@ const payer = Keypair.fromSecretKey(
         mint,
         500,
         splInterfaceInfo,
-        9, // decimals - must match the mint decimals
+        9,
         payer.publicKey
     );
 

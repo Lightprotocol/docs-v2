@@ -9,13 +9,16 @@ import { createRpc } from "@lightprotocol/stateless.js";
 import {
     createMintInterface,
     createAtaInterface,
-    mintToInterface,
     getAssociatedTokenAddressInterface,
+} from "@lightprotocol/compressed-token";
+import {
+    wrap,
     createUnwrapInstructions,
 } from "@lightprotocol/compressed-token/unified";
 import {
+    TOKEN_PROGRAM_ID,
     createAssociatedTokenAccount,
-    TOKEN_2022_PROGRAM_ID,
+    mintTo,
 } from "@solana/spl-token";
 import { homedir } from "os";
 import { readFileSync } from "fs";
@@ -33,27 +36,35 @@ const payer = Keypair.fromSecretKey(
 );
 
 (async function () {
-    // Setup: Create and mint tokens to light-token associated token account
-    const { mint } = await createMintInterface(rpc, payer, payer, null, 9);
-    await createAtaInterface(rpc, payer, mint, payer.publicKey);
-    const destination = getAssociatedTokenAddressInterface(
-        mint,
-        payer.publicKey
+    // Setup: Create SPL mint, fund SPL ATA, wrap into Light ATA
+    const { mint } = await createMintInterface(
+        rpc,
+        payer,
+        payer,
+        null,
+        9,
+        undefined,
+        undefined,
+        TOKEN_PROGRAM_ID
     );
-    await mintToInterface(rpc, payer, mint, destination, payer, 1000);
-
-    // Create destination SPL ATA
     const splAta = await createAssociatedTokenAccount(
         rpc,
         payer,
         mint,
         payer.publicKey,
         undefined,
-        TOKEN_2022_PROGRAM_ID
+        TOKEN_PROGRAM_ID
     );
+    await mintTo(rpc, payer, mint, splAta, payer, 1000);
 
-    // Returns TransactionInstruction[][]. Each inner array is one txn.
-    // Handles loading cold state + unwrapping in one go.
+    await createAtaInterface(rpc, payer, mint, payer.publicKey);
+    const lightTokenAta = getAssociatedTokenAddressInterface(
+        mint,
+        payer.publicKey
+    );
+    await wrap(rpc, payer, splAta, lightTokenAta, payer, mint, BigInt(1000));
+
+    // Create unwrap instructions
     const instructions = await createUnwrapInstructions(
         rpc,
         splAta,

@@ -83,25 +83,35 @@ if (sig) console.log("Loaded:", sig);
 
 <Accordion title="Compare to SPL">
 
+<Tabs>
+<Tab title="Instruction">
+
 ```typescript
 import {
   createAssociatedTokenAccountInstruction,
   getAssociatedTokenAddressSync,
-  getOrCreateAssociatedTokenAccount,
 } from "@solana/spl-token";
 
 const ata = getAssociatedTokenAddressSync(mint, recipient);
 
-// Instruction:
 const tx = new Transaction().add(
   createAssociatedTokenAccountInstruction(payer.publicKey, ata, recipient, mint)
 );
+```
 
-// Action:
+</Tab>
+<Tab title="Action">
+
+```typescript
+import { getOrCreateAssociatedTokenAccount } from "@solana/spl-token";
+
 const ata = await getOrCreateAssociatedTokenAccount(
   connection, payer, mint, recipient
 );
 ```
+
+</Tab>
+</Tabs>
 
 </Accordion>
 

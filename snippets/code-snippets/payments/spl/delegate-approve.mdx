@@ -1,0 +1,12 @@
+```typescript
+import { getApproveCheckedInstruction } from "@solana-program/token";
+
+const approveInstruction = getApproveCheckedInstruction({
+  source: tokenAccountAddress,
+  mint: usdcMintAddress,
+  delegate: delegateAddress,
+  owner: ownerKeypair,
+  amount: 1_000_000_000n,
+  decimals: 6
+});
+```

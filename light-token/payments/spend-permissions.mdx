@@ -9,6 +9,10 @@ import FullSetup from "/snippets/setup/full-setup.mdx";
 import SupportFooter from "/snippets/support-footer.mdx";
 import AgentSkillPayments from "/snippets/setup/agent-skill-payments.mdx";
 import PaymentsAiPrompt from "/snippets/ai-prompts/toolkits/payments.mdx";
+import SplDelegateApprove from "/snippets/code-snippets/payments/spl/delegate-approve.mdx";
+import SplDelegateCheck from "/snippets/code-snippets/payments/spl/delegate-check.mdx";
+import SplDelegateTransfer from "/snippets/code-snippets/payments/spl/delegate-transfer.mdx";
+import SplDelegateRevoke from "/snippets/code-snippets/payments/spl/delegate-revoke.mdx";
 
 ---
 
@@ -91,6 +95,12 @@ const tx = await approveInterface(
 console.log("Approved:", tx);
 ```
 
+<Accordion title="Compare to SPL">
+
+<SplDelegateApprove />
+
+</Accordion>
+
 ## Check delegation status
 
 Check the delegation status of an account:
@@ -103,6 +113,12 @@ const account = await getAtaInterface(rpc, senderAta, owner.publicKey, mint);
 console.log("Delegate:", account.parsed.delegate?.toBase58() ?? "none");
 console.log("Delegated amount:", account.parsed.delegatedAmount.toString());
 ```
+
+<Accordion title="Compare to SPL">
+
+<SplDelegateCheck />
+
+</Accordion>
 
 ## Transfer as Delegate
 
@@ -128,6 +144,12 @@ const tx = await transferInterface(
 
 console.log("Delegated transfer:", tx);
 ```
+
+<Accordion title="Compare to SPL">
+
+<SplDelegateTransfer />
+
+</Accordion>
 
 <Accordion title="Instruction-level builder">
 
@@ -171,6 +193,12 @@ const tx = await revokeInterface(rpc, payer, senderAta, mint, owner);
 
 console.log("Revoked:", tx);
 ```
+
+<Accordion title="Compare to SPL">
+
+<SplDelegateRevoke />
+
+</Accordion>
 
 </Tab>
 <Tab title="AI Prompt">

@@ -1,0 +1,12 @@
+```typescript
+import { getTransferCheckedInstruction } from "@solana-program/token";
+
+const transferInstruction = getTransferCheckedInstruction({
+  source: ownerTokenAccount,
+  mint: usdcMintAddress,
+  destination: recipientTokenAccount,
+  authority: delegateKeypair,
+  amount: 100_000_000n,
+  decimals: 6
+});
+```

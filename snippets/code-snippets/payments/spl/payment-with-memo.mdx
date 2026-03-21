@@ -1,0 +1,31 @@
+```typescript
+import { getAddMemoInstruction } from "@solana-program/memo";
+import { getTransferInstruction } from "@solana-program/token";
+
+const transferInstruction = getTransferInstruction({
+  source: senderAta,
+  destination: recipientAta,
+  authority: sender.address,
+  amount: 250_000n
+});
+
+const memoInstruction = getAddMemoInstruction({
+  memo: "Payment for services rendered - Invoice #12345"
+});
+
+const signature = await client.transaction.prepareAndSend({
+  authority: sender,
+  instructions: [transferInstruction, memoInstruction],
+  version: 0
+});
+
+const transaction = await client.runtime.rpc
+  .getTransaction(signature, {
+    encoding: "jsonParsed",
+    maxSupportedTransactionVersion: 0
+  })
+  .send();
+
+console.log("Transaction logs with Memo:");
+console.log(transaction?.meta?.logMessages);
+```

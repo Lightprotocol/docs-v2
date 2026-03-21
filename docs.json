@@ -86,14 +86,9 @@
                       "light-token/payments/verify-recipient-address"
                     ]
                   },
+                  "light-token/payments/spend-permissions",
                   "light-token/payments/wrap-unwrap",
-                  {
-                    "group": "Advanced",
-                    "pages": [
-                      "light-token/payments/spend-permissions",
-                      "pda/compressed-pdas/nullifier-pda"
-                    ]
-                  },
+                  "pda/compressed-pdas/nullifier-pda",
                   "light-token/payments/production-readiness"
                 ]
               },
@@ -353,6 +348,10 @@
     }
   },
   "redirects": [
+    {
+      "source": "/light-token/payments/integration-guide",
+      "destination": "https://zkcompression.com/light-token/payments/overview"
+    },
     {
       "source": "/light-token/payments/nullifier-pda",
       "destination": "https://zkcompression.com/pda/compressed-pdas/nullifier-pda"
