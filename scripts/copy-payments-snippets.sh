@@ -22,7 +22,7 @@ wrap_typescript() {
 
 # Send examples
 echo "Processing: send/"
-for file in send-action send-instruction batch-send payment-with-memo sign-all-transactions; do
+for file in basic-send-action basic-send-instruction batch-send payment-with-memo sign-all-transactions; do
     src="$EXAMPLES/send/$file.ts"
     if [ -f "$src" ]; then
         wrap_typescript "$src" "$SNIPPETS_DIR/send/$file.mdx"
