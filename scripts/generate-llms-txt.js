@@ -111,6 +111,20 @@ function slugify(text) {
 // ── Section builders ────────────────────────────────────────────────
 
 function buildAiTools(anchor) {
+  const prefix = [
+    `Install orchestrator agent skill or view [skill.md](${BASE_URL}/skill.md):`,
+    '',
+    '```bash',
+    'npx skills add https://zkcompression.com',
+    '```',
+    '',
+    'Install or view [dedicated agent skills](/ai-tools/overview#agent-skills).',
+    '',
+    '```',
+    'npx skills add Lightprotocol/skills',
+    '```',
+  ].join('\n');
+
   const lines = [];
 
   for (const group of anchor.groups) {
@@ -169,7 +183,7 @@ function buildAiTools(anchor) {
     );
   }
 
-  return lines;
+  return { prefix, lines };
 }
 
 function splitLightTokenProgram(group) {
@@ -302,7 +316,8 @@ function generate() {
 
   // 1. AI Agent Resources
   const aiAnchor = anchors.find((a) => a.anchor === 'AI Tools');
-  sections.push({ name: 'AI Agent Resources', lines: buildAiTools(aiAnchor) });
+  const aiTools = buildAiTools(aiAnchor);
+  sections.push({ name: 'AI Agent Resources', prefix: aiTools.prefix, lines: aiTools.lines });
 
   // 2. Documentation and API Reference — interleaved
   const docAnchor = anchors.find((a) => a.anchor === 'Documentation');
@@ -395,6 +410,9 @@ function generate() {
   // Section content
   for (const s of sections) {
     out.push(`## ${s.name}`);
+    if (s.prefix) {
+      out.push(s.prefix);
+    }
     if (s.raw) {
       out.push(s.raw);
     } else {
