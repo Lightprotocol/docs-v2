@@ -6,10 +6,9 @@ description: "Create Solana PDA accounts with sponsored rent-exemption and minim
 import FullCounterExample from '/snippets/code-snippets/light-token/counter/anchor-macro/full-example.mdx';
 import AgentSkillGeneric from "/snippets/setup/agent-skill-generic.mdx";
 import LightPdaAiPrompt from "/snippets/ai-prompts/program-cookbook/light-pda.mdx";
+import LightPdaCost from "/snippets/cost-tables/light-pda-cost.mdx";
 
-| Creation Cost    | Regular PDA          | Light-PDA       |
-|------------------|----------------------|-----------------|
-| 100-byte account | ~1,600,000 lamports  | ~11,500 lamports |
+<LightPdaCost />
 
 A Light-PDA is a standard Solana PDA. Seeds, bump derivation, and
 `invoke_signed` work the same way. Your instruction handlers for reads,

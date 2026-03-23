@@ -8,11 +8,10 @@ import ProgramExamplesTable from '/snippets/overview-tables/program-examples-tab
 import DevelopmentEnvironmentSetup from '/snippets/setup/development-environment-setup.mdx';
 import CompressedPdasGuidesTable from '/snippets/overview-tables/compressed-pdas-guides-table.mdx';
 import SdkReferenceCompressedPdas from '/snippets/overview-tables/sdk-reference-compressed-pdas.mdx';
+import CompressedPdaCost from "/snippets/cost-tables/compressed-pda-cost.mdx";
 
 
-| Creation      | Regular PDA Account    | Compressed PDA         |
-| :------------- | :--------------------- | :---------------------- |
-| 100-byte PDA  | 	~1,600,000 lamports          | 15,000 lamports     |
+<CompressedPdaCost />
 
 Compressed PDAs are derived using a specific program address and seed, like regular PDAs. 
 Custom programs invoke the <Tooltip tip="The program enforces compressed account layout with ownership and sum checks. It is invoked to create and interact with compressed accounts and tokens.">Light System program</Tooltip>

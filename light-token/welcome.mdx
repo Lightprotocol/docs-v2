@@ -14,6 +14,9 @@ import CookbookGuidesTable from "/snippets/overview-tables/cookbook-guides-table
 import WelcomePageInstall from "/snippets/setup/welcome-page-install.mdx";
 import SdkReference from "/snippets/overview-tables/sdk-reference.mdx";
 import { CodeCompare } from "/snippets/jsx/code-compare.jsx";
+import MintAccountCost from "/snippets/cost-tables/mint-account-cost.mdx";
+import TokenAccountCost from "/snippets/cost-tables/token-account-cost.mdx";
+import CuPerformance from "/snippets/cost-tables/cu-performance.mdx";
 import {
   splCreateMintCode,
   lightCreateMintCode,
@@ -39,9 +42,7 @@ import {
 Light-mint accounts represent a unique mint and optionally can store token-metadata.
 Functionally equivalent to SPL mints.
 
-|  Creation Cost                 |     Light-Token |  SPL-Token |
-| :---------------- | --------------: | ---------: |
-| **Mint Account**  | **0.00001 SOL** | 0.0015 SOL |
+<MintAccountCost />
 
 <Accordion title="Compare to SPL">
 <Tabs>
@@ -88,9 +89,7 @@ View the [guide](/light-token/cookbook/create-mint) to create Light Token mints,
 Light-token accounts can hold balances from any light, SPL, or Token-2022 mint, without the need
 to pay rent-exemption.
 
-|  Creation Cost                 |     Light-Token |  SPL-Token |
-| :---------------- | --------------: | ---------: |
-| **Token Account** | **0.00001 SOL** |  0.0029 SOL |
+<TokenAccountCost />
 
 <Accordion title="Compare to SPL">
 <Tabs>
@@ -133,11 +132,7 @@ to pay rent-exemption.
 View the [guide](/light-token/cookbook/create-ata) to create associated token accounts.
 </Accordion>
 
-|   CU Performance                       | Light-Token | SPL-Token |
-| :----------------------- | ----------: | --------: |
-| **ATA Creation**         |   **4,348** |    14,194 |
-| **Transfer**             |     **312** |     4,645 |
-| **Transfer** (rent-free) |   **1,885** |     4,645 |
+<CuPerformance />
 
 <Card
   title="Learn how the Light Token Program works"

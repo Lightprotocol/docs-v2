@@ -1,7 +1,7 @@
 ```typescript
 import 'dotenv/config';
 import {PrivyClient} from '@privy-io/node';
-import {createRpc, CTOKEN_PROGRAM_ID} from '@lightprotocol/stateless.js';
+import {createRpc, LIGHT_TOKEN_PROGRAM_ID} from '@lightprotocol/stateless.js';
 import {PublicKey, Transaction, ComputeBudgetProgram} from '@solana/web3.js';
 import {getAssociatedTokenAddressSync, getAccount} from '@solana/spl-token';
 import {getSplInterfaceInfos} from '@lightprotocol/compressed-token';
@@ -50,7 +50,7 @@ const wrapTokens = async (
   const tx = new Transaction().add(
     ComputeBudgetProgram.setComputeUnitLimit({units: 200_000}),
     createAssociatedTokenAccountInterfaceIdempotentInstruction(
-      fromPubkey, lightTokenAta, fromPubkey, mintPubkey, CTOKEN_PROGRAM_ID,
+      fromPubkey, lightTokenAta, fromPubkey, mintPubkey, LIGHT_TOKEN_PROGRAM_ID,
     ),
     createWrapInstruction(
       splAta, lightTokenAta, fromPubkey, mintPubkey,

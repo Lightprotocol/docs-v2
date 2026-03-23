@@ -7,6 +7,7 @@ keywords: ["shielded pools", "mixer", "nullifiers on Solana", "zcash on solana",
 
 import ZkExamplesTable from "/snippets/overview-tables/zk-examples-table.mdx";
 import AgentSkillZkNullifier from "/snippets/setup/agent-skill-zk-nullifier.mdx";
+import CompressedPdaCost from "/snippets/cost-tables/compressed-pda-cost.mdx";
 
 ---
 
@@ -118,9 +119,7 @@ ZK applications on Solana can use existing state Merkle trees to store state in 
 * This way you don't need to maintain your own Merkle tree and indexer.
 * RPCs that support ZK Compression (Helius, Triton) index state changes.
 
-| Creation      | Regular PDA Account    | Compressed PDA         |
-| :------------- | :--------------------- | :---------------------- |
-| 100-byte PDA  | 	~1,600,000 lamports          | 15,000 lamports     |
+<CompressedPdaCost />
 
 <Note>
 Your circuit must include compressed accounts. Find [guides to compressed accounts in the documentation](/pda/compressed-pdas/overview) and the [full example with zk implementation here](https://github.com/Lightprotocol/program-examples/blob/99d260f9f356743b8fe3501c684f7926930d6079/zk-id/circuits/compressed_account.circom).

@@ -4,15 +4,15 @@ sidebarTitle: "Overview"
 description: "Overview to Light-PDAs (Solana accounts with sponsored rent-exemption) and compressed PDAs (compressed accounts without rent-exemption cost)."
 ---
 import CompressibleRentExplained from "/snippets/compressible-rent-explained.mdx";
+import LightPdaCost from "/snippets/cost-tables/light-pda-cost.mdx";
+import CompressedPdaCost from "/snippets/cost-tables/compressed-pda-cost.mdx";
 
 ## Light-PDA
 
 Light-PDAs are Solana PDAs with sponsored rent-exemption and can be implemented with minimal code changes to your existing Solana program.
 Your program logic stays mostly untouched, which keeps audit overhead minimal.
 
-|                  | Regular PDA          | Light-PDA       |
-|------------------|----------------------|-----------------|
-| 100-byte account | ~1,600,000 lamports  | ~11,500 lamports |
+<LightPdaCost />
 
 > Use Light-PDA's like any Solana PDA, e.g. for DeFi pools, vaults, pool accounts, or other shared state.
 
@@ -30,9 +30,7 @@ Compressed PDAs are compressed accounts with an address.
 Programs invoke the Light System program to create and update compressed accounts, instead of the System program.
 Fully compatible with existing Solana programs, but requires custom logic.
 
-|                  | Regular PDA          | Compressed PDA  |
-|------------------|----------------------|-----------------|
-| 100-byte account | ~1,600,000 lamports  | 15,000 lamports |
+<CompressedPdaCost />
 
 > Use for accounts where each user or entity gets their own PDA and state is infrequently accessed:
 > - Per-user state (profiles, preferences, credentials)

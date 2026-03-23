@@ -10,13 +10,12 @@ import ToolkitsSetup from "/snippets/setup/toolkits-setup.mdx";
 import AgentSkillPayments from "/snippets/setup/agent-skill-payments.mdx";
 import WalletsAiPrompt from "/snippets/ai-prompts/toolkits/wallets.mdx";
 import SupportFooter from "/snippets/support-footer.mdx";
+import TokenAccountCost from "/snippets/cost-tables/token-account-cost.mdx";
 
 1. The Light-token API matches the SPL-token API almost entirely, and extends their functionality to include the light token program in addition to the SPL-token and Token-2022 programs.
 2. Your users hold and receive tokens of the same mints, just stored more efficiently.
 
-| Creation Cost     | SPL                 | Light-token          |
-| :---------------- | :------------------ | :------------------- |
-| **Token Account** | ~2,000,000 lamports | ~**11,000** lamports |
+<TokenAccountCost />
 
 ### What you will implement
 

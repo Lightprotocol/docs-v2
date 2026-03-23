@@ -57,7 +57,7 @@ const payer = Keypair.fromSecretKey(
         payer.publicKey
     );
 
-    const tx = await wrap(rpc, payer, splAta, lightTokenAta, payer, mint, 500);
+    const tx = await wrap(rpc, payer, splAta, lightTokenAta, payer, mint, BigInt(500));
 
     console.log("Tx:", tx);
 })();

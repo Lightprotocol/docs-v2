@@ -8,7 +8,7 @@ import {
   getAssociatedTokenAddressInterface,
   createAssociatedTokenAccountInterfaceIdempotentInstruction,
 } from '@lightprotocol/compressed-token/unified';
-import { createRpc, CTOKEN_PROGRAM_ID } from '@lightprotocol/stateless.js';
+import { createRpc, LIGHT_TOKEN_PROGRAM_ID } from '@lightprotocol/stateless.js';
 import type { SignTransactionFn } from './signAndSendBatches';
 
 export interface WrapParams {
@@ -61,7 +61,7 @@ export function useWrap() {
       const tx = new Transaction().add(
         ComputeBudgetProgram.setComputeUnitLimit({ units: 200_000 }),
         createAssociatedTokenAccountInterfaceIdempotentInstruction(
-          owner, lightTokenAta, owner, mintPubkey, CTOKEN_PROGRAM_ID,
+          owner, lightTokenAta, owner, mintPubkey, LIGHT_TOKEN_PROGRAM_ID,
         ),
         createWrapInstruction(
           splAta, lightTokenAta, owner, mintPubkey,

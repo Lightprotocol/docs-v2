@@ -9,6 +9,8 @@ import { Footer } from "/snippets/jsx/footer.jsx";
 import { HeroCubeGrid } from "/snippets/jsx/hero-cube-grid.jsx";
 import { LiquidGlassPill } from "/snippets/jsx/liquid-glass-pill.jsx";
 import { PartnerLogos } from "/snippets/jsx/partner-logos.jsx";
+import TokenCreationCost from "/snippets/cost-tables/token-creation-cost.mdx";
+import PdaCostCombined from "/snippets/cost-tables/pda-cost-combined.mdx";
 
 {/* Hero with animation - styles in style.css (no flash) */}
 
@@ -30,10 +32,7 @@ stablecoin payments, our APIs help you scale.
 
 ## Token APIs
 
-| Creation Cost | Light Token Program | SPL / Token 2022 |
-|:--------|:------|:---------------|
-| Mint Account | 0.00001 SOL | 0.0015 SOL |
-| Token Account | 0.00001 SOL | 0.0029 SOL |
+<TokenCreationCost />
 
 <Card
   title="Light Token Program"
@@ -79,9 +78,7 @@ stablecoin payments, our APIs help you scale.
 
 ## PDA Accounts
 
-| Creation Cost | Light / Compressed | Solana default |
-|:--------|:------|:---------------|
-| 100-byte PDA | ~0.000015 SOL | 0.0016 SOL |
+<PdaCostCombined />
 
 <CardGroup cols={2}>
   <Card title="Light PDA (New)" icon="expand" href="/pda/light-pda/overview">
