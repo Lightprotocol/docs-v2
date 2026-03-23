@@ -32,18 +32,18 @@ Set your application as the payer so users never interact with SOL.
 
 In total, your sponsor covers three costs:
 
-|  |  |  |
-|:-----|:-------|:----|
-| **Account creation** | 11,000 lamports | Initial bump on virtual rent balance. Rent-exemption is sponsored. |
-| **Rent top-ups** | ~766 lamports per write | Fee payer bumps the virtual rent balance on each write to keep accounts active. Set `payer` parameter on any Light Token instruction. |
-| **Transaction fees**<br/>+ Priority Fee | 5,000 lamports<br/>+ Priority Fee per tx  | Standard Solana fee payer. Set `feePayer` on the transaction. |
-<Accordion title="Cost Breakdown in Practice">
-
 |      | Light | SPL / Token 2022 |
 | :--- | :--- | :--- |
 | **Transfer** | *~\$0.001*  | *~\$0.001* |
 | **Create Token Account** | **~\$0.001** (0.00001 SOL) | **~\$0.30** (0.0029 SOL) |
 | **Transfer + Create Token Account** | **~\$0.001** (0.00001 SOL) | **~\$0.30** (0.0029 SOL) |
+
+<Accordion title="Technical Cost Breakdown">
+|  |  |  |
+|:-----|:-------|:----|
+| **Account creation** | 11,000 lamports | Initial bump on virtual rent balance. Rent-exemption is sponsored. |
+| **Rent top-ups** | ~766 lamports per write | Fee payer bumps the virtual rent balance on each write to keep accounts active. Set `payer` parameter on any Light Token instruction. |
+| **Transaction fees**<br/>+ Priority Fee | 5,000 lamports<br/>+ Priority Fee per tx  | Standard Solana fee payer. Set `feePayer` on the transaction. |
 
 </Accordion>
 
