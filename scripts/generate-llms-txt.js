@@ -392,7 +392,7 @@ function generate() {
     '> ZK Compression is a framework on Solana for stablecoin payment rails, agent commerce, consumer apps, defi protocols, depin, and more. ',
   );
   out.push(
-    "> The Light SDK and API's let you create mint, token and PDA accounts >99% cheaper with familiar Solana developer experience.",
+    "> The Light SDK and APIs let you create mint, token and PDA accounts >99% cheaper with familiar Solana developer experience.",
   );
   out.push('');
   out.push(

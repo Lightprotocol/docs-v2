@@ -1,7 +1,7 @@
 # ZK Compression by Light Protocol and Helius Labs
 
 > ZK Compression is a framework on Solana for stablecoin payment rails, agent commerce, consumer apps, defi protocols, depin, and more. 
-> The Light SDK and API's let you create mint, token and PDA accounts >99% cheaper with familiar Solana developer experience.
+> The Light SDK and APIs let you create mint, token and PDA accounts >99% cheaper with familiar Solana developer experience.
 
 This documentation provides guides, references and tutorials for developers building on Solana.
 
@@ -58,7 +58,7 @@ Install or view [dedicated agent skills](/ai-tools/overview#agent-skills).
 ```
 npx skills add Lightprotocol/skills
 ```
-- [Agent skills](https://www.zkcompression.com/ai-tools/agent-skills.md): Install structured agent skill files for Token API's and PDA accounts. Skills tell AI coding agents what they can do with ZK Compression.
+- [Agent skills](https://www.zkcompression.com/ai-tools/agent-skills.md): Install structured agent skill files for Token APIs and PDA accounts. Skills tell AI coding agents what they can do with ZK Compression.
 - [MCP](https://www.zkcompression.com/ai-tools/mcp.md): Connect AI apps to Light Protocol data sources and tools via the Model Context Protocol (MCP). Includes installation for Claude Code, Codex, Cursor, and more.
 - [AI Prompts](https://www.zkcompression.com/ai-tools/prompts.md): Ready-to-use AI prompts for Light Protocol. Copy a prompt, paste into your AI coding agent, and let it implement the recipe in your project.
 - [Orchestration Skill](https://www.zkcompression.com/skill.md): Full agent skill for AI coding agents.
@@ -86,7 +86,7 @@ npx skills add Lightprotocol/skills
 - [Anchor Constraints LightAccount](https://www.zkcompression.com/api-reference/anchor.md): Syntax reference for #[light_account] constraints with sponsored rent-exemption.
 
 ## For Payments and Wallets
-- [Payment Flows on Solana with Light Token](https://www.zkcompression.com/light-token/payments/overview.md): Learn how the Light Token API's reduce account creation cost for stablecoin payment infrastructure by 99% with similar developer experience to SPL / Token 2022.
+- [Payment Flows on Solana with Light Token](https://www.zkcompression.com/light-token/payments/overview.md): Learn how the Light Token APIs reduce account creation cost for stablecoin payment infrastructure by 99% with similar developer experience to SPL / Token 2022.
 - **Send Payments:** [Basic Payment](https://www.zkcompression.com/light-token/payments/basic-payment.md): Send a single token transfer with Light Token APIs with comparison to SPL.  If the recipient is receiving this token for the first time, their token account can be created as part of the same transaction.
 - **Send Payments:** [Batch Payments](https://www.zkcompression.com/light-token/payments/batch-payments.md): Send payments to multiple recipients in a single transaction or sequentially.
 - **Send Payments:** [Payment with Memo](https://www.zkcompression.com/light-token/payments/payment-with-memo.md): Attach invoice IDs, payment references, or notes to Light Token transfers using Solana's memo program.
