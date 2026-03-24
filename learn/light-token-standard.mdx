@@ -23,23 +23,23 @@ import CompressibleRentExplained from "/snippets/compressible-rent-explained.mdx
   </thead>
   <tbody>
     <tr>
-      <td style={{ textAlign: "left" }}>**[Mint Accounts](#light-mint-accounts)**</td>
+      <td style={{ textAlign: "left" }}>**[Mint Accounts](#mint-accounts)**</td>
       <td style={{ textAlign: "left" }}>Solana Account</td>
       <td style={{ textAlign: "left" }}>
         <ul>
           <li>Represents a unique mint and optionally can store token-metadata.</li>
           <li>Functionally equivalent to SPL mints.</li>
-          <li>Pays the rent-exemption cost</li>
+          <li>Rent-exemption cost covered by the Light Token Program</li>
         </ul>
       </td>
     </tr>
     <tr>
-      <td style={{ textAlign: "left" }}>**[Token Accounts](#light-token-account)**</td>
+      <td style={{ textAlign: "left" }}>**[Token Accounts](#token-account)**</td>
       <td style={{ textAlign: "left" }}>Solana account</td>
       <td style={{ textAlign: "left" }}>
         <ul>
           <li>Stores token balances of mints (SPL, Token-2022, or Light)</li>
-          <li>Pays the rent-exemption cost</li>
+          <li>Rent-exemption cost covered by the Light Token Program</li>
         </ul>
       </td>
     </tr>
@@ -71,7 +71,7 @@ Light-mints **uniquely represent a token on Solana and store its global metadata
     <Frame>
       <img
         src="/images/mint-account-layout.png"
-        alt="Diagram showing light-mint compressed account structure with three components: Hash (identifier for light-mint in purple box), Account (struct containing BaseMint with SPL-compatible fields, light-mint Data for program state, and optional Extensions for Token Metadata), and BasemintData (containing Supply, Decimals, Mint Authority, and Freeze Authority fields) with Token Metadata extension"
+        alt="Diagram showing light-mint account structure with three components: Address (identifier for light-mint in purple box), Account (struct containing BaseMint with SPL-compatible fields, MintMetadata for program state, and optional Extensions for Token Metadata), and BaseMint (containing Supply, Decimals, Mint Authority, and Freeze Authority fields) with Token Metadata extension"
       />
     </Frame>
   </Tab>
@@ -290,7 +290,7 @@ Here is how light-tokens and SPL tokens compare:
 
 # Associated Light Token Account
 
-**Associated light-token** accounts (light-ATAs) follow the same pattern as [associated token accounts](https://docs.solana.com/developing/programming-model/associated-token-account) (ATA):
+**Associated light-token** accounts (light-ATAs) follow the same pattern as [associated token accounts](https://solana.com/docs/tokens#associated-token-account) (ATA):
 
 - Each wallet needs its own light-token account to hold tokens from the same light-mint.
 - The address for light-ATAs is deterministically derived with the owner's address, light token program ID, and mint address.
@@ -316,7 +316,7 @@ Under the hood, compressed token accounts store token balance, owner, and other 
 1. Light token accounts are automatically compressed/decompressed when active/inactive.
 2. Any light-token or SPL token can be compressed/decompressed at will.
 
-<Note>You can still use compressed tokens for token distribution. Learn more about this here.</Note>
+<Note>You can still use compressed tokens for [token distribution](/token-distribution).</Note>
 
 <Tabs>
   <Tab title="Diagram">
