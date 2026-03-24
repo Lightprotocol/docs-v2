@@ -13,6 +13,7 @@ Context:
 - Packages: @lightprotocol/compressed-token, @lightprotocol/stateless.js
 
 transferInterface() transfers tokens in a single call. The recipient parameter is a wallet public key.
+Pass the source token-account owner pubkey and the signing authority separately: owner-signed flows use (owner.publicKey, owner); delegated flows use (owner.publicKey, delegate). Do not use removed InterfaceOptions.owner.
 The SDK derives and creates the destination ATA internally. All transfers use transferChecked under the hood.
 - Light Token → Light Token: transfers between Light Token accounts
 - SPL → Light Token: locks SPL tokens in interface PDA, mints to Light Token account
@@ -76,6 +77,7 @@ Context:
 - Packages: @lightprotocol/compressed-token, @lightprotocol/stateless.js
 
 transferInterface() transfers tokens in a single call. The recipient parameter is a wallet public key.
+Pass the source token-account owner pubkey and the signing authority separately: owner-signed flows use (owner.publicKey, owner); delegated flows use (owner.publicKey, delegate). Do not use removed InterfaceOptions.owner.
 The SDK derives and creates the destination ATA internally. All transfers use transferChecked under the hood.
 - Light Token → Light Token: transfers between Light Token accounts
 - SPL → Light Token: locks SPL tokens in interface PDA, mints to Light Token account

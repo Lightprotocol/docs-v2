@@ -36,20 +36,15 @@ const payer = Keypair.fromSecretKey(
     await mintToInterface(rpc, payer, mint, senderAta, payer, 1_000_000_000);
 
     const recipient = Keypair.generate();
-    await createAtaInterface(rpc, payer, mint, recipient.publicKey);
-    const recipientAta = getAssociatedTokenAddressInterface(
-        mint,
-        recipient.publicKey
-    );
 
-    // Transfer tokens between light-token associated token accounts
-    // destination is recipient wallet; transferInterface creates recipient ATA idempotently
+    // Recipient wallet; transferInterface creates recipient ATA idempotently
     const tx = await transferInterface(
         rpc,
         payer,
         senderAta,
         mint,
         recipient.publicKey,
+        sender.publicKey,
         sender,
         500_000_000
     );

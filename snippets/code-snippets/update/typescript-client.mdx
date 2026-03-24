@@ -15,15 +15,10 @@ import {
   Rpc,
   sleep,
   SystemAccountMetaConfig,
-  featureFlags,
-  VERSION,
   selectStateTreeInfo,
   TreeInfo,
 } from "@lightprotocol/stateless.js";
 import * as assert from "assert";
-
-// Force V2 mode
-(featureFlags as any).version = VERSION.V2;
 
 const path = require("path");
 const os = require("os");

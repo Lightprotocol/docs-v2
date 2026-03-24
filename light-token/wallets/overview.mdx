@@ -248,7 +248,16 @@ import {
 const sourceAta = getAssociatedTokenAddressInterface(mint, owner.publicKey);
 
 // Handles loading, creates recipient ATA, transfers.
-await transferInterface(rpc, payer, sourceAta, mint, recipient, owner, amount);
+await transferInterface(
+  rpc,
+  payer,
+  sourceAta,
+  mint,
+  recipient,
+  owner.publicKey,
+  owner,
+  amount
+);
 ```
 
 <Accordion title="Compare to SPL">

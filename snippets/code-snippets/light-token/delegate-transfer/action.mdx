@@ -55,11 +55,9 @@ const payer = Keypair.fromSecretKey(
         senderAta,
         mint,
         recipient.publicKey,
+        payer.publicKey,
         delegate,
-        200_000,
-        undefined,
-        undefined,
-        { owner: payer.publicKey }
+        200_000
     );
 
     console.log("Delegated transfer:", tx);

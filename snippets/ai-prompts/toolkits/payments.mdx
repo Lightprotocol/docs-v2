@@ -18,7 +18,7 @@ SPL → Light Token API mapping:
 | Operation    | SPL                               | Light Token                              |
 | Receive      | getOrCreateAssociatedTokenAccount() | createLoadAtaInstructions() / loadAta()  |
 | Transfer     | createTransferInstruction()        | createTransferInterfaceInstructions()    |
-| Delegated Transfer | transfer() (delegate signs)  | transferInterface({ owner })             |
+| Delegated Transfer | transfer() (delegate signs)  | transferInterface(..., ownerPubkey, delegateSigner, ...) |
 | Get Balance  | getAccount()                      | getAtaInterface()                        |
 | Tx History   | getSignaturesForAddress()         | getSignaturesForOwnerInterface()         |
 | Wrap SPL     | N/A                               | createWrapInstruction() / wrap()         |
@@ -123,7 +123,7 @@ SPL → Light Token API mapping:
 | Operation    | SPL                               | Light Token                              |
 | Receive      | getOrCreateAssociatedTokenAccount() | createLoadAtaInstructions() / loadAta()  |
 | Transfer     | createTransferInstruction()        | createTransferInterfaceInstructions()    |
-| Delegated Transfer | transfer() (delegate signs)  | transferInterface({ owner })             |
+| Delegated Transfer | transfer() (delegate signs)  | transferInterface(..., ownerPubkey, delegateSigner, ...) |
 | Get Balance  | getAccount()                      | getAtaInterface()                        |
 | Tx History   | getSignaturesForAddress()         | getSignaturesForOwnerInterface()         |
 | Wrap SPL     | N/A                               | createWrapInstruction() / wrap()         |

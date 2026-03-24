@@ -549,6 +549,7 @@ const tx = await transferInterface(
   sourceAta,
   mint,
   recipient,
+  owner.publicKey,
   owner,
   amount
 );
@@ -913,11 +914,9 @@ const tx = await transferInterface(
   sourceAta,
   mint,
   recipient,
+  owner.publicKey,
   delegate,
-  amount,
-  undefined,
-  undefined,
-  { owner: owner.publicKey }
+  amount
 );
 ```
 ```typescript title="SPL"

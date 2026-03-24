@@ -30,11 +30,9 @@ import { rpc, payer, setup } from "../setup.js";
         senderAta,
         mint,
         recipient.publicKey,
+        payer.publicKey,
         delegate,
-        200_000,
-        undefined,
-        undefined,
-        { owner: payer.publicKey }
+        200_000
     );
 
     console.log("Delegated transfer to:", recipient.publicKey.toBase58());

@@ -76,13 +76,13 @@ const payer = Keypair.fromSecretKey(
 
     // 3. Transfer to recipient's light associated token account
     await createAtaInterfaceIdempotent(rpc, payer, mint, recipient.publicKey);
-    const recipientLightAta = getAssociatedTokenAddressInterface(mint, recipient.publicKey);
     await transferInterface(
         rpc,
         payer,
         payerLightAta,
         mint,
-        recipientLightAta,
+        recipient.publicKey,
+        payer.publicKey,
         payer,
         tokenAmount,
     );

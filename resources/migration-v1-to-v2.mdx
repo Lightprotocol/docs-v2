@@ -242,20 +242,14 @@ import {
     deriveAddressSeedV2,
     batchAddressTree,
     PackedAccounts,
-    featureFlags,
-    VERSION,
 } from "@lightprotocol/stateless.js";
 ```
 
-### Enable v2 mode
+### V2 mode (TypeScript)
 
-Set the feature flag before making any calls:
+Published **`@lightprotocol/stateless.js@^0.23.0`** defaults to **V2** — you do **not** need to set **`LIGHT_PROTOCOL_VERSION=V2`** in application code.
 
-```typescript
-import { featureFlags, VERSION } from "@lightprotocol/stateless.js";
-
-(featureFlags as any).version = VERSION.V2;
-```
+If you **build `stateless.js` from source** and need V1 artifacts, set **`LIGHT_PROTOCOL_VERSION=V1`** for that build. For rare runtime overrides in custom bundles, you can still assign **`featureFlags.version`** before other imports run (advanced; prefer matching published versions instead).
 
 ### Update address derivation
 

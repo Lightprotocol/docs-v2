@@ -19,10 +19,10 @@ import { rpc, payer, setup } from "../setup.js";
         payer.publicKey,
         mint,
         200_000,
-        delegate.publicKey,
+        payer.publicKey,
         recipient.publicKey,
         9,
-        { owner: payer.publicKey }
+        { delegatePubkey: delegate.publicKey }
     );
 
     for (const ixs of instructions) {
