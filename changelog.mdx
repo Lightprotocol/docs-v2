@@ -5,6 +5,63 @@ description: "Latest Releases"
 rss: true
 ---
 
+<Update label="JS SDKs v0.23.0" description="March 2026">
+
+<Warning>
+Breaking changes in this release. See the [compressed-token CHANGELOG](https://github.com/Lightprotocol/light-protocol/blob/main/js/compressed-token/CHANGELOG.md) and [stateless.js CHANGELOG](https://github.com/Lightprotocol/light-protocol/blob/main/js/stateless.js/CHANGELOG.md) for migration steps.
+</Warning>
+
+Stable production release targeting ZK Compression V2. Supersedes the `0.23.0-beta.x` line. V2 is the default for npm consumers - no `LIGHT_PROTOCOL_VERSION` env var required in application code.
+
+### @lightprotocol/compressed-token
+
+`transferInterface()` now takes a recipient wallet `PublicKey` (not a pre-derived ATA) and splits the source account owner into separate `owner` (pubkey) and `authority` (signer) params. `decompressInterface()` is removed - use `loadAta()` or `createLoadAtaInstructions()`. `CTOKEN_PROGRAM_ID` and related names renamed to `LIGHT_TOKEN_PROGRAM_ID` / `LightToken*`. `createTransferInterfaceInstructions()` and `createLoadAtaInstructions()` now return batched `TransactionInstruction[][]`.
+
+New: `approveInterface()`, `revokeInterface()`, `loadAta()`, `createUnwrapInstructions()`, `selectInputsForAmount()`, `createLightTokenFreezeAccountInstruction()`, `createLightTokenThawAccountInstruction()`, `MAX_TOP_UP` constant, `LightTokenProgram` alias. (#2338, #2341, #2344, #2347, #2350)
+
+<Tabs>
+  <Tab title="npm">
+    ```bash
+    npm install @lightprotocol/compressed-token@0.23.0
+    ```
+  </Tab>
+  <Tab title="yarn">
+    ```bash
+    yarn add @lightprotocol/compressed-token@0.23.0
+    ```
+  </Tab>
+  <Tab title="pnpm">
+    ```bash
+    pnpm add @lightprotocol/compressed-token@0.23.0
+    ```
+  </Tab>
+</Tabs>
+
+### @lightprotocol/stateless.js
+
+V2 is now the default build target for npm packages. `getAccountInfoInterface()` now throws on unexpected RPC failures instead of returning `null`. `Rpc` in V2 mode uses V2-suffixed JSON-RPC methods (e.g. `getCompressedAccountV2`) - your Photon/compression endpoint must support the V2 API surface. Browser bundle fix: `AccountMeta` `isSigner`/`isWritable` flags stay boolean-compatible with `@solana/web3.js`. (#2347)
+
+<Tabs>
+  <Tab title="npm">
+    ```bash
+    npm install @lightprotocol/stateless.js@0.23.0
+    ```
+  </Tab>
+  <Tab title="yarn">
+    ```bash
+    yarn add @lightprotocol/stateless.js@0.23.0
+    ```
+  </Tab>
+  <Tab title="pnpm">
+    ```bash
+    pnpm add @lightprotocol/stateless.js@0.23.0
+    ```
+  </Tab>
+</Tabs>
+
+</Update>
+
+
 <Update label="Devnet Registry v2.3.1" description="March 2026">
 
 ### light-registry v2.3.1 (Devnet)
