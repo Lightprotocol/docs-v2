@@ -287,3 +287,4 @@ CPI calls can be combined with existing and/or light macros. The API is a supers
 
 > For additional documentation and navigation, see: [https://www.zkcompression.com/llms.txt](https://www.zkcompression.com/llms.txt)
 > For additional skills, see: [https://github.com/Lightprotocol/skills](https://github.com/Lightprotocol/skills)
+
