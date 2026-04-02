@@ -1,0 +1,26 @@
+```typescript
+import { Keypair, Transaction, sendAndConfirmTransaction } from "@solana/web3.js";
+import { createRpc } from "@lightprotocol/stateless.js";
+import { createRevokeInstructions } from "@lightprotocol/token-interface";
+
+const rpc = createRpc();
+const payer = Keypair.fromSecretKey(/* ... */);
+
+const mint = /* existing mint public key */;
+const owner = Keypair.generate();
+
+const instructions = await createRevokeInstructions({
+  rpc,
+  payer: payer.publicKey,
+  owner: owner.publicKey,
+  mint,
+});
+
+const signature = await sendAndConfirmTransaction(
+  rpc,
+  new Transaction().add(...instructions),
+  [payer, owner]
+);
+console.log("Revoked all delegate permissions");
+console.log("Tx:", signature);
+```

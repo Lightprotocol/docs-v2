@@ -7,6 +7,8 @@ keywords: ["wrap tokens solana", "unwrap tokens solana", "spl to light token", "
 
 import RegisterSplMint from "/snippets/setup/register-spl-mint.mdx";
 import FullSetup from "/snippets/setup/full-setup.mdx";
+import WrapTokenInterfaceInstructionCode from "/snippets/code-snippets/light-token/wrap/token-interface-instruction.mdx";
+import UnwrapTokenInterfaceInstructionCode from "/snippets/code-snippets/light-token/unwrap/token-interface-instruction.mdx";
 import SupportFooter from "/snippets/support-footer.mdx";
 import AgentSkillPayments from "/snippets/setup/agent-skill-payments.mdx";
 import PaymentsAiPrompt from "/snippets/ai-prompts/toolkits/payments.mdx";
@@ -65,6 +67,11 @@ const tx = new Transaction().add(
 ```
 
 </Tab>
+<Tab title="SDK 2.0 (token-interface)">
+
+<WrapTokenInterfaceInstructionCode />
+
+</Tab>
 <Tab title="Action">
 
 ```typescript
@@ -117,6 +124,11 @@ for (const ixs of instructions) {
   await sendAndConfirmTransaction(rpc, tx, [payer, owner]);
 }
 ```
+
+</Tab>
+<Tab title="SDK 2.0 (token-interface)">
+
+<UnwrapTokenInterfaceInstructionCode />
 
 </Tab>
 <Tab title="Action">

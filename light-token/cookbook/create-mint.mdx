@@ -29,10 +29,13 @@ import {
 } from "/snippets/code-samples/code-compare-snippets.jsx";
 import ActionCode from "/snippets/code-snippets/light-token/create-mint/action.mdx";
 import InstructionCode from "/snippets/code-snippets/light-token/create-mint/instruction.mdx";
+import TokenInterfaceInstructionCode from "/snippets/code-snippets/light-token/create-mint/token-interface-instruction.mdx";
 import SplActionCode from "/snippets/code-snippets/light-token/create-spl-mint/action.mdx";
 import SplInstructionCode from "/snippets/code-snippets/light-token/create-spl-mint/instruction.mdx";
+import SplTokenInterfaceInstructionCode from "/snippets/code-snippets/light-token/create-spl-mint/token-interface-instruction.mdx";
 import T22ActionCode from "/snippets/code-snippets/light-token/create-t22-mint/action.mdx";
 import T22InstructionCode from "/snippets/code-snippets/light-token/create-t22-mint/instruction.mdx";
+import T22TokenInterfaceInstructionCode from "/snippets/code-snippets/light-token/create-t22-mint/token-interface-instruction.mdx";
 
 import RustActionCode from "/snippets/code-snippets/light-token/create-mint/rust-client/action.mdx";
 import RustInstructionCode from "/snippets/code-snippets/light-token/create-mint/rust-client/instruction.mdx";
@@ -103,6 +106,9 @@ Compare to SPL:
 <Tab title="Instruction">
 <InstructionCode />
 </Tab>
+<Tab title="SDK 2.0 (token-interface)">
+<TokenInterfaceInstructionCode />
+</Tab>
 </Tabs>
 
 </Step>
@@ -124,6 +130,9 @@ Pass `TOKEN_PROGRAM_ID` to create a standard SPL mint with an interface PDA in o
 <Tab title="Instruction">
 <SplInstructionCode />
 </Tab>
+<Tab title="SDK 2.0 (token-interface)">
+<SplTokenInterfaceInstructionCode />
+</Tab>
 </Tabs>
 
 ## Create Token 2022 mint with interface PDA
@@ -136,6 +145,9 @@ Pass `TOKEN_2022_PROGRAM_ID` to create a Token-2022 mint with an interface PDA i
 </Tab>
 <Tab title="Instruction">
 <T22InstructionCode />
+</Tab>
+<Tab title="SDK 2.0 (token-interface)">
+<T22TokenInterfaceInstructionCode />
 </Tab>
 </Tabs>
 

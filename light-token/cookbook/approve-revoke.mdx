@@ -22,6 +22,8 @@ import {
 } from "/snippets/code-samples/code-compare-snippets.jsx";
 import TsApproveActionCode from "/snippets/code-snippets/light-token/approve-revoke/approve-action.mdx";
 import TsRevokeActionCode from "/snippets/code-snippets/light-token/approve-revoke/revoke-action.mdx";
+import TsApproveTokenInterfaceInstructionCode from "/snippets/code-snippets/light-token/approve-revoke/token-interface-approve-instruction.mdx";
+import TsRevokeTokenInterfaceInstructionCode from "/snippets/code-snippets/light-token/approve-revoke/token-interface-revoke-instruction.mdx";
 import ApproveActionCode from "/snippets/code-snippets/light-token/approve-revoke/rust-client/approve-action.mdx";
 import ApproveInstructionCode from "/snippets/code-snippets/light-token/approve-revoke/rust-client/approve-instruction.mdx";
 import RevokeActionCode from "/snippets/code-snippets/light-token/approve-revoke/rust-client/revoke-action.mdx";
@@ -103,12 +105,18 @@ import SupportFooter from "/snippets/support-footer.mdx";
 <Tab title="Action">
 <TsApproveActionCode />
 </Tab>
+<Tab title="SDK 2.0 (token-interface)">
+<TsApproveTokenInterfaceInstructionCode />
+</Tab>
 </Tabs>
 </Tab>
 <Tab title="Revoke">
 <Tabs>
 <Tab title="Action">
 <TsRevokeActionCode />
+</Tab>
+<Tab title="SDK 2.0 (token-interface)">
+<TsRevokeTokenInterfaceInstructionCode />
 </Tab>
 </Tabs>
 </Tab>

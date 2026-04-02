@@ -18,6 +18,7 @@ import {
 } from "/snippets/code-samples/code-compare-snippets.jsx";
 import ActionCode from "/snippets/code-snippets/light-token/transfer-interface/action.mdx";
 import InstructionCode from "/snippets/code-snippets/light-token/transfer-interface/instruction.mdx";
+import TokenInterfaceInstructionCode from "/snippets/code-snippets/light-token/transfer-interface/token-interface-instruction.mdx";
 import RustActionCode from "/snippets/code-snippets/light-token/transfer-interface/rust-client/action.mdx";
 import RustInstructionCode from "/snippets/code-snippets/light-token/transfer-interface/rust-client/instruction.mdx";
 import AnchorProgramCode from "/snippets/code-snippets/light-token/transfer-interface/anchor-program/full-example.mdx";
@@ -99,6 +100,9 @@ Compare to SPL:
 <Tab title="Instruction">
 <InstructionCode />
 </Tab>
+<Tab title="SDK 2.0 (token-interface)">
+<TokenInterfaceInstructionCode />
+</Tab>
 </Tabs>
 
 </Step>
@@ -158,6 +162,43 @@ const batches = await createTransferToAccountInterfaceInstructions(
 );
 
 const { rest: loads, last: transfer } = sliceLast(batches);
+```
+
+</Tab>
+<Tab title="SDK 2.0 (token-interface)">
+
+```typescript
+import { Transaction, sendAndConfirmTransaction } from "@solana/web3.js";
+import {
+  createTransferCheckedInstruction,
+  createLoadInstructions,
+} from "@lightprotocol/token-interface";
+
+// The destination must be an existing token account.
+const destinationTokenAccount = /* existing ATA or program-owned token account */;
+const sourceAta = /* owner's Light ATA */;
+const decimals = 9;
+
+const loadIxs = await createLoadInstructions({
+  rpc,
+  payer: payer.publicKey,
+  owner: owner.publicKey,
+  mint,
+  authority: owner.publicKey,
+});
+
+const transferIx = createTransferCheckedInstruction({
+  source: sourceAta,
+  destination: destinationTokenAccount,
+  mint,
+  authority: owner.publicKey,
+  payer: payer.publicKey,
+  amount: 500_000_000n,
+  decimals,
+});
+
+const tx = new Transaction().add(...loadIxs, transferIx);
+await sendAndConfirmTransaction(rpc, tx, [payer, owner]);
 ```
 
 </Tab>

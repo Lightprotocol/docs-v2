@@ -9,6 +9,7 @@ import FullSetup from "/snippets/setup/full-setup.mdx";
 import AgentSkillGeneric from "/snippets/setup/agent-skill-generic.mdx";
 import DelegateTransferAction from "/snippets/code-snippets/payments/spend-permissions/delegate-transfer.mdx";
 import DelegateTransferInstruction from "/snippets/code-snippets/payments/spend-permissions/delegate-transfer-instruction.mdx";
+import DelegateTransferTokenInterfaceInstruction from "/snippets/code-snippets/payments/spend-permissions/delegate-transfer-token-interface-instruction.mdx";
 import SupportFooter from "/snippets/support-footer.mdx";
 
 `transferInterface` with `{ owner }` transfers tokens from an associated token account as an approved delegate. The delegate is the transaction authority. Only the delegate and fee payer sign; the owner's signature is not required.
@@ -34,6 +35,9 @@ import SupportFooter from "/snippets/support-footer.mdx";
 </Tab>
 <Tab title="Instruction">
 <DelegateTransferInstruction />
+</Tab>
+<Tab title="SDK 2.0 (token-interface)">
+<DelegateTransferTokenInterfaceInstruction />
 </Tab>
 </Tabs>
 

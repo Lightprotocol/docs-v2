@@ -1,0 +1,30 @@
+```typescript
+import { Keypair, Transaction, sendAndConfirmTransaction } from "@solana/web3.js";
+import { createRpc } from "@lightprotocol/stateless.js";
+import { createTransferInstructions } from "@lightprotocol/token-interface";
+
+const rpc = createRpc();
+const payer = Keypair.fromSecretKey(/* ... */);
+
+const mint = /* existing mint public key */;
+const sourceOwner = Keypair.generate();
+const authority = sourceOwner; // delegate Keypair for delegated transfer
+const recipient = Keypair.generate();
+
+const transferIxs = await createTransferInstructions({
+  rpc,
+  payer: payer.publicKey,
+  mint,
+  sourceOwner: sourceOwner.publicKey,
+  authority: authority.publicKey,
+  recipient: recipient.publicKey,
+  amount: 500_000_000n,
+});
+
+const signature = await sendAndConfirmTransaction(
+  rpc,
+  new Transaction().add(...transferIxs),
+  [payer, authority]
+);
+console.log("Tx:", signature);
+```
