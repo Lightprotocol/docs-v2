@@ -1,0 +1,32 @@
+```typescript
+import { Keypair, Transaction, sendAndConfirmTransaction } from "@solana/web3.js";
+import { createRpc } from "@lightprotocol/stateless.js";
+import { createUnwrapInstruction, getSplInterfaces } from "@lightprotocol/token-interface";
+
+const rpc = createRpc();
+const payer = Keypair.fromSecretKey(/* ... */);
+
+const mint = /* existing SPL/Token-2022 mint */;
+const lightTokenAta = /* existing Light ATA */;
+const splAta = /* destination SPL ATA */;
+
+const splInterfaces = await getSplInterfaces(rpc, mint);
+const splInterface =
+  splInterfaces.find((info) => info.isInitialized) ?? splInterfaces[0];
+if (!splInterface) throw new Error("No SPL interface found");
+
+const unwrapIx = createUnwrapInstruction({
+  source: lightTokenAta,
+  destination: splAta,
+  owner: payer.publicKey,
+  mint,
+  amount: 500n,
+  splInterface,
+  decimals: 9,
+  payer: payer.publicKey,
+});
+
+const tx = new Transaction().add(unwrapIx);
+const signature = await sendAndConfirmTransaction(rpc, tx, [payer]);
+console.log("Tx:", signature);
+```

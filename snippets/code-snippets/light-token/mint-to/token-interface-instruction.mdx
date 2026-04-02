@@ -1,0 +1,36 @@
+```typescript
+import { Keypair, Transaction, sendAndConfirmTransaction } from "@solana/web3.js";
+import { createRpc, LIGHT_TOKEN_PROGRAM_ID } from "@lightprotocol/stateless.js";
+import {
+  createAtaInstruction,
+  createMintToInstruction,
+  getAtaAddress,
+} from "@lightprotocol/token-interface";
+
+const rpc = createRpc();
+const payer = Keypair.fromSecretKey(/* ... */);
+
+const mint = /* existing mint public key */;
+const recipient = Keypair.generate();
+const destination = getAtaAddress({ mint, owner: recipient.publicKey });
+
+const createAtaIx = createAtaInstruction({
+  payer: payer.publicKey,
+  owner: recipient.publicKey,
+  mint,
+  programId: LIGHT_TOKEN_PROGRAM_ID,
+});
+
+const mintToIx = createMintToInstruction({
+  mint,
+  destination,
+  authority: payer.publicKey,
+  payer: payer.publicKey,
+  amount: 1_000_000_000n,
+  tokenProgramId: LIGHT_TOKEN_PROGRAM_ID,
+});
+
+const tx = new Transaction().add(createAtaIx, mintToIx);
+const signature = await sendAndConfirmTransaction(rpc, tx, [payer]);
+console.log("Tx:", signature);
+```

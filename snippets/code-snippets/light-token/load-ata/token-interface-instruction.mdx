@@ -1,0 +1,25 @@
+```typescript
+import { Keypair, Transaction, sendAndConfirmTransaction } from "@solana/web3.js";
+import { createRpc } from "@lightprotocol/stateless.js";
+import { createLoadInstructions } from "@lightprotocol/token-interface";
+
+const rpc = createRpc();
+const payer = Keypair.fromSecretKey(/* ... */);
+
+const mint = /* existing mint public key */;
+const owner = payer.publicKey;
+
+const instructions = await createLoadInstructions({
+  rpc,
+  payer: payer.publicKey,
+  owner,
+  mint,
+  authority: owner,
+});
+
+if (instructions.length > 0) {
+  const tx = new Transaction().add(...instructions);
+  const signature = await sendAndConfirmTransaction(rpc, tx, [payer]);
+  console.log("Tx:", signature);
+}
+```

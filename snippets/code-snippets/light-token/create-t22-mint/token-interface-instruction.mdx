@@ -1,0 +1,24 @@
+```typescript
+import { Keypair, Transaction, sendAndConfirmTransaction } from "@solana/web3.js";
+import { createRpc } from "@lightprotocol/stateless.js";
+import { createMintInstructions } from "@lightprotocol/token-interface";
+import { TOKEN_2022_PROGRAM_ID } from "@solana/spl-token";
+
+const rpc = createRpc();
+const payer = Keypair.fromSecretKey(/* ... */);
+const mintKeypair = Keypair.generate();
+
+const instructions = await createMintInstructions({
+  rpc,
+  payer: payer.publicKey,
+  keypair: mintKeypair,
+  decimals: 9,
+  mintAuthority: payer.publicKey,
+  tokenProgramId: TOKEN_2022_PROGRAM_ID,
+});
+
+const tx = new Transaction().add(...instructions);
+const signature = await sendAndConfirmTransaction(rpc, tx, [payer, mintKeypair]);
+console.log("Mint:", mintKeypair.publicKey.toBase58());
+console.log("Tx:", signature);
+```

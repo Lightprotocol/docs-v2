@@ -1,0 +1,40 @@
+```typescript
+import { Keypair, Transaction, sendAndConfirmTransaction } from "@solana/web3.js";
+import {
+  createApproveInstructions,
+  createTransferInstructions,
+} from "@lightprotocol/token-interface";
+import { rpc, payer, setup } from "../setup.js";
+
+(async function () {
+  const { mint } = await setup();
+  const delegate = Keypair.generate();
+  const recipient = Keypair.generate();
+
+  const approveIxs = await createApproveInstructions({
+    rpc,
+    payer: payer.publicKey,
+    owner: payer.publicKey,
+    mint,
+    delegate: delegate.publicKey,
+    amount: 500_000_000n,
+  });
+  await sendAndConfirmTransaction(rpc, new Transaction().add(...approveIxs), [payer]);
+
+  const transferIxs = await createTransferInstructions({
+    rpc,
+    payer: payer.publicKey,
+    mint,
+    sourceOwner: payer.publicKey,
+    authority: delegate.publicKey,
+    recipient: recipient.publicKey,
+    amount: 200_000_000n,
+  });
+  const sig = await sendAndConfirmTransaction(
+    rpc,
+    new Transaction().add(...transferIxs),
+    [payer, delegate]
+  );
+  console.log("Tx:", sig);
+})();
+```

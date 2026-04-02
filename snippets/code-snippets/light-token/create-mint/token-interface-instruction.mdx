@@ -1,0 +1,38 @@
+```typescript
+import { Buffer } from "buffer";
+import {
+  Keypair,
+  PublicKey,
+  Transaction,
+  sendAndConfirmTransaction,
+} from "@solana/web3.js";
+import { createRpc, LIGHT_TOKEN_PROGRAM_ID } from "@lightprotocol/stateless.js";
+import { createMintInstructions } from "@lightprotocol/token-interface";
+
+const COMPRESSED_MINT_SEED = Buffer.from("compressed_mint");
+const rpc = createRpc();
+const payer = Keypair.fromSecretKey(/* ... */);
+
+function findMintAddress(mintSigner: PublicKey): [PublicKey, number] {
+  return PublicKey.findProgramAddressSync(
+    [COMPRESSED_MINT_SEED, mintSigner.toBuffer()],
+    LIGHT_TOKEN_PROGRAM_ID
+  );
+}
+
+const mintSigner = Keypair.generate();
+const [mintPda] = findMintAddress(mintSigner.publicKey);
+const instructions = await createMintInstructions({
+  rpc,
+  payer: payer.publicKey,
+  keypair: mintSigner,
+  decimals: 9,
+  mintAuthority: payer.publicKey,
+  tokenProgramId: LIGHT_TOKEN_PROGRAM_ID,
+});
+
+const tx = new Transaction().add(...instructions);
+const signature = await sendAndConfirmTransaction(rpc, tx, [payer, mintSigner]);
+console.log("Mint:", mintPda.toBase58());
+console.log("Tx:", signature);
+```
