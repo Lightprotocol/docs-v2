@@ -186,7 +186,6 @@
           {
             "group": "Resources",
             "pages": [
-              "resources/cli",
               "resources/migration-v1-to-v2",
               "resources/addresses-and-urls",
               {
